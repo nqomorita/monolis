@@ -1,2 +1,4 @@
+/bin/monolis
+/obj/*.o
 *.DS_Store
 
