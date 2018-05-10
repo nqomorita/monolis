@@ -1,35 +1,31 @@
 module mod_monolis_util
+  use mod_monolis_prm
+  use mod_monolis_com
+  use mod_monolis_mat
   implicit none
-
-  integer(4), parameter :: kint    = 4
-  integer(4), parameter :: kdouble = 8
-
-  type monolis_matrix
-    integer(kind=kint) :: N, NP, NPU, NPL, NDOF
-    integer(kind=kint), pointer :: indexU(:)
-    integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: itemU(:)
-    integer(kind=kint), pointer :: itemL(:)
-    real(kind=kdouble), pointer :: D(:)
-    real(kind=kdouble), pointer :: AU(:)
-    real(kind=kdouble), pointer :: AL(:)m
-    real(kind=kdouble), pointer :: X(:)
-    real(kind=kdouble), pointer :: B(:)
-  end type monolis_matrix
-
-  type(monolis_matrix), save :: monoMAT
 
 contains
 
-  subroutine monolis_mat_initialize(monoMAT)
+  subroutine monolis_initialize(monoPRM, monoCOM, monoMAT)
     implicit none
-    type(monolis_matrix) :: monoMAT
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
 
-  end subroutine monolis_mat_initialize
+    call monolis_prm_initialize(monoPRM)
+    call monolis_com_initialize(monoCOM)
+    call monolis_mat_initialize(monoMAT)
+  end subroutine monolis_initialize
 
-  subroutine monolis_mat_finalize(monoMAT)
+  subroutine monolis_finalize(monoPRM, monoCOM, monoMAT)
     implicit none
-    type(monolis_matrix) :: monoMAT
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
 
-  end subroutine monolis_mat_finalize
+    call monolis_prm_finalize(monoPRM)
+    call monolis_com_finalize(monoCOM)
+    call monolis_mat_finalize(monoMAT)
+  end subroutine monolis_finalize
+
 end module mod_monolis_util

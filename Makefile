@@ -10,7 +10,7 @@ SRC_DIR  = ./src
 OBJ_DIR  = ./obj
 BIN_LIST = monolis
 TARGET   = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
-SRC_LIST = main.f90 util.f90 comm.f90
+SRC_LIST = def_prm.f90 def_mat.f90 def_com.f90 util.f90 hecmw_monolis.f90 monolis.f90 main.f90
 SOURCES  = $(addprefix $(SRC_DIR)/, $(SRC_LIST))
 OBJS     = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
 RM       = rm

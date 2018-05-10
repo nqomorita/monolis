@@ -1,8 +1,8 @@
-module mod_monolis_comm
-  use mod_monolis_util
+module mod_monolis_com
+  use mod_monolis_prm
   implicit none
 
-  type monolis_comm
+  type monolis_com
     integer(kind=kint)          :: myrank
     integer(kind=kint)          :: comm
     integer(kind=kint)          :: commsize
@@ -11,16 +11,20 @@ module mod_monolis_comm
     integer(kind=kint), pointer :: RecvItem(:)
     integer(kind=kint), pointer :: SendIndex(:)
     integer(kind=kint), pointer :: SendItem(:)
-  end type monolis_comm
-
-  type(monolis_comm), save :: monoCOM
+  end type monolis_com
 
 contains
 
-  subroutine monolis_comm_initialize(monoCOM)
+  subroutine monolis_com_initialize(monoCOM)
     implicit none
-    type(monolis_comm) :: monoCOM
+    type(monolis_com) :: monoCOM
 
-  end subroutine monolis_comm_initialize
+  end subroutine monolis_com_initialize
 
-end module mod_monolis_comm
+  subroutine monolis_com_finalize(monoCOM)
+    implicit none
+    type(monolis_com) :: monoCOM
+
+  end subroutine monolis_com_finalize
+
+end module mod_monolis_com
