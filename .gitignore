@@ -1,4 +1,5 @@
 /bin/monolis
-/obj/*.o
+*.o
 *.DS_Store
+*.mod
 
