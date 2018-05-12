@@ -6,7 +6,7 @@ module mod_monolis_hecmw
 
 contains
 
-  subroutine solve_hecmw_monolis()
+  subroutine monolis_solve_hecmw_inner()
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -14,6 +14,6 @@ contains
 
     write(*,*)"** monolis hello!"
 
-  end subroutine solve_hecmw_monolis
+  end subroutine monolis_solve_hecmw_inner
 
 end module mod_monolis_hecmw
