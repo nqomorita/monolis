@@ -12,6 +12,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
+    write(*,*)"** monolis hello!"
+
   end subroutine solve_hecmw_monolis
 
 end module mod_monolis_hecmw
