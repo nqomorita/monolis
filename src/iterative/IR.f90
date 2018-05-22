@@ -4,7 +4,7 @@ module mod_monolis_solver_IR
 
 contains
 
-  subroutine monolis_solve_IR(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_solver_IR(monoPRM, monoCOM, monoMAT)
     use mod_monolis_prm
     use mod_monolis_com
     use mod_monolis_mat
@@ -69,6 +69,6 @@ contains
 
     t2 = monolis_wtime()
     tsol = t2 - t1
-  end subroutine monolis_solve_IR
+  end subroutine monolis_solver_IR
 
 end module mod_monolis_solver_IR

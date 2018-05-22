@@ -24,7 +24,7 @@ LIBTARGET = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 hecmw_monolis.f90
 SRC_LIST_ALGO = linalg_com.f90 linalg.f90
 SRC_LIST_PREC = precond.f90
-SRC_LIST_ITER = IR.f90 GS.f90 iterative.f90
+SRC_LIST_ITER = IR.f90 GS.f90 CG.f90 iterative.f90
 SRC_LIST_LIB  = monolis.f90
 SRC_LIST_MAIN = main.f90
 

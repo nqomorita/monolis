@@ -4,7 +4,7 @@ module mod_monolis_solver_GS
 
 contains
 
-  subroutine monolis_solve_GS(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_solver_GS(monoPRM, monoCOM, monoMAT)
     use mod_monolis_prm
     use mod_monolis_com
     use mod_monolis_mat
@@ -20,11 +20,11 @@ contains
 
     t1 = monolis_wtime()
 
-    N       = monoMAT%N
-    NP      = monoMAT%NP
-    NDOF    = monoMAT%NDOF
-    NDOF2   = NDOF*NDOF
-    NNDOF   = N*NDOF
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    NDOF2 = NDOF*NDOF
+    NNDOF = N*NDOF
 
     allocate(R(NDOF*NP))
     allocate(X(NDOF*NP))
@@ -88,6 +88,6 @@ contains
 
     t2 = monolis_wtime()
     tsol = t2 - t1
-  end subroutine monolis_solve_GS
+  end subroutine monolis_solver_GS
 
 end module mod_monolis_solver_GS
