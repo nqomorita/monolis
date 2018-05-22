@@ -7,6 +7,7 @@ module mod_monolis_prm
   type monolis_prm
     integer(kind=kint) :: method
     integer(kind=kint) :: precond
+    integer(kind=kint) :: maxiter
   end type monolis_prm
 
 contains
