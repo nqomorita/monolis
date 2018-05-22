@@ -18,6 +18,8 @@ contains
     real(kind=kdouble) :: t1, t2, tset, tsol
     real(kind=kdouble), allocatable :: R(:), D(:), X(:), T(:)
 
+    t1 = monolis_wtime()
+
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
@@ -32,14 +34,8 @@ contains
     X = 0.0d0
     T = 0.0d0
 
-    t1 = monolis_wtime()
-
     !call monolis_inner_product_R()
     !call monolis_precond_setup()
-
-    t2 = monolis_wtime()
-    tset = t2 - t1
-    t1 = monolis_wtime()
 
     do i=1,NNDOF
       R(i) = monoMAT%B(i)
@@ -66,13 +62,13 @@ contains
 
     !call hecmw_update_R()
 
-    t2 = monolis_wtime()
-    tsol = t2 - t1
-
     deallocate(R)
     deallocate(D)
     deallocate(X)
     deallocate(T)
+
+    t2 = monolis_wtime()
+    tsol = t2 - t1
   end subroutine monolis_solve_IR
 
 end module mod_monolis_solver_IR
