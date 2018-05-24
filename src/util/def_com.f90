@@ -16,6 +16,10 @@ module mod_monolis_com
     integer(kind=kint), pointer :: SendItem(:)
   end type monolis_com
 
+  integer(kind=kint), parameter :: monolis_sum = 1
+  integer(kind=kint), parameter :: monolis_max = 2
+  integer(kind=kint), parameter :: monolis_min = 3
+
 contains
 
   subroutine monolis_com_initialize(monoCOM)

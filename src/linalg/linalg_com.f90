@@ -86,24 +86,22 @@ contains
 #endif
   end subroutine monolis_allreduce_I
 
-  subroutine pppb_SendRecv_R &
+  subroutine monolis_SendRecv_R &
      &       ( NEIBPETOT, NEIBPE, SendIndex, SendItem, RecvIndex, RecvItem, &
      &         WS, WR, VAL, comm)
     implicit none
     integer(kind=kint) :: NEIBPETOT
+    integer(kind=kint) :: istart, inum, k, ierr
+    integer(kind=kint) :: neib, comm
     integer(kind=kint), pointer :: NEIBPE   (:)
     integer(kind=kint), pointer :: SendIndex(:)
     integer(kind=kint), pointer :: SendItem (:)
     integer(kind=kint), pointer :: RecvIndex(:)
     integer(kind=kint), pointer :: RecvItem (:)
-    integer(kind=kint) :: istart, inum, k, ierr
-    integer(kind=kint) :: neib, comm
-
     integer(kind=kint), allocatable :: sta1(:,:)
     integer(kind=kint), allocatable :: sta2(:,:)
     integer(kind=kint), allocatable :: req1(:)
     integer(kind=kint), allocatable :: req2(:)
-
     real(kind=kdouble) :: VAL(:)
     real(kind=kdouble) :: WS(:), WR(:)
 
@@ -128,7 +126,7 @@ contains
     do neib = 1, NEIBPETOT
       istart= RecvIndex(neib-1)
       inum  = RecvIndex(neib  ) - istart
-      call MPI_IRECV (WR(istart+1), inum, MPI_DOUBLE_PRECISION, NEIBPE(neib), 0, comm, req2(neib), ierr)
+      call MPI_IRECV(WR(istart+1), inum, MPI_DOUBLE_PRECISION, NEIBPE(neib), 0, comm, req2(neib), ierr)
     enddo
 
     call MPI_WAITALL(NEIBPETOT, req2, sta2, ierr)
@@ -141,33 +139,31 @@ contains
       enddo
     enddo
 
-    call MPI_WAITALL (NEIBPETOT, req1, sta1, ierr)
+    call MPI_WAITALL(NEIBPETOT, req1, sta1, ierr)
 
-    deallocate (sta1, sta2, req1, req2)
+    deallocate(sta1, sta2, req1, req2)
 #endif
 
-  end subroutine pppb_SendRecv_R
+  end subroutine monolis_SendRecv_R
 
-  subroutine pppb_SendRecv_I &
+  subroutine monolis_SendRecv_I &
      &       ( NEIBPETOT, NEIBPE, SendIndex, SendItem, RecvIndex, RecvItem, &
      &         WS, WR, VAL, comm)
     implicit none
     integer(kind=kint) :: NEIBPETOT
+    integer(kind=kint) :: istart, inum, k, ierr
+    integer(kind=kint) :: neib, comm
+    integer(kind=kint) :: VAL(:)
+    integer(kind=kint) :: WS(:), WR(:)
     integer(kind=kint), pointer :: NEIBPE   (:)
     integer(kind=kint), pointer :: SendIndex(:)
     integer(kind=kint), pointer :: SendItem (:)
     integer(kind=kint), pointer :: RecvIndex(:)
     integer(kind=kint), pointer :: RecvItem (:)
-    integer(kind=kint) :: istart, inum, k, ierr
-    integer(kind=kint) :: neib, comm
-
     integer(kind=kint), allocatable :: sta1(:,:)
     integer(kind=kint), allocatable :: sta2(:,:)
     integer(kind=kint), allocatable :: req1(:)
     integer(kind=kint), allocatable :: req2(:)
-
-    integer(kind=kint) :: VAL(:)
-    integer(kind=kint) :: WS(:), WR(:)
 
 #ifdef WITHMPI
     !** Initialization
@@ -190,7 +186,7 @@ contains
     do neib = 1, NEIBPETOT
       istart= RecvIndex(neib-1)
       inum  = RecvIndex(neib  ) - istart
-      call MPI_IRECV (WR(istart+1), inum, MPI_INTEGER, NEIBPE(neib), 0, comm, req2(neib), ierr)
+      call MPI_IRECV(WR(istart+1), inum, MPI_INTEGER, NEIBPE(neib), 0, comm, req2(neib), ierr)
     enddo
 
     call MPI_WAITALL(NEIBPETOT, req2, sta2, ierr)
@@ -203,11 +199,10 @@ contains
       enddo
     enddo
 
-    call MPI_WAITALL (NEIBPETOT, req1, sta1, ierr)
+    call MPI_WAITALL(NEIBPETOT, req1, sta1, ierr)
 
     deallocate (sta1, sta2, req1, req2)
 #endif
-
-  end subroutine pppb_SendRecv_I
+  end subroutine monolis_SendRecv_I
 
 end module mod_monolis_linalg_com
