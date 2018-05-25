@@ -16,7 +16,8 @@ contains
     integer(kind=kint) :: i, iter
     real(kind=kdouble) :: tol, resid, R2, B2, D2
     real(kind=kdouble) :: t1, t2, tset, tsol
-    real(kind=kdouble), allocatable :: R(:), D(:), X(:), T(:)
+    real(kind=kdouble), pointer :: B(:), X(:)
+    real(kind=kdouble), allocatable :: R(:), D(:), T(:)
 
     t1 = monolis_wtime()
 
@@ -24,21 +25,18 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
+    X => monoMAT%X; X = 0.0d0
+    B => monoMAT%B
 
-    allocate(R(NDOF*NP))
-    allocate(D(NDOF*NP))
-    allocate(X(NDOF*NP))
-    allocate(T(NDOF*NP))
-    R = 0.0d0
-    D = 0.0d0
-    X = 0.0d0
-    T = 0.0d0
+    allocate(R(NDOF*NP)); R = 0.0d0
+    allocate(D(NDOF*NP)); D = 0.0d0
+    allocate(T(NDOF*NP)); T = 0.0d0
 
     !call monolis_inner_product_R()
     !call monolis_precond_setup()
 
     do i=1,NNDOF
-      R(i) = monoMAT%B(i)
+      R(i) = B(i)
     enddo
 
     do iter=1, monoPRM%maxiter
@@ -56,15 +54,10 @@ contains
       if(resid <= tol) exit
     enddo
 
-    do i=1,NNDOF
-      monoMAT%X(i) = X(i)
-    enddo
-
     !call hecmw_update_R()
 
     deallocate(R)
     deallocate(D)
-    deallocate(X)
     deallocate(T)
 
     t2 = monolis_wtime()

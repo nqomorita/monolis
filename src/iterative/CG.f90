@@ -31,7 +31,7 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X
+    X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
 
     allocate(WW(NDOF*NP,4))
@@ -80,6 +80,8 @@ contains
 
       rho1 = rho
     enddo
+
+    !call monolis_update_R()
 
     t2 = monolis_wtime()
     tsol = t2 - t1

@@ -36,17 +36,16 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X
+    X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
 
-    allocate(R(NDOF*NP))
-    allocate(U(NDOF*NP))
-    allocate(W(NDOF*NP))
-    allocate(Q(NDOF*NP))
-    allocate(P(NDOF*NP))
-    allocate(S(NDOF*NP))
-    allocate(WK(NDOF*NP))
-    R = 0.0d0; U = 0.0d0; W = 0.0d0; Q = 0.0d0; P = 0.0d0; S = 0.0d0; WK= 0.0d0
+    allocate(R (NDOF*NP)); R = 0.0d0
+    allocate(U (NDOF*NP)); U = 0.0d0
+    allocate(W (NDOF*NP)); W = 0.0d0
+    allocate(Q (NDOF*NP)); Q = 0.0d0
+    allocate(P (NDOF*NP)); P = 0.0d0
+    allocate(S (NDOF*NP)); S = 0.0d0
+    allocate(WK(NDOF*NP)); WK= 0.0d0
 
     !call monolis_precond_setup()
     !call monolis_residual()
@@ -89,6 +88,8 @@ contains
       if(monoCOM%myrank == 0) write (*,'(i7, 1pe16.6)') iter, resid
       if(resid <= tol) exit
     enddo
+
+    !call monolis_update_R()
 
     deallocate(R,U,W,Q,P,S,WK)
 

@@ -16,7 +16,8 @@ contains
     integer(kind=kint) :: i, j, k, l, iter
     real(kind=kdouble) :: tol, resid, R2, B2
     real(kind=kdouble) :: t1, t2, tset, tsol
-    real(kind=kdouble), allocatable :: R(:), X(:), Dinv(:), ALUtmp(:,:), T(:)
+    real(kind=kdouble), pointer :: B(:), X(:)
+    real(kind=kdouble), allocatable :: R(:), Dinv(:), LU(:,:), T(:)
 
     t1 = monolis_wtime()
 
@@ -25,39 +26,35 @@ contains
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     NNDOF = N*NDOF
+    X => monoMAT%X; X = 0.0d0
+    B => monoMAT%B
 
-    allocate(R(NDOF*NP))
-    allocate(X(NDOF*NP))
-    allocate(Dinv(NDOF2*NP))
-    allocate(ALUtmp(NDOF,NDOF))
-    allocate(T(NDOF))
-    R = 0.0d0
-    X = 0.0d0
-    Dinv = 0.0d0
-    ALUtmp = 0.0d0
-    T = 0.0d0
+    allocate(R(NDOF*NP));     R    = 0.0d0
+    allocate(T(NDOF));        T    = 0.0d0
+    allocate(Dinv(NDOF2*NP)); Dinv = 0.0d0
+    allocate(LU(NDOF,NDOF));  LU   = 0.0d0
 
     do i=1,NP
       do j=1,NDOF
         do k=1,NDOF
-          ALUtmp(k,j) = monoMAT%D(NDOF2*(i-1)+NDOF*(j-1)+k)
+          LU(k,j) = monoMAT%D(NDOF2*(i-1)+NDOF*(j-1)+k)
         enddo
       enddo
       do k= 1, NDOF
-        ALUtmp(k,k)= 1.0d0/ALUtmp(k,k)
+        LU(k,k)= 1.0d0/LU(k,k)
         do l= k+1, NDOF
-          ALUtmp(l,k)= ALUtmp(l,k) * ALUtmp(k,k)
+          LU(l,k)= LU(l,k) * LU(k,k)
           do j= k+1, NDOF
-            T(j)= ALUtmp(l,j) - ALUtmp(l,k)*ALUtmp(k,j)
+            T(j)= LU(l,j) - LU(l,k)*LU(k,j)
           enddo
           do j= k+1, NDOF
-            ALUtmp(l,j)= T(j)
+            LU(l,j)= T(j)
           enddo
         enddo
       enddo
       do j=1,NDOF
         do k=1,NDOF
-          Dinv(NDOF2*(i-1)+NDOF*(j-1)+k) = ALUtmp(k,j)
+          Dinv(NDOF2*(i-1)+NDOF*(j-1)+k) = LU(k,j)
         enddo
       enddo
     enddo
@@ -74,16 +71,12 @@ contains
       if(resid <= tol) exit
     enddo
 
-    do i=1,NNDOF
-      monoMAT%X(i) = X(i)
-    enddo
-
     !call monolis_update_R()
 
     deallocate(R)
     deallocate(X)
     deallocate(Dinv)
-    deallocate(ALUtmp)
+    deallocate(LU)
     deallocate(T)
 
     t2 = monolis_wtime()
