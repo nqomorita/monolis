@@ -8,6 +8,9 @@ contains
     use mod_monolis_prm
     use mod_monolis_com
     use mod_monolis_mat
+    use mod_monolis_precond
+    use mod_monolis_matvec
+    use mod_monolis_linalg
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -15,7 +18,7 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, l, iter, iter_RR
     real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tset, tsol
+    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, rho, rho1, C1
     real(kind=kdouble), allocatable :: WW(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
@@ -37,13 +40,13 @@ contains
     allocate(WW(NDOF*NP,4))
     WW = 0.0d0
 
-    !call monolis_precond_setup()
-    !call monolis_residual()
-    !call monolis_inner_product_R()
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_residual(monoCOM, monoMAT, X, B, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT, ndof, X, B, beta, tcomm)
 
     do iter=1, monoPRM%maxiter
-      !call monolis_precond_apply()
-      !call monolis_inner_product_R()
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, X, B)
+      call monolis_inner_product_R(monoCOM, monoMAT, ndof, X, B, beta, tcomm)
 
       if ( ITER.eq.1 ) then
         do i=1, NNDOF
@@ -56,8 +59,8 @@ contains
         enddo
       endif
 
-      !call monolis_matvec()
-      !call hecmw_inner_product_R()
+      call monolis_matvec(monoCOM, monoMAT, X, B, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, ndof, X, B, beta, tcomm)
       alpha = rho/C1
 
       do i=1, NNDOF
@@ -65,14 +68,14 @@ contains
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        !call monolis_residual()
+        call monolis_residual(monoCOM, monoMAT, X, B, tcomm)
       else
         do i=1, NNDOF
           WW(i,R) = WW(i,R) - alpha * WW(i,Q)
         enddo
       endif
 
-      !call monolis_inner_product()
+      call monolis_inner_product_R(monoCOM, monoMAT, ndof, X, B, beta, tcomm)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0) write (*,'(i7, 1pe16.6)') iter, resid

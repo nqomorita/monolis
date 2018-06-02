@@ -40,8 +40,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: ndof
-    integer(kind=kint) :: X(:), Y(:)
     integer(kind=kint) :: i
+    real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, sum
     real(kind=kdouble), optional :: tcomm
 
@@ -63,8 +63,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: ndof
-    integer(kind=kint) :: X(:), Y(:)
     integer(kind=kint) :: i
+    real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: sum
 
     sum = 0.0d0

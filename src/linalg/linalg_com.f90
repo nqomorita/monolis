@@ -106,13 +106,11 @@ contains
     real(kind=kdouble) :: WS(:), WR(:)
 
 #ifdef WITHMPI
-    !** Initialization
     allocate(sta1(MPI_STATUS_SIZE, NEIBPETOT))
     allocate(sta2(MPI_STATUS_SIZE, NEIBPETOT))
     allocate(req1(NEIBPETOT))
     allocate(req2(NEIBPETOT))
 
-    !** Send
     do neib = 1, NEIBPETOT
       istart= SendIndex(neib-1)
       inum  = SendIndex(neib  ) - istart
@@ -122,7 +120,6 @@ contains
       call MPI_ISEND(WS(istart+1), inum, MPI_DOUBLE_PRECISION, NEIBPE(neib), 0, comm, req1(neib), ierr)
     enddo
 
-    !** Recieve
     do neib = 1, NEIBPETOT
       istart= RecvIndex(neib-1)
       inum  = RecvIndex(neib  ) - istart
@@ -166,13 +163,11 @@ contains
     integer(kind=kint), allocatable :: req2(:)
 
 #ifdef WITHMPI
-    !** Initialization
     allocate(sta1(MPI_STATUS_SIZE, NEIBPETOT))
     allocate(sta2(MPI_STATUS_SIZE, NEIBPETOT))
     allocate(req1(NEIBPETOT))
     allocate(req2(NEIBPETOT))
 
-    !** Send
     do neib = 1, NEIBPETOT
       istart= SendIndex(neib-1)
       inum  = SendIndex(neib  ) - istart
@@ -182,7 +177,6 @@ contains
       call MPI_ISEND(WS(istart+1), inum, MPI_INTEGER, NEIBPE(neib), 0, comm, req1(neib), ierr)
     enddo
 
-    !** Recieve
     do neib = 1, NEIBPETOT
       istart= RecvIndex(neib-1)
       inum  = RecvIndex(neib  ) - istart

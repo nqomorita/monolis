@@ -6,15 +6,29 @@ module mod_monolis_precond
 
 contains
 
-  subroutine monolis_precond(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    call monolis_prm_initialize(monoPRM)
-    call monolis_com_initialize(monoCOM)
-    call monolis_mat_initialize(monoMAT)
-  end subroutine monolis_precond
+  end subroutine monolis_precond_setup
+
+  subroutine monolis_precond_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    real(kind=kdouble) :: X(:), Y(:)
+
+  end subroutine monolis_precond_apply
+
+  subroutine monolis_precond_clear(monoPRM, monoCOM, monoMAT)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+
+  end subroutine monolis_precond_clear
 
 end module mod_monolis_precond
