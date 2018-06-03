@@ -1,4 +1,4 @@
-module mod_monolis_hecmw
+module mod_monolis_solve
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -7,7 +7,7 @@ module mod_monolis_hecmw
 
 contains
 
-  subroutine monolis_solve_hecmw_inner(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_solve(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -16,6 +16,6 @@ contains
     write(*,*)"** monolis hello!"
     call monolis_iterative(monoPRM, monoCOM, monoMAT)
 
-  end subroutine monolis_solve_hecmw_inner
+  end subroutine monolis_solve
 
-end module mod_monolis_hecmw
+end module mod_monolis_solve
