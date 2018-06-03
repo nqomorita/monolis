@@ -14,10 +14,8 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: ndof
+    integer(kind=kint) :: i, ndof, sum
     integer(kind=kint) :: X(:), Y(:)
-    integer(kind=kint) :: sum
-    integer(kind=kint) :: i
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
@@ -39,8 +37,7 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: ndof
-    integer(kind=kint) :: i
+    integer(kind=kint) :: i, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, sum
     real(kind=kdouble), optional :: tcomm
@@ -62,8 +59,7 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: ndof
-    integer(kind=kint) :: i
+    integer(kind=kint) :: i, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: sum
 

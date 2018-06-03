@@ -86,7 +86,7 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, monoMAT, ndof, X, tcomm)
+    call monolis_update_R(monoCOM, ndof, X, tcomm)
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     t2 = monolis_wtime()

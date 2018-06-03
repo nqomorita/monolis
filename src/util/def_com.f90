@@ -9,11 +9,12 @@ module mod_monolis_com
     integer(kind=kint)          :: myrank
     integer(kind=kint)          :: comm
     integer(kind=kint)          :: commsize
-    integer(kind=kint), pointer :: NeibPE(:)
-    integer(kind=kint), pointer :: RecvIndex(:)
-    integer(kind=kint), pointer :: RecvItem(:)
-    integer(kind=kint), pointer :: SendIndex(:)
-    integer(kind=kint), pointer :: SendItem(:)
+    integer(kind=kint)          :: n_neib
+    integer(kind=kint), pointer :: neib_pe(:)
+    integer(kind=kint), pointer :: recv_index(:)
+    integer(kind=kint), pointer :: recv_item(:)
+    integer(kind=kint), pointer :: send_index(:)
+    integer(kind=kint), pointer :: send_item(:)
   end type monolis_com
 
   integer(kind=kint), parameter :: monolis_sum = 1
@@ -43,7 +44,7 @@ contains
 
     size = 1
 #ifdef WITHMPI
-    call MPI_Comm_size(comm, size, ierr)
+    call MPI_comm_size(comm, size, ierr)
 #endif
   end subroutine monolis_com_size
 
@@ -52,7 +53,7 @@ contains
     integer(kind=kint) :: comm
     integer(kind=kint) :: ierr
 #ifdef WITHMPI
-    call MPI_BARRIER(comm, ierr)
+    call MPI_barrier(comm, ierr)
 #endif
   end subroutine monolis_barrier
 
@@ -60,7 +61,7 @@ contains
     implicit none
     real(kind=kdouble) :: monolis_wtime
 #ifdef WITHMPI
-    monolis_wtime = MPI_WTIME()
+    monolis_wtime = MPI_wtime()
 #else
     call system_clock(monolis_wtime)
 #endif

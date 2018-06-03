@@ -2,6 +2,7 @@ module mod_monolis_iterative
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_solver_CG
   implicit none
 
 contains
@@ -12,9 +13,11 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    call monolis_prm_initialize(monoPRM)
-    call monolis_com_initialize(monoCOM)
-    call monolis_mat_initialize(monoMAT)
+    select case(monoPRM%method)
+      case (1)
+        call monolis_solver_CG(monoPRM, monoCOM, monoMAT)
+    end select
+
   end subroutine monolis_iterative
 
 end module mod_monolis_iterative

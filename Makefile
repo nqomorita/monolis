@@ -3,7 +3,7 @@ FLAG_MPI  = -DWITHMPI
 CPP       = -cpp $(FLAG_MPI)
 
 FC        = mpif90
-FFLAGS    = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid -Wall
+FFLAGS    = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
 LDFLAGS   =
 LIBS      =
 

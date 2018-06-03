@@ -19,7 +19,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
+
+    do i=1, monoMAT%NP
+      X(i) = Y(i)
+    enddo
 
   end subroutine monolis_precond_apply
 
