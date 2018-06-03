@@ -41,6 +41,36 @@ subroutine monolis(N, NP, NPU, NPL, NDOF, indexU, indexL, itemU, itemL, D, AU, A
   integer(kind=kint) :: maxiter
   real(kind=kdouble) :: tol
 
+  monoMAT%N = N
+  monoMAT%NP = NP
+  monoMAT%NPU = NPU
+  monoMAT%NPL = NPL
+  monoMAT%NDOF = NDOF
+  monoMAT%indexU = indexU
+  monoMAT%indexL = indexL
+  monoMAT%itemU = itemU
+  monoMAT%itemL = itemL
+  monoMAT%D = D
+  monoMAT%AU = AU
+  monoMAT%AL = AL
+  monoMAT%X = X
+  monoMAT%B = B
+
+  monoCOM%myrank = myrank
+  monoCOM%comm = comm
+  monoCOM%commsize = commsize
+  monoCOM%n_neib = n_neib
+  monoCOM%neib_pe = neib_pe
+  monoCOM%recv_index = recv_index
+  monoCOM%send_index = send_index
+  monoCOM%recv_item = recv_item
+  monoCOM%send_item = send_item
+
+  monoPRM%method = method
+  monoPRM%precond = precond
+  monoPRM%maxiter = maxiter
+  monoPRM%tol = tol
+
   call monolis_solve(monoPRM, monoCOM, monoMAT)
 
 end subroutine monolis
