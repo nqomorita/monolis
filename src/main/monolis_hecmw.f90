@@ -2,6 +2,7 @@ module mod_monolis_hecmw
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_iterative
   implicit none
 
 contains
@@ -13,6 +14,7 @@ contains
     type(monolis_mat) :: monoMAT
 
     write(*,*)"** monolis hello!"
+    call monolis_iterative(monoPRM, monoCOM, monoMAT)
 
   end subroutine monolis_solve_hecmw_inner
 
