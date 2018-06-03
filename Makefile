@@ -3,7 +3,7 @@ FLAG_MPI  = -DWITHMPI
 CPP       = -cpp $(FLAG_MPI)
 
 FC        = mpif90
-FFLAGS    = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
+FFLAGS    = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid -Wall
 LDFLAGS   =
 LIBS      =
 
@@ -22,7 +22,7 @@ TARGET    = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
 LIBTARGET = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 hecmw_monolis.f90
-SRC_LIST_ALGO = linalg_com.f90 linalg.f90 matvec.f90
+SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90
 SRC_LIST_PREC = precond.f90
 SRC_LIST_ITER = IR.f90 GS.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB.f90 iterative.f90
 SRC_LIST_LIB  = monolis.f90

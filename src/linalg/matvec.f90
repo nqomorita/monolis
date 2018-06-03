@@ -7,7 +7,7 @@ module mod_monolis_matvec
 
 contains
 
-  subroutine monolis_residual(monoCOM, monoMAT, X, Y, tcomm)
+  subroutine monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     use mod_monolis_com
     use mod_monolis_mat
     use mod_monolis_linalg_com
@@ -16,7 +16,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: ndof
     integer(kind=kint) :: i
-    real(kind=kdouble) :: X(:), Y(:)
+    real(kind=kdouble) :: X(:), B(:), R(:)
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
