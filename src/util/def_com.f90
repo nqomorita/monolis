@@ -20,7 +20,6 @@ module mod_monolis_com
   integer(kind=kint), parameter :: monolis_sum = 1
   integer(kind=kint), parameter :: monolis_max = 2
   integer(kind=kint), parameter :: monolis_min = 3
-
   integer(kind=kint), parameter :: monolis_status_size = MPI_STATUS_SIZE
 
 contains

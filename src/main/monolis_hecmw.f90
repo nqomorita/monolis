@@ -7,7 +7,7 @@ module mod_monolis_hecmw
 
 contains
 
-  subroutine monolis_solve_hecmw_inner()
+  subroutine monolis_solve_hecmw_inner(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM

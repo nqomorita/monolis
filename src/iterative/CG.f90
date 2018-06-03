@@ -41,6 +41,7 @@ contains
     W = 0.0d0
 
     iter_RR = 50
+    tol = monoPRM%tol
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)

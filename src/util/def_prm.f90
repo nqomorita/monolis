@@ -8,6 +8,7 @@ module mod_monolis_prm
     integer(kind=kint) :: method
     integer(kind=kint) :: precond
     integer(kind=kint) :: maxiter
+    real(kind=kdouble) :: tol
   end type monolis_prm
 
 contains
