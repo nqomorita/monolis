@@ -20,7 +20,7 @@ contains
     real(kind=kdouble), optional :: tcomm
 
     sum = 0
-    do i = 1, monoMAT%NP * ndof
+    do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
     end do
 
@@ -43,7 +43,7 @@ contains
     real(kind=kdouble), optional :: tcomm
 
     sum = 0.0d0
-    do i = 1, monoMAT%NP * ndof
+    do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
     end do
 
@@ -64,7 +64,7 @@ contains
     real(kind=kdouble) :: sum
 
     sum = 0.0d0
-    do i = 1, monoMAT%NP * ndof
+    do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
     end do
   end subroutine monolis_inner_product_R_local

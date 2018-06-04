@@ -22,8 +22,8 @@ contains
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
 
-    do i=1, monoMAT%NP
-      X(i) = Y(i)
+    do i=1, monoMAT%NP*monoMAT%NDOF
+      Y(i) = X(i)
     enddo
 
   end subroutine monolis_precond_apply
