@@ -13,7 +13,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    write(*,*)"** monolis hello!"
     call monolis_iterative(monoPRM, monoCOM, monoMAT)
 
   end subroutine monolis_solve

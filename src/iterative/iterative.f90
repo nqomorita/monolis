@@ -15,6 +15,7 @@ contains
 
     select case(monoPRM%method)
       case (1)
+        write(*,"(a)")" ** monolis_solver_CG"
         call monolis_solver_CG(monoPRM, monoCOM, monoMAT)
     end select
 
