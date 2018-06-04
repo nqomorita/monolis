@@ -4,15 +4,15 @@ module mod_monolis_mat
 
   type monolis_mat
     integer(kind=kint) :: N, NP, NPU, NPL, NDOF
-    integer(kind=kint), pointer :: indexU(:)
-    integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: itemU(:)
-    integer(kind=kint), pointer :: itemL(:)
-    real(kind=kdouble), pointer :: D(:)
-    real(kind=kdouble), pointer :: AU(:)
-    real(kind=kdouble), pointer :: AL(:)
-    real(kind=kdouble), pointer :: X(:)
-    real(kind=kdouble), pointer :: B(:)
+    integer(kind=kint), pointer :: indexU(:) => null()
+    integer(kind=kint), pointer :: indexL(:) => null()
+    integer(kind=kint), pointer :: itemU(:) => null()
+    integer(kind=kint), pointer :: itemL(:) => null()
+    real(kind=kdouble), pointer :: D(:) => null()
+    real(kind=kdouble), pointer :: AU(:) => null()
+    real(kind=kdouble), pointer :: AL(:) => null()
+    real(kind=kdouble), pointer :: X(:) => null()
+    real(kind=kdouble), pointer :: B(:) => null()
   end type monolis_mat
 
 contains

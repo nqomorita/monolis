@@ -10,11 +10,11 @@ module mod_monolis_com
     integer(kind=kint)          :: comm
     integer(kind=kint)          :: commsize
     integer(kind=kint)          :: n_neib
-    integer(kind=kint), pointer :: neib_pe(:)
-    integer(kind=kint), pointer :: recv_index(:)
-    integer(kind=kint), pointer :: recv_item(:)
-    integer(kind=kint), pointer :: send_index(:)
-    integer(kind=kint), pointer :: send_item(:)
+    integer(kind=kint), pointer :: neib_pe(:)    => null()
+    integer(kind=kint), pointer :: recv_index(:) => null()
+    integer(kind=kint), pointer :: recv_item(:)  => null()
+    integer(kind=kint), pointer :: send_index(:) => null()
+    integer(kind=kint), pointer :: send_item(:)  => null()
   end type monolis_com
 
   integer(kind=kint), parameter :: monolis_sum = 1
