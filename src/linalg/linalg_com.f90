@@ -87,11 +87,11 @@ contains
   end subroutine monolis_allreduce_I
 
   subroutine monolis_SendRecv_R(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
-  & ws, wr, val, comm)
+  & ws, wr, val, ndof, comm)
     implicit none
     integer(kind=kint) :: n_neib
-    integer(kind=kint) :: istart, inum, k, ierr
-    integer(kind=kint) :: neib, comm
+    integer(kind=kint) :: iS, in, j, k, ierr
+    integer(kind=kint) :: i, ndof, comm
     integer(kind=kint), pointer :: neib_pe(:)
     integer(kind=kint), pointer :: send_index(:)
     integer(kind=kint), pointer :: send_item (:)
@@ -104,28 +104,34 @@ contains
     real(kind=kdouble) :: val(:), ws(:), wr(:)
 
 #ifdef WITHMPI
-    do neib = 1, n_neib
-      istart= send_index(neib-1)
-      inum  = send_index(neib  ) - istart
-      do k = istart+1, istart+inum
-        ws(k) = val(send_item(k))
+    do i = 1, n_neib
+      iS = send_index(i-1)
+      in = send_index(i  ) - iS
+      if(in == 0) cycle
+      do j = iS+1, iS+in
+        do k = 1, ndof
+          ws(ndof*(j-1)+k) = val(ndof*(send_item(j)-1)+k)
+        enddo
       enddo
-      call MPI_Isend(ws(istart+1), inum, MPI_DOUBLE_PRECISION, neib_pe(neib), 0, comm, req1(neib), ierr)
+      call MPI_Isend(ws(iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req1(i), ierr)
     enddo
 
-    do neib = 1, n_neib
-      istart= recv_index(neib-1)
-      inum  = recv_index(neib  ) - istart
-      call MPI_Irecv(wr(istart+1), inum, MPI_DOUBLE_PRECISION, neib_pe(neib), 0, comm, req2(neib), ierr)
+    do i = 1, n_neib
+      iS = recv_index(i-1)
+      in = recv_index(i  ) - iS
+      if(in == 0) cycle
+      call MPI_Irecv(wr(iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req2(i), ierr)
     enddo
 
-    call MPI_WAITALL(n_neib, req2, sta2, ierr)
+    call MPI_waitall(n_neib, req2, sta2, ierr)
 
-    do neib= 1, n_neib
-      istart= recv_index(neib-1)
-      inum  = recv_index(neib  ) - istart
-      do k= istart+1, istart+inum
-        val(recv_item(k))= wr(k)
+    do i = 1, n_neib
+      iS = recv_index(i-1)
+      in = recv_index(i  ) - iS
+      do j = iS+1, iS+in
+        do k = 1, ndof
+          val(ndof*(recv_item(j)-1)+k) = wr(ndof*(j-1)+k)
+        enddo
       enddo
     enddo
 
@@ -134,11 +140,11 @@ contains
   end subroutine monolis_SendRecv_R
 
   subroutine monolis_SendRecv_I(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
-  & ws, wr, val, comm)
+  & ws, wr, val, ndof, comm)
     implicit none
     integer(kind=kint) :: n_neib
-    integer(kind=kint) :: istart, inum, k, ierr
-    integer(kind=kint) :: neib, comm
+    integer(kind=kint) :: iS, in, j, k, ierr
+    integer(kind=kint) :: i, ndof, comm
     integer(kind=kint) :: val(:), ws(:), wr(:)
     integer(kind=kint), pointer :: neib_pe(:)
     integer(kind=kint), pointer :: send_index(:)
@@ -151,28 +157,34 @@ contains
     integer(kind=kint) :: req2(n_neib)
 
 #ifdef WITHMPI
-    do neib = 1, n_neib
-      istart= send_index(neib-1)
-      inum  = send_index(neib  ) - istart
-      do k = istart+1, istart+inum
-        ws(k) = val(send_item(k))
+    do i = 1, n_neib
+      iS = send_index(i-1)
+      in = send_index(i  ) - iS
+      if(in == 0) cycle
+      do j = iS+1, iS+in
+        do k = 1, ndof
+          ws(ndof*(j-1)+k) = val(ndof*(send_item(j)-1)+k)
+        enddo
       enddo
-      call MPI_Isend(ws(istart+1), inum, MPI_INTEGER, neib_pe(neib), 0, comm, req1(neib), ierr)
+      call MPI_Isend(ws(iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req1(i), ierr)
     enddo
 
-    do neib = 1, n_neib
-      istart= recv_index(neib-1)
-      inum  = recv_index(neib  ) - istart
-      call MPI_Irecv(wr(istart+1), inum, MPI_INTEGER, neib_pe(neib), 0, comm, req2(neib), ierr)
+    do i = 1, n_neib
+      iS = recv_index(i-1)
+      in = recv_index(i  ) - iS
+      if(in == 0) cycle
+      call MPI_Irecv(wr(iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req2(i), ierr)
     enddo
 
-    call MPI_WAITALL(n_neib, req2, sta2, ierr)
+    call MPI_waitall(n_neib, req2, sta2, ierr)
 
-    do neib= 1, n_neib
-      istart= recv_index(neib-1)
-      inum  = recv_index(neib  ) - istart
-      do k= istart+1, istart+inum
-        val(recv_item(k))= wr(k)
+    do i = 1, n_neib
+      iS = recv_index(i-1)
+      in = recv_index(i  ) - iS
+      do j = iS+1, iS+in
+        do k = 1, ndof
+          val(ndof*(recv_item(j)-1)+k) = wr(ndof*(j-1)+k)
+        enddo
       enddo
     enddo
 

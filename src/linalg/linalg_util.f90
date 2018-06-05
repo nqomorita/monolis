@@ -29,7 +29,7 @@ contains
     call monolis_SendRecv_R(monoCOM%n_neib, monoCOM%neib_pe, &
       &   monoCOM%send_index, monoCOM%send_item, &
       &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X, monoCOM%comm)
+      &   ws, wr, X, ndof, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_R
@@ -56,7 +56,7 @@ contains
     call monolis_SendRecv_I(monoCOM%n_neib, monoCOM%neib_pe, &
       &   monoCOM%send_index, monoCOM%send_item, &
       &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X, monoCOM%comm)
+      &   ws, wr, X, ndof, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_I
