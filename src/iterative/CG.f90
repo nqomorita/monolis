@@ -47,7 +47,7 @@ contains
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
     call monolis_inner_product_R(monoCOM, monoMAT, ndof, B, B, B2, tcomm)
 
-    do iter=1, monoPRM%maxiter
+    do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,Z))
       call monolis_inner_product_R(monoCOM, monoMAT, ndof, W(:,R), W(:,Z), rho, tcomm)
 
@@ -66,14 +66,14 @@ contains
       call monolis_inner_product_R(monoCOM, monoMAT, ndof, W(:,P), W(:,Q), omega, tcomm)
       alpha = rho/omega
 
-      do i=1, NNDOF
+      do i = 1, NNDOF
         X(i) = X(i) + alpha * W(i,P)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
       else
-        do i=1, NNDOF
+        do i = 1, NNDOF
           W(i,R) = W(i,R) - alpha * W(i,Q)
         enddo
       endif
