@@ -10,8 +10,6 @@ program main
   type(monolis_com) :: monoCOM
   type(monolis_mat) :: monoMAT
 
-  write(*,*)"monolis"
-
   call monolis_initialize(monoPRM, monoCOM, monoMAT)
 
   call monolis_finalize(monoPRM, monoCOM, monoMAT)

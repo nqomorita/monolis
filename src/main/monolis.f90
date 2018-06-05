@@ -27,12 +27,12 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   real(kind=kdouble), intent(in), pointer :: AU(:)
   real(kind=kdouble), intent(in), pointer :: AL(:)
   real(kind=kdouble), intent(in), pointer :: B(:)
-  real(kind=kdouble), intent(out), pointer :: X(:)
+  real(kind=kdouble), intent(out),pointer :: X(:)
   !> for monoCOM
-  integer(kind=kint), intent(in)         :: myrank
-  integer(kind=kint), intent(in)         :: comm
-  integer(kind=kint), intent(in)         :: commsize
-  integer(kind=kint), intent(in)         :: n_neib
+  integer(kind=kint), intent(in)          :: myrank
+  integer(kind=kint), intent(in)          :: comm
+  integer(kind=kint), intent(in)          :: commsize
+  integer(kind=kint), intent(in)          :: n_neib
   integer(kind=kint), intent(in), pointer :: neib_pe(:)
   integer(kind=kint), intent(in), pointer :: recv_index(:)
   integer(kind=kint), intent(in), pointer :: recv_item(:)
