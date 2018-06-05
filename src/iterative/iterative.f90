@@ -14,7 +14,7 @@ contains
     type(monolis_mat) :: monoMAT
 
     select case(monoPRM%method)
-      case (1)
+      case (monolis_iter_CG)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_CG"
         call monolis_solver_CG(monoPRM, monoCOM, monoMAT)
     end select

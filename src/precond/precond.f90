@@ -12,6 +12,9 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
+    if(monoPRM%precond == monolis_prec_DIAG)then
+
+    endif
   end subroutine monolis_precond_setup
 
   subroutine monolis_precond_apply(monoPRM, monoCOM, monoMAT, X, Y)
@@ -22,10 +25,13 @@ contains
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
 
-    do i=1, monoMAT%N*monoMAT%NDOF
-      Y(i) = X(i)
-    enddo
+    if(monoPRM%precond == monolis_prec_DIAG)then
 
+    else
+      do i=1, monoMAT%N*monoMAT%NDOF
+        Y(i) = X(i)
+      enddo
+    endif
   end subroutine monolis_precond_apply
 
   subroutine monolis_precond_clear(monoPRM, monoCOM, monoMAT)
@@ -34,6 +40,9 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
+    if(monoPRM%precond == monolis_prec_DIAG)then
+
+    endif
   end subroutine monolis_precond_clear
 
 end module mod_monolis_precond
