@@ -97,19 +97,13 @@ contains
     integer(kind=kint), pointer :: send_item (:)
     integer(kind=kint), pointer :: recv_index(:)
     integer(kind=kint), pointer :: recv_item (:)
-    integer(kind=kint), allocatable :: sta1(:,:)
-    integer(kind=kint), allocatable :: sta2(:,:)
-    integer(kind=kint), allocatable :: req1(:)
-    integer(kind=kint), allocatable :: req2(:)
-    real(kind=kdouble) :: val(:)
-    real(kind=kdouble) :: ws(:), wr(:)
+    integer(kind=kint) :: sta1(MPI_STATUS_SIZE, n_neib)
+    integer(kind=kint) :: sta2(MPI_STATUS_SIZE, n_neib)
+    integer(kind=kint) :: req1(n_neib)
+    integer(kind=kint) :: req2(n_neib)
+    real(kind=kdouble) :: val(:), ws(:), wr(:)
 
 #ifdef WITHMPI
-    allocate(sta1(MPI_STATUS_SIZE, n_neib))
-    allocate(sta2(MPI_STATUS_SIZE, n_neib))
-    allocate(req1(n_neib))
-    allocate(req2(n_neib))
-
     do neib = 1, n_neib
       istart= send_index(neib-1)
       inum  = send_index(neib  ) - istart
@@ -136,8 +130,6 @@ contains
     enddo
 
     call MPI_waitall(n_neib, req1, sta1, ierr)
-
-    deallocate(sta1, sta2, req1, req2)
 #endif
   end subroutine monolis_SendRecv_R
 
@@ -147,24 +139,18 @@ contains
     integer(kind=kint) :: n_neib
     integer(kind=kint) :: istart, inum, k, ierr
     integer(kind=kint) :: neib, comm
-    integer(kind=kint) :: val(:)
+    integer(kind=kint) :: val(:), ws(:), wr(:)
     integer(kind=kint), pointer :: neib_pe(:)
     integer(kind=kint), pointer :: send_index(:)
     integer(kind=kint), pointer :: send_item (:)
     integer(kind=kint), pointer :: recv_index(:)
     integer(kind=kint), pointer :: recv_item (:)
-    integer(kind=kint), allocatable :: sta1(:,:)
-    integer(kind=kint), allocatable :: sta2(:,:)
-    integer(kind=kint), allocatable :: req1(:)
-    integer(kind=kint), allocatable :: req2(:)
-    real(kind=kdouble) :: ws(:), wr(:)
+    integer(kind=kint) :: sta1(MPI_STATUS_SIZE, n_neib)
+    integer(kind=kint) :: sta2(MPI_STATUS_SIZE, n_neib)
+    integer(kind=kint) :: req1(n_neib)
+    integer(kind=kint) :: req2(n_neib)
 
 #ifdef WITHMPI
-    allocate(sta1(MPI_STATUS_SIZE, n_neib))
-    allocate(sta2(MPI_STATUS_SIZE, n_neib))
-    allocate(req1(n_neib))
-    allocate(req2(n_neib))
-
     do neib = 1, n_neib
       istart= send_index(neib-1)
       inum  = send_index(neib  ) - istart
@@ -191,8 +177,6 @@ contains
     enddo
 
     call MPI_waitall(n_neib, req1, sta1, ierr)
-
-    deallocate(sta1, sta2, req1, req2)
 #endif
   end subroutine monolis_SendRecv_I
 

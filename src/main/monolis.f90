@@ -64,7 +64,7 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoCOM%comm = comm
   monoCOM%commsize = commsize
   monoCOM%n_neib = n_neib
-  if(1 < n_neib)then
+  if(n_neib /= 0)then
     monoCOM%neib_pe => neib_pe
     monoCOM%recv_index => recv_index
     monoCOM%recv_item  => recv_item

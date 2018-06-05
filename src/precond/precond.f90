@@ -22,7 +22,7 @@ contains
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
 
-    do i=1, monoMAT%NP*monoMAT%NDOF
+    do i=1, monoMAT%N*monoMAT%NDOF
       Y(i) = X(i)
     enddo
 

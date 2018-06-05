@@ -29,7 +29,7 @@ contains
     call monolis_SendRecv_R(monoCOM%n_neib, monoCOM%neib_pe, &
       &   monoCOM%send_index, monoCOM%send_item, &
       &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X , monoCOM%comm)
+      &   ws, wr, X, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_R
@@ -42,9 +42,9 @@ contains
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, ndof, ns, nr
     integer(kind=kint) :: X(:)
+    integer(kind=kint), allocatable :: ws(:), wr(:)
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
-    real(kind=kdouble), allocatable :: ws(:), wr(:)
 
     if( monoCOM%n_neib == 0 ) return
 
@@ -56,7 +56,7 @@ contains
     call monolis_SendRecv_I(monoCOM%n_neib, monoCOM%neib_pe, &
       &   monoCOM%send_index, monoCOM%send_item, &
       &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X , monoCOM%comm)
+      &   ws, wr, X, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_I

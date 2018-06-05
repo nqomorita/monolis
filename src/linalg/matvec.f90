@@ -10,7 +10,6 @@ contains
   subroutine monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     use mod_monolis_com
     use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -19,7 +18,7 @@ contains
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
-    call  monolis_matvec(monoCOM, monoMAT, X, R, tcomm)
+    call monolis_matvec(monoCOM, monoMAT, X, R, tcomm)
 
     do i=1,monoMAT%N*monoMAT%NDOF
       R(i) = B(i) - R(i)
@@ -29,7 +28,6 @@ contains
   subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
     use mod_monolis_com
     use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -46,7 +44,7 @@ contains
   subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
     use mod_monolis_com
     use mod_monolis_mat
-    use mod_monolis_linalg_com
+    use mod_monolis_linalg_util
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -67,6 +65,8 @@ contains
     indexL => monoMAT%indexL
     itemU =>  monoMAT%itemU
     itemL =>  monoMAT%itemL
+
+    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     do i = 1, N
       X1= X(3*i-2)
