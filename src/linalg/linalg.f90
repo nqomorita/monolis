@@ -8,9 +8,6 @@ module mod_monolis_linalg
 contains
 
   subroutine monolis_inner_product_I(monoCOM, monoMAT, ndof, X, Y, sum, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -31,9 +28,6 @@ contains
   end subroutine monolis_inner_product_I
 
   subroutine monolis_inner_product_R(monoCOM, monoMAT, ndof, X, Y, sum, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -54,8 +48,6 @@ contains
   end subroutine monolis_inner_product_R
 
   subroutine monolis_inner_product_R_local(monoCOM, monoMAT, ndof, X, Y, sum)
-    use mod_monolis_com
-    use mod_monolis_mat
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT

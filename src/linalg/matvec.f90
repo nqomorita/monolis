@@ -2,14 +2,13 @@ module mod_monolis_matvec
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_linalg_util
   use mod_monolis_linalg_com
   implicit none
 
 contains
 
   subroutine monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -26,8 +25,6 @@ contains
   end subroutine monolis_residual
 
   subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -44,9 +41,6 @@ contains
   end subroutine monolis_matvec
 
   subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_util
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -116,9 +110,6 @@ contains
   end subroutine monolis_matvec_nn
 
   subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_util
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT

@@ -78,5 +78,4 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%tol = tol
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
-
 end subroutine monolis

@@ -5,7 +5,6 @@ program main
   use mod_monolis_util
   use mod_monolis_solve
   implicit none
-
   type(monolis_prm) :: monoPRM
   type(monolis_com) :: monoCOM
   type(monolis_mat) :: monoMAT

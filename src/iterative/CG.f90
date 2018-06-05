@@ -1,17 +1,17 @@
 module mod_monolis_solver_CG
+  use mod_monolis_prm
+  use mod_monolis_com
+  use mod_monolis_mat
+  use mod_monolis_precond
+  use mod_monolis_matvec
+  use mod_monolis_linalg
+  use mod_monolis_linalg_util
 
   implicit none
 
 contains
 
   subroutine monolis_solver_CG(monoPRM, monoCOM, monoMAT)
-    use mod_monolis_prm
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_precond
-    use mod_monolis_matvec
-    use mod_monolis_linalg
-    use mod_monolis_linalg_util
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM

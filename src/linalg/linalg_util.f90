@@ -8,9 +8,6 @@ module mod_monolis_linalg_util
 contains
 
   subroutine monolis_update_R(monoCOM, ndof, X, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, ndof, ns, nr
@@ -35,9 +32,6 @@ contains
   end subroutine monolis_update_R
 
   subroutine monolis_update_I(monoCOM, ndof, X, tcomm)
-    use mod_monolis_com
-    use mod_monolis_mat
-    use mod_monolis_linalg_com
     implicit none
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, ndof, ns, nr

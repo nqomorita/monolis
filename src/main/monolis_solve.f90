@@ -14,7 +14,6 @@ contains
     type(monolis_mat) :: monoMAT
 
     call monolis_iterative(monoPRM, monoCOM, monoMAT)
-
   end subroutine monolis_solve
 
 end module mod_monolis_solve
