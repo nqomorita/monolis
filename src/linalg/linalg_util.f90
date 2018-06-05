@@ -19,7 +19,7 @@ contains
     real(kind=kdouble), optional :: tcomm
     real(kind=kdouble), allocatable :: ws(:), wr(:)
 
-    if( monoCOM%n_neib == 0 ) return
+    if(monoCOM%n_neib == 0) return
 
     ns = monoCOM%send_index(monoCOM%n_neib)
     nr = monoCOM%recv_index(monoCOM%n_neib)
@@ -27,9 +27,9 @@ contains
     allocate(ws(ndof*ns), wr(ndof*nr))
 
     call monolis_SendRecv_R(monoCOM%n_neib, monoCOM%neib_pe, &
-      &   monoCOM%send_index, monoCOM%send_item, &
-      &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X, ndof, monoCOM%comm)
+       & monoCOM%send_index, monoCOM%send_item, &
+       & monoCOM%recv_index, monoCOM%recv_item, &
+       & ws, wr, X, ndof, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_R
@@ -46,7 +46,7 @@ contains
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
-    if( monoCOM%n_neib == 0 ) return
+    if(monoCOM%n_neib == 0) return
 
     ns = monoCOM%send_index(monoCOM%n_neib)
     nr = monoCOM%recv_index(monoCOM%n_neib)
@@ -54,9 +54,9 @@ contains
     allocate(ws(ndof*ns), wr(ndof*nr))
 
     call monolis_SendRecv_I(monoCOM%n_neib, monoCOM%neib_pe, &
-      &   monoCOM%send_index, monoCOM%send_item, &
-      &   monoCOM%recv_index, monoCOM%recv_item, &
-      &   ws, wr, X, ndof, monoCOM%comm)
+       & monoCOM%send_index, monoCOM%send_item, &
+       & monoCOM%recv_index, monoCOM%recv_item, &
+       & ws, wr, X, ndof, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_I

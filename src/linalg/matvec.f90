@@ -63,44 +63,44 @@ contains
     AL => monoMAT%AL
     indexU => monoMAT%indexU
     indexL => monoMAT%indexL
-    itemU =>  monoMAT%itemU
-    itemL =>  monoMAT%itemL
+    itemU  => monoMAT%itemU
+    itemL  => monoMAT%itemL
 
     call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     do i = 1, N
-      X1= X(3*i-2)
-      X2= X(3*i-1)
-      X3= X(3*i  )
-      Y1= D(9*i-8)*X1 + D(9*i-7)*X2 + D(9*i-6)*X3
-      Y2= D(9*i-5)*X1 + D(9*i-4)*X2 + D(9*i-3)*X3
-      Y3= D(9*i-2)*X1 + D(9*i-1)*X2 + D(9*i  )*X3
+      X1 = X(3*i-2)
+      X2 = X(3*i-1)
+      X3 = X(3*i  )
+      Y1 = D(9*i-8)*X1 + D(9*i-7)*X2 + D(9*i-6)*X3
+      Y2 = D(9*i-5)*X1 + D(9*i-4)*X2 + D(9*i-3)*X3
+      Y3 = D(9*i-2)*X1 + D(9*i-1)*X2 + D(9*i  )*X3
 
-      jS= indexL(i-1) + 1
-      jE= indexL(i  )
-      do j= jS, jE
-        in  = itemL(j)
-        X1= X(3*in-2)
-        X2= X(3*in-1)
-        X3= X(3*in  )
-        Y1= Y1 + AL(9*j-8)*X1 + AL(9*j-7)*X2 + AL(9*j-6)*X3
-        Y2= Y2 + AL(9*j-5)*X1 + AL(9*j-4)*X2 + AL(9*j-3)*X3
-        Y3= Y3 + AL(9*j-2)*X1 + AL(9*j-1)*X2 + AL(9*j  )*X3
+      jS = indexL(i-1) + 1
+      jE = indexL(i  )
+      do j = jS, jE
+        in = itemL(j)
+        X1 = X(3*in-2)
+        X2 = X(3*in-1)
+        X3 = X(3*in  )
+        Y1 = Y1 + AL(9*j-8)*X1 + AL(9*j-7)*X2 + AL(9*j-6)*X3
+        Y2 = Y2 + AL(9*j-5)*X1 + AL(9*j-4)*X2 + AL(9*j-3)*X3
+        Y3 = Y3 + AL(9*j-2)*X1 + AL(9*j-1)*X2 + AL(9*j  )*X3
       enddo
-      jS= indexU(i-1) + 1
-      jE= indexU(i  )
-      do j= jS, jE
-        in  = itemU(j)
-        X1= X(3*in-2)
-        X2= X(3*in-1)
-        X3= X(3*in  )
-        Y1= Y1 + AU(9*j-8)*X1 + AU(9*j-7)*X2 + AU(9*j-6)*X3
-        Y2= Y2 + AU(9*j-5)*X1 + AU(9*j-4)*X2 + AU(9*j-3)*X3
-        Y3= Y3 + AU(9*j-2)*X1 + AU(9*j-1)*X2 + AU(9*j  )*X3
+      jS = indexU(i-1) + 1
+      jE = indexU(i  )
+      do j = jS, jE
+        in = itemU(j)
+        X1 = X(3*in-2)
+        X2 = X(3*in-1)
+        X3 = X(3*in  )
+        Y1 = Y1 + AU(9*j-8)*X1 + AU(9*j-7)*X2 + AU(9*j-6)*X3
+        Y2 = Y2 + AU(9*j-5)*X1 + AU(9*j-4)*X2 + AU(9*j-3)*X3
+        Y3 = Y3 + AU(9*j-2)*X1 + AU(9*j-1)*X2 + AU(9*j  )*X3
       enddo
-      Y(3*i-2)= Y1
-      Y(3*i-1)= Y2
-      Y(3*i  )= Y3
+      Y(3*i-2) = Y1
+      Y(3*i-1) = Y2
+      Y(3*i  ) = Y3
     enddo
 
   end subroutine monolis_matvec_33

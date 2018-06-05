@@ -81,7 +81,7 @@ contains
       call monolis_inner_product_R(monoCOM, monoMAT, ndof,  W(:,R), W(:,R), R2, tcomm)
       resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0) write (*,'(i7, 1pe16.6)') iter, resid
+      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
 
       rho1 = rho

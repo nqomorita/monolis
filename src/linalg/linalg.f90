@@ -22,7 +22,7 @@ contains
     sum = 0
     do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
-    end do
+    enddo
 
     t1 = monolis_wtime()
     call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
@@ -45,11 +45,11 @@ contains
     sum = 0.0d0
     do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
-    end do
+    enddo
 
-    t1= monolis_wtime()
+    t1 = monolis_wtime()
     call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
-    t2= monolis_wtime()
+    t2 = monolis_wtime()
     if (present(tcomm)) tcomm = tcomm + t2 - t1
   end subroutine monolis_inner_product_R
 
@@ -66,7 +66,7 @@ contains
     sum = 0.0d0
     do i = 1, monoMAT%N * ndof
       sum = sum + X(i)*Y(i)
-    end do
+    enddo
   end subroutine monolis_inner_product_R_local
 
 end module mod_monolis_linalg
