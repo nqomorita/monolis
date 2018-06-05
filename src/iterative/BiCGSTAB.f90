@@ -1,13 +1,17 @@
 module mod_monolis_solver_BiCGSTAB
+  use mod_monolis_prm
+  use mod_monolis_com
+  use mod_monolis_mat
+  use mod_monolis_precond
+  use mod_monolis_matvec
+  use mod_monolis_linalg
+  use mod_monolis_linalg_util
 
   implicit none
 
 contains
 
   subroutine monolis_solver_BiCGSTAB(monoPRM, monoCOM, monoMAT)
-    use mod_monolis_prm
-    use mod_monolis_com
-    use mod_monolis_mat
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -15,20 +19,20 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, l, iter, iter_RR
     real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tset, tsol
-    real(kind=kdouble) :: alpha, beta, rho, rho1, C1, C2, omega
+    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
+    real(kind=kdouble) :: alpha, beta, rho, rho1, C1, c2, omega
     real(kind=kdouble) :: CG(2)
-    real(kind=kdouble), allocatable :: WW(:,:)
+    real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    integer(kind=kint), parameter :: R = 1
-    integer(kind=kint), parameter :: RT= 2
-    integer(kind=kint), parameter :: P = 3
-    integer(kind=kint), parameter :: PT= 4
-    integer(kind=kint), parameter :: S = 5
-    integer(kind=kint), parameter :: ST= 1
-    integer(kind=kint), parameter :: T = 6
-    integer(kind=kint), parameter :: V = 7
-    integer(kind=kint), parameter :: WK= 8
+    integer(kind=kint), parameter :: R  = 1
+    integer(kind=kint), parameter :: RT = 2
+    integer(kind=kint), parameter :: P  = 3
+    integer(kind=kint), parameter :: PT = 4
+    integer(kind=kint), parameter :: S  = 5
+    integer(kind=kint), parameter :: ST = 1
+    integer(kind=kint), parameter :: T  = 6
+    integer(kind=kint), parameter :: V  = 7
+    integer(kind=kint), parameter :: WK = 8
 
     t1 = monolis_wtime()
 
@@ -36,79 +40,85 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X; X = 0.0d0
+    X => monoMAT%X; X = 1.0d0
     B => monoMAT%B
 
-    allocate(WW(NDOF*NP,4))
-    WW = 0.0d0
+    allocate(W(NDOF*NP,8))
+    W = 0.0d0
 
-    !call monolis_precond_setup()
-    !call monolis_residual()
+    iter_RR = 50
+    tol = monoPRM%tol
 
-    do i=1, NNDOF
-      WW(i,RT) = WW(i,R)
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+
+    do i = 1, NNDOF
+      W(i,RT) = W(i,R)
     enddo
 
-    !call monolis_inner_product_R()
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
 
-    do iter=1, monoPRM%maxiter
-      !call monolis_inner_product_R()
+    do iter = 1, monoPRM%maxiter
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,RT), rho, tcomm)
 
-      if ( iter.gt.1 ) then
-        beta = (RHO/RHO1) * (alpha/omega)
+      if(1 < iter)then
+        beta = (rho/rho1) * (alpha/omega)
         do i = 1, NNDOF
-          WW(i,P) = WW(i,R) + beta * (WW(i,P) - omega * WW(i,V))
+          W(i,P) = W(i,R) + beta * (W(i,P) - omega * W(i,V))
         enddo
-       else
+      else
         do i = 1, NNDOF
-          WW(i,P) = WW(i,R)
+          W(i,P) = W(i,R)
         enddo
       endif
 
-      !call monolis_precond_apply()
-      !call monolis_matvec()
-      !call hecmw_inner_product_R()
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,P), W(:,PT))
+      call monolis_matvec(monoCOM, monoMAT, W(:,PT), W(:,V), tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,RT), W(:,V), c2, tcomm)
 
-      alpha = RHO / C2
+      alpha = rho / c2
 
       do i = 1, NNDOF
-        WW(i,S) = WW(i,R) - alpha * WW(i,V)
+        W(i,S) = W(i,R) - alpha * W(i,V)
       enddo
 
-      !call monolis_precond_apply()
-      !call monolis_matvec()
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,S), W(:,ST))
+      call monolis_matvec(monoCOM, monoMAT, W(:,ST), W(:,T), tcomm)
 
-      !call hecmw_inner_product_R_nocomm()
-      !call hecmw_inner_product_R_nocomm()
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,T), W(:,S), CG(1))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,T), W(:,T), CG(2))
+      call monolis_allreduce_R(2, CG, monolis_sum, monoCOM%comm)
 
       omega = CG(1) / CG(2)
 
       do i = 1, NNDOF
-        X (i) = X(i) + alpha * WW(i,PT) + omega * WW(i,ST)
+        X (i) = X(i) + alpha * W(i,PT) + omega * W(i,ST)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        !call monolis_residual()
+        call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
       else
-        do i=1, NNDOF
-          !WW(i,R) = WW(i,R) - alpha * WW(i,Q)
+        do i = 1, NNDOF
+          W(i,R) = W(i,R) - omega * W(i,T)
         enddo
       endif
 
-      !call monolis_inner_product()
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
       resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0) write (*,'(i7, 1pe16.6)') iter, resid
+      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
 
       rho1 = rho
     enddo
 
-    !call monolis_update_R()
+    call monolis_update_R(monoCOM, NDOF, X, tcomm)
+    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
+
+    deallocate(W)
 
     t2 = monolis_wtime()
     tsol = t2 - t1
-
   end subroutine monolis_solver_BiCGSTAB
 
 end module mod_monolis_solver_BiCGSTAB

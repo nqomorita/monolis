@@ -45,25 +45,25 @@ contains
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, ndof, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
 
     do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,Z))
-      call monolis_inner_product_R(monoCOM, monoMAT, ndof, W(:,R), W(:,Z), rho, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,Z), rho, tcomm)
 
-      if(iter == 1)then
-        do i=1, NNDOF
-          W(i,P) = W(i,Z)
-        enddo
-      else
+      if(1 < iter)then
         beta = rho/rho1
         do i = 1, NNDOF
           W(i,P) = W(i,Z) + beta * W(i,P)
         enddo
+      else
+        do i=1, NNDOF
+          W(i,P) = W(i,Z)
+        enddo
       endif
 
       call monolis_matvec(monoCOM, monoMAT, W(:,P), W(:,Q), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, ndof, W(:,P), W(:,Q), omega, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,P), W(:,Q), omega, tcomm)
       alpha = rho/omega
 
       do i = 1, NNDOF
@@ -78,7 +78,7 @@ contains
         enddo
       endif
 
-      call monolis_inner_product_R(monoCOM, monoMAT, ndof,  W(:,R), W(:,R), R2, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF,  W(:,R), W(:,R), R2, tcomm)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
@@ -87,7 +87,7 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, ndof, X, tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, tcomm)
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     deallocate(W)

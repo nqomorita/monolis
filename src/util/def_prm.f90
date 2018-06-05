@@ -6,6 +6,7 @@ module mod_monolis_prm
 
   integer(4), parameter :: monolis_iter_CG       = 1
   integer(4), parameter :: monolis_iter_BiCGSTAB = 2
+  integer(4), parameter :: monolis_iter_GropCG   = 3
 
   integer(4), parameter :: monolis_prec_DIAG = 1
   integer(4), parameter :: monolis_prec_ILU  = 2
