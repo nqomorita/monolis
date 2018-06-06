@@ -1,13 +1,17 @@
 module mod_monolis_solver_PipeCR
+  use mod_monolis_prm
+  use mod_monolis_com
+  use mod_monolis_mat
+  use mod_monolis_precond
+  use mod_monolis_matvec
+  use mod_monolis_linalg
+  use mod_monolis_linalg_util
 
   implicit none
 
 contains
 
   subroutine monolis_solver_PipeCR(monoPRM, monoCOM, monoMAT)
-    use mod_monolis_prm
-    use mod_monolis_com
-    use mod_monolis_mat
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -16,41 +20,21 @@ contains
     integer(kind=kint) :: i, j, k, iter, iter_RR
     integer(kind=kint ) :: requests(1)
     integer(kind=kint ) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tset, tsol, D2
-    real(kind=kdouble) :: alpha, alpha1, beta, rho, rho1, gamma, gamma1, delta, C1
+    real(kind=kdouble) :: tol, resid, R2, B2, U2
+    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
+    real(kind=kdouble) :: alpha, alpha1, beta, rho, rho1, gamma, gamma1, delta, phi, utol
     real(kind=kdouble) :: buf(3), CG(3)
-    real(kind=kdouble), allocatable :: WW(:,:)
+    real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    !integer(kind=kint), parameter ::  R = 1
-    !integer(kind=kint), parameter ::  Z = 2
-    !integer(kind=kint), parameter ::  Q = 2
-    !integer(kind=kint), parameter ::  P = 3
-    !integer(kind=kint), parameter :: WK = 4
-
-    real(kind=kdouble), allocatable :: R(:)
-    real(kind=kdouble), allocatable :: U(:)
-    real(kind=kdouble), allocatable :: W(:)
-    real(kind=kdouble), allocatable :: Q(:)
-    real(kind=kdouble), allocatable :: P(:)
-    real(kind=kdouble), allocatable :: Z(:)
-    real(kind=kdouble), allocatable :: L(:)
-    real(kind=kdouble), allocatable :: M(:)
-    real(kind=kdouble), allocatable :: S(:)
-    real(kind=kdouble), allocatable :: WK(:)
-    real(kind=kdouble), allocatable  :: D(:), E(:)
-
-
-    !integer(kind=kint), parameter ::  R= 1
-    !integer(kind=kint), parameter ::  U= 2
-    !integer(kind=kint), parameter ::  W= 3
-    !integer(kind=kint), parameter ::  Q= 4
-    !integer(kind=kint), parameter ::  P= 5
-    !integer(kind=kint), parameter ::  Z= 6
-    !integer(kind=kint), parameter ::  L= 7
-    !integer(kind=kint), parameter ::  M= 8
-    !integer(kind=kint), parameter ::  S= 9
-    !integer(kind=kint), parameter :: WK=10
+    integer(kind=kint), parameter ::  R = 1
+    integer(kind=kint), parameter ::  U = 2
+    integer(kind=kint), parameter ::  V = 3
+    integer(kind=kint), parameter ::  Q = 4
+    integer(kind=kint), parameter ::  P = 5
+    integer(kind=kint), parameter ::  Z = 6
+    integer(kind=kint), parameter ::  L = 7
+    integer(kind=kint), parameter ::  M = 8
+    integer(kind=kint), parameter ::  S = 9
 
     t1 = monolis_wtime()
 
@@ -58,84 +42,82 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X; X = 0.0d0
+    X => monoMAT%X; X = 1.0d0
     B => monoMAT%B
 
-    allocate(R(NDOF*NP))
-    allocate(U(NDOF*NP))
-    allocate(W(NDOF*NP))
-    allocate(Q(NDOF*NP))
-    allocate(P(NDOF*NP))
-    allocate(Z(NDOF*NP))
-    allocate(L(NDOF*NP))
-    allocate(M(NDOF*NP))
-    allocate(S(NDOF*NP))
-    allocate(WK(NDOF*NP))
-    R = 0.d0; U = 0.d0; W = 0.d0; Q = 0.d0; P = 0.d0
-    Z = 0.d0; L = 0.d0; M = 0.d0; S = 0.d0; WK= 0.d0
+    allocate(W(NDOF*NP, 9))
+    W = 0.0d0
 
-    !call monolis_precond_setup()
-    !call monolis_residual()
-    !call monolis_inner_product_R()
-    !call monolis_precond_apply()
-    !call monolis_matvec()
+    iter_RR = 50
+    tol = monoPRM%tol
 
-    gamma = 1.0d0
-    alpha = 1.0d0
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
+    call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,U), W(:,U), U2, tcomm)
+    call monolis_matvec(monoCOM, monoMAT, W(:,U), W(:,V), tcomm)
+
+    phi  = dsqrt(R2/U2)
+    utol = tol/phi
 
     do iter=1, monoPRM%maxiter
-      !call monolis_inner_product_R_nocomm()
-      !call monolis_inner_product_R_nocomm()
-      !call monolis_inner_product_R_nocomm()
-      !call monolis_Iallreduce_R()
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,V), W(:,M))
 
-      !call monolis_precond_apply()
-      !call monolis_matvec()
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,V), W(:,U), CG(1))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,V), W(:,M), CG(2))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,U), W(:,U), CG(3))
+      call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
-      gamma1 = 1.0d0/gamma
-      alpha1 = 1.0d0/alpha
+      call monolis_matvec(monoCOM, monoMAT, W(:,M), W(:,L), tcomm)
 
       !call monolis_wait(requests, statuses)
-      gamma = buf(1)
-      delta = buf(2)
-      D2    = buf(3)
+      !gamma = buf(1)
+      !delta = buf(2)
+      !U2    = buf(3)
+      gamma = CG(1)
+      delta = CG(2)
+      U2    = CG(3)
 
-      if(iter > 1)then
+      if(1 < iter)then
         beta  = gamma*gamma1
         alpha = gamma/(delta-beta*gamma*alpha1)
       else
-        alpha = gamma/delta
         beta  = 0.0d0
+        alpha = gamma/delta
       endif
 
       do i = 1, NNDOF
-         Z(i) = L(i) + beta * Z(i)
-         Q(i) = M(i) + beta * Q(i)
-         S(i) = W(i) + beta * S(i)
-         P(i) = U(i) + beta * P(i)
+         W(i,Z) = W(i,L) + beta * W(i,Z)
+         W(i,Q) = W(i,M) + beta * W(i,Q)
+         W(i,P) = W(i,U) + beta * W(i,P)
+         X(i)   = X(i)   + alpha * W(i,P)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        do i = 1, NNDOF
-         X(i) = X(i) + alpha * P(i)
-        enddo
-        !call monolis_residual()
-        !call monolis_precond_apply()
+        call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+        call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
+        call monolis_matvec(monoCOM, monoMAT, W(:,U), W(:,V), tcomm)
       else
         do i = 1, NNDOF
-          R(i) = R(i) - alpha * S(i)
-          U(i) = U(i) - alpha * Q(i)
-          W(i) = W(i) - alpha * Z(i)
-          X(i) = X(i) + alpha * P(i)
+          W(i,U) = W(i,U) - alpha * W(i,Q)
+          W(i,V) = W(i,V) - alpha * W(i,Z)
         enddo
       endif
 
-      resid = dsqrt(R2/B2)
+      resid = dsqrt(U2/B2)
+      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid*phi
+      if(resid <= utol) exit
 
-      if(monoCOM%myrank == 0) write (*,'(i7, 1pe16.6)') iter, resid
+      gamma1 = 1.0d0/gamma
+      alpha1 = 1.0d0/alpha
     enddo
 
-    !call monolis_update_R()
+    call monolis_update_R(monoCOM, NDOF, X, tcomm)
+    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
+
+    deallocate(W)
 
     t2 = monolis_wtime()
     tsol = t2 - t1

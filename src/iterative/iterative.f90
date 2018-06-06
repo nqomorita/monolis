@@ -7,6 +7,7 @@ module mod_monolis_iterative
   use mod_monolis_solver_BiCGSTAB_noprec
   use mod_monolis_solver_GropCG
   use mod_monolis_solver_PipeCG
+  use mod_monolis_solver_PipeCR
   implicit none
 
 contains
@@ -37,6 +38,10 @@ contains
       case (monolis_iter_PipeCG)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_PipeCG"
         call monolis_solver_PipeCG(monoPRM, monoCOM, monoMAT)
+
+      case (monolis_iter_PipeCR)
+        if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_PipeCR"
+        call monolis_solver_PipeCR(monoPRM, monoCOM, monoMAT)
     end select
 
   end subroutine monolis_iterative
