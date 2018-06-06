@@ -7,7 +7,8 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_iter_CG       = 1
   integer(4), parameter :: monolis_iter_BiCGSTAB = 2
   integer(4), parameter :: monolis_iter_BiCGSTAB_noprec = 3
-  integer(4), parameter :: monolis_iter_GropCG   = 4
+  integer(4), parameter :: monolis_iter_GropCG   = 14
+  integer(4), parameter :: monolis_iter_PipeCG   = 4
 
   integer(4), parameter :: monolis_prec_DIAG   = 1
   integer(4), parameter :: monolis_prec_ILU    = 2
