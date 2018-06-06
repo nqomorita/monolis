@@ -4,6 +4,7 @@ module mod_monolis_iterative
   use mod_monolis_mat
   use mod_monolis_solver_CG
   use mod_monolis_solver_BiCGSTAB
+  use mod_monolis_solver_BiCGSTAB_noprec
   use mod_monolis_solver_GropCG
   implicit none
 
@@ -23,6 +24,10 @@ contains
       case (monolis_iter_BiCGSTAB)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_BiCGSTAB"
         call monolis_solver_BiCGSTAB(monoPRM, monoCOM, monoMAT)
+
+      case (monolis_iter_BiCGSTAB_noprec)
+        if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_BiCGSTAB_noprec"
+        call monolis_solver_BiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
 
       case (monolis_iter_GropCG)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_GropCG"

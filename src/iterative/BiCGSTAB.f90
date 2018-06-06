@@ -32,7 +32,6 @@ contains
     integer(kind=kint), parameter :: ST = 1
     integer(kind=kint), parameter :: T  = 6
     integer(kind=kint), parameter :: V  = 7
-    integer(kind=kint), parameter :: WK = 8
 
     t1 = monolis_wtime()
 
@@ -43,7 +42,7 @@ contains
     X => monoMAT%X; X = 1.0d0
     B => monoMAT%B
 
-    allocate(W(NDOF*NP,8))
+    allocate(W(NDOF*NP,7))
     W = 0.0d0
 
     iter_RR = 50
@@ -92,7 +91,7 @@ contains
       omega = CG(1) / CG(2)
 
       do i = 1, NNDOF
-        X (i) = X(i) + alpha * W(i,PT) + omega * W(i,ST)
+        X(i) = X(i) + alpha * W(i,PT) + omega * W(i,ST)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
