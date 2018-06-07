@@ -18,23 +18,23 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, iter, iter_RR
-    integer(kind=kint ) :: requests(1)
-    integer(kind=kint ) :: statuses(monolis_status_size,1)
+    integer(kind=kint) :: requests(1)
+    integer(kind=kint) :: statuses(monolis_status_size,1)
     real(kind=kdouble) :: tol, resid, R2, B2
     real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
     real(kind=kdouble) :: alpha, alpha1, beta, rho, rho1, gamma, gamma1, delta, C1
     real(kind=kdouble) :: buf(3), CG(3)
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    integer(kind=kint), parameter ::  R = 1
-    integer(kind=kint), parameter ::  U = 2
-    integer(kind=kint), parameter ::  V = 3
-    integer(kind=kint), parameter ::  Q = 4
-    integer(kind=kint), parameter ::  P = 5
-    integer(kind=kint), parameter ::  Z = 6
-    integer(kind=kint), parameter ::  L = 7
-    integer(kind=kint), parameter ::  M = 8
-    integer(kind=kint), parameter ::  S = 9
+    integer(kind=kint), parameter :: R = 1
+    integer(kind=kint), parameter :: U = 2
+    integer(kind=kint), parameter :: V = 3
+    integer(kind=kint), parameter :: Q = 4
+    integer(kind=kint), parameter :: P = 5
+    integer(kind=kint), parameter :: Z = 6
+    integer(kind=kint), parameter :: L = 7
+    integer(kind=kint), parameter :: M = 8
+    integer(kind=kint), parameter :: S = 9
 
     t1 = monolis_wtime()
 
