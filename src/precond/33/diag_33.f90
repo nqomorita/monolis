@@ -4,6 +4,11 @@ module mod_monolis_precond_diag_33
   use mod_monolis_mat
   implicit none
 
+  private
+  public :: monolis_precond_diag_33_setup
+  public :: monolis_precond_diag_33_apply
+  public :: monolis_precond_diag_33_clear
+
   real(kind=kdouble), pointer :: ALU(:) => null()
 
 contains
