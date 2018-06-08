@@ -45,4 +45,21 @@ contains
 
   end subroutine monolis_check_converge
 
+  subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: iter
+    real(kind=kdouble) :: R2, resid
+    real(kind=kdouble) :: t1, t2
+    real(kind=kdouble), optional :: tcomm
+    logical :: is_converge
+
+    is_converge = .false.
+    resid = dsqrt(R2/B2)
+    if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
+    if(resid < monoPRM%tol) is_converge = .true.
+
+  end subroutine monolis_check_converge_2
 end module mod_monolis_converge

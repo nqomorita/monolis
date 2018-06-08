@@ -24,11 +24,11 @@ contains
     real(kind=kdouble) :: alpha, beta, rho, rho1, omega
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    logical :: is_converge
     integer(kind=kint), parameter :: R = 1
     integer(kind=kint), parameter :: Z = 2
     integer(kind=kint), parameter :: Q = 2
     integer(kind=kint), parameter :: P = 3
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -85,9 +85,9 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, tcomm)
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
     call monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
+    call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     deallocate(W)
 

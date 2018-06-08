@@ -6,6 +6,7 @@ module mod_monolis_solver_GropCG
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_converge
 
   implicit none
 
@@ -21,7 +22,7 @@ contains
     integer(kind=kint) :: reqs1(1)
     integer(kind=kint) :: reqs2(1)
     integer(kind=kint) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: tol, resid, R2, B2
+    real(kind=kdouble) :: R2
     real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, delta, gamma, gamma1, omega
     real(kind=kdouble) :: buf1(1), buf2(2)
@@ -33,6 +34,7 @@ contains
     integer(kind=kint), parameter :: Q = 4
     integer(kind=kint), parameter :: P = 5
     integer(kind=kint), parameter :: S = 6
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -43,15 +45,13 @@ contains
     X => monoMAT%X; X = 1.0d0
     B => monoMAT%B
 
-    allocate(W(NDOF*NP, 6))
+    allocate(W(NDOF*NP,6))
     W = 0.0d0
-
     iter_RR = 50
-    tol = monoPRM%tol
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
 
     do i = 1,NDOF*NP
@@ -86,9 +86,8 @@ contains
         W(i,S) = W(i,V) + beta * W(i,S)
       enddo
 
-      resid = dsqrt(R2/B2)
-      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
-      if(resid <= tol) exit
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      if(is_converge) exit
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)

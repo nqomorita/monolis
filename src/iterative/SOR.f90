@@ -6,6 +6,7 @@ module mod_monolis_solver_SOR
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_scaling
 
   implicit none
   private
@@ -43,6 +44,7 @@ contains
 
     tol = monoPRM%tol
 
+    call monolis_scaling_fw(monoPRM, monoCOM, monoMAT)
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
 
@@ -56,6 +58,7 @@ contains
       if(resid <= tol) exit
     enddo
 
+    call monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     deallocate(W)
@@ -175,15 +178,20 @@ contains
         enddo
         do k = 1, NDOF
           do l = 1, NDOF
-            YT(k) = YT(k) - AU(NDOF2*(j-1) + (k-1)*NDOF + l)*XT(l)
+            YT(k) = YT(k) - AU(NDOF2*(j-1) + NDOF*(k-1) + l)*XT(l)
           enddo
         enddo
       enddo
 
-      do j = 1, NDOF
-        WT(j) = omega*B(j) + (1.0d0 - omega)*DT(j) + omega*YT(j)
+      do k = 1, NDOF
+        WT(k) = omega*B(NDOF*(i-1) + k) + (1.0d0 - omega)*DT(k) + omega*YT(k)
       enddo
 
+      do j = 2, NDOF
+        do k = 1, j-1
+          WT(j) = WT(j) - ALU(NDOF2*(i-1) + NDOF*(j-1) + k)*WT(k)
+        enddo
+      enddo
       do j = NDOF, 1, -1
         do k = NDOF, j+1, -1
           WT(j) = WT(j) - ALU(NDOF2*(i-1) + NDOF*(j-1) + k)*WT(k)
