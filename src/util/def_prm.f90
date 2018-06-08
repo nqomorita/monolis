@@ -23,10 +23,11 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_prec_SPIKE  = 7
 
   type monolis_prm
-    integer(kind=kint) :: method
-    integer(kind=kint) :: precond
-    integer(kind=kint) :: maxiter
-    real(kind=kdouble) :: tol
+    integer(kind=kint) :: method = 1
+    integer(kind=kint) :: precond = 1
+    integer(kind=kint) :: maxiter = 1000
+    real(kind=kdouble) :: tol = 1.0d-8
+    logical :: is_scaling = .true.
   end type monolis_prm
 
 contains

@@ -8,7 +8,7 @@ end module mod_monolis
 subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   & indexU, itemU, indexL, itemL, myrank, comm, commsize, n_neib, &
   & neib_pe, recv_index, send_index, recv_item, send_item, &
-  & method, precond, maxiter, tol)
+  & method, precond, maxiter, tol, is_scaling)
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -43,6 +43,7 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   integer(kind=kint), intent(in) :: precond
   integer(kind=kint), intent(in) :: maxiter
   real(kind=kdouble), intent(in) :: tol
+  logical, intent(in) :: is_scaling
 
   !> for monoMAT
   monoMAT%N = N
@@ -76,13 +77,14 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%precond = precond
   monoPRM%maxiter = maxiter
   monoPRM%tol = tol
+  monoPRM%is_scaling = is_scaling
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
 end subroutine monolis
 
 subroutine monolis_wrapper(N, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &
   & icomm, neib_pe, recv_index, send_index, recv_item, send_item, &
-  & iparam, rparam)
+  & iparam, rparam, lparam)
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -112,6 +114,7 @@ subroutine monolis_wrapper(N, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &
   !> for monoPRM
   integer(kind=kint), intent(in) :: iparam(3)
   real(kind=kdouble), intent(in) :: rparam(1)
+  logical :: lparam(1)
 
   !> for monoMAT
   monoMAT%N = N(1)
@@ -145,6 +148,7 @@ subroutine monolis_wrapper(N, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &
   monoPRM%precond = iparam(2)
   monoPRM%maxiter = iparam(3)
   monoPRM%tol = rparam(1)
+  monoPRM%is_scaling = lparam(1)
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
 end subroutine monolis_wrapper
