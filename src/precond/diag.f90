@@ -3,6 +3,7 @@ module mod_monolis_precond_diag
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond_diag_33
+  use mod_monolis_precond_diag_nn
   implicit none
 
 contains
@@ -15,6 +16,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_setup(monoPRM, monoCOM, monoMAT)
+    else
+      call monolis_precond_diag_nn_setup(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_diag_setup
 
@@ -28,6 +31,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    else
+      call monolis_precond_diag_nn_apply(monoPRM, monoCOM, monoMAT, X, Y)
     endif
   end subroutine monolis_precond_diag_apply
 
@@ -39,6 +44,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_clear(monoPRM, monoCOM, monoMAT)
+    else
+      call monolis_precond_diag_nn_clear(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_diag_clear
 
