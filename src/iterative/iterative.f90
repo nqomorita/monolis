@@ -10,6 +10,7 @@ module mod_monolis_iterative
   use mod_monolis_solver_PipeCR
   use mod_monolis_solver_CABiCGSTAB_noprec
   use mod_monolis_solver_SOR
+  use mod_monolis_solver_IR
   implicit none
 
 contains
@@ -53,9 +54,9 @@ contains
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_SOR"
         call monolis_solver_SOR(monoPRM, monoCOM, monoMAT)
 
-      !case (monolis_iter_IR)
-      !  if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_IR"
-      !  call monolis_solver_IR(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_IR)
+        if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_IR"
+        call monolis_solver_IR(monoPRM, monoCOM, monoMAT)
     end select
 
   end subroutine monolis_iterative
