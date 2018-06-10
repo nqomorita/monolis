@@ -6,6 +6,7 @@ module mod_monolis_solver_CABiCGSTAB_noprec
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_converge
 
   implicit none
 
@@ -18,8 +19,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, l, iter, iter_RR
-    real(kind=kdouble) :: tol, resid, R2, B2, D2, tcomm
-    real(kind=kdouble) :: t1, t2, tset, tsol
+    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm, R2
     real(kind=kdouble) :: alpha, beta, rho, rho1, C1, CG(5), omega
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
@@ -31,6 +31,7 @@ contains
     integer(kind=kint), parameter :: Q = 6
     integer(kind=kint), parameter :: Y = 7
     integer(kind=kint), parameter :: Z = 8
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -45,8 +46,8 @@ contains
     W = 0.0d0
 
     iter_RR = 50
-    tol = monoPRM%tol
 
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R0), tcomm)
 
     do i=1, NNDOF
@@ -98,10 +99,9 @@ contains
       beta  = (alpha/omega) * CG(1) / rho
       alpha = CG(1) / (CG(2) + beta * CG(3) - beta * omega * CG(4))
       R2    = CG(5)
-      resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
-      if(resid <= tol) exit
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      if(is_converge) exit
 
       rho = CG(1)
     enddo

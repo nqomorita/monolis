@@ -6,7 +6,6 @@ module mod_monolis_solver_CG
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
-  use mod_monolis_scaling
   use mod_monolis_converge
 
   implicit none
@@ -43,8 +42,6 @@ contains
     allocate(W(NDOF*NP, 4))
     W = 0.0d0
 
-    call monolis_scaling_fw(monoPRM, monoCOM, monoMAT)
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
 
@@ -85,8 +82,6 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
-    call monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     deallocate(W)

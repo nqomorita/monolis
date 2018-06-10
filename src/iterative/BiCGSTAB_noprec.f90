@@ -6,6 +6,7 @@ module mod_monolis_solver_BiCGSTAB_noprec
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_converge
 
   implicit none
 
@@ -18,7 +19,6 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, l, iter, iter_RR
-    real(kind=kdouble) :: tol, resid, R2, B2
     real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, rho, rho1, C1, c2, omega
     real(kind=kdouble) :: CG(2)
@@ -32,6 +32,7 @@ contains
     integer(kind=kint), parameter :: ST = 1
     integer(kind=kint), parameter :: T  = 6
     integer(kind=kint), parameter :: V  = 7
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -46,9 +47,8 @@ contains
     W = 0.0d0
 
     iter_RR = 50
-    tol = monoPRM%tol
 
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
 
     do i = 1, NNDOF
@@ -100,17 +100,13 @@ contains
         enddo
       endif
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
-      resid = dsqrt(R2/B2)
-
-      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
-      if(resid <= tol) exit
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, W(:,R), iter, is_converge, tcomm)
+      if(is_converge) exit
 
       rho1 = rho
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     deallocate(W)
 

@@ -6,6 +6,7 @@ module mod_monolis_solver_PipeCR
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_converge
 
   implicit none
 
@@ -26,15 +27,16 @@ contains
     real(kind=kdouble) :: buf(3), CG(3)
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    integer(kind=kint), parameter ::  R = 1
-    integer(kind=kint), parameter ::  U = 2
-    integer(kind=kint), parameter ::  V = 3
-    integer(kind=kint), parameter ::  Q = 4
-    integer(kind=kint), parameter ::  P = 5
-    integer(kind=kint), parameter ::  Z = 6
-    integer(kind=kint), parameter ::  L = 7
-    integer(kind=kint), parameter ::  M = 8
-    integer(kind=kint), parameter ::  S = 9
+    integer(kind=kint), parameter :: R = 1
+    integer(kind=kint), parameter :: U = 2
+    integer(kind=kint), parameter :: V = 3
+    integer(kind=kint), parameter :: Q = 4
+    integer(kind=kint), parameter :: P = 5
+    integer(kind=kint), parameter :: Z = 6
+    integer(kind=kint), parameter :: L = 7
+    integer(kind=kint), parameter :: M = 8
+    integer(kind=kint), parameter :: S = 9
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -51,7 +53,6 @@ contains
     iter_RR = 50
     tol = monoPRM%tol
 
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
@@ -115,7 +116,6 @@ contains
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     deallocate(W)
 

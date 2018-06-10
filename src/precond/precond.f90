@@ -29,7 +29,7 @@ contains
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)
     else
-      do i=1, monoMAT%N*monoMAT%NDOF
+      do i = 1, monoMAT%N*monoMAT%NDOF
         Y(i) = X(i)
       enddo
     endif

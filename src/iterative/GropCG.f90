@@ -49,7 +49,6 @@ contains
     W = 0.0d0
     iter_RR = 50
 
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
@@ -91,7 +90,6 @@ contains
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     deallocate(W)
 

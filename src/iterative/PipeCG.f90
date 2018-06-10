@@ -6,6 +6,7 @@ module mod_monolis_solver_PipeCG
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_converge
 
   implicit none
 
@@ -20,8 +21,7 @@ contains
     integer(kind=kint) :: i, j, k, iter, iter_RR
     integer(kind=kint) :: requests(1)
     integer(kind=kint) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
+    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm, R2
     real(kind=kdouble) :: alpha, alpha1, beta, rho, rho1, gamma, gamma1, delta, C1
     real(kind=kdouble) :: buf(3), CG(3)
     real(kind=kdouble), allocatable :: W(:,:)
@@ -35,6 +35,7 @@ contains
     integer(kind=kint), parameter :: L = 7
     integer(kind=kint), parameter :: M = 8
     integer(kind=kint), parameter :: S = 9
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -47,11 +48,9 @@ contains
 
     allocate(W(NDOF*NP, 9))
     W = 0.0d0
-
     iter_RR = 50
-    tol = monoPRM%tol
 
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
@@ -111,14 +110,11 @@ contains
         enddo
       endif
 
-      resid = dsqrt(R2/B2)
-
-      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
-      if(resid <= tol) exit
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      if(is_converge) exit
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
 
     deallocate(W)
 

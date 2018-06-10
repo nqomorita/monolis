@@ -6,7 +6,7 @@ module mod_monolis_solver_SOR
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
-  use mod_monolis_scaling
+  use mod_monolis_converge
 
   implicit none
   private
@@ -28,6 +28,7 @@ contains
     real(kind=kdouble), pointer :: B(:), X(:)
     real(kind=kdouble), allocatable :: W(:,:)
     integer(kind=kint), parameter :: R = 1
+    logical :: is_converge
 
     t1 = monolis_wtime()
 
@@ -44,7 +45,7 @@ contains
 
     tol = monoPRM%tol
 
-    call monolis_scaling_fw(monoPRM, monoCOM, monoMAT)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
 
@@ -58,7 +59,6 @@ contains
       if(resid <= tol) exit
     enddo
 
-    call monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     deallocate(W)

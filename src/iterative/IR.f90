@@ -6,7 +6,6 @@ module mod_monolis_solver_IR
   use mod_monolis_matvec
   use mod_monolis_linalg
   use mod_monolis_linalg_util
-  use mod_monolis_scaling
   use mod_monolis_converge
 
   implicit none
@@ -26,7 +25,7 @@ contains
     real(kind=kdouble) :: tol, resid, R2, B2, D2
     real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
     real(kind=kdouble), pointer :: B(:), X(:)
-    real(kind=kdouble), allocatable :: R(:), D(:), T(:)
+    real(kind=kdouble), allocatable :: R(:), D(:)
 
     t1 = monolis_wtime()
 
@@ -39,18 +38,16 @@ contains
 
     allocate(R(NDOF*NP)); R = 0.0d0
     allocate(D(NDOF*NP)); D = 0.0d0
-    allocate(T(NDOF*NP)); T = 0.0d0
 
-    call monolis_scaling_fw(monoPRM, monoCOM, monoMAT)
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_IR_setup(monoPRM, monoCOM, monoMAT)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
 
-    do i=1,NNDOF
+    do i = 1,NNDOF
       R(i) = B(i)
     enddo
 
-    do iter=1, monoPRM%maxiter
-      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, D)
+    do iter = 1, monoPRM%maxiter
+      call monolis_IR_apply(monoPRM, monoCOM, monoMAT, R, D)
 
       do i=1,NNDOF
         X(i) = X(i) + D(i)
@@ -65,16 +62,53 @@ contains
       if(resid <= tol) exit
     enddo
 
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
-    call monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
+    call monolis_IR_clear(monoPRM, monoCOM, monoMAT)
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     deallocate(R)
     deallocate(D)
-    deallocate(T)
 
     t2 = monolis_wtime()
     tsol = t2 - t1
   end subroutine monolis_solver_IR
+
+  subroutine monolis_IR_setup(monoPRM, monoCOM, monoMAT)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+
+    if(monoPRM%precond == monolis_prec_DIAG)then
+      call monolis_precond_diag_setup(monoPRM, monoCOM, monoMAT)
+    endif
+  end subroutine monolis_IR_setup
+
+  subroutine monolis_IR_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: i
+    real(kind=kdouble) :: X(:), Y(:)
+
+    if(monoPRM%precond == monolis_prec_DIAG)then
+      call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    else
+      do i = 1, monoMAT%N*monoMAT%NDOF
+        Y(i) = X(i)
+      enddo
+    endif
+  end subroutine monolis_IR_apply
+
+  subroutine monolis_IR_clear(monoPRM, monoCOM, monoMAT)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+
+    if(monoPRM%precond == monolis_prec_DIAG)then
+      call monolis_precond_diag_clear(monoPRM, monoCOM, monoMAT)
+    endif
+  end subroutine monolis_IR_clear
 
 end module mod_monolis_solver_IR
