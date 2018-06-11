@@ -22,8 +22,8 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter
-    real(kind=kdouble) :: tol, resid, R2, B2, D2
-    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
+    real(kind=kdouble) :: tol, resid, R2, B2
+    real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble), pointer :: B(:), X(:)
     real(kind=kdouble), allocatable :: R(:), D(:)
 
@@ -35,6 +35,7 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
+    tol = monoPRM%tol
 
     allocate(R(NDOF*NP)); R = 0.0d0
     allocate(D(NDOF*NP)); D = 0.0d0

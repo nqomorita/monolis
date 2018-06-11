@@ -15,9 +15,9 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_diag_33_setup(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_diag_33_setup(monoMAT)
     else
-      call monolis_precond_diag_nn_setup(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_diag_nn_setup(monoMAT)
     endif
   end subroutine monolis_precond_diag_setup
 
@@ -26,13 +26,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
 
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_diag_33_apply(monoPRM, monoCOM, monoMAT, X, Y)
+      call monolis_precond_diag_33_apply(monoMAT, X, Y)
     else
-      call monolis_precond_diag_nn_apply(monoPRM, monoCOM, monoMAT, X, Y)
+      call monolis_precond_diag_nn_apply(monoMAT, X, Y)
     endif
   end subroutine monolis_precond_diag_apply
 
@@ -43,9 +42,9 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_diag_33_clear(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_diag_33_clear()
     else
-      call monolis_precond_diag_nn_clear(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_diag_nn_clear()
     endif
   end subroutine monolis_precond_diag_clear
 

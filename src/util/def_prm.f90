@@ -36,6 +36,11 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
 
+    monoPRM%method = 1
+    monoPRM%precond = 1
+    monoPRM%maxiter = 1000
+    monoPRM%tol = 1.0d-8
+    monoPRM%is_scaling = .true.
   end subroutine monolis_prm_initialize
 
   subroutine monolis_prm_finalize(monoPRM)

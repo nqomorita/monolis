@@ -18,7 +18,7 @@ contains
 
 #ifdef WITHMPI
     temp = 0.0d0
-    N    = 1
+    N = 1
     if(tag == tagSum)then
       call MPI_allreduce(val, temp, N, MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
     elseif(tag == tagMax)then
@@ -56,7 +56,7 @@ contains
 
 #ifdef WITHMPI
     temp = 0
-    N    = 1
+    N = 1
     if(tag == tagSum)then
       call MPI_allreduce(val, temp, N, MPI_INTEGER, MPI_SUM, comm, ierr)
     elseif(tag == tagMax)then

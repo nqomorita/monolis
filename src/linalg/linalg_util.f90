@@ -10,9 +10,8 @@ contains
   subroutine monolis_update_R(monoCOM, ndof, X, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: i, ndof, ns, nr
+    integer(kind=kint) :: ndof, ns, nr
     real(kind=kdouble) :: X(:)
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
     real(kind=kdouble), allocatable :: ws(:), wr(:)
 
@@ -34,10 +33,9 @@ contains
   subroutine monolis_update_I(monoCOM, ndof, X, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: i, ndof, ns, nr
+    integer(kind=kint) :: ndof, ns, nr
     integer(kind=kint) :: X(:)
     integer(kind=kint), allocatable :: ws(:), wr(:)
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
     if(monoCOM%n_neib == 0) return

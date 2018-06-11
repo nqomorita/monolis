@@ -13,7 +13,7 @@ module mod_monolis_precond_diag_nn
 
 contains
 
-  subroutine monolis_precond_diag_nn_setup(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_diag_nn_setup(monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -63,13 +63,12 @@ contains
     deallocate(LU)
   end subroutine monolis_precond_diag_nn_setup
 
-  subroutine monolis_precond_diag_nn_apply(monoPRM, monoCOM, monoMAT, X, Y)
+  subroutine monolis_precond_diag_nn_apply(monoMAT, X, Y)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, k, N, NDOF, NDOF2
-    real(kind=kdouble) :: X1, X2, X3
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble), allocatable :: T(:)
 
@@ -103,12 +102,8 @@ contains
     deallocate(T)
   end subroutine monolis_precond_diag_nn_apply
 
-  subroutine monolis_precond_diag_nn_clear(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_diag_nn_clear()
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-
     deallocate(ALU)
   end subroutine monolis_precond_diag_nn_clear
 

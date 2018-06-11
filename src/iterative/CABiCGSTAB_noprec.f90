@@ -18,9 +18,9 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, j, k, l, iter, iter_RR
-    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm, R2
-    real(kind=kdouble) :: alpha, beta, rho, rho1, C1, CG(5), omega
+    integer(kind=kint) :: i, iter, iter_RR
+    real(kind=kdouble) :: t1, t2, tsol, tcomm, R2
+    real(kind=kdouble) :: alpha, beta, rho, rho1, CG(5), omega
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
     integer(kind=kint), parameter :: R0= 1

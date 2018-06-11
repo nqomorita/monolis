@@ -17,7 +17,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: B(:)
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
     call monolis_inner_product_R(monoCOM, monoMAT, monoMAT%NDOF, B, B, B2, tcomm)
@@ -31,7 +30,6 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
     real(kind=kdouble) :: R(:), R2, resid
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
     logical :: is_converge
 
@@ -52,7 +50,6 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
     real(kind=kdouble) :: R2, resid
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
     logical :: is_converge
 

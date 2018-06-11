@@ -14,7 +14,6 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), B(:), R(:)
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
     call monolis_matvec(monoCOM, monoMAT, X, R, tcomm)
@@ -28,9 +27,7 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
     if(monoMAT%NDOF == 3)then

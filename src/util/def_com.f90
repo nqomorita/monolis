@@ -28,6 +28,15 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
 
+    monoCOM%myrank = 0
+    monoCOM%comm = 0
+    monoCOM%commsize = 0
+    monoCOM%n_neib = 0
+    monoCOM%neib_pe => null()
+    monoCOM%recv_index => null()
+    monoCOM%recv_item => null()
+    monoCOM%send_index => null()
+    monoCOM%send_item => null()
   end subroutine monolis_com_initialize
 
   subroutine monolis_com_finalize(monoCOM)

@@ -18,14 +18,13 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, j, k, l, iter, iter_RR
-    integer(kind=kint) :: reqs1(1)
-    integer(kind=kint) :: reqs2(1)
-    integer(kind=kint) :: statuses(monolis_status_size,1)
+    integer(kind=kint) :: i, iter, iter_RR
+    !integer(kind=kint) :: reqs1(1), reqs2(1)
+    !integer(kind=kint) :: statuses(monolis_status_size,1)
     real(kind=kdouble) :: R2
-    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm
-    real(kind=kdouble) :: alpha, beta, delta, gamma, gamma1, omega
-    real(kind=kdouble) :: buf1(1), buf2(2)
+    real(kind=kdouble) :: t1, t2, tsol, tcomm
+    real(kind=kdouble) :: alpha, beta, delta, gamma, gamma1
+    !real(kind=kdouble) :: buf1(1), buf2(2)
     real(kind=kdouble), allocatable :: W(:,:)
     real(kind=kdouble), pointer :: B(:), X(:)
     integer(kind=kint), parameter :: R = 1

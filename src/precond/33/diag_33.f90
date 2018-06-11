@@ -13,7 +13,7 @@ module mod_monolis_precond_diag_33
 
 contains
 
-  subroutine monolis_precond_diag_33_setup(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_diag_33_setup(monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -74,12 +74,12 @@ contains
     enddo
   end subroutine monolis_precond_diag_33_setup
 
-  subroutine monolis_precond_diag_33_apply(monoPRM, monoCOM, monoMAT, X, Y)
+  subroutine monolis_precond_diag_33_apply(monoMAT, X, Y)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, N
+    integer(kind=kint) :: i
     real(kind=kdouble) :: X1, X2, X3
     real(kind=kdouble) :: X(:), Y(:)
 
@@ -98,12 +98,8 @@ contains
     enddo
   end subroutine monolis_precond_diag_33_apply
 
-  subroutine monolis_precond_diag_33_clear(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_diag_33_clear()
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-
     deallocate(ALU)
   end subroutine monolis_precond_diag_33_clear
 
