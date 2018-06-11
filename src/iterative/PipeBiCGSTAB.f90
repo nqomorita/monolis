@@ -110,9 +110,9 @@ contains
 
       call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,R), CG(1), tcomm)
       call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,W0),CG(2), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,S), CG(2), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,Z), CG(2), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R),  W(:,R), CG(2), tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,S), CG(3), tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R0), W(:,Z), CG(4), tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R),  W(:,R), CG(5), tcomm)
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,W0), W(:,WT))
       call monolis_matvec(monoCOM, monoMAT, W(:,WT), W(:,T), tcomm)

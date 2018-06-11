@@ -10,7 +10,6 @@ program main
   type(monolis_mat) :: monoMAT
 
   call monolis_initialize(monoPRM, monoCOM, monoMAT)
-
   call monolis_finalize(monoPRM, monoCOM, monoMAT)
 
 end program main

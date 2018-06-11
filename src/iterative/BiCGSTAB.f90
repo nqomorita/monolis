@@ -55,8 +55,6 @@ contains
       W(i,RT) = W(i,R)
     enddo
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
-
     do iter = 1, monoPRM%maxiter
       call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,RT), rho, tcomm)
 
@@ -91,14 +89,14 @@ contains
       omega = CG(1) / CG(2)
 
       do i = 1, NNDOF
-        X(i) = X(i) + alpha * W(i,PT) + omega * W(i,ST)
+        X(i) = X(i) + alpha*W(i,PT) + omega*W(i,ST)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
       else
         do i = 1, NNDOF
-          W(i,R) = W(i,R) - omega * W(i,T)
+          W(i,R) = W(i,S) - omega * W(i,T)
         enddo
       endif
 

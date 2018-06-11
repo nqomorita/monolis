@@ -55,8 +55,6 @@ contains
       W(i,RT) = W(i,R)
     enddo
 
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
-
     do iter = 1, monoPRM%maxiter
       call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,RT), rho, tcomm)
 
@@ -89,7 +87,7 @@ contains
       omega = CG(1) / CG(2)
 
       do i = 1, NNDOF
-        X(i) = X(i) + alpha * W(i,P) + omega * W(i,S)
+        X(i) = X(i) + alpha*W(i,P) + omega*W(i,S)
       enddo
 
       if(mod(iter, iter_RR) == 0)then

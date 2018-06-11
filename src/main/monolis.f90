@@ -80,6 +80,7 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%is_scaling = is_scaling
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
+  !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 end subroutine monolis
 
 subroutine monolis_wrapper(N, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &
@@ -151,4 +152,5 @@ subroutine monolis_wrapper(N, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &
   monoPRM%is_scaling = lparam(1)
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
+  !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 end subroutine monolis_wrapper

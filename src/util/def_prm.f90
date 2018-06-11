@@ -5,16 +5,16 @@ module mod_monolis_prm
   integer(4), parameter :: kdouble = 8
 
   integer(4), parameter :: monolis_iter_CG       = 1
-  integer(4), parameter :: monolis_iter_BiCGSTAB = 2
-  integer(4), parameter :: monolis_iter_BiCGSTAB_noprec = 3
-  integer(4), parameter :: monolis_iter_GropCG   = 14
-  integer(4), parameter :: monolis_iter_PipeCG   = 15
-  integer(4), parameter :: monolis_iter_PipeCR   = 16
-  integer(4), parameter :: monolis_iter_CABiCGSTAB_noprec = 17
-  integer(4), parameter :: monolis_iter_PipeBiCGSTAB = 4
-  integer(4), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 18
-  integer(4), parameter :: monolis_iter_SOR      = 13
-  integer(4), parameter :: monolis_iter_IR       = 19
+  integer(4), parameter :: monolis_iter_GropCG   = 2
+  integer(4), parameter :: monolis_iter_PipeCG   = 3
+  integer(4), parameter :: monolis_iter_PipeCR   = 4
+  integer(4), parameter :: monolis_iter_BiCGSTAB = 5
+  integer(4), parameter :: monolis_iter_PipeBiCGSTAB = 6
+  integer(4), parameter :: monolis_iter_BiCGSTAB_noprec = 7
+  integer(4), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
+  integer(4), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
+  integer(4), parameter :: monolis_iter_SOR      = 10
+  integer(4), parameter :: monolis_iter_IR       = 11
 
   integer(4), parameter :: monolis_prec_DIAG   = 1
   integer(4), parameter :: monolis_prec_ILU    = 2
@@ -31,6 +31,25 @@ module mod_monolis_prm
     real(kind=kdouble) :: tol = 1.0d-8
     logical :: is_scaling = .true.
   end type monolis_prm
+
+  character*24, dimension(11) :: monolis_str_iter = (/"CG                 ", &
+                                                    & "GropCG             ", &
+                                                    & "PipeCG             ", &
+                                                    & "PipeCR             ", &
+                                                    & "BiCGSTAB           ", &
+                                                    & "PipeBiCGSTAB       ", &
+                                                    & "BiCGSTAB_noprec    ", &
+                                                    & "CABiCGSTAB_noprec  ", &
+                                                    & "PipeBiCGSTAB_noprec", &
+                                                    & "SOR                ", &
+                                                    & "IR                 "/)
+  character*24, dimension(7)  :: monolis_str_prec = (/"diag  ", &
+                                                    & "ilu   ", &
+                                                    & "sor   ", &
+                                                    & "jacobi", &
+                                                    & "sainv ", &
+                                                    & "rif   ", &
+                                                    & "spike "/)
 
 contains
 
