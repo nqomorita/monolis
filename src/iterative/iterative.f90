@@ -9,6 +9,8 @@ module mod_monolis_iterative
   use mod_monolis_solver_PipeCG
   use mod_monolis_solver_PipeCR
   use mod_monolis_solver_CABiCGSTAB_noprec
+  use mod_monolis_solver_PipeBiCGSTAB
+  use mod_monolis_solver_PipeBiCGSTAB_noprec
   use mod_monolis_solver_SOR
   use mod_monolis_solver_IR
   implicit none
@@ -49,6 +51,14 @@ contains
       case (monolis_iter_CABiCGSTAB_noprec)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_CABiCGSTAB_noprec"
         call monolis_solver_CABiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
+
+      case (monolis_iter_PipeBiCGSTAB)
+        if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_PipeBiCGSTAB"
+        call monolis_solver_PipeBiCGSTAB(monoPRM, monoCOM, monoMAT)
+
+      case (monolis_iter_PipeBiCGSTAB_noprec)
+        if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_PipeBiCGSTAB_noprec"
+        call monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
 
       case (monolis_iter_SOR)
         if(monoCOM%myrank == 0) write(*,"(a)")" ** monolis_solver_SOR"
