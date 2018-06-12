@@ -3,6 +3,7 @@ module mod_monolis_precond
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond_diag
+  use mod_monolis_precond_ilu
   implicit none
 
 contains
@@ -15,6 +16,8 @@ contains
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_setup(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_ILU)then
+      call monolis_precond_ilu_setup(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_setup
 
@@ -28,6 +31,8 @@ contains
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    elseif(monoPRM%precond == monolis_prec_ILU)then
+      call monolis_precond_ilu_apply(monoPRM, monoCOM, monoMAT, X, Y)
     else
       do i = 1, monoMAT%N*monoMAT%NDOF
         Y(i) = X(i)
@@ -43,6 +48,8 @@ contains
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_clear(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_ILU)then
+      call monolis_precond_ilu_clear(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_clear
 
