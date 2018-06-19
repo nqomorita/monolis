@@ -25,13 +25,6 @@ contains
     if(monoCOM%commsize == 1) isEntire = .true.
 
     t1 = monolis_wtime()
-    !call monolis_reorder_matrix(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
-    !call monolis_restruct_matrix(monoCOM, monoMAT, monoMATF, perm, iperm)
-    t2 = monolis_wtime()
-    tset = tset + t2 - t1
-    if(monoCOM%myrank == 0) write(*,"(a,1pe11.4)")"    * reordering time: ", t2-t1
-
-    t1 = monolis_wtime()
     !call monolis_get_fillin(monoMAT, hecT, indexU, itemU, NPU)
     t2 = monolis_wtime()
     tset = tset + t2 - t1

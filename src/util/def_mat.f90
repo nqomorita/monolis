@@ -34,7 +34,29 @@ contains
     monoMAT%AU => null()
     monoMAT%AL => null()
     monoMAT%X => null()
+    monoMAT%B => null()
   end subroutine monolis_mat_initialize
+
+  subroutine monolis_mat_copy(monoA, monoB)
+    implicit none
+    type(monolis_mat) :: monoA
+    type(monolis_mat) :: monoB
+
+    monoB%N    = monoA%N
+    monoB%NP   = monoA%NP
+    monoB%NPU  = monoA%NPU
+    monoB%NPL  = monoA%NPL
+    monoB%NDOF = monoA%NDOF
+    monoB%indexU => monoA%indexU
+    monoB%indexL => monoA%indexL
+    monoB%itemU  => monoA%itemU
+    monoB%itemL  => monoA%itemL
+    monoB%D  => monoA%D
+    monoB%AU => monoA%AU
+    monoB%AL => monoA%AL
+    monoB%X  => monoA%X
+    monoB%B  => monoA%B
+  end subroutine monolis_mat_copy
 
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
@@ -48,6 +70,7 @@ contains
     if(associated(monoMAT%AU)) deallocate(monoMAT%AU)
     if(associated(monoMAT%AL)) deallocate(monoMAT%AL)
     if(associated(monoMAT%X)) deallocate(monoMAT%X)
+    if(associated(monoMAT%B)) deallocate(monoMAT%B)
     monoMAT%indexU => null()
     monoMAT%indexL => null()
     monoMAT%itemU => null()
@@ -56,5 +79,6 @@ contains
     monoMAT%AU => null()
     monoMAT%AL => null()
     monoMAT%X => null()
+    monoMAT%B => null()
   end subroutine monolis_mat_finalize
 end module mod_monolis_mat

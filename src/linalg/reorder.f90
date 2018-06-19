@@ -2,7 +2,6 @@ module mod_monolis_reorder
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
-  use mod_monolis_metis
   implicit none
 
   type monolis_edge_info
@@ -10,31 +9,71 @@ module mod_monolis_reorder
     integer(kind=kint), pointer :: node(:) => null()
   endtype monolis_edge_info
 
-  integer(kind=kint), pointer ::  perm(:) => null()
-  integer(kind=kint), pointer :: iperm(:) => null()
+  integer(kind=kint), save, pointer ::  perm(:) => null()
+  integer(kind=kint), save, pointer :: iperm(:) => null()
+
 contains
 
-  subroutine monolis_reorder_matrix(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+  subroutine monolis_reorder_matrix_fw(monoPRM, monoCOM, monoMAT, monoMAT_reorder)
     implicit none
-    integer(kind=kint), intent(in)  :: N, NP
-    integer(kind=kint), intent(in)  :: indexL(0:), indexU(0:)
-    integer(kind=kint), intent(in)  :: itemL(:), itemU(:)
-    integer(kind=kint), intent(out) :: perm(:), iperm(:)
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    type(monolis_mat) :: monoMAT_reorder
+    integer(kind=kint) :: N
 
+    if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
-    call monolis_reorder_matrix_metis(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+      N = monoMAT%N
+      allocate( perm(N))
+      allocate(iperm(N))
+      call monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
+      call monolis_mat_copy(monoMAT, monoMAT_reorder)
 #else
-    call monolis_reorder_matrix_none(N, perm, iperm)
+      call monolis_mat_copy(monoMAT, monoMAT_reorder)
 #endif
-  end subroutine monolis_reorder_matrix
+    else
+      call monolis_mat_copy(monoMAT, monoMAT_reorder)
+    endif
+  end subroutine monolis_reorder_matrix_fw
 
-  subroutine monolis_reorder_matrix_metis(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+  subroutine monolis_reorder_matrix_bk(monoPRM, monoCOM, monoMAT_reorder, monoMAT)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    type(monolis_mat) :: monoMAT_reorder
+    integer(kind=kint) :: i, in, j, jn, jo, N, NDOF
+
+    N    = monoMAT%N
+    NDOF = monoMAT%NDOF
+
+    if(monoPRM%is_reordering)then
+#ifdef WITH_METIS
+      do i = 1, N
+        in = perm(i)
+        jn = (i -1)*NDOF
+        jo = (in-1)*NDOF
+        do j = 1, NDOF
+          monoMAT%X(jn + j) = monoMAT_reorder%X(jo + j)
+        enddo
+      enddo
+      deallocate( perm)
+      deallocate(iperm)
+#else
+      monoMAT%X = monoMAT_reorder%X
+#endif
+    else
+      monoMAT%X = monoMAT_reorder%X
+    endif
+  end subroutine monolis_reorder_matrix_bk
+
+  subroutine monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
     implicit none
     type(monolis_edge_info), allocatable :: edge(:)
-    integer(kind=kint), intent(in)  :: N, NP
-    integer(kind=kint), intent(in)  :: indexL(0:), indexU(0:)
-    integer(kind=kint), intent(in)  :: itemL(:), itemU(:)
-    integer(kind=kint), intent(out) :: perm(:), iperm(:)
+    type(monolis_mat) :: monoMAT
+    type(monolis_mat) :: monoMAT_reorder
+    integer(kind=kint) :: N, NP
     integer(kind=kint) :: i, j, k, iS, jS, jE, nu, nl
     integer(kind=kint) :: icel, nedge, ic_type, in, jn, kn, nn, ne
     integer(kind=kint) :: imax, imin
@@ -42,12 +81,22 @@ contains
     integer(kind=kint), allocatable :: check(:), nozero(:)
     integer(kind=kint) :: ierr
     integer(kind=kint) :: nvtxs
+    integer(kind=kint), pointer :: indexL(:)      => null()
+    integer(kind=kint), pointer :: indexU(:)      => null()
+    integer(kind=kint), pointer :: itemL(:)       => null()
+    integer(kind=kint), pointer :: itemU(:)       => null()
     integer(kind=kint), pointer :: xadj(:)        => null()
     integer(kind=kint), pointer :: adjncy(:)      => null()
     integer(kind=kint), pointer :: vwgt(:)        => null()
     integer(kind=kint), pointer :: options(:)     => null()
     integer(kind=kint), pointer :: metis_perm(:)  => null()
     integer(kind=kint), pointer :: metis_iperm(:) => null()
+
+    N = monoMAT%N
+    indexL => monoMAT%indexL
+    indexU => monoMAT%indexU
+    itemL  => monoMAT%itemL
+    itemU  => monoMAT%itemU
 
     nvtxs = N
     allocate(edge(N))
@@ -134,42 +183,20 @@ contains
       enddo
     enddo
 
-    allocate(metis_perm(N))
-    allocate(metis_iperm(N))
-
-    !ierr = monolis_metis_nodeND(nvtxs, xadj, adjncy, vwgt, options, metis_perm, metis_iperm)
-    call METIS_SetDefaultOptions(options)
-    call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, metis_perm, metis_iperm)
+    call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, perm, iperm)
 
     do i = 1, N
-      perm (i) = metis_perm(i)  + 1
-      iperm(i) = metis_iperm(i) + 1
+       perm(i) =  perm(i) + 1
+      iperm(i) = iperm(i) + 1
     enddo
 
-    deallocate(edge)
-    deallocate(check)
     do i = 1, N
-      deallocate(edge(i)%node)
+      if(associated(edge(i)%node)) deallocate(edge(i)%node)
     enddo
     deallocate(edge)
     deallocate(xadj)
     deallocate(adjncy)
-    deallocate(metis_perm)
-    deallocate(metis_iperm)
   end subroutine monolis_reorder_matrix_metis
-
-  subroutine monolis_reorder_matrix_none(N, perm, iperm)
-    implicit none
-    type(monolis_edge_info), allocatable :: edge(:)
-    integer(kind=kint), intent(in)  :: N
-    integer(kind=kint), intent(out) :: perm(:), iperm(:)
-    integer(kind=kint) :: i
-
-    do i = 1, N
-      perm (i) = 1
-      iperm(i) = 1
-    enddo
-  end subroutine monolis_reorder_matrix_none
 
   subroutine reallocate_array(iold, inew, x)
     implicit none

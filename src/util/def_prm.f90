@@ -24,14 +24,6 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_prec_RIF    = 6
   integer(4), parameter :: monolis_prec_SPIKE  = 7
 
-  type monolis_prm
-    integer(kind=kint) :: method = 1
-    integer(kind=kint) :: precond = 1
-    integer(kind=kint) :: maxiter = 1000
-    real(kind=kdouble) :: tol = 1.0d-8
-    logical :: is_scaling = .true.
-  end type monolis_prm
-
   character*24, dimension(11) :: monolis_str_iter = (/"CG                 ", &
                                                     & "GropCG             ", &
                                                     & "PipeCG             ", &
@@ -51,6 +43,15 @@ module mod_monolis_prm
                                                     & "rif   ", &
                                                     & "spike "/)
 
+  type monolis_prm
+    integer(kind=kint) :: method = 1
+    integer(kind=kint) :: precond = 1
+    integer(kind=kint) :: maxiter = 1000
+    real(kind=kdouble) :: tol = 1.0d-8
+    logical :: is_scaling    = .true.
+    logical :: is_reordering = .true.
+  end type monolis_prm
+
 contains
 
   subroutine monolis_prm_initialize(monoPRM)
@@ -62,6 +63,7 @@ contains
     monoPRM%maxiter = 1000
     monoPRM%tol = 1.0d-8
     monoPRM%is_scaling = .true.
+    monoPRM%is_reordering = .true.
   end subroutine monolis_prm_initialize
 
   subroutine monolis_prm_finalize(monoPRM)
