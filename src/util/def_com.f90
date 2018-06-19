@@ -1,7 +1,7 @@
 module mod_monolis_com
   use mod_monolis_prm
   implicit none
-#ifdef WITHMPI
+#ifdef WITH_MPI
   include 'mpif.h'
 #endif
 
@@ -51,7 +51,7 @@ contains
     integer(kind=kint) :: ierr
 
     size = 1
-#ifdef WITHMPI
+#ifdef WITH_MPI
     call MPI_comm_size(comm, size, ierr)
 #endif
   end subroutine monolis_com_size
@@ -60,7 +60,7 @@ contains
     implicit none
     integer(kind=kint) :: comm
     integer(kind=kint) :: ierr
-#ifdef WITHMPI
+#ifdef WITH_MPI
     call MPI_barrier(comm, ierr)
 #endif
   end subroutine monolis_barrier
@@ -68,7 +68,7 @@ contains
   function monolis_wtime()
     implicit none
     real(kind=kdouble) :: monolis_wtime
-#ifdef WITHMPI
+#ifdef WITH_MPI
     monolis_wtime = MPI_wtime()
 #else
     call system_clock(monolis_wtime)

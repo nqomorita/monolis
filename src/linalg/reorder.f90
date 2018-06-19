@@ -1,5 +1,4 @@
 module mod_monolis_reorder
-  use, intrinsic :: iso_c_binding
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -11,9 +10,25 @@ module mod_monolis_reorder
     integer(kind=kint), pointer :: node(:) => null()
   endtype monolis_edge_info
 
+  integer(kind=kint), pointer ::  perm(:) => null()
+  integer(kind=kint), pointer :: iperm(:) => null()
 contains
 
-  subroutine monolis_reorde_matrix_metis(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+  subroutine monolis_reorder_matrix(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+    implicit none
+    integer(kind=kint), intent(in)  :: N, NP
+    integer(kind=kint), intent(in)  :: indexL(0:), indexU(0:)
+    integer(kind=kint), intent(in)  :: itemL(:), itemU(:)
+    integer(kind=kint), intent(out) :: perm(:), iperm(:)
+
+#ifdef WITH_METIS
+    call monolis_reorder_matrix_metis(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
+#else
+    call monolis_reorder_matrix_none(N, perm, iperm)
+#endif
+  end subroutine monolis_reorder_matrix
+
+  subroutine monolis_reorder_matrix_metis(N, NP, indexL, itemL, indexU, itemU, perm, iperm)
     implicit none
     type(monolis_edge_info), allocatable :: edge(:)
     integer(kind=kint), intent(in)  :: N, NP
@@ -25,14 +40,14 @@ contains
     integer(kind=kint) :: imax, imin
     integer(kind=kint) :: nlocal(20)
     integer(kind=kint), allocatable :: check(:), nozero(:)
-    integer(idx_t) :: ierr
-    integer(idx_t) :: nvtxs
-    integer(idx_t), pointer :: xadj(:)        => null()
-    integer(idx_t), pointer :: adjncy(:)      => null()
-    integer(idx_t), pointer :: vwgt(:)        => null()
-    integer(idx_t), pointer :: options(:)     => null()
-    integer(idx_t), pointer :: metis_perm(:)  => null()
-    integer(idx_t), pointer :: metis_iperm(:) => null()
+    integer(kind=kint) :: ierr
+    integer(kind=kint) :: nvtxs
+    integer(kind=kint), pointer :: xadj(:)        => null()
+    integer(kind=kint), pointer :: adjncy(:)      => null()
+    integer(kind=kint), pointer :: vwgt(:)        => null()
+    integer(kind=kint), pointer :: options(:)     => null()
+    integer(kind=kint), pointer :: metis_perm(:)  => null()
+    integer(kind=kint), pointer :: metis_iperm(:) => null()
 
     nvtxs = N
     allocate(edge(N))
@@ -122,7 +137,10 @@ contains
     allocate(metis_perm(N))
     allocate(metis_iperm(N))
 
-    ierr = monolis_metis_nodeND(nvtxs, xadj, adjncy, vwgt, options, metis_perm, metis_iperm)
+    !ierr = monolis_metis_nodeND(nvtxs, xadj, adjncy, vwgt, options, metis_perm, metis_iperm)
+    call METIS_SetDefaultOptions(options)
+    call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, metis_perm, metis_iperm)
+
     do i = 1, N
       perm (i) = metis_perm(i)  + 1
       iperm(i) = metis_iperm(i) + 1
@@ -138,7 +156,20 @@ contains
     deallocate(adjncy)
     deallocate(metis_perm)
     deallocate(metis_iperm)
-  end subroutine monolis_reorde_matrix_metis
+  end subroutine monolis_reorder_matrix_metis
+
+  subroutine monolis_reorder_matrix_none(N, perm, iperm)
+    implicit none
+    type(monolis_edge_info), allocatable :: edge(:)
+    integer(kind=kint), intent(in)  :: N
+    integer(kind=kint), intent(out) :: perm(:), iperm(:)
+    integer(kind=kint) :: i
+
+    do i = 1, N
+      perm (i) = 1
+      iperm(i) = 1
+    enddo
+  end subroutine monolis_reorder_matrix_none
 
   subroutine reallocate_array(iold, inew, x)
     implicit none

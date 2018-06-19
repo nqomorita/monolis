@@ -16,7 +16,7 @@ contains
     integer(kind=kint) :: N, ierr
     real(kind=kdouble) :: val, temp
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     temp = 0.0d0
     N = 1
     if(tag == tagSum)then
@@ -36,7 +36,7 @@ contains
     integer(kind=kint) :: N, ierr
     real(kind=kdouble) :: val(N), temp(N)
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     temp = 0.0d0
     if(tag == tagSum)then
       call MPI_allreduce(val, temp, N, MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
@@ -54,7 +54,7 @@ contains
     integer(kind=kint), intent(in) :: tag, comm
     integer(kind=kint)  :: N, ierr, val, temp
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     temp = 0
     N = 1
     if(tag == tagSum)then
@@ -73,7 +73,7 @@ contains
     integer(kind=kint), intent(in) :: tag, comm
     integer(kind=kint)  :: N, ierr, val(N), temp(N)
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     temp = 0
     if(tag == tagSum)then
       call MPI_allreduce(val, temp, N, MPI_INTEGER, MPI_SUM, comm, ierr)
@@ -103,7 +103,7 @@ contains
     integer(kind=kint) :: req2(n_neib)
     real(kind=kdouble) :: val(:), ws(:), wr(:)
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     do i = 1, n_neib
       iS = send_index(i-1)
       in = send_index(i  ) - iS
@@ -156,7 +156,7 @@ contains
     integer(kind=kint) :: req1(n_neib)
     integer(kind=kint) :: req2(n_neib)
 
-#ifdef WITHMPI
+#ifdef WITH_MPI
     do i = 1, n_neib
       iS = send_index(i-1)
       in = send_index(i  ) - iS

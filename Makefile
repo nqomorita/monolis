@@ -1,25 +1,29 @@
 
-FLAG_MPI  = -DWITHMPI
-CPP       = -cpp $(FLAG_MPI)
+FLAG_MPI   = -DWITH_MPI
+FLAG_METIS = -DWITH_METIS
+CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS)
 
-FC        = mpif90
-FFLAGS    = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
-LDFLAGS   =
-LIBS      =
+FC         = mpif90
+FFLAGS     = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
 
-INCLUDE   = -I ./include
-MOD_DIR   = -J ./include
-BIN_DIR   = ./bin
-SRC_DIR   = ./src
-OBJ_DIR   = ./obj
-LIB_DIR   = ./lib
-BIN_LIST  = monolis
-LIB_LIST  = libmonolis.a
-RM        = rm -r
-AR        = - ar ruv
+METIS_DIR  = /Users/morita/
+METIS_INC  = -I $(METIS_DIR)/include
+METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
-TARGET    = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
-LIBTARGET = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
+INCLUDE    = -I ./include
+MOD_DIR    = -J ./include
+LIBRARY    = $(METIS_LIB)
+BIN_DIR    = ./bin
+SRC_DIR    = ./src
+OBJ_DIR    = ./obj
+LIB_DIR    = ./lib
+BIN_LIST   = monolis
+LIB_LIST   = libmonolis.a
+RM         = rm -r
+AR         = - ar ruv
+
+TARGET     = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
+LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 metis.f90 util.f90
 SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 converge.f90 scaling.f90 reorder.f90
@@ -41,7 +45,7 @@ OBJS_AR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_AR:.f90=.o))
 all: $(TARGET) $(LIBTARGET)
 
 $(TARGET): $(OBJS)
-	$(FC) -o $@ $(OBJS) $(LDFLAGS)
+	$(FC) -o $@ $(OBJS) $(LIBRARY)
 
 $(LIBTARGET): $(OBJS_AR)
 	$(AR) $@ $(OBJS_AR)
