@@ -2,6 +2,7 @@ module mod_monolis_reorder
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_restruct
   implicit none
 
   type monolis_edge_info
@@ -20,15 +21,14 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    integer(kind=kint) :: N
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
-      N = monoMAT%N
-      allocate( perm(N))
-      allocate(iperm(N))
+      allocate( perm(monoMAT%N))
+      allocate(iperm(monoMAT%N))
       call monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
-      call monolis_mat_copy(monoMAT, monoMAT_reorder)
+      call monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
+      call monolis_reorder_vector_fw(monoMAT%N, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
 #else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
 #endif
@@ -43,21 +43,10 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    integer(kind=kint) :: i, in, j, jn, jo, N, NDOF
-
-    N    = monoMAT%N
-    NDOF = monoMAT%NDOF
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
-      do i = 1, N
-        in = perm(i)
-        jn = (i -1)*NDOF
-        jo = (in-1)*NDOF
-        do j = 1, NDOF
-          monoMAT%X(jn + j) = monoMAT_reorder%X(jo + j)
-        enddo
-      enddo
+      call monolis_reorder_back_vector_bk(monoMAT%N, monoMAT%NDOF, monoMAT_reorder%X, monoMAT%X)
       deallocate( perm)
       deallocate(iperm)
 #else
@@ -67,6 +56,38 @@ contains
       monoMAT%X = monoMAT_reorder%X
     endif
   end subroutine monolis_reorder_matrix_bk
+
+  subroutine monolis_reorder_vector_fw(N, NDOF, A, B)
+    implicit none
+    integer(kind=kint) :: N, NDOF
+    real(kind=kdouble) :: A(:)
+    real(kind=kdouble) :: B(:)
+    integer(kind=kint) :: i, in, jn, jo, j
+    do i = 1, N
+      in = perm(i)
+      jn = (i -1)*NDOF
+      jo = (in-1)*NDOF
+      do j = 1, NDOF
+        B(jn + j) = A(jo + j)
+      enddo
+    enddo
+  end subroutine monolis_reorder_vector_fw
+
+  subroutine monolis_reorder_back_vector_bk(N, NDOF, B, A)
+    implicit none
+    integer(kind=kint) :: N, NDOF
+    real(kind=kdouble) :: B(:)
+    real(kind=kdouble) :: A(:)
+    integer(kind=kint) :: i, in, jn, jo, j
+    do i = 1, N
+      in = iperm(i)
+      jn = (i -1)*NDOF
+      jo = (in-1)*NDOF
+      do j = 1, NDOF
+        A(jo + j) = B(jn + j)
+      enddo
+    enddo
+  end subroutine monolis_reorder_back_vector_bk
 
   subroutine monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
     implicit none
@@ -183,11 +204,13 @@ contains
       enddo
     enddo
 
+#ifdef WITH_METIS
     call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, perm, iperm)
+#endif
 
     do i = 1, N
-       perm(i) =  perm(i) + 1
-      iperm(i) = iperm(i) + 1
+       perm(i) = i
+      iperm(i) = i
     enddo
 
     do i = 1, N
@@ -198,9 +221,9 @@ contains
     deallocate(adjncy)
   end subroutine monolis_reorder_matrix_metis
 
-  subroutine reallocate_array(iold, inew, x)
+  subroutine reallocate_array(in, inew, x)
     implicit none
-    integer(kind=kint), intent(in) :: iold, inew
+    integer(kind=kint), intent(in) :: in, inew
     integer(kind=kint), pointer :: x(:), t(:)
     integer(kind=kint) :: i
 
@@ -210,7 +233,7 @@ contains
       t => x
       x => null()
       allocate(x(inew))
-      do i=1,iold
+      do i=1,in
         x(i) = t(i)
       enddo
       deallocate(t)
