@@ -18,11 +18,12 @@ module mod_monolis_prm
 
   integer(4), parameter :: monolis_prec_DIAG   = 1
   integer(4), parameter :: monolis_prec_ILU    = 2
-  integer(4), parameter :: monolis_prec_SOR    = 3
-  integer(4), parameter :: monolis_prec_JACOBI = 4
-  integer(4), parameter :: monolis_prec_SAINV  = 5
-  integer(4), parameter :: monolis_prec_RIF    = 6
-  integer(4), parameter :: monolis_prec_SPIKE  = 7
+  integer(4), parameter :: monolis_prec_JACOBI = 3
+  integer(4), parameter :: monolis_prec_DIRECT = 4
+  integer(4), parameter :: monolis_prec_SOR    = 5
+  integer(4), parameter :: monolis_prec_SAINV  = 6
+  integer(4), parameter :: monolis_prec_RIF    = 7
+  integer(4), parameter :: monolis_prec_SPIKE  = 8
 
   character*24, dimension(11) :: monolis_str_iter = (/"CG                 ", &
                                                     & "GropCG             ", &

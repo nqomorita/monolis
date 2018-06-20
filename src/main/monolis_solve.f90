@@ -25,17 +25,18 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
+    type(monolis_com) :: monoCOM_reorder
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
 
     call monolis_timer_initialize()
-    call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoMAT, monoMAT_reorder)
-    call monolis_scaling_fw(monoPRM, monoCOM, monoMAT_reorder)
-    call monolis_precond_setup(monoPRM, monoCOM, monoMAT_reorder)
-    call monolis_solver(monoPRM, monoCOM, monoMAT_reorder)
-    call monolis_precond_clear(monoPRM, monoCOM, monoMAT_reorder)
-    call monolis_scaling_bk(monoPRM, monoCOM, monoMAT_reorder)
-    call monolis_reorder_matrix_bk(monoPRM, monoCOM, monoMAT_reorder, monoMAT)
+    call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
+    call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
+    call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)
+    call monolis_solver(monoPRM, monoCOM_reorder, monoMAT_reorder)
+    call monolis_precond_clear(monoPRM, monoCOM_reorder, monoMAT_reorder)
+    call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
+    call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
     call monolis_timer_finalize(monoCOM)
   end subroutine monolis_solve
 
@@ -43,6 +44,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
+    type(monolis_com) :: monoCOM_reorder
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint) :: i, j
@@ -52,13 +54,13 @@ contains
       do j = 1, 1
         monoPRM%precond = j
         call monolis_timer_initialize()
-        call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoMAT, monoMAT_reorder)
-        call monolis_scaling_fw(monoPRM, monoCOM, monoMAT_reorder)
-        call monolis_precond_setup(monoPRM, monoCOM, monoMAT_reorder)
-        call monolis_solver(monoPRM, monoCOM, monoMAT_reorder)
-        call monolis_precond_clear(monoPRM, monoCOM, monoMAT_reorder)
-        call monolis_scaling_bk(monoPRM, monoCOM, monoMAT_reorder)
-        call monolis_reorder_matrix_bk(monoPRM, monoCOM, monoMAT_reorder, monoMAT)
+        call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
+        call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
+        call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)
+        call monolis_solver(monoPRM, monoCOM_reorder, monoMAT_reorder)
+        call monolis_precond_clear(monoPRM, monoCOM_reorder, monoMAT_reorder)
+        call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
+        call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
         call monolis_timer_finalize(monoCOM)
       enddo
     enddo
@@ -106,6 +108,7 @@ contains
 
       case (monolis_iter_IR)
         call monolis_solver_IR(monoPRM, monoCOM, monoMAT)
+
     end select
   end subroutine monolis_solver
 

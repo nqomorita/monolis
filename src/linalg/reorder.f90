@@ -15,20 +15,22 @@ module mod_monolis_reorder
 
 contains
 
-  subroutine monolis_reorder_matrix_fw(monoPRM, monoCOM, monoMAT, monoMAT_reorder)
+  subroutine monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
+    type(monolis_com) :: monoCOM_reorder
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
-      allocate( perm(monoMAT%N))
-      allocate(iperm(monoMAT%N))
+      allocate( perm(monoMAT%NP))
+      allocate(iperm(monoMAT%NP))
       call monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
       call monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
-      call monolis_reorder_vector_fw(monoMAT%N, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
+      call monolis_restruct_comm(monoCOM, monoCOM_reorder, perm)
+      call monolis_reorder_vector_fw(monoMAT%NP, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
 #else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
 #endif
@@ -46,7 +48,7 @@ contains
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
-      call monolis_reorder_back_vector_bk(monoMAT%N, monoMAT%NDOF, monoMAT_reorder%X, monoMAT%X)
+      call monolis_reorder_back_vector_bk(monoMAT%NP, monoMAT%NDOF, monoMAT_reorder%X, monoMAT%X)
       deallocate( perm)
       deallocate(iperm)
 #else
@@ -114,6 +116,7 @@ contains
     integer(kind=kint), pointer :: metis_iperm(:) => null()
 
     N = monoMAT%N
+    NP = monoMAT%NP
     indexL => monoMAT%indexL
     indexU => monoMAT%indexU
     itemL  => monoMAT%itemL
@@ -131,60 +134,29 @@ contains
         allocate(nozero(in))
         nozero = 0
 
-        jn = 1
+        jn = 0
         jS = indexL(i-1) + 1
         jE = indexL(i  )
         do j = jS, jE
-          nozero(jn) = itemL(j)
           jn = jn + 1
+          nozero(jn) = itemL(j)
         enddo
         jS = indexU(i-1) + 1
         jE = indexU(i  )
         do j = jS, jE
-          if(N < itemU(j))then
-            nozero(jn) = i
-          else
+          if(itemU(j) <= N)then
+            jn = jn + 1
             nozero(jn) = itemU(j)
           endif
-          jn = jn + 1
         enddo
 
-        call reallocate_array(edge(i)%N, in, edge(i)%node)
-        edge(i)%N = in
+        call reallocate_array(edge(i)%N, jn, edge(i)%node)
+        edge(i)%N = jn
 
-        do j = 1, in
+        do j = 1, jn
           edge(i)%node(j) = nozero(j)
         enddo
         deallocate(nozero)
-      endif
-    enddo
-
-    !buget sort (delete multiple entries)
-    do i = 1, N
-      in = edge(i)%N
-      if(0 < in)then
-        imax = maxval(edge(i)%node)
-        imin = minval(edge(i)%node)
-        allocate(check(imin:imax))
-        check(imin:imax) = 0
-        do j = 1, in
-          check(edge(i)%node(j)) = 1
-        enddo
-        nn = 0
-        do j = imin, imax
-          if(check(j) == 1) nn = nn + 1
-        enddo
-        edge(i)%N = nn
-        deallocate(edge(i)%node)
-        allocate(edge(i)%node(nn))
-        in = 1
-        do j = imin, imax
-          if(check(j) == 1)then
-            edge(i)%node(in) = j
-            in = in + 1
-          endif
-        enddo
-        deallocate(check)
       endif
     enddo
 
@@ -209,6 +181,10 @@ contains
 #endif
 
     do i = 1, N
+       perm(i) =  perm(i) + 1
+      iperm(i) = iperm(i) + 1
+    enddo
+    do i = N+1, NP
        perm(i) = i
       iperm(i) = i
     enddo

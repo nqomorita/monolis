@@ -5,9 +5,38 @@ module mod_monolis_restruct
 
   implicit none
   private
+  public :: monolis_restruct_comm
   public :: monolis_restruct_matrix
 
 contains
+
+  subroutine monolis_restruct_comm(monoCOM, monoCOM_reorder, perm)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_com) :: monoCOM_reorder
+    integer(kind=kint) :: perm(:)
+    integer(kind=kint) :: i, in, N
+
+    monoCOM_reorder%myrank = monoCOM%myrank
+    monoCOM_reorder%comm = monoCOM%comm
+    monoCOM_reorder%commsize = monoCOM%commsize
+    monoCOM_reorder%n_neib = monoCOM%n_neib
+
+    if(monoCOM%n_neib /= 0)then
+      monoCOM_reorder%neib_pe => monoCOM%neib_pe
+      monoCOM_reorder%recv_index => monoCOM%recv_index
+      monoCOM_reorder%recv_item => monoCOM%recv_item
+      monoCOM_reorder%send_index => monoCOM%send_index
+
+      N = monoCOM%send_index(monoCOM%n_neib)
+      allocate(monoCOM_reorder%send_item(N))
+
+      do i = 1, N
+        in = perm(i)
+        monoCOM_reorder%send_item(in) = monoCOM%send_item(i)
+      enddo
+    endif
+  end subroutine monolis_restruct_comm
 
   subroutine monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
     implicit none
