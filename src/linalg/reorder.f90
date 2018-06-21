@@ -29,7 +29,7 @@ contains
       allocate(iperm(monoMAT%NP))
       call monolis_reorder_matrix_metis(monoMAT, monoMAT_reorder)
       call monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
-      call monolis_restruct_comm(monoCOM, monoCOM_reorder, perm)
+      call monolis_restruct_comm(monoCOM, monoCOM_reorder, iperm)
       call monolis_reorder_vector_fw(monoMAT%NP, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
 #else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
@@ -66,7 +66,7 @@ contains
     real(kind=kdouble) :: B(:)
     integer(kind=kint) :: i, in, jn, jo, j
     do i = 1, N
-      in = perm(i)
+      in = iperm(i)
       jn = (i -1)*NDOF
       jo = (in-1)*NDOF
       do j = 1, NDOF
@@ -82,7 +82,7 @@ contains
     real(kind=kdouble) :: A(:)
     integer(kind=kint) :: i, in, jn, jo, j
     do i = 1, N
-      in = iperm(i)
+      in = perm(i)
       jn = (i -1)*NDOF
       jo = (in-1)*NDOF
       do j = 1, NDOF

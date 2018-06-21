@@ -30,10 +30,9 @@ contains
 
       N = monoCOM%send_index(monoCOM%n_neib)
       allocate(monoCOM_reorder%send_item(N))
-
       do i = 1, N
-        in = perm(i)
-        monoCOM_reorder%send_item(in) = monoCOM%send_item(i)
+        in = perm(monoCOM%send_item(i))
+        monoCOM_reorder%send_item(i) = in
       enddo
     endif
   end subroutine monolis_restruct_comm
@@ -157,10 +156,10 @@ contains
     integer(kind=kint) :: NDOF2, i, in, jn, jo, j
 
     NDOF2 = NDOF*NDOF
-    do in = 1, N
-      i = iperm(in)
-      jo = (in-1)*NDOF2
-      jn = (i -1)*NDOF2
+    do i = 1, N
+      in = iperm(i)
+      jo = (i -1)*NDOF2
+      jn = (in-1)*NDOF2
       do j = 1, NDOF2
         Dp(jn + j) = D(jo + j)
       enddo
@@ -183,20 +182,20 @@ contains
     integer(kind=kint) :: jo, ko, kn, jn, lo, ln, l
 
     NDOF2 = NDOF*NDOF
-    do in = 1, N
-      i = iperm(in)
-      jsnewL = indexLp(i-1)+1
-      jenewL = indexLp(i)
-      jsnewU = indexUp(i-1)+1
-      jenewU = indexUp(i)
-      do jo = indexX(in-1)+1, indexX(in)
+    do i = 1, N
+      in = iperm(i)
+      jsnewL = indexLp(in-1)+1
+      jenewL = indexLp(in)
+      jsnewU = indexUp(in-1)+1
+      jenewU = indexUp(in)
+      do jo = indexX(i-1)+1, indexX(i)
         ko = itemX(jo)
-        if (ko > N) cycle
+        if(ko > N) cycle
         kn = iperm(ko)
-        if(kn < i)then
+        if(kn < in)then
           call bsearch_int_array(itemLp, jsnewL, jenewL, kn, jn)
           if(jn < 0)then
-            write(*,*) "** monolis error: jn < 0 in reorder_off_diag"
+            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
           endif
           lo = (jo-1)*NDOF2
           ln = (jn-1)*NDOF2
@@ -206,7 +205,7 @@ contains
         else
           call bsearch_int_array(itemUp, jsnewU, jenewU, kn, jn)
           if(jn < 0)then
-            write(*,*) "** monolis error: jn < 0 in reorder_off_diag"
+            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
           endif
           lo = (jo-1)*NDOF2
           ln = (jn-1)*NDOF2

@@ -37,7 +37,7 @@ contains
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X; X = 1.0d0
+    X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
 
     allocate(W(NDOF*NP,1))
