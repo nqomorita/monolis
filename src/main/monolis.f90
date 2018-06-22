@@ -44,6 +44,7 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   integer(kind=kint), intent(in) :: maxiter
   real(kind=kdouble), intent(in) :: tol
   logical, intent(in) :: is_scaling
+  !logical, intent(in) :: is_scaling
 
   !> for monoMAT
   monoMAT%N = N
@@ -78,6 +79,7 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%maxiter = maxiter
   monoPRM%tol = tol
   monoPRM%is_scaling = is_scaling
+  monoPRM%is_reordering = .false.
 
   call monolis_solve(monoPRM, monoCOM, monoMAT)
   !call monolis_solve_test(monoPRM, monoCOM, monoMAT)

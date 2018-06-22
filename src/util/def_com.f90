@@ -45,6 +45,22 @@ contains
 
   end subroutine monolis_com_finalize
 
+  subroutine monolis_com_copy(monoCOM, monoCOM_reorder)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_com) :: monoCOM_reorder
+
+    monoCOM_reorder%myrank = monoCOM%myrank
+    monoCOM_reorder%comm = monoCOM%comm
+    monoCOM_reorder%commsize = monoCOM%commsize
+    monoCOM_reorder%n_neib = monoCOM%n_neib
+    monoCOM_reorder%neib_pe => monoCOM%neib_pe
+    monoCOM_reorder%recv_index => monoCOM%recv_index
+    monoCOM_reorder%recv_item => monoCOM%recv_item
+    monoCOM_reorder%send_index => monoCOM%send_index
+    monoCOM_reorder%send_item => monoCOM%send_item
+  end subroutine monolis_com_copy
+
   subroutine monolis_com_size(size, comm)
     implicit none
     integer(kind=kint) :: size, comm

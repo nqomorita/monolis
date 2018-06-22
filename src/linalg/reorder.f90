@@ -33,9 +33,11 @@ contains
       call monolis_reorder_vector_fw(monoMAT%NP, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
 #else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
+      call monolis_com_copy(monoCOM, monoCOM_reorder)
 #endif
     else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
+      call monolis_com_copy(monoCOM, monoCOM_reorder)
     endif
   end subroutine monolis_reorder_matrix_fw
 
@@ -51,11 +53,7 @@ contains
       call monolis_reorder_back_vector_bk(monoMAT%NP, monoMAT%NDOF, monoMAT_reorder%X, monoMAT%X)
       deallocate( perm)
       deallocate(iperm)
-#else
-      monoMAT%X = monoMAT_reorder%X
 #endif
-    else
-      monoMAT%X = monoMAT_reorder%X
     endif
   end subroutine monolis_reorder_matrix_bk
 
@@ -180,11 +178,15 @@ contains
     call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, perm, iperm)
 #endif
 
-    do i = 1, N
-       perm(i) =  perm(i) + 1
-      iperm(i) = iperm(i) + 1
-    enddo
-    do i = N+1, NP
+    !do i = 1, N
+    !   perm(i) =  perm(i) + 1
+    !  iperm(i) = iperm(i) + 1
+    !enddo
+    !do i = N+1, NP
+    !   perm(i) = i
+    !  iperm(i) = i
+    !enddo
+    do i = 1, NP
        perm(i) = i
       iperm(i) = i
     enddo
