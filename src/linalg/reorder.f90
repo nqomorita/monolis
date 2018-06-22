@@ -178,15 +178,11 @@ contains
     call METIS_NodeND(nvtxs, xadj, adjncy, vwgt, options, perm, iperm)
 #endif
 
-    !do i = 1, N
-    !   perm(i) =  perm(i) + 1
-    !  iperm(i) = iperm(i) + 1
-    !enddo
-    !do i = N+1, NP
-    !   perm(i) = i
-    !  iperm(i) = i
-    !enddo
-    do i = 1, NP
+    do i = 1, N
+       perm(i) =  perm(i) + 1
+      iperm(i) = iperm(i) + 1
+    enddo
+    do i = N+1, NP
        perm(i) = i
       iperm(i) = i
     enddo
