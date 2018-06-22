@@ -1,4 +1,4 @@
-module mod_monolis_direct
+module mod_monolis_direct_LU
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -10,31 +10,44 @@ module mod_monolis_direct
 
 contains
 
-  subroutine monolis_solver_LU(monoPRM, monoCOM, monoMAT)
-    implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    type(monolis_mat) :: monoMATF
-    real(kind=kdouble) :: t1, t2, tset, tsol, tcomm, R2
+!  subroutine  monolis_solver_direct_setup(monoPRM, monoCOM, monoMAT)
+!    implicit none
+!    type(monolis_prm) :: monoPRM
+!    type(monolis_com) :: monoCOM
+!    type(monolis_mat) :: monoMAT
+!
+!    call monolis_solver_direct_init(monoPRM, monoCOM, monoMAT)
+!    call monolis_solver_direct_fact(monoPRM, monoCOM, monoMAT)
+!  end subroutine monolis_solver_direct_setup
+!
+!  subroutine monolis_solver_direct_apply(monoPRM, monoCOM, monoMAT, X, Y)
+!    implicit none
+!    type(monolis_prm) :: monoPRM
+!    type(monolis_com) :: monoCOM
+!    type(monolis_mat) :: monoMAT
+!    real(kind=kdouble) :: X(:), Y(:)
+!
+!    call monolis_solver_direct_solv(monoPRM, monoCOM, monoMAT)
+!  end subroutine monolis_solver_direct_apply
+!
+!  subroutine monolis_solver_direct_clear(monoPRM, monoCOM, monoMAT)
+!    implicit none
+!    type(monolis_prm) :: monoPRM
+!    type(monolis_com) :: monoCOM
+!    type(monolis_mat) :: monoMAT
+!
+!    call monolis_solver_direct_clear(monoPRM, monoCOM, monoMAT)
+!  end subroutine monolis_solver_direct_clear
+!
+!  subroutine monolis_solver_direct_init(monoPRM, monoCOM, monoMAT)
+!    implicit none
+!    type(monolis_prm) :: monoPRM
+!    type(monolis_com) :: monoCOM
+!    type(monolis_mat) :: monoMAT
+!
+!    if(monoCOM%commsize == 0) isEntire = .true.
+!    call monolis_matrix_get_fillin(hecMESH, hecT, idxU, itemU, NPU)
+!    call hecmw_matrix_copy_with_fillin(hecMESH, hecT, idxU, itemU, AU, NPU)
+!  end subroutine monolis_solver_direct_init
 
-    !allocate( perm(NP))
-    !allocate(iperm(NP))
-
-    if(monoCOM%myrank == 0) write(*,"(a)")"   ** analysis phase"
-    if(monoCOM%commsize == 1) isEntire = .true.
-
-    t1 = monolis_wtime()
-    !call monolis_get_fillin(monoMAT, hecT, indexU, itemU, NPU)
-    t2 = monolis_wtime()
-    tset = tset + t2 - t1
-    if(monoCOM%myrank == 0) write(*,"(a,1pe11.4)")"    * fill-in    time: ", t2-t1
-
-    t1 = monolis_wtime()
-    !call monolis_matrix_copy_with_fillin(hecMESH, monoMATF, indexU, itemU, AU, NPU)
-    t2 = monolis_wtime()
-    tset = tset + t2 - t1
-    if(monoCOM%myrank == 0) write(*,"(a,1pe11.4)")"    * reallocate time: ", t2-t1
-
-  end subroutine monolis_solver_LU
-end module mod_monolis_direct
+end module mod_monolis_direct_LU
