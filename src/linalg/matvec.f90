@@ -30,6 +30,8 @@ contains
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble), optional :: tcomm
 
+    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
     else
@@ -58,8 +60,6 @@ contains
     indexL => monoMAT%indexL
     itemU  => monoMAT%itemU
     itemL  => monoMAT%itemL
-
-    call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
     do i = 1, N
       YT = 0.0d0
@@ -127,8 +127,6 @@ contains
     indexL => monoMAT%indexL
     itemU  => monoMAT%itemU
     itemL  => monoMAT%itemL
-
-    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     do i = 1, N
       X1 = X(3*i-2)

@@ -113,14 +113,14 @@ contains
           ws(ndof*(j-1)+k) = val(ndof*(send_item(j)-1)+k)
         enddo
       enddo
-      call MPI_Isend(ws(iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req1(i), ierr)
+      call MPI_Isend(ws(ndof*iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req1(i), ierr)
     enddo
 
     do i = 1, n_neib
       iS = recv_index(i-1)
       in = recv_index(i  ) - iS
       if(in == 0) cycle
-      call MPI_Irecv(wr(iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req2(i), ierr)
+      call MPI_Irecv(wr(ndof*iS+1), ndof*in, MPI_DOUBLE_PRECISION, neib_pe(i), 0, comm, req2(i), ierr)
     enddo
 
     call MPI_waitall(n_neib, req2, sta2, ierr)
@@ -166,14 +166,14 @@ contains
           ws(ndof*(j-1)+k) = val(ndof*(send_item(j)-1)+k)
         enddo
       enddo
-      call MPI_Isend(ws(iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req1(i), ierr)
+      call MPI_Isend(ws(ndof*iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req1(i), ierr)
     enddo
 
     do i = 1, n_neib
       iS = recv_index(i-1)
       in = recv_index(i  ) - iS
       if(in == 0) cycle
-      call MPI_Irecv(wr(iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req2(i), ierr)
+      call MPI_Irecv(wr(ndof*iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req2(i), ierr)
     enddo
 
     call MPI_waitall(n_neib, req2, sta2, ierr)
