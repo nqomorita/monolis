@@ -24,7 +24,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoTREE
-    type(monolis_fillin), pointer:: T(:)
+    type(monolis_fillin), pointer:: tree(:)
     integer(kind=kint), pointer :: idxU(:)
     integer(kind=kint), pointer :: itemU(:)
     integer(kind=kint), pointer :: idxL(:)
@@ -43,13 +43,13 @@ contains
     logical :: is_fillin, is_asym
 
     N = monoMAT%N
-    allocate(T(N))
+    allocate(tree(N))
 
     do i = 1, N
-      T(i)%factorized = .false.
-      T(i)%updated = .false.
-      T(i)%n_descendant = 0
-      T(i)%n_ancestor = 0
+      tree(i)%factorized = .false.
+      tree(i)%updated = .false.
+      tree(i)%n_descendant = 0
+      tree(i)%n_ancestor = 0
 
       jS = monoMAT%indexU(i-1) + 1
       jE = monoMAT%indexU(i  )
@@ -59,14 +59,14 @@ contains
           in = in + 1
         endif
       enddo
-      T(i)%n_ancestor = in
-      allocate(T(i)%ancestor(in))
+      tree(i)%n_ancestor = in
+      allocate(tree(i)%ancestor(in))
 
       in = 0
       do j = jS, jE
         if(monoMAT%itemU(j) <= N)then
           in = in + 1
-          T(i)%ancestor(in) = monoMAT%itemU(j)
+          tree(i)%ancestor(in) = monoMAT%itemU(j)
         endif
       enddo
     enddo
@@ -78,22 +78,22 @@ contains
       allocate(fillin_mask(Nbytes))
 
       do i = 1, N
-        if(T(i)%n_ancestor < 2) cycle
+        if(tree(i)%n_ancestor < 2) cycle
         is = i/bit + 1
         child_mask(is:Nbytes) = 0
         parent_mask(is:Nbytes) = 0
 
-        parent = T(i)%ancestor(1)
+        parent = tree(i)%ancestor(1)
         range = 0
-        do j = 2, T(i)%n_ancestor
-          in = T(i)%ancestor(j)
+        do j = 2, tree(i)%n_ancestor
+          in = tree(i)%ancestor(j)
           ie = in/bit + 1
           child_mask(ie) = ibset(child_mask(ie),mod(in,bit))
           range = in
         enddo
-        k = T(parent)%n_ancestor
+        k = tree(parent)%n_ancestor
         do j = 1, k
-          in = T(parent)%ancestor(j)
+          in = tree(parent)%ancestor(j)
           ie = in/bit + 1
           parent_mask(ie) = ibset(parent_mask(ie),mod(in,bit))
           range = max(range,in)
@@ -109,7 +109,7 @@ contains
 
         if(0 < c)then
           allocate(array(c))
-          T(parent)%n_ancestor=c
+          tree(parent)%n_ancestor=c
           in = 0
           do j = is, ie
             do k = 1, popcnt(fillin_mask(j))
@@ -119,8 +119,8 @@ contains
               array(in) = bit*(j-1)+c
             enddo
           enddo
-          deallocate(T(parent)%ancestor)
-          T(parent)%ancestor => array
+          deallocate(tree(parent)%ancestor)
+          tree(parent)%ancestor => array
         endif
       enddo
       deallocate(child_mask )
@@ -128,20 +128,20 @@ contains
       deallocate(fillin_mask)
 
       !do i = 1, N
-      !  do j = 1, T(i)%n_ancestor
-      !    T(T(i)%ancestor(j))%n_descendant = T(T(i)%ancestor(j))%n_descendant + 1
+      !  do j = 1, tree(i)%n_ancestor
+      !    tree(tree(i)%ancestor(j))%n_descendant = tree(tree(i)%ancestor(j))%n_descendant + 1
       !  enddo
       !enddo
       !do i = 1, N
-      !  allocate(T(i)%descendant(T(i)%n_descendant))
+      !  allocate(tree(i)%descendant(tree(i)%n_descendant))
       !enddo
 
       !allocate(diff(N))
       !diff(:) = 0
       !do i = 1, N
-      !  do j = 1, T(i)%n_ancestor
-      !    diff(T(i)%ancestor(j)) = diff(T(i)%ancestor(j)) + 1
-      !    T(T(i)%ancestor(j))%descendant(diff(T(i)%ancestor(j))) = i
+      !  do j = 1, tree(i)%n_ancestor
+      !    diff(tree(i)%ancestor(j)) = diff(tree(i)%ancestor(j)) + 1
+      !    tree(tree(i)%ancestor(j))%descendant(diff(tree(i)%ancestor(j))) = i
       !  enddo
       !enddo
     endif
@@ -151,8 +151,8 @@ contains
     in = 0
     idxU(0) = 0
     do i = 1, N
-      idxU(i) = idxU(i-1) + T(i)%n_ancestor + 1
-      in = in + T(i)%n_ancestor + 1
+      idxU(i) = idxU(i-1) + tree(i)%n_ancestor + 1
+      in = in + tree(i)%n_ancestor + 1
     enddo
     NPU = in
     monoTREE%NPU = in
@@ -163,9 +163,9 @@ contains
     do i = 1, N
       in = in + 1
       itemU(in) = i
-      do j = 1, T(i)%n_ancestor
+      do j = 1, tree(i)%n_ancestor
         in = in + 1
-        itemU(in) = T(i)%ancestor(j)
+        itemU(in) = tree(i)%ancestor(j)
       enddo
     enddo
 
@@ -222,34 +222,32 @@ contains
     integer(kind=kint), pointer :: itemL(:)
     real(kind=kdouble), pointer :: AU(:)
     real(kind=kdouble), pointer :: AL(:)
-    integer(kind=kint) :: N, NPU, NPL
-    integer(kind=kint) :: i, j, k, iS, iE, jS, jE
+    integer(kind=kint) :: N, NPU, NPL, NDOF, NDOF2
+    integer(kind=kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
     integer(kind=kint) :: in, jn ,kn, nn
     logical :: is_asym
 
     N = monoTREE%N
     NPU = monoTREE%NPU
+    NDOF = monoTREE%NDOF
+    NDOF2 = NDOF*NDOF
     idxU => monoTREE%indexU
     itemU => monoTREE%itemU
     idxL => monoTREE%indexL
     itemL => monoTREE%itemL
 
     !value
-    allocate(monoTREE%AU(9*NPU))
+    allocate(monoTREE%AU(NDOF2*NPU))
     AU => monoTREE%AU
     AU = 0.0d0
 
     do k = 1, N
       in = idxU(k-1)+1
-      AU(9*in-8) = monoMAT%D(9*k-8)
-      AU(9*in-7) = monoMAT%D(9*k-7)
-      AU(9*in-6) = monoMAT%D(9*k-6)
-      AU(9*in-5) = monoMAT%D(9*k-5)
-      AU(9*in-4) = monoMAT%D(9*k-4)
-      AU(9*in-3) = monoMAT%D(9*k-3)
-      AU(9*in-2) = monoMAT%D(9*k-2)
-      AU(9*in-1) = monoMAT%D(9*k-1)
-      AU(9*in  ) = monoMAT%D(9*k  )
+      jS = NDOF2*(in-1)
+      jE = NDOF2*(k -1)
+      do j = 1, NDOF2
+        AU(jS + j) = monoMAT%D(jE + j)
+      enddo
     enddo
 
     do k = 1, N
@@ -262,15 +260,11 @@ contains
         do i = iS, iE
           in = itemU(i)
           if(jn == in)then
-            AU(9*i-8) = monoMAT%AU(9*j-8)
-            AU(9*i-7) = monoMAT%AU(9*j-7)
-            AU(9*i-6) = monoMAT%AU(9*j-6)
-            AU(9*i-5) = monoMAT%AU(9*j-5)
-            AU(9*i-4) = monoMAT%AU(9*j-4)
-            AU(9*i-3) = monoMAT%AU(9*j-3)
-            AU(9*i-2) = monoMAT%AU(9*j-2)
-            AU(9*i-1) = monoMAT%AU(9*j-1)
-            AU(9*i  ) = monoMAT%AU(9*j  )
+            lS = NDOF2*(i-1)
+            lE = NDOF2*(j-1)
+            do l = 1, NDOF2
+              AU(lS + l) = monoMAT%AU(lE + l)
+            enddo
             iS = iS + 1
             cycle aa
           endif
@@ -292,15 +286,11 @@ contains
           do i = iS, iE
             in = itemL(i)
             if(jn == in)then
-              AL(9*i-8) = monoMAT%AL(9*j-8)
-              AL(9*i-7) = monoMAT%AL(9*j-7)
-              AL(9*i-6) = monoMAT%AL(9*j-6)
-              AL(9*i-5) = monoMAT%AL(9*j-5)
-              AL(9*i-4) = monoMAT%AL(9*j-4)
-              AL(9*i-3) = monoMAT%AL(9*j-3)
-              AL(9*i-2) = monoMAT%AL(9*j-2)
-              AL(9*i-1) = monoMAT%AL(9*j-1)
-              AL(9*i  ) = monoMAT%AL(9*j  )
+              lS = NDOF2*(i-1)
+              lE = NDOF2*(j-1)
+              do l = 1, NDOF2
+                AL(lS + l) = monoMAT%AL(lE + l)
+              enddo
               iS = iS + 1
               cycle bb
             endif

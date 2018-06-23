@@ -132,10 +132,10 @@ contains
     integer(kind=kint) :: N, NDOF
     integer(kind=kint) :: perm(:), iperm(:)
     integer(kind=kint) :: indexL(0:), indexU(0:)
-    integer(kind=kint) :: itemL(:), itemU(:)
-    real(kind=kdouble) :: AL(:), AU(:), D(:)
     integer(kind=kint) :: indexLp(0:), indexUp(0:)
+    integer(kind=kint) :: itemL(:), itemU(:)
     integer(kind=kint) :: itemLp(:), itemUp(:)
+    real(kind=kdouble) :: AL(:), AU(:), D(:)
     real(kind=kdouble) :: ALp(:), AUp(:), Dp(:)
     Dp  = 0.0d0
     ALp = 0.0d0
