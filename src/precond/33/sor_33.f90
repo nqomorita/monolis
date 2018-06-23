@@ -20,25 +20,26 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, k, l, N
-    real(kind=kdouble) :: T(3,3), P(3)
+    real(kind=kdouble) :: T(3,3), P(3), sigma
     real(kind=kdouble), pointer :: D(:)
 
     N =  monoMAT%N
     D => monoMAT%D
+    sigma = 1.0d0
 
     allocate(ALU(9*N))
     ALU = 0.0d0
 
     do i = 1, N
-      ALU(9*i-8) = D(9*i-8)
+      ALU(9*i-8) = D(9*i-8)*sigma
       ALU(9*i-7) = D(9*i-7)
       ALU(9*i-6) = D(9*i-6)
       ALU(9*i-5) = D(9*i-5)
-      ALU(9*i-4) = D(9*i-4)
+      ALU(9*i-4) = D(9*i-4)*sigma
       ALU(9*i-3) = D(9*i-3)
       ALU(9*i-2) = D(9*i-2)
       ALU(9*i-1) = D(9*i-1)
-      ALU(9*i  ) = D(9*i  )
+      ALU(9*i  ) = D(9*i  )*sigma
     enddo
 
     do l = 1, N
@@ -97,35 +98,21 @@ contains
     AL => monoMAT%AL
     AU => monoMAT%AU
 
-    do i = 1, monoMAT%N*monoMAT%NDOF
+    do i = 1, monoMAT%NP*monoMAT%NDOF
       Y(i) = X(i)
     enddo
 
     do i = 1, monoMAT%N
-      X1 = X(3*i-2)
-      X2 = X(3*i-1)
-      X3 = X(3*i  )
-      X2 = X2 - ALU(9*i-5)*X1
-      X3 = X3 - ALU(9*i-2)*X1 - ALU(9*i-1)*X2
-      X3 = ALU(9*i  )* X3
-      X2 = ALU(9*i-4)*(X2 - ALU(9*i-3)*X3)
-      X1 = ALU(9*i-8)*(X1 - ALU(9*i-6)*X3 - ALU(9*i-7)*X2)
-      Y(3*i-2) = X1
-      Y(3*i-1) = X2
-      Y(3*i  ) = X3
-    enddo
-
-    do i = 1, monoMAT%N
-      S1 = X(3*i-2)
-      S2 = X(3*i-1)
-      S3 = X(3*i  )
+      S1 = Y(3*i-2)
+      S2 = Y(3*i-1)
+      S3 = Y(3*i  )
       jS = indexL(i-1)+1
       jE = indexL(i)
       do j = jS, jE
         jn = itemL(j)
-        X1 = X(3*jn-2)
-        X2 = X(3*jn-1)
-        X3 = X(3*jn  )
+        X1 = Y(3*jn-2)
+        X2 = Y(3*jn-1)
+        X3 = Y(3*jn  )
         S1 = S1 - AL(9*j-8)*X1 - AL(9*j-7)*X2 - AL(9*j-6)*X3
         S2 = S2 - AL(9*j-5)*X1 - AL(9*j-4)*X2 - AL(9*j-3)*X3
         S3 = S3 - AL(9*j-2)*X1 - AL(9*j-1)*X2 - AL(9*j  )*X3
@@ -138,12 +125,12 @@ contains
       X3 = ALU(9*i  )* X3
       X2 = ALU(9*i-4)*(X2 - ALU(9*i-3)*X3)
       X1 = ALU(9*i-8)*(X1 - ALU(9*i-6)*X3 - ALU(9*i-7)*X2)
-      X(3*i-2) = X1
-      X(3*i-1) = X2
-      X(3*i  ) = X3
+      Y(3*i-2) = X1
+      Y(3*i-1) = X2
+      Y(3*i  ) = X3
     enddo
 
-    do i = 1, monoMAT%N
+    do i = monoMAT%N, 1, -1
       S1 = 0.0d0
       S2 = 0.0d0
       S3 = 0.0d0
@@ -151,9 +138,9 @@ contains
       jE = indexU(i)
       do j = jE, jS, -1
         jn = itemU(j)
-        X1 = X(3*jn-2)
-        X2 = X(3*jn-1)
-        X3 = X(3*jn  )
+        X1 = Y(3*jn-2)
+        X2 = Y(3*jn-1)
+        X3 = Y(3*jn  )
         S1 = S1 + AU(9*j-8)*X1 + AU(9*j-7)*X2 + AU(9*j-6)*X3
         S2 = S2 + AU(9*j-5)*X1 + AU(9*j-4)*X2 + AU(9*j-3)*X3
         S3 = S3 + AU(9*j-2)*X1 + AU(9*j-1)*X2 + AU(9*j  )*X3
@@ -166,9 +153,9 @@ contains
       X3 = ALU(9*i  )* X3
       X2 = ALU(9*i-4)*(X2 - ALU(9*i-3)*X3)
       X1 = ALU(9*i-8)*(X1 - ALU(9*i-6)*X3 - ALU(9*i-7)*X2)
-      X(3*i-2) = X(3*i-2) - X1
-      X(3*i-1) = X(3*i-1) - X2
-      X(3*i  ) = X(3*i  ) - X3
+      Y(3*i-2) = Y(3*i-2) - X1
+      Y(3*i-1) = Y(3*i-1) - X2
+      Y(3*i  ) = Y(3*i  ) - X3
     enddo
   end subroutine monolis_precond_sor_33_apply
 
