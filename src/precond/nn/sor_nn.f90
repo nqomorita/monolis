@@ -1,4 +1,4 @@
-module mod_monolis_precond_diag_nn
+module mod_monolis_precond_sor_nn
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -6,15 +6,15 @@ module mod_monolis_precond_diag_nn
   implicit none
 
   private
-  public :: monolis_precond_diag_nn_setup
-  public :: monolis_precond_diag_nn_apply
-  public :: monolis_precond_diag_nn_clear
+  public :: monolis_precond_sor_nn_setup
+  public :: monolis_precond_sor_nn_apply
+  public :: monolis_precond_sor_nn_clear
 
   real(kind=kdouble), pointer :: ALU(:) => null()
 
 contains
 
-  subroutine monolis_precond_diag_nn_setup(monoMAT)
+  subroutine monolis_precond_sor_nn_setup(monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -62,9 +62,9 @@ contains
 
     deallocate(T)
     deallocate(LU)
-  end subroutine monolis_precond_diag_nn_setup
+  end subroutine monolis_precond_sor_nn_setup
 
-  subroutine monolis_precond_diag_nn_apply(monoMAT, X, Y)
+  subroutine monolis_precond_sor_nn_apply(monoMAT, X, Y)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -101,11 +101,11 @@ contains
     enddo
 
     deallocate(T)
-  end subroutine monolis_precond_diag_nn_apply
+  end subroutine monolis_precond_sor_nn_apply
 
-  subroutine monolis_precond_diag_nn_clear()
+  subroutine monolis_precond_sor_nn_clear()
     implicit none
     deallocate(ALU)
-  end subroutine monolis_precond_diag_nn_clear
+  end subroutine monolis_precond_sor_nn_clear
 
-end module mod_monolis_precond_diag_nn
+end module mod_monolis_precond_sor_nn

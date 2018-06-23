@@ -4,6 +4,7 @@ module mod_monolis_precond_diag
   use mod_monolis_mat
   use mod_monolis_precond_diag_33
   use mod_monolis_precond_diag_nn
+
   implicit none
 
 contains

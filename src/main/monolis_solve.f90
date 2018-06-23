@@ -51,7 +51,7 @@ contains
 
     do i = 1, 9
       monoPRM%method = i
-      do j = 1, 1
+      do j = 1, 3
         monoPRM%precond = j
         call monolis_timer_initialize()
         call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
