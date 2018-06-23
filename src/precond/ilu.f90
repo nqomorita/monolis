@@ -7,7 +7,7 @@ module mod_monolis_precond_ilu
 
   implicit none
 
-  type(monolis_mat) :: monoTREE
+  type(monolis_mat), save :: monoTREE
 
 contains
 
@@ -28,13 +28,15 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: X(:), Y(:)
-    integer(kind=kint) :: i
+    integer(kind=kint) :: i, N, NDOF
 
-    do i = 1, monoMAT%N*monoMAT%NDOF
+    N = monoMAT%N
+    NDOF = monoMAT%NDOF
+    do i = 1, N*NDOF
       monoTREE%B(i) = X(i)
     enddo
     call monolis_solv_LU_inner(monoPRM, monoCOM, monoTREE)
-    do i = 1, monoMAT%N*monoMAT%NDOF
+    do i = 1, N*NDOF
       Y(i) = monoTREE%X(i)
     enddo
   end subroutine monolis_precond_ilu_apply
@@ -54,12 +56,17 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoTREE
-    integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
+    integer(kind=kint) :: N, NDOF
     logical :: is_fillin = .false.
     logical :: is_asym = .false.
 
-    allocate(monoTREE%B(monoMAT%N*monoMAT%NDOF))
-    allocate(monoTREE%X(monoMAT%N*monoMAT%NDOF))
+    N = monoMAT%N
+    NDOF = monoMAT%NDOF
+    monoTREE%N = monoMAT%N
+    monoTREE%NP = monoMAT%NP
+    monoTREE%NDOF = monoMAT%NDOF
+    allocate(monoTREE%B(N*NDOF))
+    allocate(monoTREE%X(N*NDOF))
     monoTREE%B = 0.0d0
     monoTREE%X = 0.0d0
     call monolis_matrix_get_fillin(monoPRM, monoCOM, monoMAT, monoTREE, is_fillin, is_asym)

@@ -10,10 +10,6 @@ module mod_monolis_fact_LU_33
   public :: monolis_solv_LU_inner_33
   public :: monolis_clear_LU_inner_33
 
-  integer(kind=kint), pointer :: idxL(:)  => null()
-  integer(kind=kint), pointer :: idxU(:)  => null()
-  integer(kind=kint), pointer :: itemL(:) => null()
-  integer(kind=kint), pointer :: itemU(:) => null()
   real(kind=kdouble), save, allocatable :: AD(:)
   real(kind=kdouble), save, pointer :: AU(:)
 
@@ -45,7 +41,7 @@ contains
     integer(kind=kint) :: N, NP, NIN, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
     integer(kind=kint) :: shift, imax
-    integer(kind=kint), allocatable :: isFill(:)
+    integer(kind=kint), allocatable :: is_fill(:)
     integer(kind=kint), pointer :: idxU(:), itemU(:)
     real(kind=kdouble) :: d1, d2, d3
     real(kind=kdouble) :: u1, u2, u3
@@ -67,7 +63,7 @@ contains
 
     allocate(U(9*imax))
     allocate(AD(3*N))
-    allocate(isFill(NP))
+    allocate(is_fill(NP))
     AD = 0.0d0
 
     !factorization
@@ -96,11 +92,11 @@ contains
 
       !U multiple section
       do j = i, NP
-        isFill(j) = 0
+        is_fill(j) = 0
       enddo
       in = 1
       do j = idxU(i-1)+2, idxU(i)
-        isFill(itemU(j)) = in
+        is_fill(itemU(j)) = in
         AU(9*j-5) = AU(9*j-5) - AU(9*j-8)*u1*d1
         AU(9*j-4) = AU(9*j-4) - AU(9*j-7)*u1*d1
         AU(9*j-3) = AU(9*j-3) - AU(9*j-6)*u1*d1
@@ -135,8 +131,8 @@ contains
         do k = idxU(jn-1)+1, idxU(jn)
           !outer product section
           kn = itemU(k)
-          if(isFill(kn) /= 0)then
-            in = isFill(kn)
+          if(is_fill(kn) /= 0)then
+            in = is_fill(kn)
             AU(9*k-8) = AU(9*k-8) - L(1)*U(9*in-8)*d1 - L(2)*U(9*in-5)*d2 - L(3)*U(9*in-2)*d3
             AU(9*k-7) = AU(9*k-7) - L(1)*U(9*in-7)*d1 - L(2)*U(9*in-4)*d2 - L(3)*U(9*in-1)*d3
             AU(9*k-6) = AU(9*k-6) - L(1)*U(9*in-6)*d1 - L(2)*U(9*in-3)*d2 - L(3)*U(9*in  )*d3
@@ -158,7 +154,7 @@ contains
       AD(3*i  ) = 1.0d0 / AU(9*in  )
     enddo
 
-    deallocate(isFill)
+    deallocate(is_fill)
     deallocate(U)
   end subroutine monolis_fact_LU_inner_33
 
@@ -208,9 +204,9 @@ contains
     enddo
     !D
     do i = 1, N
-      X(3*i-2) = X(3*i-2) * AD(3*i-2)
-      X(3*i-1) = X(3*i-1) * AD(3*i-1)
-      X(3*i  ) = X(3*i  ) * AD(3*i  )
+      X(3*i-2) = X(3*i-2)*AD(3*i-2)
+      X(3*i-1) = X(3*i-1)*AD(3*i-1)
+      X(3*i  ) = X(3*i  )*AD(3*i  )
     enddo
     !U
     do i = N, 1, -1

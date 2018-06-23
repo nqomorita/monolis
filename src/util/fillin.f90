@@ -29,16 +29,15 @@ contains
     integer(kind=kint), pointer :: itemU(:)
     integer(kind=kint), pointer :: idxL(:)
     integer(kind=kint), pointer :: itemL(:)
-    integer(kind=kint) :: N, NPU, NPL
-    integer(kind=kint) :: i, j, k, jS, jE, in, c
-    integer(kind=kint) :: Nbytes
-    integer(kind=kint) :: Start, End
-    integer(kind=kint) :: range, parent
-    integer(kind=kint) :: ZERO = 0
     integer(kind=kint), pointer :: array(:)
     integer(kind=kint), pointer :: fillin_mask(:)
     integer(kind=kint), pointer :: child_mask(:)
     integer(kind=kint), pointer :: parent_mask(:)
+    integer(kind=kint) :: N, NPU, NPL
+    integer(kind=kint) :: i, j, k, jS, jE, in, c
+    integer(kind=kint) :: Nbytes
+    integer(kind=kint) :: is, ie
+    integer(kind=kint) :: range, parent
     integer(kind=kint) :: bit = kint*8
     integer(kind=kint), allocatable :: count(:), diff(:)
     logical :: is_fillin, is_asym
@@ -80,31 +79,31 @@ contains
 
       do i = 1, N
         if(T(i)%n_ancestor < 2) cycle
-        Start = i/bit + 1
-        child_mask(Start:Nbytes) = 0
-        parent_mask(Start:Nbytes) = 0
+        is = i/bit + 1
+        child_mask(is:Nbytes) = 0
+        parent_mask(is:Nbytes) = 0
 
         parent = T(i)%ancestor(1)
         range = 0
         do j = 2, T(i)%n_ancestor
           in = T(i)%ancestor(j)
-          End = in/bit + 1
-          child_mask(End) = ibset(child_mask(End),mod(in,bit))
+          ie = in/bit + 1
+          child_mask(ie) = ibset(child_mask(ie),mod(in,bit))
           range = in
         enddo
         k = T(parent)%n_ancestor
         do j = 1, k
           in = T(parent)%ancestor(j)
-          End = in/bit + 1
-          parent_mask(End) = ibset(parent_mask(End),mod(in,bit))
+          ie = in/bit + 1
+          parent_mask(ie) = ibset(parent_mask(ie),mod(in,bit))
           range = max(range,in)
         enddo
-        End = range/bit + 1
+        ie = range/bit + 1
 
-        fillin_mask(Start:End) = ior(child_mask(Start:End), parent_mask(Start:End))
+        fillin_mask(is:ie) = ior(child_mask(is:ie), parent_mask(is:ie))
 
         c = 0
-        do j = Start, End
+        do j = is, ie
           c = c + popcnt(fillin_mask(j))
         enddo
 
@@ -112,7 +111,7 @@ contains
           allocate(array(c))
           T(parent)%n_ancestor=c
           in = 0
-          do j = Start, End
+          do j = is, ie
             do k = 1, popcnt(fillin_mask(j))
               in = in + 1
               c = popcnt( iand(fillin_mask(j), - fillin_mask(j)) -1 )
@@ -147,10 +146,8 @@ contains
       !enddo
     endif
 
+    allocate(monoTREE%indexU(0:N))
     idxU => monoTREE%indexU
-    itemU => monoTREE%itemU
-
-    allocate(idxU(0:N))
     in = 0
     idxU(0) = 0
     do i = 1, N
@@ -158,8 +155,10 @@ contains
       in = in + T(i)%n_ancestor + 1
     enddo
     NPU = in
+    monoTREE%NPU = in
 
-    allocate(itemU(NPU))
+    allocate(monoTREE%itemU(NPU))
+    itemU => monoTREE%itemU
     in = 0
     do i = 1, N
       in = in + 1
@@ -207,6 +206,7 @@ contains
           enddo
         enddo aa
       enddo
+      deallocate(count)
     endif
   end subroutine monolis_matrix_get_fillin
 

@@ -16,6 +16,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
+    else
+      stop "  ** monolis error: monolis_init_LU_inner"
     endif
   end subroutine monolis_init_LU_inner
 
@@ -27,6 +29,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
+    else
+      stop "  ** monolis error: monolis_fact_LU_inner"
     endif
   end subroutine monolis_fact_LU_inner
 
@@ -38,6 +42,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
+    else
+      stop "  ** monolis error: monolis_solv_LU_inner"
     endif
   end subroutine monolis_solv_LU_inner
 
@@ -49,6 +55,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
+    else
+      stop "  ** monolis error: monolis_clear_LU_inner"
     endif
   end subroutine monolis_clear_LU_inner
 end module mod_monolis_fact_LU
