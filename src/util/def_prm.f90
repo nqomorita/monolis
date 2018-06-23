@@ -36,13 +36,14 @@ module mod_monolis_prm
                                                     & "PipeBiCGSTAB_noprec", &
                                                     & "SOR                ", &
                                                     & "IR                 "/)
-  character*24, dimension(7)  :: monolis_str_prec = (/"diag  ", &
-                                                    & "ilu   ", &
-                                                    & "sor   ", &
-                                                    & "jacobi", &
-                                                    & "sainv ", &
-                                                    & "rif   ", &
-                                                    & "spike "/)
+  character*24, dimension(8)  :: monolis_str_prec = (/"Diag  ", &
+                                                    & "ILU   ", &
+                                                    & "Jacobi", &
+                                                    & "Direct", &
+                                                    & "SOR   ", &
+                                                    & "SAINV ", &
+                                                    & "RIF   ", &
+                                                    & "SPIKE "/)
 
   type monolis_prm
     integer(kind=kint) :: method = 1
