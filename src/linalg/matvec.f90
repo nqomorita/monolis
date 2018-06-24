@@ -100,7 +100,7 @@ contains
         enddo
       enddo
 
-      do k = 1,NDOF
+      do k = 1, NDOF
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
