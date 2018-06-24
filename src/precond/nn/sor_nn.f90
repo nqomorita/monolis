@@ -116,7 +116,7 @@ contains
         enddo
         do k = 1, NDOF
           do l = 1, NDOF
-            ST(k) = ST(k) - AL(NDOF2*(j-1)+NDOF*(k-1)+l) * XXT(l)
+            ST(k) = ST(k) - AL(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
           enddo
         enddo
       enddo
