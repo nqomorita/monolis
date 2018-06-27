@@ -144,3 +144,65 @@ subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   call monolis_solve(monoPRM, monoCOM, monoMAT)
   !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 end subroutine monolis_serial
+
+subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  use mod_monolis_prm
+  use mod_monolis_convert
+  implicit none
+  real(kind=kdouble), pointer :: Af(:)
+  real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+  integer(kind=kint), pointer :: indexU(:)
+  integer(kind=kint), pointer :: indexL(:)
+  integer(kind=kint), pointer :: itemU(:)
+  integer(kind=kint), pointer :: itemL(:)
+  integer(kind=kint) :: Nf, NDOFf
+  integer(kind=kint) :: N, NDOF, NPU, NPL
+  integer(kind=kint) :: i, j, k, jS, jE, in
+  real(kind=kdouble) :: thresh
+
+  call monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+end subroutine monolis_convert_full_matrix
+
+subroutine monolis_convert_coo_matrix(Nf, NDOFf, Af, indexI, indexJ, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  use mod_monolis_prm
+  use mod_monolis_convert
+  implicit none
+  real(kind=kdouble), pointer :: Af(:)
+  real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+  integer(kind=kint), pointer :: indexI(:)
+  integer(kind=kint), pointer :: indexJ(:)
+  integer(kind=kint), pointer :: indexU(:)
+  integer(kind=kint), pointer :: indexL(:)
+  integer(kind=kint), pointer :: itemU(:)
+  integer(kind=kint), pointer :: itemL(:)
+  integer(kind=kint) :: Nf, NDOFf
+  integer(kind=kint) :: N, NDOF, NPU, NPL
+  integer(kind=kint) :: i, j, k, jS, jE, in
+
+  call  monolis_convert_coo_matrix_main(Nf, NDOFf, Af, indexI, indexJ, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+end subroutine monolis_convert_coo_matrix
+
+subroutine monolis_convert_csr_matrix(Nf, NDOFf, Af, index, item, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  use mod_monolis_prm
+  use mod_monolis_convert
+  implicit none
+  real(kind=kdouble), pointer :: Af(:)
+  real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+  integer(kind=kint), pointer :: indexU(:)
+  integer(kind=kint), pointer :: indexL(:)
+  integer(kind=kint), pointer :: index(:)
+  integer(kind=kint), pointer :: itemU(:)
+  integer(kind=kint), pointer :: itemL(:)
+  integer(kind=kint), pointer :: item(:)
+  integer(kind=kint) :: Nf, NDOFf
+  integer(kind=kint) :: N, NDOF, NPU, NPL
+  integer(kind=kint) :: i, j, k, jS, jE, in
+
+  call monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+end subroutine monolis_convert_csr_matrix
