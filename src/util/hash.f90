@@ -47,7 +47,7 @@ contains
     monolis_hash_tree%tree_size = monolis_hash_size(monolis_current_hash_size)
     allocate(bin(monolis_hash_tree%tree_size))
     monolis_hash_tree%bin => bin
-    nullfy(bin)
+    nullify(bin)
   end subroutine monolis_hash_init
 
   subroutine monolis_hash_finalize()
@@ -61,7 +61,7 @@ contains
       enddo
     enddo
     deallocate(monolis_hash_tree%bin)
-    nullfy(list)
+    nullify(list)
   end subroutine monolis_hash_finalize
 
   subroutine monolis_hash_get(key, val, is_exist)
@@ -93,6 +93,7 @@ contains
 
     if(.not. is_exist)then
       call monolis_hash_list_push(key, index, val)
+      is_pushed = .true.
     endif
   end subroutine monolis_hash_push
 
@@ -166,12 +167,16 @@ contains
       new_list(i)%key   = old_list(i)%key
       new_list(i)%val   = old_list(i)%val
     enddo
+
     new_list(inew)%index = index
     new_list(inew)%key   = key
     new_list(inew)%val   = val
 
+    monolis_hash_tree%bin(index)%n = inew
     monolis_hash_tree%bin(index)%list => new_list
     if(associated(old_list)) deallocate(old_list)
+    nullify(old_list)
+    nullify(new_list)
   end subroutine monolis_hash_list_push
 
   !> BJD2 hash function
