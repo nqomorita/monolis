@@ -25,25 +25,27 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_prec_SPIKE  = 7
   integer(4), parameter :: monolis_prec_DIRECT = 8
 
-  character*24, dimension(11) :: monolis_str_iter = (/"CG                 ", &
-                                                    & "GropCG             ", &
-                                                    & "PipeCG             ", &
-                                                    & "PipeCR             ", &
-                                                    & "BiCGSTAB           ", &
-                                                    & "PipeBiCGSTAB       ", &
-                                                    & "BiCGSTAB_noprec    ", &
-                                                    & "CABiCGSTAB_noprec  ", &
-                                                    & "PipeBiCGSTAB_noprec", &
-                                                    & "SOR                ", &
-                                                    & "IR                 "/)
-  character*24, dimension(8)  :: monolis_str_prec = (/"Diag  ", &
-                                                    & "ILU   ", &
-                                                    & "Jacobi", &
-                                                    & "SOR   ", &
-                                                    & "SAINV ", &
-                                                    & "RIF   ", &
-                                                    & "SPIKE ", &
-                                                    & "Direct"/)
+  character*24, dimension(11) :: monolis_str_iter = (/&
+  & "CG                 ", &
+  & "GropCG             ", &
+  & "PipeCG             ", &
+  & "PipeCR             ", &
+  & "BiCGSTAB           ", &
+  & "PipeBiCGSTAB       ", &
+  & "BiCGSTAB_noprec    ", &
+  & "CABiCGSTAB_noprec  ", &
+  & "PipeBiCGSTAB_noprec", &
+  & "SOR                ", &
+  & "IR                 "/)
+  character*24, dimension(8)  :: monolis_str_prec = (/&
+  & "Diag  ", &
+  & "ILU   ", &
+  & "Jacobi", &
+  & "SOR   ", &
+  & "SAINV ", &
+  & "RIF   ", &
+  & "SPIKE ", &
+  & "Direct"/)
 
   type monolis_prm
     integer(kind=kint) :: method = 1
