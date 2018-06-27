@@ -5,6 +5,12 @@ module mod_monolis_hash
 
   implicit none
 
+  private
+  public :: monolis_hash_init
+  public :: monolis_hash_finalize
+  public :: monolis_hash_get
+  public :: monolis_hash_push
+
   integer(kind=kint), save :: monolis_current_hash_size = 1
   integer(kind=kint), parameter :: monolis_hash_size(22) = (/&
   &     1021,     2039,      4093,      8191,     16381, &
@@ -41,6 +47,7 @@ contains
     monolis_hash_tree%tree_size = monolis_hash_size(monolis_current_hash_size)
     allocate(bin(monolis_hash_tree%tree_size))
     monolis_hash_tree%bin => bin
+    nullfy(bin)
   end subroutine monolis_hash_init
 
   subroutine monolis_hash_finalize()
@@ -54,6 +61,7 @@ contains
       enddo
     enddo
     deallocate(monolis_hash_tree%bin)
+    nullfy(list)
   end subroutine monolis_hash_finalize
 
   subroutine monolis_hash_get(key, val, is_exist)
@@ -61,6 +69,7 @@ contains
     integer(kind=kint) :: key, hash, index, val
     logical :: is_exist
 
+    val = 0
     is_exist = .false.
     call monolis_hash_key(key, hash)
     index = mod(hash, monolis_hash_tree%tree_size)
@@ -165,6 +174,7 @@ contains
     if(associated(old_list)) deallocate(old_list)
   end subroutine monolis_hash_list_push
 
+  !> BJD2 hash function
   subroutine monolis_hash_key(key, hash)
     implicit none
     integer(kind=kint) :: key, hash
