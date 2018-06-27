@@ -18,7 +18,7 @@ extern void monolis_convert_full_matrix_c_(int Nf, int NDOFf, double *Af, double
   int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
   int *indexU, int *indexL, int *itemU, int *itemL);
 
-extern void monolis_convert_coo_matrix_c_(int Nf, int NDOFf, double *Af, int *indexI, int *indexJ,
+extern void monolis_convert_coo_matrix_c_(int Nf, int NZf, int NDOFf, double *Af, int *indexI, int *indexJ,
   int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
   int *indexU, int *indexL, int *itemU, int *itemL);
 

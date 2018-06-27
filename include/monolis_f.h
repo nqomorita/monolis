@@ -91,7 +91,7 @@ interface
 end interface
 
 interface
-  subroutine monolis_convert_coo_matrix(Nf, NDOFf, Af, indexI, indexJ, &
+  subroutine monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
     & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
     use mod_monolis_prm
     use mod_monolis_convert
@@ -104,11 +104,11 @@ interface
     integer(kind=kint), pointer :: indexL(:)
     integer(kind=kint), pointer :: itemU(:)
     integer(kind=kint), pointer :: itemL(:)
-    integer(kind=kint) :: Nf, NDOFf
+    integer(kind=kint) :: Nf, NZf, NDOFf
     integer(kind=kint) :: N, NDOF, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in
 
-    call  monolis_convert_coo_matrix_main(Nf, NDOFf, Af, indexI, indexJ, &
+    call  monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
     & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
   end subroutine monolis_convert_coo_matrix
 end interface
