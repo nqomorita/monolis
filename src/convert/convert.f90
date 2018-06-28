@@ -92,7 +92,6 @@ contains
         endif
       enddo
     enddo
-
   end subroutine monolis_convert_full_matrix_main
 
   subroutine monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
@@ -166,18 +165,17 @@ contains
         id = id + 1
         itemL(id) = nj
         do k = 1, NDOF2
-          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          D(NDOF2*(il-1) + k) = D(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
         enddo
       endif
       if(nj < ni)then
         iu = iu + 1
         itemU(il) = nj
         do k = 1, NDOF2
-          AU(NDOF2*(il-1) + k) = AU(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
         enddo
       endif
     enddo
-
   end subroutine monolis_convert_coo_matrix_main
 
   subroutine monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
@@ -193,8 +191,80 @@ contains
     integer(kind=kint), pointer :: itemL(:)
     integer(kind=kint), pointer :: item(:)
     integer(kind=kint) :: Nf, NDOFf
-    integer(kind=kint) :: N, NDOF, NPU, NPL
-    integer(kind=kint) :: i, j, k, jS, jE, in
+    integer(kind=kint) :: N, NDOF, NDOF2, NPU, NPL
+    integer(kind=kint) :: i, j, k, jS, jE, in, id, iu, il
 
+    allocate(indexU(0:Nf))
+    allocate(indexL(0:Nf))
+    indexU = 0
+    indexL = 0
+
+    N = Nf
+    NDOF = NDOFf
+    NDOF2 = NDOFf*NDOFf
+    do i = 1, N
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(in < i)then
+          indexU(i) = indexU(i) + 1
+        endif
+        !if(in == i)
+        if(i < in)then
+          indexL(i) = indexL(i) + 1
+        endif
+      enddo
+    enddo
+
+    do i = 1, N
+      indexL(i) = indexL(i-1) + indexL(i)
+      indexU(i) = indexU(i-1) + indexU(i)
+    enddo
+
+    NPL = indexL(N)
+    NPU = indexU(N)
+    allocate(itemL(NPL))
+    allocate(itemU(NPU))
+    allocate(D(NDOF2*N))
+    allocate(AL(NDOF2*NPL))
+    allocate(AU(NDOF2*NPU))
+    itemL = 0
+    itemU = 0
+    D = 0.0d0
+    AL = 0.0d0
+    AU = 0.0d0
+
+    il = 0
+    id = 0
+    iu = 0
+    do i = 1, N
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(in < i)then
+          il = il + 1
+          itemL(il) = in
+          do k = 1, NDOF2
+            AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          enddo
+        endif
+        if(i == in)then
+          id = id + 1
+          itemL(id) = in
+          do k = 1, NDOF2
+            D(NDOF2*(il-1) + k) = D(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          enddo
+        endif
+        if(i < in)then
+          iu = iu + 1
+          itemU(il) = in
+          do k = 1, NDOF2
+            AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          enddo
+        endif
+      enddo
+    enddo
   end subroutine monolis_convert_csr_matrix_main
 end module mod_monolis_convert
