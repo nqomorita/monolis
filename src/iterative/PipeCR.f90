@@ -25,17 +25,8 @@ contains
     real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta, phi, utol
     real(kind=kdouble) :: buf(3), CG(3)
-    real(kind=kdouble), allocatable :: W(:,:)
+    real(kind=kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    integer(kind=kint), parameter :: R = 1
-    integer(kind=kint), parameter :: U = 2
-    integer(kind=kint), parameter :: V = 3
-    integer(kind=kint), parameter :: Q = 4
-    integer(kind=kint), parameter :: P = 5
-    integer(kind=kint), parameter :: Z = 6
-    integer(kind=kint), parameter :: L = 7
-    integer(kind=kint), parameter :: M = 8
-    integer(kind=kint), parameter :: S = 9
     logical :: is_converge
 
     t1 = monolis_wtime()
@@ -46,32 +37,38 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
-
-    allocate(W(NDOF*NP, 9))
-    W = 0.0d0
-
     iter_RR = 50
     tol = monoPRM%tol
 
-    call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+    allocate(R(NDOF*NP)); R = 0.0d0
+    allocate(U(NDOF*NP)); U = 0.0d0
+    allocate(V(NDOF*NP)); V = 0.0d0
+    allocate(Q(NDOF*NP)); Q = 0.0d0
+    allocate(P(NDOF*NP)); P = 0.0d0
+    allocate(Z(NDOF*NP)); Z = 0.0d0
+    allocate(L(NDOF*NP)); L = 0.0d0
+    allocate(M(NDOF*NP)); M = 0.0d0
+    allocate(S(NDOF*NP)); S = 0.0d0
+
+    call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
-    call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,U), W(:,U), U2, tcomm)
-    call monolis_matvec(monoCOM, monoMAT, W(:,U), W(:,V), tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
+    call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
+    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, U, U, U2, tcomm)
+    call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)
 
     phi  = dsqrt(R2/U2)
     utol = tol/phi
 
     do iter=1, monoPRM%maxiter
-      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,V), W(:,M))
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)
 
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,V), W(:,U), CG(1))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,V), W(:,M), CG(2))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,U), W(:,U), CG(3))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, V, U, CG(1))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, V, M, CG(2))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, U, U, CG(3))
       call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
-      call monolis_matvec(monoCOM, monoMAT, W(:,M), W(:,L), tcomm)
+      call monolis_matvec(monoCOM, monoMAT, M, L, tcomm)
 
       !call monolis_wait(requests, statuses)
       !gamma = buf(1)
@@ -90,20 +87,20 @@ contains
       endif
 
       do i = 1, NNDOF
-         W(i,Z) = W(i,L) + beta * W(i,Z)
-         W(i,Q) = W(i,M) + beta * W(i,Q)
-         W(i,P) = W(i,U) + beta * W(i,P)
-         X(i)   = X(i)   + alpha * W(i,P)
+         Z(i) = L(i) + beta*Z(i)
+         Q(i) = M(i) + beta*Q(i)
+         P(i) = U(i) + beta*P(i)
+         X(i) = X(i) + alpha*P(i)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
-        call monolis_precond_apply(monoPRM, monoCOM, monoMAT, W(:,R), W(:,U))
-        call monolis_matvec(monoCOM, monoMAT, W(:,U), W(:,V), tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
+        call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
+        call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)
       else
         do i = 1, NNDOF
-          W(i,U) = W(i,U) - alpha * W(i,Q)
-          W(i,V) = W(i,V) - alpha * W(i,Z)
+          U(i) = U(i) - alpha*Q(i)
+          V(i) = V(i) - alpha*Z(i)
         enddo
       endif
 
@@ -117,7 +114,15 @@ contains
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
-    deallocate(W)
+    deallocate(R)
+    deallocate(U)
+    deallocate(V)
+    deallocate(Q)
+    deallocate(P)
+    deallocate(Z)
+    deallocate(L)
+    deallocate(M)
+    deallocate(S)
 
     t2 = monolis_wtime()
     tsol = t2 - t1

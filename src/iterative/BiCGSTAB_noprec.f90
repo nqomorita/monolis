@@ -22,16 +22,8 @@ contains
     real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, rho, rho1, c2, omega
     real(kind=kdouble) :: CG(2)
-    real(kind=kdouble), allocatable :: W(:,:)
+    real(kind=kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
     real(kind=kdouble), pointer :: B(:), X(:)
-    integer(kind=kint), parameter :: R  = 1
-    integer(kind=kint), parameter :: RT = 2
-    integer(kind=kint), parameter :: P  = 3
-    integer(kind=kint), parameter :: PT = 4
-    integer(kind=kint), parameter :: S  = 5
-    integer(kind=kint), parameter :: ST = 1
-    integer(kind=kint), parameter :: T  = 6
-    integer(kind=kint), parameter :: V  = 7
     logical :: is_converge
 
     t1 = monolis_wtime()
@@ -42,63 +34,68 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
-
-    allocate(W(NDOF*NP,7))
-    W = 0.0d0
-
     iter_RR = 50
 
+    allocate(R (NDOF*NP)); R  = 0.0d0
+    allocate(RT(NDOF*NP)); RT = 0.0d0
+    allocate(P (NDOF*NP)); P  = 0.0d0
+    allocate(PT(NDOF*NP)); PT = 0.0d0
+    allocate(S (NDOF*NP)); S  = 0.0d0
+    allocate(ST(NDOF*NP)); ST = 0.0d0
+    allocate(T (NDOF*NP)); T  = 0.0d0
+    allocate(V (NDOF*NP)); V  = 0.0d0
+
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
-    call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
     do i = 1, NNDOF
-      W(i,RT) = W(i,R)
+      RT(i) = R(i)
     enddo
 
     do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,RT), rho, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, RT, rho, tcomm)
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
         do i = 1, NNDOF
-          W(i,P) = W(i,R) + beta * (W(i,P) - omega * W(i,V))
+          P(i) = R(i) + beta*(P(i) - omega*V(i))
         enddo
       else
         do i = 1, NNDOF
-          W(i,P) = W(i,R)
+          P(i) = R(i)
         enddo
       endif
 
-      call monolis_matvec(monoCOM, monoMAT, W(:,P), W(:,V), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,RT), W(:,V), c2, tcomm)
+      call monolis_matvec(monoCOM, monoMAT, P, V, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, RT, V, c2, tcomm)
 
       alpha = rho / c2
 
       do i = 1, NNDOF
-        W(i,S) = W(i,R) - alpha * W(i,V)
+        S(i) = R(i) - alpha*V(i)
       enddo
 
-      call monolis_matvec(monoCOM, monoMAT, W(:,S), W(:,T), tcomm)
+      call monolis_matvec(monoCOM, monoMAT, S, T, tcomm)
 
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,T), W(:,S), CG(1))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, W(:,T), W(:,T), CG(2))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, T, S, CG(1))
+      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, T, T, CG(2))
       call monolis_allreduce_R(2, CG, monolis_sum, monoCOM%comm)
 
       omega = CG(1) / CG(2)
 
       do i = 1, NNDOF
-        X(i) = X(i) + alpha*W(i,P) + omega*W(i,S)
+        X(i) = X(i) + alpha*P(i) + omega*S(i)
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
       else
         do i = 1, NNDOF
-          W(i,R) = W(i,S) - omega * W(i,T)
+          R(i) = S(i) - omega*T(i)
         enddo
       endif
 
-      call monolis_check_converge(monoPRM, monoCOM, monoMAT, W(:,R), iter, is_converge, tcomm)
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, iter, is_converge, tcomm)
       if(is_converge) exit
 
       rho1 = rho
@@ -106,7 +103,14 @@ contains
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
-    deallocate(W)
+    deallocate(R )
+    deallocate(RT)
+    deallocate(P )
+    deallocate(PT)
+    deallocate(S )
+    deallocate(ST)
+    deallocate(T )
+    deallocate(V )
 
     t2 = monolis_wtime()
     tsol = t2 - t1

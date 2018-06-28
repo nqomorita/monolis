@@ -26,8 +26,7 @@ contains
     real(kind=kdouble) :: tol, resid, R2, B2
     real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble), pointer :: B(:), X(:)
-    real(kind=kdouble), allocatable :: W(:,:)
-    integer(kind=kint), parameter :: R = 1
+    real(kind=kdouble), allocatable :: R(:)
     logical :: is_converge
 
     t1 = monolis_wtime()
@@ -39,11 +38,9 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X; X = 0.0d0
     B => monoMAT%B
-
-    allocate(W(NDOF*NP,1))
-    W = 0.0d0
-
     tol = monoPRM%tol
+
+    allocate(R(NDOF*NP)); R = 0.0d0
 
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_solver_SOR_setup(monoMAT)
@@ -51,8 +48,8 @@ contains
 
     do iter=1, monoPRM%maxiter
       call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tcomm)
-      call monolis_residual(monoCOM, monoMAT, X, B, W(:,R), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, W(:,R), W(:,R), R2, tcomm)
+      call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
+      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
@@ -61,7 +58,7 @@ contains
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)
 
-    deallocate(W)
+    deallocate(R)
     deallocate(ALU)
 
     t2 = monolis_wtime()
