@@ -80,8 +80,11 @@ subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%is_scaling = is_scaling
   monoPRM%is_reordering = .true.
 
+#ifdef DTEST_ALL
+  call monolis_solve_test(monoPRM, monoCOM, monoMAT)
+#else
   call monolis_solve(monoPRM, monoCOM, monoMAT)
-  !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
+#endif
 end subroutine monolis
 
 subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
@@ -141,8 +144,11 @@ subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%is_scaling = is_scaling
   monoPRM%is_reordering = .true.
 
+#ifdef DTEST_ALL
+  call monolis_solve_test(monoPRM, monoCOM, monoMAT)
+#else
   call monolis_solve(monoPRM, monoCOM, monoMAT)
-  !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
+#endif
 end subroutine monolis_serial
 
 subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
