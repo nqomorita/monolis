@@ -22,6 +22,12 @@ contains
     integer(kind=kint) :: i, j, k, jS, jE, iu, il
     real(kind=kdouble) :: thresh, temp
 
+    if(Nf < 1 .or. NDOFf < 1 .or. (.not. associated(Af)))then
+      stop "  ** monolis error: monolis_convert_full_matrix_main"
+    endif
+
+    if(associated(indexU)) deallocate(indexU)
+    if(associated(indexL)) deallocate(indexL)
     allocate(indexU(0:Nf))
     allocate(indexL(0:Nf))
     indexU = 0
@@ -50,6 +56,11 @@ contains
 
     NPL = indexL(N)
     NPU = indexU(N)
+    if(associated(itemL)) deallocate(itemL)
+    if(associated(itemU)) deallocate(itemU)
+    if(associated(D)) deallocate(D)
+    if(associated(AL)) deallocate(AL)
+    if(associated(AU)) deallocate(AU)
     allocate(itemL(NPL))
     allocate(itemU(NPU))
     allocate(D(NDOF2*N))
@@ -110,6 +121,13 @@ contains
     integer(kind=kint) :: N, NDOF, NPU, NPL, NDOF2
     integer(kind=kint) :: i, j, k, jS, jE, in, ni, nj, id, iu, il
 
+    if(Nf < 1 .or. NZf < 1 .or. (.not. associated(Af)) &
+      & .or. (.not. associated(indexI)) .or. (.not. associated(indexJ)))then
+      stop "  ** monolis error: monolis_convert_coo_matrix_main"
+    endif
+
+    if(associated(indexU)) deallocate(indexU)
+    if(associated(indexL)) deallocate(indexL)
     allocate(indexU(0:Nf))
     allocate(indexL(0:Nf))
     indexU = 0
@@ -137,6 +155,11 @@ contains
 
     NPL = indexL(N)
     NPU = indexU(N)
+    if(associated(itemL)) deallocate(itemL)
+    if(associated(itemU)) deallocate(itemU)
+    if(associated(D)) deallocate(D)
+    if(associated(AL)) deallocate(AL)
+    if(associated(AU)) deallocate(AU)
     allocate(itemL(NPL))
     allocate(itemU(NPU))
     allocate(D(NDOF2*N))
@@ -194,6 +217,13 @@ contains
     integer(kind=kint) :: N, NDOF, NDOF2, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in, id, iu, il
 
+    if(Nf < 1 .or. NDOFf < 1 .or. (.not. associated(Af)) &
+      & .or. (.not. associated(index)) .or. (.not. associated(item)))then
+      stop "  ** monolis error: monolis_convert_csr_matrix_main"
+    endif
+
+    if(associated(indexU)) deallocate(indexU)
+    if(associated(indexL)) deallocate(indexL)
     allocate(indexU(0:Nf))
     allocate(indexL(0:Nf))
     indexU = 0
@@ -224,6 +254,11 @@ contains
 
     NPL = indexL(N)
     NPU = indexU(N)
+    if(associated(itemL)) deallocate(itemL)
+    if(associated(itemU)) deallocate(itemU)
+    if(associated(D)) deallocate(D)
+    if(associated(AL)) deallocate(AL)
+    if(associated(AU)) deallocate(AU)
     allocate(itemL(NPL))
     allocate(itemU(NPU))
     allocate(D(NDOF2*N))
