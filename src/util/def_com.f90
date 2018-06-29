@@ -43,6 +43,16 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
 
+    if(associated(monoCOM%neib_pe)) deallocate(monoCOM%neib_pe)
+    if(associated(monoCOM%recv_index)) deallocate(monoCOM%recv_index)
+    if(associated(monoCOM%recv_item)) deallocate(monoCOM%recv_item)
+    if(associated(monoCOM%send_index)) deallocate(monoCOM%send_index)
+    if(associated(monoCOM%send_item)) deallocate(monoCOM%send_item)
+    monoCOM%neib_pe => null()
+    monoCOM%recv_index => null()
+    monoCOM%recv_item => null()
+    monoCOM%send_index => null()
+    monoCOM%send_item => null()
   end subroutine monolis_com_finalize
 
   subroutine monolis_com_copy(monoCOM, monoCOM_reorder)
