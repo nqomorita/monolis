@@ -1,12 +1,14 @@
 
 FLAG_MPI   = -DWITH_MPI
 FLAG_METIS = -DWITH_METIS
+FLAG_DDM   = -DOVER_DDM
+#FLAG_TEST  = -DTEST_ALL
 CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS)
 
 FC         = mpif90
 FFLAGS     = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
 
-METIS_DIR  = /Users/morita/
+METIS_DIR  = /Users/morita
 METIS_INC  = -I $(METIS_DIR)/include
 METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
@@ -15,15 +17,18 @@ MOD_DIR    = -J ./include
 LIBRARY    = $(METIS_LIB)
 BIN_DIR    = ./bin
 SRC_DIR    = ./src
+SMP_DIR    = ./sample
 OBJ_DIR    = ./obj
 LIB_DIR    = ./lib
 BIN_LIST   = monolis
 LIB_LIST   = libmonolis.a
+SMP_LIST   = hash_table/monolis_sample
 RM         = rm -r
 AR         = - ar ruv
 
 TARGET     = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
+SMPTARGET  = $(addprefix $(SMP_DIR)/, $(SMP_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 fillin.f90 transpose.f90 hash.f90
 SRC_LIST_CONV = convert.f90
@@ -34,17 +39,21 @@ SRC_LIST_DIRC = LU.f90
 SRC_LIST_ITER = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
 SRC_LIST_LIB  = monolis_solve.f90 monolis.f90 monolis_c.f90
 SRC_LIST_MAIN = main.f90
+SRC_LIST_SAMP = hash_table/main.f90
 
-SRC_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB)) $(addprefix main/, $(SRC_LIST_MAIN))
-SRC_LIST_AR = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_ALL_LIST_AR = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB))
+SRC_ALL_LIST_SAMP = $(SRC_LIST_SAMP)
 
-SOURCES    = $(addprefix $(SRC_DIR)/, $(SRC_LIST))
-SOURCES_AR = $(addprefix $(SRC_DIR)/, $(SRC_LIST_AR))
+SOURCES    = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
+SOURCES_AR = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST_AR))
+SAMPLE     = $(addprefix $(SMP_DIR)/, $(SRC_ALL_LIST_SAMP))
 
 OBJS    = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
 OBJS_AR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_AR:.f90=.o))
+SMPS    = $(subst $(SMP_DIR), $(SMP_DIR), $(SAMPLE:.f90=.o))
 
-all: $(TARGET) $(LIBTARGET)
+all: $(TARGET) $(LIBTARGET) $(SMPTARGET)
 
 $(TARGET): $(OBJS)
 	$(FC) -o $@ $(OBJS) $(LIBRARY)
@@ -52,13 +61,22 @@ $(TARGET): $(OBJS)
 $(LIBTARGET): $(OBJS_AR)
 	$(AR) $@ $(OBJS_AR)
 
+$(SMPTARGET): $(SMPS)
+	$(FC) -o $@ $(SMPS) $(LIBRARY) -L$(LIB_DIR) -lmonolis
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
+$(SMP_DIR)/%.o: $(SMP_DIR)/%.f90
+	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ -c $<
+
 clean:
-	$(RM) $(OBJS) $(TARGET) $(LIBTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(SMPS) $(TARGET) $(LIBTARGET) $(SMPTARGET) ./include/*.mod
 
 distclean:
-	$(RM) $(OBJS) $(TARGET) $(LIBTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(SMPS) $(TARGET) $(LIBTARGET) $(SMPTARGET) ./include/*.mod
+
+sampleclean:
+	$(RM) $(SMPTARGET)
 
 .PHONY: clean

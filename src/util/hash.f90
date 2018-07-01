@@ -84,6 +84,7 @@ contains
 
     is_exist  = .false.
     is_pushed = .false.
+
     if(0.75d0*dble(monolis_hash_size(monolis_current_hash_size)) < dble(monolis_hash_tree%n_put))then
       call monolis_hash_resize()
     endif
@@ -101,7 +102,7 @@ contains
   subroutine monolis_hash_resize()
     implicit none
     integer(kind=kint) :: i, j, n, hash, val
-    integer(kind=kint) :: new_size_id, new_size, old_size
+    integer(kind=kint) :: new_size, old_size
     type(type_monolis_hash_bin), pointer :: new_bin(:), old_bin(:), temp_bin
     type(type_monolis_hash_list), pointer :: list(:)
     character :: key*27
@@ -110,8 +111,7 @@ contains
     if(monolis_current_hash_size < 22)then
       monolis_current_hash_size = monolis_current_hash_size + 1
     endif
-    new_size_id = monolis_current_hash_size
-    new_size = monolis_hash_size(new_size_id)
+    new_size = monolis_hash_size(monolis_current_hash_size)
     monolis_hash_tree%tree_size = new_size
 
     allocate(new_bin(new_size))
@@ -119,7 +119,7 @@ contains
     monolis_hash_tree%bin => new_bin
 
     do i = 1, old_size
-      temp_bin => monolis_hash_tree%bin(i)
+      temp_bin => old_bin(i)
       temp_bin%list => old_bin(i)%list
       do j = 1, old_bin(i)%n
         hash = temp_bin%list(j)%hash
