@@ -22,13 +22,15 @@ OBJ_DIR    = ./obj
 LIB_DIR    = ./lib
 BIN_LIST   = monolis
 LIB_LIST   = libmonolis.a
-SMP_LIST   = hash_table/monolis_sample
+SMP1_LIST  = hash_table/monolis_sample
+SMP2_LIST  = matrix_market/monolis_sample
 RM         = rm -r
 AR         = - ar ruv
 
 TARGET     = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
-SMPTARGET  = $(addprefix $(SMP_DIR)/, $(SMP_LIST))
+SMP1TARGET  = $(addprefix $(SMP_DIR)/, $(SMP1_LIST))
+SMP2TARGET  = $(addprefix $(SMP_DIR)/, $(SMP2_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 fillin.f90 transpose.f90 hash.f90
 SRC_LIST_CONV = convert.f90
@@ -39,21 +41,23 @@ SRC_LIST_DIRC = LU.f90
 SRC_LIST_ITER = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
 SRC_LIST_LIB  = monolis_solve.f90 monolis.f90 monolis_c.f90
 SRC_LIST_MAIN = main.f90
-SRC_LIST_SAMP = hash_table/main.f90
+SRC_LIST_SMP1 = hash_table/main.f90
+SRC_LIST_SMP2 = matrix_market/main.f90
 
 SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_ALL_LIST_AR = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB))
-SRC_ALL_LIST_SAMP = $(SRC_LIST_SAMP)
 
 SOURCES    = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
 SOURCES_AR = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST_AR))
-SAMPLE     = $(addprefix $(SMP_DIR)/, $(SRC_ALL_LIST_SAMP))
+SAMPLE1    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP1))
+SAMPLE2    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP2))
 
 OBJS    = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
 OBJS_AR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_AR:.f90=.o))
-SMPS    = $(subst $(SMP_DIR), $(SMP_DIR), $(SAMPLE:.f90=.o))
+SMP1    = $(SAMPLE1:.f90=.o)
+SMP2    = $(SAMPLE2:.f90=.o)
 
-all: $(TARGET) $(LIBTARGET) $(SMPTARGET)
+all: $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET)
 
 $(TARGET): $(OBJS)
 	$(FC) -o $@ $(OBJS) $(LIBRARY)
@@ -61,8 +65,11 @@ $(TARGET): $(OBJS)
 $(LIBTARGET): $(OBJS_AR)
 	$(AR) $@ $(OBJS_AR)
 
-$(SMPTARGET): $(SMPS)
-	$(FC) -o $@ $(SMPS) $(LIBRARY) -L$(LIB_DIR) -lmonolis
+$(SMP1TARGET): $(SMP1)
+	$(FC) -o $@ $(SMP1) $(LIBRARY) -L$(LIB_DIR) -lmonolis
+
+$(SMP2TARGET): $(SMP2)
+	$(FC) -o $@ $(SMP2) $(LIBRARY) -L$(LIB_DIR) -lmonolis
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
@@ -71,12 +78,12 @@ $(SMP_DIR)/%.o: $(SMP_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ -c $<
 
 clean:
-	$(RM) $(OBJS) $(SMPS) $(TARGET) $(LIBTARGET) $(SMPTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(SMP1) $(SMP2) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) ./include/*.mod
 
 distclean:
-	$(RM) $(OBJS) $(SMPS) $(TARGET) $(LIBTARGET) $(SMPTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(SMP1) $(SMP2) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) ./include/*.mod
 
 sampleclean:
-	$(RM) $(SMPTARGET)
+	$(RM) $(SMP1) $(SMP2) $(SMP1TARGET) $(SMP2TARGET)
 
 .PHONY: clean
