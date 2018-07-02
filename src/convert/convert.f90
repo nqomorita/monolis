@@ -140,11 +140,11 @@ contains
       ni = indexI(i)
       nj = indexJ(i)
       if(ni < nj)then
-        indexL(i) = indexL(i) + 1
+        indexL(ni) = indexL(ni) + 1
       endif
       !if(i == j)
       if(nj < ni)then
-        indexU(i) = indexU(i) + 1
+        indexU(ni) = indexU(ni) + 1
       endif
     enddo
 
@@ -155,6 +155,8 @@ contains
 
     NPL = indexL(N)
     NPU = indexU(N)
+    if(NPL == 0) NPL = 1
+    if(NPU == 0) NPU = 1
     if(associated(itemL)) deallocate(itemL)
     if(associated(itemU)) deallocate(itemU)
     if(associated(D)) deallocate(D)
@@ -181,21 +183,21 @@ contains
         il = il + 1
         itemL(il) = nj
         do k = 1, NDOF2
-          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
       if(i == j)then
         id = id + 1
         itemL(id) = nj
         do k = 1, NDOF2
-          D(NDOF2*(il-1) + k) = D(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          D (NDOF2*(id-1) + k) = D (NDOF2*(id-1) + k) + dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
       if(nj < ni)then
         iu = iu + 1
-        itemU(il) = nj
+        itemU(iu) = nj
         do k = 1, NDOF2
-          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+          AU(NDOF2*(iu-1) + k) = AU(NDOF2*(iu-1) + k) + dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
     enddo
@@ -282,21 +284,21 @@ contains
           il = il + 1
           itemL(il) = in
           do k = 1, NDOF2
-            AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+            AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*(j-1) + k))
           enddo
         endif
         if(i == in)then
           id = id + 1
           itemL(id) = in
           do k = 1, NDOF2
-            D(NDOF2*(il-1) + k) = D(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+            D (NDOF2*(id-1) + k) = D (NDOF2*(id-1) + k) + dabs(Af(NDOF2*(j-1) + k))
           enddo
         endif
         if(i < in)then
           iu = iu + 1
-          itemU(il) = in
+          itemU(iu) = in
           do k = 1, NDOF2
-            AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+            AU(NDOF2*(iu-1) + k) = AU(NDOF2*(iu-1) + k) + dabs(Af(NDOF2*(j-1) + k))
           enddo
         endif
       enddo

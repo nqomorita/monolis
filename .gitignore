@@ -3,6 +3,7 @@
 *.DS_Store
 *.mod
 *.a
+*.mtx
 monolis
 monolis_sample
 
