@@ -65,12 +65,12 @@ interface
     integer(kind=kint), intent(in) :: maxiter
     real(kind=kdouble), intent(in) :: tol
     logical, intent(in) :: is_scaling
-  end subroutine monolis_wrapper
+  end subroutine monolis_serial
 end interface
 
 interface
   subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+    & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
     use mod_monolis_prm
     use mod_monolis_convert
     implicit none
@@ -84,15 +84,12 @@ interface
     integer(kind=kint) :: N, NDOF, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in
     real(kind=kdouble) :: thresh
-
-    call monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
   end subroutine monolis_convert_full_matrix
 end interface
 
 interface
   subroutine monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+    & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
     use mod_monolis_prm
     use mod_monolis_convert
     implicit none
@@ -107,15 +104,12 @@ interface
     integer(kind=kint) :: Nf, NZf, NDOFf
     integer(kind=kint) :: N, NDOF, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in
-
-    call  monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
   end subroutine monolis_convert_coo_matrix
 end interface
 
 interface
   subroutine monolis_convert_csr_matrix(Nf, NDOFf, Af, index, item, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+    & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
     use mod_monolis_prm
     use mod_monolis_convert
     implicit none
@@ -130,8 +124,5 @@ interface
     integer(kind=kint) :: Nf, NDOFf
     integer(kind=kint) :: N, NDOF, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in
-
-    call monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
   end subroutine monolis_convert_csr_matrix
 end interface

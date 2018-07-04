@@ -83,7 +83,7 @@ subroutine monolis_serial_c(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
 end subroutine monolis_serial_c
 
 subroutine monolis_convert_full_matrix_c(Nf, NDOFf, Af, thresh, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -99,11 +99,11 @@ subroutine monolis_convert_full_matrix_c(Nf, NDOFf, Af, thresh, &
   real(kind=kdouble) :: thresh
 
   call monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh,  &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_full_matrix_c
 
 subroutine monolis_convert_coo_matrix_c(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -120,11 +120,11 @@ subroutine monolis_convert_coo_matrix_c(Nf, NZf, NDOFf, Af, indexI, indexJ, &
   integer(kind=kint) :: i, j, k, jS, jE, in
 
   call monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_coo_matrix_c
 
 subroutine monolis_convert_csr_matrix_c(Nf, NDOFf, Af, index, item, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -141,5 +141,5 @@ subroutine monolis_convert_csr_matrix_c(Nf, NDOFf, Af, index, item, &
   integer(kind=kint) :: i, j, k, jS, jE, in
 
   call monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_csr_matrix_c

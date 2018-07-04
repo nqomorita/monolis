@@ -27,6 +27,7 @@ contains
   subroutine monolis_com_initialize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
+    integer(kind=kint) :: ierr, commsize, myrank
 
     monoCOM%myrank = 0
     monoCOM%comm = 0
@@ -37,6 +38,15 @@ contains
     monoCOM%recv_item => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
+
+#ifdef WITH_MPI
+    call MPI_init(ierr)
+    call MPI_comm_size(MPI_COMM_WORLD, commsize, ierr)
+    call MPI_comm_rank(MPI_COMM_WORLD, myrank,   ierr)
+    monoCOM%comm = MPI_COMM_WORLD
+    monoCOM%commsize = commsize
+    monoCOM%myrank = myrank
+#endif
   end subroutine monolis_com_initialize
 
   subroutine monolis_com_finalize(monoCOM)

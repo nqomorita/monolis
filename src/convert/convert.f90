@@ -9,7 +9,7 @@ contains
 
   subroutine monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh, &
     & N, NDOF, NPU, NPL, &
-    & D, AU, AL, indexU, indexL, itemU, itemL)
+    & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
     real(kind=kdouble), pointer :: Af(:)
     real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
@@ -85,19 +85,19 @@ contains
             il = il + 1
             itemL(il) = j
             do k = 1, NDOF2
-              AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              AL(NDOF2*(il-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
             enddo
           endif
           if(i == j)then
             do k = 1, NDOF2
-              D(NDOF2*(j-1) + k) = D(NDOF2*(j-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              D(NDOF2*(j-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
             enddo
           endif
           if(j <  i)then
             iu = iu + 1
             itemU(iu) = j
             do k = 1, NDOF2
-              AU(NDOF2*(iu-1) + k) = AU(NDOF2*(iu-1) + k) + dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              AU(NDOF2*(iu-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
             enddo
           endif
         endif
@@ -107,7 +107,7 @@ contains
 
   subroutine monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
     & N, NDOF, NPU, NPL, &
-    & D, AU, AL, indexU, indexL, itemU, itemL)
+    & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
     real(kind=kdouble), pointer :: Af(:)
     real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
@@ -139,11 +139,10 @@ contains
     do i = 1, NZf
       ni = indexI(i)
       nj = indexJ(i)
-      if(ni < nj)then
+      if(nj < ni)then
         indexL(ni) = indexL(ni) + 1
       endif
-      !if(i == j)
-      if(nj < ni)then
+      if(ni < nj)then
         indexU(ni) = indexU(ni) + 1
       endif
     enddo
@@ -165,8 +164,8 @@ contains
     allocate(itemL(NPL))
     allocate(itemU(NPU))
     allocate(D(NDOF2*N))
-    allocate(AL(NDOF2*NPL))
     allocate(AU(NDOF2*NPU))
+    allocate(AL(NDOF2*NPL))
     itemL = 0
     itemU = 0
     D = 0.0d0
@@ -179,25 +178,24 @@ contains
     do i = 1, NZf
       ni = indexI(i)
       nj = indexJ(i)
-      if(ni < nj)then
+      if(nj < ni)then
         il = il + 1
         itemL(il) = nj
         do k = 1, NDOF2
-          AL(NDOF2*(il-1) + k) = AL(NDOF2*(il-1) + k) + dabs(Af(NDOF2*(i-1) + k))
+          AL(NDOF2*(il-1) + k) = dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
-      if(i == j)then
+      if(ni == nj)then
         id = id + 1
-        itemL(id) = nj
         do k = 1, NDOF2
-          D (NDOF2*(id-1) + k) = D (NDOF2*(id-1) + k) + dabs(Af(NDOF2*(i-1) + k))
+          D (NDOF2*(id-1) + k) = dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
-      if(nj < ni)then
+      if(ni < nj)then
         iu = iu + 1
         itemU(iu) = nj
         do k = 1, NDOF2
-          AU(NDOF2*(iu-1) + k) = AU(NDOF2*(iu-1) + k) + dabs(Af(NDOF2*(i-1) + k))
+          AU(NDOF2*(iu-1) + k) =  dabs(Af(NDOF2*(i-1) + k))
         enddo
       endif
     enddo
@@ -205,7 +203,7 @@ contains
 
   subroutine monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
     & N, NDOF, NPU, NPL, &
-    & D, AU, AL, indexU, indexL, itemU, itemL)
+    & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
     real(kind=kdouble), pointer :: Af(:)
     real(kind=kdouble), pointer :: D(:), AU(:), AL(:)

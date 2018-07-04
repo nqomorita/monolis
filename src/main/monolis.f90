@@ -136,6 +136,11 @@ subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoCOM%comm = 0
   monoCOM%commsize = 0
   monoCOM%n_neib = 0
+  monoCOM%neib_pe => NULL()
+  monoCOM%recv_index => NULL()
+  monoCOM%recv_item  => NULL()
+  monoCOM%send_index => NULL()
+  monoCOM%send_item  => NULL()
   !> for monoPRM
   monoPRM%method = method
   monoPRM%precond = precond
@@ -143,6 +148,8 @@ subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   monoPRM%tol = tol
   monoPRM%is_scaling = is_scaling
   monoPRM%is_reordering = .true.
+
+  call monolis_com_initialize(monoCOM)
 
 #ifdef DTEST_ALL
   call monolis_solve_test(monoPRM, monoCOM, monoMAT)
@@ -152,7 +159,7 @@ subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
 end subroutine monolis_serial
 
 subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -168,11 +175,11 @@ subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
   real(kind=kdouble) :: thresh
 
   call monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_full_matrix
 
 subroutine monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -189,11 +196,11 @@ subroutine monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
   integer(kind=kint) :: i, j, k, jS, jE, in
 
   call  monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_coo_matrix
 
 subroutine monolis_convert_csr_matrix(Nf, NDOFf, Af, index, item, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
   use mod_monolis_prm
   use mod_monolis_convert
   implicit none
@@ -210,5 +217,5 @@ subroutine monolis_convert_csr_matrix(Nf, NDOFf, Af, index, item, &
   integer(kind=kint) :: i, j, k, jS, jE, in
 
   call monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
-  & N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL)
+  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 end subroutine monolis_convert_csr_matrix
