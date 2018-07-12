@@ -7,7 +7,14 @@ module mod_monolis_convert
 
 contains
 
-  subroutine monolis_convert_full_matrix_main(Nf, NDOFf, Af, thresh, &
+  subroutine monolis_convert_test(N) bind(c)
+    use iso_c_binding
+    implicit none
+    integer(c_int), value :: N
+    write(*,*)"N", N
+  end subroutine monolis_convert_test
+
+  subroutine monolis_convert_full_matrix(Nf, NDOFf, Af, thresh, &
     & N, NDOF, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
@@ -103,9 +110,9 @@ contains
         endif
       enddo
     enddo
-  end subroutine monolis_convert_full_matrix_main
+  end subroutine monolis_convert_full_matrix
 
-  subroutine monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
+  subroutine monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
     & N, NDOF, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
@@ -199,9 +206,9 @@ contains
         enddo
       endif
     enddo
-  end subroutine monolis_convert_coo_matrix_main
+  end subroutine monolis_convert_coo_matrix
 
-  subroutine monolis_convert_csr_matrix_main(Nf, NDOFf, Af, index, item, &
+  subroutine monolis_convert_csr_matrix(Nf, NDOFf, Af, index, item, &
     & N, NDOF, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
     implicit none
@@ -301,5 +308,5 @@ contains
         endif
       enddo
     enddo
-  end subroutine monolis_convert_csr_matrix_main
+  end subroutine monolis_convert_csr_matrix
 end module mod_monolis_convert

@@ -1,16 +1,11 @@
 program main
-  use mod_monolis_prm
-  use mod_monolis_com
-  use mod_monolis_mat
-  use mod_monolis_util
-  use mod_monolis_solve
-  use mod_monolis_convert
+  use mod_monolis
   implicit none
   type(monolis_prm) :: monoPRM
   type(monolis_com) :: monoCOM
   type(monolis_mat) :: monoMAT
   integer(kind=kint) :: i, j, N, NDOF, NPU, NPL, Nf, NZf, NDOFf
-  integer(kind=kint) :: method, precond, maxiter
+  integer(kind=kint) :: method, precond, maxiter, is_scaling
   integer(kind=kint), pointer :: indexI(:) => NULL()
   integer(kind=kint), pointer :: indexJ(:) => NULL()
   integer(kind=kint), pointer :: indexU(:) => NULL()
@@ -25,8 +20,8 @@ program main
   real(kind=kdouble), pointer :: B(:) => NULL()
   real(kind=kdouble) :: tol
   character :: ctemp*10
-  logical :: is_scaling
-  include "monolis_f.h"
+
+  write(*,"(a)")"* monolis coo_matrix test"
 
   !> reference: matrix market
   !> https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/bcsstruc2/bcsstk14.html
@@ -42,7 +37,7 @@ program main
   close(20)
 
   NDOFf = 1
-  call monolis_convert_coo_matrix_main(Nf, NZf, NDOFf, Af, indexI, indexJ, &
+  call monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
     & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 
   allocate(X(Nf))
@@ -54,7 +49,7 @@ program main
   precond = 1
   maxiter = 1000
   tol = 1.0d-8
-  is_scaling = .true.
+  is_scaling = 1
 
   call monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   & indexU, itemU, indexL, itemL, &

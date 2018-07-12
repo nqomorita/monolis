@@ -1,12 +1,12 @@
 program main
-  use mod_monolis_prm
-  use mod_monolis_hash
+  use mod_monolis
   implicit none
   integer(kind=kint) :: i, j, k, in, hash, val, ans
   character :: key*27
   logical :: is_exist, is_pushed
 
-  write(*,"(a)")"* monolis_hash_init"
+  write(*,"(a)")"* monolis hash test"
+  write(*,"(a)")"** monolis_hash_init"
   call monolis_hash_init()
 
   do i = iachar("a"), iachar("k")
@@ -35,6 +35,6 @@ program main
     enddo
   enddo
 
-  write(*,"(a)")"* monolis_hash_finalize"
+  write(*,"(a)")"** monolis_hash_finalize"
   call monolis_hash_finalize()
 end program main
