@@ -2,6 +2,37 @@
 #ifndef MONOLIS_H
 #define MONOLIS_H
 
+typedef struct {
+  int myrank, comm, commsize, n_neib;
+  int *neib_pe;
+  int *recv_index;
+  int *recv_item;
+  int *send_index;
+  int *send_item;
+} monolis_com;
+
+typedef struct {
+  int N, NP, NPU, NPL, NDOF;
+  int *indexU;
+  int *indexL;
+  int *itemU;
+  int *itemL;
+  double *D;
+  double *AU;
+  double *AL;
+  double *X;
+  double *B;
+} monolis_mat;
+
+typedef struct {
+  int method;
+  int precond;
+  int maxiter;
+  double tol;
+  //logical is_scaling
+  //logical is_reordering
+} monolis_prm;
+
 extern void monolis(int N, int NP, int NDOF, int NPU, int NPL,
   double *D, double *AU, double *AL, double *X, double *B,
   int *indexU, int *itemU, int *indexL, int *itemL,
