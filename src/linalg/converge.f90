@@ -20,6 +20,10 @@ contains
     real(kind=kdouble), optional :: tcomm
 
     call monolis_inner_product_R(monoCOM, monoMAT, monoMAT%NDOF, B, B, B2, tcomm)
+    if(B2 == 0.0d0)then
+      if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis error: bnorm ", B2
+      stop
+    endif
 
   end subroutine monolis_set_converge
 

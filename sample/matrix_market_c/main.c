@@ -39,15 +39,19 @@ int main(int argc, char *args[]) {
   itemU  = (int *)calloc(NPU, sizeof(int));
   itemL  = (int *)calloc(NPL, sizeof(int));
 
+  for (i=0; i<N*NDOF; i++){
+    B[i] = 1.0;
+  }
+
   monolis_convert_coo_get_matrix(&N, &NZ, &NDOF, Af, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
   precond = 1;
-  maxiter = 1000;
+  maxiter = 10;
   tol = 1.0e-8;
   is_scaling = 1;
 
-  //monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol, is_scaling);
+  monolis_serial(&N, &NDOF, &NPU, &NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &method, &precond, &maxiter, &tol, &is_scaling);
 
   /** monolis_finalize(monoPRM, monoCOM, monoMAT) **/
 

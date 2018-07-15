@@ -40,6 +40,11 @@ program main
   !call monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
   !  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 
+  call monolis_convert_coo_get_size(Nf, NZf, indexI, indexJ, NPU, NPL)
+
+  call monolis_convert_coo_get_matrix(N, NZ, NDOF, Af, indexI, indexJ, NPU, NPL, &
+       & D, AU, AL, indexU, itemU, indexL, itemL)
+
   allocate(X(Nf))
   allocate(B(Nf))
   X = 0.0d0
