@@ -54,6 +54,6 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
 
-    if(monoCOM%myrank == 0) write(*,"(a,i8,1p4e12.5)")" ** monolis solved:", 0, tsol, tspmv, tprec, tcomm
+    !if(monoCOM%myrank == 0) write(*,"(a,i8,1p4e12.5)")" ** monolis solved:", 0, tsol, tspmv, tprec, tcomm
   end subroutine monolis_timer_finalize
 end module mod_monolis_util
