@@ -29,8 +29,8 @@ typedef struct {
   int precond;
   int maxiter;
   double tol;
-  //logical is_scaling
-  //logical is_reordering
+  //bool is_scaling;
+  //bool is_reordering;
 } monolis_prm;
 
 extern void monolis(int N, int NP, int NDOF, int NPU, int NPL,
@@ -49,14 +49,16 @@ extern void monolis_convert_full_matrix(int Nf, int NDOFf, double *Af, double th
   int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
   int *indexU, int *itemU, int *indexL, int *itemL);
 
-extern void monolis_convert_coo_matrix(int Nf, int NZf, int NDOFf, double *Af, int *indexI, int *indexJ,
-  int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
+extern void monolis_convert_coo_get_size(int *Nf, int *NZf, int *indexI, int *indexJ, int *NPU, int *NPL);
+
+extern void monolis_convert_coo_get_matrix(int *Nf, int *NZf, int *NDOFf, double *Af, int *indexI, int *indexJ,
+  int *NPU, int *NPL, double *D, double *AU, double *AL,
   int *indexU, int *itemU, int *indexL, int *itemL);
 
 extern void monolis_convert_csr_matrix(int Nf, int NDOFf, double *Af, int *index, int *item,
   int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
   int *indexU, int *itemU, int *indexL, int *itemL);
 
-extern void monolis_convert_test(int N);
+extern void monolis_convert_test(int N, double *X, double *Y);
 
 #endif

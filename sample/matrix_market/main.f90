@@ -37,8 +37,8 @@ program main
   close(20)
 
   NDOFf = 1
-  call monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
-    & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
+  !call monolis_convert_coo_matrix(Nf, NZf, NDOFf, Af, indexI, indexJ, &
+  !  & N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL)
 
   allocate(X(Nf))
   allocate(B(Nf))
