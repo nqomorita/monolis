@@ -65,8 +65,8 @@ contains
     integer(kind=kint) :: i, in, jn, jo, j
     do i = 1, N
       in = iperm(i)
-      jn = (i -1)*NDOF
-      jo = (in-1)*NDOF
+      jn = (in-1)*NDOF
+      jo = (i -1)*NDOF
       do j = 1, NDOF
         B(jn + j) = A(jo + j)
       enddo
