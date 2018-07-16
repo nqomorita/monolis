@@ -59,10 +59,39 @@ int main(int argc, char *args[]) {
   tol = 1.0e-8;
   is_scaling = 1;
 
+/*
+  printf("* indexU\n");
+  for (i=0; i<N+1; i++){
+    printf("%d ", indexU[i]);
+  }
+  printf("\n");
+
+  printf("* indexL\n");
+  for (i=0; i<N+1; i++){
+    printf("%d ", indexL[i]);
+  }
+  printf("\n");
+
+  printf("* itemU\n");
+  for (i=0; i<NPU; i++){
+    printf("%d ", itemU[i]);
+  }
+  printf("\n");
+
+  printf("* itemL\n");
+  for (i=0; i<NPL; i++){
+    printf("%d ", itemL[i]);
+  }
+  printf("\n");
+*/
+
   monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol, is_scaling);
 
   printf("* monolis result\n");
-  printf("%f %f %f\n", X[0], X[1], X[2]);
+  for (i=0; i<N; i++){
+    printf("%f ", X[i]);
+  }
+  printf("\n");
 
   for (i=0; i<N*NDOF; i++){
     B[i] = 0.0;
@@ -70,8 +99,11 @@ int main(int argc, char *args[]) {
 
   monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
 
-  printf("* monolis result\n");
-  printf("%f %f %f\n", B[0], B[1], B[2]);
+  printf("* monolis result B\n");
+  for (i=0; i<N; i++){
+    printf("%f ", B[i]);
+  }
+  printf("\n");
 
   free(X);
   free(B);
