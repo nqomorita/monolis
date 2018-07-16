@@ -191,19 +191,19 @@ contains
       if(nj < ni)then
         il = il + 1
         do k = 1, NDOF2
-          AL(NDOF2*(il-1) + k) = dabs(A(NDOF2*(i-1) + k))
+          AL(NDOF2*(il-1) + k) = A(NDOF2*(i-1) + k)
         enddo
       endif
       if(ni == nj)then
         id = id + 1
         do k = 1, NDOF2
-          D (NDOF2*(id-1) + k) = dabs(A(NDOF2*(i-1) + k))
+          D (NDOF2*(id-1) + k) = A(NDOF2*(i-1) + k)
         enddo
       endif
       if(ni < nj)then
         iu = iu + 1
         do k = 1, NDOF2
-          AU(NDOF2*(iu-1) + k) =  dabs(A(NDOF2*(i-1) + k))
+          AU(NDOF2*(iu-1) + k) = A(NDOF2*(i-1) + k)
         enddo
       endif
     enddo
