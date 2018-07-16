@@ -51,11 +51,15 @@ contains
     indexJ => indexJ_c
     N = N_c
     NZ = NZ_c
+    indexI = indexI + 1
+    indexJ = indexJ + 1
 
     call monolis_convert_coo_get_size(N, NZ, indexI, indexJ, NPU, NPL)
 
     NPU_c = NPU
     NPL_c = NPL
+    indexI = indexI - 1
+    indexJ = indexJ - 1
   end subroutine monolis_convert_coo_get_size_c
 
   subroutine monolis_convert_coo_get_index(N, NZ, indexI, indexJ, NPU, NPL, indexU, itemU, indexL, itemL)
@@ -137,16 +141,20 @@ contains
     NZ = NZf_c
     NPU = NPU_c
     NPL = NPL_c
-
     indexI => indexI_c
     indexJ => indexJ_c
     indexU => indexU_c
     indexL => indexL_c
     itemU => itemU_c
     itemL => itemL_c
+    indexI = indexI + 1
+    indexJ = indexJ + 1
 
     call monolis_convert_coo_get_index(N, NZ, indexI, indexJ, NPU, NPL, &
          & indexU, itemU, indexL, itemL)
+
+    indexI = indexI - 1
+    indexJ = indexJ - 1
   end subroutine monolis_convert_coo_get_index_c
 
   subroutine monolis_convert_coo_update_matrix_entry(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
@@ -234,7 +242,6 @@ contains
     NDOF = NDOF_c
     NPU = NPU_c
     NPL = NPL_c
-
     A => A_c
     indexI => indexI_c
     indexJ => indexJ_c
@@ -245,8 +252,13 @@ contains
     indexL => indexL_c
     itemU => itemU_c
     itemL => itemL_c
+    indexI = indexI + 1
+    indexJ = indexJ + 1
 
     call monolis_convert_coo_update_matrix_entry(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
+
+    indexI = indexI - 1
+    indexJ = indexJ - 1
   end subroutine monolis_convert_coo_update_matrix_entry_c
 end module mod_monolis_convert_coo

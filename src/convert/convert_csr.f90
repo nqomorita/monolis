@@ -55,11 +55,13 @@ contains
     item  => item_c
     N  = N_c
     NZ = NZ_c
+    item = item + 1
 
     call monolis_convert_csr_get_size(N, NZ, index, item, NPU, NPL)
 
     NPU_c = NPU
     NPL_c = NPL
+    item = item - 1
   end subroutine monolis_convert_csr_get_size_c
 
   subroutine monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
@@ -153,8 +155,11 @@ contains
     indexL => indexL_c
     itemU => itemU_c
     itemL => itemL_c
+    item = item + 1
 
     call monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
+
+    item = item - 1
   end subroutine monolis_convert_csr_get_index_c
 
   subroutine monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
@@ -244,7 +249,6 @@ contains
     NDOF = NDOF_c
     NPU = NPU_c
     NPL = NPL_c
-
     A => A_c
     index => index_c
     item => item_c
@@ -255,9 +259,11 @@ contains
     indexL => indexL_c
     itemU => itemU_c
     itemL => itemL_c
+    item = item + 1
 
     call monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
 
+    item = item - 1
   end subroutine monolis_convert_csr_update_matrix_entry_c
 end module mod_monolis_convert_csr

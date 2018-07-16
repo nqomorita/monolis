@@ -72,6 +72,9 @@ extern void monolis_convert_csr_get_index(int N, int NZ, int *index, int *item,
 extern void monolis_convert_csr_update_matrix_entry(int N, int NZ, int NDOF, double *A, int *index, int *item,
   int NPU, int NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
 
+extern void monolis_matvec_serial(int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
+  int *indexU, int *itemU, int *indexL, int *itemL, double *X, double *B);
+
 #ifdef __cplusplus
 }
 #endif

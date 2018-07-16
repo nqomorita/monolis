@@ -106,6 +106,54 @@ contains
     enddo
   end subroutine monolis_matvec_nn
 
+  subroutine monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X_c, Y_c) &
+    & bind(c, name="monolis_matvec_serial")
+    use iso_c_binding
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(c_int), value   :: N, NDOF, NPU, NPL
+    integer(c_int), intent(in), target :: indexU(0:N)
+    integer(c_int), intent(in), target :: indexL(0:N)
+    integer(c_int), intent(in), target :: itemU(NPU)
+    integer(c_int), intent(in), target :: itemL(NPL)
+    real(c_double), intent(in), target :: D(N*NDOF*NDOF)
+    real(c_double), intent(in), target :: AU(NPU*NDOF*NDOF)
+    real(c_double), intent(in), target :: AL(NPL*NDOF*NDOF)
+    real(c_double), intent(in), target :: X_c(N*NDOF)
+    real(c_double), intent(out),target :: Y_c(N*NDOF)
+    real(kind=kdouble), pointer :: X(:), Y(:)
+
+    !> for monoMAT
+    monoMAT%N = N
+    monoMAT%NP = N
+    monoMAT%NPU = NPU
+    monoMAT%NPL = NPL
+    monoMAT%NDOF = NDOF
+    monoMAT%D  => D
+    monoMAT%AU => AU
+    monoMAT%AL => AL
+    monoMAT%indexU => indexU
+    monoMAT%indexL => indexL
+    monoMAT%itemU => itemU
+    monoMAT%itemL => itemL
+    !> for monoCOM
+    monoCOM%myrank = 0
+    monoCOM%comm = 0
+    monoCOM%commsize = 0
+    monoCOM%n_neib = 0
+    monoCOM%neib_pe => NULL()
+    monoCOM%recv_index => NULL()
+    monoCOM%recv_item  => NULL()
+    monoCOM%send_index => NULL()
+    monoCOM%send_item  => NULL()
+
+    X => X_c
+    Y => Y_c
+
+    call monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF)
+  end subroutine monolis_matvec_serial
+
   subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
