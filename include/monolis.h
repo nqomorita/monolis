@@ -2,6 +2,10 @@
 #ifndef MONOLIS_H
 #define MONOLIS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   int myrank, comm, commsize, n_neib;
   int *neib_pe;
@@ -67,5 +71,9 @@ extern void monolis_convert_csr_get_index(int N, int NZ, int *index, int *item,
 
 extern void monolis_convert_csr_update_matrix_entry(int N, int NZ, int NDOF, double *A, int *index, int *item,
   int NPU, int NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
