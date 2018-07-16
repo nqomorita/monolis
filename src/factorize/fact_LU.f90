@@ -3,6 +3,7 @@ module mod_monolis_fact_LU
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_fact_LU_33
+  use mod_monolis_fact_LU_nn
 
   implicit none
 
@@ -15,7 +16,8 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      !call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      call monolis_init_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
       stop "  ** monolis error: monolis_init_LU_inner"
     endif
@@ -28,7 +30,8 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      !call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      call monolis_fact_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
       stop "  ** monolis error: monolis_fact_LU_inner"
     endif
@@ -41,7 +44,8 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      !call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      call monolis_solv_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
       stop "  ** monolis error: monolis_solv_LU_inner"
     endif
@@ -54,7 +58,8 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      !call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
+      call monolis_clear_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
       stop "  ** monolis error: monolis_clear_LU_inner"
     endif
