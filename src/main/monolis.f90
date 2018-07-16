@@ -175,7 +175,7 @@ contains
     type(monolis_com), save :: monoCOM
     type(monolis_mat), save :: monoMAT
     !> for monoMAT
-    integer(c_int), intent(in) :: N, NDOF, NPU, NPL
+    integer(c_int), value   :: N, NDOF, NPU, NPL
     integer(c_int), intent(in), target :: indexU(0:N)
     integer(c_int), intent(in), target :: indexL(0:N)
     integer(c_int), intent(in), target :: itemU(NPU)
@@ -186,11 +186,8 @@ contains
     real(c_double), intent(in), target :: B(N*NDOF)
     real(c_double), intent(out),target :: X(N*NDOF)
     !> for monoPRM
-    integer(c_int), intent(in) :: method
-    integer(c_int), intent(in) :: precond
-    integer(c_int), intent(in) :: maxiter
-    integer(c_int), intent(in) :: is_scaling
-    real(c_double), intent(in) :: tol
+    integer(c_int), value :: method, precond, maxiter, is_scaling
+    real(c_double), value :: tol
 
     !> for monoMAT
     monoMAT%N = N

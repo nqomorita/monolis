@@ -40,7 +40,7 @@ contains
     implicit none
     integer(c_int), target :: indexI_c(NZ_c)
     integer(c_int), target :: indexJ_c(NZ_c)
-    integer(c_int) :: N_c, NZ_c
+    integer(c_int), value  :: N_c, NZ_c
     integer(c_int) :: NPU_c, NPL_c
     !> for fortran
     integer(kind=kint), pointer :: indexI(:) => null()
@@ -123,7 +123,7 @@ contains
     integer(c_int), target :: indexL_c(0:N_c)
     integer(c_int), target :: itemU_c(NPU_c)
     integer(c_int), target :: itemL_c(NPL_c)
-    integer(c_int) :: N_c, NZf_c, NPU_c, NPL_c
+    integer(c_int), value  :: N_c, NZf_c, NPU_c, NPL_c
     !> for fortran
     integer(kind=kint), pointer :: indexI(:) => null()
     integer(kind=kint), pointer :: indexJ(:) => null()
@@ -215,7 +215,7 @@ contains
     integer(c_int), target :: indexL_c(0:N_c)
     integer(c_int), target :: itemU_c(NPU_c)
     integer(c_int), target :: itemL_c(NPL_c)
-    integer(c_int) :: N_c, NZf_c, NDOF_c, NPU_c, NPL_c
+    integer(c_int), value  :: N_c, NZf_c, NDOF_c, NPU_c, NPL_c
     !> for fortran
     real(kind=kdouble), pointer :: A(:) => null()
     real(kind=kdouble), pointer :: D(:) => null()
