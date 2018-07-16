@@ -29,6 +29,7 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
 
+    call monolis_check_diagonal(monoMAT)
     call monolis_timer_initialize()
     call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
@@ -49,6 +50,7 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint) :: i, j
 
+    call monolis_check_diagonal(monoMAT)
     do i = 1, 9
       monoPRM%method = i
       do j = 1, 3

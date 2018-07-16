@@ -10,6 +10,7 @@ module mod_monolis_util
   public :: monolis_finalize
   public :: monolis_timer_initialize
   public :: monolis_timer_finalize
+  public :: monolis_check_diagonal
 
   !> tsol = tspmv + tprec + tcomm + others
   real(kind=kdouble) :: tsol  = 0.0d0
@@ -56,4 +57,21 @@ contains
 
     !if(monoCOM%myrank == 0) write(*,"(a,i8,1p4e12.5)")" ** monolis solved:", 0, tsol, tspmv, tprec, tcomm
   end subroutine monolis_timer_finalize
+
+  subroutine monolis_check_diagonal(monoMAT)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: i, j, in, N, NDOF, NDOF2
+
+    N =  monoMAT%N
+    NDOF  = monoMAT%NDOF
+    NDOF2 = NDOF*NDOF
+
+    do i = 1, N
+      do j = 1, NDOF
+        in = NDOF2*(i-1) + (NDOF+1)*(j-1) + 1
+        if(monoMAT%D(in) == 0.0d0) stop " ** monolis error: zero diagonal"
+      enddo
+    enddo
+  end subroutine monolis_check_diagonal
 end module mod_monolis_util
