@@ -40,21 +40,12 @@ program main
 
   call monolis_convert_csr_get_size(N, NZ, index, item, NPU, NPL)
 
-  allocate(X(N*NDOF))
-  allocate(B(N*NDOF))
-  allocate(D(N*NDOF*NDOF))
-  allocate(AU(NPU*NDOF*NDOF))
-  allocate(AL(NPL*NDOF*NDOF))
-  allocate(indexU(0:N))
-  allocate(indexL(0:N))
-  allocate(itemU(NPU))
-  allocate(itemL(NPL))
-  X = 0.0d0
-  B = 1.0d0
+  call monolis_convert_alloc_matrix(N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL, X, B)
 
   call monolis_convert_csr_get_matrix(N, NZ, NDOF, A, index, item, NPU, NPL, &
        & D, AU, AL, indexU, itemU, indexL, itemL)
 
+  B = 1.0d0
   method = 1
   precond = 1
   maxiter = 1000

@@ -5,8 +5,6 @@ module mod_monolis
   use mod_monolis_util
   use mod_monolis_solve
   use mod_monolis_convert
-  use mod_monolis_convert_coo
-  use mod_monolis_convert_csr
   use mod_monolis_hash
 
 contains

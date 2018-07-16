@@ -1,4 +1,4 @@
-module mod_monolis_convert
+module mod_monolis_convert_full
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -104,4 +104,4 @@ contains
       enddo
     enddo
   end subroutine monolis_convert_full_matrix
-end module mod_monolis_convert
+end module mod_monolis_convert_full

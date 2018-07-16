@@ -2,6 +2,20 @@
 #include <stdlib.h>
 #include "monolis.h"
 
+void monolis_convert_alloc_matrix_c(int N, int NDOF, int NPU, int NPL,
+  double *D, double *AU, double *AL, int *indexU, int *indexL, int *itemU, int *itemL, double *X, double *B)
+{
+  X = (double *)calloc(N*NDOF, sizeof(double));
+  B = (double *)calloc(N*NDOF, sizeof(double));
+  D  = (double *)calloc(N  *NDOF*NDOF, sizeof(double));
+  AU = (double *)calloc(NPU*NDOF*NDOF, sizeof(double));
+  AL = (double *)calloc(NPL*NDOF*NDOF, sizeof(double));
+  indexU = (int *)calloc(N+1, sizeof(int));
+  indexL = (int *)calloc(N+1, sizeof(int));
+  itemU  = (int *)calloc(NPU, sizeof(int));
+  itemL  = (int *)calloc(NPL, sizeof(int));
+}
+
 int main(int argc, char *args[]) {
   FILE *fp;
   char fname[] = "test.mtx";
@@ -29,6 +43,7 @@ int main(int argc, char *args[]) {
 
   monolis_convert_coo_get_size(&N, &NZ, indexI, indexJ, &NPU, &NPL);
 
+  //monolis_convert_alloc_matrix_c(N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL, X, B);
   X = (double *)calloc(N*NDOF, sizeof(double));
   B = (double *)calloc(N*NDOF, sizeof(double));
   D  = (double *)calloc(N  *NDOF*NDOF, sizeof(double));
@@ -39,11 +54,11 @@ int main(int argc, char *args[]) {
   itemU  = (int *)calloc(NPU, sizeof(int));
   itemL  = (int *)calloc(NPL, sizeof(int));
 
+  monolis_convert_coo_get_matrix(&N, &NZ, &NDOF, A, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+
   for (i=0; i<N*NDOF; i++){
     B[i] = 1.0;
   }
-
-  monolis_convert_coo_get_matrix(&N, &NZ, &NDOF, A, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
   precond = 1;
@@ -53,7 +68,15 @@ int main(int argc, char *args[]) {
 
   monolis_serial(&N, &NDOF, &NPU, &NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &method, &precond, &maxiter, &tol, &is_scaling);
 
-  /** monolis_finalize(monoPRM, monoCOM, monoMAT) **/
+  free(X);
+  free(B);
+  free(D);
+  free(AU);
+  free(AL);
+  free(indexU);
+  free(indexL);
+  free(itemU);
+  free(itemL);
 
   return 0;
 }
