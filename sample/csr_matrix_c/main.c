@@ -49,7 +49,9 @@ int main(int argc, char *args[]) {
     B[i] = 1.0;
   }
 
-  monolis_convert_csr_get_matrix(&N, &NZ, &NDOF, A, index, item, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+  monolis_convert_csr_get_index(&N, &NZ, index, item, &NPU, &NPL, indexU, itemU, indexL, itemL);
+
+  monolis_convert_csr_update_matrix_entry(&N, &NZ, &NDOF, A, index, item, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
   precond = 1;
@@ -60,6 +62,15 @@ int main(int argc, char *args[]) {
   monolis_serial(&N, &NDOF, &NPU, &NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, &method, &precond, &maxiter, &tol, &is_scaling);
 
   /** monolis_finalize(monoPRM, monoCOM, monoMAT) **/
+  free(X);
+  free(B);
+  free(D);
+  free(AU);
+  free(AL);
+  free(indexU);
+  free(indexL);
+  free(itemU);
+  free(itemL);
 
   return 0;
 }

@@ -36,6 +36,26 @@ contains
     itemU = 0
     itemL = 0
   end subroutine monolis_convert_alloc_matrix
+
+  subroutine monolis_convert_dealloc_matrix(D, AU, AL, indexU, indexL, itemU, itemL, X, B)
+    implicit none
+    real(kind=kdouble), pointer :: X(:), B(:)
+    real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+    integer(kind=kint), pointer :: indexU(:)
+    integer(kind=kint), pointer :: indexL(:)
+    integer(kind=kint), pointer :: itemU(:)
+    integer(kind=kint), pointer :: itemL(:)
+
+    deallocate(X)
+    deallocate(B)
+    deallocate(D)
+    deallocate(AU)
+    deallocate(AL)
+    deallocate(indexU)
+    deallocate(indexL)
+    deallocate(itemU)
+    deallocate(itemL)
+  end subroutine monolis_convert_dealloc_matrix
 end module mod_monolis_alloc_matrix
 
 module mod_monolis_convert

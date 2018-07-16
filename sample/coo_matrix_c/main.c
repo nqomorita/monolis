@@ -54,7 +54,9 @@ int main(int argc, char *args[]) {
   itemU  = (int *)calloc(NPU, sizeof(int));
   itemL  = (int *)calloc(NPL, sizeof(int));
 
-  monolis_convert_coo_get_matrix(&N, &NZ, &NDOF, A, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+  monolis_convert_coo_get_index(&N, &NZ, indexI, indexJ, &NPU, &NPL, indexU, itemU, indexL, itemL);
+
+  monolis_convert_coo_update_matrix_entry(&N, &NZ, &NDOF, A, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   for (i=0; i<N*NDOF; i++){
     B[i] = 1.0;

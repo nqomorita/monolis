@@ -45,20 +45,27 @@ extern void monolis_serial(int *N, int *NDOF, int *NPU, int *NPL,
   int *indexU, int *itemU, int *indexL, int *itemL,
   int *method, int *precond, int *maxiter, double *tol, int *is_scaling);
 
+/* monolis_convert_full section */
 extern void monolis_convert_full_matrix(int Nf, int NDOFf, double *Af, double thresh,
   int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
   int *indexU, int *itemU, int *indexL, int *itemL);
 
+/* monolis_convert_coo section */
 extern void monolis_convert_coo_get_size(int *N, int *NZ, int *indexI, int *indexJ, int *NPU, int *NPL);
 
-extern void monolis_convert_coo_get_matrix(int *N, int *NZ, int *NDOF, double *A, int *indexI, int *indexJ,
-  int *NPU, int *NPL, double *D, double *U, double *L,
-  int *indexU, int *itemU, int *indexL, int *itemL);
+extern void monolis_convert_coo_get_index(int *N, int *NZ, int *indexI, int *indexJ,
+  int *NPU, int *NPL, int *indexU, int *itemU, int *indexL, int *itemL);
 
+extern void monolis_convert_coo_update_matrix_entry(int *N, int *NZ, int *NDOF, double *A, int *indexI, int *indexJ,
+  int *NPU, int *NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
+
+/* monolis_convert_csr section */
 extern void monolis_convert_csr_get_size(int *N, int *NZ, int *index, int *item, int *NPU, int *NPL);
 
-extern void monolis_convert_csr_get_matrix(int *N, int *NZ, int *NDOF, double *A, int *index, int *item,
-  int *NPU, int *NPL, double *D, double *U, double *L,
-  int *indexU, int *itemU, int *indexL, int *itemL);
+extern void monolis_convert_csr_get_index(int *N, int *NZ, int *index, int *item,
+  int *NPU, int *NPL, int *indexU, int *itemU, int *indexL, int *itemL);
+
+extern void monolis_convert_csr_update_matrix_entry(int *N, int *NZ, int *NDOF, double *A, int *index, int *item,
+  int *NPU, int *NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
 
 #endif

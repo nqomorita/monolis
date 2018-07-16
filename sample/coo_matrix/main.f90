@@ -39,10 +39,9 @@ program main
   NDOF = 1
 
   call monolis_convert_coo_get_size(N, NZ, indexI, indexJ, NPU, NPL)
-
   call monolis_convert_alloc_matrix(N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL, X, B)
-
-  call monolis_convert_coo_get_matrix(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
+  call monolis_convert_coo_get_index(N, NZ, indexI, indexJ, NPU, NPL, indexU, itemU, indexL, itemL)
+  call monolis_convert_coo_update_matrix_entry(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
        & D, AU, AL, indexU, itemU, indexL, itemL)
 
   B = 1.0d0
@@ -56,5 +55,5 @@ program main
   & indexU, itemU, indexL, itemL, &
   & method, precond, maxiter, tol, is_scaling)
 
-  !call monolis_finalize(monoPRM, monoCOM, monoMAT)
+  call  monolis_convert_dealloc_matrix(D, AU, AL, indexU, indexL, itemU, itemL, X, B)
 end program main

@@ -61,26 +61,22 @@ contains
     NPL_c = NPL
   end subroutine monolis_convert_csr_get_size_c
 
-  subroutine monolis_convert_csr_get_matrix(N, NZ, NDOF, A, index, item, NPU, NPL, &
-    & D, AU, AL, indexU, itemU, indexL, itemL)
+  subroutine monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
     implicit none
-    real(kind=kdouble), pointer :: A(:)
-    real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
     integer(kind=kint), pointer :: indexU(:)
     integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: index(:)
     integer(kind=kint), pointer :: itemU(:)
     integer(kind=kint), pointer :: itemL(:)
+    integer(kind=kint), pointer :: index(:)
     integer(kind=kint), pointer :: item(:)
     integer(kind=kint) :: N, NZ, NDOF, NDOF2, NPU, NPL
     integer(kind=kint) :: i, j, k, jS, jE, in, id, iu, il
 
-    if(N < 1 .or. NDOF < 1 .or. (.not. associated(A)) &
+    if(N < 1 .or. NZ < 1 &
       & .or. (.not. associated(index)) .or. (.not. associated(item)))then
-      stop "  ** monolis error: monolis_convert_csr_matrix_main"
+      stop "  ** monolis error: monolis_convert_csr_get_index"
     endif
 
-    NDOF2 = NDOF*NDOF
     indexU = 0
     indexL = 0
 
@@ -105,6 +101,82 @@ contains
 
     itemL = 0
     itemU = 0
+
+    il = 0
+    id = 0
+    iu = 0
+    do i = 1, N
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(in < i)then
+          il = il + 1
+          itemL(il) = in
+        endif
+        if(i < in)then
+          iu = iu + 1
+          itemU(iu) = in
+        endif
+      enddo
+    enddo
+  end subroutine monolis_convert_csr_get_index
+
+  subroutine monolis_convert_csr_get_index_c(N_c, NZ_c, index_c, item_c, NPU_c, NPL_c, &
+    & indexU_c, itemU_c, indexL_c, itemL_c) bind(c, name="monolis_convert_csr_get_index")
+    use iso_c_binding
+    implicit none
+    integer(c_int), target :: index_c(0:N_c)
+    integer(c_int), target :: item_c(NZ_c)
+    integer(c_int), target :: indexU_c(0:N_c)
+    integer(c_int), target :: indexL_c(0:N_c)
+    integer(c_int), target :: itemU_c(NPU_c)
+    integer(c_int), target :: itemL_c(NPL_c)
+    integer(c_int) :: N_c, NZ_c, NDOF_c, NPU_c, NPL_c
+    !> for fortran
+    integer(kind=kint), pointer :: index(:) => null()
+    integer(kind=kint), pointer :: item(:) => null()
+    integer(kind=kint), pointer :: indexU(:) => null()
+    integer(kind=kint), pointer :: indexL(:) => null()
+    integer(kind=kint), pointer :: itemU(:) => null()
+    integer(kind=kint), pointer :: itemL(:) => null()
+    integer(kind=kint) :: N, NZ, NDOF, NPU, NPL
+
+    N = N_c
+    NZ = NZ_c
+    NDOF = NDOF_c
+    NPU = NPU_c
+    NPL = NPL_c
+    index => index_c
+    item => item_c
+    indexU => indexU_c
+    indexL => indexL_c
+    itemU => itemU_c
+    itemL => itemL_c
+
+    call monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
+  end subroutine monolis_convert_csr_get_index_c
+
+  subroutine monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
+    & D, AU, AL, indexU, itemU, indexL, itemL)
+    implicit none
+    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+    integer(kind=kint), pointer :: indexU(:)
+    integer(kind=kint), pointer :: indexL(:)
+    integer(kind=kint), pointer :: index(:)
+    integer(kind=kint), pointer :: itemU(:)
+    integer(kind=kint), pointer :: itemL(:)
+    integer(kind=kint), pointer :: item(:)
+    integer(kind=kint) :: N, NZ, NDOF, NDOF2, NPU, NPL
+    integer(kind=kint) :: i, j, k, jS, jE, in, id, iu, il
+
+    if(N < 1 .or. NZ < 1 .or. NDOF < 1 .or. (.not. associated(A)) &
+      & .or. (.not. associated(index)) .or. (.not. associated(item)))then
+      stop "  ** monolis error: monolis_convert_csr_update_matrix_entry"
+    endif
+
+    NDOF2 = NDOF*NDOF
     D = 0.0d0
     AL = 0.0d0
     AU = 0.0d0
@@ -119,7 +191,6 @@ contains
         in = item(j)
         if(in < i)then
           il = il + 1
-          itemL(il) = in
           do k = 1, NDOF2
             AL(NDOF2*(il-1) + k) = dabs(A(NDOF2*(j-1) + k))
           enddo
@@ -132,17 +203,16 @@ contains
         endif
         if(i < in)then
           iu = iu + 1
-          itemU(iu) = in
           do k = 1, NDOF2
             AU(NDOF2*(iu-1) + k) = dabs(A(NDOF2*(j-1) + k))
           enddo
         endif
       enddo
     enddo
-  end subroutine monolis_convert_csr_get_matrix
+  end subroutine monolis_convert_csr_update_matrix_entry
 
-  subroutine monolis_convert_csr_get_matrix_c(N_c, NZ_c, NDOF_c, A_c, index_c, item_c, NPU_c, NPL_c, &
-    & D_c, AU_c, AL_c, indexU_c, itemU_c, indexL_c, itemL_c) bind(c, name="monolis_convert_csr_get_matrix")
+  subroutine monolis_convert_csr_update_matrix_entry_c(N_c, NZ_c, NDOF_c, A_c, index_c, item_c, NPU_c, NPL_c, &
+    & D_c, AU_c, AL_c, indexU_c, itemU_c, indexL_c, itemL_c) bind(c, name="monolis_convert_csr_update_matrix_entry")
     use iso_c_binding
     implicit none
     real(c_double), target :: A_c(NZ_c*NDOF_c*NDOF_c)
@@ -186,8 +256,8 @@ contains
     itemU => itemU_c
     itemL => itemL_c
 
-    call monolis_convert_csr_get_matrix(N, NZ, NDOF, A, index, item, NPU, NPL, &
+    call monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
 
-  end subroutine monolis_convert_csr_get_matrix_c
+  end subroutine monolis_convert_csr_update_matrix_entry_c
 end module mod_monolis_convert_csr
