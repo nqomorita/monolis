@@ -17,7 +17,7 @@ contains
 
     if(Nf < 1 .or. NZf < 1 &
       & .or. (.not. associated(indexI)) .or. (.not. associated(indexJ)))then
-      stop "  ** monolis error: monolis_convert_coo_matrix_main"
+      stop "  ** monolis error: monolis_convert_coo_get_size"
     endif
 
     NPL = 0
@@ -34,26 +34,25 @@ contains
     enddo
   end subroutine monolis_convert_coo_get_size
 
-  subroutine monolis_convert_coo_get_size_c(N_c, NZf_c, indexI_c, indexJ_c, &
+  subroutine monolis_convert_coo_get_size_c(N_c, NZ_c, indexI_c, indexJ_c, &
     & NPU_c, NPL_c) bind(c, name="monolis_convert_coo_get_size")
     use iso_c_binding
     implicit none
-    integer(c_int), target :: indexI_c(NZf_c)
-    integer(c_int), target :: indexJ_c(NZf_c)
-    integer(c_int) :: N_c, NZf_c
+    integer(c_int), target :: indexI_c(NZ_c)
+    integer(c_int), target :: indexJ_c(NZ_c)
+    integer(c_int) :: N_c, NZ_c
     integer(c_int) :: NPU_c, NPL_c
     !> for fortran
     integer(kind=kint), pointer :: indexI(:) => null()
     integer(kind=kint), pointer :: indexJ(:) => null()
-    integer(kind=kint) :: Nf, NZf, NDOFf
-    integer(kind=kint) :: N, NDOF, NPU, NPL, NDOF2
+    integer(kind=kint) :: N, NZ, NDOF, NPU, NPL, NDOF2
 
     indexI => indexI_c
     indexJ => indexJ_c
-    Nf = N_c
-    NZf = NZf_c
+    N = N_c
+    NZ = NZ_c
 
-    call monolis_convert_coo_get_size(Nf, NZf, indexI, indexJ, NPU, NPL)
+    call monolis_convert_coo_get_size(N, NZ, indexI, indexJ, NPU, NPL)
 
     NPU_c = NPU
     NPL_c = NPL
@@ -133,11 +132,11 @@ contains
     enddo
   end subroutine monolis_convert_coo_get_matrix
 
-  subroutine monolis_convert_coo_get_matrix_c(N_c, NZf_c, NDOF_c, Af_c, indexI_c, indexJ_c, NPU_c, NPL_c, &
+  subroutine monolis_convert_coo_get_matrix_c(N_c, NZf_c, NDOF_c, A_c, indexI_c, indexJ_c, NPU_c, NPL_c, &
     & D_c, AU_c, AL_c, indexU_c, itemU_c, indexL_c, itemL_c) bind(c, name="monolis_convert_coo_get_matrix")
     use iso_c_binding
     implicit none
-    real(c_double), target :: Af_c(NZf_c)
+    real(c_double), target :: A_c(NZf_c)
     integer(c_int), target :: indexI_c(NZf_c)
     integer(c_int), target :: indexJ_c(NZf_c)
     real(c_double), target :: D_c (N_c  *NDOF_c*NDOF_c)
@@ -149,7 +148,7 @@ contains
     integer(c_int), target :: itemL_c(NPL_c)
     integer(c_int) :: N_c, NZf_c, NDOF_c, NPU_c, NPL_c
     !> for fortran
-    real(kind=kdouble), pointer :: Af(:) => null()
+    real(kind=kdouble), pointer :: A(:) => null()
     real(kind=kdouble), pointer :: D(:) => null()
     real(kind=kdouble), pointer :: AU(:) => null()
     real(kind=kdouble), pointer :: AL(:) => null()
@@ -167,7 +166,7 @@ contains
     NPU = NPU_c
     NPL = NPL_c
 
-    Af => Af_c
+    A => A_c
     indexI => indexI_c
     indexJ => indexJ_c
     D  => D_c
@@ -178,7 +177,7 @@ contains
     itemU => itemU_c
     itemL => itemL_c
 
-    call monolis_convert_coo_get_matrix(N, NZ, NDOF, Af, indexI, indexJ, NPU, NPL, &
+    call monolis_convert_coo_get_matrix(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
     & D, AU, AL, indexU, itemU, indexL, itemL)
 
   end subroutine monolis_convert_coo_get_matrix_c

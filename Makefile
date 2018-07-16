@@ -27,6 +27,8 @@ LIB_LIST   = libmonolis.a
 SMP1_LIST  = hash_table/monolis_sample
 SMP2_LIST  = matrix_market/monolis_sample
 SMP3_LIST  = matrix_market_c/monolis_sample
+SMP4_LIST  = csr_matrix/monolis_sample
+SMP5_LIST  = csr_matrix_c/monolis_sample
 RM         = rm -r
 AR         = - ar ruv
 
@@ -35,9 +37,11 @@ LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 SMP1TARGET  = $(addprefix $(SMP_DIR)/, $(SMP1_LIST))
 SMP2TARGET  = $(addprefix $(SMP_DIR)/, $(SMP2_LIST))
 SMP3TARGET  = $(addprefix $(SMP_DIR)/, $(SMP3_LIST))
+SMP4TARGET  = $(addprefix $(SMP_DIR)/, $(SMP4_LIST))
+SMP5TARGET  = $(addprefix $(SMP_DIR)/, $(SMP5_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 fillin.f90 transpose.f90 hash.f90
-SRC_LIST_CONV = convert.f90 convert_coo.f90
+SRC_LIST_CONV = convert.f90 convert_coo.f90 convert_csr.f90
 SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 converge.f90 scaling.f90 restruct.f90 reorder.f90
 SRC_LIST_FACT = 33/fact_LU_33.f90 fact_LU.f90
 SRC_LIST_PREC = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 precond.f90
@@ -48,6 +52,8 @@ SRC_LIST_MAIN = main.f90
 SRC_LIST_SMP1 = hash_table/main.f90
 SRC_LIST_SMP2 = matrix_market/main.f90
 SRC_LIST_SMP3 = matrix_market_c/main.c
+SRC_LIST_SMP4 = csr_matrix/main.f90
+SRC_LIST_SMP5 = csr_matrix_c/main.c
 
 SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_ALL_LIST_AR = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB))
@@ -57,14 +63,18 @@ SOURCES_AR = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST_AR))
 SAMPLE1    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP1))
 SAMPLE2    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP2))
 SAMPLE3    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP3))
+SAMPLE4    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP4))
+SAMPLE5    = $(addprefix $(SMP_DIR)/, $(SRC_LIST_SMP5))
 
 OBJS    = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
 OBJS_AR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_AR:.f90=.o))
 SMP1    = $(SAMPLE1:.f90=.o)
 SMP2    = $(SAMPLE2:.f90=.o)
 SMP3    = $(SAMPLE3:.c=.o)
+SMP4    = $(SAMPLE4:.f90=.o)
+SMP5    = $(SAMPLE5:.c=.o)
 
-all: $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET)
+all: $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET) $(SMP4TARGET) $(SMP5TARGET)
 
 $(TARGET): $(OBJS)
 	$(FC) -o $@ $(OBJS) $(LIBRARY)
@@ -81,6 +91,12 @@ $(SMP2TARGET): $(SMP2)
 $(SMP3TARGET): $(SMP3)
 	$(FC) -o $@ $(SMP3) $(LIBRARY) -L$(LIB_DIR) -lmonolis
 
+$(SMP4TARGET): $(SMP4)
+	$(FC) -o $@ $(SMP4) $(LIBRARY) -L$(LIB_DIR) -lmonolis
+
+$(SMP5TARGET): $(SMP5)
+	$(FC) -o $@ $(SMP5) $(LIBRARY) -L$(LIB_DIR) -lmonolis
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
@@ -91,12 +107,12 @@ $(SMP_DIR)/%.o: $(SMP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
-	$(RM) $(OBJS) $(SMP1) $(SMP2) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET) ./include/*.mod
+	$(RM) $(OBJS) $(SMP1) $(SMP2) $(SMP3) $(SMP4) $(SMP5) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET) $(SMP4TARGET) $(SMP5TARGET) ./include/*.mod
 
 distclean:
-	$(RM) $(OBJS) $(SMP1) $(SMP2) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET)  ./include/*.mod
+	$(RM) $(OBJS) $(SMP1) $(SMP2) $(SMP3) $(SMP4) $(SMP5) $(TARGET) $(LIBTARGET) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET) $(SMP4TARGET) $(SMP5TARGET) ./include/*.mod
 
 sampleclean:
-	$(RM) $(SMP1) $(SMP2) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET)
+	$(RM) $(SMP1) $(SMP2) $(SMP3) $(SMP4) $(SMP5) $(SMP1TARGET) $(SMP2TARGET) $(SMP3TARGET) $(SMP4TARGET) $(SMP5TARGET)
 
 .PHONY: clean

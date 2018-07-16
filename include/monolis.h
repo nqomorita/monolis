@@ -51,14 +51,14 @@ extern void monolis_convert_full_matrix(int Nf, int NDOFf, double *Af, double th
 
 extern void monolis_convert_coo_get_size(int *N, int *NZ, int *indexI, int *indexJ, int *NPU, int *NPL);
 
-extern void monolis_convert_coo_get_matrix(int *N, int *NZ, int *NDOF, double *Af, int *indexI, int *indexJ,
+extern void monolis_convert_coo_get_matrix(int *N, int *NZ, int *NDOF, double *A, int *indexI, int *indexJ,
   int *NPU, int *NPL, double *D, double *AU, double *AL,
   int *indexU, int *itemU, int *indexL, int *itemL);
 
-extern void monolis_convert_csr_matrix(int Nf, int NDOFf, double *Af, int *index, int *item,
-  int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
-  int *indexU, int *itemU, int *indexL, int *itemL);
+extern void monolis_convert_csr_get_size(int *N, int *NZ, int *index, int *item, int *NPU, int *NPL);
 
-extern void monolis_convert_test(int N, double *X, double *Y);
+extern void monolis_convert_csr_get_matrix(int *N, int *NZ, int *NDOF, double *A, int *index, int *item,
+  int *NPU, int *NPL, double *D, double *AU, double *AL,
+  int *indexU, int *itemU, int *indexL, int *itemL);
 
 #endif

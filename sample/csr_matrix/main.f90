@@ -4,10 +4,10 @@ program main
   type(monolis_prm) :: monoPRM
   type(monolis_com) :: monoCOM
   type(monolis_mat) :: monoMAT
-  integer(kind=kint) :: i, j, N, NDOF, NPU, NPL, NZ
+  integer(kind=kint) :: i, j, N, NZ, NDOF, NPU, NPL
   integer(kind=kint) :: method, precond, maxiter, is_scaling
-  integer(kind=kint), pointer :: indexI(:) => NULL()
-  integer(kind=kint), pointer :: indexJ(:) => NULL()
+  integer(kind=kint), pointer :: index(:) => NULL()
+  integer(kind=kint), pointer :: item(:) => NULL()
   integer(kind=kint), pointer :: indexU(:) => NULL()
   integer(kind=kint), pointer :: indexL(:) => NULL()
   integer(kind=kint), pointer :: itemU(:) => NULL()
@@ -21,24 +21,24 @@ program main
   real(kind=kdouble) :: tol
   character :: ctemp*10
 
-  write(*,"(a)")"* monolis coo_matrix test"
+  write(*,"(a)")"* monolis csr_matrix test"
 
   !> reference: matrix market
   !> https://math.nist.gov/MatrixMarket/data/Harwell-Boeing/bcsstruc2/bcsstk14.html
   open(20, file="./test.mtx", status="old")
     read(20,*)ctemp
-    read(20,*)N, N, NZ
-    allocate(indexI(NZ))
-    allocate(indexJ(NZ))
+    read(20,*)N, NZ
+    allocate(index(0:N))
+    allocate(item(NZ))
     allocate(A(NZ))
-    do i = 1, NZ
-      read(20,*)indexI(i), indexJ(i), A(i)
-    enddo
+    read(20,*)(index(i), i = 0, N)
+    read(20,*)(item(i), i = 1, NZ)
+    read(20,*)(A(i), i = 1, NZ)
   close(20)
 
   NDOF = 1
 
-  call monolis_convert_coo_get_size(N, NZ, indexI, indexJ, NPU, NPL)
+  call monolis_convert_csr_get_size(N, NZ, index, item, NPU, NPL)
 
   allocate(X(N*NDOF))
   allocate(B(N*NDOF))
@@ -52,7 +52,7 @@ program main
   X = 0.0d0
   B = 1.0d0
 
-  call monolis_convert_coo_get_matrix(N, NZ, NDOF, A, indexI, indexJ, NPU, NPL, &
+  call monolis_convert_csr_get_matrix(N, NZ, NDOF, A, index, item, NPU, NPL, &
        & D, AU, AL, indexU, itemU, indexL, itemL)
 
   method = 1

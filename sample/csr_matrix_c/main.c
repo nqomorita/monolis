@@ -7,27 +7,33 @@ int main(int argc, char *args[]) {
   char fname[] = "test.mtx";
   int i, j, N, NDOF, NPU, NPL, NZ;
   int method, precond, maxiter, is_scaling;
-  int *indexI, *indexJ, *indexU, *indexL, *itemU, *itemL;
+  int *index, *item, *indexU, *indexL, *itemU, *itemL;
   double *A, *D, *AU, *AL, *X, *B;
   double tol;
   char str[16];
 
-  printf("* monolis coo_matrix test in C\n");
+  printf("* monolis csr_matrix test in C\n");
 
   fp = fopen(fname, "r");
     fscanf(fp, "%s", str);
-    fscanf(fp, "%d %d %d", &N, &N, &NZ);
-    indexI = (int *)calloc(NZ, sizeof(int));
-    indexJ = (int *)calloc(NZ, sizeof(int));
+    fscanf(fp, "%d %d", &N, &NZ);
+    index = (int *)calloc(N+1, sizeof(int));
+    item = (int *)calloc(NZ, sizeof(int));
     A = (double *)calloc(NZ, sizeof(double));
+    for(i=0; i<N+1; i=i+1){
+      fscanf(fp, "%d", &index[i]);
+    }
     for(i=0; i<NZ; i=i+1){
-      fscanf(fp, "%d %d %lf", &indexI[i], &indexJ[i], &A[i]);
+      fscanf(fp, "%d", &item[i]);
+    }
+    for(i=0; i<NZ; i=i+1){
+      fscanf(fp, "%lf", &A[i]);
     }
   fclose(fp);
 
   NDOF = 1;
 
-  monolis_convert_coo_get_size(&N, &NZ, indexI, indexJ, &NPU, &NPL);
+  monolis_convert_csr_get_size(&N, &NZ, index, item, &NPU, &NPL);
 
   X = (double *)calloc(N*NDOF, sizeof(double));
   B = (double *)calloc(N*NDOF, sizeof(double));
@@ -43,7 +49,7 @@ int main(int argc, char *args[]) {
     B[i] = 1.0;
   }
 
-  monolis_convert_coo_get_matrix(&N, &NZ, &NDOF, A, indexI, indexJ, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+  monolis_convert_csr_get_matrix(&N, &NZ, &NDOF, A, index, item, &NPU, &NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
   precond = 1;
