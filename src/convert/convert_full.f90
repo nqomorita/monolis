@@ -85,19 +85,19 @@ contains
             il = il + 1
             itemL(il) = j
             do k = 1, NDOF2
-              AL(NDOF2*(il-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              AL(NDOF2*(il-1) + k) = Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k)
             enddo
           endif
           if(i == j)then
             do k = 1, NDOF2
-              D(NDOF2*(j-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              D(NDOF2*(j-1) + k) = Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k)
             enddo
           endif
           if(j <  i)then
             iu = iu + 1
             itemU(iu) = j
             do k = 1, NDOF2
-              AU(NDOF2*(iu-1) + k) = dabs(Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k))
+              AU(NDOF2*(iu-1) + k) = Af(NDOF2*Nf*(i-1) + NDOF2*(j-1) + k)
             enddo
           endif
         endif
