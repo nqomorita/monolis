@@ -107,10 +107,11 @@ contains
 
   function monolis_wtime()
     implicit none
-    real(kind=kdouble) :: monolis_wtime
 #ifdef WITH_MPI
+    real(kind=kdouble) :: monolis_wtime
     monolis_wtime = MPI_wtime()
 #else
+    integer(kind=kint) :: monolis_wtime
     call system_clock(monolis_wtime)
 #endif
   end function monolis_wtime
