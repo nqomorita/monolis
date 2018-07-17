@@ -159,7 +159,7 @@ contains
       enddo
 
       do j = 1, NDOF
-        XT(j) = ST(NDOF*(i-1) + j)
+        XT(j) = ST(j)
       enddo
       do j = 2, NDOF
         do k = 1, j-1

@@ -46,7 +46,7 @@ int main(int argc, char *args[]) {
   itemL  = (int *)calloc(NPL, sizeof(int));
 
   for (i=0; i<N*NDOF; i++){
-    B[i] = 1.0;
+    B[i] = (double)i;
   }
 
   monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL);
@@ -54,12 +54,12 @@ int main(int argc, char *args[]) {
   monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
-  precond = 1;
+  precond = 4;
   maxiter = 10;
   tol = 1.0e-8;
-  is_scaling = 0;
-  is_reordering = 0;
-  show_iteration = 0;
+  is_scaling = 1;
+  is_reordering = 1;
+  show_iteration = 1;
 
 /*
   printf("* indexU\n");
