@@ -12,7 +12,8 @@ contains
   subroutine monolis(N, NP, NDOF, NPU, NPL, D, AU, AL, X, B, &
     & indexU, itemU, indexL, itemL, myrank, comm, commsize, n_neib, &
     & neib_pe, recv_index, send_index, recv_item, send_item, &
-    & method, precond, maxiter, tol, is_scaling)
+    & method, precond, maxiter, tol, &
+    & is_scaling, is_reordering, is_init_x, show_iteration)
     use mod_monolis_prm
     use mod_monolis_com
     use mod_monolis_mat
@@ -47,6 +48,9 @@ contains
     integer(kind=kint), intent(in) :: precond
     integer(kind=kint), intent(in) :: maxiter
     integer(kind=kint), intent(in) :: is_scaling
+    integer(kind=kint), intent(in) :: is_reordering
+    integer(kind=kint), intent(in) :: is_init_x
+    integer(kind=kint), intent(in) :: show_iteration
     real(kind=kdouble), intent(in) :: tol
 
     !> for monoMAT
@@ -81,8 +85,14 @@ contains
     monoPRM%precond = precond
     monoPRM%maxiter = maxiter
     monoPRM%tol = tol
+    monoPRM%is_scaling = .false.
+    monoPRM%is_reordering = .false.
+    monoPRM%is_init_x = .false.
+    monoPRM%show_iteration = .false.
     if(is_scaling == 1) monoPRM%is_scaling = .true.
-    monoPRM%is_reordering = .true.
+    if(is_reordering == 1) monoPRM%is_reordering = .true.
+    if(is_init_x == 1) monoPRM%is_init_x = .true.
+    if(show_iteration == 1) monoPRM%show_iteration = .true.
 
 #ifdef DTEST_ALL
     call monolis_solve_test(monoPRM, monoCOM, monoMAT)
@@ -93,7 +103,7 @@ contains
 
   subroutine monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
     & indexU, itemU, indexL, itemL, &
-    & method, precond, maxiter, tol, is_scaling, is_reordering, &
+    & method, precond, maxiter, tol, is_scaling, is_reordering, is_init_x, &
     & show_iteration)
     use mod_monolis_prm
     use mod_monolis_com
@@ -120,6 +130,7 @@ contains
     integer(kind=kint), intent(in) :: maxiter
     integer(kind=kint), intent(in) :: is_scaling
     integer(kind=kint), intent(in) :: is_reordering
+    integer(kind=kint), intent(in) :: is_init_x
     integer(kind=kint), intent(in) :: show_iteration
     real(kind=kdouble), intent(in) :: tol
 
@@ -155,9 +166,11 @@ contains
     monoPRM%tol = tol
     monoPRM%is_scaling = .false.
     monoPRM%is_reordering = .false.
+    monoPRM%is_init_x = .false.
     monoPRM%show_iteration = .false.
     if(is_scaling == 1) monoPRM%is_scaling = .true.
     if(is_reordering == 1) monoPRM%is_reordering = .true.
+    if(is_init_x == 1) monoPRM%is_init_x = .true.
     if(show_iteration == 1) monoPRM%show_iteration = .true.
 
     call monolis_com_initialize(monoCOM)
@@ -171,7 +184,7 @@ contains
 
   subroutine monolis_serial_c(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
     & indexU, itemU, indexL, itemL, &
-    & method, precond, maxiter, tol, is_scaling, is_reordering, &
+    & method, precond, maxiter, tol, is_scaling, is_reordering, is_init_x, &
     & show_iteration) bind(c, name="monolis_serial")
     use iso_c_binding
     use mod_monolis_prm
@@ -194,7 +207,8 @@ contains
     real(c_double), intent(in), target :: B(N*NDOF)
     real(c_double), intent(out),target :: X(N*NDOF)
     !> for monoPRM
-    integer(c_int), value :: method, precond, maxiter, is_scaling, is_reordering, show_iteration
+    integer(c_int), value :: method, precond, maxiter
+    integer(c_int), value :: is_scaling, is_reordering, is_init_x, show_iteration
     real(c_double), value :: tol
 
     !> for monoMAT
@@ -229,9 +243,11 @@ contains
     monoPRM%tol = tol
     monoPRM%is_scaling = .false.
     monoPRM%is_reordering = .false.
+    monoPRM%is_init_x = .false.
     monoPRM%show_iteration = .false.
     if(is_scaling == 1) monoPRM%is_scaling = .true.
     if(is_reordering == 1) monoPRM%is_reordering = .true.
+    if(is_init_x == 1) monoPRM%is_init_x = .true.
     if(show_iteration == 1) monoPRM%show_iteration = .true.
 
     call monolis_com_initialize(monoCOM)

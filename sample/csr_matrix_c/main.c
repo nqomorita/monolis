@@ -6,7 +6,7 @@ int main(int argc, char *args[]) {
   FILE *fp;
   char fname[] = "test.mtx";
   int i, j, N, NDOF, NPU, NPL, NZ;
-  int method, precond, maxiter, is_scaling, is_reordering, show_iteration;
+  int method, precond, maxiter, is_scaling, is_reordering, is_init_x, show_iteration;
   int *index, *item, *indexU, *indexL, *itemU, *itemL;
   double *A, *D, *AU, *AL, *X, *B;
   double tol;
@@ -59,6 +59,7 @@ int main(int argc, char *args[]) {
   tol = 1.0e-8;
   is_scaling = 1;
   is_reordering = 1;
+  is_init_x = 1;
   show_iteration = 1;
 
 /*
@@ -88,7 +89,7 @@ int main(int argc, char *args[]) {
 */
 
   monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
-  is_scaling, is_reordering, show_iteration);
+  is_scaling, is_reordering, is_init_x, show_iteration);
 
   printf("* monolis result\n");
   for (i=0; i<N; i++){

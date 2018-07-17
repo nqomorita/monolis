@@ -6,7 +6,7 @@ program main
   type(monolis_mat) :: monoMAT
   integer(kind=kint) :: i, j, N, NDOF, NPU, NPL, NZ
   integer(kind=kint) :: method, precond, maxiter
-  integer(kind=kint) :: is_scaling, is_reordering, show_iteration
+  integer(kind=kint) :: is_scaling, is_reordering, is_init_x, show_iteration
   integer(kind=kint), pointer :: indexI(:) => NULL()
   integer(kind=kint), pointer :: indexJ(:) => NULL()
   integer(kind=kint), pointer :: indexU(:) => NULL()
@@ -52,11 +52,12 @@ program main
   tol = 1.0d-8
   is_scaling = 1
   is_reordering = 1
+  is_init_x = 1
   show_iteration = 1
 
   call monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
   & indexU, itemU, indexL, itemL, &
-  & method, precond, maxiter, tol, is_scaling, is_reordering, show_iteration)
+  & method, precond, maxiter, tol, is_scaling, is_reordering, is_init_x, show_iteration)
 
   write(*,"(a)")"* monolis result"
   write(*,"(1p3e12.5)")X

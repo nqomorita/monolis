@@ -33,9 +33,11 @@ contains
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X; X = 0.0d0
+    X => monoMAT%X
     B => monoMAT%B
     tol = monoPRM%tol
+
+    if(monoPRM%is_init_x) X = 0.0d0
 
     allocate(R(NDOF*NP)); R = 0.0d0
     allocate(D(NDOF*NP)); D = 0.0d0
