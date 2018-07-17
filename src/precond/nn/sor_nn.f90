@@ -146,14 +146,14 @@ contains
       enddo
       jS = indexU(i-1) + 1
       jE = indexU(i  )
-      do j = jS, jE
+      do j = jE, jS, -1
         jn = itemU(j)
         do k = 1, NDOF
           XT(k) = Y(NDOF*(jn-1)+k)
         enddo
         do k = 1, NDOF
           do l = 1, NDOF
-            ST(k) = ST(k) - AU(NDOF2*(j-1)+(k-1)*NDOF+l)*XT(l)
+            ST(k) = ST(k) + AU(NDOF2*(j-1)+(k-1)*NDOF+l)*XT(l)
           enddo
         enddo
       enddo
@@ -173,7 +173,7 @@ contains
         XT(j) = ALU(NDOF2*(i-1) + (NDOF+1)*(j-1) + 1)*XT(j)
       enddo
       do k = 1, NDOF
-        Y(NDOF*(i-1)+k) = Y(NDOF*(i-1)+k)- XT(k)
+        Y(NDOF*(i-1)+k) = Y(NDOF*(i-1)+k) - XT(k)
       enddo
     enddo
 

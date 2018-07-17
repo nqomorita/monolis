@@ -106,7 +106,7 @@ contains
       S1 = Y(3*i-2)
       S2 = Y(3*i-1)
       S3 = Y(3*i  )
-      jS = indexL(i-1)+1
+      jS = indexL(i-1) + 1
       jE = indexL(i)
       do j = jS, jE
         jn = itemL(j)
