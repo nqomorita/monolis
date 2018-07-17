@@ -69,6 +69,7 @@ contains
     monoPRM%tol = 1.0d-8
     monoPRM%is_scaling = .true.
     monoPRM%is_reordering = .true.
+    monoPRM%show_iteration = .true.
   end subroutine monolis_prm_initialize
 
   subroutine monolis_prm_finalize(monoPRM)
