@@ -31,6 +31,7 @@ contains
       call monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
       call monolis_restruct_comm(monoCOM, monoCOM_reorder, iperm)
       call monolis_reorder_vector_fw(monoMAT%NP, monoMAT%NDOF, monoMAT%B, monoMAT_reorder%B)
+      if(.not. monoPRM%is_init_x) call monolis_reorder_vector_fw(monoMAT%NP, monoMAT%NDOF, monoMAT%X, monoMAT_reorder%X)
 #else
       call monolis_mat_copy(monoMAT, monoMAT_reorder)
       call monolis_com_copy(monoCOM, monoCOM_reorder)

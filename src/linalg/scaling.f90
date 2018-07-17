@@ -22,7 +22,7 @@ contains
     integer(kind=kint) :: isL, ieL, isU, ieU, inod
     integer(kind=kint) :: i, j, k, ii, ij, ip(monoMAT%NDOF), iq(monoMAT%NDOF)
     real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: D(:), AL(:), AU(:), B(:)
+    real(kind=kdouble), pointer :: D(:), AL(:), AU(:), X(:), B(:)
     integer(kind=kint), pointer :: indexL(:), itemL(:), indexU(:), itemU(:)
 
     if(.not. monoPRM%is_scaling) return
@@ -31,6 +31,7 @@ contains
     NP = monoMAT%NP
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
+    X => monoMAT%X
     B => monoMAT%B
     D => monoMAT%D
     AL => monoMAT%AL
@@ -94,6 +95,14 @@ contains
         B(NDOF*(i-1) + k) = B(NDOF*(i-1) + k)*diag(NDOF*(i-1) + k)
       enddo
     enddo
+
+    if(.not. monoPRM%is_init_x)then
+      do i = 1, N
+        do k = 1, NDOF
+          X(NDOF*(i-1) + k) = X(NDOF*(i-1) + k)/diag(NDOF*(i-1) + k)
+        enddo
+      enddo
+    endif
   end subroutine monolis_scaling_fw
 
   subroutine monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
