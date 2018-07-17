@@ -34,6 +34,8 @@ contains
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
+    elseif(monoMAT%NDOF == 1)then
+      call monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
     else
       call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF, tcomm)
     endif
@@ -153,6 +155,46 @@ contains
 
     call monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF)
   end subroutine monolis_matvec_serial
+
+  subroutine monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: i, j, in, N, jS, jE
+    integer(kind=kint), pointer :: indexL(:), itemL(:)
+    integer(kind=kint), pointer :: indexU(:), itemU(:)
+    real(kind=kdouble) :: Y1
+    real(kind=kdouble) :: X(:), Y(:)
+    real(kind=kdouble), pointer :: D(:), AU(:), AL(:)
+    real(kind=kdouble) :: t1, t2
+    real(kind=kdouble), optional :: tcomm
+
+    N = monoMAT%N
+    D  => monoMAT%D
+    AU => monoMAT%AU
+    AL => monoMAT%AL
+    indexU => monoMAT%indexU
+    indexL => monoMAT%indexL
+    itemU  => monoMAT%itemU
+    itemL  => monoMAT%itemL
+
+    do i = 1, N
+      Y1 = D(i)*X(i)
+      jS = indexL(i-1) + 1
+      jE = indexL(i  )
+      do j = jS, jE
+        in = itemL(j)
+        Y1 = Y1 + AL(j)*X(in)
+      enddo
+      jS = indexU(i-1) + 1
+      jE = indexU(i  )
+      do j = jS, jE
+        in = itemU(j)
+        Y1 = Y1 + AU(j)*X(in)
+      enddo
+      Y(i) = Y1
+    enddo
+  end subroutine monolis_matvec_11
 
   subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
     implicit none
