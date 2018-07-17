@@ -54,7 +54,7 @@ contains
       call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
       resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0) write (*,"(i7, 1pe16.6)") iter, resid
+      if(monoCOM%myrank == 0 .and. monoPRM%show_iteration) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
     enddo
 
