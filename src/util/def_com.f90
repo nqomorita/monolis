@@ -56,6 +56,7 @@ contains
   subroutine monolis_com_finalize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
+    integer(kind=kint) :: ierr
 
     if(associated(monoCOM%neib_pe)) deallocate(monoCOM%neib_pe)
     if(associated(monoCOM%recv_index)) deallocate(monoCOM%recv_index)
@@ -67,6 +68,10 @@ contains
     monoCOM%recv_item => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
+
+#ifdef WITH_MPI
+    call MPI_finalize(ierr)
+#endif
   end subroutine monolis_com_finalize
 
   subroutine monolis_com_copy(monoCOM, monoCOM_reorder)

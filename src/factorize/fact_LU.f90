@@ -19,7 +19,7 @@ contains
       !call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
       call monolis_init_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
-      stop "  ** monolis error: monolis_init_LU_inner"
+      call monolis_init_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_init_LU_inner
 
@@ -33,7 +33,7 @@ contains
       !call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
       call monolis_fact_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
-      stop "  ** monolis error: monolis_fact_LU_inner"
+      call monolis_fact_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_fact_LU_inner
 
@@ -47,7 +47,7 @@ contains
       !call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
       call monolis_solv_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
-      stop "  ** monolis error: monolis_solv_LU_inner"
+      call monolis_solv_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_solv_LU_inner
 
@@ -61,7 +61,7 @@ contains
       !call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
       call monolis_clear_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     else
-      stop "  ** monolis error: monolis_clear_LU_inner"
+      call monolis_clear_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_clear_LU_inner
 end module mod_monolis_fact_LU

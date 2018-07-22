@@ -69,8 +69,8 @@ contains
     AD = 0.0d0
 
     !factorization
-    do i = 1,N
-      in = idxU(i-1)+1
+    do i = 1, N
+      in = idxU(i-1) + 1
       if(AU(9*in-8) == 0.0d0) stop "*** zero diagonal entry"
       if(AU(9*in-4) == 0.0d0) stop "*** zero diagonal entry"
       if(AU(9*in  ) == 0.0d0) stop "*** zero diagonal entry"
@@ -96,6 +96,7 @@ contains
       do j = i, NP
         is_fill(j) = 0
       enddo
+
       in = 1
       do j = idxU(i-1)+2, idxU(i)
         is_fill(itemU(j)) = in

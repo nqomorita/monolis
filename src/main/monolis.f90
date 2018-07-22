@@ -180,6 +180,8 @@ contains
 #else
     call monolis_solve(monoPRM, monoCOM, monoMAT)
 #endif
+
+    call monolis_com_finalize(monoCOM)
   end subroutine monolis_serial
 
   subroutine monolis_serial_c(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
@@ -257,5 +259,7 @@ contains
 #else
     call monolis_solve(monoPRM, monoCOM, monoMAT)
 #endif
+
+    call  monolis_com_finalize(monoCOM)
   end subroutine monolis_serial_c
 end module mod_monolis

@@ -110,6 +110,11 @@ int main(int argc, char *args[]) {
     B[i] = 0.0;
   }
 
+  is_scaling = 0;
+  is_reordering = 0;
+  is_init_x = 0;
+  show_iteration = 0;
+
   monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
 
   printf("* monolis result B\n");
@@ -117,6 +122,13 @@ int main(int argc, char *args[]) {
     printf("%f ", B[i]);
   }
   printf("\n");
+
+  for (i=0; i<N*NDOF; i++){
+    B[i] = 1.0;
+  }
+
+  monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
+  is_scaling, is_reordering, is_init_x, show_iteration);
 
   free(X);
   free(B);
