@@ -24,7 +24,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
   end subroutine monolis_init_LU_inner_asym_33
 
@@ -32,7 +32,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
   end subroutine monolis_clear_LU_inner_asym_33
 
@@ -40,7 +40,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
     integer(kind=kint) :: N, NP, NIN, NDOF, NNDOF
     integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
     integer(kind=kint) :: shift, imax
@@ -203,7 +203,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
     integer(kind=kint) :: N, NP, NNDOF
     integer(kind=kint) :: i, j, k, in, jS, jE, kn
     real(kind=kdouble) :: t1, t2

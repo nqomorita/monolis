@@ -61,16 +61,23 @@ contains
   subroutine monolis_check_diagonal(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, in, N, NDOF, NDOF2
+    integer(kind=kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
 
-    N =  monoMAT%N
+    NP =  monoMAT%NP
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
-    do i = 1, N
-      do j = 1, NDOF
-        in = NDOF2*(i-1) + (NDOF+1)*(j-1) + 1
-        if(monoMAT%D(in) == 0.0d0) stop " ** monolis error: zero diagonal"
+    do i = 1, NP
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        in = monoMAT%item(j)
+        if(i == in)then
+          do k = 1, NDOF
+            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
+            if(monoMAT%A(kn) == 0.0d0) stop " ** monolis error: zero diagonal"
+          enddo
+        endif
       enddo
     enddo
   end subroutine monolis_check_diagonal

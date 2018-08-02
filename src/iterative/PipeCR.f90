@@ -107,7 +107,7 @@ contains
       endif
 
       resid = dsqrt(U2/B2)
-      if(monoCOM%myrank == 0 .and. monoPRM%show_iteration) write (*,"(i7, 1pe16.6)") iter, resid*phi
+      if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid*phi
       if(resid <= utol) exit
 
       gamma1 = 1.0d0/gamma

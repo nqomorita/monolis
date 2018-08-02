@@ -3,17 +3,26 @@ module mod_monolis_mat
   implicit none
 
   type monolis_mat
-    integer(kind=kint) :: N, NP, NPU, NPL, NDOF
-    integer(kind=kint), pointer :: indexU(:) => null()
-    integer(kind=kint), pointer :: indexL(:) => null()
-    integer(kind=kint), pointer :: itemU(:) => null()
-    integer(kind=kint), pointer :: itemL(:) => null()
-    real(kind=kdouble), pointer :: D(:) => null()
-    real(kind=kdouble), pointer :: AU(:) => null()
-    real(kind=kdouble), pointer :: AL(:) => null()
+    integer(kind=kint) :: N, NP, NZ, NDOF
+    integer(kind=kint), pointer :: index(:) => null()
+    integer(kind=kint), pointer :: item(:) => null()
+    real(kind=kdouble), pointer :: A(:) => null()
     real(kind=kdouble), pointer :: X(:) => null()
     real(kind=kdouble), pointer :: B(:) => null()
   end type monolis_mat
+
+  type monolis_mat_LDU
+    integer(kind=kint) :: N, NP, NPU, NPL, NDOF
+    integer(kind=kint), pointer :: indexU(:) => null()
+    integer(kind=kint), pointer :: itemU(:) => null()
+    integer(kind=kint), pointer :: indexL(:) => null()
+    integer(kind=kint), pointer :: itemL(:) => null()
+    real(kind=kdouble), pointer :: U(:) => null()
+    real(kind=kdouble), pointer :: D(:) => null()
+    real(kind=kdouble), pointer :: L(:) => null()
+    real(kind=kdouble), pointer :: X(:) => null()
+    real(kind=kdouble), pointer :: B(:) => null()
+  end type monolis_mat_LDU
 
 contains
 
@@ -23,16 +32,11 @@ contains
 
     monoMAT%N = 0
     monoMAT%NP = 0
-    monoMAT%NPU = 0
-    monoMAT%NPL = 0
+    monoMAT%NZ = 0
     monoMAT%NDOF = 0
-    monoMAT%indexU => null()
-    monoMAT%indexL => null()
-    monoMAT%itemU => null()
-    monoMAT%itemL => null()
-    monoMAT%D => null()
-    monoMAT%AU => null()
-    monoMAT%AL => null()
+    monoMAT%index => null()
+    monoMAT%item => null()
+    monoMAT%A => null()
     monoMAT%X => null()
     monoMAT%B => null()
   end subroutine monolis_mat_nullify
@@ -43,16 +47,11 @@ contains
 
     monoMAT%N = 0
     monoMAT%NP = 0
-    monoMAT%NPU = 0
-    monoMAT%NPL = 0
+    monoMAT%NZ = 0
     monoMAT%NDOF = 0
-    monoMAT%indexU => null()
-    monoMAT%indexL => null()
-    monoMAT%itemU => null()
-    monoMAT%itemL => null()
-    monoMAT%D => null()
-    monoMAT%AU => null()
-    monoMAT%AL => null()
+    monoMAT%index => null()
+    monoMAT%item => null()
+    monoMAT%A => null()
     monoMAT%X => null()
     monoMAT%B => null()
   end subroutine monolis_mat_initialize
@@ -64,16 +63,11 @@ contains
 
     monoB%N = monoA%N
     monoB%NP = monoA%NP
-    monoB%NPU = monoA%NPU
-    monoB%NPL = monoA%NPL
+    monoB%NZ = monoA%NZ
     monoB%NDOF = monoA%NDOF
-    monoB%indexU => monoA%indexU
-    monoB%indexL => monoA%indexL
-    monoB%itemU => monoA%itemU
-    monoB%itemL => monoA%itemL
-    monoB%D => monoA%D
-    monoB%AU => monoA%AU
-    monoB%AL => monoA%AL
+    monoB%index => monoA%index
+    monoB%item => monoA%item
+    monoB%A => monoA%A
     monoB%X => monoA%X
     monoB%B => monoA%B
   end subroutine monolis_mat_copy
@@ -82,22 +76,14 @@ contains
     implicit none
     type(monolis_mat) :: monoMAT
 
-    if(associated(monoMAT%indexU)) deallocate(monoMAT%indexU)
-    if(associated(monoMAT%indexL)) deallocate(monoMAT%indexL)
-    if(associated(monoMAT%itemU)) deallocate(monoMAT%itemU)
-    if(associated(monoMAT%itemL)) deallocate(monoMAT%itemL)
-    if(associated(monoMAT%D)) deallocate(monoMAT%D)
-    if(associated(monoMAT%AU)) deallocate(monoMAT%AU)
-    if(associated(monoMAT%AL)) deallocate(monoMAT%AL)
+    if(associated(monoMAT%index)) deallocate(monoMAT%index)
+    if(associated(monoMAT%item)) deallocate(monoMAT%item)
+    if(associated(monoMAT%A)) deallocate(monoMAT%A)
     if(associated(monoMAT%X)) deallocate(monoMAT%X)
     if(associated(monoMAT%B)) deallocate(monoMAT%B)
-    monoMAT%indexU => null()
-    monoMAT%indexL => null()
-    monoMAT%itemU => null()
-    monoMAT%itemL => null()
-    monoMAT%D => null()
-    monoMAT%AU => null()
-    monoMAT%AL => null()
+    monoMAT%index => null()
+    monoMAT%item => null()
+    monoMAT%A => null()
     monoMAT%X => null()
     monoMAT%B => null()
   end subroutine monolis_mat_finalize

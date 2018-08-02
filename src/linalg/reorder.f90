@@ -103,10 +103,8 @@ contains
     integer(kind=kint), allocatable :: check(:), nozero(:)
     integer(kind=kint) :: ierr
     integer(kind=kint) :: nvtxs
-    integer(kind=kint), pointer :: indexL(:)      => null()
-    integer(kind=kint), pointer :: indexU(:)      => null()
-    integer(kind=kint), pointer :: itemL(:)       => null()
-    integer(kind=kint), pointer :: itemU(:)       => null()
+    integer(kind=kint), pointer :: index(:)       => null()
+    integer(kind=kint), pointer :: item(:)        => null()
     integer(kind=kint), pointer :: xadj(:)        => null()
     integer(kind=kint), pointer :: adjncy(:)      => null()
     integer(kind=kint), pointer :: vwgt(:)        => null()
@@ -116,36 +114,26 @@ contains
 
     N = monoMAT%N
     NP = monoMAT%NP
-    indexL => monoMAT%indexL
-    indexU => monoMAT%indexU
-    itemL  => monoMAT%itemL
-    itemU  => monoMAT%itemU
+    index => monoMAT%index
+    item  => monoMAT%item
 
     nvtxs = N
     allocate(edge(N))
 
     do i = 1, N
-      nl = indexL(i) - indexL(i-1)
-      nu = indexU(i) - indexU(i-1)
-      in = nl + nu
+      in = index(i) - index(i-1)
 
       if(0 < in)then
         allocate(nozero(in))
         nozero = 0
 
         jn = 0
-        jS = indexL(i-1) + 1
-        jE = indexL(i  )
+        jS = index(i-1) + 1
+        jE = index(i  )
         do j = jS, jE
-          jn = jn + 1
-          nozero(jn) = itemL(j)
-        enddo
-        jS = indexU(i-1) + 1
-        jE = indexU(i  )
-        do j = jS, jE
-          if(itemU(j) <= N)then
+          if(item(j) <= N)then
             jn = jn + 1
-            nozero(jn) = itemU(j)
+            nozero(jn) = item(j)
           endif
         enddo
 

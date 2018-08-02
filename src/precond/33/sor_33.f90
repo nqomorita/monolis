@@ -19,27 +19,37 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, N
+    integer(kind=kint) :: i, j, jS, jE, in, k, l, N
+    integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: T(3,3), P(3), sigma
-    real(kind=kdouble), pointer :: D(:)
+    real(kind=kdouble), pointer :: A(:)
 
     N =  monoMAT%N
-    D => monoMAT%D
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
     sigma = 1.0d0
 
     allocate(ALU(9*N))
     ALU = 0.0d0
 
     do i = 1, N
-      ALU(9*i-8) = D(9*i-8)*sigma
-      ALU(9*i-7) = D(9*i-7)
-      ALU(9*i-6) = D(9*i-6)
-      ALU(9*i-5) = D(9*i-5)
-      ALU(9*i-4) = D(9*i-4)*sigma
-      ALU(9*i-3) = D(9*i-3)
-      ALU(9*i-2) = D(9*i-2)
-      ALU(9*i-1) = D(9*i-1)
-      ALU(9*i  ) = D(9*i  )*sigma
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(i == in)then
+          ALU(9*i-8) = A(9*j-8)
+          ALU(9*i-7) = A(9*j-7)
+          ALU(9*i-6) = A(9*j-6)
+          ALU(9*i-5) = A(9*j-5)
+          ALU(9*i-4) = A(9*j-4)
+          ALU(9*i-3) = A(9*j-3)
+          ALU(9*i-2) = A(9*j-2)
+          ALU(9*i-1) = A(9*j-1)
+          ALU(9*i  ) = A(9*j  )
+        endif
+      enddo
     enddo
 
     do l = 1, N
@@ -82,21 +92,15 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, jS, jE, jn
-    integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: indexU(:)
-    integer(kind=kint), pointer :: itemL(:)
-    integer(kind=kint), pointer :: itemU(:)
+    integer(kind=kint), pointer :: index(:)
+    integer(kind=kint), pointer :: item(:)
     real(kind=kdouble) :: X1, X2, X3, S1, S2, S3
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: AL(:)
-    real(kind=kdouble), pointer :: AU(:)
+    real(kind=kdouble), pointer :: A(:)
 
-    indexL => monoMAT%indexL
-    indexU => monoMAT%indexU
-    itemL => monoMAT%itemL
-    itemU => monoMAT%itemU
-    AL => monoMAT%AL
-    AU => monoMAT%AU
+    index => monoMAT%index
+    item => monoMAT%item
+    A => monoMAT%A
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       Y(i) = X(i)
@@ -106,16 +110,18 @@ contains
       S1 = Y(3*i-2)
       S2 = Y(3*i-1)
       S3 = Y(3*i  )
-      jS = indexL(i-1) + 1
-      jE = indexL(i)
+      jS = index(i-1) + 1
+      jE = index(i)
       do j = jS, jE
-        jn = itemL(j)
-        X1 = Y(3*jn-2)
-        X2 = Y(3*jn-1)
-        X3 = Y(3*jn  )
-        S1 = S1 - AL(9*j-8)*X1 - AL(9*j-7)*X2 - AL(9*j-6)*X3
-        S2 = S2 - AL(9*j-5)*X1 - AL(9*j-4)*X2 - AL(9*j-3)*X3
-        S3 = S3 - AL(9*j-2)*X1 - AL(9*j-1)*X2 - AL(9*j  )*X3
+        jn = item(j)
+        if(jn < i)then
+          X1 = Y(3*jn-2)
+          X2 = Y(3*jn-1)
+          X3 = Y(3*jn  )
+          S1 = S1 - A(9*j-8)*X1 - A(9*j-7)*X2 - A(9*j-6)*X3
+          S2 = S2 - A(9*j-5)*X1 - A(9*j-4)*X2 - A(9*j-3)*X3
+          S3 = S3 - A(9*j-2)*X1 - A(9*j-1)*X2 - A(9*j  )*X3
+        endif
       enddo
       X1 = S1
       X2 = S2
@@ -134,16 +140,18 @@ contains
       S1 = 0.0d0
       S2 = 0.0d0
       S3 = 0.0d0
-      jS = indexU(i-1) + 1
-      jE = indexU(i)
+      jS = index(i-1) + 1
+      jE = index(i)
       do j = jE, jS, -1
-        jn = itemU(j)
-        X1 = Y(3*jn-2)
-        X2 = Y(3*jn-1)
-        X3 = Y(3*jn  )
-        S1 = S1 + AU(9*j-8)*X1 + AU(9*j-7)*X2 + AU(9*j-6)*X3
-        S2 = S2 + AU(9*j-5)*X1 + AU(9*j-4)*X2 + AU(9*j-3)*X3
-        S3 = S3 + AU(9*j-2)*X1 + AU(9*j-1)*X2 + AU(9*j  )*X3
+        jn = item(j)
+        if(i < jn)then
+          X1 = Y(3*jn-2)
+          X2 = Y(3*jn-1)
+          X3 = Y(3*jn  )
+          S1 = S1 + A(9*j-8)*X1 + A(9*j-7)*X2 + A(9*j-6)*X3
+          S2 = S2 + A(9*j-5)*X1 + A(9*j-4)*X2 + A(9*j-3)*X3
+          S3 = S3 + A(9*j-2)*X1 + A(9*j-1)*X2 + A(9*j  )*X3
+        endif
       enddo
       X1 = S1
       X2 = S2

@@ -19,15 +19,18 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, N, NDOF, NDOF2
+    integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
+    integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: sigma
     real(kind=kdouble), allocatable :: T(:), LU(:,:)
-    real(kind=kdouble), pointer :: D(:)
+    real(kind=kdouble), pointer :: A(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
-    D => monoMAT%D
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
     sigma = 1.0d0
 
     allocate(T(NDOF))
@@ -38,27 +41,35 @@ contains
     LU  = 0.0d0
 
     do i = 1, N
-      do j = 1, NDOF
-        do k = 1, NDOF
-          LU(j,k) = D(NDOF2*(i-1) + NDOF*(j-1) + k)
-        enddo
-      enddo
-      do k = 1, NDOF
-        LU(k,k) = 1.0d0/LU(k,k)
-        do l = k+1, NDOF
-          LU(l,k) = LU(l,k)*LU(k,k)
-          do j = k+1, NDOF
-            T(j) = LU(l,j) - LU(l,k)*LU(k,j)
+      jS = index(i-1) + 1
+      jE = index(i)
+      do ii = jS, jE
+        in = item(ii)
+        if(i == in)then
+          do j = 1, NDOF
+            do k = 1, NDOF
+              LU(j,k) = A(NDOF2*(i-1) + NDOF*(j-1) + k)
+            enddo
           enddo
-          do j = k+1, NDOF
-            LU(l,j) = T(j)
+
+          do k = 1, NDOF
+            LU(k,k) = 1.0d0/LU(k,k)
+            do l = k+1, NDOF
+              LU(l,k) = LU(l,k)*LU(k,k)
+              do j = k+1, NDOF
+                T(j) = LU(l,j) - LU(l,k)*LU(k,j)
+              enddo
+              do j = k+1, NDOF
+                LU(l,j) = T(j)
+              enddo
+            enddo
           enddo
-        enddo
-      enddo
-      do j = 1, NDOF
-        do k = 1, NDOF
-          ALU(NDOF2*(i-1) + NDOF*(j-1) + k) = LU(j,k)
-        enddo
+          do j = 1, NDOF
+            do k = 1, NDOF
+              ALU(NDOF2*(i-1) + NDOF*(j-1) + k) = LU(j,k)
+            enddo
+          enddo
+        endif
       enddo
     enddo
 
@@ -72,25 +83,19 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, jE, jS, jn, k, l, N, NP, NDOF, NDOF2
-    integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: indexU(:)
-    integer(kind=kint), pointer :: itemL(:)
-    integer(kind=kint), pointer :: itemU(:)
+    integer(kind=kint), pointer :: index(:)
+    integer(kind=kint), pointer :: item(:)
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: AL(:)
-    real(kind=kdouble), pointer :: AU(:)
+    real(kind=kdouble), pointer :: A(:)
     real(kind=kdouble), allocatable :: XT(:), YT(:), ST(:)
 
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
-    indexL => monoMAT%indexL
-    indexU => monoMAT%indexU
-    itemL => monoMAT%itemL
-    itemU => monoMAT%itemU
-    AL => monoMAT%AL
-    AU => monoMAT%AU
+    index => monoMAT%index
+    item => monoMAT%item
+    A => monoMAT%A
 
     do i = 1, NP*NDOF
       Y(i) = X(i)
@@ -107,18 +112,20 @@ contains
       do j = 1, NDOF
         ST(j) = Y(NDOF*(i-1)+j)
       enddo
-      jS = indexL(i-1) + 1
-      jE = indexL(i  )
+      jS = index(i-1) + 1
+      jE = index(i  )
       do j = jS, jE
-        jn = itemL(j)
-        do k = 1, NDOF
-          XT(k) = Y(NDOF*(jn-1)+k)
-        enddo
-        do k = 1, NDOF
-          do l = 1, NDOF
-            ST(k) = ST(k) - AL(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
+        jn = item(j)
+        if(jn < i)then
+          do k = 1, NDOF
+            XT(k) = Y(NDOF*(jn-1)+k)
           enddo
-        enddo
+          do k = 1, NDOF
+            do l = 1, NDOF
+              ST(k) = ST(k) - A(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
+            enddo
+          enddo
+        endif
       enddo
 
       do j = 1, NDOF
@@ -144,18 +151,20 @@ contains
       do j = 1, NDOF
         ST(j) = 0.0d0
       enddo
-      jS = indexU(i-1) + 1
-      jE = indexU(i  )
+      jS = index(i-1) + 1
+      jE = index(i  )
       do j = jE, jS, -1
-        jn = itemU(j)
-        do k = 1, NDOF
-          XT(k) = Y(NDOF*(jn-1)+k)
-        enddo
-        do k = 1, NDOF
-          do l = 1, NDOF
-            ST(k) = ST(k) + AU(NDOF2*(j-1)+(k-1)*NDOF+l)*XT(l)
+        jn = item(j)
+        if(i < jn)then
+          do k = 1, NDOF
+            XT(k) = Y(NDOF*(jn-1)+k)
           enddo
-        enddo
+          do k = 1, NDOF
+            do l = 1, NDOF
+              ST(k) = ST(k) + A(NDOF2*(j-1)+(k-1)*NDOF+l)*XT(l)
+            enddo
+          enddo
+        endif
       enddo
 
       do j = 1, NDOF

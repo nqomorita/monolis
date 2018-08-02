@@ -63,7 +63,7 @@ program main
   write(*,"(1p3e12.5)")X
 
   B = 0.0d0
-  call monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B)
+  !call monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B)
 
   write(*,"(a)")"* monolis b = Ax"
   write(*,"(1p3e12.5)")B

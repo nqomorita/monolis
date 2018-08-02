@@ -54,8 +54,10 @@ module mod_monolis_prm
     real(kind=kdouble) :: tol = 1.0d-8
     logical :: is_scaling    = .true.
     logical :: is_reordering = .true.
-    logical :: is_init_x = .true.
-    logical :: show_iteration = .true.
+    logical :: is_init_x     = .true.
+    logical :: show_iterlog  = .true.
+    logical :: show_time     = .true.
+    logical :: show_summary  = .true.
   end type monolis_prm
 
 contains
@@ -68,10 +70,12 @@ contains
     monoPRM%precond = 1
     monoPRM%maxiter = 1000
     monoPRM%tol = 1.0d-8
-    monoPRM%is_scaling = .true.
+    monoPRM%is_scaling    = .true.
     monoPRM%is_reordering = .true.
-    monoPRM%is_init_x = .true.
-    monoPRM%show_iteration = .true.
+    monoPRM%is_init_x     = .true.
+    monoPRM%show_iterlog  = .true.
+    monoPRM%show_time     = .true.
+    monoPRM%show_summary  = .true.
   end subroutine monolis_prm_initialize
 
   subroutine monolis_prm_finalize(monoPRM)

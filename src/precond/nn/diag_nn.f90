@@ -19,14 +19,17 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, N, NDOF, NDOF2
+    integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
+    integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble), allocatable :: T(:), LU(:,:)
-    real(kind=kdouble), pointer :: D(:)
+    real(kind=kdouble), pointer :: A(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
-    D => monoMAT%D
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
 
     allocate(T(NDOF))
     allocate(LU(NDOF,NDOF))
@@ -36,27 +39,35 @@ contains
     LU  = 0.0d0
 
     do i = 1, N
-      do j = 1, NDOF
-        do k = 1, NDOF
-          LU(j,k) = D(NDOF2*(i-1) + NDOF*(j-1) + k)
-        enddo
-      enddo
-      do k = 1, NDOF
-        LU(k,k) = 1.0d0/LU(k,k)
-        do l = k+1, NDOF
-          LU(l,k) = LU(l,k)*LU(k,k)
-          do j = k+1, NDOF
-            T(j) = LU(l,j) - LU(l,k)*LU(k,j)
+      jS = index(i-1) + 1
+      jE = index(i)
+      do ii = jS, jE
+        in = item(ii)
+        if(i == in)then
+          do j = 1, NDOF
+            do k = 1, NDOF
+              LU(j,k) = A(NDOF2*(i-1) + NDOF*(j-1) + k)
+            enddo
           enddo
-          do j = k+1, NDOF
-            LU(l,j) = T(j)
+
+          do k = 1, NDOF
+            LU(k,k) = 1.0d0/LU(k,k)
+            do l = k+1, NDOF
+              LU(l,k) = LU(l,k)*LU(k,k)
+              do j = k+1, NDOF
+                T(j) = LU(l,j) - LU(l,k)*LU(k,j)
+              enddo
+              do j = k+1, NDOF
+                LU(l,j) = T(j)
+              enddo
+            enddo
           enddo
-        enddo
-      enddo
-      do j = 1, NDOF
-        do k = 1, NDOF
-          ALU(NDOF2*(i-1) + NDOF*(j-1) + k) = LU(j,k)
-        enddo
+          do j = 1, NDOF
+            do k = 1, NDOF
+              ALU(NDOF2*(i-1) + NDOF*(j-1) + k) = LU(j,k)
+            enddo
+          enddo
+        endif
       enddo
     enddo
 

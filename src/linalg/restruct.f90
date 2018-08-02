@@ -42,180 +42,107 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint) :: perm(:), iperm(:)
-    integer(kind=kint) :: N, NP, NPL, NPU, NDOF, NDOF2
+    integer(kind=kint) :: N, NP, NZ, NDOF, NDOF2
 
     N = monoMAT%N
     NP = monoMAT%NP
-    NPL = monoMAT%indexL(NP)
-    NPU = monoMAT%indexU(NP)
+    NZ = monoMAT%index(NP)
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
     monoMAT_reorder%N = N
     monoMAT_reorder%NP = NP
-    monoMAT_reorder%NPL = NPL
-    monoMAT_reorder%NPU = NPU
+    monoMAT_reorder%NZ = NZ
     monoMAT_reorder%NDOF = NDOF
-    allocate(monoMAT_reorder%indexL(0:NP))
-    allocate(monoMAT_reorder%indexU(0:NP))
-    allocate(monoMAT_reorder%itemL(NPL))
-    allocate(monoMAT_reorder%itemU(NPU))
+    allocate(monoMAT_reorder%index(0:NP))
+    allocate(monoMAT_reorder%item(NZ))
     call monolis_restruct_matrix_profile(NP, perm, iperm, &
-       & monoMAT%indexL, monoMAT%indexU, monoMAT%itemL, monoMAT%itemU, &
-       & monoMAT_reorder%indexL, monoMAT_reorder%indexU, monoMAT_reorder%itemL, monoMAT_reorder%itemU)
+       & monoMAT%index, monoMAT%item, monoMAT_reorder%index, monoMAT_reorder%item)
 
-    allocate(monoMAT_reorder%D (NDOF2*NP ))
-    allocate(monoMAT_reorder%AL(NDOF2*NPL))
-    allocate(monoMAT_reorder%AU(NDOF2*NPU))
+    allocate(monoMAT_reorder%A(NDOF2*NZ))
     call monolis_restruct_matrix_values(NP, NDOF, perm, iperm, &
-       & monoMAT%indexL, monoMAT%indexU, monoMAT%itemL, monoMAT%itemU, &
-       & monoMAT%AL, monoMAT%AU, monoMAT%D, &
-       & monoMAT_reorder%indexL, monoMAT_reorder%indexU, monoMAT_reorder%itemL, monoMAT_reorder%itemU, &
-       & monoMAT_reorder%AL, monoMAT_reorder%AU, monoMAT_reorder%D)
+       & monoMAT%index, monoMAT%item, monoMAT%A, &
+       & monoMAT_reorder%index, monoMAT_reorder%item, monoMAT_reorder%A)
 
     allocate(monoMAT_reorder%X(NDOF*NP))
     allocate(monoMAT_reorder%B(NDOF*NP))
   end subroutine monolis_restruct_matrix
 
   subroutine monolis_restruct_matrix_profile(N, perm, iperm, &
-    & indexL, indexU, itemL, itemU, indexLp, indexUp, itemLp, itemUp)
+    & index, item, indexp, itemp)
     implicit none
     integer(kind=kint) :: N
     integer(kind=kint) :: perm(:), iperm(:)
-    integer(kind=kint) :: indexL(0:), indexU(0:)
-    integer(kind=kint) :: itemL(:), itemU(:)
-    integer(kind=kint) :: indexLp(0:), indexUp(0:)
-    integer(kind=kint) :: itemLp(:), itemUp(:)
-    integer(kind=kint) :: cntL, cntU, i, in, j, jo, jn
+    integer(kind=kint) :: index(0:), item(:)
+    integer(kind=kint) :: indexp(0:), itemp(:)
+    integer(kind=kint) :: cnt, i, in, j, jo, jn
 
-    cntL = 0
-    cntU = 0
-    indexLp(0) = 0
-    indexUp(0) = 0
+    cnt = 0
+    index(0) = 0
     do i = 1, N
       in = perm(i)
-      do j = indexL(in-1)+1, indexL(in)
-        jo = itemL(j)
+      do j = index(in-1)+1, index(in)
+        jo = item(j)
         jn = iperm(jo)
-        if(jn < i)then
-          cntL = cntL + 1
-          itemLp(cntL) = jn
-        else
-          cntU = cntU + 1
-          itemUp(cntU) = jn
-        endif
+        cnt = cnt + 1
+        itemp(cnt) = jn
       enddo
-
-      do j = indexU(in-1)+1, indexU(in)
-        jo = itemU(j)
-        if(jo > N) cycle
-        jn = iperm(jo)
-        if(jn < i)then
-          cntL = cntL + 1
-          itemLp(cntL) = jn
-        else
-          cntU = cntU + 1
-          itemUp(cntU) = jn
-        endif
-      enddo
-      indexLp(i) = cntL
-      indexUp(i) = cntU
-      call sort_int_array(itemLp, indexLp(i-1)+1, indexLp(i))
-      call sort_int_array(itemUp, indexUp(i-1)+1, indexUp(i))
+      indexp(i) = cnt
+      call sort_int_array(itemp, indexp(i-1)+1, indexp(i))
     enddo
   end subroutine monolis_restruct_matrix_profile
 
-  subroutine monolis_restruct_matrix_values(N, NDOF, perm, iperm, &
-      & indexL, indexU, itemL, itemU, AL, AU, D, &
-      & indexLp, indexUp, itemLp, itemUp, ALp, AUp, Dp)
+  subroutine monolis_restruct_matrix_values(N, NDOF, perm, iperm, index, item, A, &
+      & indexp, itemp, Ap)
     implicit none
     integer(kind=kint) :: N, NDOF
-    integer(kind=kint) :: perm(:), iperm(:)
-    integer(kind=kint) :: indexL(0:), indexU(0:)
-    integer(kind=kint) :: indexLp(0:), indexUp(0:)
-    integer(kind=kint) :: itemL(:), itemU(:)
-    integer(kind=kint) :: itemLp(:), itemUp(:)
-    real(kind=kdouble) :: AL(:), AU(:), D(:)
-    real(kind=kdouble) :: ALp(:), AUp(:), Dp(:)
-    Dp  = 0.0d0
-    ALp = 0.0d0
-    AUp = 0.0d0
-    call reorder_diag(N, NDOF, iperm, D, Dp)
-    call reorder_off_diag(N, NDOF, iperm, indexL, itemL, AL, &
-       & indexLp, indexUp, itemLp, itemUp, ALp, AUp)
-    call reorder_off_diag(N, NDOF, iperm, indexU, itemU, AU, &
-       & indexLp, indexUp, itemLp, itemUp, ALp, AUp)
-  end subroutine monolis_restruct_matrix_values
-
-  subroutine reorder_diag(N, NDOF, iperm, D, Dp)
-    implicit none
-    integer(kind=kint) :: N, NDOF
+    integer(kind=kint) :: perm(:)
     integer(kind=kint) :: iperm(:)
-    real(kind=kdouble) :: D(:)
-    real(kind=kdouble) :: Dp(:)
-    integer(kind=kint) :: NDOF2, i, in, jn, jo, j
-
-    NDOF2 = NDOF*NDOF
-    do i = 1, N
-      in = iperm(i)
-      jo = (i -1)*NDOF2
-      jn = (in-1)*NDOF2
-      do j = 1, NDOF2
-        Dp(jn + j) = D(jo + j)
-      enddo
-    enddo
-  end subroutine reorder_diag
-
-  subroutine reorder_off_diag(N, NDOF, iperm, indexX, itemX, AX, &
-      & indexLp, indexUp, itemLp, itemUp, ALp, AUp)
-    implicit none
-    integer(kind=kint) :: N, NDOF
-    integer(kind=kint) :: iperm(:)
-    integer(kind=kint) :: indexX(0:)
-    integer(kind=kint) :: itemX(:)
-    real(kind=kdouble) :: AX(:)
-    integer(kind=kint) :: indexLp(0:), indexUp(0:)
-    integer(kind=kint) :: itemLp(:), itemUp(:)
-    real(kind=kdouble) :: ALp(:), AUp(:)
+    integer(kind=kint) :: index(0:)
+    integer(kind=kint) :: item(:)
+    real(kind=kdouble) :: A(:)
+    integer(kind=kint) :: indexp(0:)
+    integer(kind=kint) :: itemp(:)
+    real(kind=kdouble) :: Ap(:)
     integer(kind=kint) :: NDOF2, in, i
     integer(kind=kint) :: jsnewL, jenewL, jsnewU, jenewU
     integer(kind=kint) :: jo, ko, kn, jn, lo, ln, l
 
-    NDOF2 = NDOF*NDOF
-    do i = 1, N
-      in = iperm(i)
-      jsnewL = indexLp(in-1)+1
-      jenewL = indexLp(in)
-      jsnewU = indexUp(in-1)+1
-      jenewU = indexUp(in)
-      do jo = indexX(i-1)+1, indexX(i)
-        ko = itemX(jo)
-        if(ko > N) cycle
-        kn = iperm(ko)
-        if(kn < in)then
-          call bsearch_int_array(itemLp, jsnewL, jenewL, kn, jn)
-          if(jn < 0)then
-            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
-          endif
-          lo = (jo-1)*NDOF2
-          ln = (jn-1)*NDOF2
-          do l = 1, NDOF2
-            ALp(ln + l) = AX(lo + l)
-          enddo
-        else
-          call bsearch_int_array(itemUp, jsnewU, jenewU, kn, jn)
-          if(jn < 0)then
-            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
-          endif
-          lo = (jo-1)*NDOF2
-          ln = (jn-1)*NDOF2
-          do l = 1, NDOF2
-            AUp(ln + l) = AX(lo + l)
-          enddo
-        endif
-      enddo
-    enddo
-  end subroutine reorder_off_diag
+!    NDOF2 = NDOF*NDOF
+!    do i = 1, N
+!      in = iperm(i)
+!      jsnewL = indexLp(in-1)+1
+!      jenewL = indexLp(in)
+!      jsnewU = indexUp(in-1)+1
+!      jenewU = indexUp(in)
+!      do jo = indexX(i-1)+1, indexX(i)
+!        ko = itemX(jo)
+!        if(ko > N) cycle
+!        kn = iperm(ko)
+!        if(kn < in)then
+!          call bsearch_int_array(itemLp, jsnewL, jenewL, kn, jn)
+!          if(jn < 0)then
+!            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
+!          endif
+!          lo = (jo-1)*NDOF2
+!          ln = (jn-1)*NDOF2
+!          do l = 1, NDOF2
+!            ALp(ln + l) = AX(lo + l)
+!          enddo
+!        else
+!          call bsearch_int_array(itemUp, jsnewU, jenewU, kn, jn)
+!          if(jn < 0)then
+!            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
+!          endif
+!          lo = (jo-1)*NDOF2
+!          ln = (jn-1)*NDOF2
+!          do l = 1, NDOF2
+!            AUp(ln + l) = AX(lo + l)
+!          enddo
+!        endif
+!      enddo
+!    enddo
+  end subroutine monolis_restruct_matrix_values
 
   recursive subroutine sort_int_array(array, istart, iend)
     implicit none

@@ -19,26 +19,36 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, N
+    integer(kind=kint) :: i, j, jS, jE, in, k, l, N
+    integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: T(3,3), P(3)
-    real(kind=kdouble), pointer :: D(:)
+    real(kind=kdouble), pointer :: A(:)
 
     N =  monoMAT%N
-    D => monoMAT%D
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
 
     allocate(ALU(9*N))
     ALU = 0.0d0
 
     do i = 1, N
-      ALU(9*i-8) = D(9*i-8)
-      ALU(9*i-7) = D(9*i-7)
-      ALU(9*i-6) = D(9*i-6)
-      ALU(9*i-5) = D(9*i-5)
-      ALU(9*i-4) = D(9*i-4)
-      ALU(9*i-3) = D(9*i-3)
-      ALU(9*i-2) = D(9*i-2)
-      ALU(9*i-1) = D(9*i-1)
-      ALU(9*i  ) = D(9*i  )
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(i == in)then
+          ALU(9*i-8) = A(9*j-8)
+          ALU(9*i-7) = A(9*j-7)
+          ALU(9*i-6) = A(9*j-6)
+          ALU(9*i-5) = A(9*j-5)
+          ALU(9*i-4) = A(9*j-4)
+          ALU(9*i-3) = A(9*j-3)
+          ALU(9*i-2) = A(9*j-2)
+          ALU(9*i-1) = A(9*j-1)
+          ALU(9*i  ) = A(9*j  )
+        endif
+      enddo
     enddo
 
     do l = 1, N

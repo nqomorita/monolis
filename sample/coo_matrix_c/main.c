@@ -81,7 +81,7 @@ int main(int argc, char *args[]) {
     B[i] = 0.0;
   }
 
-  monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
+  //monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
 
   printf("* monolis result\n");
   printf("%f %f %f\n", B[0], B[1], B[2]);

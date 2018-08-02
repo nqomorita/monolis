@@ -13,7 +13,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
       !call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -27,7 +27,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
       !call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -41,7 +41,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
       !call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -55,7 +55,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
       !call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)

@@ -7,7 +7,7 @@ module mod_monolis_precond_Jacobi
 
   implicit none
 
-  type(monolis_mat), save :: monoTREE
+  type(monolis_mat_LDU), save :: monoTREE
 
 contains
 
@@ -17,7 +17,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    call monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT, monoTREE)
+    call monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT)
     call monolis_init_LU_inner(monoPRM, monoCOM, monoTREE)
     call monolis_fact_LU_inner(monoPRM, monoCOM, monoTREE)
   end subroutine monolis_precond_Jacobi_setup
@@ -50,12 +50,11 @@ contains
     call monolis_clear_LU_inner(monoPRM, monoCOM, monoTREE)
   end subroutine monolis_precond_Jacobi_clear
 
-  subroutine monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT, monoTREE)
+  subroutine monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    type(monolis_mat) :: monoTREE
     integer(kind=kint) :: N, NDOF
     logical :: is_fillin = .true.
     logical :: is_asym = .false.

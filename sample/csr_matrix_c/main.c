@@ -115,7 +115,7 @@ int main(int argc, char *args[]) {
   is_init_x = 0;
   show_iteration = 0;
 
-  monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
+  //monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
 
   printf("* monolis result B\n");
   for (i=0; i<N; i++){

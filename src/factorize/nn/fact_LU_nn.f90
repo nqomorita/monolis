@@ -19,16 +19,16 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
-    AU => monoMAT%AU
+    AU => monoMAT%U
   end subroutine monolis_init_LU_inner_nn
 
   subroutine monolis_clear_LU_inner_nn(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
 
     deallocate(AD)
   end subroutine monolis_clear_LU_inner_nn
@@ -37,7 +37,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
     integer(kind=kint) :: N, NP, NIN, NDOF, NNDOF, NDOF2
     integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
     integer(kind=kint) :: shift, imax
@@ -165,7 +165,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_mat_LDU) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF
     integer(kind=kint) :: i, j, k, in, jS, jE, kn
     integer(kind=kint), pointer :: idxU(:), itemU(:)

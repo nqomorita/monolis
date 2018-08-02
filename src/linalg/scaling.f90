@@ -20,10 +20,10 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NDOF2
     integer(kind=kint) :: isL, ieL, isU, ieU, inod
-    integer(kind=kint) :: i, j, k, ii, ij, ip(monoMAT%NDOF), iq(monoMAT%NDOF)
+    integer(kind=kint) :: i, j, jS, jE, in, k, l
     real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: D(:), AL(:), AU(:), X(:), B(:)
-    integer(kind=kint), pointer :: indexL(:), itemL(:), indexU(:), itemU(:)
+    real(kind=kdouble), pointer :: A(:), X(:), B(:)
+    integer(kind=kint), pointer :: index(:), item(:)
 
     if(.not. monoPRM%is_scaling) return
 
@@ -33,58 +33,35 @@ contains
     NDOF2 = NDOF*NDOF
     X => monoMAT%X
     B => monoMAT%B
-    D => monoMAT%D
-    AL => monoMAT%AL
-    AU => monoMAT%AU
-    indexL => monoMAT%indexL
-    itemL => monoMAT%itemL
-    indexU => monoMAT%indexU
-    itemU => monoMAT%itemU
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
 
     allocate(diag(NDOF*NP))
 
-    do i = 1, N
-      do k = 1, NDOF
-        diag(NDOF*(i-1)+k) = 1.0d0 / dsqrt(dabs(D(NDOF*NDOF*(i-1) + (k-1)*(NDOF+1) + 1)))
+    do i = 1, NP
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        if(i == in)then
+          do k = 1, NDOF2
+            diag(NDOF*(i-1)+k) = 1.0d0 / dsqrt(dabs(A(NDOF2*(j-1) + (k-1)*(NDOF+1) + 1)))
+          enddo
+        endif
       enddo
     enddo
 
     call monolis_update_R(monoCOM, NDOF, diag, tcomm)
 
     do i = 1, NP
-      do j = 1, NDOF
-        ip(j) = NDOF*(i-1) + j
-      enddo
-      do j = 1, NDOF
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
         do k = 1, NDOF
-          D(NDOF2*(i-1) + NDOF*(j-1) + k) = D(NDOF2*(i-1) + NDOF*(j-1) + k)*diag(ip(j))*diag(ip(k))
-        enddo
-      enddo
-
-      isL = indexL(i-1) + 1
-      ieL = indexL(i  )
-      do k = isL, ieL
-        inod = itemL(k)
-        do ii = 1, NDOF
-          iq(ii) = NDOF*(inod-1) + ii
-        enddo
-        do ii = 1, NDOF
-          do ij = 1, NDOF
-            AL(NDOF2*(k-1) + NDOF*(ii-1) + ij) = AL(NDOF2*(k-1) + NDOF*(ii-1) + ij)*diag(ip(ii))*diag(iq(ij))
-          enddo
-        enddo
-      enddo
-
-      isU = indexU(i-1) + 1
-      ieU = indexU(i  )
-      do k = isU, ieU
-        inod = itemU(k)
-        do ii = 1, NDOF
-          iq(ii) = NDOF*(inod-1) + ii
-        enddo
-        do ii = 1, NDOF
-          do ij = 1, NDOF
-            AU(NDOF2*(k-1) + NDOF*(ii-1) + ij) = AU(NDOF2*(k-1) + NDOF*(ii-1) + ij)*diag(ip(ii))*diag(iq(ij))
+          do l = 1, NDOF
+            A(NDOF2*(j-1) + NDOF*(k-1) + l) = A(NDOF2*(j-1) + NDOF*(k-1) + l)*diag(NDOF*(i-1)+k)*diag(NDOF*(in-1)+l)
           enddo
         enddo
       enddo
@@ -112,10 +89,10 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NDOF2
     integer(kind=kint) :: isL, ieL, isU, ieU, inod
-    integer(kind=kint) :: i, j, k, ii, ij, ip(monoMAT%NDOF), iq(monoMAT%NDOF)
+    integer(kind=kint) :: i, j, k, l, in, jS, jE
     real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: D(:), AL(:), AU(:), B(:), X(:)
-    integer(kind=kint), pointer :: indexL(:), itemL(:), indexU(:), itemU(:)
+    real(kind=kdouble), pointer :: A(:), B(:), X(:)
+    integer(kind=kint), pointer :: index(:), item(:)
 
     if(.not. monoPRM%is_scaling) return
 
@@ -125,57 +102,27 @@ contains
     NDOF2 = NDOF*NDOF
     B => monoMAT%B
     X => monoMAT%X
-    D => monoMAT%D
-    AL => monoMAT%AL
-    AU => monoMAT%AU
-    indexL => monoMAT%indexL
-    itemL => monoMAT%itemL
-    indexU => monoMAT%indexU
-    itemU => monoMAT%itemU
+    A => monoMAT%A
+    index => monoMAT%index
+    item => monoMAT%item
+
+    do i = 1, NP
+      jS = index(i-1) + 1
+      jE = index(i)
+      do j = jS, jE
+        in = item(j)
+        do k = 1, NDOF
+          do l = 1, NDOF
+            A(NDOF2*(j-1) + NDOF*(k-1) + l) = A(NDOF2*(j-1) + NDOF*(k-1) + l)/(diag(NDOF*(i-1)+k)*diag(NDOF*(in-1)+l))
+          enddo
+        enddo
+      enddo
+    enddo
 
     do i = 1, N
       do k = 1, NDOF
         X(NDOF*(i-1) + k) = X(NDOF*(i-1) + k)*diag(NDOF*(i-1) + k)
         B(NDOF*(i-1) + k) = B(NDOF*(i-1) + k)/diag(NDOF*(i-1) + k)
-      enddo
-    enddo
-
-    do i = 1, NP
-      do j = 1, NDOF
-        ip(j) = NDOF*(i-1) + j
-      enddo
-      do j = 1, NDOF
-        do k = 1, NDOF
-          D(NDOF2*(i-1) + NDOF*(j-1) + k) = D(NDOF2*(i-1) + NDOF*(j-1) + k)/(diag(ip(j))*diag(ip(k)))
-        enddo
-      enddo
-
-      isL = indexL(i-1) + 1
-      ieL = indexL(i  )
-      do k = isL, ieL
-        inod = itemL(k)
-        do ii = 1, NDOF
-          iq(ii) = NDOF*(inod-1) + ii
-        enddo
-        do ii = 1, NDOF
-          do ij = 1, NDOF
-            AL(NDOF2*(k-1) + NDOF*(ii-1) + ij) = AL(NDOF2*(k-1) + NDOF*(ii-1) + ij)/(diag(ip(ii))*diag(iq(ij)))
-          enddo
-        enddo
-      enddo
-
-      isU = indexU(i-1) + 1
-      ieU = indexU(i  )
-      do k = isU, ieU
-        inod = itemU(k)
-        do ii = 1, NDOF
-          iq(ii) = NDOF*(inod-1) + ii
-        enddo
-        do ii = 1, NDOF
-          do ij = 1, NDOF
-            AU(NDOF2*(k-1) + NDOF*(ii-1) + ij) = AU(NDOF2*(k-1) + NDOF*(ii-1) + ij)/(diag(ip(ii))*diag(iq(ij)))
-          enddo
-        enddo
       enddo
     enddo
 
