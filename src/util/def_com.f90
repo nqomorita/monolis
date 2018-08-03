@@ -1,5 +1,6 @@
 module mod_monolis_com
   use mod_monolis_prm
+  use iso_c_binding
   implicit none
 #ifdef WITH_MPI
   include 'mpif.h'
@@ -16,6 +17,18 @@ module mod_monolis_com
     integer(kind=kint), pointer :: send_index(:) => null()
     integer(kind=kint), pointer :: send_item(:)  => null()
   end type monolis_com
+
+  type, bind(c) :: monolis_com_c
+    integer(c_int) :: myrank
+    integer(c_int) :: comm
+    integer(c_int) :: commsize
+    integer(c_int) :: n_neib
+    type(c_ptr) :: neib_pe
+    type(c_ptr) :: recv_index
+    type(c_ptr) :: recv_item
+    type(c_ptr) :: send_index
+    type(c_ptr) :: send_item
+  end type monolis_com_c
 
   integer(kind=kint), parameter :: monolis_sum = 1
   integer(kind=kint), parameter :: monolis_max = 2

@@ -33,7 +33,7 @@ int main(int argc, char *args[]) {
 
   NDOF = 1;
 
-  monolis_convert_csr_get_size(N, NZ, index, item, &NPU, &NPL);
+  //monolis_convert_csr_get_size(N, NZ, index, item, &NPU, &NPL);
 
   X = (double *)calloc(N*NDOF, sizeof(double));
   B = (double *)calloc(N*NDOF, sizeof(double));
@@ -58,9 +58,9 @@ int main(int argc, char *args[]) {
   X[6] = 1.002039983680125;
   X[7] = 2.846185230518152;
 
-  monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL);
+  //monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL);
 
-  monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+  //monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL);
 
   method = 1;
   precond = 4;
@@ -97,8 +97,8 @@ int main(int argc, char *args[]) {
   printf("\n");
 */
 
-  monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
-  is_scaling, is_reordering, is_init_x, show_iteration);
+  //monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
+  //is_scaling, is_reordering, is_init_x, show_iteration);
 
   printf("* monolis result\n");
   for (i=0; i<N; i++){
@@ -127,8 +127,8 @@ int main(int argc, char *args[]) {
     B[i] = 1.0;
   }
 
-  monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
-  is_scaling, is_reordering, is_init_x, show_iteration);
+  //monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
+  //is_scaling, is_reordering, is_init_x, show_iteration);
 
   free(X);
   free(B);

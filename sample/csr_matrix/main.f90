@@ -39,11 +39,11 @@ program main
 
   NDOF = 1
 
-  call monolis_convert_csr_get_size(N, NZ, index, item, NPU, NPL)
-  call monolis_convert_alloc_matrix(N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL, X, B)
-  call monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
-  call monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
-       & D, AU, AL, indexU, itemU, indexL, itemL)
+  !call monolis_convert_csr_get_size(N, NZ, index, item, NPU, NPL)
+  !call monolis_convert_alloc_matrix(N, NDOF, NPU, NPL, D, AU, AL, indexU, indexL, itemU, itemL, X, B)
+  !call monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL)
+  !call monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, &
+  !     & D, AU, AL, indexU, itemU, indexL, itemL)
 
   B = 1.0d0
   method = 1
@@ -55,9 +55,9 @@ program main
   is_init_x = 1
   show_iteration = 1
 
-  call monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
-  & indexU, itemU, indexL, itemL, &
-  & method, precond, maxiter, tol, is_scaling, is_reordering, is_init_x, show_iteration)
+  !call monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, &
+  !& indexU, itemU, indexL, itemL, &
+  !& method, precond, maxiter, tol, is_scaling, is_reordering, is_init_x, show_iteration)
 
   write(*,"(a)")"* monolis result"
   write(*,"(1p3e12.5)")X
@@ -68,5 +68,5 @@ program main
   write(*,"(a)")"* monolis b = Ax"
   write(*,"(1p3e12.5)")B
 
-  call monolis_convert_dealloc_matrix(D, AU, AL, indexU, indexL, itemU, itemL, X, B)
+  !call monolis_convert_dealloc_matrix(D, AU, AL, indexU, indexL, itemU, itemL, X, B)
 end program main

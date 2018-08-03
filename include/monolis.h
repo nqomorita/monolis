@@ -37,45 +37,17 @@ typedef struct {
   //bool is_reordering;
 } monolis_prm;
 
-extern void monolis(int N, int NP, int NDOF, int NPU, int NPL,
-  double *D, double *AU, double *AL, double *X, double *B,
-  int *indexU, int *itemU, int *indexL, int *itemL,
-  int myrank, int comm, int commsize, int n_neib,
-  int *neib_pe, int *recv_index, int *send_index, int *recv_item, int *send_item,
+extern void monolis_initialize(monolis_com monoCOM);
+
+extern void monolis(monolis_com monoCOM, int N, int NP, int NZ, int NDOF,
+  double *A, double *X, double *B, int *index, int *item,
   int method, int precond, int maxiter, double tol,
   int is_scaling, int is_reordering, int is_init_x, int show_iteration);
 
-extern void monolis_serial(int N, int NDOF, int NPU, int NPL,
-  double *D, double *AU, double *AL, double *X, double *B,
-  int *indexU, int *itemU, int *indexL, int *itemL,
-  int method, int precond, int maxiter, double tol,
-  int is_scaling, int is_reordering, int is_init_x, int show_iteration);
+extern void monolis_finalize(monolis_com monoCOM);
 
-/* monolis_convert_full section */
-extern void monolis_convert_full_matrix(int Nf, int NDOFf, double *Af, double thresh,
-  int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
-  int *indexU, int *itemU, int *indexL, int *itemL);
-
-/* monolis_convert_coo section */
-extern void monolis_convert_coo_get_size(int N, int NZ, int *indexI, int *indexJ, int *NPU, int *NPL);
-
-extern void monolis_convert_coo_get_index(int N, int NZ, int *indexI, int *indexJ,
-  int NPU, int NPL, int *indexU, int *itemU, int *indexL, int *itemL);
-
-extern void monolis_convert_coo_update_matrix_entry(int N, int NZ, int NDOF, double *A, int *indexI, int *indexJ,
-  int NPU, int NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
-
-/* monolis_convert_csr section */
-extern void monolis_convert_csr_get_size(int N, int NZ, int *index, int *item, int *NPU, int *NPL);
-
-extern void monolis_convert_csr_get_index(int N, int NZ, int *index, int *item,
-  int NPU, int NPL, int *indexU, int *itemU, int *indexL, int *itemL);
-
-extern void monolis_convert_csr_update_matrix_entry(int N, int NZ, int NDOF, double *A, int *index, int *item,
-  int NPU, int NPL, double *D, double *U, double *L, int *indexU, int *itemU, int *indexL, int *itemL);
-
-extern void monolis_matvec_serial(int N, int NDOF, int NPU, int NPL, double *D, double *AU, double *AL,
-  int *indexU, int *itemU, int *indexL, int *itemL, double *X, double *B);
+extern void monolis_matvec(monolis_com monoCOM, int N, int NP, int NZ, int NDOF, double *A,
+  int *index, int *item, double *X, double *B);
 
 #ifdef __cplusplus
 }
