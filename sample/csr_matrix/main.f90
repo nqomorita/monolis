@@ -39,7 +39,7 @@ program main
   X = 1.0d0
   B = 1.0d0
   method = 1
-  precond = 1
+  precond = 2
   maxiter = 1000
   tol = 1.0d-8
   is_scaling    = .true.

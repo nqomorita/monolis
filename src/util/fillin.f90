@@ -53,7 +53,7 @@ contains
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i  )
       do j = jS, jE
-        if(i < monoMAT%item(j) .and. monoMAT%item(j) <= N)then
+        if(i < monoMAT%item(j))then
           in = in + 1
         endif
       enddo
@@ -62,7 +62,7 @@ contains
 
       in = 0
       do j = jS, jE
-        if(i < monoMAT%item(j) .and. monoMAT%item(j) <= N)then
+        if(i < monoMAT%item(j))then
           in = in + 1
           tree(i)%ancestor(in) = monoMAT%item(j)
         endif
@@ -86,14 +86,14 @@ contains
         do j = 2, tree(i)%n_ancestor
           in = tree(i)%ancestor(j)
           ie = in/bit + 1
-          child_mask(ie) = ibset(child_mask(ie),mod(in,bit))
+          child_mask(ie) = ibset(child_mask(ie), mod(in,bit))
           range = in
         enddo
         k = tree(parent)%n_ancestor
         do j = 1, k
           in = tree(parent)%ancestor(j)
           ie = in/bit + 1
-          parent_mask(ie) = ibset(parent_mask(ie),mod(in,bit))
+          parent_mask(ie) = ibset(parent_mask(ie), mod(in,bit))
           range = max(range,in)
         enddo
         ie = range/bit + 1
@@ -107,7 +107,7 @@ contains
 
         if(0 < c)then
           allocate(array(c))
-          tree(parent)%n_ancestor=c
+          tree(parent)%n_ancestor = c
           in = 0
           do j = is, ie
             do k = 1, popcnt(fillin_mask(j))
@@ -213,70 +213,80 @@ contains
     NDOF2 = NDOF*NDOF
     indexU => monoTREE%indexU
     itemU => monoTREE%itemU
-    indexL => monoTREE%indexL
-    itemL => monoTREE%itemL
 
     !value
-!    allocate(monoTREE%AU(NDOF2*NPU))
-!    AU => monoTREE%AU
-!    AU = 0.0d0
-!
-!    do k = 1, N
-!      in = indexU(k-1)+1
-!      jS = NDOF2*(in-1)
-!      jE = NDOF2*(k -1)
-!      do j = 1, NDOF2
-!        AU(jS + j) = monoMAT%D(jE + j)
-!      enddo
-!    enddo
-!
-!    do k = 1, N
-!      iS = indexU(k-1) + 1
-!      iE = indexU(k)
-!      jS = monoMAT%indexU(k-1) + 1
-!      jE = monoMAT%indexU(k)
-!      aa:do j = jS, jE
-!        jn = monoMAT%itemU(j)
-!        do i = iS, iE
-!          in = itemU(i)
-!          if(jn == in)then
-!            lS = NDOF2*(i-1)
-!            lE = NDOF2*(j-1)
-!            do l = 1, NDOF2
-!              AU(lS + l) = monoMAT%AU(lE + l)
-!            enddo
-!            iS = iS + 1
-!            cycle aa
-!          endif
-!        enddo
-!      enddo aa
-!    enddo
-!
-!    if(is_asym)then
-!      allocate(AL(9*NPL))
-!      AL = 0.0d0
-!
-!      do k = 1, N
-!        iS = indexL(k-1) + 1
-!        iE = indexL(k)
-!        jS = monoMAT%indexL(k-1) + 1
-!        jE = monoMAT%indexL(k)
-!        bb:do j = jS, jE
-!          jn = monoMAT%itemL(j)
-!          do i = iS, iE
-!            in = itemL(i)
-!            if(jn == in)then
-!              lS = NDOF2*(i-1)
-!              lE = NDOF2*(j-1)
-!              do l = 1, NDOF2
-!                AL(lS + l) = monoMAT%AL(lE + l)
-!              enddo
-!              iS = iS + 1
-!              cycle bb
-!            endif
-!          enddo
-!        enddo bb
-!      enddo
-!    endif
+    allocate(monoTREE%U(NDOF2*NPU))
+    AU => monoTREE%U
+    AU = 0.0d0
+
+    do i = 1, N
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        in = monoMAT%item(j)
+        if(i == in)then
+          jn = indexU(i-1)+1
+          do l = 1, NDOF2
+            AU(NDOF2*(jn-1) + l) = monoMAT%A(NDOF2*(j-1) + l)
+          enddo
+        endif
+      enddo
+    enddo
+
+    do k = 1, N
+      iS = indexU(k-1) + 1
+      iE = indexU(k)
+      jS = monoMAT%index(k-1) + 1
+      jE = monoMAT%index(k)
+      aa:do j = jS, jE
+        jn = monoMAT%item(j)
+        if(k < jn)then
+          do i = iS, iE
+            in = itemU(i)
+            if(jn == in)then
+              lS = NDOF2*(i-1)
+              lE = NDOF2*(j-1)
+              do l = 1, NDOF2
+                AU(lS + l) = monoMAT%A(lE + l)
+              enddo
+              iS = iS + 1
+              cycle aa
+            endif
+          enddo
+        endif
+      enddo aa
+    enddo
+
+    if(is_asym)then
+      indexL => monoTREE%indexL
+      itemL => monoTREE%itemL
+      allocate(monoTREE%L(NDOF2*NPL))
+      AL => monoTREE%L
+      AL = 0.0d0
+
+      do k = 1, N
+        iS = indexL(k-1) + 1
+        iE = indexL(k)
+        jS = monoMAT%index(k-1) + 1
+        jE = monoMAT%index(k)
+        bb:do j = jS, jE
+          jn = monoMAT%item(j)
+          if(jn < k)then
+            do i = iS, iE
+              in = itemL(i)
+              if(jn == in)then
+                lS = NDOF2*(i-1)
+                lE = NDOF2*(j-1)
+                do l = 1, NDOF2
+                  AL(lS + l) = monoMAT%A(lE + l)
+                enddo
+                iS = iS + 1
+                cycle bb
+              endif
+            enddo
+          endif
+        enddo bb
+      enddo
+    endif
   end subroutine monolis_matrix_copy_with_fillin
 end module mod_monolis_matrix_fillin
