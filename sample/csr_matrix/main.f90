@@ -36,15 +36,15 @@ program main
   allocate(X(N))
   allocate(B(N))
 
-  X = 0.0d0
+  X = 1.0d0
   B = 1.0d0
   method = 1
   precond = 1
   maxiter = 1000
   tol = 1.0d-8
-  is_scaling    = .false.
-  is_reordering = .false.
-  is_init_x     = .false.
+  is_scaling    = .true.
+  is_reordering = .true.
+  is_init_x     = .true.
   show_iterlog  = .true.
   show_time     = .true.
   show_summary  = .true.

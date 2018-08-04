@@ -17,15 +17,15 @@ contains
     integer(kind=kint) :: perm(:)
     integer(kind=kint) :: i, in, N
 
-    monoCOM_reorder%myrank = monoCOM%myrank
-    monoCOM_reorder%comm = monoCOM%comm
+    monoCOM_reorder%myrank   = monoCOM%myrank
+    monoCOM_reorder%comm     = monoCOM%comm
     monoCOM_reorder%commsize = monoCOM%commsize
-    monoCOM_reorder%n_neib = monoCOM%n_neib
+    monoCOM_reorder%n_neib   = monoCOM%n_neib
 
     if(monoCOM%n_neib /= 0)then
-      monoCOM_reorder%neib_pe => monoCOM%neib_pe
+      monoCOM_reorder%neib_pe    => monoCOM%neib_pe
       monoCOM_reorder%recv_index => monoCOM%recv_index
-      monoCOM_reorder%recv_item => monoCOM%recv_item
+      monoCOM_reorder%recv_item  => monoCOM%recv_item
       monoCOM_reorder%send_index => monoCOM%send_index
 
       N = monoCOM%send_index(monoCOM%n_neib)
@@ -78,7 +78,7 @@ contains
     integer(kind=kint) :: cnt, i, in, j, jo, jn
 
     cnt = 0
-    index(0) = 0
+    indexp(0) = 0
     do i = 1, N
       in = perm(i)
       do j = index(in-1)+1, index(in)
@@ -96,52 +96,31 @@ contains
       & indexp, itemp, Ap)
     implicit none
     integer(kind=kint) :: N, NDOF
-    integer(kind=kint) :: perm(:)
-    integer(kind=kint) :: iperm(:)
-    integer(kind=kint) :: index(0:)
-    integer(kind=kint) :: item(:)
+    integer(kind=kint) :: perm(:), iperm(:)
+    integer(kind=kint) :: index(0:), item(:)
     real(kind=kdouble) :: A(:)
-    integer(kind=kint) :: indexp(0:)
-    integer(kind=kint) :: itemp(:)
+    integer(kind=kint) :: indexp(0:), itemp(:)
     real(kind=kdouble) :: Ap(:)
     integer(kind=kint) :: NDOF2, in, i
-    integer(kind=kint) :: jsnewL, jenewL, jsnewU, jenewU
+    integer(kind=kint) :: jSn, jEn
     integer(kind=kint) :: jo, ko, kn, jn, lo, ln, l
 
-!    NDOF2 = NDOF*NDOF
-!    do i = 1, N
-!      in = iperm(i)
-!      jsnewL = indexLp(in-1)+1
-!      jenewL = indexLp(in)
-!      jsnewU = indexUp(in-1)+1
-!      jenewU = indexUp(in)
-!      do jo = indexX(i-1)+1, indexX(i)
-!        ko = itemX(jo)
-!        if(ko > N) cycle
-!        kn = iperm(ko)
-!        if(kn < in)then
-!          call bsearch_int_array(itemLp, jsnewL, jenewL, kn, jn)
-!          if(jn < 0)then
-!            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
-!          endif
-!          lo = (jo-1)*NDOF2
-!          ln = (jn-1)*NDOF2
-!          do l = 1, NDOF2
-!            ALp(ln + l) = AX(lo + l)
-!          enddo
-!        else
-!          call bsearch_int_array(itemUp, jsnewU, jenewU, kn, jn)
-!          if(jn < 0)then
-!            write(*,*) "** monolis error: jn < 0 i reorder_off_diag"
-!          endif
-!          lo = (jo-1)*NDOF2
-!          ln = (jn-1)*NDOF2
-!          do l = 1, NDOF2
-!            AUp(ln + l) = AX(lo + l)
-!          enddo
-!        endif
-!      enddo
-!    enddo
+    NDOF2 = NDOF*NDOF
+    do i = 1, N
+      in = iperm(i)
+      jSn = indexp(in-1)+1
+      jEn = indexp(in)
+      do jo = index(i-1)+1, index(i)
+        ko = item(jo)
+        kn = iperm(ko)
+        call bsearch_int_array(itemp, jSn, jEn, kn, jn)
+        lo = (jo-1)*NDOF2
+        ln = (jn-1)*NDOF2
+        do l = 1, NDOF2
+          Ap(ln + l) = A(lo + l)
+        enddo
+      enddo
+    enddo
   end subroutine monolis_restruct_matrix_values
 
   recursive subroutine sort_int_array(array, istart, iend)
