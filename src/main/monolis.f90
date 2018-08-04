@@ -31,13 +31,13 @@ contains
     integer(kind=kint), intent(in) :: method
     integer(kind=kint), intent(in) :: precond
     integer(kind=kint), intent(in) :: maxiter
-    integer(kind=kint), intent(in) :: is_scaling
-    integer(kind=kint), intent(in) :: is_reordering
-    integer(kind=kint), intent(in) :: is_init_x
-    integer(kind=kint), intent(in) :: show_iterlog
-    integer(kind=kint), intent(in) :: show_time
-    integer(kind=kint), intent(in) :: show_summary
     real(kind=kdouble), intent(in) :: tol
+    logical, intent(in) :: is_scaling
+    logical, intent(in) :: is_reordering
+    logical, intent(in) :: is_init_x
+    logical, intent(in) :: show_iterlog
+    logical, intent(in) :: show_time
+    logical, intent(in) :: show_summary
 
     !> for monoMAT
     monoMAT%N = N
@@ -54,18 +54,12 @@ contains
     monoPRM%precond = precond
     monoPRM%maxiter = maxiter
     monoPRM%tol = tol
-    monoPRM%is_scaling     = .false.
-    monoPRM%is_reordering  = .false.
-    monoPRM%is_init_x      = .false.
-    monoPRM%show_iterlog   = .false.
-    monoPRM%show_time      = .false.
-    monoPRM%show_summary   = .false.
-    if(is_scaling     == 1) monoPRM%is_scaling     = .true.
-    if(is_reordering  == 1) monoPRM%is_reordering  = .true.
-    if(is_init_x      == 1) monoPRM%is_init_x      = .true.
-    if(show_iterlog   == 1) monoPRM%show_iterlog   = .true.
-    if(show_time      == 1) monoPRM%show_time      = .true.
-    if(show_summary   == 1) monoPRM%show_summary   = .true.
+    monoPRM%is_scaling    = is_scaling
+    monoPRM%is_reordering = is_reordering
+    monoPRM%is_init_x     = is_init_x
+    monoPRM%show_iterlog  = show_iterlog
+    monoPRM%show_time     = show_time
+    monoPRM%show_summary  = show_summary
 
 #ifdef DTEST_ALL
     call monolis_solve_test(monoPRM, monoCOM, monoMAT)
@@ -96,9 +90,9 @@ contains
     real(c_double), intent(out),target :: X(N*NDOF)
     !> for monoPRM
     integer(c_int), value :: method, precond, maxiter
+    real(c_double), value :: tol
     integer(c_int), value :: is_scaling, is_reordering, is_init_x
     integer(c_int), value :: show_iterlog, show_time, show_summary
-    real(c_double), value :: tol
 
     !> for monoMAT
     monoMAT%N = N

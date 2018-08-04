@@ -23,6 +23,36 @@ contains
     enddo
   end subroutine monolis_residual
 
+  subroutine monolis_matvec_wrapper(monoCOM, N, NP, NZ, NDOF, A, index, item, X, Y, tcomm)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kind=kint) :: N, NP, NZ, NDOF
+    integer(kind=kint), pointer :: index(:), item(:)
+    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble) :: X(:), Y(:)
+    real(kind=kdouble), optional :: tcomm
+
+    !> for monoMAT
+    monoMAT%N = N
+    monoMAT%NP = NP
+    monoMAT%NZ = NZ
+    monoMAT%NDOF = NDOF
+    monoMAT%A => A
+    monoMAT%index => index
+    monoMAT%item => item
+
+    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+
+    if(monoMAT%NDOF == 3)then
+      call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
+    elseif(monoMAT%NDOF == 1)then
+      call monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
+    else
+      call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF, tcomm)
+    endif
+  end subroutine monolis_matvec_wrapper
+
   subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
