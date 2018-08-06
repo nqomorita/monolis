@@ -42,16 +42,45 @@ contains
     monoMAT%index => index
     monoMAT%item => item
 
-    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
-
-    if(monoMAT%NDOF == 3)then
-      call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
-    elseif(monoMAT%NDOF == 1)then
-      call monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
-    else
-      call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF, tcomm)
-    endif
+    call monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
   end subroutine monolis_matvec_wrapper
+
+  subroutine monolis_matvec_wrapper_c(monoCOM_c, N, NP, NZ, NDOF, A, index, item, X_c, Y_c) &
+    & bind(c, name="monolis_matvec_wrapper")
+    use iso_c_binding
+    implicit none
+    type(monolis_com_c) :: monoCOM_c
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    !> for monoMAT
+    integer(c_int), value :: N, NP, NZ, NDOF
+    integer(c_int), intent(in), target :: index(0:NP)
+    integer(c_int), intent(in), target :: item(NZ)
+    real(c_double), intent(in), target :: A(NZ*NDOF*NDOF)
+    real(c_double), intent(in), target :: X_c(NP*NDOF)
+    real(c_double), intent(out),target :: Y_c(NP*NDOF)
+    real(kind=kdouble), pointer :: X(:), Y(:)
+    !> for monoMAT
+
+    monoMAT%N = N
+    monoMAT%NP = NP
+    monoMAT%NZ = NZ
+    monoMAT%NDOF = NDOF
+    monoMAT%A => A
+    monoMAT%index => index
+    monoMAT%item => item
+    monoMAT%item = monoMAT%item + 1
+    !> for monoCOM
+    monoCOM%myrank = monoCOM_c%myrank
+    monoCOM%comm = monoCOM_c%comm
+    monoCOM%commsize = monoCOM_c%commsize
+    monoCOM%n_neib = monoCOM_c%n_neib
+
+    X => X_c
+    Y => Y_c
+    call monolis_matvec(monoCOM, monoMAT, X, Y)
+    monoMAT%item = monoMAT%item - 1
+  end subroutine monolis_matvec_wrapper_c
 
   subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
     implicit none

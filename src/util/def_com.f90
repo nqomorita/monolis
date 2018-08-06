@@ -66,6 +66,32 @@ contains
 #endif
   end subroutine monolis_com_initialize
 
+  subroutine monolis_com_initialize_c(monoCOM_c) bind(c, name="monolis_com_initialize")
+    use iso_c_binding
+    implicit none
+    type(monolis_com_c) :: monoCOM_c
+    integer(kind=kint) :: ierr, commsize, myrank
+
+    monoCOM_c%myrank = 0
+    monoCOM_c%comm = 0
+    monoCOM_c%commsize = 0
+    monoCOM_c%n_neib = 0
+    !monoCOM_c%neib_pe => null()
+    !monoCOM_c%recv_index => null()
+    !monoCOM_c%recv_item => null()
+    !monoCOM_c%send_index => null()
+    !monoCOM_c%send_item => null()
+
+#ifdef WITH_MPI
+    call MPI_init(ierr)
+    call MPI_comm_size(MPI_COMM_WORLD, commsize, ierr)
+    call MPI_comm_rank(MPI_COMM_WORLD, myrank,   ierr)
+    monoCOM_c%comm = MPI_COMM_WORLD
+    monoCOM_c%commsize = commsize
+    monoCOM_c%myrank = myrank
+#endif
+  end subroutine monolis_com_initialize_c
+
   subroutine monolis_com_finalize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
@@ -86,6 +112,28 @@ contains
     call MPI_finalize(ierr)
 #endif
   end subroutine monolis_com_finalize
+
+  subroutine monolis_com_finalize_c(monoCOM_c) bind(c, name="monolis_com_finalize")
+    use iso_c_binding
+    implicit none
+    type(monolis_com_c) :: monoCOM_c
+    integer(kind=kint) :: ierr
+
+    !if(associated(monoCOM_c%neib_pe)) deallocate(monoCOM_c%neib_pe)
+    !if(associated(monoCOM_c%recv_index)) deallocate(monoCOM_c%recv_index)
+    !if(associated(monoCOM_c%recv_item)) deallocate(monoCOM_c%recv_item)
+    !if(associated(monoCOM_c%send_index)) deallocate(monoCOM_c%send_index)
+    !if(associated(monoCOM_c%send_item)) deallocate(monoCOM_c%send_item)
+    !monoCOM_c%neib_pe => null()
+    !monoCOM_c%recv_index => null()
+    !monoCOM_c%recv_item => null()
+    !monoCOM_c%send_index => null()
+    !monoCOM_c%send_item => null()
+
+#ifdef WITH_MPI
+    call MPI_finalize(ierr)
+#endif
+  end subroutine monolis_com_finalize_c
 
   subroutine monolis_com_copy(monoCOM, monoCOM_reorder)
     implicit none

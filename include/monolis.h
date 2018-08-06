@@ -37,16 +37,16 @@ typedef struct {
   //bool is_reordering;
 } monolis_prm;
 
-extern void monolis_initialize(monolis_com monoCOM);
+extern void monolis_com_initialize(monolis_com *monoCOM);
 
-extern void monolis(monolis_com monoCOM, int N, int NP, int NZ, int NDOF,
+extern void monolis(monolis_com *monoCOM, int N, int NP, int NZ, int NDOF,
   double *A, double *X, double *B, int *index, int *item,
   int method, int precond, int maxiter, double tol,
-  int is_scaling, int is_reordering, int is_init_x, int show_iteration);
+  int is_scaling, int is_reordering, int is_init_x, int show_iterlog, int show_time, int show_summary);
 
-extern void monolis_finalize(monolis_com monoCOM);
+extern void monolis_com_finalize(monolis_com *monoCOM);
 
-extern void monolis_matvec(monolis_com monoCOM, int N, int NP, int NZ, int NDOF, double *A,
+extern void monolis_matvec_wrapper(monolis_com *monoCOM, int N, int NP, int NZ, int NDOF, double *A,
   int *index, int *item, double *X, double *B);
 
 #ifdef __cplusplus

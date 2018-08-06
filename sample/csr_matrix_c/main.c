@@ -4,11 +4,13 @@
 
 int main(int argc, char *args[]) {
   FILE *fp;
+  monolis_com monoCOM;
   char fname[] = "test.mtx";
   int i, j, N, NDOF, NPU, NPL, NZ;
-  int method, precond, maxiter, is_scaling, is_reordering, is_init_x, show_iteration;
-  int *index, *item, *indexU, *indexL, *itemU, *itemL;
-  double *A, *D, *AU, *AL, *X, *B;
+  int method, precond, maxiter, is_scaling, is_reordering, is_init_x;
+  int show_iterlog, show_time, show_summary;
+  int *index, *item;
+  double *A, *X, *B;
   double tol;
   char str[16];
 
@@ -33,72 +35,39 @@ int main(int argc, char *args[]) {
 
   NDOF = 1;
 
-  //monolis_convert_csr_get_size(N, NZ, index, item, &NPU, &NPL);
+  monolis_com_initialize(&monoCOM);
 
   X = (double *)calloc(N*NDOF, sizeof(double));
   B = (double *)calloc(N*NDOF, sizeof(double));
-  D  = (double *)calloc(N  *NDOF*NDOF, sizeof(double));
-  AU = (double *)calloc(NPU*NDOF*NDOF, sizeof(double));
-  AL = (double *)calloc(NPL*NDOF*NDOF, sizeof(double));
-  indexU = (int *)calloc(N+1, sizeof(int));
-  indexL = (int *)calloc(N+1, sizeof(int));
-  itemU  = (int *)calloc(NPU, sizeof(int));
-  itemL  = (int *)calloc(NPL, sizeof(int));
 
   for (i=0; i<N*NDOF; i++){
     B[i] = (double)i;
   }
 
-  X[0] = -0.241534067727462;
-  X[1] = 0.300285597715213;
-  X[2] = 0.365565075479389;
-  X[3] = 0.550795593635243;
-  X[4] = 1.077111383108927;
-  X[5] = 0.611179110567108;
-  X[6] = 1.002039983680125;
-  X[7] = 2.846185230518152;
-
-  //monolis_convert_csr_get_index(N, NZ, index, item, NPU, NPL, indexU, itemU, indexL, itemL);
-
-  //monolis_convert_csr_update_matrix_entry(N, NZ, NDOF, A, index, item, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL);
+  //X[0] = -0.241534067727462;
+  //X[1] = 0.300285597715213;
+  //X[2] = 0.365565075479389;
+  //X[3] = 0.550795593635243;
+  //X[4] = 1.077111383108927;
+  //X[5] = 0.611179110567108;
+  //X[6] = 1.002039983680125;
+  //X[7] = 2.846185230518152;
 
   method = 1;
-  precond = 4;
+  precond = 3;
   maxiter = 10;
   tol = 1.0e-8;
-  is_scaling = 1;
+  is_scaling    = 1;
   is_reordering = 1;
-  is_init_x = 1;
-  show_iteration = 1;
+  is_init_x     = 1;
+  show_iterlog  = 1;
+  show_time     = 1;
+  show_summary  = 1;
 
-/*
-  printf("* indexU\n");
-  for (i=0; i<N+1; i++){
-    printf("%d ", indexU[i]);
-  }
-  printf("\n");
-
-  printf("* indexL\n");
-  for (i=0; i<N+1; i++){
-    printf("%d ", indexL[i]);
-  }
-  printf("\n");
-
-  printf("* itemU\n");
-  for (i=0; i<NPU; i++){
-    printf("%d ", itemU[i]);
-  }
-  printf("\n");
-
-  printf("* itemL\n");
-  for (i=0; i<NPL; i++){
-    printf("%d ", itemL[i]);
-  }
-  printf("\n");
-*/
-
-  //monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
-  //is_scaling, is_reordering, is_init_x, show_iteration);
+  printf("* call monolis\n");
+  monolis(&monoCOM, N, N, NZ, NDOF, A, X, B, index, item,
+     method, precond, maxiter, tol,
+     is_scaling, is_reordering, is_init_x, show_iterlog, show_time, show_summary);
 
   printf("* monolis result\n");
   for (i=0; i<N; i++){
@@ -109,36 +78,22 @@ int main(int argc, char *args[]) {
   for (i=0; i<N*NDOF; i++){
     B[i] = 0.0;
   }
+  monolis_matvec_wrapper(&monoCOM, N, N, NZ, NDOF, A, index, item, X, B);
 
-  is_scaling = 0;
-  is_reordering = 0;
-  is_init_x = 0;
-  show_iteration = 0;
-
-  //monolis_matvec_serial(N, NDOF, NPU, NPL, D, AU, AL, indexU, itemU, indexL, itemL, X, B);
-
-  printf("* monolis result B\n");
+  printf("* monolis b = Ax\n");
+  printf("* monolis result\n");
   for (i=0; i<N; i++){
     printf("%f ", B[i]);
   }
   printf("\n");
 
-  for (i=0; i<N*NDOF; i++){
-    B[i] = 1.0;
-  }
-
-  //monolis_serial(N, NDOF, NPU, NPL, D, AU, AL, X, B, indexU, itemU, indexL, itemL, method, precond, maxiter, tol,
-  //is_scaling, is_reordering, is_init_x, show_iteration);
-
   free(X);
   free(B);
-  free(D);
-  free(AU);
-  free(AL);
-  free(indexU);
-  free(indexL);
-  free(itemU);
-  free(itemL);
+  free(A);
+  free(index);
+  free(item);
+
+  monolis_com_finalize(&monoCOM);
 
   return 0;
 }

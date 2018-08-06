@@ -68,7 +68,7 @@ contains
 #endif
   end subroutine monolis
 
-  subroutine monolis_c(monoCOM, N, NP, NZ, NDOF, A, X, B, index, item, &
+  subroutine monolis_c(monoCOM_c, N, NP, NZ, NDOF, A, X, B, index, item, &
     & method, precond, maxiter, tol, &
     & is_scaling, is_reordering, is_init_x, show_iterlog, show_time, show_summary) &
     & bind(c, name="monolis")
@@ -78,16 +78,17 @@ contains
     use mod_monolis_mat
     use mod_monolis_solve
     implicit none
-    type(monolis_com_c) :: monoCOM
+    type(monolis_com_c) :: monoCOM_c
+    type(monolis_com), save :: monoCOM
     type(monolis_prm), save :: monoPRM
     type(monolis_mat), save :: monoMAT
     !> for monoMAT
-    integer(c_int), value   :: N, NP, NZ, NDOF
-    integer(c_int), intent(in), target :: index(0:N)
+    integer(c_int), value :: N, NP, NZ, NDOF
+    integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
     real(c_double), intent(in), target :: A(NZ*NDOF*NDOF)
-    real(c_double), intent(in), target :: B(N*NDOF)
-    real(c_double), intent(out),target :: X(N*NDOF)
+    real(c_double), intent(in), target :: B(NP*NDOF)
+    real(c_double), intent(out),target :: X(NP*NDOF)
     !> for monoPRM
     integer(c_int), value :: method, precond, maxiter
     real(c_double), value :: tol
@@ -104,6 +105,12 @@ contains
     monoMAT%B => B
     monoMAT%index => index
     monoMAT%item => item
+    monoMAT%item = monoMAT%item + 1
+    !> for monoCOM
+    monoCOM%myrank = monoCOM_c%myrank
+    monoCOM%comm = monoCOM_c%comm
+    monoCOM%commsize = monoCOM_c%commsize
+    monoCOM%n_neib = monoCOM_c%n_neib
     !> for monoPRM
     monoPRM%method = method
     monoPRM%precond = precond
@@ -123,9 +130,10 @@ contains
     if(show_summary   == 1) monoPRM%show_summary  = .true.
 
 #ifdef DTEST_ALL
-    !call monolis_solve_test(monoPRM, monoCOM, monoMAT)
+    call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 #else
-    !call monolis_solve(monoPRM, monoCOM, monoMAT)
+    call monolis_solve(monoPRM, monoCOM, monoMAT)
 #endif
+    monoMAT%item = monoMAT%item - 1
   end subroutine monolis_c
 end module mod_monolis
