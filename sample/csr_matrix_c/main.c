@@ -44,17 +44,17 @@ int main(int argc, char *args[]) {
     B[i] = (double)i;
   }
 
-  //X[0] = -0.241534067727462;
-  //X[1] = 0.300285597715213;
-  //X[2] = 0.365565075479389;
-  //X[3] = 0.550795593635243;
-  //X[4] = 1.077111383108927;
-  //X[5] = 0.611179110567108;
-  //X[6] = 1.002039983680125;
-  //X[7] = 2.846185230518152;
+  X[0] = -0.241534067727462;
+  X[1] = 0.300285597715213;
+  X[2] = 0.365565075479389;
+  X[3] = 0.550795593635243;
+  X[4] = 1.077111383108927;
+  X[5] = 0.611179110567108;
+  X[6] = 1.002039983680125;
+  X[7] = 2.846185230518152;
 
   method = 1;
-  precond = 3;
+  precond = 1;
   maxiter = 10;
   tol = 1.0e-8;
   is_scaling    = 1;
@@ -66,8 +66,8 @@ int main(int argc, char *args[]) {
 
   printf("* call monolis\n");
   monolis(&monoCOM, N, N, NZ, NDOF, A, X, B, index, item,
-     method, precond, maxiter, tol,
-     is_scaling, is_reordering, is_init_x, show_iterlog, show_time, show_summary);
+    method, precond, maxiter, tol,
+    is_scaling, is_reordering, is_init_x, show_iterlog, show_time, show_summary);
 
   printf("* monolis result\n");
   for (i=0; i<N; i++){
