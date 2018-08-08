@@ -52,7 +52,7 @@ contains
 
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
     call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)
 
@@ -60,9 +60,9 @@ contains
     alpha = 1.0d0
 
     do iter=1, monoPRM%maxiter
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, R, U, CG(1))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, V, U, CG(2))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, R, R, CG(3))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, R, U, CG(1))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, V, U, CG(2))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, R, R, CG(3))
       call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)

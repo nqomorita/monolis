@@ -57,10 +57,10 @@ contains
     enddo
 
     call monolis_matvec(monoCOM, monoMAT, P, S, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, U, gamma, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma, tcomm)
 
     do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, P, S, delta, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, P, S, delta, tcomm)
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, S, Q)
 
       alpha = gamma/delta
@@ -71,8 +71,8 @@ contains
         U(i) = U(i) - alpha*Q(i)
       enddo
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, U, gamma1, tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma1, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
 
       call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)
 

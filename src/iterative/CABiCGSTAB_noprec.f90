@@ -54,15 +54,15 @@ contains
     enddo
 
     call monolis_matvec(monoCOM, monoMAT, R0, V, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, R0, CG(1), tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, V , CG(2), tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R0, R0, CG(1), tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R0, V , CG(2), tcomm)
 
     alpha = CG(1)/CG(2)
     beta  = 0.0d0
     omega = 0.0d0
     rho   = CG(1)
 
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
     do iter=1, monoPRM%maxiter
       do i = 1, NNDOF
@@ -77,8 +77,8 @@ contains
         Y(i) = V(i) - alpha * Z(i)
       enddo
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, Q, Y, CG(1), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, Y, Y, CG(2), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Q, Y, CG(1), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Y, Y, CG(2), tcomm)
 
       omega = CG(1)/CG(2)
 
@@ -89,11 +89,11 @@ contains
 
       call monolis_matvec(monoCOM, monoMAT, R, V, tcomm)
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, R, CG(1), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, V, CG(2), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, S, CG(3), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, Z, CG(4), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R , R, CG(5), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, R, CG(1), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, V, CG(2), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, S, CG(3), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, Z, CG(4), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R , R, CG(5), tcomm)
 
       beta  = (alpha/omega) * CG(1) / rho
       alpha = CG(1) / (CG(2) + beta * CG(3) - beta * omega * CG(4))

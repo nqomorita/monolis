@@ -53,10 +53,10 @@ contains
     allocate(S(NDOF*NP)); S = 0.0d0
 
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, U, U, U2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, U, U, U2, tcomm)
     call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)
 
     phi  = dsqrt(R2/U2)
@@ -65,9 +65,9 @@ contains
     do iter=1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)
 
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, V, U, CG(1))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, V, M, CG(2))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, U, U, CG(3))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, V, U, CG(1))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, V, M, CG(2))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, U, U, CG(3))
       call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
       call monolis_matvec(monoCOM, monoMAT, M, L, tcomm)

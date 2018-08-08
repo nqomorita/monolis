@@ -57,8 +57,8 @@ contains
 
     call monolis_matvec(monoCOM, monoMAT, R , W0, tcomm)
     call monolis_matvec(monoCOM, monoMAT, W0, T , tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R , RR, tcomm)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, W0, RW, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, R , RR, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, W0, RW, tcomm)
 
     alpha = RR / RW
     beta  = 0.0d0
@@ -73,8 +73,8 @@ contains
         Y(i) = W0(i) - alpha* Z(i)
       enddo
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, Q, Y, CG(1), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, Y, Y, CG(2), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Q, Y, CG(1), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Y, Y, CG(2), tcomm)
 
       call monolis_matvec(monoCOM, monoMAT, Z, V, tcomm)
 
@@ -96,11 +96,11 @@ contains
         enddo
       endif
 
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, R, CG(1), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, W0,CG(2), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, S, CG(3), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R0, Z, CG(4), tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R,  R, CG(5), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, R, CG(1), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, W0,CG(2), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, S, CG(3), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, Z, CG(4), tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R,  R, CG(5), tcomm)
 
       call monolis_matvec(monoCOM, monoMAT, W0, T, tcomm)
 

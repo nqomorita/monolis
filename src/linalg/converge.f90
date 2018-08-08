@@ -19,7 +19,7 @@ contains
     real(kind=kdouble) :: B(:)
     real(kind=kdouble), optional :: tcomm
 
-    call monolis_inner_product_R(monoCOM, monoMAT, monoMAT%NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)
     if(B2 == 0.0d0)then
       if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis error: bnorm ", B2
       stop
@@ -39,7 +39,7 @@ contains
 
     is_converge = .false.
 
-    call monolis_inner_product_R(monoCOM, monoMAT, monoMAT%NDOF, R, R, R2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tcomm)
     resid = dsqrt(R2/B2)
 
     if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid

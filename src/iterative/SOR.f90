@@ -46,12 +46,12 @@ contains
 
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
     call monolis_solver_SOR_setup(monoMAT)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
     do iter=1, monoPRM%maxiter
       call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tcomm)
       call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid

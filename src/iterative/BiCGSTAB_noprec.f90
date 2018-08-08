@@ -55,7 +55,7 @@ contains
     enddo
 
     do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, RT, rho, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, RT, rho, tcomm)
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
@@ -69,7 +69,7 @@ contains
       endif
 
       call monolis_matvec(monoCOM, monoMAT, P, V, tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, RT, V, c2, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, RT, V, c2, tcomm)
 
       alpha = rho / c2
 
@@ -79,8 +79,8 @@ contains
 
       call monolis_matvec(monoCOM, monoMAT, S, T, tcomm)
 
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, T, S, CG(1))
-      call monolis_inner_product_R_local(monoCOM, monoMAT, NDOF, T, T, CG(2))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, T, S, CG(1))
+      call monolis_inner_product_R_local(monoCOM, N, NDOF, T, T, CG(2))
       call monolis_allreduce_R(2, CG, monolis_sum, monoCOM%comm)
 
       omega = CG(1) / CG(2)

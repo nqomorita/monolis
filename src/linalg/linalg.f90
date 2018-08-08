@@ -7,17 +7,16 @@ module mod_monolis_linalg
 
 contains
 
-  subroutine monolis_inner_product_I(monoCOM, monoMAT, ndof, X, Y, sum, tcomm)
+  subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ndof, sum
+    integer(kind=kint) :: i, n, ndof, sum
     integer(kind=kint) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble), optional :: tcomm
 
     sum = 0
-    do i = 1, monoMAT%N * ndof
+    do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
 
@@ -27,17 +26,16 @@ contains
     if(present(tcomm)) tcomm = tcomm + t2 - t1
   end subroutine monolis_inner_product_I
 
-  subroutine monolis_inner_product_R(monoCOM, monoMAT, ndof, X, Y, sum, tcomm)
+  subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ndof
+    integer(kind=kint) :: i, n, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, sum
     real(kind=kdouble), optional :: tcomm
 
     sum = 0.0d0
-    do i = 1, monoMAT%N * ndof
+    do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
 
@@ -47,18 +45,16 @@ contains
     if (present(tcomm)) tcomm = tcomm + t2 - t1
   end subroutine monolis_inner_product_R
 
-  subroutine monolis_inner_product_R_local(monoCOM, monoMAT, ndof, X, Y, sum)
+  subroutine monolis_inner_product_R_local(monoCOM, n, ndof, X, Y, sum)
     implicit none
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ndof
+    integer(kind=kint) :: i, n, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: sum
 
     sum = 0.0d0
-    do i = 1, monoMAT%N * ndof
+    do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
   end subroutine monolis_inner_product_R_local
-
 end module mod_monolis_linalg

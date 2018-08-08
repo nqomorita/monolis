@@ -47,7 +47,7 @@ contains
 
     do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, Z)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, Z, rho, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho, tcomm)
 
       if(1 < iter)then
         beta = rho/rho1
@@ -61,7 +61,7 @@ contains
       endif
 
       call monolis_matvec(monoCOM, monoMAT, P, Q, tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, P, Q, omega, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, tcomm)
       alpha = rho/omega
 
       do i = 1, NNDOF

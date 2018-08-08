@@ -43,7 +43,7 @@ contains
     allocate(D(NDOF*NP)); D = 0.0d0
 
     call monolis_IR_setup(monoPRM, monoCOM, monoMAT)
-    call monolis_inner_product_R(monoCOM, monoMAT, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
     do i = 1,NNDOF
       R(i) = B(i)
@@ -57,7 +57,7 @@ contains
       enddo
 
       call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-      call monolis_inner_product_R(monoCOM, monoMAT, NDOF, R, R, R2, tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
 
       resid = dsqrt(R2/B2)
 
