@@ -21,7 +21,7 @@ contains
     integer(kind=kint) :: i, iter, iter_RR
     real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, rho, rho1, c2, omega
-    real(kind=kdouble) :: CG(2)
+    real(kind=kdouble) :: CG(2), B2
     real(kind=kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge
@@ -47,7 +47,7 @@ contains
     allocate(T (NDOF*NP)); T  = 0.0d0
     allocate(V (NDOF*NP)); V  = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
     do i = 1, NNDOF
@@ -97,7 +97,7 @@ contains
         enddo
       endif
 
-      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, iter, is_converge, tcomm)
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)
       if(is_converge) exit
 
       rho1 = rho

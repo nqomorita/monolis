@@ -21,7 +21,7 @@ contains
     integer(kind=kint) :: i, iter, iter_RR
     !integer(kind=kint) :: reqs1(1), reqs2(1)
     !integer(kind=kint) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: R2
+    real(kind=kdouble) :: R2, B2
     real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, delta, gamma, gamma1
     !real(kind=kdouble) :: buf1(1), buf2(2)
@@ -48,7 +48,7 @@ contains
     allocate(P(NDOF*NP)); P = 0.0d0
     allocate(S(NDOF*NP)); S = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
 
@@ -84,7 +84,7 @@ contains
         S(i) = V(i) + beta * S(i)
       enddo
 
-      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
       if(is_converge) exit
     enddo
 

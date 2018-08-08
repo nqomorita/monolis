@@ -7,16 +7,14 @@ module mod_monolis_converge
   use mod_monolis_linalg_com
   implicit none
 
-  real(kind=kdouble), save :: B2
-
 contains
 
-  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: B(:)
+    real(kind=kdouble) :: B(:), B2
     real(kind=kdouble), optional :: tcomm
 
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)
@@ -27,13 +25,13 @@ contains
 
   end subroutine monolis_set_converge
 
-  subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, iter, is_converge, tcomm)
+  subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
-    real(kind=kdouble) :: R(:), R2, resid
+    real(kind=kdouble) :: R(:), R2, B2, resid
     real(kind=kdouble), optional :: tcomm
     logical :: is_converge
 
@@ -47,13 +45,13 @@ contains
 
   end subroutine monolis_check_converge
 
-  subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+  subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
-    real(kind=kdouble) :: R2, resid
+    real(kind=kdouble) :: R2, B2, resid
     real(kind=kdouble), optional :: tcomm
     logical :: is_converge
 

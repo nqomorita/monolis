@@ -20,7 +20,7 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter, iter_RR
     real(kind=kdouble) :: t1, t2, tsol, tcomm, CG(5), RR, RW, RR1, RS, RZ, R2, QY, YY
-    real(kind=kdouble) :: alpha, beta, omega, omega1
+    real(kind=kdouble) :: alpha, beta, omega, omega1, B2
     real(kind=kdouble), allocatable :: R(:), RT(:), R0(:), W0(:), WT(:), T(:), PT(:), S(:), ST(:)
     real(kind=kdouble), allocatable :: Z(:), ZT(:), Q(:), QT(:), Y(:), V(:)
     real(kind=kdouble), pointer :: B(:), X(:)
@@ -54,7 +54,7 @@ contains
     allocate(Y (NDOF*NP)); Y  = 0.0d0
     allocate(V (NDOF*NP)); V  = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
     do i = 1, NNDOF
@@ -124,7 +124,7 @@ contains
       RZ = CG(4)
       R2 = CG(5)
 
-      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
       if(is_converge) exit
 
       beta  = (alpha*RR1) / (RR*omega1)

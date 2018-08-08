@@ -23,7 +23,7 @@ contains
     !integer(kind=kint) :: statuses(monolis_status_size,1)
     real(kind=kdouble) :: t1, t2, tsol, tcomm, R2
     real(kind=kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta
-    real(kind=kdouble) :: buf(3), CG(3)
+    real(kind=kdouble) :: buf(3), CG(3), B2
     real(kind=kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge
@@ -50,7 +50,7 @@ contains
     allocate(M(NDOF*NP)); M = 0.0d0
     allocate(S(NDOF*NP)); S = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
@@ -110,7 +110,7 @@ contains
         enddo
       endif
 
-      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, iter, is_converge, tcomm)
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
       if(is_converge) exit
     enddo
 
