@@ -30,7 +30,7 @@ contains
     type(monolis_mat) :: monoMAT_reorder
 
     call monolis_check_diagonal(monoMAT)
-    call monolis_timer_initialize()
+    call monolis_timer_initialize(monoPRM)
     call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
     call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)
@@ -55,7 +55,7 @@ contains
       monoPRM%method = i
       do j = 1, 3
         monoPRM%precond = j
-        call monolis_timer_initialize()
+        call monolis_timer_initialize(monoPRM)
         call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
         call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
         call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)

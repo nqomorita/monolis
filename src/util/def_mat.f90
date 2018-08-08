@@ -9,6 +9,7 @@ module mod_monolis_mat
     real(kind=kdouble), pointer :: A(:) => null()
     real(kind=kdouble), pointer :: X(:) => null()
     real(kind=kdouble), pointer :: B(:) => null()
+    real(kind=kdouble), pointer :: diag(:)
   end type monolis_mat
 
   type monolis_mat_LDU

@@ -12,12 +12,6 @@ module mod_monolis_util
   public :: monolis_timer_finalize
   public :: monolis_check_diagonal
 
-  !> tsol = tspmv + tprec + tcomm + others
-  real(kind=kdouble) :: tsol  = 0.0d0
-  real(kind=kdouble) :: tspmv = 0.0d0
-  real(kind=kdouble) :: tprec = 0.0d0
-  real(kind=kdouble) :: tcomm = 0.0d0
-
 contains
 
   subroutine monolis_initialize(monoPRM, monoCOM, monoMAT)
@@ -42,13 +36,14 @@ contains
     call monolis_mat_finalize(monoMAT)
   end subroutine monolis_finalize
 
-  subroutine monolis_timer_initialize()
+  subroutine monolis_timer_initialize(monoPRM)
     implicit none
+    type(monolis_prm) :: monoPRM
 
-    tsol  = 0.0d0
-    tspmv = 0.0d0
-    tprec = 0.0d0
-    tcomm = 0.0d0
+    monoPRM%tsol  = 0.0d0
+    monoPRM%tspmv = 0.0d0
+    monoPRM%tprec = 0.0d0
+    monoPRM%tcomm = 0.0d0
   end subroutine monolis_timer_initialize
 
   subroutine monolis_timer_finalize(monoCOM)

@@ -7,7 +7,6 @@ module mod_monolis_scaling
   implicit none
 
   private
-  real(kind=kdouble), private, allocatable :: diag(:)
   public :: monolis_scaling_fw
   public :: monolis_scaling_bk
 
@@ -22,7 +21,7 @@ contains
     integer(kind=kint) :: inod
     integer(kind=kint) :: i, j, jS, jE, in, k, l
     real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: A(:), X(:), B(:)
+    real(kind=kdouble), pointer :: A(:), X(:), B(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
 
     if(.not. monoPRM%is_scaling) return
@@ -37,7 +36,8 @@ contains
     index => monoMAT%index
     item => monoMAT%item
 
-    allocate(diag(NDOF*NP))
+    allocate(monoMAT%diag(NDOF*NP))
+    diag => monoMAT%diag
 
     do i = 1, NP
       jS = index(i-1) + 1
@@ -90,7 +90,7 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NDOF2
     integer(kind=kint) :: i, j, k, l, in, jS, jE
     real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: A(:), B(:), X(:)
+    real(kind=kdouble), pointer :: A(:), B(:), X(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
 
     if(.not. monoPRM%is_scaling) return
@@ -104,6 +104,7 @@ contains
     A => monoMAT%A
     index => monoMAT%index
     item => monoMAT%item
+    diag => monoMAT%diag
 
     do i = 1, NP
       jS = index(i-1) + 1

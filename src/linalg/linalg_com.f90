@@ -16,7 +16,6 @@ contains
     integer(kind=kint) :: N, ierr
     real(kind=kdouble) :: val, temp
 
-
 #ifdef WITH_MPI
     temp = 0.0d0
     N = 1
