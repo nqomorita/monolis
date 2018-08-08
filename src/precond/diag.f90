@@ -43,9 +43,9 @@ contains
     type(monolis_mat) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_diag_33_clear()
+      call monolis_precond_diag_33_clear(monoMAT)
     else
-      call monolis_precond_diag_nn_clear()
+      call monolis_precond_diag_nn_clear(monoMAT)
     endif
   end subroutine monolis_precond_diag_clear
 end module mod_monolis_precond_diag

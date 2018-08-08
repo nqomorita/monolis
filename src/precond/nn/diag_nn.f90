@@ -10,8 +10,6 @@ module mod_monolis_precond_diag_nn
   public :: monolis_precond_diag_nn_apply
   public :: monolis_precond_diag_nn_clear
 
-  real(kind=kdouble), pointer :: ALU(:) => null()
-
 contains
 
   subroutine monolis_precond_diag_nn_setup(monoMAT)
@@ -22,7 +20,7 @@ contains
     integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
     integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble), allocatable :: T(:), LU(:,:)
-    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: A(:), ALU(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
@@ -33,7 +31,8 @@ contains
 
     allocate(T(NDOF))
     allocate(LU(NDOF,NDOF))
-    allocate(ALU(NDOF2*N))
+    allocate(monoMAT%monoTree%D(NDOF2*N))
+    ALU => monoMAT%monoTree%D
     T   = 0.0d0
     ALU = 0.0d0
     LU  = 0.0d0
@@ -82,11 +81,13 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, k, N, NDOF, NDOF2
     real(kind=kdouble) :: X(:), Y(:)
+    real(kind=kdouble), pointer :: ALU(:)
     real(kind=kdouble), allocatable :: T(:)
 
     N     = monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
+    ALU => monoMAT%monoTree%D
 
     allocate(T(NDOF))
     T = 0.0d0
@@ -114,8 +115,11 @@ contains
     deallocate(T)
   end subroutine monolis_precond_diag_nn_apply
 
-  subroutine monolis_precond_diag_nn_clear()
+  subroutine monolis_precond_diag_nn_clear(monoMAT)
     implicit none
+    type(monolis_mat) :: monoMAT
+    real(kind=kdouble), pointer :: ALU(:)
+    ALU => monoMAT%monoTree%D
     deallocate(ALU)
   end subroutine monolis_precond_diag_nn_clear
 

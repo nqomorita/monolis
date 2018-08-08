@@ -10,8 +10,6 @@ module mod_monolis_precond_sor_33
   public :: monolis_precond_sor_33_apply
   public :: monolis_precond_sor_33_clear
 
-  real(kind=kdouble), pointer :: ALU(:) => null()
-
 contains
 
   subroutine monolis_precond_sor_33_setup(monoMAT)
@@ -22,7 +20,7 @@ contains
     integer(kind=kint) :: i, j, jS, jE, in, k, l, N
     integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: T(3,3), P(3), sigma
-    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: A(:), ALU(:)
 
     N =  monoMAT%N
     A => monoMAT%A
@@ -30,7 +28,8 @@ contains
     item => monoMAT%item
     sigma = 1.0d0
 
-    allocate(ALU(9*N))
+    allocate(monoMAT%monoTree%D(9*N))
+    ALU => monoMAT%monoTree%D
     ALU = 0.0d0
 
     do i = 1, N
@@ -96,11 +95,12 @@ contains
     integer(kind=kint), pointer :: item(:)
     real(kind=kdouble) :: X1, X2, X3, S1, S2, S3
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: A(:), ALU(:)
 
     index => monoMAT%index
     item => monoMAT%item
     A => monoMAT%A
+    ALU => monoMAT%monoTree%D
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       Y(i) = X(i)
@@ -167,8 +167,11 @@ contains
     enddo
   end subroutine monolis_precond_sor_33_apply
 
-  subroutine monolis_precond_sor_33_clear()
+  subroutine monolis_precond_sor_33_clear(monoMAT)
     implicit none
+    type(monolis_mat) :: monoMAT
+    real(kind=kdouble), pointer :: ALU(:)
+    ALU => monoMAT%monoTree%D
     deallocate(ALU)
   end subroutine monolis_precond_sor_33_clear
 

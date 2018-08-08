@@ -25,12 +25,13 @@ contains
     integer(kind=kint) :: iter
     real(kind=kdouble) :: tol, resid, R2, B2
     real(kind=kdouble) :: t1, t2, tsol, tcomm
-    real(kind=kdouble), pointer :: B(:), X(:)
+    real(kind=kdouble), pointer :: B(:), X(:), ALU(:)
     real(kind=kdouble), allocatable :: R(:)
     logical :: is_converge
 
     t1 = monolis_wtime()
 
+    ALU => monoMAT%monoTree%D
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
@@ -72,7 +73,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NP, NDOF, NDOF2
     integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: A(:), ALU(:)
     real(kind=kdouble), allocatable :: T(:), LU(:,:)
 
     N     = monoMAT%N
@@ -85,7 +86,8 @@ contains
 
     allocate(T(NDOF))
     allocate(LU(NDOF,NDOF))
-    allocate(ALU(NDOF2*NP))
+    allocate(monoMAT%monoTree%D(NDOF2*NP))
+    ALU => monoMAT%monoTree%D
     T   = 0.0d0
     ALU = 0.0d0
     LU  = 0.0d0
@@ -133,10 +135,11 @@ contains
     integer(kind=kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
     integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: X(:), B(:), XT(NDOF), YT(NDOF), DT(NDOF), WT(NDOF)
-    real(kind=kdouble), pointer :: A(:)
+    real(kind=kdouble), pointer :: A(:), ALU(:)
     real(kind=kdouble) :: t1, t2, omega
     real(kind=kdouble), optional :: tcomm
 
+    ALU => monoMAT%monoTree%D
     N     = monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
