@@ -129,7 +129,7 @@ contains
     if(show_time      == 1) monoPRM%show_time     = .true.
     if(show_summary   == 1) monoPRM%show_summary  = .true.
 
-#ifdef DTEST_ALL
+#ifdef TEST_ALL
     call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 #else
     call monolis_solve(monoPRM, monoCOM, monoMAT)
