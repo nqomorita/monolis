@@ -1,7 +1,7 @@
 program main
   use mod_monolis
   implicit none
-  integer(kind=kint) :: i, j, k, in, hash, val, ans
+  integer(kind=kint) :: i, j, k, in, val, ans
   character :: key*27
   logical :: is_exist, is_pushed
 

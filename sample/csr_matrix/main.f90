@@ -2,7 +2,7 @@ program main
   use mod_monolis
   implicit none
   type(monolis_com) :: monoCOM
-  integer(kind=kint) :: i, j, N, NZ, NDOF
+  integer(kind=kint) :: i, N, NZ, NDOF
   integer(kind=kint) :: method, precond, maxiter
   logical :: is_scaling, is_reordering, is_init_x
   logical :: show_iterlog, show_time, show_summary

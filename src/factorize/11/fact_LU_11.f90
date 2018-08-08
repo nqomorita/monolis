@@ -38,16 +38,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP, NIN, NDOF, NNDOF
+    integer(kind=kint) :: N, NP
     integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
-    integer(kind=kint) :: shift, imax
+    integer(kind=kint) :: imax
     integer(kind=kint), allocatable :: is_fill(:)
     integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: d1, d2, d3
-    real(kind=kdouble) :: u1, u2, u3
-    real(kind=kdouble) :: l1, l2, l3
+    real(kind=kdouble) :: d1, u1, l1
     real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: D(1), L(1)
+    real(kind=kdouble) :: L(1)
     real(kind=kdouble), allocatable :: U(:)
 
     N  = monoMAT%N
@@ -115,7 +113,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP, NNDOF
+    integer(kind=kint) :: N, NP
     integer(kind=kint) :: i, j, k, in, jS, jE, kn
     integer(kind=kint), pointer :: idxU(:), itemU(:)
     real(kind=kdouble) :: t1, t2

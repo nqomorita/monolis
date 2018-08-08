@@ -23,8 +23,6 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
 
-    integer(kind=kint) :: i
-
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
       allocate( perm(monoMAT%NP))
@@ -98,12 +96,9 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, k, iS, jS, jE, nu, nl
-    integer(kind=kint) :: icel, nedge, ic_type, in, jn, kn, nn, ne
-    integer(kind=kint) :: imax, imin
-    integer(kind=kint) :: nlocal(20)
+    integer(kind=kint) :: i, j, jS, jE
+    integer(kind=kint) :: nedge, in, jn
     integer(kind=kint), allocatable :: nozero(:)
-    integer(kind=kint) :: ierr
     integer(kind=kint) :: nvtxs
     integer(kind=kint), pointer :: index(:)       => null()
     integer(kind=kint), pointer :: item(:)        => null()
@@ -111,8 +106,6 @@ contains
     integer(kind=kint), pointer :: adjncy(:)      => null()
     integer(kind=kint), pointer :: vwgt(:)        => null()
     integer(kind=kint), pointer :: options(:)     => null()
-    integer(kind=kint), pointer :: metis_perm(:)  => null()
-    integer(kind=kint), pointer :: metis_iperm(:) => null()
 
     N = monoMAT%N
     NP = monoMAT%NP

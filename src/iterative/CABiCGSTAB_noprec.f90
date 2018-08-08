@@ -20,7 +20,7 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter, iter_RR
     real(kind=kdouble) :: t1, t2, tsol, tcomm, R2
-    real(kind=kdouble) :: alpha, beta, rho, rho1, CG(5), omega
+    real(kind=kdouble) :: alpha, beta, rho, CG(5), omega
     real(kind=kdouble), allocatable :: R0(:), R(:), V(:), S(:), P(:), Q(:), Y(:), Z(:)
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge

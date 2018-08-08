@@ -20,7 +20,7 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter, iter_RR
     real(kind=kdouble) :: t1, t2, tsol, tcomm, CG(5), RR, RW, RR1, RS, RZ, R2, QY, YY
-    real(kind=kdouble) :: alpha, beta, rho, rho1, omega, omega1
+    real(kind=kdouble) :: alpha, beta, omega, omega1
     real(kind=kdouble), allocatable :: R(:), RT(:), R0(:), W0(:), WT(:), T(:), PT(:), S(:), ST(:)
     real(kind=kdouble), allocatable :: Z(:), ZT(:), Q(:), QT(:), Y(:), V(:)
     real(kind=kdouble), pointer :: B(:), X(:)

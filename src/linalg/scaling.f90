@@ -19,7 +19,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NDOF2
-    integer(kind=kint) :: isL, ieL, isU, ieU, inod
+    integer(kind=kint) :: inod
     integer(kind=kint) :: i, j, jS, jE, in, k, l
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), X(:), B(:)
@@ -88,7 +88,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NDOF2
-    integer(kind=kint) :: isL, ieL, isU, ieU, inod
     integer(kind=kint) :: i, j, k, l, in, jS, jE
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), B(:), X(:)

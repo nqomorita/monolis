@@ -9,8 +9,6 @@ program main
   type(monolis_prm) :: monoPRM
   type(monolis_com) :: monoCOM
   type(monolis_mat) :: monoMAT
-  integer(kind=kint) :: key, val
-  logical :: is_pushed, is_exist
 
   !call monolis_initialize(monoPRM, monoCOM, monoMAT)
   !call monolis_finalize(monoPRM, monoCOM, monoMAT)

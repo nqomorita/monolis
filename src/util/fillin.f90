@@ -37,7 +37,7 @@ contains
     integer(kind=kint) :: is, ie
     integer(kind=kint) :: range, parent
     integer(kind=kint) :: bit = kint*8
-    integer(kind=kint), allocatable :: count(:), diff(:)
+    integer(kind=kint), allocatable :: count(:)
     logical :: is_fillin, is_asym
 
     N = monoMAT%N
@@ -204,7 +204,7 @@ contains
     real(kind=kdouble), pointer :: AL(:)
     integer(kind=kint) :: N, NPU, NPL, NDOF, NDOF2
     integer(kind=kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
-    integer(kind=kint) :: in, jn ,kn, nn
+    integer(kind=kint) :: in, jn
     logical :: is_asym
 
     N = monoTREE%N
@@ -260,6 +260,7 @@ contains
     if(is_asym)then
       indexL => monoTREE%indexL
       itemL => monoTREE%itemL
+      NPL = monoTREE%NPL
       allocate(monoTREE%L(NDOF2*NPL))
       AL => monoTREE%L
       AL = 0.0d0

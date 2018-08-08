@@ -38,7 +38,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP, NIN, NDOF, NNDOF, NDOF2
+    integer(kind=kint) :: N, NP, NDOF, NDOF2
     integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
     integer(kind=kint) :: shift, imax
     integer(kind=kint), allocatable :: is_fill(:)
@@ -167,7 +167,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF
-    integer(kind=kint) :: i, j, k, in, jS, jE, kn
+    integer(kind=kint) :: i, j, in, jS, jE
     integer(kind=kint), pointer :: idxU(:), itemU(:)
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble) :: X1, X2, X3

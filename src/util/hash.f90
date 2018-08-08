@@ -101,7 +101,7 @@ contains
 
   subroutine monolis_hash_resize()
     implicit none
-    integer(kind=kint) :: i, j, n, hash, val
+    integer(kind=kint) :: i, j, hash, val
     integer(kind=kint) :: new_size, old_size
     type(type_monolis_hash_bin), pointer :: new_bin(:), old_bin(:), temp_bin
     type(type_monolis_hash_list), pointer :: list(:)
