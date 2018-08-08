@@ -4,10 +4,6 @@ module mod_monolis_direct_LU
   use mod_monolis_mat
   implicit none
 
-  integer(kind=kint), pointer :: perm(:)  => null()
-  integer(kind=kint), pointer :: iperm(:) => null()
-  logical, save :: isEntire = .false.
-
 contains
 
 !  subroutine  monolis_solver_direct_setup(monoPRM, monoCOM, monoMAT)

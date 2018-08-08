@@ -7,8 +7,6 @@ module mod_monolis_precond_Jacobi
 
   implicit none
 
-  type(monolis_mat_LDU), save :: monoTREE
-
 contains
 
   subroutine  monolis_precond_Jacobi_setup(monoPRM, monoCOM, monoMAT)
@@ -18,8 +16,8 @@ contains
     type(monolis_mat) :: monoMAT
 
     call monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT)
-    call monolis_init_LU_inner(monoPRM, monoCOM, monoTREE)
-    call monolis_fact_LU_inner(monoPRM, monoCOM, monoTREE)
+    call monolis_init_LU_inner(monoPRM, monoCOM, monoMAT%monoTREE)
+    call monolis_fact_LU_inner(monoPRM, monoCOM, monoMAT%monoTREE)
   end subroutine monolis_precond_Jacobi_setup
 
   subroutine monolis_precond_Jacobi_apply(monoPRM, monoCOM, monoMAT, X, Y)
@@ -33,11 +31,11 @@ contains
     N = monoMAT%N
     NDOF = monoMAT%NDOF
     do i = 1, N*NDOF
-      monoTREE%B(i) = X(i)
+      monoMAT%monoTREE%B(i) = X(i)
     enddo
-    call monolis_solv_LU_inner(monoPRM, monoCOM, monoTREE)
+    call monolis_solv_LU_inner(monoPRM, monoCOM, monoMAT%monoTREE)
     do i = 1, N*NDOF
-      Y(i) = monoTREE%X(i)
+      Y(i) = monoMAT%monoTREE%X(i)
     enddo
   end subroutine monolis_precond_Jacobi_apply
 
@@ -47,7 +45,9 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    call monolis_clear_LU_inner(monoPRM, monoCOM, monoTREE)
+    deallocate(monoMAT%monoTREE%B)
+    deallocate(monoMAT%monoTREE%X)
+    call monolis_clear_LU_inner(monoPRM, monoCOM, monoMAT%monoTREE)
   end subroutine monolis_precond_Jacobi_clear
 
   subroutine monolis_precond_Jacobi_init(monoPRM, monoCOM, monoMAT)
@@ -61,14 +61,14 @@ contains
 
     N = monoMAT%N
     NDOF = monoMAT%NDOF
-    monoTREE%N = monoMAT%N
-    monoTREE%NP = monoMAT%NP
-    monoTREE%NDOF = monoMAT%NDOF
-    allocate(monoTREE%B(N*NDOF))
-    allocate(monoTREE%X(N*NDOF))
-    monoTREE%B = 0.0d0
-    monoTREE%X = 0.0d0
-    call monolis_matrix_get_fillin(monoPRM, monoCOM, monoMAT, monoTREE, is_fillin, is_asym)
-    call monolis_matrix_copy_with_fillin(monoPRM, monoCOM, monoMAT, monoTREE, is_asym)
+    monoMAT%monoTREE%N = monoMAT%N
+    monoMAT%monoTREE%NP = monoMAT%NP
+    monoMAT%monoTREE%NDOF = monoMAT%NDOF
+    allocate(monoMAT%monoTREE%B(N*NDOF))
+    allocate(monoMAT%monoTREE%X(N*NDOF))
+    monoMAT%monoTREE%B = 0.0d0
+    monoMAT%monoTREE%X = 0.0d0
+    call monolis_matrix_get_fillin(monoPRM, monoCOM, monoMAT, monoMAT%monoTREE, is_fillin, is_asym)
+    call monolis_matrix_copy_with_fillin(monoPRM, monoCOM, monoMAT, monoMAT%monoTREE, is_asym)
   end subroutine monolis_precond_Jacobi_init
 end module mod_monolis_precond_Jacobi

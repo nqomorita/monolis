@@ -2,18 +2,6 @@ module mod_monolis_mat
   use mod_monolis_prm
   implicit none
 
-  type monolis_mat
-    integer(kind=kint) :: N, NP, NZ, NDOF
-    integer(kind=kint), pointer :: index(:) => null()
-    integer(kind=kint), pointer :: item(:) => null()
-    integer(kind=kint), pointer :: perm(:) => null()
-    integer(kind=kint), pointer :: iperm(:) => null()
-    real(kind=kdouble), pointer :: A(:) => null()
-    real(kind=kdouble), pointer :: X(:) => null()
-    real(kind=kdouble), pointer :: B(:) => null()
-    real(kind=kdouble), pointer :: diag(:) => null()
-  end type monolis_mat
-
   type monolis_mat_LDU
     integer(kind=kint) :: N, NP, NPU, NPL, NDOF
     integer(kind=kint), pointer :: indexU(:) => null()
@@ -26,6 +14,19 @@ module mod_monolis_mat
     real(kind=kdouble), pointer :: X(:) => null()
     real(kind=kdouble), pointer :: B(:) => null()
   end type monolis_mat_LDU
+
+  type monolis_mat
+    type(monolis_mat_LDU) :: monoTREE
+    integer(kind=kint) :: N, NP, NZ, NDOF
+    integer(kind=kint), pointer :: index(:) => null()
+    integer(kind=kint), pointer :: item(:) => null()
+    integer(kind=kint), pointer :: perm(:) => null()
+    integer(kind=kint), pointer :: iperm(:) => null()
+    real(kind=kdouble), pointer :: A(:) => null()
+    real(kind=kdouble), pointer :: X(:) => null()
+    real(kind=kdouble), pointer :: B(:) => null()
+    real(kind=kdouble), pointer :: diag(:) => null()
+  end type monolis_mat
 
 contains
 
