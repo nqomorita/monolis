@@ -10,9 +10,6 @@ module mod_monolis_fact_LU_33
   public :: monolis_solv_LU_inner_33
   public :: monolis_clear_LU_inner_33
 
-  real(kind=kdouble), save, allocatable :: AD(:)
-  real(kind=kdouble), save, pointer :: AU(:)
-
 contains
 
   subroutine monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -21,7 +18,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
 
-    AU => monoMAT%U
   end subroutine monolis_init_LU_inner_33
 
   subroutine monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -30,7 +26,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
 
-    deallocate(AD)
+    deallocate(monoMAT%D)
+    deallocate(monoMAT%U)
   end subroutine monolis_clear_LU_inner_33
 
   subroutine monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
@@ -48,6 +45,7 @@ contains
     real(kind=kdouble) :: t1, t2
     real(kind=kdouble) :: L(9)
     real(kind=kdouble), allocatable :: U(:)
+    real(kind=kdouble), pointer :: AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -61,8 +59,10 @@ contains
     enddo
 
     allocate(U(9*imax))
-    allocate(AD(3*N))
     allocate(is_fill(NP))
+    allocate(monoMAT%D(N))
+    AU => monoMAT%U
+    AD => monoMAT%D
     AD = 0.0d0
 
     !factorization
@@ -169,7 +169,7 @@ contains
     real(kind=kdouble) :: X1, X2, X3
     real(kind=kdouble) :: A1, A2, A3
     real(kind=kdouble), allocatable :: S(:)
-    real(kind=kdouble), pointer :: X(:)
+    real(kind=kdouble), pointer :: X(:), AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -179,6 +179,8 @@ contains
     X => monoMAT%X
     idxU => monoMAT%indexU
     itemU => monoMAT%itemU
+    AU => monoMAT%U
+    AD => monoMAT%D
 
     !L
     do i = 1, N
