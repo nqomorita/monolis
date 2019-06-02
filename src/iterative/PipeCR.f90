@@ -62,7 +62,7 @@ contains
     phi  = dsqrt(R2/U2)
     utol = tol/phi
 
-    do iter=1, monoPRM%maxiter
+    do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)
 
       call monolis_inner_product_R_local(monoCOM, N, NDOF, V, U, CG(1))
@@ -79,6 +79,10 @@ contains
       gamma = CG(1)
       delta = CG(2)
       U2    = CG(3)
+
+      resid = dsqrt(U2/B2)
+      if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid*phi
+      if(resid <= utol) exit
 
       if(1 < iter)then
         beta  = gamma*gamma1
@@ -105,10 +109,6 @@ contains
           V(i) = V(i) - alpha*Z(i)
         enddo
       endif
-
-      resid = dsqrt(U2/B2)
-      if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid*phi
-      if(resid <= utol) exit
 
       gamma1 = 1.0d0/gamma
       alpha1 = 1.0d0/alpha

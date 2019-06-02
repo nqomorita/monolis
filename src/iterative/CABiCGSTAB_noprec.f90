@@ -49,9 +49,7 @@ contains
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R0, tcomm)
 
-    do i=1, NNDOF
-      R(i) = R0(i)
-    enddo
+    call monolis_vec_copy_R(N, NDOF, R0, R)
 
     call monolis_matvec(monoCOM, monoMAT, R0, V, tcomm)
     call monolis_inner_product_R(monoCOM, N, NDOF, R0, R0, CG(1), tcomm)
@@ -64,7 +62,7 @@ contains
 
     call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
-    do iter=1, monoPRM%maxiter
+    do iter = 1, monoPRM%maxiter
       do i = 1, NNDOF
         P(i) = R(i) + beta * (P(i) - omega * S(i))
         S(i) = V(i) + beta * (S(i) - omega * Z(i))

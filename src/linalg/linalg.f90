@@ -7,6 +7,16 @@ module mod_monolis_linalg
 
 contains
 
+  subroutine monolis_vec_copy_R(n, ndof, X, Y)
+    implicit none
+    integer(kind=kint) :: i, n, ndof
+    real(kind=kdouble) :: X(:), Y(:)
+
+    do i = 1, n * ndof
+      Y(i) = X(i)
+    enddo
+  end subroutine monolis_vec_copy_R
+
   subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tcomm)
     implicit none
     type(monolis_com) :: monoCOM

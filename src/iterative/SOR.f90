@@ -49,7 +49,7 @@ contains
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
-    do iter=1, monoPRM%maxiter
+    do iter = 1, monoPRM%maxiter
       call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tcomm)
       call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
       call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)

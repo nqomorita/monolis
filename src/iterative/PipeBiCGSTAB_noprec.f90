@@ -51,9 +51,7 @@ contains
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
-    do i = 1, NNDOF
-      R0(i) = R(i)
-    enddo
+    call monolis_vec_copy_R(N, NDOF, R, R0)
 
     call monolis_matvec(monoCOM, monoMAT, R , W0, tcomm)
     call monolis_matvec(monoCOM, monoMAT, W0, T , tcomm)

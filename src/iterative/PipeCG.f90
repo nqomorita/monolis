@@ -59,7 +59,7 @@ contains
     gamma = 1.0d0
     alpha = 1.0d0
 
-    do iter=1, monoPRM%maxiter
+    do iter = 1, monoPRM%maxiter
       call monolis_inner_product_R_local(monoCOM, N, NDOF, R, U, CG(1))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, V, U, CG(2))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, R, R, CG(3))
@@ -78,6 +78,9 @@ contains
       gamma = CG(1)
       delta = CG(2)
       R2    = CG(3)
+
+      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
+      if(is_converge) exit
 
       if(1 < iter)then
         beta  = gamma*gamma1
@@ -109,9 +112,6 @@ contains
           X(i) = X(i) + alpha*P(i)
         enddo
       endif
-
-      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
-      if(is_converge) exit
     enddo
 
     call monolis_update_R(monoCOM, NDOF, X, tcomm)

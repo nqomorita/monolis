@@ -52,9 +52,7 @@ contains
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
 
-    do i = 1,NDOF*NP
-      P(i) = U(i)
-    enddo
+    call monolis_vec_copy_R(N, NDOF, U, P)
 
     call monolis_matvec(monoCOM, monoMAT, P, S, tcomm)
     call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma, tcomm)

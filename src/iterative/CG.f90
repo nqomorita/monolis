@@ -55,9 +55,7 @@ contains
           P(i) = Z(i) + beta * P(i)
         enddo
       else
-        do i=1, NNDOF
-          P(i) = Z(i)
-        enddo
+        call monolis_vec_copy_R(N, NDOF, Z, P)
       endif
 
       call monolis_matvec(monoCOM, monoMAT, P, Q, tcomm)

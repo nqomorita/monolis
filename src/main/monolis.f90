@@ -61,7 +61,7 @@ contains
     monoPRM%show_time     = show_time
     monoPRM%show_summary  = show_summary
 
-#ifdef DTEST_ALL
+#ifdef TEST_ALL
     call monolis_solve_test(monoPRM, monoCOM, monoMAT)
 #else
     call monolis_solve(monoPRM, monoCOM, monoMAT)

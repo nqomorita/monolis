@@ -57,9 +57,7 @@ contains
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
-    do i = 1, NNDOF
-      R0 = R
-    enddo
+    call monolis_vec_copy_R(N, NDOF, R, R0)
 
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, RT)
     call monolis_matvec(monoCOM, monoMAT, RT, W0, tcomm)
@@ -91,7 +89,11 @@ contains
 
       QY = CG(1)
       YY = CG(2)
-      omega1 = QY / YY
+      if(YY /= 0.0d0)then
+        omega1 = QY / YY
+      else
+        omega1 = 0.0d0
+      endif
 
       if(mod(iter, iter_RR) == 0)then
         do i = 1, NNDOF
