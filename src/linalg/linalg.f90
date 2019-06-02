@@ -17,6 +17,17 @@ contains
     enddo
   end subroutine monolis_vec_copy_R
 
+  subroutine monolis_vec_AXPY(n, ndof, alpha, X, Y, Z)
+    implicit none
+    integer(kind=kint) :: i, n, ndof
+    real(kind=kdouble) :: alpha
+    real(kind=kdouble) :: X(:), Y(:), Z(:)
+
+    do i = 1, n * ndof
+      Z(i) = alpha*X(i) + Y(i)
+    enddo
+  end subroutine monolis_vec_AXPY
+
   subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tcomm)
     implicit none
     type(monolis_com) :: monoCOM

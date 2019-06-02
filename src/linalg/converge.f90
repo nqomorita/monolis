@@ -19,8 +19,8 @@ contains
 
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)
     if(B2 == 0.0d0)then
-      if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis error: bnorm ", B2
-      stop
+      if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
+      monoMAT%X = 0.0d0
     endif
 
   end subroutine monolis_set_converge

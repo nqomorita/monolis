@@ -51,9 +51,7 @@ contains
 
       if(1 < iter)then
         beta = rho/rho1
-        do i = 1, NNDOF
-          P(i) = Z(i) + beta * P(i)
-        enddo
+        call monolis_vec_AXPY(N, NDOF, beta, P, Z, P)
       else
         call monolis_vec_copy_R(N, NDOF, Z, P)
       endif
@@ -62,16 +60,12 @@ contains
       call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, tcomm)
       alpha = rho/omega
 
-      do i = 1, NNDOF
-        X(i) = X(i) + alpha * P(i)
-      enddo
+      call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
       else
-        do i = 1, NNDOF
-          R(i) = R(i) - alpha * Q(i)
-        enddo
+        call monolis_vec_AXPY(N, NDOF, -alpha, Q, R, R)
       endif
 
       call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)

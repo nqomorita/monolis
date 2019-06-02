@@ -98,9 +98,7 @@ contains
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        do i = 1, NNDOF
-         X(i) = X(i) + alpha*P(i)
-        enddo
+        call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)
         call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
         call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
         call monolis_matvec(monoCOM, monoMAT, U, V, tcomm)

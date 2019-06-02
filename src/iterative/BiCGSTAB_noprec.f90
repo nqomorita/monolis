@@ -68,10 +68,7 @@ contains
       call monolis_inner_product_R(monoCOM, N, NDOF, RT, V, c2, tcomm)
 
       alpha = rho / c2
-
-      do i = 1, NNDOF
-        S(i) = R(i) - alpha*V(i)
-      enddo
+      call monolis_vec_AXPY(N, NDOF, -alpha, V, R, S)
 
       call monolis_matvec(monoCOM, monoMAT, S, T, tcomm)
 
@@ -88,9 +85,7 @@ contains
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
       else
-        do i = 1, NNDOF
-          R(i) = S(i) - omega*T(i)
-        enddo
+        call monolis_vec_AXPY(N, NDOF, -omega, T, S, R)
       endif
 
       call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)
