@@ -16,6 +16,7 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_iter_SOR      = 10
   integer(4), parameter :: monolis_iter_IR       = 11
 
+  integer(4), parameter :: monolis_prec_NONE   = 0
   integer(4), parameter :: monolis_prec_DIAG   = 1
   integer(4), parameter :: monolis_prec_ILU    = 2
   integer(4), parameter :: monolis_prec_JACOBI = 3
@@ -37,7 +38,8 @@ module mod_monolis_prm
   & "PipeBiCGSTAB_noprec", &
   & "SOR                ", &
   & "IR                 "/)
-  character*24, dimension(8)  :: monolis_str_prec = (/&
+  character*24, dimension(0:8)  :: monolis_str_prec = (/&
+  & "None  ", &
   & "Diag  ", &
   & "ILU   ", &
   & "Jacobi", &
