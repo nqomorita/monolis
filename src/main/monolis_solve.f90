@@ -74,7 +74,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write(*,"(a)")" ** monolis solver: "// &
+    if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write(*,"(a)")" ** monolis solver : "// &
     & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))
 
     select case(monoPRM%method)

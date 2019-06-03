@@ -42,7 +42,7 @@ SMP5TARGET  = $(addprefix $(SMP_DIR)/, $(SMP5_LIST))
 
 SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 fillin.f90 hash.f90
 #SRC_LIST_CONV = convert_full.f90 convert_coo.f90 convert_csr.f90 alloc_matrix.f90
-SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 converge.f90 scaling.f90 restruct.f90 reorder.f90
+SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90 scaling.f90 restruct.f90 reorder.f90
 SRC_LIST_FACT = 11/fact_LU_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90
 SRC_LIST_PREC = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 precond.f90
 SRC_LIST_DIRC = LU.f90
