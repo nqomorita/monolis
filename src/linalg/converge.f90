@@ -9,18 +9,22 @@ module mod_monolis_converge
 
 contains
 
-  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
+  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: B(:), B2
     real(kind=kdouble), optional :: tcomm
+    logical :: is_converge
 
+    is_converge = .false.
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)
+
     if(B2 == 0.0d0)then
       if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
       monoMAT%X = 0.0d0
+      is_converge = .true.
     endif
 
   end subroutine monolis_set_converge
@@ -36,7 +40,6 @@ contains
     logical :: is_converge
 
     is_converge = .false.
-
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tcomm)
     resid = dsqrt(R2/B2)
 

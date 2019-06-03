@@ -54,7 +54,8 @@ contains
     allocate(Y (NDOF*NP)); Y  = 0.0d0
     allocate(V (NDOF*NP)); V  = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
+    if(is_converge) return
     call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
 
     call monolis_vec_copy_R(N, NDOF, R, R0)

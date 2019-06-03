@@ -45,7 +45,8 @@ contains
 
     allocate(R(NDOF*NP)); R = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
+    if(is_converge) return
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
 
