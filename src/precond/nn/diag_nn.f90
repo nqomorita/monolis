@@ -50,6 +50,7 @@ contains
           enddo
 
           do k = 1, NDOF
+            if(LU(k,k) == 0.0d0) stop "** monolis error: zero diag in monolis_precond_diag_nn_setup"
             LU(k,k) = 1.0d0/LU(k,k)
             do l = k+1, NDOF
               LU(l,k) = LU(l,k)*LU(k,k)
