@@ -4,6 +4,7 @@ module mod_monolis_matvec
   use mod_monolis_mat
   use mod_monolis_linalg_util
   use mod_monolis_linalg_com
+  use mod_monolis_util
   implicit none
 
 contains
@@ -88,6 +89,10 @@ contains
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble), optional :: tcomm
+
+#ifdef DEBUG
+    call monolis_debug_header("monolis_matvec")
+#endif
 
     call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 

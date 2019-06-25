@@ -39,6 +39,10 @@ contains
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
 
+#ifdef DEBUG
+    call monolis_debug_header("monolis_precond_apply")
+#endif
+
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_ILU)then
