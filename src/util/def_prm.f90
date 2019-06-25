@@ -58,6 +58,7 @@ module mod_monolis_prm
     logical :: is_scaling    = .true.
     logical :: is_reordering = .true.
     logical :: is_init_x     = .true.
+    logical :: is_debug      = .false.
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.
     logical :: show_summary  = .true.
@@ -81,6 +82,7 @@ contains
     monoPRM%is_scaling    = .true.
     monoPRM%is_reordering = .true.
     monoPRM%is_init_x     = .true.
+    monoPRM%is_debug      = .false.
     monoPRM%show_iterlog  = .true.
     monoPRM%show_time     = .true.
     monoPRM%show_summary  = .true.

@@ -29,7 +29,11 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
 
-    call monolis_check_diagonal(monoMAT)
+#ifdef DEBUG
+    monoPRM%is_debug = .true.
+#endif
+
+    call monolis_check_diagonal(monoPRM, monoMAT)
     call monolis_timer_initialize(monoPRM)
     call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
@@ -38,7 +42,7 @@ contains
     call monolis_precond_clear(monoPRM, monoCOM_reorder, monoMAT_reorder)
     call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
     call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
-    call monolis_timer_finalize(monoCOM)
+    call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve
 
   subroutine monolis_solve_test(monoPRM, monoCOM, monoMAT)
@@ -50,7 +54,7 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint) :: i, j
 
-    call monolis_check_diagonal(monoMAT)
+    call monolis_check_diagonal(monoPRM, monoMAT)
     do i = 1, 9
       monoPRM%method = i
       do j = 1, 4
@@ -63,7 +67,7 @@ contains
         call monolis_precond_clear(monoPRM, monoCOM_reorder, monoMAT_reorder)
         call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
         call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
-        call monolis_timer_finalize(monoCOM)
+        call monolis_timer_finalize(monoPRM, monoCOM)
       enddo
     enddo
   end subroutine monolis_solve_test
@@ -73,6 +77,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver")
 
     if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write(*,"(a)")" ** monolis solver : "// &
     & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))

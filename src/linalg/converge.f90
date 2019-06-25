@@ -5,6 +5,7 @@ module mod_monolis_converge
   use mod_monolis_linalg
   use mod_monolis_linalg_util
   use mod_monolis_linalg_com
+  use mod_monolis_util
   implicit none
 
 contains
@@ -17,6 +18,8 @@ contains
     real(kind=kdouble) :: B(:), B2
     real(kind=kdouble), optional :: tcomm
     logical :: is_converge
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_set_converge")
 
     is_converge = .false.
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)

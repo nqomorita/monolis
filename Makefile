@@ -2,8 +2,9 @@
 FLAG_MPI   = -DWITH_MPI
 FLAG_METIS = -DWITH_METIS
 FLAG_DDM   = -DOVER_DDM
+FLAG_DEBUG = -DDEBUG
 #FLAG_TEST  = -DTEST_ALL
-CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_TEST)
+CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_TEST) $(FLAG_DEBUG)
 
 FC         = mpif90
 FFLAGS     = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid

@@ -6,6 +6,7 @@ module mod_monolis_precond
   use mod_monolis_precond_ilu
   use mod_monolis_precond_Jacobi
   use mod_monolis_precond_SOR
+  use mod_monolis_util
 
   implicit none
 
@@ -16,6 +17,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_setup")
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_setup(monoPRM, monoCOM, monoMAT)
@@ -56,6 +59,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_clear")
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_clear(monoPRM, monoCOM, monoMAT)

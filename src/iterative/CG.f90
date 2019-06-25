@@ -7,6 +7,7 @@ module mod_monolis_solver_CG
   use mod_monolis_linalg
   use mod_monolis_linalg_util
   use mod_monolis_converge
+  use mod_monolis_util
 
   implicit none
 
@@ -24,6 +25,8 @@ contains
     real(kind=kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver_CG")
 
     t1 = monolis_wtime()
 

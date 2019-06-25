@@ -4,6 +4,7 @@ module mod_monolis_scaling
   use mod_monolis_mat
   use mod_monolis_linalg
   use mod_monolis_linalg_util
+  use mod_monolis_util
   implicit none
 
   private
@@ -23,6 +24,8 @@ contains
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), X(:), B(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_fw")
 
     if(.not. monoPRM%is_scaling) return
 
@@ -92,6 +95,8 @@ contains
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), B(:), X(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_bk")
 
     if(.not. monoPRM%is_scaling) return
 

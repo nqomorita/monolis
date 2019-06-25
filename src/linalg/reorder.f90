@@ -3,6 +3,7 @@ module mod_monolis_reorder
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_restruct
+  use mod_monolis_util
   implicit none
 
   type monolis_edge_info
@@ -20,6 +21,8 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint), pointer ::  perm(:), iperm(:)
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_fw")
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
@@ -50,6 +53,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_bk")
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
