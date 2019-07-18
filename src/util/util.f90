@@ -5,6 +5,12 @@ module mod_monolis_util
 
   implicit none
 
+  type monolis_structure
+    type(monolis_prm) :: PRM
+    type(monolis_com) :: COM
+    type(monolis_mat) :: MAT
+  end type monolis_structure
+
   private
   public :: monolis_initialize
   public :: monolis_finalize
