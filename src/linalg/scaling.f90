@@ -48,7 +48,7 @@ contains
       do j = jS, jE
         in = item(j)
         if(i == in)then
-          do k = 1, NDOF2
+          do k = 1, NDOF
             diag(NDOF*(i-1)+k) = 1.0d0 / dsqrt(dabs(A(NDOF2*(j-1) + (k-1)*(NDOF+1) + 1)))
           enddo
         endif

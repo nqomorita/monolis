@@ -6,6 +6,13 @@ module mod_monolis_linalg
   use mod_monolis_util
   implicit none
 
+  private
+  public :: monolis_vec_copy_R
+  public :: monolis_vec_AXPY
+  public :: monolis_inner_product_I
+  public :: monolis_inner_product_R
+  public :: monolis_inner_product_R_local
+
 contains
 
   subroutine monolis_vec_copy_R(n, ndof, X, Y)
