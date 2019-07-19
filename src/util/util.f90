@@ -12,6 +12,7 @@ module mod_monolis_util
   end type monolis_structure
 
   private
+  public :: monolis_structure
   public :: monolis_initialize
   public :: monolis_finalize
   public :: monolis_timer_initialize
