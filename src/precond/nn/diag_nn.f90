@@ -45,7 +45,7 @@ contains
         if(i == in)then
           do j = 1, NDOF
             do k = 1, NDOF
-              LU(j,k) = A(NDOF2*(i-1) + NDOF*(j-1) + k)
+              LU(j,k) = A(NDOF2*(ii-1) + NDOF*(j-1) + k)
             enddo
           enddo
 
