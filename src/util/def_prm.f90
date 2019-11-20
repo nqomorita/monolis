@@ -25,6 +25,7 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_prec_RIF    = 6
   integer(4), parameter :: monolis_prec_SPIKE  = 7
   integer(4), parameter :: monolis_prec_DIRECT = 8
+  integer(4), parameter :: monolis_prec_MUMPS  = 9
 
   character*24, dimension(11) :: monolis_str_iter = (/&
   & "CG                 ", &
