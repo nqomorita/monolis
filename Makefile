@@ -1,23 +1,28 @@
 
 FLAG_MPI   = -DWITH_MPI
 FLAG_METIS = -DWITH_METIS
+FLAG_MUMPS = -DWITH_MUMPS
 FLAG_DDM   = -DOVER_DDM
 #FLAG_DEBUG = -DDEBUG
 #FLAG_TEST  = -DTEST_ALL
-CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_TEST) $(FLAG_DEBUG)
+CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
 FC         = mpif90
 FFLAGS     = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
 CC         = mpicc
 CFLAGS     =
 
-METIS_DIR  = /Users/morita
+METIS_DIR  = $(HOME)/FrontISTR_tools
 METIS_INC  = -I $(METIS_DIR)/include
 METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
-INCLUDE    = -I ./include
+MUMPS_DIR  = $(HOME)/FrontISTR_tools
+MUMPS_INC  = -I $(MUMPS_DIR)/include
+MUMPS_LIB  = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -lscalapack -lopenblas
+
+INCLUDE    = -I ./include $(MUMPS_INC)
 MOD_DIR    = -J ./include
-LIBRARY    = $(METIS_LIB)
+LIBRARY    = $(METIS_LIB) $(MUMPS_LIB)
 BIN_DIR    = ./bin
 SRC_DIR    = ./src
 SMP_DIR    = ./sample

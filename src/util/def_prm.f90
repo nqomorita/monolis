@@ -39,7 +39,7 @@ module mod_monolis_prm
   & "PipeBiCGSTAB_noprec", &
   & "SOR                ", &
   & "IR                 "/)
-  character*24, dimension(0:8)  :: monolis_str_prec = (/&
+  character*24, dimension(0:9)  :: monolis_str_prec = (/&
   & "None  ", &
   & "Diag  ", &
   & "ILU   ", &
@@ -48,7 +48,8 @@ module mod_monolis_prm
   & "SAINV ", &
   & "RIF   ", &
   & "SPIKE ", &
-  & "Direct"/)
+  & "Direct", &
+  & "MUMPS "/)
 
   type monolis_prm
     integer(kind=kint) :: method = 1
@@ -59,6 +60,7 @@ module mod_monolis_prm
     logical :: is_scaling    = .true.
     logical :: is_reordering = .true.
     logical :: is_init_x     = .true.
+    logical :: is_sym_matrix = .true.
     logical :: is_debug      = .false.
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.

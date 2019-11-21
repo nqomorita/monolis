@@ -30,7 +30,7 @@ contains
     elseif(monoPRM%precond == monolis_prec_SOR)then
       call monolis_precond_SOR_setup(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
-      !call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_setup
 
@@ -55,7 +55,7 @@ contains
     elseif(monoPRM%precond == monolis_prec_SOR)then
       call monolis_precond_SOR_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
-      !call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
+      call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
     else
       do i = 1, monoMAT%N*monoMAT%NDOF
         Y(i) = X(i)
@@ -80,7 +80,7 @@ contains
     elseif(monoPRM%precond == monolis_prec_SOR)then
       call monolis_precond_SOR_clear(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
-      !call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
+      call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
     endif
   end subroutine monolis_precond_clear
 
