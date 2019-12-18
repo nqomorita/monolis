@@ -62,6 +62,7 @@ module mod_monolis_prm
     logical :: is_init_x     = .true.
     logical :: is_sym_matrix = .true.
     logical :: is_debug      = .false.
+    logical :: is_check_diag = .true.
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.
     logical :: show_summary  = .true.

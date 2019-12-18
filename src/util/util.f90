@@ -72,6 +72,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
 
+    if(.not. monoPRM%is_check_diag) return
     if(monoPRM%is_debug) call monolis_debug_header("monolis_check_diagonal")
 
     NP =  monoMAT%NP
