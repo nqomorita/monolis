@@ -55,8 +55,10 @@ module mod_monolis_prm
     integer(kind=kint) :: method = 1
     integer(kind=kint) :: precond = 1
     integer(kind=kint) :: maxiter = 1000
+    integer(kind=kint) :: curiter = 0
     integer(kind=kint) :: ierr = -1
     real(kind=kdouble) :: tol = 1.0d-8
+    real(kind=kdouble) :: curresid = 0.0d0
     logical :: is_scaling    = .true.
     logical :: is_reordering = .true.
     logical :: is_init_x     = .true.

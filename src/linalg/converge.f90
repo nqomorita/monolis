@@ -46,8 +46,13 @@ contains
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tcomm)
     resid = dsqrt(R2/B2)
 
+    monoPRM%curiter = iter
+    monoPRM%curresid = resid
     if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
-    if(resid < monoPRM%tol) is_converge = .true.
+    if(resid < monoPRM%tol)then
+      is_converge = .true.
+      if(monoCOM%myrank == 0 .and. monoPRM%is_debug) write (*,"(i7, 1pe16.6)") iter, resid
+    endif
 
   end subroutine monolis_check_converge
 
