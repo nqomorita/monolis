@@ -49,7 +49,7 @@ contains
     monoPRM%curiter = iter
     monoPRM%curresid = resid
     if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
-    if(resid < monoPRM%tol)then
+    if(resid < monoPRM%tol .or. iter == monoPRM%maxiter)then
       is_converge = .true.
       if(monoCOM%myrank == 0 .and. monoPRM%is_debug) write (*,"(i7, 1pe16.6)") iter, resid
     endif
