@@ -1,38 +1,51 @@
 
-FLAG_MPI   = -DWITH_MPI
-FLAG_METIS = -DWITH_METIS
-FLAG_MUMPS = -DWITH_MUMPS
-FLAG_DDM   = -DOVER_DDM
+#FLAG_DDM   = -DOVER_DDM
 #FLAG_DEBUG = -DDEBUG
 #FLAG_TEST  = -DTEST_ALL
-export CPP        = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
-export FC         = mpif90
-export FFLAGS     = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
-export CC         = mpicc
-export CFLAGS     =
+export FC     = mpif90
+export FFLAGS = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
+export CC     = mpicc
+export CFLAGS =
 
-export METIS_DIR  = $(HOME)/FrontISTR_tools
-export METIS_INC  = -I $(METIS_DIR)/include
-export METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
+ifdef FLAGS
+	comma:= ,
+	empty:=
+	space:= $(empty) $(empty)
+	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
-export MUMPS_DIR  = $(HOME)/FrontISTR_tools
-export MUMPS_INC  = -I $(MUMPS_DIR)/include
-export MUMPS_LIB  = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -lscalapack -lopenblas
+	ifeq ($(findstring MPI, $(DFLAGS)), MPI)
+		export FLAG_MPI   = -DWITH_MPI
+	endif
 
-export INCLUDE    = -I ./include $(MUMPS_INC)
-export MOD_DIR    = -J ./include
-export LIBRARY    = $(METIS_LIB) $(MUMPS_LIB)
-export SRC_DIR    = ./src
-export SMP_DIR    = ./sample
-export OBJ_DIR    = ./obj
-export LIB_DIR    = ./lib
-export LIB_LIST   = libmonolis.a
+	ifeq ($(findstring METIS, $(DFLAGS)), METIS)
+		FLAG_METIS = -DWITH_METIS
+		export METIS_DIR = $(HOME)/FrontISTR_tools
+		export METIS_INC = -I $(METIS_DIR)/include
+		export METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+	endif
 
-export MAKE       = make
-export CD         = cd
-export RM         = rm -r
-export AR         = - ar ruv
+	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
+		FLAG_MUMPS = -DWITH_MUMPS
+		export MUMPS_DIR = $(HOME)/FrontISTR_tools
+		export MUMPS_INC = -I $(MUMPS_DIR)/include
+		export MUMPS_LIB = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -lscalapack -lopenblas
+	endif
+endif
+
+export INCLUDE  = -I ./include $(MUMPS_INC)
+export MOD_DIR  = -J ./include
+export LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
+export SRC_DIR  = ./src
+export OBJ_DIR  = ./obj
+export LIB_DIR  = ./lib
+export LIB_LIST = libmonolis.a
+export CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG) $(FLAG_DDM)
+
+export MAKE     = make
+export CD       = cd
+export RM       = rm -r
+export AR       = - ar ruv
 
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 
