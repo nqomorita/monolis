@@ -2,6 +2,10 @@
 
 - Morita's non-overlapping / overlapping domain decomposition based linear equation solver
 
+## Manual
+
+https://morita.gitlab.io/monolis/
+
 ## Direct solver
 
 - LU factorization (LU)
