@@ -27,12 +27,14 @@ https://morita.gitlab.io/monolis/
 ## Preconditioning
 
 - Diagonal scaling
+- Incomplete LU
+- Jacobi
+- Successive Over Relaxation
 
 ## Matrix storage format
 
 - CSR format
     - n\*n blocking
-    - storing a sparse matrix separately as A = L + D + U
 
 ## Interface
 
@@ -40,8 +42,38 @@ https://morita.gitlab.io/monolis/
 
 ## Miscellanies
 
-- MPI parallelization (-DWITH_MPI)
-- Reordering with metis version 5 (-DWITH_METIS)
+- MPI parallelization
+- Reordering with metis version 5
+
+## Compile
+
+Confirm and set the following variables in Makefile.
+
+```
+FC     = mpif90
+FFLAGS = -O2
+METIS_DIR = $(path to metis)
+METIS_INC = -I $(METIS_DIR)/include
+METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+```
+
+### with MPI and METIS
+
+```
+make FLAGS=MPI,METIS
+```
+
+### with MPI
+
+```
+make FLAGS=MPI
+```
+
+### with METIS
+
+```
+make FLAGS=METIS
+```
 
 ## License
 
