@@ -20,6 +20,8 @@ module mod_monolis_util
   public :: monolis_check_diagonal
   public :: monolis_debug_header
 
+  integer(kind=kint), save :: myrank
+
 contains
 
   subroutine monolis_initialize(monoPRM, monoCOM, monoMAT)
@@ -31,6 +33,7 @@ contains
     call monolis_prm_initialize(monoPRM)
     call monolis_com_initialize(monoCOM)
     call monolis_mat_initialize(monoMAT)
+    myrank = monoCOM%myrank
   end subroutine monolis_initialize
 
   subroutine monolis_finalize(monoPRM, monoCOM, monoMAT)
@@ -98,7 +101,7 @@ contains
     implicit none
     character(*) :: header
 
-    write(*,"(a)")"** monolis debug: "//trim(header)
+    if(myrank == 0) write(*,"(a)")"** monolis debug: "//trim(header)
   end subroutine monolis_debug_header
 
   subroutine monolis_debug_equal_R(header, a, b)
@@ -107,7 +110,7 @@ contains
     real(kind=kdouble) :: a, b
 
     if(a /= b)then
-      write(*,"(a,1pe12.5,a,1pe12.5,a)")"** monolis debug: ", a, "is not equal", b, " at "//trim(header)
+      if(myrank == 0) write(*,"(a,1pe12.5,a,1pe12.5,a)")"** monolis debug: ", a, "is not equal", b, " at "//trim(header)
     endif
   end subroutine monolis_debug_equal_R
 
