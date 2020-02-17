@@ -15,7 +15,7 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring MPI, $(DFLAGS)), MPI)
-		export FLAG_MPI   = -DWITH_MPI
+		export FLAG_MPI = -DWITH_MPI
 	endif
 
 	ifeq ($(findstring METIS, $(DFLAGS)), METIS)

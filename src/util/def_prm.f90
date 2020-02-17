@@ -27,6 +27,12 @@ module mod_monolis_prm
   integer(4), parameter :: monolis_prec_DIRECT = 8
   integer(4), parameter :: monolis_prec_MUMPS  = 9
 
+  !enum, bind(c)
+  !  enumerator :: BoundaryType_Dirichlet = 1
+  !  enumerator :: BoundaryType_Neumann
+  !  enumerator :: BoundaryType_Robin
+  !end enum
+
   character*24, dimension(11) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &

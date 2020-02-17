@@ -40,10 +40,10 @@ contains
 
     if(monoPRM%is_init_x) X = 0.0d0
 
-    allocate(R(NDOF*NP)); R = 0.0d0
-    allocate(Z(NDOF*NP)); Z = 0.0d0
-    allocate(Q(NDOF*NP)); Q = 0.0d0
-    allocate(P(NDOF*NP)); P = 0.0d0
+    allocate(R(NDOF*NP), source = 0.0d0)
+    allocate(Z(NDOF*NP), source = 0.0d0)
+    allocate(Q(NDOF*NP), source = 0.0d0)
+    allocate(P(NDOF*NP), source = 0.0d0)
 
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
     if(is_converge) return

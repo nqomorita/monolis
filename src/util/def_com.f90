@@ -76,11 +76,6 @@ contains
     monoCOM_c%comm = 0
     monoCOM_c%commsize = 0
     monoCOM_c%n_neib = 0
-    !monoCOM_c%neib_pe => null()
-    !monoCOM_c%recv_index => null()
-    !monoCOM_c%recv_item => null()
-    !monoCOM_c%send_index => null()
-    !monoCOM_c%send_item => null()
 
 #ifdef WITH_MPI
     call MPI_init(ierr)
@@ -118,17 +113,6 @@ contains
     implicit none
     type(monolis_com_c) :: monoCOM_c
     integer(kind=kint) :: ierr
-
-    !if(associated(monoCOM_c%neib_pe)) deallocate(monoCOM_c%neib_pe)
-    !if(associated(monoCOM_c%recv_index)) deallocate(monoCOM_c%recv_index)
-    !if(associated(monoCOM_c%recv_item)) deallocate(monoCOM_c%recv_item)
-    !if(associated(monoCOM_c%send_index)) deallocate(monoCOM_c%send_index)
-    !if(associated(monoCOM_c%send_item)) deallocate(monoCOM_c%send_item)
-    !monoCOM_c%neib_pe => null()
-    !monoCOM_c%recv_index => null()
-    !monoCOM_c%recv_item => null()
-    !monoCOM_c%send_index => null()
-    !monoCOM_c%send_item => null()
 
 #ifdef WITH_MPI
     call MPI_finalize(ierr)
