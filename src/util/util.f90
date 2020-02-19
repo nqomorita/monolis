@@ -102,7 +102,9 @@ contains
     implicit none
     real(kind=kdouble) :: monolis_get_time
 
+#ifdef WITH_MPI
     monolis_get_time = MPI_Wtime()
+#endif
   end function monolis_get_time
 
   subroutine monolis_debug_header(header)

@@ -60,21 +60,46 @@ contains
     monoMAT%B => null()
   end subroutine monolis_mat_initialize
 
-  subroutine monolis_mat_copy(monoA, monoB)
+  subroutine monolis_mat_copy_by_pointer(min, mout)
     implicit none
-    type(monolis_mat) :: monoA
-    type(monolis_mat) :: monoB
+    type(monolis_mat) :: min
+    type(monolis_mat) :: mout
 
-    monoB%N = monoA%N
-    monoB%NP = monoA%NP
-    monoB%NZ = monoA%NZ
-    monoB%NDOF = monoA%NDOF
-    monoB%index => monoA%index
-    monoB%item => monoA%item
-    monoB%A => monoA%A
-    monoB%X => monoA%X
-    monoB%B => monoA%B
-  end subroutine monolis_mat_copy
+    mout%N = min%N
+    mout%NP = min%NP
+    mout%NZ = min%NZ
+    mout%NDOF = min%NDOF
+    mout%index => min%index
+    mout%item => min%item
+    mout%A => min%A
+    mout%X => min%X
+    mout%B => min%B
+  end subroutine monolis_mat_copy_by_pointer
+
+  subroutine monolis_mat_copy_all(min, mout)
+    implicit none
+    type(monolis_mat) :: min
+    type(monolis_mat) :: mout
+    integer(kind=kint) :: i, NZ
+
+    mout%N = min%N
+    mout%NP = min%NP
+    mout%NZ = min%NZ
+    mout%NDOF = min%NDOF
+
+    NZ = min%index(min%NP)
+    allocate(mout%index(0:min%NP))
+    allocate(mout%item(NZ))
+    allocate(mout%A(min%NDOF*min%NDOF*NZ))
+    allocate(mout%X(min%NDOF*min%NP))
+    allocate(mout%B(min%NDOF*min%NP))
+
+    mout%index(0:min%NP) = min%index(0:min%NP)
+    mout%item = min%item
+    mout%A = min%A
+    mout%X = min%X
+    mout%B = min%B
+  end subroutine monolis_mat_copy_all
 
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
