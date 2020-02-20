@@ -105,15 +105,48 @@ contains
     implicit none
     type(monolis_mat) :: monoMAT
 
+    call monolis_mat_tree_finalize(monoMAT%monoTREE)
+
     if(associated(monoMAT%index)) deallocate(monoMAT%index)
     if(associated(monoMAT%item)) deallocate(monoMAT%item)
     if(associated(monoMAT%A)) deallocate(monoMAT%A)
     if(associated(monoMAT%X)) deallocate(monoMAT%X)
     if(associated(monoMAT%B)) deallocate(monoMAT%B)
+    if(associated(monoMAT%perm)) deallocate(monoMAT%perm)
+    if(associated(monoMAT%iperm)) deallocate(monoMAT%iperm)
+    if(associated(monoMAT%diag)) deallocate(monoMAT%diag)
     monoMAT%index => null()
     monoMAT%item => null()
     monoMAT%A => null()
     monoMAT%X => null()
     monoMAT%B => null()
+    monoMAT%perm => null()
+    monoMAT%iperm => null()
+    monoMAT%diag => null()
   end subroutine monolis_mat_finalize
+
+  subroutine monolis_mat_tree_finalize(monoMAT)
+    implicit none
+    type(monolis_mat_LDU) :: monoMAT
+
+    if(associated(monoMAT%indexU)) deallocate(monoMAT%indexU)
+    if(associated(monoMAT%indexL)) deallocate(monoMAT%indexL)
+    if(associated(monoMAT%itemU)) deallocate(monoMAT%itemU)
+    if(associated(monoMAT%itemL)) deallocate(monoMAT%itemL)
+    if(associated(monoMAT%L)) deallocate(monoMAT%L)
+    if(associated(monoMAT%D)) deallocate(monoMAT%D)
+    if(associated(monoMAT%U)) deallocate(monoMAT%U)
+    if(associated(monoMAT%X)) deallocate(monoMAT%X)
+    if(associated(monoMAT%B)) deallocate(monoMAT%B)
+    monoMAT%indexU => null()
+    monoMAT%indexL => null()
+    monoMAT%itemU => null()
+    monoMAT%itemL => null()
+    monoMAT%L => null()
+    monoMAT%D => null()
+    monoMAT%U => null()
+    monoMAT%X => null()
+    monoMAT%B => null()
+  end subroutine monolis_mat_tree_finalize
+
 end module mod_monolis_mat

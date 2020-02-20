@@ -89,8 +89,11 @@ contains
 
     monoPRM%method = 1
     monoPRM%precond = 1
+    monoPRM%curiter = 0
     monoPRM%maxiter = 1000
+    monoPRM%ierr = -1
     monoPRM%tol = 1.0d-8
+    monoPRM%curresid = 0.0d0
     monoPRM%is_scaling    = .true.
     monoPRM%is_reordering = .true.
     monoPRM%is_init_x     = .true.

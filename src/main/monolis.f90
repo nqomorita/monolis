@@ -26,7 +26,7 @@ contains
     integer(kind=kint), intent(in), pointer :: item(:)
     real(kind=kdouble), intent(in), pointer :: A(:)
     real(kind=kdouble), intent(in), pointer :: B(:)
-    real(kind=kdouble), intent(out),pointer :: X(:)
+    real(kind=kdouble), pointer :: X(:)
     !> for monoPRM
     integer(kind=kint), intent(in) :: method
     integer(kind=kint), intent(in) :: precond
