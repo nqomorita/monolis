@@ -18,9 +18,9 @@ contains
     use mod_monolis_solve
     implicit none
     type(monolis_com_c) :: monoCOM_c
-    type(monolis_com), save :: monoCOM
-    type(monolis_prm), save :: monoPRM
-    type(monolis_mat), save :: monoMAT
+    type(monolis_com) :: monoCOM
+    type(monolis_prm) :: monoPRM
+    type(monolis_mat) :: monoMAT
     !> for monoMAT
     integer(c_int), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), target :: index(0:NP)

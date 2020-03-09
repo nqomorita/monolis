@@ -4,7 +4,7 @@
 #FLAG_TEST  = -DTEST_ALL
 
 export FC     = mpif90
-export FFLAGS = -O2 -fbounds-check -fbacktrace -ffpe-trap=invalid
+export FFLAGS = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 export CC     = mpicc
 export CFLAGS =
 

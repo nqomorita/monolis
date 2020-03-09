@@ -18,8 +18,8 @@ contains
     use mod_monolis_solve
     implicit none
     type(monolis_com) :: monoCOM
-    type(monolis_prm), save :: monoPRM
-    type(monolis_mat), save :: monoMAT
+    type(monolis_prm) :: monoPRM
+    type(monolis_mat) :: monoMAT
     !> for monoMAT
     integer(kind=kint), intent(in) :: N, NP, NZ, NDOF
     integer(kind=kint), intent(in), pointer :: index(:)
