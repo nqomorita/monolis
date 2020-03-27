@@ -34,6 +34,7 @@ contains
     call monolis_prm_initialize(monoPRM)
     call monolis_com_initialize(monoCOM)
     call monolis_mat_initialize(monoMAT)
+    call monolis_timer_initialize(monoPRM)
     myrank = monoCOM%myrank
   end subroutine monolis_initialize
 
@@ -43,6 +44,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
+    call monolis_timer_finalize(monoPRM, monoCOM)
     call monolis_prm_finalize(monoPRM)
     call monolis_com_finalize(monoCOM)
     call monolis_mat_finalize(monoMAT)
@@ -69,6 +71,15 @@ contains
 
     !if(monoCOM%myrank == 0) write(*,"(a,i8,1p4e12.5)")" ** monolis solved:", 0, tsol, tspmv, tprec, tcomm
   end subroutine monolis_timer_finalize
+
+  function monolis_get_time()
+    implicit none
+    real(kind=kdouble) :: monolis_get_time
+
+#ifdef WITH_MPI
+    monolis_get_time = MPI_Wtime()
+#endif
+  end function monolis_get_time
 
   subroutine monolis_check_diagonal(monoPRM, monoMAT)
     implicit none
@@ -97,15 +108,6 @@ contains
       enddo
     enddo
   end subroutine monolis_check_diagonal
-
-  function monolis_get_time()
-    implicit none
-    real(kind=kdouble) :: monolis_get_time
-
-#ifdef WITH_MPI
-    monolis_get_time = MPI_Wtime()
-#endif
-  end function monolis_get_time
 
   subroutine monolis_debug_header(header)
     implicit none
