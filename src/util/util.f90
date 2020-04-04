@@ -102,7 +102,10 @@ contains
         if(i == in)then
           do k = 1, NDOF
             kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
-            if(monoMAT%A(kn) == 0.0d0) stop " ** monolis error: zero diagonal"
+            if(monoMAT%A(kn) == 0.0d0)then
+              if(myrank == 0) write(*,"(a,i8,a,i8)")" ** monolis error: zero diagonal at node:", i, " , dof: ", k
+              stop
+            endif
           enddo
         endif
       enddo
