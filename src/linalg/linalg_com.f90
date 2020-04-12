@@ -86,7 +86,7 @@ contains
 #endif
   end subroutine monolis_allreduce_I
 
-  subroutine monolis_SendRecv_R(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
+  subroutine monolis_SendRecv_pre_R(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
   & ws, wr, val, ndof, comm)
     implicit none
     integer(kind=kint) :: n_neib
@@ -137,7 +137,29 @@ contains
 
     call MPI_waitall(n_neib, req1, sta1, ierr)
 #endif
-  end subroutine monolis_SendRecv_R
+  end subroutine monolis_SendRecv_pre_R
+
+  subroutine monolis_SendRecv_post_R(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
+  & ws, wr, val, ndof, comm)
+    implicit none
+    integer(kind=kint) :: n_neib
+    integer(kind=kint) :: iS, in, j, k, ierr
+    integer(kind=kint) :: i, ndof, comm
+    integer(kind=kint), pointer :: neib_pe(:)
+    integer(kind=kint), pointer :: send_index(:)
+    integer(kind=kint), pointer :: send_item (:)
+    integer(kind=kint), pointer :: recv_index(:)
+    integer(kind=kint), pointer :: recv_item (:)
+    integer(kind=kint) :: sta1(monolis_status_size, n_neib)
+    integer(kind=kint) :: sta2(monolis_status_size, n_neib)
+    integer(kind=kint) :: req1(n_neib)
+    integer(kind=kint) :: req2(n_neib)
+    real(kind=kdouble) :: val(:), ws(:), wr(:)
+
+#ifdef WITH_MPI
+
+#endif
+  end subroutine monolis_SendRecv_post_R
 
   subroutine monolis_SendRecv_I(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
   & ws, wr, val, ndof, comm)

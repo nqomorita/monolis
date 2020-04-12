@@ -11,24 +11,13 @@ module mod_monolis_com
     integer(kind=kint)          :: comm
     integer(kind=kint)          :: commsize
     integer(kind=kint)          :: n_neib
+    logical :: is_overlap = .true.
     integer(kind=kint), pointer :: neib_pe(:)    => null()
     integer(kind=kint), pointer :: recv_index(:) => null()
     integer(kind=kint), pointer :: recv_item(:)  => null()
     integer(kind=kint), pointer :: send_index(:) => null()
     integer(kind=kint), pointer :: send_item(:)  => null()
   end type monolis_com
-
-  type, bind(c) :: monolis_com_c
-    integer(c_int) :: myrank
-    integer(c_int) :: comm
-    integer(c_int) :: commsize
-    integer(c_int) :: n_neib
-    type(c_ptr) :: neib_pe
-    type(c_ptr) :: recv_index
-    type(c_ptr) :: recv_item
-    type(c_ptr) :: send_index
-    type(c_ptr) :: send_item
-  end type monolis_com_c
 
   integer(kind=kint), parameter :: monolis_sum = 1
   integer(kind=kint), parameter :: monolis_max = 2
@@ -66,27 +55,6 @@ contains
 #endif
   end subroutine monolis_com_initialize
 
-  subroutine monolis_com_initialize_c(monoCOM_c) bind(c, name="monolis_com_initialize")
-    use iso_c_binding
-    implicit none
-    type(monolis_com_c) :: monoCOM_c
-    integer(kind=kint) :: ierr, commsize, myrank
-
-    monoCOM_c%myrank = 0
-    monoCOM_c%comm = 0
-    monoCOM_c%commsize = 0
-    monoCOM_c%n_neib = 0
-
-#ifdef WITH_MPI
-    call MPI_init(ierr)
-    call MPI_comm_size(MPI_COMM_WORLD, commsize, ierr)
-    call MPI_comm_rank(MPI_COMM_WORLD, myrank,   ierr)
-    monoCOM_c%comm = MPI_COMM_WORLD
-    monoCOM_c%commsize = commsize
-    monoCOM_c%myrank = myrank
-#endif
-  end subroutine monolis_com_initialize_c
-
   subroutine monolis_com_finalize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
@@ -107,17 +75,6 @@ contains
     call MPI_finalize(ierr)
 #endif
   end subroutine monolis_com_finalize
-
-  subroutine monolis_com_finalize_c(monoCOM_c) bind(c, name="monolis_com_finalize")
-    use iso_c_binding
-    implicit none
-    type(monolis_com_c) :: monoCOM_c
-    integer(kind=kint) :: ierr
-
-#ifdef WITH_MPI
-    call MPI_finalize(ierr)
-#endif
-  end subroutine monolis_com_finalize_c
 
   subroutine monolis_com_copy(monoCOM, monoCOM_reorder)
     implicit none

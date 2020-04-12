@@ -35,7 +35,7 @@ contains
     call monolis_debug_header("monolis_matvec")
 #endif
 
-    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
@@ -44,6 +44,8 @@ contains
     else
       call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF, tcomm)
     endif
+
+    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X, tcomm)
   end subroutine monolis_matvec
 
   subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF, tcomm)

@@ -74,10 +74,13 @@ contains
 
   function monolis_get_time()
     implicit none
-    real(kind=kdouble) :: monolis_get_time
+    real(kind=kdouble) :: monolis_get_time, t1
 
 #ifdef WITH_MPI
     monolis_get_time = MPI_Wtime()
+#else
+    call cpu_time(t1)
+    monolis_get_time = t1
 #endif
   end function monolis_get_time
 
