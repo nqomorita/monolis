@@ -1,6 +1,6 @@
 
 all:
-	$(CD) coo_matrix && $(MAKE)
+#	$(CD) coo_matrix && $(MAKE)
 
 clean:
 
