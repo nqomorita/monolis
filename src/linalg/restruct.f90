@@ -20,15 +20,18 @@ contains
     monoCOM_reorder%myrank   = monoCOM%myrank
     monoCOM_reorder%comm     = monoCOM%comm
     monoCOM_reorder%commsize = monoCOM%commsize
-    monoCOM_reorder%n_neib   = monoCOM%n_neib
+    monoCOM_reorder%send_n_neib = monoCOM%send_n_neib
+    monoCOM_reorder%recv_n_neib = monoCOM%recv_n_neib
 
-    if(monoCOM%n_neib /= 0)then
-      monoCOM_reorder%neib_pe    => monoCOM%neib_pe
-      monoCOM_reorder%recv_index => monoCOM%recv_index
-      monoCOM_reorder%recv_item  => monoCOM%recv_item
-      monoCOM_reorder%send_index => monoCOM%send_index
+    if(monoCOM%send_n_neib /= 0)then
+      monoCOM_reorder%recv_neib_pe => monoCOM%recv_neib_pe
+      monoCOM_reorder%recv_index   => monoCOM%recv_index
+      monoCOM_reorder%recv_item    => monoCOM%recv_item
 
-      N = monoCOM%send_index(monoCOM%n_neib)
+      monoCOM_reorder%send_neib_pe => monoCOM%send_neib_pe
+      monoCOM_reorder%send_index   => monoCOM%send_index
+
+      N = monoCOM%send_index(monoCOM%send_n_neib)
       allocate(monoCOM_reorder%send_item(N))
       do i = 1, N
         in = perm(monoCOM%send_item(i))

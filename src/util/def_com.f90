@@ -10,13 +10,17 @@ module mod_monolis_com
     integer(kind=kint)          :: myrank
     integer(kind=kint)          :: comm
     integer(kind=kint)          :: commsize
-    integer(kind=kint)          :: n_neib
     logical :: is_overlap = .true.
-    integer(kind=kint), pointer :: neib_pe(:)    => null()
-    integer(kind=kint), pointer :: recv_index(:) => null()
-    integer(kind=kint), pointer :: recv_item(:)  => null()
-    integer(kind=kint), pointer :: send_index(:) => null()
-    integer(kind=kint), pointer :: send_item(:)  => null()
+
+    integer(kind=kint)          :: recv_n_neib
+    integer(kind=kint), pointer :: recv_neib_pe(:) => null()
+    integer(kind=kint), pointer :: recv_index(:)   => null()
+    integer(kind=kint), pointer :: recv_item(:)    => null()
+
+    integer(kind=kint)          :: send_n_neib
+    integer(kind=kint), pointer :: send_neib_pe(:) => null()
+    integer(kind=kint), pointer :: send_index(:)   => null()
+    integer(kind=kint), pointer :: send_item(:)    => null()
   end type monolis_com
 
   integer(kind=kint), parameter :: monolis_sum = 1
@@ -38,10 +42,14 @@ contains
     monoCOM%myrank = 0
     monoCOM%comm = 0
     monoCOM%commsize = 0
-    monoCOM%n_neib = 0
-    monoCOM%neib_pe => null()
+
+    monoCOM%recv_n_neib = 0
+    monoCOM%recv_neib_pe => null()
     monoCOM%recv_index => null()
     monoCOM%recv_item => null()
+
+    monoCOM%send_n_neib = 0
+    monoCOM%send_neib_pe => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
 
@@ -60,14 +68,19 @@ contains
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: ierr
 
-    if(associated(monoCOM%neib_pe)) deallocate(monoCOM%neib_pe)
+    if(associated(monoCOM%recv_neib_pe)) deallocate(monoCOM%recv_neib_pe)
     if(associated(monoCOM%recv_index)) deallocate(monoCOM%recv_index)
     if(associated(monoCOM%recv_item)) deallocate(monoCOM%recv_item)
+
+    if(associated(monoCOM%send_neib_pe)) deallocate(monoCOM%send_neib_pe)
     if(associated(monoCOM%send_index)) deallocate(monoCOM%send_index)
     if(associated(monoCOM%send_item)) deallocate(monoCOM%send_item)
-    monoCOM%neib_pe => null()
+
+    monoCOM%recv_neib_pe => null()
     monoCOM%recv_index => null()
     monoCOM%recv_item => null()
+
+    monoCOM%send_neib_pe => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
 
@@ -84,10 +97,14 @@ contains
     monoCOM_reorder%myrank = monoCOM%myrank
     monoCOM_reorder%comm = monoCOM%comm
     monoCOM_reorder%commsize = monoCOM%commsize
-    monoCOM_reorder%n_neib = monoCOM%n_neib
-    monoCOM_reorder%neib_pe => monoCOM%neib_pe
+
+    monoCOM_reorder%recv_n_neib = monoCOM%recv_n_neib
+    monoCOM_reorder%recv_neib_pe => monoCOM%recv_neib_pe
     monoCOM_reorder%recv_index => monoCOM%recv_index
     monoCOM_reorder%recv_item => monoCOM%recv_item
+
+    monoCOM_reorder%send_n_neib = monoCOM%send_n_neib
+    monoCOM_reorder%send_neib_pe => monoCOM%send_neib_pe
     monoCOM_reorder%send_index => monoCOM%send_index
     monoCOM_reorder%send_item => monoCOM%send_item
   end subroutine monolis_com_copy
