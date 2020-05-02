@@ -21,8 +21,10 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
     integer(kind=kint), pointer ::  perm(:), iperm(:)
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_fw")
+    t1 = monolis_get_time()
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
@@ -45,6 +47,9 @@ contains
       call monolis_mat_copy_by_pointer(monoMAT, monoMAT_reorder)
       call monolis_com_copy(monoCOM, monoCOM_reorder)
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_reorder_matrix_fw
 
   subroutine monolis_reorder_matrix_bk(monoPRM, monoCOM, monoMAT_reorder, monoMAT)
@@ -53,8 +58,10 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_bk")
+    t1 = monolis_get_time()
 
     if(monoPRM%is_reordering)then
 #ifdef WITH_METIS
@@ -63,6 +70,9 @@ contains
       deallocate(monoMAT%iperm)
 #endif
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_reorder_matrix_bk
 
   subroutine monolis_reorder_vector_fw(monoMAT, N, NDOF, A, B)

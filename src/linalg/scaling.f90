@@ -24,10 +24,11 @@ contains
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), X(:), B(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_fw")
-
     if(.not. monoPRM%is_scaling) return
+    t1 = monolis_get_time()
 
     N = monoMAT%N
     NP = monoMAT%NP
@@ -83,6 +84,9 @@ contains
         enddo
       enddo
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_scaling_fw
 
   subroutine monolis_scaling_bk(monoPRM, monoCOM, monoMAT)
@@ -95,10 +99,11 @@ contains
     real(kind=kdouble) :: tcomm
     real(kind=kdouble), pointer :: A(:), B(:), X(:), diag(:)
     integer(kind=kint), pointer :: index(:), item(:)
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_bk")
-
     if(.not. monoPRM%is_scaling) return
+    t1 = monolis_get_time()
 
     N = monoMAT%N
     NP = monoMAT%NP
@@ -132,5 +137,7 @@ contains
     enddo
 
     deallocate(diag)
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_scaling_bk
 end module mod_monolis_scaling

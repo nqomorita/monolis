@@ -34,7 +34,6 @@ contains
     call monolis_prm_initialize(monoPRM)
     call monolis_com_initialize(monoCOM)
     call monolis_mat_initialize(monoMAT)
-    call monolis_timer_initialize(monoPRM)
     myrank = monoCOM%myrank
   end subroutine monolis_initialize
 
@@ -44,7 +43,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    call monolis_timer_finalize(monoPRM, monoCOM)
     call monolis_prm_finalize(monoPRM)
     call monolis_com_finalize(monoCOM)
     call monolis_mat_finalize(monoMAT)
@@ -56,7 +54,8 @@ contains
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_initialize")
 
-    monoPRM%tsol  = 0.0d0
+    monoPRM%tsol  = monolis_get_time()
+    monoPRM%tprep = 0.0d0
     monoPRM%tspmv = 0.0d0
     monoPRM%tprec = 0.0d0
     monoPRM%tcomm = 0.0d0
@@ -66,10 +65,20 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
+    real(kind=kdouble) :: t1
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_finalize")
 
-    !if(monoCOM%myrank == 0) write(*,"(a,i8,1p4e12.5)")" ** monolis solved:", 0, tsol, tspmv, tprec, tcomm
+    t1 = monolis_get_time()
+    monoPRM%tsol = t1 - monoPRM%tsol
+
+    if(monoPRM%show_summary .and. monoCOM%myrank == 0)then
+      write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%tsol
+      write(*,"(a,1p4e10.3)")"  - solution/prepost time:", monoPRM%tprep
+      write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", monoPRM%tspmv
+      write(*,"(a,1p4e10.3)")"  - solution/precond time:", monoPRM%tprec
+      !write(*,"(a,1p4e10.3)")"  - solution/comm    time:", monoPRM%tcomm
+    endif
   end subroutine monolis_timer_finalize
 
   function monolis_get_time()
@@ -89,9 +98,11 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
+    real(kind=kdouble) :: t1, t2
 
     if(.not. monoPRM%is_check_diag) return
     if(monoPRM%is_debug) call monolis_debug_header("monolis_check_diagonal")
+    t1 = monolis_get_time()
 
     NP =  monoMAT%NP
     NDOF  = monoMAT%NDOF
@@ -113,6 +124,9 @@ contains
         endif
       enddo
     enddo
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
   subroutine monolis_debug_header(header)

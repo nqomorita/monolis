@@ -18,8 +18,10 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_setup")
+    t1 = monolis_get_time()
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_setup(monoPRM, monoCOM, monoMAT)
@@ -32,6 +34,9 @@ contains
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
       call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_precond_setup
 
   subroutine monolis_precond_apply(monoPRM, monoCOM, monoMAT, X, Y)
@@ -41,10 +46,12 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), Y(:)
+    real(kind=kdouble) :: t1, t2
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_precond_apply")
 #endif
+    t1 = monolis_get_time()
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)
@@ -61,6 +68,9 @@ contains
         Y(i) = X(i)
       enddo
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprec = monoPRM%tprec + t2 - t1
   end subroutine monolis_precond_apply
 
   subroutine monolis_precond_clear(monoPRM, monoCOM, monoMAT)
@@ -68,8 +78,10 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    real(kind=kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_clear")
+    t1 = monolis_get_time()
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_clear(monoPRM, monoCOM, monoMAT)
@@ -82,6 +94,9 @@ contains
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
     endif
+
+    t2 = monolis_get_time()
+    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_precond_clear
 
 end module mod_monolis_precond

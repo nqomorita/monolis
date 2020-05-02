@@ -24,28 +24,33 @@ contains
     enddo
   end subroutine monolis_residual
 
-  subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tcomm)
+  subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tspmv)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble) :: t1, t2
+    real(kind=kdouble), optional :: tspmv
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_matvec")
 #endif
+    t1 = monolis_get_time()
 
-    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X)
 
     if(monoMAT%NDOF == 3)then
-      call monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
+      call monolis_matvec_33(monoCOM, monoMAT, X, Y)
     elseif(monoMAT%NDOF == 1)then
-      call monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
+      call monolis_matvec_11(monoCOM, monoMAT, X, Y)
     else
-      call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF, tcomm)
+      call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
     endif
 
-    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X)
+
+    t2 = monolis_get_time()
+    if(present(tspmv)) tspmv = tspmv + t2 - t1
   end subroutine monolis_matvec
 
   subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF, tcomm)
