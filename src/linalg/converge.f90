@@ -22,7 +22,7 @@ contains
     if(monoPRM%is_debug) call monolis_debug_header("monolis_set_converge")
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2)
 
     if(B2 == 0.0d0)then
       if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
@@ -43,7 +43,7 @@ contains
     logical :: is_converge
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2)
     resid = dsqrt(R2/B2)
 
     monoPRM%curiter = iter

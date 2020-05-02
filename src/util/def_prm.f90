@@ -78,6 +78,7 @@ module mod_monolis_prm
     real(kind=kdouble) :: tsol  = 0.0d0
     real(kind=kdouble) :: tprep = 0.0d0
     real(kind=kdouble) :: tspmv = 0.0d0
+    real(kind=kdouble) :: tdotp = 0.0d0
     real(kind=kdouble) :: tprec = 0.0d0
     real(kind=kdouble) :: tcomm = 0.0d0
   end type monolis_prm

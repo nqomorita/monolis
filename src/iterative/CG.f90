@@ -48,7 +48,7 @@ contains
 
     do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, Z)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho, monoPRM%tdotp)
 
       if(1 < iter)then
         beta = rho/rho1
@@ -58,7 +58,7 @@ contains
       endif
 
       call monolis_matvec(monoCOM, monoMAT, P, Q, monoPRM%tspmv)
-      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega)
+      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, monoPRM%tdotp)
       alpha = rho/omega
 
       call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)

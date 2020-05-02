@@ -27,7 +27,7 @@ contains
     real(kind=kdouble), pointer :: B(:), X(:)
     real(kind=kdouble), allocatable :: R(:), D(:)
 
-    t1 = monolis_wtime()
+    t1 = monolis_get_time()
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -67,7 +67,7 @@ contains
     deallocate(R)
     deallocate(D)
 
-    t2 = monolis_wtime()
+    t2 = monolis_get_time()
     tsol = t2 - t1
   end subroutine monolis_solver_IR
 

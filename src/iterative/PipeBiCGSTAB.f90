@@ -26,7 +26,7 @@ contains
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge
 
-    t1 = monolis_wtime()
+    t1 = monolis_get_time()
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -154,7 +154,7 @@ contains
     deallocate(Y )
     deallocate(V )
 
-    t2 = monolis_wtime()
+    t2 = monolis_get_time()
     tsol = t2 - t1
   end subroutine monolis_solver_PipeBiCGSTAB
 end module mod_monolis_solver_PipeBiCGSTAB

@@ -61,33 +61,33 @@ contains
       sum = sum + X(i)*Y(i)
     enddo
 
-    t1 = monolis_wtime()
+    t1 = monolis_get_time()
     call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
-    t2 = monolis_wtime()
+    t2 = monolis_get_time()
     if(present(tcomm)) tcomm = tcomm + t2 - t1
   end subroutine monolis_inner_product_I
 
-  subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tcomm)
+  subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tdotp)
     implicit none
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, n, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, sum
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble), optional :: tdotp
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_R")
 #endif
+    t1 = monolis_get_time()
 
     sum = 0.0d0
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
 
-    t1 = monolis_wtime()
     call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
-    t2 = monolis_wtime()
-    if (present(tcomm)) tcomm = tcomm + t2 - t1
+    t2 = monolis_get_time()
+    if(present(tdotp)) tdotp = tdotp + t2 - t1
   end subroutine monolis_inner_product_R
 
   subroutine monolis_inner_product_R_local(monoCOM, n, ndof, X, Y, sum)

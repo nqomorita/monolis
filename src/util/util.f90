@@ -57,6 +57,7 @@ contains
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
     monoPRM%tspmv = 0.0d0
+    monoPRM%tdotp = 0.0d0
     monoPRM%tprec = 0.0d0
     monoPRM%tcomm = 0.0d0
   end subroutine monolis_timer_initialize
@@ -66,6 +67,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     real(kind=kdouble) :: t1
+    logical :: is_output
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_finalize")
 
@@ -73,9 +75,19 @@ contains
     monoPRM%tsol = t1 - monoPRM%tsol
 
     if(monoPRM%show_summary .and. monoCOM%myrank == 0)then
+      write(*,"(a,i10)")" ** monolis converge iter:", monoPRM%curiter
+      write(*,"(a,1p4e10.3)")" ** monolis rel. residual:", monoPRM%curresid
+    endif
+
+    is_output = monoPRM%show_summary .or. monoPRM%show_time
+    if(is_output .and. monoCOM%myrank == 0)then
       write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%tsol
+    endif
+
+    if(monoPRM%show_time .and. monoCOM%myrank == 0)then
       write(*,"(a,1p4e10.3)")"  - solution/prepost time:", monoPRM%tprep
       write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", monoPRM%tspmv
+      write(*,"(a,1p4e10.3)")"  - solution/inner p time:", monoPRM%tdotp
       write(*,"(a,1p4e10.3)")"  - solution/precond time:", monoPRM%tprec
       !write(*,"(a,1p4e10.3)")"  - solution/comm    time:", monoPRM%tcomm
     endif

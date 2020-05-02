@@ -29,7 +29,7 @@ contains
     real(kind=kdouble), allocatable :: R(:)
     logical :: is_converge
 
-    t1 = monolis_wtime()
+    t1 = monolis_get_time()
 
     ALU => monoMAT%monoTree%D
     N     = monoMAT%N
@@ -65,7 +65,7 @@ contains
     deallocate(R)
     deallocate(ALU)
 
-    t2 = monolis_wtime()
+    t2 = monolis_get_time()
     tsol = t2 - t1
   end subroutine monolis_solver_SOR
 

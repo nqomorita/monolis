@@ -80,7 +80,7 @@ contains
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_solver")
 
-    if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write(*,"(a)")" ** monolis solver : "// &
+    if(monoPRM%show_summary .and. monoCOM%myrank == 0) write(*,"(a)")" ** monolis solver: "// &
     & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))
 
     select case(monoPRM%method)
