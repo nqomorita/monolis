@@ -109,14 +109,14 @@ contains
 
   function monolis_get_time_sync()
     implicit none
-    real(kind=kdouble) :: monolis_get_time, t1
+    real(kind=kdouble) :: monolis_get_time_sync, t1
 
 #ifdef WITH_MPI
     call monolis_barrier(mycomm)
-    monolis_get_time = MPI_Wtime()
+    monolis_get_time_sync = MPI_Wtime()
 #else
     call cpu_time(t1)
-    monolis_get_time = t1
+    monolis_get_time_sync = t1
 #endif
   end function monolis_get_time_sync
 
