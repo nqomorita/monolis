@@ -20,8 +20,9 @@ module mod_monolis_util
   public :: monolis_check_diagonal
   public :: monolis_debug_header
   public :: monolis_get_time
+  public :: monolis_get_time_sync
 
-  integer(kind=kint), save :: myrank
+  integer(kind=kint), save :: myrank, mycomm
 
 contains
 
@@ -35,6 +36,7 @@ contains
     call monolis_com_initialize(monoCOM)
     call monolis_mat_initialize(monoMAT)
     myrank = monoCOM%myrank
+    mycomm = monoCOM%comm
   end subroutine monolis_initialize
 
   subroutine monolis_finalize(monoPRM, monoCOM, monoMAT)
@@ -104,6 +106,19 @@ contains
     monolis_get_time = t1
 #endif
   end function monolis_get_time
+
+  function monolis_get_time_sync()
+    implicit none
+    real(kind=kdouble) :: monolis_get_time, t1
+
+#ifdef WITH_MPI
+    call monolis_barrier(mycomm)
+    monolis_get_time = MPI_Wtime()
+#else
+    call cpu_time(t1)
+    monolis_get_time = t1
+#endif
+  end function monolis_get_time_sync
 
   subroutine monolis_check_diagonal(monoPRM, monoMAT)
     implicit none
