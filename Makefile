@@ -1,12 +1,10 @@
+#> monolis Makefile
 
-#FLAG_DDM   = -DOVER_DDM
-#FLAG_DEBUG = -DDEBUG
-#FLAG_TEST  = -DTEST_ALL
-
-export FC     = mpif90
-export FFLAGS = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
-export CC     = mpicc
-export CFLAGS =
+FC     = mpif90
+FFLAGS = -O3 -mtune=native -march=native -mfpmath=both
+#-fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+CC     = mpicc
+CFLAGS =
 
 ifdef FLAGS
 	comma:= ,
@@ -14,51 +12,65 @@ ifdef FLAGS
 	space:= $(empty) $(empty)
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
+	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
+		FLAG_DEBUG = -DDEBUG
+	endif
+
+	ifeq ($(findstring TEST, $(DFLAGS)), TEST)
+		FLAG_TEST = -DTEST
+	endif
+
 	ifeq ($(findstring MPI, $(DFLAGS)), MPI)
-		export FLAG_MPI = -DWITH_MPI
+		FLAG_MPI = -DWITH_MPI
 	endif
 
 	ifeq ($(findstring METIS, $(DFLAGS)), METIS)
 		FLAG_METIS = -DWITH_METIS
-		export METIS_DIR = $(HOME)/FrontISTR_tools
-		export METIS_INC = -I $(METIS_DIR)/include
-		export METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+		METIS_DIR = $(HOME)
+		METIS_INC = -I $(METIS_DIR)/include
+		METIS_LIB = -L$(METIS_DIR)/lib -lmetis
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		FLAG_MUMPS = -DWITH_MUMPS
-		export MUMPS_DIR = $(HOME)/FrontISTR_tools
-		export MUMPS_INC = -I $(MUMPS_DIR)/include
-		export MUMPS_LIB = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -lscalapack -lopenblas
+		MUMPS_DIR = $(HOME)
+		MUMPS_INC = -I $(MUMPS_DIR)/include
+		MUMPS_LIB = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -lscalapack -lopenblas
 	endif
 endif
 
-export INCLUDE  = -I ./include $(MUMPS_INC)
-export MOD_DIR  = -J ./include
-export LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
-export SRC_DIR  = ./src
-export OBJ_DIR  = ./obj
-export LIB_DIR  = ./lib
-export LIB_LIST = libmonolis.a
-export CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG) $(FLAG_DDM)
+INCLUDE  = -I ./include $(MUMPS_INC)
+MOD_DIR  = -J ./include
+LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
+SRC_DIR  = ./src
+OBJ_DIR  = ./obj
+LIB_DIR  = ./lib
+LIB_LIST = libmonolis.a
+CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
-export MAKE     = make
-export CD       = cd
-export RM       = rm -r
-export AR       = - ar ruv
+MAKE     = make
+CD       = cd
+RM       = rm -r
+AR       = - ar ruv
 
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 
-SRC_LIST_UTIL = def_prm.f90 def_mat.f90 def_com.f90 util.f90 fillin.f90 hash.f90
-#SRC_LIST_CONV = convert_full.f90 convert_coo.f90 convert_csr.f90 alloc_matrix.f90
-SRC_LIST_ALGO = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90 scaling.f90 restruct.f90 reorder.f90
-SRC_LIST_FACT = 11/fact_LU_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90
-SRC_LIST_PREC = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 precond.f90
-SRC_LIST_DIRC = LU.f90
-SRC_LIST_ITER = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
-SRC_LIST_LIB  = monolis_solve.f90 monolis.f90
+SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 util.f90 hash.f90
+SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 reorder.f90
+#SRC_LIST_CONV   = convert_full.f90 convert_coo.f90 convert_csr.f90 alloc_matrix.f90
+#SRC_LIST_IO     =
+#SRC_LIST_GRAPH  =
+SRC_LIST_ALGO   = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90
+SRC_LIST_FACT   = 11/fact_LU_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90
+SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 precond.f90
+SRC_LIST_DIRECT = LU.f90
+SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
+SRC_LIST_MAIN   = monolis_solve.f90 monolis.f90
+#SRC_LIST_PART  =
+#SRC_LIST_WRAP  =
 
-SRC_ALL_LIST  = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix convert/, $(SRC_LIST_CONV)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER)) $(addprefix main/, $(SRC_LIST_LIB))
+SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix main/, $(SRC_LIST_MAIN))
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
 
