@@ -12,10 +12,11 @@ contains
     real(kdouble), intent(inout) :: A(:)
     real(kdouble), intent(in) :: stiff(nnode*ndof,nnode*ndof)
     integer(kint) :: e1(nnode), e2(nnode)
-    integer(kint) :: i, j, k, in, jn, jS, jE, i2, j2, i1, j1
+    integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
     integer(kint) :: eperm1(nnode), eperm2(nnode)
     real(kdouble) :: temp(nnode*ndof,nnode*ndof)
 
+    NDOF2 = ndof*ndof
     e1 = e1t
     e2 = e2t
     do i = 1, nnode
@@ -32,7 +33,7 @@ contains
         j1 = eperm1(j)
         do i2 = 1, ndof
           do j2 = 1, ndof
-            temp(ndof*(j-1)+j2, ndof*(i-1)+i2) = stiff(ndof*(j1-1)+j2, ndof*(i1-1)+i2)
+            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = stiff(ndof*(j1-1)+j2, ndof*(i1-1)+i2)
           enddo
         enddo
       enddo
@@ -46,15 +47,12 @@ contains
         do k = jS, jE
           jn = item(k)
           if(jn == e2(j))then
-            A(9*k-8) = A(9*k-8) + temp(3*i-2,3*j-2)
-            A(9*k-7) = A(9*k-7) + temp(3*i-2,3*j-1)
-            A(9*k-6) = A(9*k-6) + temp(3*i-2,3*j  )
-            A(9*k-5) = A(9*k-5) + temp(3*i-1,3*j-2)
-            A(9*k-4) = A(9*k-4) + temp(3*i-1,3*j-1)
-            A(9*k-3) = A(9*k-3) + temp(3*i-1,3*j  )
-            A(9*k-2) = A(9*k-2) + temp(3*i  ,3*j-2)
-            A(9*k-1) = A(9*k-1) + temp(3*i  ,3*j-1)
-            A(9*k  ) = A(9*k  ) + temp(3*i  ,3*j  )
+            do i1 = 1, ndof
+            do i2 = 1, ndof
+              im = NDOF2*(k-1) + ndof*(i1-1) + i2
+              A(im) = A(im) + temp(ndof*(j-1)+i2, ndof*(i-1)+i1)
+            enddo
+            enddo
             jS = k + 1
             cycle aa
           endif
@@ -71,62 +69,31 @@ contains
     integer(kint), intent(in) :: index(0:), item(:), indexR(0:), itemR(:), permA(:)
     real(kdouble), intent(inout) :: A(:), B(:)
     real(kdouble), intent(in) :: val
-    integer(kint) :: i, j, jn, kn, jS, jE
+    integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
+
+    NDOF2 = ndof*ndof
 
     jS = indexR(nnode-1) + 1
     jE = indexR(nnode)
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
-      if(idof == 1)then
-        B(3*jn-2) = B(3*jn-2) - val*A(9*kn-8)
-        B(3*jn-1) = B(3*jn-1) - val*A(9*kn-5)
-        B(3*jn  ) = B(3*jn  ) - val*A(9*kn-2)
-        A(9*kn-8) = 0.0d0
-        A(9*kn-5) = 0.0d0
-        A(9*kn-2) = 0.0d0
-      elseif(idof == 2)then
-        B(3*jn-2) = B(3*jn-2) - val*A(9*kn-7)
-        B(3*jn-1) = B(3*jn-1) - val*A(9*kn-4)
-        B(3*jn  ) = B(3*jn  ) - val*A(9*kn-1)
-        A(9*kn-7) = 0.0d0
-        A(9*kn-4) = 0.0d0
-        A(9*kn-1) = 0.0d0
-      elseif(idof == 3)then
-        B(3*jn-2) = B(3*jn-2) - val*A(9*kn-6)
-        B(3*jn-1) = B(3*jn-1) - val*A(9*kn-3)
-        B(3*jn  ) = B(3*jn  ) - val*A(9*kn  )
-        A(9*kn-6) = 0.0d0
-        A(9*kn-3) = 0.0d0
-        A(9*kn  ) = 0.0d0
-      endif
+      do k = 1, ndof
+        B(ndof*(jn-1)+k) = B(ndof*(jn-1)+k) - val*A(NDOF2*(kn-1) + ndof*(k-1) + idof)
+        A(NDOF2*(kn-1) + ndof*(k-1) + idof) = 0.0d0
+      enddo
     enddo
 
     jS = index(nnode-1) + 1
     jE = index(nnode)
     do j = jS, jE
-      if(idof == 1)then
-        A(9*j-8) = 0.0d0
-        A(9*j-7) = 0.0d0
-        A(9*j-6) = 0.0d0
-      elseif(idof == 2)then
-        A(9*j-5) = 0.0d0
-        A(9*j-4) = 0.0d0
-        A(9*j-3) = 0.0d0
-      elseif(idof == 3)then
-        A(9*j-2) = 0.0d0
-        A(9*j-1) = 0.0d0
-        A(9*j  ) = 0.0d0
-      endif
+      do k = 1, ndof
+        A(NDOF2*(j-1) + ndof*(idof-1) + k) = 0.0d0
+      enddo
+
       jn = item(j)
       if(jn == nnode)then
-        if(idof == 1)then
-          A(9*j-8) = 1.0d0
-        elseif(idof == 2)then
-          A(9*j-4) = 1.0d0
-        elseif(idof == 3)then
-          A(9*j  ) = 1.0d0
-        endif
+        A(NDOF2*(j-1) + (ndof+1)*(idof-1) + 1) = 1.0d0
       endif
     enddo
 
