@@ -12,7 +12,7 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
-		FLAG_DEBUG = -DDEBUG
+		#FLAG_DEBUG = -DDEBUG
 		FFLAGS = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 	endif
 
@@ -55,8 +55,8 @@ AR       = - ar ruv
 
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 
-SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 util.f90 hash.f90
-SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 reorder.f90
+SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 util.f90 stdlib.f90 hash.f90
+SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 reorder.f90 sparse_util.f90
 #SRC_LIST_CONV   = convert_full.f90 convert_coo.f90 convert_csr.f90 alloc_matrix.f90
 #SRC_LIST_IO     =
 #SRC_LIST_GRAPH  =

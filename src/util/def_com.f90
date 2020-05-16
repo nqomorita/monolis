@@ -41,7 +41,7 @@ contains
 
     monoCOM%myrank = 0
     monoCOM%comm = 0
-    monoCOM%commsize = 0
+    monoCOM%commsize = 1
 
     monoCOM%recv_n_neib = 0
     monoCOM%recv_neib_pe => null()
@@ -88,6 +88,64 @@ contains
     call MPI_finalize(ierr)
 #endif
   end subroutine monolis_com_finalize
+
+  subroutine monolis_com_input_comm_table(monoCOM)
+    implicit none
+    type(monolis_com) :: monoCOM
+    integer(kint) :: i, nitem, jn
+    character :: cnum*5, header*7
+
+    if(monoCOM%commsize <= 1)then
+      monoCOM%commsize = 1
+      return
+    endif
+
+    write(cnum,"(i0)")monoCOM%myrank
+    header = "parted/"
+
+    open(10, file=header//"mesh.msh.send."//trim(cnum), status='old')
+      read(10,*) monoCOM%send_n_neib, nitem
+      allocate(monoCOM%send_neib_pe(monoCOM%send_n_neib))
+      do i = 1, monoCOM%send_n_neib
+        read(10,*) monoCOM%send_neib_pe(i)
+      enddo
+      allocate(monoCOM%send_index(0:monoCOM%send_n_neib))
+      allocate(monoCOM%send_item(nitem))
+      monoCOM%send_index = 0
+      monoCOM%send_item = 0
+
+      if(monoCOM%send_n_neib == 0) return
+
+      do i = 0, monoCOM%send_n_neib
+        read(10,*) monoCOM%send_index(i)
+      enddo
+      do i = 1, nitem
+        read(10,*) monoCOM%send_item(i)
+      enddo
+    close(10)
+
+    open(10, file=header//"mesh.msh.recv."//trim(cnum), status='old')
+      read(10,*)monoCOM%recv_n_neib, nitem
+      if(monoCOM%send_n_neib /= monoCOM%recv_n_neib)then
+        stop "** error: monolis_com_input_comm_table"
+      endif
+
+      allocate(monoCOM%recv_neib_pe(monoCOM%recv_n_neib))
+      do i = 1, monoCOM%recv_n_neib
+        read(10,*) monoCOM%recv_neib_pe(i)
+      enddo
+      allocate(monoCOM%recv_index(0:monoCOM%recv_n_neib))
+      allocate(monoCOM%recv_item(nitem))
+      monoCOM%recv_index = 0
+      monoCOM%recv_item = 0
+      do i = 0, monoCOM%recv_n_neib
+        read(10,*) monoCOM%recv_index(i)
+      enddo
+      do i = 1, nitem
+        read(10,*) monoCOM%recv_item(i)
+      enddo
+    close(10)
+  end subroutine monolis_com_input_comm_table
 
   subroutine monolis_com_copy(monoCOM, monoCOM_reorder)
     implicit none

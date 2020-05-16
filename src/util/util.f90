@@ -26,28 +26,26 @@ module mod_monolis_util
 
 contains
 
-  subroutine monolis_initialize(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_initialize(monolis)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_structure) :: monolis
 
-    call monolis_prm_initialize(monoPRM)
-    call monolis_com_initialize(monoCOM)
-    call monolis_mat_initialize(monoMAT)
-    myrank = monoCOM%myrank
-    mycomm = monoCOM%comm
+    call monolis_prm_initialize(monolis%PRM)
+    call monolis_com_initialize(monolis%COM)
+    call monolis_mat_initialize(monolis%MAT)
+    call monolis_com_input_comm_table(monolis%COM)
+
+    myrank = monolis%COM%myrank
+    mycomm = monolis%COM%comm
   end subroutine monolis_initialize
 
-  subroutine monolis_finalize(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_finalize(monolis)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    type(monolis_structure) :: monolis
 
-    call monolis_prm_finalize(monoPRM)
-    call monolis_com_finalize(monoCOM)
-    call monolis_mat_finalize(monoMAT)
+    call monolis_prm_finalize(monolis%PRM)
+    call monolis_com_finalize(monolis%COM)
+    call monolis_mat_finalize(monolis%MAT)
   end subroutine monolis_finalize
 
   subroutine monolis_timer_initialize(monoPRM)
