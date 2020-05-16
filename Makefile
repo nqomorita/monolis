@@ -2,7 +2,6 @@
 
 FC     = mpif90
 FFLAGS = -O3 -mtune=native -march=native -mfpmath=both
-#-fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 CC     = mpicc
 CFLAGS =
 
@@ -14,6 +13,7 @@ ifdef FLAGS
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
 		FLAG_DEBUG = -DDEBUG
+		FFLAGS = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 	endif
 
 	ifeq ($(findstring TEST, $(DFLAGS)), TEST)

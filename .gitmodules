@@ -1,0 +1,4 @@
+[submodule "submodule/METIS"]
+	path = submodule/METIS
+	url = https://github.com/KarypisLab/METIS.git
+	ignore = dirty
