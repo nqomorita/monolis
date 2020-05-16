@@ -1,9 +1,11 @@
-/bin/monolis
 *.o
 *.DS_Store
 *.mod
 *.a
 *.mtx
+bin
+include
+lib
 monolis
 monolis_sample
 submodule
