@@ -3,29 +3,29 @@ module mod_monolis_mat
   implicit none
 
   type monolis_mat_LDU
-    integer(kind=kint) :: N, NP, NPU, NPL, NDOF
-    integer(kind=kint), pointer :: indexU(:) => null()
-    integer(kind=kint), pointer :: itemU(:) => null()
-    integer(kind=kint), pointer :: indexL(:) => null()
-    integer(kind=kint), pointer :: itemL(:) => null()
-    real(kind=kdouble), pointer :: U(:) => null()
-    real(kind=kdouble), pointer :: D(:) => null()
-    real(kind=kdouble), pointer :: L(:) => null()
-    real(kind=kdouble), pointer :: X(:) => null()
-    real(kind=kdouble), pointer :: B(:) => null()
+    integer(kint) :: N, NP, NPU, NPL, NDOF
+    integer(kint), pointer :: indexU(:) => null()
+    integer(kint), pointer :: itemU(:) => null()
+    integer(kint), pointer :: indexL(:) => null()
+    integer(kint), pointer :: itemL(:) => null()
+    real(kdouble), pointer :: U(:) => null()
+    real(kdouble), pointer :: D(:) => null()
+    real(kdouble), pointer :: L(:) => null()
+    real(kdouble), pointer :: X(:) => null()
+    real(kdouble), pointer :: B(:) => null()
   end type monolis_mat_LDU
 
   type monolis_mat
     type(monolis_mat_LDU) :: monoTREE
-    integer(kind=kint) :: N, NP, NZ, NDOF
-    integer(kind=kint), pointer :: index(:) => null()
-    integer(kind=kint), pointer :: item(:) => null()
-    integer(kind=kint), pointer :: perm(:) => null()
-    integer(kind=kint), pointer :: iperm(:) => null()
-    real(kind=kdouble), pointer :: A(:) => null()
-    real(kind=kdouble), pointer :: X(:) => null()
-    real(kind=kdouble), pointer :: B(:) => null()
-    real(kind=kdouble), pointer :: diag(:) => null()
+    integer(kint) :: N, NP, NZ, NDOF
+    integer(kint), pointer :: index(:) => null()
+    integer(kint), pointer :: item(:) => null()
+    integer(kint), pointer :: perm(:) => null()
+    integer(kint), pointer :: iperm(:) => null()
+    real(kdouble), pointer :: A(:) => null()
+    real(kdouble), pointer :: X(:) => null()
+    real(kdouble), pointer :: B(:) => null()
+    real(kdouble), pointer :: diag(:) => null()
   end type monolis_mat
 
 contains
@@ -80,7 +80,7 @@ contains
     implicit none
     type(monolis_mat) :: min
     type(monolis_mat) :: mout
-    integer(kind=kint) :: i, NZ
+    integer(kint) :: i, NZ
 
     mout%N = min%N
     mout%NP = min%NP

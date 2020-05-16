@@ -4,34 +4,28 @@ module mod_monolis_prm
   integer(4), parameter :: kint    = 4
   integer(4), parameter :: kdouble = 8
 
-  integer(4), parameter :: monolis_iter_CG       = 1
-  integer(4), parameter :: monolis_iter_GropCG   = 2
-  integer(4), parameter :: monolis_iter_PipeCG   = 3
-  integer(4), parameter :: monolis_iter_PipeCR   = 4
-  integer(4), parameter :: monolis_iter_BiCGSTAB = 5
-  integer(4), parameter :: monolis_iter_PipeBiCGSTAB = 6
-  integer(4), parameter :: monolis_iter_BiCGSTAB_noprec = 7
-  integer(4), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
-  integer(4), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
-  integer(4), parameter :: monolis_iter_SOR      = 10
-  integer(4), parameter :: monolis_iter_IR       = 11
+  integer(kint), parameter :: monolis_iter_CG       = 1
+  integer(kint), parameter :: monolis_iter_GropCG   = 2
+  integer(kint), parameter :: monolis_iter_PipeCG   = 3
+  integer(kint), parameter :: monolis_iter_PipeCR   = 4
+  integer(kint), parameter :: monolis_iter_BiCGSTAB = 5
+  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB = 6
+  integer(kint), parameter :: monolis_iter_BiCGSTAB_noprec = 7
+  integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
+  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
+  integer(kint), parameter :: monolis_iter_SOR      = 10
+  integer(kint), parameter :: monolis_iter_IR       = 11
 
-  integer(4), parameter :: monolis_prec_NONE   = 0
-  integer(4), parameter :: monolis_prec_DIAG   = 1
-  integer(4), parameter :: monolis_prec_ILU    = 2
-  integer(4), parameter :: monolis_prec_JACOBI = 3
-  integer(4), parameter :: monolis_prec_SOR    = 4
-  integer(4), parameter :: monolis_prec_SAINV  = 5
-  integer(4), parameter :: monolis_prec_RIF    = 6
-  integer(4), parameter :: monolis_prec_SPIKE  = 7
-  integer(4), parameter :: monolis_prec_DIRECT = 8
-  integer(4), parameter :: monolis_prec_MUMPS  = 9
-
-  !enum, bind(c)
-  !  enumerator :: BoundaryType_Dirichlet = 1
-  !  enumerator :: BoundaryType_Neumann
-  !  enumerator :: BoundaryType_Robin
-  !end enum
+  integer(kint), parameter :: monolis_prec_NONE   = 0
+  integer(kint), parameter :: monolis_prec_DIAG   = 1
+  integer(kint), parameter :: monolis_prec_ILU    = 2
+  integer(kint), parameter :: monolis_prec_JACOBI = 3
+  integer(kint), parameter :: monolis_prec_SOR    = 4
+  integer(kint), parameter :: monolis_prec_SAINV  = 5
+  integer(kint), parameter :: monolis_prec_RIF    = 6
+  integer(kint), parameter :: monolis_prec_SPIKE  = 7
+  integer(kint), parameter :: monolis_prec_DIRECT = 8
+  integer(kint), parameter :: monolis_prec_MUMPS  = 9
 
   character*24, dimension(11) :: monolis_str_iter = (/&
   & "CG                 ", &
@@ -58,13 +52,13 @@ module mod_monolis_prm
   & "MUMPS "/)
 
   type monolis_prm
-    integer(kind=kint) :: method = 1
-    integer(kind=kint) :: precond = 1
-    integer(kind=kint) :: maxiter = 1000
-    integer(kind=kint) :: curiter = 0
-    integer(kind=kint) :: ierr = -1
-    real(kind=kdouble) :: tol = 1.0d-8
-    real(kind=kdouble) :: curresid = 0.0d0
+    integer(kint) :: method = 1
+    integer(kint) :: precond = 1
+    integer(kint) :: maxiter = 1000
+    integer(kint) :: curiter = 0
+    integer(kint) :: ierr = -1
+    real(kdouble) :: tol = 1.0d-8
+    real(kdouble) :: curresid = 0.0d0
     logical :: is_scaling    = .true.
     logical :: is_reordering = .true.
     logical :: is_init_x     = .true.
@@ -75,12 +69,12 @@ module mod_monolis_prm
     logical :: show_time     = .true.
     logical :: show_summary  = .true.
     !> time: tsol = tspmv + tprec + tcomm + others
-    real(kind=kdouble) :: tsol  = 0.0d0
-    real(kind=kdouble) :: tprep = 0.0d0
-    real(kind=kdouble) :: tspmv = 0.0d0
-    real(kind=kdouble) :: tdotp = 0.0d0
-    real(kind=kdouble) :: tprec = 0.0d0
-    real(kind=kdouble) :: tcomm = 0.0d0
+    real(kdouble) :: tsol  = 0.0d0
+    real(kdouble) :: tprep = 0.0d0
+    real(kdouble) :: tspmv = 0.0d0
+    real(kdouble) :: tdotp = 0.0d0
+    real(kdouble) :: tprec = 0.0d0
+    real(kdouble) :: tcomm = 0.0d0
   end type monolis_prm
 
 contains

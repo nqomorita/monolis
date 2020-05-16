@@ -7,29 +7,29 @@ module mod_monolis_com
 #endif
 
   type monolis_com
-    integer(kind=kint)          :: myrank
-    integer(kind=kint)          :: comm
-    integer(kind=kint)          :: commsize
+    integer(kint)          :: myrank
+    integer(kint)          :: comm
+    integer(kint)          :: commsize
     logical :: is_overlap = .true.
 
-    integer(kind=kint)          :: recv_n_neib
-    integer(kind=kint), pointer :: recv_neib_pe(:) => null()
-    integer(kind=kint), pointer :: recv_index(:)   => null()
-    integer(kind=kint), pointer :: recv_item(:)    => null()
+    integer(kint)          :: recv_n_neib
+    integer(kint), pointer :: recv_neib_pe(:) => null()
+    integer(kint), pointer :: recv_index(:)   => null()
+    integer(kint), pointer :: recv_item(:)    => null()
 
-    integer(kind=kint)          :: send_n_neib
-    integer(kind=kint), pointer :: send_neib_pe(:) => null()
-    integer(kind=kint), pointer :: send_index(:)   => null()
-    integer(kind=kint), pointer :: send_item(:)    => null()
+    integer(kint)          :: send_n_neib
+    integer(kint), pointer :: send_neib_pe(:) => null()
+    integer(kint), pointer :: send_index(:)   => null()
+    integer(kint), pointer :: send_item(:)    => null()
   end type monolis_com
 
-  integer(kind=kint), parameter :: monolis_sum = 1
-  integer(kind=kint), parameter :: monolis_max = 2
-  integer(kind=kint), parameter :: monolis_min = 3
+  integer(kint), parameter :: monolis_sum = 1
+  integer(kint), parameter :: monolis_max = 2
+  integer(kint), parameter :: monolis_min = 3
 #ifdef WITH_MPI
-  integer(kind=kint), parameter :: monolis_status_size = MPI_STATUS_SIZE
+  integer(kint), parameter :: monolis_status_size = MPI_STATUS_SIZE
 #else
-  integer(kind=kint), parameter :: monolis_status_size = 1
+  integer(kint), parameter :: monolis_status_size = 1
 #endif
 
 contains
@@ -37,7 +37,7 @@ contains
   subroutine monolis_com_initialize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: ierr, commsize, myrank
+    integer(kint) :: ierr, commsize, myrank
 
     monoCOM%myrank = 0
     monoCOM%comm = 0
@@ -66,7 +66,7 @@ contains
   subroutine monolis_com_finalize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: ierr
+    integer(kint) :: ierr
 
     if(associated(monoCOM%recv_neib_pe)) deallocate(monoCOM%recv_neib_pe)
     if(associated(monoCOM%recv_index)) deallocate(monoCOM%recv_index)
@@ -111,8 +111,8 @@ contains
 
   subroutine monolis_com_size(size, comm)
     implicit none
-    integer(kind=kint) :: size, comm
-    integer(kind=kint) :: ierr
+    integer(kint) :: size, comm
+    integer(kint) :: ierr
 
     size = 1
 #ifdef WITH_MPI
@@ -122,8 +122,8 @@ contains
 
   subroutine monolis_barrier(comm)
     implicit none
-    integer(kind=kint) :: comm
-    integer(kind=kint) :: ierr
+    integer(kint) :: comm
+    integer(kint) :: ierr
 #ifdef WITH_MPI
     call MPI_barrier(comm, ierr)
 #endif
