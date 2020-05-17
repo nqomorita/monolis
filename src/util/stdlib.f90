@@ -35,6 +35,17 @@ contains
     monolis_normalize_vector = a/l2
   end function monolis_normalize_vector
 
+  function monolis_get_l2_norm(a, n)
+    implicit none
+    integer(kint) :: i, n
+    real(kdouble) :: monolis_get_l2_norm(n), a(n), l2
+
+    do i = 1, n
+      l2 = a(i)*a(i)
+    enddo
+    monolis_get_l2_norm = dsqrt(l2)
+  end function monolis_get_l2_norm
+
   subroutine monolis_get_inverse_matrix(n, a, inv)
     implicit none
     integer(kint) :: n, i, j, k
