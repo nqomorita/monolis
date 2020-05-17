@@ -19,7 +19,7 @@ contains
     monolis_normalize_cross_product_3d = norm/l2
   end function monolis_normalize_cross_product_3d
 
-  function monolis_normalize_vector(a, n)
+  function monolis_normalize_vector(n, a)
     implicit none
     integer(kint) :: i, n
     real(kdouble) :: monolis_normalize_vector(n), a(n), l2
@@ -35,7 +35,7 @@ contains
     monolis_normalize_vector = a/l2
   end function monolis_normalize_vector
 
-  function monolis_get_l2_norm(a, n)
+  function monolis_get_l2_norm(n, a)
     implicit none
     integer(kint) :: i, n
     real(kdouble) :: monolis_get_l2_norm(n), a(n), l2
