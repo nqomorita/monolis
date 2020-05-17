@@ -4,6 +4,37 @@ module mod_monolis_stdlib
 
 contains
 
+  function monolis_normalize_cross_product_3d(a, b)
+    implicit none
+    real(kdouble) :: monolis_normalize_cross_product_3d(3), a(3), b(3), norm(3), l2
+
+    norm(1) = a(2)*b(3) - a(3)*b(2)
+    norm(2) = a(3)*b(1) - a(1)*b(3)
+    norm(3) = a(1)*b(2) - a(2)*b(1)
+    l2 = dsqrt(norm(1)*norm(1) + norm(2)*norm(2) + norm(3)*norm(3))
+    if(l2 == 0.0d0)then
+      monolis_normalize_cross_product_3d = 0.0d0
+      return
+    endif
+    monolis_normalize_cross_product_3d = norm/l2
+  end function monolis_normalize_cross_product_3d
+
+  function monolis_normalize_vector(a, n)
+    implicit none
+    integer(kint) :: i, n
+    real(kdouble) :: monolis_normalize_vector(n), a(n), l2
+
+    do i = 1, n
+      l2 = a(i)*a(i)
+    enddo
+    l2 = dsqrt(l2)
+    if(l2 == 0.0d0)then
+      monolis_normalize_vector = 0.0d0
+      return
+    endif
+    monolis_normalize_vector = a/l2
+  end function monolis_normalize_vector
+
   subroutine monolis_get_inverse_matrix(n, a, inv)
     implicit none
     integer(kint) :: n, i, j, k
