@@ -38,7 +38,7 @@ contains
   function monolis_get_l2_norm(n, a)
     implicit none
     integer(kint) :: i, n
-    real(kdouble) :: monolis_get_l2_norm(n), a(n), l2
+    real(kdouble) :: monolis_get_l2_norm, a(n), l2
 
     do i = 1, n
       l2 = a(i)*a(i)
