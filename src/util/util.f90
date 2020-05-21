@@ -22,7 +22,7 @@ module mod_monolis_util
   public :: monolis_get_time
   public :: monolis_get_time_sync
 
-  integer(kind=kint), save :: myrank, mycomm
+  integer(kint), save :: myrank, mycomm
 
 contains
 
@@ -66,7 +66,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    real(kind=kdouble) :: t1
+    real(kdouble) :: t1
     logical :: is_output
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_finalize")
@@ -95,7 +95,7 @@ contains
 
   function monolis_get_time()
     implicit none
-    real(kind=kdouble) :: monolis_get_time, t1
+    real(kdouble) :: monolis_get_time, t1
 
 #ifdef WITH_MPI
     monolis_get_time = MPI_Wtime()
@@ -107,7 +107,7 @@ contains
 
   function monolis_get_time_sync()
     implicit none
-    real(kind=kdouble) :: monolis_get_time_sync, t1
+    real(kdouble) :: monolis_get_time_sync, t1
 
 #ifdef WITH_MPI
     call monolis_barrier(mycomm)
@@ -122,8 +122,8 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
-    real(kind=kdouble) :: t1, t2
+    integer(kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
+    real(kdouble) :: t1, t2
 
     if(.not. monoPRM%is_check_diag) return
     if(monoPRM%is_debug) call monolis_debug_header("monolis_check_diagonal")
@@ -164,7 +164,7 @@ contains
   subroutine monolis_debug_equal_R(header, a, b)
     implicit none
     character(*) :: header
-    real(kind=kdouble) :: a, b
+    real(kdouble) :: a, b
 
     if(a /= b)then
       if(myrank == 0) write(*,"(a,1pe12.5,a,1pe12.5,a)")"** monolis debug: ", a, "is not equal", b, " at "//trim(header)

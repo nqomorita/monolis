@@ -7,8 +7,8 @@ module mod_monolis_reorder
   implicit none
 
   type monolis_edge_info
-    integer(kind=kint) :: N = 0
-    integer(kind=kint), pointer :: node(:) => null()
+    integer(kint) :: N = 0
+    integer(kint), pointer :: node(:) => null()
   endtype monolis_edge_info
 
 contains
@@ -20,8 +20,8 @@ contains
     type(monolis_com) :: monoCOM_reorder
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    integer(kind=kint), pointer ::  perm(:), iperm(:)
-    real(kind=kdouble) :: t1, t2
+    integer(kint), pointer ::  perm(:), iperm(:)
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_fw")
     t1 = monolis_get_time()
@@ -58,7 +58,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    real(kind=kdouble) :: t1, t2
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_bk")
     t1 = monolis_get_time()
@@ -78,10 +78,10 @@ contains
   subroutine monolis_reorder_vector_fw(monoMAT, N, NDOF, A, B)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NDOF
-    real(kind=kdouble) :: A(:)
-    real(kind=kdouble) :: B(:)
-    integer(kind=kint) :: i, in, jn, jo, j
+    integer(kint) :: N, NDOF
+    real(kdouble) :: A(:)
+    real(kdouble) :: B(:)
+    integer(kint) :: i, in, jn, jo, j
     do i = 1, N
       in = monoMAT%iperm(i)
       jn = (in-1)*NDOF
@@ -95,10 +95,10 @@ contains
   subroutine monolis_reorder_back_vector_bk(monoMAT, N, NDOF, B, A)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NDOF
-    real(kind=kdouble) :: B(:)
-    real(kind=kdouble) :: A(:)
-    integer(kind=kint) :: i, in, jn, jo, j
+    integer(kint) :: N, NDOF
+    real(kdouble) :: B(:)
+    real(kdouble) :: A(:)
+    integer(kint) :: i, in, jn, jo, j
     do i = 1, N
       in = monoMAT%perm(i)
       jn = (i -1)*NDOF
@@ -114,18 +114,18 @@ contains
     type(monolis_edge_info), allocatable :: edge(:)
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, jS, jE
-    integer(kind=kint) :: nedge, in, jn
-    integer(kind=kint), allocatable :: nozero(:)
-    integer(kind=kint) :: nvtxs
-    integer(kind=kint), pointer :: index(:)   => null()
-    integer(kind=kint), pointer :: item(:)    => null()
-    integer(kind=kint), pointer :: xadj(:)    => null()
-    integer(kind=kint), pointer :: adjncy(:)  => null()
-    integer(kind=kint), pointer :: vwgt(:)    => null()
-    integer(kind=kint), pointer :: options(:) => null()
-    integer(kind=kint), pointer :: perm(:), iperm(:)
+    integer(kint) :: N, NP
+    integer(kint) :: i, j, jS, jE
+    integer(kint) :: nedge, in, jn
+    integer(kint), allocatable :: nozero(:)
+    integer(kint) :: nvtxs
+    integer(kint), pointer :: index(:)   => null()
+    integer(kint), pointer :: item(:)    => null()
+    integer(kint), pointer :: xadj(:)    => null()
+    integer(kint), pointer :: adjncy(:)  => null()
+    integer(kint), pointer :: vwgt(:)    => null()
+    integer(kint), pointer :: options(:) => null()
+    integer(kint), pointer :: perm(:), iperm(:)
 
     N = monoMAT%N
     NP = monoMAT%NP
@@ -203,9 +203,9 @@ contains
 
   subroutine reallocate_array(in, inew, x)
     implicit none
-    integer(kind=kint), intent(in) :: in, inew
-    integer(kind=kint), pointer :: x(:), t(:)
-    integer(kind=kint) :: i
+    integer(kint), intent(in) :: in, inew
+    integer(kint), pointer :: x(:), t(:)
+    integer(kint) :: i
 
     if(.not. associated(x))then
       allocate(x(inew))
