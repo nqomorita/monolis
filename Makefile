@@ -2,8 +2,9 @@
 
 FC     = mpif90
 FFLAGS = -O3 -mtune=native -march=native -mfpmath=both
-CC     = mpicc
-CFLAGS =
+
+#CC     = mpicc
+#CFLAGS =
 
 ifdef FLAGS
 	comma:= ,

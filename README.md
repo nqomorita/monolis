@@ -52,26 +52,26 @@ Confirm and set the following variables in Makefile.
 ```
 FC     = mpif90
 FFLAGS = -O2
-METIS_DIR = $(path to metis)
-METIS_INC = -I $(METIS_DIR)/include
-METIS_LIB = -L$(METIS_DIR)/lib -lmetis
 ```
 
 ### with MPI and METIS
 
 ```
+./install_lib.sh
 make FLAGS=MPI,METIS
 ```
 
 ### with MPI
 
 ```
+./install_lib.sh
 make FLAGS=MPI
 ```
 
 ### with METIS
 
 ```
+./install_lib.sh
 make FLAGS=METIS
 ```
 
