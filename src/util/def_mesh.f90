@@ -27,9 +27,9 @@ module mod_monolis_mesh
   end type monolis_graph
 
   type monolis_node_list
-    integer(kint) :: n_node
-    integer(kint) :: n_node_in, n_node_out
-    integer(kint) :: n_elem
+    integer(kint) :: nnode
+    integer(kint) :: nnode_in, nnode_out
+    integer(kint) :: nelem
     integer(kint), allocatable :: nid(:)
     integer(kint), allocatable :: nid_perm(:)
     integer(kint), allocatable :: eid(:)

@@ -24,8 +24,9 @@ contains
     integer(kint) :: i, n
     real(kdouble) :: monolis_normalize_vector(n), a(n), l2
 
+    l2 = 0.0d0
     do i = 1, n
-      l2 = a(i)*a(i)
+      l2 = l2 + a(i)*a(i)
     enddo
     l2 = dsqrt(l2)
     if(l2 == 0.0d0)then
@@ -40,8 +41,9 @@ contains
     integer(kint) :: i, n
     real(kdouble) :: monolis_get_l2_norm, a(n), l2
 
+    l2 = 0.0d0
     do i = 1, n
-      l2 = a(i)*a(i)
+      l2 = l2 + a(i)*a(i)
     enddo
     monolis_get_l2_norm = dsqrt(l2)
   end function monolis_get_l2_norm

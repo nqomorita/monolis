@@ -26,7 +26,7 @@ program monolis_partitioner
 
   call monolis_visual_parted_mesh(mesh%nnode, mesh%node, mesh%nelem, mesh%nbase_func, mesh%elem)
 
-  call monolis_output_mesh(mesh, graph, comm, node_list)
+  call monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
 
   call monolis_part_finalize()
 
