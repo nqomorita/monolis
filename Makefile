@@ -59,7 +59,7 @@ LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 util.f90 stdlib.f90 hash.f90
 SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 reorder.f90 sparse_util.f90
 #SRC_LIST_CONV   = convert_full.f90 convert_coo.f90 convert_csr.f90 alloc_matrix.f90
-#SRC_LIST_IO     =
+SRC_LIST_IO     = io.f90
 SRC_LIST_GRAPH  = graph.f90
 SRC_LIST_ALGO   = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90
 SRC_LIST_FACT   = 11/fact_LU_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90
@@ -71,7 +71,7 @@ SRC_LIST_MAIN   = monolis_solve.f90 monolis.f90
 #SRC_LIST_WRAP  =
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
-SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix graph/, $(SRC_LIST_GRAPH))  $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH))  $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix main/, $(SRC_LIST_MAIN))
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
 

@@ -19,10 +19,12 @@ module mod_monolis_util
   public :: monolis_timer_finalize
   public :: monolis_check_diagonal
   public :: monolis_debug_header
+  public :: monolis_warning_header
   public :: monolis_get_time
   public :: monolis_get_time_sync
 
   integer(kint), save :: myrank, mycomm
+  logical, save :: is_debug
 
 contains
 
@@ -52,7 +54,8 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_initialize")
+    is_debug = monoPRM%is_debug
+    call monolis_debug_header("monolis_timer_initialize")
 
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
@@ -69,7 +72,7 @@ contains
     real(kdouble) :: t1
     logical :: is_output
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_timer_finalize")
+    call monolis_debug_header("monolis_timer_finalize")
 
     t1 = monolis_get_time()
     monoPRM%tsol = t1 - monoPRM%tsol
@@ -126,7 +129,7 @@ contains
     real(kdouble) :: t1, t2
 
     if(.not. monoPRM%is_check_diag) return
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_check_diagonal")
+    call monolis_debug_header("monolis_check_diagonal")
     t1 = monolis_get_time()
 
     NP =  monoMAT%NP
@@ -158,8 +161,16 @@ contains
     implicit none
     character(*) :: header
 
+    if(.not. is_debug) return
     if(myrank == 0) write(*,"(a)")"** monolis debug: "//trim(header)
   end subroutine monolis_debug_header
+
+  subroutine monolis_warning_header(header)
+    implicit none
+    character(*) :: header
+
+    if(myrank == 0) write(*,"(a)")"** monolis warning: "//trim(header)
+  end subroutine monolis_warning_header
 
   subroutine monolis_debug_equal_R(header, a, b)
     implicit none
