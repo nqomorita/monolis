@@ -31,6 +31,8 @@ contains
 
 #ifdef WITH_METIS
     call METIS_MESHTONODAL(nelem, nnode, eptr, eind, numflag, index, item)
+#else
+    call monolis_debug_header("monolis_get_mesh_to_nodal: METIS is NOT enabled")
 #endif
   end subroutine monolis_get_mesh_to_nodal
 
@@ -52,8 +54,12 @@ contains
 
     if(npart /= 1)then
       ncon = 1
+#ifdef WITH_METIS
       call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
         & options, objval, part_id)
+#else
+    call monolis_debug_header("monolis_get_mesh_part_kway: METIS is NOT enabled")
+#endif
     endif
   end subroutine monolis_get_mesh_part_kway
 
