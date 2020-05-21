@@ -3,14 +3,28 @@ module mod_monolis_mesh
   implicit none
 
   type monolis_mesh
-    integer(kint) :: n_node
+    integer(kint) :: nnode
     integer(kint) :: nnode_in, nnode_out
+    integer(kint) :: nelem
+    integer(kint) :: nbase_func
     integer(kint), allocatable :: nid(:)
     real(kdouble), allocatable :: node(:,:)
-    integer(kint) :: n_elem
+    integer(kint), allocatable :: eid(:)
     integer(kint), allocatable :: elem(:,:)
-    integer(kint) :: n_base_func
   end type monolis_mesh
+
+  type monolis_graph
+    integer(kint) :: N = 0
+    !> node base
+    integer(kint), pointer :: node_domid_raw(:) => null()
+    integer(kint), pointer :: node_domid(:) => null()
+    !> elem base
+    !integer(kint), pointer :: xadj(:) => null()
+    !integer(kint), pointer :: adjncy(:) => null()
+    !integer(kint), pointer :: elem_domid_uniq(:) => null()
+    integer(kint), pointer :: elem_domid_raw(:) => null()
+    integer(kint), pointer :: elem_domid(:) => null()
+  end type monolis_graph
 
   type monolis_node_list
     integer(kint) :: n_node

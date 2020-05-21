@@ -1,9 +1,35 @@
 module mod_monolis_io
   use mod_monolis_prm
+  use mod_monolis_com
   use mod_monolis_util
+  use mod_monolis_mesh
+  use mod_monolis_stdlib
   implicit none
 
 contains
+
+  subroutine monolis_input_mesh(mesh)
+    implicit none
+    type(monolis_mesh) :: mesh
+    character :: fname*100
+
+    fname = "node.dat"
+    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node, mesh%nid)
+
+    fname = "elem.dat"
+    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
+
+    call monolis_global_to_local(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
+  end subroutine monolis_input_mesh
+
+  subroutine monolis_output_mesh(mesh, graph, comm, node_list)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    type(monolis_com) :: comm(:)
+    type(monolis_node_list) :: node_list(:)
+
+  end subroutine monolis_output_mesh
 
   subroutine monolis_input_mesh_node(fname, nnode, node, nid)
     implicit none
@@ -176,25 +202,25 @@ contains
         write(20,*)""
       enddo
 
-      write(20,"(a)")"1 1"
-      write(20,"(a)")"node_domid, unknown"
-      do i = 1, nnode
+      !write(20,"(a)")"1 1"
+      !write(20,"(a)")"node_domid, unknown"
+      !do i = 1, nnode
         !write(20,"(i0,x,i0,x,i0,x,i0)") i, bp_graph%node_domid_raw(i)!, bp_graph%elem_domid(i), in
-      enddo
+      !enddo
 
-      write(20,"(a)")"1 1"
-      write(20,"(a)")"elem_domid, unknown"
-      do i = 1, nelem
+      !write(20,"(a)")"1 1"
+      !write(20,"(a)")"elem_domid, unknown"
+      !do i = 1, nelem
         !write(20,"(i0,x,i0,x,i0,x,i0)") i, bp_graph%elem_domid_raw(i), bp_graph%elem_domid(i), in
-      enddo
+      !enddo
     close(20)
   end subroutine monolis_visual_parted_mesh
 
-  subroutine monolis_get_arg(n_domain, is_format_id)
+  subroutine monolis_get_arg(n_domain, is_format_id, is_overlap)
     implicit none
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128
-    logical :: is_format_id
+    logical :: is_format_id, is_overlap
 
     call monolis_debug_header("monolis_get_arg")
 
@@ -222,8 +248,8 @@ contains
         n_domain = n
 
       elseif(trim(argc1) == "-t")then
-        !if(trim(argc2) == "N") monolis_is_nonoverlapping = .true.
-        !if(trim(argc2) == "O") monolis_is_nonoverlapping = .false.
+        if(trim(argc2) == "O") is_overlap = .true.
+        if(trim(argc2) == "N") is_overlap = .false.
 
       elseif(trim(argc1) == "--with-id")then
         if(trim(argc2) == "Y") is_format_id = .true.

@@ -1,23 +1,39 @@
 module mod_monolis_graph
   use mod_monolis_prm
+  use mod_monolis_mesh
   use mod_monolis_util
 
   implicit none
 
-  type monolis_graph
-    integer(kint) :: N = 0
-    !> node base
-    integer(kint), pointer :: node_domid_raw(:) => null()
-    integer(kint), pointer :: node_domid(:) => null()
-    !> elem base
-    !integer(kint), pointer :: xadj(:) => null()
-    !integer(kint), pointer :: adjncy(:) => null()
-    !integer(kint), pointer :: elem_domid_uniq(:) => null()
-    integer(kint), pointer :: elem_domid_raw(:) => null()
-    integer(kint), pointer :: elem_domid(:) => null()
-  end type monolis_graph
-
 contains
+
+  subroutine monolis_part_graph(mesh, graph, n_domain)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    integer(kint), pointer :: index(:), item(:)
+    integer(kint), pointer :: part_id(:)
+    integer(kint) :: i, n_domain
+
+    allocate(graph%node_domid_raw(mesh%nnode), source = 0)
+
+    if(n_domain == 1)then
+      do i = 1, mesh%nnode
+        graph%node_domid_raw(i) = i
+      enddo
+      return
+    endif
+
+    call monolis_get_mesh_to_nodal(mesh%nnode, mesh%nelem, mesh%nbase_func, mesh%elem, index, item)
+
+    call monolis_get_mesh_part_kway(mesh%nnode, index, item, n_domain, part_id)
+
+    do i = 1, mesh%nnode
+      graph%node_domid_raw(i) = part_id(i)
+    enddo
+
+    deallocate(part_id)
+  end subroutine monolis_part_graph
 
   subroutine monolis_get_mesh_to_nodal(nnode, nelem, nbase, elem, index, item)
     implicit none

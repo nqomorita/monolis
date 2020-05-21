@@ -46,6 +46,42 @@ contains
     monolis_get_l2_norm = dsqrt(l2)
   end function monolis_get_l2_norm
 
+  subroutine monolis_global_to_local(nnode, nid, nelem, e, nenode, perm)
+    implicit none
+    integer(kint) :: i, in, j, nenode
+    integer(kint) :: imax, imin
+    integer(kint) :: nnode, nid(:)
+    integer(kint) :: nelem, e(:,:)
+    integer(kint), allocatable :: temp(:)
+    integer(kint), optional, allocatable :: perm(:)
+
+    imax = maxval(nid)
+    imin = minval(nid)
+    allocate(temp(imin:imax))
+    temp = 0
+
+    in = 1
+    do i = 1, nnode
+      temp(nid(i)) = in
+      in = in + 1
+    enddo
+
+    do i = 1, nelem
+      do j = 1, nenode
+        in = e(j,i)
+        e(j,i) = temp(in)
+      enddo
+    enddo
+
+    if(present(perm))then
+      allocate(perm(imin:imax))
+      do i = imin, imax
+        perm(i) = temp(i)
+      enddo
+    endif
+    deallocate(temp)
+  end subroutine monolis_global_to_local
+
   subroutine monolis_get_inverse_matrix(n, a, inv)
     implicit none
     integer(kint) :: n, i, j, k
@@ -181,11 +217,11 @@ contains
 
   subroutine monolis_bsearch_int_with_position(array, iS, iE, val, idx, pos)
     implicit none
-    integer(kind=kint), intent(in) :: array(:)
-    integer(kind=kint), intent(in) :: iS, iE
-    integer(kind=kint), intent(in) :: val
-    integer(kind=kint), intent(out) :: idx, pos
-    integer(kind=kint) :: center, left, right, pivot
+    integer(kint), intent(in) :: array(:)
+    integer(kint), intent(in) :: iS, iE
+    integer(kint), intent(in) :: val
+    integer(kint), intent(out) :: idx, pos
+    integer(kint) :: center, left, right, pivot
 
     pos = -1
     left = iS
@@ -215,10 +251,10 @@ contains
 
   subroutine monolis_uniq_int(array, len, newlen)
     implicit none
-    integer(kind=kint), intent(inout) :: array(:)
-    integer(kind=kint), intent(in) :: len
-    integer(kind=kint), intent(out) :: newlen
-    integer(kind=kint) :: i, ndup
+    integer(kint), intent(inout) :: array(:)
+    integer(kint), intent(in) :: len
+    integer(kint), intent(out) :: newlen
+    integer(kint) :: i, ndup
 
     ndup = 0
     do i = 2, len
