@@ -19,6 +19,9 @@ module mod_monolis_util
   public :: monolis_timer_finalize
   public :: monolis_check_diagonal
   public :: monolis_debug_header
+  public :: monolis_debug_int
+  public :: monolis_debug_char
+  public :: monolis_debug_logical
   public :: monolis_warning_header
   public :: monolis_get_time
   public :: monolis_get_time_sync

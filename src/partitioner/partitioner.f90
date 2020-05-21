@@ -1,4 +1,4 @@
-program main
+program monolis_partitioner
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_graph
@@ -6,7 +6,7 @@ program main
   use mod_monolis_io
   implicit none
   type(monolis_mesh) :: mesh
-  type(mod_monolis_graph) :: graph
+  type(monolis_graph) :: graph
   type(monolis_com), allocatable :: comm(:)
   type(monolis_node_list), allocatable :: node_list(:)
   integer(kint) :: n_domain
@@ -14,4 +14,4 @@ program main
 
   call monolis_get_arg(n_domain, is_format_id)
 
-end program main
+end program monolis_partitioner
