@@ -4,6 +4,19 @@ module mod_monolis_graph
 
   implicit none
 
+  type monolis_graph
+    integer(kint) :: N = 0
+    !> node base
+    integer(kint), pointer :: node_domid_raw(:) => null()
+    integer(kint), pointer :: node_domid(:) => null()
+    !> elem base
+    !integer(kint), pointer :: xadj(:) => null()
+    !integer(kint), pointer :: adjncy(:) => null()
+    !integer(kint), pointer :: elem_domid_uniq(:) => null()
+    integer(kint), pointer :: elem_domid_raw(:) => null()
+    integer(kint), pointer :: elem_domid(:) => null()
+  end type monolis_graph
+
 contains
 
   subroutine monolis_get_mesh_to_nodal(nnode, nelem, nbase, elem, index, item)

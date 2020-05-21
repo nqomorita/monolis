@@ -190,4 +190,52 @@ contains
     close(20)
   end subroutine monolis_visual_parted_mesh
 
+  subroutine monolis_get_arg(n_domain, is_format_id)
+    implicit none
+    integer(kint) :: i, count, n, n_domain
+    character :: argc1*128, argc2*128
+    logical :: is_format_id
+
+    call monolis_debug_header("monolis_get_arg")
+
+    count = iargc()
+    if(count == 1)then
+      call getarg(1, argc1)
+      if(trim(argc1) == "-h")then
+        write(*,"(a)")"-n {num of subdomain}: the number of subdomain"
+        write(*,"(a)")"-t {N/O}: type of domain decomposition (N:non-overlapping, O:overlapping)"
+        write(*,"(a)")"--with-id {Y/N}: node or elem id appears at the beginning of each line"
+        write(*,"(a)")"-h: help"
+        stop
+      endif
+    endif
+
+    n_domain = 1
+    is_format_id = .true.
+
+    if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
+    do i = 1, count/2
+      call getarg(2*i-1, argc1)
+      call getarg(2*i  , argc2)
+      if(trim(argc1) == "-n")then
+        read(argc2,*) n
+        n_domain = n
+
+      elseif(trim(argc1) == "-t")then
+        !if(trim(argc2) == "N") monolis_is_nonoverlapping = .true.
+        !if(trim(argc2) == "O") monolis_is_nonoverlapping = .false.
+
+      elseif(trim(argc1) == "--with-id")then
+        if(trim(argc2) == "Y") is_format_id = .true.
+        if(trim(argc2) == "N") is_format_id = .false.
+
+      else
+        write(*,"(a)")"* monolis input arg error"
+        stop
+      endif
+    enddo
+
+    call monolis_debug_int("n_domain", n_domain)
+  end subroutine monolis_get_arg
+
 end module mod_monolis_io

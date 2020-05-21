@@ -165,6 +165,32 @@ contains
     if(myrank == 0) write(*,"(a)")"** monolis debug: "//trim(header)
   end subroutine monolis_debug_header
 
+  subroutine monolis_debug_int(header, n)
+    implicit none
+    integer(kint) :: n
+    character(*) :: header
+
+    if(.not. is_debug) return
+    if(myrank == 0) write(*,"(a,i12)")"** monolis debug: "//trim(header)//": ", n
+  end subroutine monolis_debug_int
+
+  subroutine monolis_debug_char(header, char)
+    implicit none
+    character(*) :: header, char
+
+    if(.not. is_debug) return
+    if(myrank == 0) write(*,"(a,a)")"** monolis debug: "//trim(header)//": ", trim(char)
+  end subroutine monolis_debug_char
+
+  subroutine monolis_debug_logical(header, l)
+    implicit none
+    logical :: l
+    character(*) :: header
+
+    if(.not. is_debug) return
+    if(myrank == 0) write(*,"(a,l)")"** monolis debug: "//trim(header)//": ", l
+  end subroutine monolis_debug_logical
+
   subroutine monolis_warning_header(header)
     implicit none
     character(*) :: header
@@ -177,6 +203,7 @@ contains
     character(*) :: header
     real(kdouble) :: a, b
 
+    if(.not. is_debug) return
     if(a /= b)then
       if(myrank == 0) write(*,"(a,1pe12.5,a,1pe12.5,a)")"** monolis debug: ", a, "is not equal", b, " at "//trim(header)
     endif
