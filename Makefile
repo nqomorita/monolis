@@ -91,7 +91,7 @@ $(LIBTARGET): $(OBJS)
 	$(AR) $@ $(OBJS)
 
 $(PARTTARGET): $(OBJS_PART)
-	$(FC) -o $@ $(OBJS_PART) $(LIBRARY)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_PART) $(LIBRARY)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<

@@ -200,10 +200,10 @@ contains
     close(20)
   end subroutine monolis_output_mesh_comm
 
-  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem)
+  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid)
     implicit none
     integer(kint) :: i, j, in
-    integer(kint) :: nnode, nelem, nbase, elem(:,:)
+    integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:)
     real(kdouble) :: node(:,:)
     character :: etype*6, output_dir*100, fname*100
 
@@ -213,7 +213,7 @@ contains
     call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
 
     open(20, file = trim(output_dir)//"mesh.parted.inp", status = "replace")
-      write(20,"(5i12)") nnode, nelem, 0, 0, 0
+      write(20,"(5i12)") nnode, nelem, 1, 0, 0
       do i = 1, nnode
         write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
       enddo
@@ -230,11 +230,11 @@ contains
         write(20,*)""
       enddo
 
-      !write(20,"(a)")"1 1"
-      !write(20,"(a)")"node_domid, unknown"
-      !do i = 1, nnode
-        !write(20,"(i0,x,i0,x,i0,x,i0)") i, bp_graph%node_domid_raw(i)!, bp_graph%elem_domid(i), in
-      !enddo
+      write(20,"(a)")"1 1"
+      write(20,"(a)")"node_domid, unknown"
+      do i = 1, nnode
+        write(20,"(i0,x,i0,x,i0,x,i0)") i, nodeid(i)!, bp_graph%elem_domid(i), in
+      enddo
 
       !write(20,"(a)")"1 1"
       !write(20,"(a)")"elem_domid, unknown"
@@ -251,6 +251,8 @@ contains
     logical :: is_format_id, is_overlap
 
     call monolis_debug_header("monolis_get_arg")
+
+    call monolis_set_debug(.true.)
 
     count = iargc()
     if(count == 1)then

@@ -18,6 +18,7 @@ module mod_monolis_util
   public :: monolis_timer_initialize
   public :: monolis_timer_finalize
   public :: monolis_check_diagonal
+  public :: monolis_set_debug
   public :: monolis_debug_header
   public :: monolis_debug_int
   public :: monolis_debug_char
@@ -26,7 +27,8 @@ module mod_monolis_util
   public :: monolis_get_time
   public :: monolis_get_time_sync
 
-  integer(kint), save :: myrank, mycomm
+  integer(kint), save :: myrank = 0
+  integer(kint), save :: mycomm
   logical, save :: is_debug
 
 contains
@@ -159,6 +161,12 @@ contains
     t2 = monolis_get_time()
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
+
+  subroutine monolis_set_debug(flag)
+    implicit none
+    logical :: flag
+    is_debug = flag
+  end subroutine monolis_set_debug
 
   subroutine monolis_debug_header(header)
     implicit none

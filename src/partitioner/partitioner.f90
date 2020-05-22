@@ -24,7 +24,8 @@ program monolis_partitioner
     stop "monolis_partitioner: nonoverlapping partition is not supported"
   endif
 
-  call monolis_visual_parted_mesh(mesh%nnode, mesh%node, mesh%nelem, mesh%nbase_func, mesh%elem)
+  call monolis_visual_parted_mesh(mesh%nnode, mesh%node, mesh%nelem, mesh%nbase_func, mesh%elem, &
+    graph%node_domid_raw)
 
   call monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
 
