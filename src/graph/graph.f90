@@ -33,7 +33,7 @@ contains
     call monolis_get_mesh_part_kway(mesh%nnode, index, item, n_domain, part_id)
 
     do i = 1, mesh%nnode
-      graph%node_domid_raw(i) = part_id(i)
+      graph%node_domid_raw(i) = part_id(i) + 1
     enddo
 
     deallocate(part_id)

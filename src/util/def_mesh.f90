@@ -21,9 +21,9 @@ module mod_monolis_mesh
     !> elem base
     !integer(kint), pointer :: xadj(:) => null()
     !integer(kint), pointer :: adjncy(:) => null()
-    !integer(kint), pointer :: elem_domid_uniq(:) => null()
     integer(kint), pointer :: elem_domid_raw(:) => null()
     integer(kint), pointer :: elem_domid(:) => null()
+    integer(kint), pointer :: elem_domid_uniq(:) => null()
   end type monolis_graph
 
   type monolis_node_list

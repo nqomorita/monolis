@@ -3,6 +3,7 @@ program monolis_partitioner
   use mod_monolis_com
   use mod_monolis_graph
   use mod_monolis_mesh
+  use mod_monolis_comm_overlap
   use mod_monolis_io
   implicit none
   type(monolis_mesh) :: mesh
@@ -19,7 +20,7 @@ program monolis_partitioner
   call monolis_part_graph(mesh, graph, n_domain)
 
   if(is_overlap)then
-    !monolis_get_overlap_commtable()
+    call monolis_get_overlap_commtable(mesh, graph, comm, node_list, n_domain)
   else
     stop "monolis_partitioner: nonoverlapping partition is not supported"
   endif
