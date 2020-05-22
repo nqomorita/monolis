@@ -37,7 +37,7 @@ contains
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = trim(output_dir)//"node."//trim(cnum)
-      !call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, node_list(i)%nid, mesh%node)
+      call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, node_list(i)%nid, mesh%node)
 
       fname = trim(output_dir)//"elem."//trim(cnum)
       !call monolis_output_mesh_elem(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
@@ -52,10 +52,10 @@ contains
       !  comm(i)%recv_index, comm(i)%recv_item)
 
       fname = trim(output_dir)//"node.global_id."//trim(cnum)
-      !call monolis_output_mesh_global_nid(fname, nnode, global_nid, nid)
+      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.global_id."//trim(cnum)
-      !call monolis_output_mesh_global_eid(fname, nelem, global_eid, eid)
+      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, mesh%nid, node_list(i)%eid)
     enddo
   end subroutine monolis_output_mesh
 

@@ -5,6 +5,12 @@ module mod_monolis_comm_util
   use mod_monolis_mesh
   implicit none
 
+  type monolis_send_list
+    integer(kint) :: nnode = 0
+    integer(kint), allocatable :: domid(:)
+    integer(kint), allocatable :: local_nid(:)
+  end type monolis_send_list
+
 contains
 
   subroutine get_overlap_domain(mesh, graph, n_domain)
@@ -19,12 +25,10 @@ contains
 
     nelem = mesh%nelem
     allocate(graph%elem_domid(nelem), source = 0)
-    !allocate(graph%elem_domid_raw(nelem), source = 0)
     allocate(graph%elem_domid_uniq(nelem), source = 0)
 
     if(n_domain == 1)then
       graph%elem_domid = 1
-      graph%elem_domid_raw = 1
       graph%elem_domid_uniq = 1
       return
     endif
@@ -47,8 +51,6 @@ contains
         graph%elem_domid(i) = id1
       endif
     enddo
-
-    !graph%elem_domid_raw = graph%elem_domid
 
     do i = 1, nelem
       if(graph%elem_domid(i) == 0) stop "get_overlap_domain"
@@ -110,7 +112,28 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
         in = in + 1
       endif
     enddo
+
+    call get_perm_node(local_node%nnode, local_node%nid, local_node%nid_perm)
   end subroutine get_nnode_and_nid_at_subdomain
+
+  subroutine get_perm_node(nnode, nid, perm)
+    implicit none
+    integer(kind=kint) :: i, in, nenode
+    integer(kind=kint) :: imax, imin
+    integer(kind=kint) :: nnode, nid(:)
+    integer(kind=kint), allocatable :: perm(:)
+
+    imax = maxval(nid)
+    imin = minval(nid)
+    allocate(perm(imin:imax))
+    perm = -1
+
+    in = 1
+    do i = 1, nnode
+      perm(nid(i)) = in
+      in = in + 1
+    enddo
+  end subroutine get_perm_node
 
   subroutine get_nelem_and_eid_at_subdomain(mesh, graph, local_node, nid)
     implicit none
@@ -152,4 +175,192 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
   end subroutine get_nelem_and_eid_at_subdomain
 
+  subroutine get_neib_PE(local_node, graph, comm, n_domain)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_node_list) :: local_node(:)
+    type(monolis_com) :: comm(:)
+    integer(kint) :: i, in, j, jn, n_neib, n_domain
+    integer(kint), allocatable :: domain(:)
+
+    allocate(domain(n_domain))
+
+    do i = 1, n_domain
+      domain = 0
+      do j = 1, local_node(i)%nnode
+        in = local_node(i)%nid(j)
+        jn = graph%node_domid_raw(in)
+        if(jn /= i)then
+          domain(jn) = domain(jn) + 1
+        endif
+      enddo
+
+      n_neib = 0
+      do j = 1, n_domain
+        if(domain(j) /= 0) n_neib = n_neib + 1
+      enddo
+      comm(i)%recv_n_neib = n_neib
+      allocate(comm(i)%recv_neib_pe(n_neib))
+      if(n_neib == 0)then
+        allocate(comm(i)%recv_index(0:1))
+      else
+        allocate(comm(i)%recv_index(0:n_neib))
+      endif
+      comm(i)%recv_index = 0
+
+      in = 0
+      do j = 1, n_domain
+        if(domain(j) /= 0)then
+          in = in + 1
+          comm(i)%recv_neib_pe(in) = j
+          comm(i)%recv_index(in) = comm(i)%recv_index(in-1) + domain(j)
+        endif
+      enddo
+    enddo
+  end subroutine get_neib_PE
+
+  subroutine get_recv_table(mesh, local_node, graph, comm, n_domain)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    type(monolis_node_list) :: local_node(:)
+    type(monolis_com) :: comm(:)
+    integer(kint) :: i, in, j, jn, n_recv, n_domain, nnode
+    integer(kint), allocatable :: node_master_localid(:)
+
+    nnode = mesh%nnode
+    allocate(node_master_localid(nnode), source = 0)
+
+    do i = 1, n_domain
+      do j = 1, local_node(i)%nnode_in
+        in = local_node(i)%nid(j)
+        if(graph%node_domid_raw(in) == i)then
+          node_master_localid(in) = local_node(i)%nid_perm(in)
+        endif
+      enddo
+    enddo
+
+    !> get recv table
+    do i = 1, n_domain
+      n_recv = comm(i)%recv_index(comm(i)%recv_n_neib)
+      allocate(local_node(i)%recv_item_perm(n_recv))
+      allocate(local_node(i)%recv_item_domid(n_recv))
+
+      !> set recv node
+      n_recv = 0
+      do j = local_node(i)%nnode_in + 1, local_node(i)%nnode
+        in = local_node(i)%nid(j)
+        jn = graph%node_domid_raw(in)
+        if(node_master_localid(in) == 0) stop "get_recv_table hey2"
+
+        if(jn /= i)then
+          n_recv = n_recv + 1
+          local_node(i)%recv_item_perm(n_recv) = node_master_localid(in)
+          local_node(i)%recv_item_domid(n_recv) = jn
+        endif
+      enddo
+      !> get recv item
+      call reorder_recv_node(comm(i), local_node(i), n_recv)
+    enddo
+  end subroutine get_recv_table
+
+  subroutine reorder_recv_node(comm, local_node, n_recv)
+    use mod_monolis_stdlib
+    implicit none
+    type(monolis_com) :: comm
+    type(monolis_node_list) :: local_node
+    integer(kint) :: n_recv, i, j, jS, jE, nnode_in, nnode_out
+    integer(kint), allocatable :: temp(:)
+
+    nnode_in = local_node%nnode_in
+    nnode_out = local_node%nnode_out
+
+    allocate(comm%recv_item(nnode_out))
+    comm%recv_item = 0
+    do i = 1, nnode_out
+      comm%recv_item(i) = nnode_in + i
+    enddo
+
+    allocate(temp(n_recv))
+    temp = local_node%recv_item_domid
+    call monolis_qsort_int_with_perm(temp, 1, n_recv, local_node%recv_item_perm)
+    call monolis_qsort_int_with_perm(local_node%recv_item_domid, 1, n_recv, comm%recv_item)
+
+    do i = 1, comm%recv_n_neib
+      jS = comm%recv_index(i-1) + 1
+      jE = comm%recv_index(i)
+      n_recv = jE - jS + 1
+      call monolis_qsort_int_with_perm(local_node%recv_item_perm(jS:jE), 1, n_recv, comm%recv_item(jS:jE))
+    enddo
+  end subroutine reorder_recv_node
+
+  subroutine get_send_table(mesh, local_node, graph, comm, n_domain)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    type(monolis_node_list) :: local_node(:)
+    type(monolis_com) :: comm(:)
+    type(monolis_send_list), allocatable :: send(:)
+    integer(kint) :: i, in, j, k, jn, jS, jE, n_domain, nnode, nelem, n_bound_node
+    logical, allocatable :: is_bound(:)
+
+    nnode = mesh%nnode
+    nelem = mesh%nelem
+    !> get is_bound
+    allocate(is_bound(nnode), source = .false.)
+    do j = 1, nelem
+      if(graph%elem_domid(j) == -1)then
+        do k = 1, mesh%nbase_func
+          in = mesh%elem(k,j)
+          is_bound(in) = .true.
+        enddo
+      endif
+    enddo
+
+    !> get local id of bound node
+    n_bound_node = 0
+    do i = 1, nnode
+      if(is_bound(i))then
+        n_bound_node = n_bound_node + 1
+      endif
+    enddo
+    if(n_bound_node == 0) stop "get_send_table"
+
+    !> get send table
+    allocate(send(n_bound_node))
+
+    do i = 1, n_domain
+      do j = 1, comm(i)%recv_n_neib
+        in = comm(i)%recv_neib_pe(j)
+        jS = comm(i)%recv_index(j-1) + 1
+        jE = comm(i)%recv_index(j)
+        call append_send_node(send(in), i, jS, jE, local_node(i)%recv_item_perm(jS:jE))
+      enddo
+    enddo
+
+    !> rebuild send table
+    call rebuild_send_table()
+  end subroutine get_send_table
+
+  subroutine append_send_node(send_list, domid, jS, jE, recv_item_perm)
+    use mod_monolis_stdlib
+    implicit none
+    type(monolis_send_list) :: send_list
+    integer(kint) :: i, j, k, in, domid, jS, jE, nnode
+    integer(kint) :: recv_item_perm(:)
+    integer(kint), allocatable :: temp(:)
+
+    nnode = jE - jS + 1
+    allocate(temp(nnode))
+    temp = domid
+
+    call monolis_reallocate_integer(send_list%domid    , send_list%nnode, nnode, temp)
+    call monolis_reallocate_integer(send_list%local_nid, send_list%nnode, nnode, recv_item_perm)
+    send_list%nnode = send_list%nnode + nnode
+  end subroutine append_send_node
+
+  subroutine rebuild_send_table()
+    implicit none
+
+  end subroutine rebuild_send_table
 end module mod_monolis_comm_util

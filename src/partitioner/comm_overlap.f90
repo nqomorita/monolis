@@ -16,7 +16,7 @@ contains
     implicit none
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
-    type(monolis_com) :: comm(:)
+    type(monolis_com), allocatable :: comm(:)
     type(monolis_node_list), allocatable :: node_list(:)
     integer(kint) :: n_domain
 
@@ -24,6 +24,7 @@ contains
 
     call get_commnication_boundary(mesh, graph, node_list, n_domain)
 
+    call get_commnication_table(mesh, graph, node_list, comm, n_domain)
   end subroutine monolis_get_overlap_commtable
 
   subroutine get_commnication_boundary(mesh, graph, node_list, n_domain)
@@ -56,4 +57,26 @@ contains
     write(*,"(4i10)") avg/n_domain
   end subroutine get_commnication_boundary
 
+  subroutine get_commnication_table(mesh, graph, node_list, comm, n_domain)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    type(monolis_node_list) :: node_list(:)
+    type(monolis_com), allocatable :: comm(:)
+    integer(kint) :: nnode, nelem, n_domain
+
+    call monolis_debug_header("get_commnication_table")
+
+    allocate(comm(n_domain))
+    if(n_domain == 1) return
+
+    !> get neib PE
+    call get_neib_PE(node_list, graph, comm, n_domain)
+
+    !> get recv table
+    call get_recv_table(mesh, node_list, graph, comm, n_domain)
+
+    !> get send table
+    call get_send_table(mesh, node_list, graph, comm, n_domain)
+  end subroutine get_commnication_table
 end module mod_monolis_comm_overlap

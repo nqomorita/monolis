@@ -19,9 +19,6 @@ module mod_monolis_mesh
     integer(kint), pointer :: node_domid_raw(:) => null()
     integer(kint), pointer :: node_domid(:) => null()
     !> elem base
-    !integer(kint), pointer :: xadj(:) => null()
-    !integer(kint), pointer :: adjncy(:) => null()
-    integer(kint), pointer :: elem_domid_raw(:) => null()
     integer(kint), pointer :: elem_domid(:) => null()
     integer(kint), pointer :: elem_domid_uniq(:) => null()
   end type monolis_graph
@@ -33,6 +30,8 @@ module mod_monolis_mesh
     integer(kint), allocatable :: nid(:)
     integer(kint), allocatable :: nid_perm(:)
     integer(kint), allocatable :: eid(:)
+    integer(kint), allocatable :: recv_item_perm(:)
+    integer(kint), allocatable :: recv_item_domid(:)
   end type monolis_node_list
 
 end module mod_monolis_mesh
