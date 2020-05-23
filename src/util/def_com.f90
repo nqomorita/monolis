@@ -103,7 +103,7 @@ contains
     write(cnum,"(i0)")monoCOM%myrank
     header = "parted/"
 
-    open(10, file=header//"mesh.msh.send."//trim(cnum), status='old')
+    open(10, file=header//"monolis.send."//trim(cnum), status='old')
       read(10,*) monoCOM%send_n_neib, nitem
       allocate(monoCOM%send_neib_pe(monoCOM%send_n_neib))
       do i = 1, monoCOM%send_n_neib
@@ -124,7 +124,7 @@ contains
       enddo
     close(10)
 
-    open(10, file=header//"mesh.msh.recv."//trim(cnum), status='old')
+    open(10, file=header//"monolis.recv."//trim(cnum), status='old')
       read(10,*)monoCOM%recv_n_neib, nitem
       if(monoCOM%send_n_neib /= monoCOM%recv_n_neib)then
         stop "** error: monolis_com_input_comm_table"

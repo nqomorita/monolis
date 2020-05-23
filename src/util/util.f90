@@ -33,9 +33,10 @@ module mod_monolis_util
 
 contains
 
-  subroutine monolis_initialize(monolis)
+  subroutine monolis_initialize(monolis, o_commsize, o_mycomm)
     implicit none
     type(monolis_structure) :: monolis
+    integer(kint), optional :: o_commsize, o_mycomm
 
     call monolis_prm_initialize(monolis%PRM)
     call monolis_com_initialize(monolis%COM)
@@ -44,6 +45,9 @@ contains
 
     myrank = monolis%COM%myrank
     mycomm = monolis%COM%comm
+
+    if(present(o_commsize)) o_commsize = monolis%COM%commsize
+    if(present(o_mycomm)) o_mycomm = monolis%COM%myrank
   end subroutine monolis_initialize
 
   subroutine monolis_finalize(monolis)
