@@ -339,7 +339,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
 
     !> rebuild send table
-    call rebuild_send_table()
+    call rebuild_send_table(comm, send, n_domain)
   end subroutine get_send_table
 
   subroutine append_send_node(send_list, domid, jS, jE, recv_item_perm)
@@ -359,8 +359,71 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     send_list%nnode = send_list%nnode + nnode
   end subroutine append_send_node
 
-  subroutine rebuild_send_table()
+  subroutine rebuild_send_table(comm, send, n_domain)
     implicit none
+    type(monolis_com) :: comm(:)
+    type(monolis_send_list) :: send(:)
+    integer(kint) :: i, in, j, n_domain, n_neib
+    integer(kint), allocatable :: domain(:)
 
+    allocate(domain(n_domain))
+
+    do i = 1, n_domain
+      domain = 0
+      do j = 1, send(i)%nnode
+        in = send(i)%domid(j)
+        domain(in) = domain(in) + 1
+      enddo
+
+      n_neib = 0
+      do j = 1, n_domain
+        if(domain(j) /= 0) n_neib = n_neib + 1
+      enddo
+      comm(i)%send_n_neib = n_neib
+
+      allocate(comm(i)%send_neib_pe(n_neib))
+      if(n_neib == 0)then
+        allocate(comm(i)%send_index(0:1))
+      else
+        allocate(comm(i)%send_index(0:n_neib))
+      endif
+      comm(i)%send_index = 0
+
+      in = 0
+      do j = 1, n_domain
+        if(domain(j) /= 0)then
+          in = in + 1
+          comm(i)%send_neib_pe(in) = j
+          comm(i)%send_index(in) = comm(i)%send_index(in-1) + domain(j)
+        endif
+      enddo
+
+      call reorder_send_node(comm(i), send(i))
+    enddo
   end subroutine rebuild_send_table
+
+  subroutine reorder_send_node(comm, send)
+    use mod_monolis_stdlib
+    implicit none
+    type(monolis_com) :: comm
+    type(monolis_send_list) :: send
+    integer(kint) :: i, in, jS, jE, n_send
+
+    n_send = send%nnode
+    if(n_send > 0)then
+      allocate(comm%send_item(n_send))
+      comm%send_item = send%local_nid
+    else
+      return
+    endif
+
+    call monolis_qsort_int_with_perm(send%domid, 1, n_send, comm%send_item)
+
+    do i = 1, comm%send_n_neib
+      jS = comm%send_index(i-1) + 1
+      jE = comm%send_index(i)
+      n_send = jE - jS + 1
+      call monolis_qsort_int(comm%send_item(jS:jE), 1, n_send)
+    enddo
+  end subroutine reorder_send_node
 end module mod_monolis_comm_util

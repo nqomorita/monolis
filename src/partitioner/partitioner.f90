@@ -42,7 +42,7 @@ contains
     if(allocated(mesh%elem)) deallocate(mesh%elem)
     if(allocated(mesh%eid)) deallocate(mesh%eid)
     if(allocated(comm)) deallocate(comm)
-    !if(allocated(node_list)) deallocate(node_list)
+    if(allocated(node_list)) deallocate(node_list)
     !if(associated(mesh%elem_domid_raw)) deallocate(mesh%elem_domid_raw)
     !if(associated(mesh%elem_domid)) deallocate(mesh%elem_domid)
   end subroutine monolis_part_finalize

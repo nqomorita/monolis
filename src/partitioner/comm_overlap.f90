@@ -21,9 +21,7 @@ contains
     integer(kint) :: n_domain
 
     call get_overlap_domain(mesh, graph, n_domain)
-
     call get_commnication_boundary(mesh, graph, node_list, n_domain)
-
     call get_commnication_table(mesh, graph, node_list, comm, n_domain)
   end subroutine monolis_get_overlap_commtable
 
@@ -70,13 +68,8 @@ contains
     allocate(comm(n_domain))
     if(n_domain == 1) return
 
-    !> get neib PE
     call get_neib_PE(node_list, graph, comm, n_domain)
-
-    !> get recv table
     call get_recv_table(mesh, node_list, graph, comm, n_domain)
-
-    !> get send table
     call get_send_table(mesh, node_list, graph, comm, n_domain)
   end subroutine get_commnication_table
 end module mod_monolis_comm_overlap
