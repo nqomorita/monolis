@@ -66,8 +66,10 @@ contains
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
+    nnode = 0
     open(20, file = fname, status = "old")
       read(20,*) nnode_in, nnode
+      if(nnode == 0) nnode = nnode_in
       call monolis_debug_int("nnode", nnode)
 
       allocate(node(3,nnode), source = 0.0d0)
@@ -111,6 +113,24 @@ contains
       endif
     close(20)
   end subroutine monolis_input_mesh_elem
+
+  subroutine monolis_input_id(fname, id)
+    implicit none
+    integer(kint) :: nid, i, j
+    integer(kint), allocatable :: id(:)
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+      read(20,*) nid
+      call monolis_debug_int("nid", nid)
+
+      allocate(id(nid), source = 0)
+
+      do i = 1, nid
+        read(20,*) id(i)
+      enddo
+    close(20)
+  end subroutine monolis_input_id
 
   subroutine monolis_input_condition(fname, ncond, icond, cond)
     implicit none
