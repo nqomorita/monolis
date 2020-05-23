@@ -5,4 +5,5 @@ module mod_monolis
   use mod_monolis_solve
   use mod_monolis_util
   use mod_monolis_sparse_util
+  use mod_monolis_stdlib
 end module mod_monolis
