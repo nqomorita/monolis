@@ -14,7 +14,7 @@ contains
     character :: fname*100
 
     fname = "node.dat"
-    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node, mesh%nid)
+    call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node, mesh%nid)
 
     fname = "elem.dat"
     call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
@@ -59,15 +59,15 @@ contains
     enddo
   end subroutine monolis_output_mesh
 
-  subroutine monolis_input_mesh_node(fname, nnode, node, nid)
+  subroutine monolis_input_mesh_node(fname, nnode_in, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode, i
+    integer(kint) :: nnode_in, nnode, i
     real(kdouble), allocatable :: node(:,:)
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "old")
-      read(20,*) nnode
+      read(20,*) nnode_in, nnode
       call monolis_debug_int("nnode", nnode)
 
       allocate(node(3,nnode), source = 0.0d0)
