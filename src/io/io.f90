@@ -112,6 +112,26 @@ contains
     close(20)
   end subroutine monolis_input_mesh_elem
 
+  subroutine monolis_input_condition(fname, ncond, icond, cond)
+    implicit none
+    integer(kint) :: ncond, i, j
+    integer(kint), allocatable :: icond(:,:)
+    real(kdouble), allocatable :: cond(:)
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+      read(20,*) ncond
+      call monolis_debug_int("ncond", ncond)
+
+      allocate(icond(2,ncond), source = 0)
+      allocate(cond(ncond), source = 0.0d0)
+
+      do i = 1, ncond
+        read(20,*) icond(1,i), icond(2,i), cond(i)
+      enddo
+    close(20)
+  end subroutine monolis_input_condition
+
   subroutine monolis_output_mesh_node(fname, nnode, nnode_in, nid, node)
     implicit none
     integer(kint) :: nnode, nnode_in
