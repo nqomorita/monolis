@@ -71,12 +71,13 @@ SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag
 SRC_LIST_DIRECT = LU.f90
 SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
 SRC_LIST_MAIN   = monolis_solve.f90 monolis.f90
-SRC_LIST_PART   = comm_util.f90 comm_overlap.f90 partitioner.f90
+SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
+SRC_LIST_PART_BIN = partitioner.f90
 #SRC_LIST_WRAP  =
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
-SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH))  $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix main/, $(SRC_LIST_MAIN))
-SRC_PART_LIST   = $(addprefix partitioner/, $(SRC_LIST_PART)) $(SRC_ALL_LIST)
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH))  $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_PART_LIST   = $(addprefix partitioner/, $(SRC_LIST_PART_BIN)) $(SRC_ALL_LIST)
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
 OBJS = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))

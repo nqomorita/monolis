@@ -143,8 +143,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint) :: nelem, nid, in, j, k
     logical, allocatable :: is_in(:)
 
-    call monolis_debug_header("get_nelem_and_eid_at_subdomain")
-
+\
     nelem = mesh%nelem
     allocate(is_in(nelem), source = .false.)
 

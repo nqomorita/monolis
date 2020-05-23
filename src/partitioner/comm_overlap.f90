@@ -40,6 +40,7 @@ contains
     allocate(node_list(n_domain))
 
     !> get local elem and eid
+    call monolis_debug_header("get_nelem_and_eid_at_subdomain")
     do nid =  1, n_domain
       call get_nelem_and_eid_at_subdomain(mesh, graph, node_list(nid), nid)
     enddo

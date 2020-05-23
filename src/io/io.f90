@@ -40,16 +40,16 @@ contains
       call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, node_list(i)%nid, mesh%node)
 
       fname = trim(output_dir)//"elem."//trim(cnum)
-      !call monolis_output_mesh_elem(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
-      !  mesh%elem, node_list(i)%nid_perm)
+      call monolis_output_mesh_elem(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
+        mesh%elem, node_list(i))
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
-      !call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
-      !  comm(i)%send_index, comm(i)%send_item)
+      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
+        comm(i)%send_index, comm(i)%send_item)
 
       fname = trim(output_dir)//"monolis.recv."//trim(cnum)
-      !call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
-      !  comm(i)%recv_index, comm(i)%recv_item)
+      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
+        comm(i)%recv_index, comm(i)%recv_item)
 
       fname = trim(output_dir)//"node.global_id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
@@ -128,9 +128,10 @@ contains
     close(20)
   end subroutine monolis_output_mesh_node
 
-  subroutine monolis_output_mesh_elem(fname, nelem, nbase, eid, elem, perm)
+  subroutine monolis_output_mesh_elem(fname, nelem, nbase, eid, elem, node_list)
     implicit none
-    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:), perm(:)
+    type(monolis_node_list) :: node_list
+    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
@@ -139,7 +140,7 @@ contains
         jn = eid(i)
         do j = 1, nbase
           in = elem(j,jn)
-          write(20,"(x,i0,$)") perm(in)
+          write(20,"(x,i0,$)") node_list%nid_perm(in)
         enddo
         write(20,*)""
       enddo
@@ -200,10 +201,10 @@ contains
     close(20)
   end subroutine monolis_output_mesh_comm
 
-  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid)
+  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid, elemid)
     implicit none
     integer(kint) :: i, j, in
-    integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:)
+    integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:), elemid(:)
     real(kdouble) :: node(:,:)
     character :: etype*6, output_dir*100, fname*100
 
@@ -213,7 +214,7 @@ contains
     call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
 
     open(20, file = trim(output_dir)//"mesh.parted.inp", status = "replace")
-      write(20,"(5i12)") nnode, nelem, 1, 0, 0
+      write(20,"(5i12)") nnode, nelem, 1, 1, 0
       do i = 1, nnode
         write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
       enddo
@@ -236,11 +237,11 @@ contains
         write(20,"(i0,x,i0,x,i0,x,i0)") i, nodeid(i)!, bp_graph%elem_domid(i), in
       enddo
 
-      !write(20,"(a)")"1 1"
-      !write(20,"(a)")"elem_domid, unknown"
-      !do i = 1, nelem
-        !write(20,"(i0,x,i0,x,i0,x,i0)") i, bp_graph%elem_domid_raw(i), bp_graph%elem_domid(i), in
-      !enddo
+      write(20,"(a)")"1 1"
+      write(20,"(a)")"elem_domid, unknown"
+      do i = 1, nelem
+        write(20,"(i0,x,i0,x,i0,x,i0)") i, elemid(i)!, bp_graph%elem_domid(i), in
+      enddo
     close(20)
   end subroutine monolis_visual_parted_mesh
 
