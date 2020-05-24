@@ -8,18 +8,37 @@ module mod_monolis_io
 
 contains
 
-  subroutine monolis_input_mesh(mesh)
+  subroutine monolis_input_mesh(mesh, is_format_id)
     implicit none
     type(monolis_mesh) :: mesh
+    integer(kint) :: i
+    logical :: is_format_id
     character :: fname*100
 
-    fname = "node.dat"
-    call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node, mesh%nid)
+    if(is_format_id)then
+      fname = "node.dat"
+      call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node, mesh%nid)
 
-    fname = "elem.dat"
-    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
+      fname = "elem.dat"
+      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
 
-    call monolis_global_to_local(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
+      call monolis_global_to_local(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
+    else
+      fname = "node.dat"
+      call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node)
+
+      fname = "elem.dat"
+      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+
+      allocate(mesh%nid(mesh%nnode), source = 0)
+      do i = 1, mesh%nnode
+        mesh%nid(i) = i
+      enddo
+      allocate(mesh%eid(mesh%nelem), source = 0)
+      do i = 1, mesh%nelem
+        mesh%eid(i) = i
+      enddo
+    endif
   end subroutine monolis_input_mesh
 
   subroutine monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
