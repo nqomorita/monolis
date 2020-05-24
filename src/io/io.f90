@@ -51,10 +51,10 @@ contains
       call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
         comm(i)%recv_index, comm(i)%recv_item)
 
-      fname = trim(output_dir)//"node.global_id."//trim(cnum)
+      fname = trim(output_dir)//"node.id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
 
-      fname = trim(output_dir)//"elem.global_id."//trim(cnum)
+      fname = trim(output_dir)//"elem.id."//trim(cnum)
       call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, mesh%nid, node_list(i)%eid)
     enddo
   end subroutine monolis_output_mesh
@@ -66,25 +66,25 @@ contains
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
-    nnode = 0
     open(20, file = fname, status = "old")
-      read(20,*) nnode_in, nnode
-      if(nnode == 0) nnode = nnode_in
-      call monolis_debug_int("nnode", nnode)
-
-      allocate(node(3,nnode), source = 0.0d0)
-
       if(present(nid))then
+        read(20,*) nnode
+        allocate(node(3,nnode), source = 0.0d0)
         allocate(nid(nnode), source = 0)
         do i = 1, nnode
           read(20,*) nid(i), node(1,i), node(2,i), node(3,i)
         enddo
+        nnode_in = nnode
       else
+        read(20,*) nnode_in, nnode
+        allocate(node(3,nnode), source = 0.0d0)
         do i = 1, nnode
           read(20,*) node(1,i), node(2,i), node(3,i)
         enddo
       endif
     close(20)
+
+    call monolis_debug_int("nnode", nnode)
   end subroutine monolis_input_mesh_node
 
   subroutine monolis_input_mesh_elem(fname, nelem, nbase, elem, eid)
