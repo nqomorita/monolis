@@ -48,40 +48,32 @@ contains
     monolis_get_l2_norm = dsqrt(l2)
   end function monolis_get_l2_norm
 
-  subroutine monolis_global_to_local(nnode, nid, nelem, e, nenode, perm)
+  subroutine monolis_global_to_local(nnode, nid, nelem, e, nenode)
     implicit none
-    integer(kint) :: i, in, j, nenode
-    integer(kint) :: imax, imin
+    integer(kint) :: i, in, j, id, nenode
     integer(kint) :: nnode, nid(:)
     integer(kint) :: nelem, e(:,:)
-    integer(kint), allocatable :: temp(:)
-    integer(kint), optional, allocatable :: perm(:)
+    integer(kint), allocatable :: perm(:), temp(:)
 
-    imax = maxval(nid)
-    imin = minval(nid)
-    allocate(temp(imin:imax))
-    temp = 0
-
-    in = 1
+    allocate(temp(nnode), source = 0)
+    allocate(perm(nnode), source = 0)
     do i = 1, nnode
-      temp(nid(i)) = in
-      in = in + 1
+      temp(i) = nid(i)
+      perm(i) = i
     enddo
+    call monolis_qsort_int_with_perm(temp, 1, nnode, perm)
 
     do i = 1, nelem
       do j = 1, nenode
         in = e(j,i)
-        e(j,i) = temp(in)
+        call monolis_bsearch_int(temp, 1, nnode, in, id)
+        if(id == -1)then
+          e(j,i) = -1
+        else
+          e(j,i) = perm(id)
+        endif
       enddo
     enddo
-
-    if(present(perm))then
-      allocate(perm(imin:imax))
-      do i = imin, imax
-        perm(i) = temp(i)
-      enddo
-    endif
-    deallocate(temp)
   end subroutine monolis_global_to_local
 
   subroutine monolis_get_inverse_matrix(n, a, inv)
