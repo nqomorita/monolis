@@ -250,7 +250,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
       do j = local_node(i)%nnode_in + 1, local_node(i)%nnode
         in = local_node(i)%nid(j)
         jn = graph%node_domid_raw(in)
-        if(node_master_localid(in) == 0) stop "get_recv_table hey2"
+        if(node_master_localid(in) == 0) stop "get_recv_table"
 
         if(jn /= i)then
           n_recv = n_recv + 1
@@ -319,11 +319,8 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     !> get local id of bound node
     n_bound_node = 0
     do i = 1, nnode
-      if(is_bound(i))then
-        n_bound_node = n_bound_node + 1
-      endif
+      if(is_bound(i)) n_bound_node = n_bound_node + 1
     enddo
-    if(n_bound_node == 0) stop "get_send_table"
 
     !> get send table
     allocate(send(n_bound_node))

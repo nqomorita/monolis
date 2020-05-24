@@ -31,6 +31,8 @@ contains
     integer(kint) :: i, n_domain
     character :: cnum*5, output_dir*100, fname*100
 
+    call monolis_debug_header("monolis_output_mesh")
+
     output_dir = "parted/"
     call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
 

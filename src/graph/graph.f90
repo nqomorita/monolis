@@ -18,15 +18,10 @@ contains
 
     call monolis_debug_header("monolis_part_graph")
 
-    allocate(graph%node_domid_raw(mesh%nnode), source = 0)
+    allocate(graph%node_domid_raw(mesh%nnode), source = 1)
     allocate(part_id(mesh%nnode), source = 0)
 
-    if(n_domain == 1)then
-      do i = 1, mesh%nnode
-        graph%node_domid_raw(i) = i
-      enddo
-      return
-    endif
+    if(n_domain == 1) return
 
     call monolis_get_mesh_to_nodal(mesh%nnode, mesh%nelem, mesh%nbase_func, mesh%elem, index, item)
 
@@ -52,7 +47,7 @@ contains
     call monolis_debug_header("monolis_get_mesh_to_nodal")
 
     nind = nelem*nbase
-    numflag = 2
+    numflag = 0
     allocate(eptr(nelem+1), source = 0)
     allocate(eind(nind), source = 0)
 

@@ -67,7 +67,6 @@ contains
     call monolis_debug_header("get_commnication_table")
 
     allocate(comm(n_domain))
-    if(n_domain == 1) return
 
     call get_neib_PE(node_list, graph, comm, n_domain)
     call get_recv_table(mesh, node_list, graph, comm, n_domain)
