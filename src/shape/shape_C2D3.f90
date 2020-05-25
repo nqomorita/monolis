@@ -61,7 +61,7 @@ contains
 
   subroutine monolis_C2D3_shapefunc(local, func)
     implicit none
-    real(kdouble) ::  local(2), func(3)
+    real(kdouble) :: local(2), func(3)
 
     func(1) = 1.0d0 - local(1) - local(2)
     func(2) = local(1)
