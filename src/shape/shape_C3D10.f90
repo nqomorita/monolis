@@ -1,5 +1,6 @@
 module mod_monolis_c3d10_shape
   use mod_monolis_prm
+  implicit none
 
   private
 
@@ -27,10 +28,10 @@ module mod_monolis_c3d10_shape
 
     public :: monolis_C3D10_num_gauss_point
     public :: monolis_C3D10_weight
-    public :: monolid_C3D10_integral_point
-    !public :: monolid_C3D10_node_point
-    public :: monolid_C3D10_shapefunc
-    public :: monolid_C3D10_shapefunc_deriv
+    public :: monolis_C3D10_integral_point
+    !public :: monolis_C3D10_node_point
+    public :: monolis_C3D10_shapefunc
+    public :: monolis_C3D10_shapefunc_deriv
 
 contains
 

@@ -1,5 +1,6 @@
 module mod_monolis_c2d4_shape
   use mod_monolis_prm
+  implicit none
 
   private
 
@@ -19,10 +20,10 @@ module mod_monolis_c2d4_shape
 
     public :: monolis_C2D4_num_gauss_point
     public :: monolis_C2D4_weight
-    public :: monolid_C2D4_integral_point
-    public :: monolid_C2D4_node_point
-    public :: monolid_C2D4_shapefunc
-    public :: monolid_C2D4_shapefunc_deriv
+    public :: monolis_C2D4_integral_point
+    public :: monolis_C2D4_node_point
+    public :: monolis_C2D4_shapefunc
+    public :: monolis_C2D4_shapefunc_deriv
 
 contains
 
