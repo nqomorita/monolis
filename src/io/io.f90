@@ -22,7 +22,7 @@ contains
       fname = "elem.dat"
       call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
 
-      call monolis_global_to_local(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
+      call monolis_global_to_local_elem(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
     else
       fname = "node.dat"
       call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node)

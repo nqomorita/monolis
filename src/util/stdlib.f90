@@ -48,7 +48,7 @@ contains
     monolis_get_l2_norm = dsqrt(l2)
   end function monolis_get_l2_norm
 
-  subroutine monolis_global_to_local(nnode, nid, nelem, e, nenode)
+  subroutine monolis_global_to_local_elem(nnode, nid, nelem, e, nenode)
     implicit none
     integer(kint) :: i, in, j, id, nenode
     integer(kint) :: nnode, nid(:)
@@ -74,7 +74,32 @@ contains
         endif
       enddo
     enddo
-  end subroutine monolis_global_to_local
+  end subroutine monolis_global_to_local_elem
+
+  subroutine monolis_global_to_local_conditoin(nnode, nid, nb, b)
+    implicit none
+    integer(kint) :: i, in, j, id
+    integer(kint) :: imax, imin, nb
+    integer(kint) :: nnode, nid(:)
+    integer(kint) :: b(:,:)
+    integer(kint), allocatable :: perm(:)
+
+    allocate(perm(nnode), source = 0)
+    do i = 1, nnode
+      perm(i) = i
+    enddo
+    call monolis_qsort_int_with_perm(nid, 1, nnode, perm)
+
+    do i = 1, nb
+      in = b(1,i)
+      call monolis_bsearch_int(nid, 1, nnode, in, id)
+      if(id == -1)then
+        b(1,i) = -1
+      else
+        b(1,i) = perm(id)
+      endif
+    enddo
+  end subroutine monolis_global_to_local_conditoin
 
   subroutine monolis_get_inverse_matrix(n, a, inv)
     implicit none
