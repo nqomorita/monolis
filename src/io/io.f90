@@ -329,6 +329,7 @@ contains
     endif
 
     n_domain = 1
+    is_overlap = .true.
     is_format_id = .true.
 
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"

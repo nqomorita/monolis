@@ -23,35 +23,25 @@ monolis ディレクトリに移動する。
 $ cd monolis
 ```
 
-### 2. インストール
+### 2. ライブラリのインストール
+
+monolis にはグラフ分割ライブラリ metis を用いる。metis のインストールのために、monolis ディレクトリにおいて以下のコマンドを実行する。
+
+```
+$ ./install_lib.sh
+```
+
+### 3. monolis のインストール
 
 - (A) 逐次計算で利用する場合
 
 make する。
 
 ```
-$ make
-```
-
-- (B) グラフライブラリ metis を利用する場合
-
-
-Makefile の中の以下の部分を適切に設定する。
-
-```
-METIS_DIR = $(path to metis)
-METIS_INC = -I $(METIS_DIR)/include
-METIS_LIB = -L$(METIS_DIR)/lib -lmetis
-```
-
-make する。
-
-
-```
 $ make FLAGS=METIS
 ```
 
-- (C) 並列計算で利用する場合
+- (B) 並列計算で利用する場合
 
 Makefile の中の以下の部分を適切に設定する。
 
@@ -62,23 +52,15 @@ FC     = mpif90
 make する。
 
 ```
-$ make FLAGS=MPI
-```
-
-- (D) 全てを利用する場合
-
-make する。
-
-```
 $ make FLAGS=MPI,METIS
 ```
 
 ### 3. インストールの確認
 
-インストールが成功していれば、`monolis/lib` に `libmonolis.a` が生成されている。
+インストールが成功していれば、`monolis/bin` に `monolis_partitioner`、`monolis/lib` に `libmonolis.a` が生成されている。
 以下のコマンドで確認できる。
 
 ```
+$ ls bin
 $ ls lib
 ```
-
