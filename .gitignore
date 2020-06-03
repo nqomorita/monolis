@@ -3,6 +3,8 @@
 *.mod
 *.a
 *.mtx
+*.inp
+*[0-9]
 bin
 include
 lib
