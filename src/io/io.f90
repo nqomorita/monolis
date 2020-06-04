@@ -173,6 +173,41 @@ contains
     close(20)
   end subroutine monolis_input_condition
 
+  subroutine monolis_input_mesh_restart_data(fname, n, nbase, var, gid)
+    implicit none
+    integer(kint) :: n, nbase, i, j, in, nid, id
+    integer(kint) :: gid(:)
+    real(kdouble) :: r(nbase)
+    character :: fname*100
+    integer(kint), allocatable :: perm(:), temp(:)
+    real(kdouble), allocatable :: var(:)
+
+    nid = size(gid)
+    allocate(temp(nid), source = 0)
+    allocate(perm(nid), source = 0)
+    do i = 1, nid
+      temp(i) = gid(i)
+      perm(i) = i
+    enddo
+    call monolis_qsort_int_with_perm(temp, 1, nid, perm)
+
+    open(20, file = fname, status = "old")
+      read(20,*) n
+      call monolis_debug_int("nvar", n)
+      call monolis_debug_int("nvar_dof", nbase)
+
+      allocate(var(nbase*n), source = 0.0d0)
+
+      do i = 1, n
+        read(20,*) in, (r(j), j = 1, nbase)
+        call monolis_bsearch_int(temp, 1, nid, in, id)
+        do j = 1, nbase
+          var(nbase*id - nbase + j) = r(j)
+        enddo
+      enddo
+    close(20)
+  end subroutine monolis_input_mesh_restart_data
+
   subroutine monolis_output_mesh_node(fname, nnode, nnode_in, nid, node)
     implicit none
     integer(kint) :: nnode, nnode_in
