@@ -2,6 +2,8 @@
 
 - Morita's non-overlapping / overlapping DDM based linear equation solver
 
+![monolis](./monolis.logo.svg)
+
 ## インストール
 
 ### 0. インストールの準備
