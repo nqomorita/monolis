@@ -24,6 +24,7 @@ module mod_monolis_c2d4_shape
     public :: monolis_C2D4_node_point
     public :: monolis_C2D4_shapefunc
     public :: monolis_C2D4_shapefunc_deriv
+    public :: monolis_C2D4_get_global_position
 
 contains
 
@@ -57,6 +58,15 @@ contains
     r(1) = np(1,i)
     r(2) = np(2,i)
   end subroutine monolis_C2D4_node_point
+
+  subroutine monolis_C2D4_get_global_position(node, r, pos)
+    implicit none
+    real(kdouble) :: node(3,4), r(2), pos(3)
+    real(kdouble) :: func(4)
+
+    call monolis_C2D4_shapefunc(r, func)
+    pos = matmul(node, func)
+  end subroutine monolis_C2D4_get_global_position
 
   subroutine monolis_C2D4_shapefunc(local, func)
     implicit none

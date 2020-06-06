@@ -1,5 +1,6 @@
 module mod_monolis_c3d8_shape
   use mod_monolis_prm
+  use mod_monolis_shape_util
   implicit none
 
   private
@@ -26,12 +27,23 @@ module mod_monolis_c3d8_shape
      -1.0d0,  1.0d0, 1.0d0  &
     ], [3,8])
 
+  integer(kint), parameter :: monolis_C3D8_surf(4,6) = reshape([ &
+     4, 3, 2, 1, &
+     5, 6, 7, 8, &
+     1, 2, 5, 6, &
+     2, 3, 6, 7, &
+     3, 4, 7, 8, &
+     4, 1, 8, 1  ], [4,6])
+
     public :: monolis_C3D8_num_gauss_point
     public :: monolis_C3D8_weight
     public :: monolis_C3D8_integral_point
     public :: monolis_C3D8_node_point
     public :: monolis_C3D8_shapefunc
     public :: monolis_C3D8_shapefunc_deriv
+    public :: monolis_C3D8_surf
+    public :: monolis_C3D8_get_global_position
+    public :: monolis_C3D8_get_global_deriv
 
 contains
 
@@ -67,6 +79,26 @@ contains
     r(2) = np(2,i)
     r(3) = np(3,i)
   end subroutine monolis_C3D8_node_point
+
+  subroutine monolis_C3D8_get_global_position(node, r, pos)
+    implicit none
+    real(kdouble) :: node(3,8), r(3), pos(3)
+    real(kdouble) :: func(8)
+
+    call monolis_C3D8_shapefunc(r, func)
+    pos = matmul(node, func)
+  end subroutine monolis_C3D8_get_global_position
+
+  subroutine monolis_C3D8_get_global_deriv(node, r, dndx, det)
+    implicit none
+    real(kdouble) :: node(3,8), r(3), dndx(8,3), deriv(8,3)
+    real(kdouble) :: xj(3,3), inv(3,3), det
+
+    call monolis_C3D8_shapefunc_deriv(r, deriv)
+    xj = matmul(node, deriv)
+    call monolis_get_inverse_matrix_3d(xj, inv, det)
+    dndx = matmul(deriv, inv)
+  end subroutine monolis_C3D8_get_global_deriv
 
   subroutine monolis_C3D8_shapefunc(local, func)
     implicit none
