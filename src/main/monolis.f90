@@ -15,4 +15,6 @@ module mod_monolis
   use mod_monolis_c3d4_shape
   use mod_monolis_c3d8_shape
   use mod_monolis_shape_util
+  use mod_monolis_geom
+  use mod_monolis_neighbor_search
 end module mod_monolis

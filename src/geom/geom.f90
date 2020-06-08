@@ -3,6 +3,13 @@ module mod_monolis_geom
   use mod_monolis_c3d8_shape
   use mod_monolis_shape_util
 
+  private
+
+  public :: monolis_geom_get_local_position
+
+  real(kdouble), parameter :: ths = 1.0d-8
+  real(kdouble), parameter :: threshup = 4.0d0
+
 contains
 
   subroutine monolis_geom_get_local_position(coord, pos, x, is_converge)
@@ -10,19 +17,17 @@ contains
     integer(kint) :: i, j
     real(kdouble) :: coord(3,8), pos(3), x(3)
     real(kdouble) :: jacobi(3,3), inJacob(3,3), det
-    real(kdouble) :: norm, thresh, threshup, func(8,3), n(8), fr(3), dx(3)
+    real(kdouble) :: norm, func(8,3), n(8), fr(3), dx(3)
     logical :: is_converge, is_fail
 
     is_converge = .false.
-    thresh = 1.0d-8
-    threshup = 4.0d0
     x = 0.0d0
     fr = 0.0d0
     do i = 1, 10
       call monolis_C3D8_shapefunc(x, n)
       fr = matmul(coord, n) - pos
       norm = dsqrt(fr(1)*fr(1) + fr(2)*fr(2) + fr(3)*fr(3))
-      if(norm < thresh)then
+      if(norm < ths)then
         is_converge = .true.
         exit
       endif
