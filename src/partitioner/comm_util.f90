@@ -143,7 +143,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint) :: nelem, nid, in, j, k
     logical, allocatable :: is_in(:)
 
-\
     nelem = mesh%nelem
     allocate(is_in(nelem), source = .false.)
 

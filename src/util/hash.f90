@@ -12,27 +12,27 @@ module mod_monolis_hash
   public :: monolis_hash_push
   public :: type_monolis_hash_tree
 
-  integer(kind=kint), save :: monolis_current_hash_size = 1
-  integer(kind=kint), parameter :: monolis_hash_size(22) = (/&
+  integer(kint), save :: monolis_current_hash_size = 1
+  integer(kint), parameter :: monolis_hash_size(22) = (/&
   &     1021,     2039,      4093,      8191,     16381, &
   &    32749,    65521,    131071,    262139,    524287, &
   &  1048573,  2097143,   4194301,   8388593,  16777213, &
   & 33554393, 67108859, 134217689, 268435399, 536870909, 1073741789, 2147483647/)
 
   type type_monolis_hash_list
-    integer(kind=kint) :: hash = 0
+    integer(kint) :: hash = 0
     character :: key*27 = "                           "
-    integer(kind=kint) :: val  = 0
+    integer(kint) :: val  = 0
   end type type_monolis_hash_list
 
   type type_monolis_hash_bin
-    integer(kind=kint) :: n = 0
+    integer(kint) :: n = 0
     type(type_monolis_hash_list), pointer :: list(:) => null()
   end type type_monolis_hash_bin
 
   type type_monolis_hash_tree
-    integer(kind=kint) :: n_put = 0
-    integer(kind=kint) :: tree_size = 0
+    integer(kint) :: n_put = 0
+    integer(kint) :: tree_size = 0
     type(type_monolis_hash_bin), pointer :: bin(:) => null()
   end type type_monolis_hash_tree
 
@@ -53,7 +53,7 @@ contains
   subroutine monolis_hash_finalize(monolis_hash_tree)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: i
+    integer(kint) :: i
     type(type_monolis_hash_list), pointer :: list(:)
     do i = 1, monolis_hash_tree%tree_size
       if(0 < monolis_hash_tree%bin(i)%n)then
@@ -68,7 +68,7 @@ contains
   subroutine monolis_hash_get(monolis_hash_tree, key, val, is_exist)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: hash, val
+    integer(kint) :: hash, val
     character :: key*27
     logical :: is_exist
 
@@ -81,7 +81,7 @@ contains
   subroutine monolis_hash_push(monolis_hash_tree, key, val, is_pushed, is_exist)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: hash, val
+    integer(kint) :: hash, val
     character :: key*27
     logical :: is_exist, is_pushed
 
@@ -105,8 +105,8 @@ contains
   subroutine monolis_hash_resize(monolis_hash_tree)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: i, j, hash, val
-    integer(kind=kint) :: new_size, old_size
+    integer(kint) :: i, j, hash, val
+    integer(kint) :: new_size, old_size
     type(type_monolis_hash_bin), pointer :: new_bin(:), old_bin(:), temp_bin
     type(type_monolis_hash_list), pointer :: list(:)
     character :: key*27
@@ -146,8 +146,8 @@ contains
   subroutine monolis_hash_list_get(monolis_hash_tree, key, hash, val, is_exist)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: n, i
-    integer(kind=kint) :: index, hash, val
+    integer(kint) :: n, i
+    integer(kint) :: index, hash, val
     character :: key*27
     logical :: is_exist
 
@@ -165,8 +165,8 @@ contains
   subroutine monolis_hash_list_push(monolis_hash_tree, key, hash, val)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kind=kint) :: i, iold, inew
-    integer(kind=kint) :: index, hash, val
+    integer(kint) :: i, iold, inew
+    integer(kint) :: index, hash, val
     character :: key*27
     type(type_monolis_hash_list), pointer :: old_list(:), new_list(:)
 
@@ -197,7 +197,7 @@ contains
   subroutine monolis_hash_key(key, hash)
     implicit none
     character :: key*27
-    integer(kind=kint) :: hash, i, t
+    integer(kint) :: hash, i, t
     hash = 5381
     do i = 1, 27
       t = mod(hash*33, 65536_4)
@@ -207,7 +207,7 @@ contains
 
   subroutine monolis_index_key(hash, index, tree_size)
     implicit none
-    integer(kind=kint) :: hash, index, tree_size
+    integer(kint) :: hash, index, tree_size
     index = mod(hash, tree_size) + 1
   end subroutine monolis_index_key
 end module mod_monolis_hash

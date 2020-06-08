@@ -288,8 +288,8 @@ contains
 
   subroutine monolis_reallocate_integer(array, nold, n, add)
     implicit none
-    integer(kind=kint), allocatable :: array(:), temp(:)
-    integer(kind=kint) :: i, n, nold, add(n)
+    integer(kint), allocatable :: array(:), temp(:)
+    integer(kint) :: i, n, nold, add(n)
 
     if(nold == 0)then
       allocate(array(n))
@@ -308,4 +308,28 @@ contains
       array(i) = add(i-nold)
     enddo
   end subroutine monolis_reallocate_integer
+
+  subroutine monolis_pointer_reallocate_integer(array, nold, n, add)
+    implicit none
+    integer(kint), pointer :: array(:), temp(:)
+    integer(kint) :: i, n, nold, add(n)
+
+    if(nold == 0)then
+      allocate(array(n))
+    else
+      allocate(temp(nold))
+      temp = array
+      deallocate(array)
+      allocate(array(nold + n))
+
+      do i = 1, nold
+        array(i) = temp(i)
+      enddo
+    endif
+
+    do i = nold + 1, nold + n
+      array(i) = add(i-nold)
+    enddo
+  end subroutine monolis_pointer_reallocate_integer
+
 end module mod_monolis_stdlib
