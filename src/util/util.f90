@@ -166,6 +166,7 @@ contains
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
+  !> debug section
   subroutine monolis_set_debug(flag)
     implicit none
     logical :: flag
@@ -212,16 +213,5 @@ contains
 
     if(myrank == 0) write(*,"(a)")"** monolis warning: "//trim(header)
   end subroutine monolis_warning_header
-
-  subroutine monolis_debug_equal_R(header, a, b)
-    implicit none
-    character(*) :: header
-    real(kdouble) :: a, b
-
-    if(.not. is_debug) return
-    if(a /= b)then
-      if(myrank == 0) write(*,"(a,1pe12.5,a,1pe12.5,a)")"** monolis debug: ", a, "is not equal", b, " at "//trim(header)
-    endif
-  end subroutine monolis_debug_equal_R
 
 end module mod_monolis_util

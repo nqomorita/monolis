@@ -42,7 +42,7 @@ contains
   subroutine monolis_neighbor_search_push(monolis_nbsearch, BB, id)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
-    integer(kint) :: id, x, y, z, in, imin(3), imax(3)
+    integer(kint) :: id, x, y, z, in, imin(3), imax(3), div(3)
     real(kdouble) :: BB(6), pos(3)
 
     pos(1) = BB(1) - ths
@@ -55,10 +55,11 @@ contains
     pos(3) = BB(6) + ths
     call get_int_coordinate(monolis_nbsearch, pos, imax)
 
-    do z = 1, imax(1) - imin(1) + 1
-    do y = 1, imax(2) - imin(2) + 1
-    do x = 1, imax(3) - imin(3) + 1
-      in = 1
+    div = monolis_nbsearch%div
+    do z = imin(3), imax(3)
+    do y = imin(2), imax(2)
+    do x = imin(1), imax(1)
+      in = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
       call monolis_neighbor_search_push_main(monolis_nbsearch, in, id)
     enddo
     enddo
@@ -137,11 +138,14 @@ contains
     integer(kint) :: id(3)
     real(kdouble) :: pos(3)
 
-    id(1) = int((pos(1) - monolis_nbsearch%BB(1))/monolis_nbsearch%dx(1))
-    id(2) = int((pos(2) - monolis_nbsearch%BB(3))/monolis_nbsearch%dx(2))
-    id(3) = int((pos(3) - monolis_nbsearch%BB(5))/monolis_nbsearch%dx(3))
-    if(id(1) < 0) id(1) = 0
-    if(id(2) < 0) id(2) = 0
-    if(id(3) < 0) id(3) = 0
+    id(1) = int((pos(1) - monolis_nbsearch%BB(1))/monolis_nbsearch%dx(1)) + 1
+    id(2) = int((pos(2) - monolis_nbsearch%BB(3))/monolis_nbsearch%dx(2)) + 1
+    id(3) = int((pos(3) - monolis_nbsearch%BB(5))/monolis_nbsearch%dx(3)) + 1
+    if(id(1) < 1) id(1) = 1
+    if(id(2) < 1) id(2) = 1
+    if(id(3) < 1) id(3) = 1
+    if(id(1) > monolis_nbsearch%div(1)) id(1) = monolis_nbsearch%div(1)
+    if(id(2) > monolis_nbsearch%div(2)) id(2) = monolis_nbsearch%div(2)
+    if(id(3) > monolis_nbsearch%div(3)) id(3) = monolis_nbsearch%div(3)
   end subroutine get_int_coordinate
 end module mod_monolis_neighbor_search
