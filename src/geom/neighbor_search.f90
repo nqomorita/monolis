@@ -108,6 +108,7 @@ contains
     logical :: is_in
 
     nid = 0
+    if(allocated(id)) deallocate(id)
     call BB_modify(monolis_nbsearch, BB, is_in)
     if(.not. is_in) return
 
