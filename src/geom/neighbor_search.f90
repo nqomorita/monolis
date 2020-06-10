@@ -81,24 +81,20 @@ contains
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
     integer(kint) :: nid, morton_id
-    integer(kint), pointer :: id(:)
+    integer(kint), allocatable :: id(:)
     real(kdouble) :: pos(3)
     logical :: is_in
 
+    nid = 0
     call BB_check(monolis_nbsearch, pos, is_in)
-    if(.not. is_in)then
-      nid = 0
-      nullify(id)
-      return
-    endif
+    if(.not. is_in) return
 
     call get_z_index_by_position(monolis_nbsearch, pos, morton_id)
 
     nid = monolis_nbsearch%cell(morton_id)%nid
-    if(nid < 1)then
-      nullify(id)
-    else
-      id => monolis_nbsearch%cell(morton_id)%id
+    if(nid > 0)then
+      allocate(id(nid))
+      id = monolis_nbsearch%cell(morton_id)%id
     endif
   end subroutine monolis_neighbor_search_get_by_position
 
@@ -107,16 +103,13 @@ contains
     type(type_monolis_neighbor_search) :: monolis_nbsearch
     integer(kint) :: nid, morton_id, imin(3), imax(3), div(3)
     integer(kint) :: in, x, y, z, newlen
-    integer(kint), pointer :: id(:), tmp(:)
+    integer(kint), allocatable :: id(:), tmp(:)
     real(kdouble) :: BB(6), pos(3)
     logical :: is_in
 
+    nid = 0
     call BB_modify(monolis_nbsearch, BB, is_in)
-    if(.not. is_in)then
-      nid = 0
-      nullify(id)
-      return
-    endif
+    if(.not. is_in) return
 
     pos(1) = BB(1) - ths
     pos(2) = BB(3) - ths
@@ -128,38 +121,34 @@ contains
     pos(3) = BB(6) + ths
     call get_int_coordinate(monolis_nbsearch, pos, imax)
 
-    if(associated(id)) deallocate(id)
-    nullify(id)
-    nid = 0
-
     div = monolis_nbsearch%div
     do z = imin(3), imax(3)
     do y = imin(2), imax(2)
     do x = imin(1), imax(1)
       in = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
-      call monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, in, id)
+      call monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, in, tmp)
     enddo
     enddo
     enddo
 
-    call monolis_qsort_int(id, 1, nid)
-    call monolis_uniq_int(id, nid, newlen)
+    call monolis_qsort_int(tmp, 1, nid)
+    call monolis_uniq_int(tmp, nid, newlen)
+    allocate(id(newlen))
+    id = tmp(1:newlen)
+    deallocate(tmp)
+    nid = newlen
   end subroutine monolis_neighbor_search_get_by_bb
 
   subroutine monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, eid, id)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
     integer(kint) :: eid, ntmp, nid
-    integer(kint), pointer :: id(:)
-    !integer(kint), allocatable :: tmp(:)
+    integer(kint), allocatable :: id(:)
 
     ntmp = monolis_nbsearch%cell(eid)%nid
     if(ntmp > 0)then
-      !allocate(tmp(ntmp))
-      !tmp = monolis_nbsearch%cell(eid)%id
-      call monolis_pointer_reallocate_integer(id, nid, ntmp, monolis_nbsearch%cell(eid)%id)
+      call monolis_reallocate_integer(id, nid, ntmp, monolis_nbsearch%cell(eid)%id)
       nid = nid + ntmp
-      !deallocate(tmp)
     endif
   end subroutine monolis_neighbor_search_get_by_bb_main
 
