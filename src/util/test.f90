@@ -80,7 +80,13 @@ program monolis_test
   call monolis_debug_header("monolis_neighbor_search_get_by_position")
   pos(1) = 0.0d0; pos(2) = 0.0d0; pos(3) = 0.0d0
   call monolis_neighbor_search_get_by_position(monolis_nbsearch, pos, nngrp, ngrp)
-  !write(*,*)nngrp, ngrp
+  write(*,*)nngrp, ngrp
+
+  BB(1) = 0.0d0; BB(2) = 1.0d0
+  BB(3) = 0.0d0; BB(4) = 1.0d0
+  BB(5) = 0.0d0; BB(6) = 1.0d0
+  call monolis_neighbor_search_get_by_bb(monolis_nbsearch, BB, nngrp, ngrp)
+  write(*,*)nngrp, ngrp
 
   call monolis_neighbor_search_finalize(monolis_nbsearch)
 end program monolis_test

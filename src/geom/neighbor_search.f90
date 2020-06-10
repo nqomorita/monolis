@@ -105,9 +105,10 @@ contains
   subroutine monolis_neighbor_search_get_by_bb(monolis_nbsearch, BB, nid, id)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
-    integer(kint) :: nid, morton_id
-    integer(kint), pointer :: id(:)
-    real(kdouble) :: BB(6)
+    integer(kint) :: nid, morton_id, imin(3), imax(3), div(3)
+    integer(kint) :: in, x, y, z, newlen
+    integer(kint), pointer :: id(:), tmp(:)
+    real(kdouble) :: BB(6), pos(3)
     logical :: is_in
 
     call BB_modify(monolis_nbsearch, BB, is_in)
@@ -117,7 +118,50 @@ contains
       return
     endif
 
+    pos(1) = BB(1) - ths
+    pos(2) = BB(3) - ths
+    pos(3) = BB(5) - ths
+    call get_int_coordinate(monolis_nbsearch, pos, imin)
+
+    pos(1) = BB(2) + ths
+    pos(2) = BB(4) + ths
+    pos(3) = BB(6) + ths
+    call get_int_coordinate(monolis_nbsearch, pos, imax)
+
+    if(associated(id)) deallocate(id)
+    nullify(id)
+    nid = 0
+
+    div = monolis_nbsearch%div
+    do z = imin(3), imax(3)
+    do y = imin(2), imax(2)
+    do x = imin(1), imax(1)
+      in = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
+      call monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, in, id)
+    enddo
+    enddo
+    enddo
+
+    call monolis_qsort_int(id, 1, nid)
+    call monolis_uniq_int(id, nid, newlen)
   end subroutine monolis_neighbor_search_get_by_bb
+
+  subroutine monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, eid, id)
+    implicit none
+    type(type_monolis_neighbor_search) :: monolis_nbsearch
+    integer(kint) :: eid, ntmp, nid
+    integer(kint), pointer :: id(:)
+    !integer(kint), allocatable :: tmp(:)
+
+    ntmp = monolis_nbsearch%cell(eid)%nid
+    if(ntmp > 0)then
+      !allocate(tmp(ntmp))
+      !tmp = monolis_nbsearch%cell(eid)%id
+      call monolis_pointer_reallocate_integer(id, nid, ntmp, monolis_nbsearch%cell(eid)%id)
+      nid = nid + ntmp
+      !deallocate(tmp)
+    endif
+  end subroutine monolis_neighbor_search_get_by_bb_main
 
   subroutine monolis_neighbor_search_finalize(monolis_nbsearch)
     implicit none
@@ -143,6 +187,7 @@ contains
   subroutine BB_modify(monolis_nbsearch, BB_in, is_in)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
+    integer(kint) :: i
     real(kdouble) :: pos(3), BB(6), BB_in(6)
     logical :: is_in
     integer(kint), parameter :: perm(3,8) = reshape([ &
@@ -156,19 +201,28 @@ contains
       2, 4, 6  &
       ], [3,8])
 
-    !is_in = .false.
-    !BB = monolis_nbsearch%BB
+    is_in = .false.
+    BB = monolis_nbsearch%BB
 
-    !do i = 1, 8
-    !  pos(1) = BB_in(perm(1,i))
-    !  pos(2) = BB_in(perm(2,i))
-    !  pos(3) = BB_in(perm(3,i))
-    !  if( BB(1)-ths <= pos(1) .and. pos(1) <= BB(2)+ths .and. &
-    !    & BB(3)-ths <= pos(2) .and. pos(2) <= BB(4)+ths .and. &
-    !    & BB(5)-ths <= pos(3) .and. pos(3) <= BB(6)+ths )then
-    !    is_in = .true.
-    !  endif
-    !enddo
+    do i = 1, 8
+      pos(1) = BB_in(perm(1,i))
+      pos(2) = BB_in(perm(2,i))
+      pos(3) = BB_in(perm(3,i))
+      if( BB(1)-ths <= pos(1) .and. pos(1) <= BB(2)+ths .and. &
+        & BB(3)-ths <= pos(2) .and. pos(2) <= BB(4)+ths .and. &
+        & BB(5)-ths <= pos(3) .and. pos(3) <= BB(6)+ths )then
+        is_in = .true.
+      endif
+    enddo
+
+    if(.not. is_in) return
+
+    if(BB_in(1) < BB(1)) BB_in(1) = BB(1)
+    if(BB_in(3) < BB(3)) BB_in(3) = BB(3)
+    if(BB_in(5) < BB(5)) BB_in(5) = BB(5)
+    if(BB_in(2) > BB(2)) BB_in(2) = BB(2)
+    if(BB_in(4) > BB(4)) BB_in(4) = BB(4)
+    if(BB_in(6) > BB(6)) BB_in(6) = BB(6)
   end subroutine BB_modify
 
   subroutine get_z_index_by_position(monolis_nbsearch, pos, morton_id)
