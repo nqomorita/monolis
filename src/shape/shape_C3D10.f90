@@ -1,5 +1,6 @@
 module mod_monolis_c3d10_shape
   use mod_monolis_prm
+  use mod_monolis_shape_util
   implicit none
 
   private
