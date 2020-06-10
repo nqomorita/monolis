@@ -30,6 +30,7 @@ module mod_monolis_c3d10_shape
     public :: monolis_C3D10_weight
     public :: monolis_C3D10_integral_point
     !public :: monolis_C3D10_node_point
+    public :: monolis_C3D10_get_global_deriv
     public :: monolis_C3D10_shapefunc
     public :: monolis_C3D10_shapefunc_deriv
 
@@ -68,6 +69,17 @@ contains
   !  r(3) = np(3,i)
   !end subroutine monolis_C3D10_node_point
 
+  subroutine monolis_C3D10_get_global_deriv(node, r, dndx, det)
+    implicit none
+    real(kdouble) :: node(3,10), r(3), dndx(10,3), deriv(10,3)
+    real(kdouble) :: xj(3,3), inv(3,3), det
+
+    call monolis_C3D10_shapefunc_deriv(r, deriv)
+    xj = matmul(node, deriv)
+    call monolis_get_inverse_matrix_3d(xj, inv, det)
+    dndx = matmul(deriv, inv)
+  end subroutine monolis_C3D10_get_global_deriv
+
   subroutine monolis_C3D10_shapefunc(local, func)
     implicit none
     real(kdouble) :: local(3), func(10)
@@ -104,7 +116,7 @@ contains
     func(2,1) = 4.0d0*xi - 1.0d0
     func(3,1) = 0.0d0
     func(4,1) = 0.0d0
-    func(5,1) = 4.0d0*(1.0d0 - 20.d0*xi - et - st)
+    func(5,1) = 4.0d0*(1.0d0 - 2.0d0*xi - et - st)
     func(6,1) = 4.0d0*et
     func(7,1) =-4.0d0*et
     func(8,1) =-4.0d0*st
@@ -117,7 +129,7 @@ contains
     func(4,2) = 0.0d0
     func(5,2) =-4.0d0*xi
     func(6,2) = 4.0d0*xi
-    func(7,2) = 4.0d0*(10.d0 - xi - 2.0d0*et - st)
+    func(7,2) = 4.0d0*(1.0d0 - xi - 2.0d0*et - st)
     func(8,2) =-4.0d0*st
     func(9,2) = 0.0d0
     func(10,2)= 4.0d0*st
