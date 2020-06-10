@@ -6,7 +6,8 @@ module mod_monolis_neighbor_search
 
   public :: monolis_neighbor_search_init
   public :: monolis_neighbor_search_finalize
-  public :: monolis_neighbor_search_get
+  public :: monolis_neighbor_search_get_by_position
+  public :: monolis_neighbor_search_get_by_bb
   public :: monolis_neighbor_search_push
   public :: type_monolis_neighbor_search
 
@@ -73,9 +74,10 @@ contains
     nid = monolis_nbsearch%cell(in)%nid
     add = id
     call monolis_pointer_reallocate_integer(monolis_nbsearch%cell(in)%id, nid, 1, add)
+    monolis_nbsearch%cell(in)%nid = nid + 1
   end subroutine monolis_neighbor_search_push_main
 
-  subroutine monolis_neighbor_search_get(monolis_nbsearch, pos, nid, id)
+  subroutine monolis_neighbor_search_get_by_position(monolis_nbsearch, pos, nid, id)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
     integer(kint) :: nid, morton_id
@@ -98,7 +100,24 @@ contains
     else
       id => monolis_nbsearch%cell(morton_id)%id
     endif
-  end subroutine monolis_neighbor_search_get
+  end subroutine monolis_neighbor_search_get_by_position
+
+  subroutine monolis_neighbor_search_get_by_bb(monolis_nbsearch, BB, nid, id)
+    implicit none
+    type(type_monolis_neighbor_search) :: monolis_nbsearch
+    integer(kint) :: nid, morton_id
+    integer(kint), pointer :: id(:)
+    real(kdouble) :: BB(6)
+    logical :: is_in
+
+    call BB_modify(monolis_nbsearch, BB, is_in)
+    if(.not. is_in)then
+      nid = 0
+      nullify(id)
+      return
+    endif
+
+  end subroutine monolis_neighbor_search_get_by_bb
 
   subroutine monolis_neighbor_search_finalize(monolis_nbsearch)
     implicit none
@@ -120,6 +139,37 @@ contains
       is_in = .true.
     endif
   end subroutine BB_check
+
+  subroutine BB_modify(monolis_nbsearch, BB_in, is_in)
+    implicit none
+    type(type_monolis_neighbor_search) :: monolis_nbsearch
+    real(kdouble) :: pos(3), BB(6), BB_in(6)
+    logical :: is_in
+    integer(kint), parameter :: perm(3,8) = reshape([ &
+      1, 3, 5, &
+      2, 3, 5, &
+      1, 4, 5, &
+      2, 4, 5, &
+      1, 3, 6, &
+      2, 3, 6, &
+      1, 4, 6, &
+      2, 4, 6  &
+      ], [3,8])
+
+    !is_in = .false.
+    !BB = monolis_nbsearch%BB
+
+    !do i = 1, 8
+    !  pos(1) = BB_in(perm(1,i))
+    !  pos(2) = BB_in(perm(2,i))
+    !  pos(3) = BB_in(perm(3,i))
+    !  if( BB(1)-ths <= pos(1) .and. pos(1) <= BB(2)+ths .and. &
+    !    & BB(3)-ths <= pos(2) .and. pos(2) <= BB(4)+ths .and. &
+    !    & BB(5)-ths <= pos(3) .and. pos(3) <= BB(6)+ths )then
+    !    is_in = .true.
+    !  endif
+    !enddo
+  end subroutine BB_modify
 
   subroutine get_z_index_by_position(monolis_nbsearch, pos, morton_id)
     implicit none

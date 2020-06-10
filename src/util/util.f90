@@ -26,6 +26,7 @@ module mod_monolis_util
   public :: monolis_warning_header
   public :: monolis_get_time
   public :: monolis_get_time_sync
+  public :: monolis_error_stop
 
   integer(kint), save :: myrank = 0
   integer(kint), save :: mycomm
@@ -214,4 +215,8 @@ contains
     if(myrank == 0) write(*,"(a)")"** monolis warning: "//trim(header)
   end subroutine monolis_warning_header
 
+  subroutine monolis_error_stop()
+    implicit none
+    error stop monolis_fail
+  end subroutine monolis_error_stop
 end module mod_monolis_util
