@@ -13,7 +13,7 @@ module mod_monolis_neighbor_search
 
   type type_monolis_neighbor_search_main
     integer(kint) :: nid = 0
-    integer(kint), pointer :: id(:) => null()
+    integer(kint), allocatable :: id(:)
   end type type_monolis_neighbor_search_main
 
   type type_monolis_neighbor_search
@@ -73,7 +73,7 @@ contains
     integer(kint) :: in, id, add(1), nid
     nid = monolis_nbsearch%cell(in)%nid
     add = id
-    call monolis_pointer_reallocate_integer(monolis_nbsearch%cell(in)%id, nid, 1, add)
+    call monolis_reallocate_integer(monolis_nbsearch%cell(in)%id, nid, 1, add)
     monolis_nbsearch%cell(in)%nid = nid + 1
   end subroutine monolis_neighbor_search_push_main
 
