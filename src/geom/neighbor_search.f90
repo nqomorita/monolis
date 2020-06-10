@@ -86,6 +86,7 @@ contains
     logical :: is_in
 
     nid = 0
+    if(allocated(id)) deallocate(id)
     call BB_check(monolis_nbsearch, pos, is_in)
     if(.not. is_in) return
 
