@@ -32,7 +32,7 @@ contains
   function monolis_C3D10_num_gauss_point()
     implicit none
     integer(kint) :: monolis_C3D10_num_gauss_point
-    monolis_C3D10_num_gauss_point = 8
+    monolis_C3D10_num_gauss_point = 4
   end function monolis_C3D10_num_gauss_point
 
   function monolis_C3D10_weight(i)
