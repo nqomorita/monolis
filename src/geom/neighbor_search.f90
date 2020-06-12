@@ -60,7 +60,7 @@ contains
     do z = imin(3), imax(3)
     do y = imin(2), imax(2)
     do x = imin(1), imax(1)
-      in = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
+      in = get_index(monolis_nbsearch%div, x, y, z)
       call monolis_neighbor_search_push_main(monolis_nbsearch, in, id)
     enddo
     enddo
@@ -80,7 +80,7 @@ contains
   subroutine monolis_neighbor_search_get_by_position(monolis_nbsearch, pos, nid, id)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
-    integer(kint) :: nid, morton_id
+    integer(kint) :: nid, index
     integer(kint), allocatable :: id(:)
     real(kdouble) :: pos(3)
     logical :: is_in
@@ -90,12 +90,12 @@ contains
     call BB_check(monolis_nbsearch, pos, is_in)
     if(.not. is_in) return
 
-    call get_z_index_by_position(monolis_nbsearch, pos, morton_id)
+    call get_index_by_position(monolis_nbsearch, pos, index)
 
-    nid = monolis_nbsearch%cell(morton_id)%nid
+    nid = monolis_nbsearch%cell(index)%nid
     if(nid > 0)then
       allocate(id(nid))
-      id = monolis_nbsearch%cell(morton_id)%id
+      id = monolis_nbsearch%cell(index)%id
     endif
   end subroutine monolis_neighbor_search_get_by_position
 
@@ -127,7 +127,7 @@ contains
     do z = imin(3), imax(3)
     do y = imin(2), imax(2)
     do x = imin(1), imax(1)
-      in = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
+      in = get_index(monolis_nbsearch%div, x, y, z)
       call monolis_neighbor_search_get_by_bb_main(monolis_nbsearch, nid, in, tmp)
     enddo
     enddo
@@ -216,16 +216,21 @@ contains
     if(BB_in(6) > BB(6)) BB_in(6) = BB(6)
   end subroutine BB_modify
 
-  subroutine get_z_index_by_position(monolis_nbsearch, pos, morton_id)
+  subroutine get_index_by_position(monolis_nbsearch, pos, index)
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
-    integer(kint) :: morton_id, id(3), div(3)
+    integer(kint) :: index, id(3)
     real(kdouble) :: pos(3)
 
     call get_int_coordinate(monolis_nbsearch, pos, id)
-    div = monolis_nbsearch%div
-    morton_id = id(3)*div(1)*div(2) + id(2)*div(1) + id(1)
-  end subroutine get_z_index_by_position
+    index = get_index(monolis_nbsearch%div, id(1), id(2), id(3))
+  end subroutine get_index_by_position
+
+  function get_index(div, x, y, z)
+    implicit none
+    integer(kint) :: get_index, x, y, z, div(3)
+    get_index = x + (y-1)*div(1) + (z-1)*div(1)*div(2)
+  end function get_index
 
   subroutine get_int_coordinate(monolis_nbsearch, pos, id)
     implicit none
