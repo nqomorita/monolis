@@ -22,6 +22,12 @@ module mod_monolis_mat
     integer(kint), pointer :: item(:) => null()
     integer(kint), pointer :: perm(:) => null()
     integer(kint), pointer :: iperm(:) => null()
+
+    !> for CRR format
+    integer(kint), pointer :: indexR(:) => null()
+    integer(kint), pointer :: itemR(:) => null()
+    integer(kint), pointer :: permR(:) => null()
+
     real(kdouble), pointer :: A(:) => null()
     real(kdouble), pointer :: X(:) => null()
     real(kdouble), pointer :: B(:) => null()
@@ -30,20 +36,25 @@ module mod_monolis_mat
 
 contains
 
-  subroutine monolis_mat_nullify(monoMAT)
-    implicit none
-    type(monolis_mat) :: monoMAT
-
-    monoMAT%N = 0
-    monoMAT%NP = 0
-    monoMAT%NZ = 0
-    monoMAT%NDOF = 0
-    monoMAT%index => null()
-    monoMAT%item => null()
-    monoMAT%A => null()
-    monoMAT%X => null()
-    monoMAT%B => null()
-  end subroutine monolis_mat_nullify
+!  subroutine monolis_mat_nullify(monoMAT)
+!    implicit none
+!    type(monolis_mat) :: monoMAT
+!
+!    monoMAT%N = 0
+!    monoMAT%NP = 0
+!    monoMAT%NZ = 0
+!    monoMAT%NDOF = 0
+!    monoMAT%index => null()
+!    monoMAT%item => null()
+!    monoMAT%perm => null()
+!    monoMAT%iperm => null()
+!    monoMAT%indexR => null()
+!    monoMAT%itemR => null()
+!    monoMAT%permR => null()
+!    monoMAT%A => null()
+!    monoMAT%X => null()
+!    monoMAT%B => null()
+!  end subroutine monolis_mat_nullify
 
   subroutine monolis_mat_initialize(monoMAT)
     implicit none
@@ -55,12 +66,17 @@ contains
     monoMAT%NDOF = 0
     monoMAT%index => null()
     monoMAT%item => null()
+    monoMAT%perm => null()
+    monoMAT%iperm => null()
+    monoMAT%indexR => null()
+    monoMAT%itemR => null()
+    monoMAT%permR => null()
     monoMAT%A => null()
     monoMAT%X => null()
     monoMAT%B => null()
   end subroutine monolis_mat_initialize
 
-  subroutine monolis_mat_copy_by_pointer(min, mout)
+  subroutine monolis_copy_mat_by_pointer(min, mout)
     implicit none
     type(monolis_mat) :: min
     type(monolis_mat) :: mout
@@ -71,35 +87,38 @@ contains
     mout%NDOF = min%NDOF
     mout%index => min%index
     mout%item => min%item
+    mout%indexR => min%indexR
+    mout%itemR => min%itemR
+    mout%permR => min%permR
     mout%A => min%A
     mout%X => min%X
     mout%B => min%B
-  end subroutine monolis_mat_copy_by_pointer
+  end subroutine monolis_copy_mat_by_pointer
 
-  subroutine monolis_mat_copy_all(min, mout)
-    implicit none
-    type(monolis_mat) :: min
-    type(monolis_mat) :: mout
-    integer(kint) :: i, NZ
-
-    mout%N = min%N
-    mout%NP = min%NP
-    mout%NZ = min%NZ
-    mout%NDOF = min%NDOF
-
-    NZ = min%index(min%NP)
-    allocate(mout%index(0:min%NP))
-    allocate(mout%item(NZ))
-    allocate(mout%A(min%NDOF*min%NDOF*NZ))
-    allocate(mout%X(min%NDOF*min%NP))
-    allocate(mout%B(min%NDOF*min%NP))
-
-    mout%index(0:min%NP) = min%index(0:min%NP)
-    mout%item = min%item
-    mout%A = min%A
-    mout%X = min%X
-    mout%B = min%B
-  end subroutine monolis_mat_copy_all
+!  subroutine monolis_mat_copy_all(min, mout)
+!    implicit none
+!    type(monolis_mat) :: min
+!    type(monolis_mat) :: mout
+!    integer(kint) :: i, NZ
+!
+!    mout%N = min%N
+!    mout%NP = min%NP
+!    mout%NZ = min%NZ
+!    mout%NDOF = min%NDOF
+!
+!    NZ = min%index(min%NP)
+!    allocate(mout%index(0:min%NP))
+!    allocate(mout%item(NZ))
+!    allocate(mout%A(min%NDOF*min%NDOF*NZ))
+!    allocate(mout%X(min%NDOF*min%NP))
+!    allocate(mout%B(min%NDOF*min%NP))
+!
+!    mout%index(0:min%NP) = min%index(0:min%NP)
+!    mout%item = min%item
+!    mout%A = min%A
+!    mout%X = min%X
+!    mout%B = min%B
+!  end subroutine monolis_mat_copy_all
 
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
@@ -115,6 +134,9 @@ contains
     if(associated(monoMAT%perm)) deallocate(monoMAT%perm)
     if(associated(monoMAT%iperm)) deallocate(monoMAT%iperm)
     if(associated(monoMAT%diag)) deallocate(monoMAT%diag)
+    if(associated(monoMAT%indexR)) deallocate(monoMAT%indexR)
+    if(associated(monoMAT%itemR)) deallocate(monoMAT%itemR)
+    if(associated(monoMAT%permR)) deallocate(monoMAT%permR)
     monoMAT%index => null()
     monoMAT%item => null()
     monoMAT%A => null()
@@ -123,6 +145,9 @@ contains
     monoMAT%perm => null()
     monoMAT%iperm => null()
     monoMAT%diag => null()
+    monoMAT%indexR => null()
+    monoMAT%itemR => null()
+    monoMAT%permR => null()
   end subroutine monolis_mat_finalize
 
   subroutine monolis_mat_tree_finalize(monoMAT)

@@ -16,8 +16,8 @@ contains
 
     call monolis_get_mesh_to_nodal(nnode, nelem, nbase_func, elem, index, item)
 
-    monolis%MAT%n = nnode
-    monolis%MAT%ndof = ndof
+    monolis%MAT%N = nnode
+    monolis%MAT%NDOF = ndof
     allocate(monolis%MAT%X(ndof*nnode), source = 0.0d0)
     allocate(monolis%MAT%B(ndof*nnode), source = 0.0d0)
     allocate(monolis%MAT%index(0:nnode), source = 0)
@@ -38,9 +38,28 @@ contains
       call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
     enddo
 
+    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%index, monolis%MAT%item, &
+      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
+
     nullify(index)
     nullify(item)
   end subroutine monolis_get_nonzero_pattern
+
+  subroutine monolis_copy_mat_profile(min, mout)
+    implicit none
+    type(monolis_structure) :: min
+    type(monolis_structure) :: mout
+    integer(kint) :: ndof2
+
+    mout%MAT%index => min%MAT%index
+    mout%MAT%item => min%MAT%item
+
+    mout%MAT%n = min%MAT%n
+    mout%MAT%ndof = min%MAT%ndof
+
+    ndof2 = min%MAT%ndof*min%MAT%ndof
+    allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%n)), source = 0.0d0)
+  end subroutine monolis_copy_mat_profile
 
   subroutine monolis_sparse_matrix_assemble(index, item, A, nnode, ndof, e1t, e2t, stiff)
     implicit none
@@ -140,7 +159,7 @@ contains
   subroutine monolis_get_CRR_format(N, index, item, indexR, itemR, permA)
     implicit none
     integer(kint), intent(in) :: N, index(0:), item(:)
-    integer(kint), allocatable :: indexR(:), itemR(:), temp(:), permA(:)
+    integer(kint), pointer :: indexR(:), itemR(:), temp(:), permA(:)
     integer(kint) :: i, j, in, jS, jE, nz, m, p
 
     allocate(temp(N), source = 0)

@@ -40,11 +40,11 @@ contains
         call monolis_reorder_vector_fw(monoMAT, monoMAT%NP, monoMAT%NDOF, monoMAT%X, monoMAT_reorder%X)
       endif
 #else
-      call monolis_mat_copy_by_pointer(monoMAT, monoMAT_reorder)
+      call monolis_copy_mat_by_pointer(monoMAT, monoMAT_reorder)
       call monolis_com_copy(monoCOM, monoCOM_reorder)
 #endif
     else
-      call monolis_mat_copy_by_pointer(monoMAT, monoMAT_reorder)
+      call monolis_copy_mat_by_pointer(monoMAT, monoMAT_reorder)
       call monolis_com_copy(monoCOM, monoCOM_reorder)
     endif
 
