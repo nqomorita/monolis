@@ -157,27 +157,6 @@ end program main
   call monolis_set_Dirichlet_bc(A, node_id, ndof_bc, val)
 ```
 
-<!--
-#### Neumann 境界条件の設定
-
-右辺ベクトルへのベクトル成分の足し込みは、`monolis_assemble_RHS` 関数で行う。
-
-```fortran
-  type(monolis_structure) :: A !> Ax = b の係数行列
-  integer(kint) :: node_id !> 節点番号
-  integer(kint) :: ndof_bc !> 境界条件を与える自由度番号（[1, ndof] の値をとる）
-  real(kdouble) :: val !> 境界条件の設定値
-
-  !> Neumann 境界条件の追加
-  node_id = 1
-  ndof_bc = 2
-  val = 1.0d0
-
-  !> 節点番号 1 の第 2 自由度成分に対応する右辺値に 1.0 を加算
-  call monolis_assemble_RHS(A, node_id, ndof_bc, val)
-```
--->
-
 #### 方程式の求解
 
 解ベクトルの取得は、`monolis_solve` 関数で行う。
@@ -196,21 +175,3 @@ end program main
   call get_RHS(b) !> for example
   call monolis_solve(A, b, x)
 ```
-
-<!--
-#### 解ベクトルの取得
-
-解ベクトルの取得は、`monolis_get_solution` 関数で行う。
-
-```fortran
-  type(monolis_structure) :: A !> Ax = b の係数行列
-  real(8), allocatable :: x(:)
-
-  !> 解ベクトルの取得
-  call monolis_get_solution(A, x)
-```
--->
-
-
-
-
