@@ -34,6 +34,22 @@ module mod_monolis_com
 
 contains
 
+  subroutine monolis_mpi_initialize()
+    implicit none
+    integer(kint) :: ierr
+#ifdef WITH_MPI
+    call MPI_init(ierr)
+#endif
+  end subroutine monolis_mpi_initialize
+
+  subroutine monolis_mpi_finalize()
+    implicit none
+    integer(kint) :: ierr
+#ifdef WITH_MPI
+    call MPI_finalize(ierr)
+#endif
+  end subroutine monolis_mpi_finalize
+
   subroutine monolis_com_initialize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
@@ -54,7 +70,6 @@ contains
     monoCOM%send_item => null()
 
 #ifdef WITH_MPI
-    call MPI_init(ierr)
     call MPI_comm_size(MPI_COMM_WORLD, commsize, ierr)
     call MPI_comm_rank(MPI_COMM_WORLD, myrank,   ierr)
     monoCOM%comm = MPI_COMM_WORLD
@@ -83,10 +98,6 @@ contains
     monoCOM%send_neib_pe => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
-
-#ifdef WITH_MPI
-    call MPI_finalize(ierr)
-#endif
   end subroutine monolis_com_finalize
 
   subroutine monolis_com_input_comm_table(monoCOM)
@@ -167,16 +178,15 @@ contains
     monoCOM_reorder%send_item => monoCOM%send_item
   end subroutine monolis_com_copy
 
-  subroutine monolis_com_size(size, comm)
-    implicit none
-    integer(kint) :: size, comm
-    integer(kint) :: ierr
-
-    size = 1
-#ifdef WITH_MPI
-    call MPI_comm_size(comm, size, ierr)
-#endif
-  end subroutine monolis_com_size
+!  subroutine monolis_com_size(size, comm)
+!    implicit none
+!    integer(kint) :: size, comm
+!    integer(kint) :: ierr
+!    size = 1
+!#ifdef WITH_MPI
+!    call MPI_comm_size(comm, size, ierr)
+!#endif
+!  end subroutine monolis_com_size
 
   subroutine monolis_barrier(comm)
     implicit none

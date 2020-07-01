@@ -13,6 +13,8 @@ module mod_monolis_util
 
   private
   public :: monolis_structure
+  public :: monolis_global_initialize
+  public :: monolis_global_finalize
   public :: monolis_initialize
   public :: monolis_finalize
   public :: monolis_timer_initialize
@@ -34,21 +36,24 @@ module mod_monolis_util
 
 contains
 
-  subroutine monolis_initialize(monolis, o_commsize, o_mycomm)
+  subroutine monolis_global_initialize()
+    implicit none
+    call monolis_mpi_initialize()
+  end subroutine monolis_global_initialize
+
+  subroutine monolis_global_finalize()
+    implicit none
+    call monolis_mpi_finalize()
+  end subroutine monolis_global_finalize
+
+  subroutine monolis_initialize(monolis)
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint), optional :: o_commsize, o_mycomm
 
     call monolis_prm_initialize(monolis%PRM)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
     call monolis_com_input_comm_table(monolis%COM)
-
-    myrank = monolis%COM%myrank
-    mycomm = monolis%COM%comm
-
-    if(present(o_commsize)) o_commsize = monolis%COM%commsize
-    if(present(o_mycomm)) o_mycomm = monolis%COM%myrank
   end subroutine monolis_initialize
 
   subroutine monolis_finalize(monolis)
