@@ -12,6 +12,8 @@
 
 全体初期化処理と全体終了処理は、プログラム実行中にそれぞれ 1 回しか実行できない。
 
+mod_monolis
+
 ```fortran
 program main
   use mod_monolis
@@ -50,7 +52,7 @@ program main
 end program main
 ```
 
-### monolis 構造体
+### monolis 構造体の初期化と終了処理
 
 monolis を利用するためには `monolis_structure` 構造体を定義する。
 `monolis_structure` 構造体は、行列の情報、求解パラメータ、並列計算のための通信情報を保持している。
@@ -118,7 +120,7 @@ program main
 end program main
 ```
 
-#### 要素行列への要素行列の足し込み
+### 要素行列への要素行列の足し込み
 
 要素行列への行列成分の足し込みは、`monolis_assemble_sparse_matrix` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。
@@ -137,7 +139,7 @@ end program main
   call monolis_assemble_sparse_matrix(A, nbase_func, connectivity, local_mat)
 ```
 
-#### Dirichlet 境界条件の追加
+### Dirichlet 境界条件の追加
 
 要素行列への Dirichlet 境界条件の追加は、`monolis_set_Dirichlet_bc` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。
@@ -158,7 +160,7 @@ end program main
   call monolis_set_Dirichlet_bc(A, node_id, ndof_bc, val)
 ```
 
-#### 方程式の求解
+### 方程式の求解
 
 解ベクトルの取得は、`monolis_solve` 関数で行う。
 右辺ベクトルはユーザが独自で作成し、monolis に引数として渡す。

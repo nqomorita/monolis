@@ -1,9 +1,46 @@
 module mod_monolis_sparse_util
   use mod_monolis_util
   use mod_monolis_stdlib
+  use mod_monolis_graph
   implicit none
 
 contains
+
+  subroutine monolis_get_nonzero_pattern(monolis, nnode, nbase_func, ndof, nelem, elem)
+    use iso_c_binding
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nnode, nbase_func, ndof, nelem, elem(:,:)
+    integer(kint) :: i, j, nz, jS, jE
+    integer(c_int), pointer :: index(:), item(:)
+
+    call monolis_get_mesh_to_nodal(nnode, nelem, nbase_func, elem, index, item)
+
+    monolis%MAT%n = nnode
+    monolis%MAT%ndof = ndof
+    allocate(monolis%MAT%X(ndof*nnode), source = 0.0d0)
+    allocate(monolis%MAT%B(ndof*nnode), source = 0.0d0)
+    allocate(monolis%MAT%index(0:nnode), source = 0)
+    do i = 1, nnode
+      monolis%MAT%index(i) = index(i+1) + i
+    enddo
+
+    nz = monolis%MAT%index(nnode)
+    allocate(monolis%MAT%A(ndof*ndof*nz), source = 0.0d0)
+    allocate(monolis%MAT%item(nz), source = 0)
+    do i = 1, nnode
+      jS = monolis%MAT%index(i-1) + 1
+      jE = monolis%MAT%index(i)
+      monolis%MAT%item(jS) = i
+      do j = jS+1, jE
+        monolis%MAT%item(j) = item(j-i) + 1
+      enddo
+      call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
+    enddo
+
+    nullify(index)
+    nullify(item)
+  end subroutine monolis_get_nonzero_pattern
 
   subroutine monolis_sparse_matrix_assemble(index, item, A, nnode, ndof, e1t, e2t, stiff)
     implicit none
