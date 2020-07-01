@@ -21,7 +21,21 @@ module mod_monolis_solve
 
 contains
 
-  subroutine monolis_solve(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_solve(monolis, B, X)
+    implicit none
+    type(monolis_structure) :: monolis
+    real(kdouble) :: B(:), X(:)
+    integer(kint) :: i
+
+    do i = 1, monolis%MAT%NP*monolis%MAT%NDOF
+      monolis%MAT%B(i) = B(i)
+      monolis%MAT%X(i) = X(i)
+    enddo
+
+    call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
+  end subroutine monolis_solve
+
+  subroutine monolis_solve_(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -43,7 +57,7 @@ contains
     call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
     call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
     call monolis_timer_finalize(monoPRM, monoCOM)
-  end subroutine monolis_solve
+  end subroutine monolis_solve_
 
   subroutine monolis_solve_test(monoPRM, monoCOM, monoMAT)
     implicit none
@@ -52,7 +66,7 @@ contains
     type(monolis_com) :: monoCOM_reorder
     type(monolis_mat) :: monoMAT
     type(monolis_mat) :: monoMAT_reorder
-    integer(kind=kint) :: i, j
+    integer(kint) :: i, j
 
     call monolis_check_diagonal(monoPRM, monoMAT)
     do i = 1, 9

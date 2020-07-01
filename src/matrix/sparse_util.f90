@@ -17,6 +17,7 @@ contains
     call monolis_get_mesh_to_nodal(nnode, nelem, nbase_func, elem, index, item)
 
     monolis%MAT%N = nnode
+    monolis%MAT%NP = nnode
     monolis%MAT%NDOF = ndof
     allocate(monolis%MAT%X(ndof*nnode), source = 0.0d0)
     allocate(monolis%MAT%B(ndof*nnode), source = 0.0d0)
@@ -53,13 +54,29 @@ contains
 
     mout%MAT%index => min%MAT%index
     mout%MAT%item => min%MAT%item
+    mout%MAT%indexR => min%MAT%indexR
+    mout%MAT%itemR => min%MAT%itemR
+    mout%MAT%permR => min%MAT%permR
 
     mout%MAT%n = min%MAT%n
+    mout%MAT%np = min%MAT%np
     mout%MAT%ndof = min%MAT%ndof
 
     ndof2 = min%MAT%ndof*min%MAT%ndof
     allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%n)), source = 0.0d0)
+    allocate(mout%MAT%X(min%MAT%np*min%MAT%ndof), source = 0.0d0)
+    allocate(mout%MAT%B(min%MAT%np*min%MAT%ndof), source = 0.0d0)
   end subroutine monolis_copy_mat_profile
+
+  subroutine monolis_assemble_sparse_matrix(monolis, nbase_func, connectivity, stiff)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: nbase_func, connectivity(nbase_func)
+    real(kdouble), intent(in) :: stiff(:,:)
+
+    call monolis_sparse_matrix_assemble(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & nbase_func, monolis%MAT%ndof, connectivity, connectivity, stiff)
+  end subroutine monolis_assemble_sparse_matrix
 
   subroutine monolis_sparse_matrix_assemble(index, item, A, nnode, ndof, e1t, e2t, stiff)
     implicit none
@@ -118,6 +135,18 @@ contains
     enddo
   end subroutine monolis_sparse_matrix_assemble
 
+  subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: node_id, ndof_bc
+    real(kdouble), intent(in) :: val
+    real(kdouble) :: B(:)
+
+    call monolis_sparse_matrix_add_bc(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, B, &
+      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR, &
+      & monolis%MAT%ndof, node_id, ndof_bc, val)
+  end subroutine monolis_set_Dirichlet_bc
+
   subroutine monolis_sparse_matrix_add_bc(index, item, A, B, indexR, itemR, permA, &
     & ndof, nnode, idof, val)
     implicit none
@@ -153,7 +182,7 @@ contains
       endif
     enddo
 
-    B(3*nnode-3+idof) = val
+    B(ndof*nnode-ndof+idof) = val
   end subroutine monolis_sparse_matrix_add_bc
 
   subroutine monolis_get_CRR_format(N, index, item, indexR, itemR, permA)

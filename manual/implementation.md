@@ -149,6 +149,7 @@ end program main
   type(monolis_structure) :: A !> Ax = b の係数行列
   integer(kint) :: node_id !> 節点番号
   integer(kint) :: ndof_bc !> 境界条件を与える自由度番号（[1, ndof] の値をとる）
+  real(kdouble) :: b(:) !> 右辺ベクトル
   real(kdouble) :: val !> 境界条件の設定値
 
   !> Dirichlet 境界条件の追加
@@ -157,7 +158,7 @@ end program main
   val = 0.0d0
 
   !> 節点番号 3 の第 2 自由度成分の値を 0.0 に固定
-  call monolis_set_Dirichlet_bc(A, node_id, ndof_bc, val)
+  call monolis_set_Dirichlet_bc(A, b, node_id, ndof_bc, val)
 ```
 
 ### 方程式の求解
