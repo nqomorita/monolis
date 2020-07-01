@@ -12,7 +12,7 @@
 
 全体初期化処理と全体終了処理は、プログラム実行中にそれぞれ 1 回しか実行できない。
 
-```fortran
+```Fortran
 program main
   use mod_monolis
   implicit none
@@ -29,7 +29,7 @@ end program main
 
 時間計測は `monolis_get_time` 関数を用いて行う。引数なし。戻り値は倍精度浮動小数点数型である。
 
-```fortran
+```Fortran
 program main
   use mod_monolis
   implicit none
@@ -62,7 +62,7 @@ monolis を利用するためには `monolis_structure` 構造体を定義する
 
 終了処理は `monolis_finalize` を用いて行う。引数は `monolis_structure` 構造体である。
 
-```fortran
+```Fortran
 subroutine sample
   use mod_monolis
   implicit none
@@ -86,7 +86,7 @@ end subroutine
 
 <img src="./nonzero.svg" height=300px>
 
-```fortran
+```Fortran
 program main
   use mod_monolis
   implicit none
@@ -121,8 +121,9 @@ end program main
 #### 要素行列への要素行列の足し込み
 
 要素行列への行列成分の足し込みは、`monolis_assemble_sparse_matrix` 関数で行う。
+`monolis_get_nonzero_pattern` 関数の実行後に利用できる。
 
-```fortran
+```Fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
   integer(kint) :: nbase_func !> 要素の次数（要素を構成する節点数）
   integer(kint) :: connectivity(2) !> 要素を構成する節点番号
@@ -138,8 +139,10 @@ end program main
 #### Dirichlet 境界条件の追加
 
 要素行列への Dirichlet 境界条件の追加は、`monolis_set_Dirichlet_bc` 関数で行う。
+`monolis_get_nonzero_pattern` 関数の実行後に利用できる。
+`monolis_assemble_sparse_matrix` 関数の実行後に利用するのが望ましい。
 
-```fortran
+```Fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
   integer(kint) :: node_id !> 節点番号
   integer(kint) :: ndof_bc !> 境界条件を与える自由度番号（[1, ndof] の値をとる）
@@ -159,7 +162,7 @@ end program main
 
 右辺ベクトルへのベクトル成分の足し込みは、`monolis_assemble_RHS` 関数で行う。
 
-```fortran
+```Fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
   integer(kint) :: node_id !> 節点番号
   integer(kint) :: ndof_bc !> 境界条件を与える自由度番号（[1, ndof] の値をとる）
@@ -180,7 +183,7 @@ end program main
 解ベクトルの取得は、`monolis_solve` 関数で行う。
 右辺ベクトルはユーザが独自で作成し、monolis に引数として渡す。
 
-```fortran
+```Fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
   real(kdouble), allocatable :: x(:) !> 解ベクトル
   real(kdouble), allocatable :: b(:) !> 右辺ベクトル
@@ -199,7 +202,7 @@ end program main
 
 解ベクトルの取得は、`monolis_get_solution` 関数で行う。
 
-```fortran
+```Fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
   real(8), allocatable :: x(:)
 
