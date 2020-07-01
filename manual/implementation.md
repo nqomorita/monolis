@@ -127,7 +127,8 @@ end program main
   type(monolis_structure) :: A !> Ax = b の係数行列
   integer(kint) :: nbase_func !> 要素の次数（要素を構成する節点数）
   integer(kint) :: connectivity(2) !> 要素を構成する節点番号
-  real(kdouble) :: local_mat(4,4) !> local_mat(nbase_func*ndof, nbase_func*ndof)、要素剛性行列
+  real(kdouble) :: local_mat(4,4) !> 要素剛性行列
+                                  !> local_mat(nbase_func*ndof, nbase_func*ndof)
 
   !> 疎行列への足し込み
   nbase_func = 2
