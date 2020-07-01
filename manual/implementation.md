@@ -4,6 +4,8 @@
 
 ## 既存ソルバへの組み込み
 
+monolis の関数を使う場合は、`mod_monolis` モジュールを `use` することで利用することができる。
+
 ### 初期化と終了処理
 
 全体初期化処理は `monolis_global_initialize` 関数を用いて行う。引数なし。
@@ -11,8 +13,6 @@
 全体終了処理は `monolis_global_finalize` を用いて行う。引数なし。
 
 全体初期化処理と全体終了処理は、プログラム実行中にそれぞれ 1 回しか実行できない。
-
-mod_monolis
 
 ```fortran
 program main
