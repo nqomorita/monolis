@@ -15,13 +15,13 @@ Gitlab の [SSH keys](https://gitlab.com/profile/keys) から、公開鍵を登�
 
 Gitlab から monolis リポジトリをローカルにクローンする。
 
-```
+```bash
 $ git clone git@gitlab.com:morita/monolis.git
 ```
 
 monolis ディレクトリに移動する。
 
-```
+```bash
 $ cd monolis
 ```
 
@@ -29,7 +29,7 @@ $ cd monolis
 
 monolis にはグラフ分割ライブラリ metis を用いる。metis のインストールのために、monolis ディレクトリにおいて以下のコマンドを実行する。
 
-```
+```bash
 $ ./install_lib.sh
 ```
 
@@ -39,7 +39,7 @@ $ ./install_lib.sh
 
 make する。
 
-```
+```bash
 $ make FLAGS=METIS
 ```
 
@@ -47,13 +47,13 @@ $ make FLAGS=METIS
 
 Makefile の中の以下の部分を適切に設定する。
 
-```
+```bash
 FC     = mpif90
 ```
 
 make する。
 
-```
+```bash
 $ make FLAGS=MPI,METIS
 ```
 
@@ -62,7 +62,7 @@ $ make FLAGS=MPI,METIS
 インストールが成功していれば、`monolis/bin` に `monolis_partitioner`、`monolis/lib` に `libmonolis.a` が生成されている。
 以下のコマンドで確認できる。
 
-```
+```bash
 $ ls bin
 $ ls lib
 ```
