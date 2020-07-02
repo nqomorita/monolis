@@ -24,6 +24,14 @@ contains
     enddo
   end subroutine monolis_residual
 
+  subroutine monolis_matvec_product(monolis, X, Y)
+    implicit none
+    type(monolis_structure) :: monolis
+    real(kdouble) :: X(:), Y(:)
+
+    call monolis_matvec(monolis%COM, monolis%MAT, X, Y)
+  end subroutine monolis_matvec_product
+
   subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tspmv)
     implicit none
     type(monolis_com) :: monoCOM

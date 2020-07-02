@@ -135,7 +135,7 @@ end program main
   !> 疎行列への足し込み
   nbase_func = 2
   connectivity(1) = 1; connectivity(2) = 3 !> 要素番号 1 の定義
-  call get_localmat(local_mat) !> for example
+  call get_localmat(local_mat) !> user subroutine
   call monolis_assemble_sparse_matrix(A, nbase_func, connectivity, local_mat)
 ```
 
@@ -176,6 +176,26 @@ end program main
   !> 解ベクトルの取得
   allocate(x(nnode*ndof), source = 0.0d0)
   allocate(b(nnode*ndof), source = 0.0d0)
-  call get_RHS(b) !> for example
+  call get_RHS(b) !> user subroutine
   call monolis_solve(A, b, x)
 ```
+
+### 行列ベクトル積
+
+行列ベクトル積の計算は、`monolis_matvec_product` 関数で行う。
+
+```fortran
+  type(monolis_structure) :: A !> y = Ax の係数行列
+  real(kdouble), allocatable :: x(:) !> 右辺ベクトル
+  real(kdouble), allocatable :: y(:) !> 解ベクトル
+
+  !> 行列ベクトル積
+  allocate(x(nnode*ndof), source = 0.0d0)
+  allocate(y(nnode*ndof), source = 0.0d0)
+  call get_RHS(x) !> user subroutine
+  call monolis_matvec_product(A, x, y)
+```
+
+### ベクトル内積
+
+ベクトル内積の計算は、`monolis_inner_product` 関数で行う。
