@@ -199,3 +199,16 @@ end program main
 ### ベクトル内積
 
 ベクトル内積の計算は、`monolis_inner_product` 関数で行う。
+
+
+### 行列値の初期化
+
+疎行列パターンを保持したまま行列の値を 0 初期化する場合は、`monolis_clear_mat_value` 関数で行う。
+この関数では、行列、右辺ベクトル、解ベクトルを全て 0 に初期化する。
+
+```fortran
+  type(monolis_structure) :: A !> y = Ax の係数行列
+
+  !> 行列値の初期化
+  call monolis_clear_mat_value(A)
+```
