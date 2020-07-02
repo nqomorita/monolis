@@ -46,28 +46,6 @@ contains
     nullify(item)
   end subroutine monolis_get_nonzero_pattern
 
-  subroutine monolis_copy_mat_profile(min, mout)
-    implicit none
-    type(monolis_structure) :: min
-    type(monolis_structure) :: mout
-    integer(kint) :: ndof2
-
-    mout%MAT%index => min%MAT%index
-    mout%MAT%item => min%MAT%item
-    mout%MAT%indexR => min%MAT%indexR
-    mout%MAT%itemR => min%MAT%itemR
-    mout%MAT%permR => min%MAT%permR
-
-    mout%MAT%n = min%MAT%n
-    mout%MAT%np = min%MAT%np
-    mout%MAT%ndof = min%MAT%ndof
-
-    ndof2 = min%MAT%ndof*min%MAT%ndof
-    allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%n)), source = 0.0d0)
-    allocate(mout%MAT%X(min%MAT%np*min%MAT%ndof), source = 0.0d0)
-    allocate(mout%MAT%B(min%MAT%np*min%MAT%ndof), source = 0.0d0)
-  end subroutine monolis_copy_mat_profile
-
   subroutine monolis_assemble_sparse_matrix(monolis, nbase_func, connectivity, stiff)
     implicit none
     type(monolis_structure) :: monolis

@@ -33,6 +33,10 @@ contains
     enddo
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
+
+    do i = 1, monolis%MAT%NP*monolis%MAT%NDOF
+      X(i) = monolis%MAT%X(i)
+    enddo
   end subroutine monolis_solve
 
   subroutine monolis_solve_(monoPRM, monoCOM, monoMAT)
