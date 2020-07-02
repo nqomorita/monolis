@@ -56,6 +56,16 @@ contains
       & nbase_func, monolis%MAT%ndof, connectivity, connectivity, stiff)
   end subroutine monolis_assemble_sparse_matrix
 
+  subroutine monolis_assemble_sparse_matrix_offdiag(monolis, nbase_func, c1, c2, stiff)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: nbase_func, c1(nbase_func), c2(nbase_func)
+    real(kdouble), intent(in) :: stiff(:,:)
+
+    call monolis_sparse_matrix_assemble(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & nbase_func, monolis%MAT%ndof, c1, c2, stiff)
+  end subroutine monolis_assemble_sparse_matrix_offdiag
+
   subroutine monolis_sparse_matrix_assemble(index, item, A, nnode, ndof, e1t, e2t, stiff)
     implicit none
     integer(kint), intent(in) :: nnode, ndof

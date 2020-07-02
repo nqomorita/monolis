@@ -178,15 +178,23 @@ contains
     monoCOM_reorder%send_item => monoCOM%send_item
   end subroutine monolis_com_copy
 
-!  subroutine monolis_com_size(size, comm)
-!    implicit none
-!    integer(kint) :: size, comm
-!    integer(kint) :: ierr
-!    size = 1
-!#ifdef WITH_MPI
-!    call MPI_comm_size(comm, size, ierr)
-!#endif
-!  end subroutine monolis_com_size
+  function monolis_global_commsize()
+    implicit none
+    integer(kint) :: monolis_global_commsize, ierr
+
+#ifdef WITH_MPI
+    call MPI_comm_size(MPI_COMM_WORLD, monolis_global_commsize, ierr)
+#endif
+  end function monolis_global_commsize
+
+  function monolis_global_myrank()
+    implicit none
+    integer(kint) :: monolis_global_myrank, ierr
+
+#ifdef WITH_MPI
+    call MPI_comm_rank(MPI_COMM_WORLD, monolis_global_myrank, ierr)
+#endif
+  end function monolis_global_myrank
 
   subroutine monolis_barrier(comm)
     implicit none
