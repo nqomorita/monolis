@@ -172,6 +172,91 @@ contains
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
+  !> set parameter section
+  subroutine monolis_param_set_method(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: param
+    monolis%PRM%method = param
+  end subroutine monolis_param_set_method
+
+  subroutine monolis_param_set_precond(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: param
+    monolis%PRM%precond = param
+  end subroutine monolis_param_set_precond
+
+  subroutine monolis_param_set_maxiter(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: param
+    monolis%PRM%maxiter = param
+  end subroutine monolis_param_set_maxiter
+
+  subroutine monolis_param_set_is_scaling(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_scaling = param
+  end subroutine monolis_param_set_is_scaling
+
+  subroutine monolis_param_set_is_reordering(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_reordering = param
+  end subroutine monolis_param_set_is_reordering
+
+  subroutine monolis_param_set_is_init_x(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_init_x = param
+  end subroutine monolis_param_set_is_init_x
+
+  subroutine monolis_param_set_is_sym_matrix(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_sym_matrix = param
+  end subroutine monolis_param_set_is_sym_matrix
+
+  subroutine monolis_param_set_is_debug(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_debug = param
+  end subroutine monolis_param_set_is_debug
+
+  subroutine monolis_param_set_is_check_diag(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_check_diag = param
+  end subroutine monolis_param_set_is_check_diag
+
+  subroutine monolis_param_set_show_iterlog(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%show_iterlog = param
+  end subroutine monolis_param_set_show_iterlog
+
+  subroutine monolis_param_set_show_time(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%show_time = param
+  end subroutine monolis_param_set_show_time
+
+  subroutine monolis_param_set_show_summary(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%show_summary = param
+  end subroutine monolis_param_set_show_summary
+
   !> debug section
   subroutine monolis_set_debug(flag)
     implicit none
