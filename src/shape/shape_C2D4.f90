@@ -68,6 +68,17 @@ contains
     pos = matmul(node, func)
   end subroutine monolis_C2D4_get_global_position
 
+  subroutine monolis_C2D4_get_global_deriv(node, r, dndx, det)
+    implicit none
+    real(kdouble) :: node(2,4), r(2), dndx(4,2), deriv(4,2)
+    real(kdouble) :: xj(2,2), inv(2,2), det
+
+    call monolis_C2D4_shapefunc_deriv(r, deriv)
+    xj = matmul(node, deriv)
+    call monolis_get_inverse_matrix_2d(xj, inv, det)
+    dndx = matmul(deriv, inv)
+  end subroutine monolis_C2D4_get_global_deriv
+
   subroutine monolis_C2D4_shapefunc(local, func)
     implicit none
     real(kdouble) :: local(2), func(4)
