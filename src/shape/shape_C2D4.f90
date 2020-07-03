@@ -25,6 +25,7 @@ module mod_monolis_c2d4_shape
     public :: monolis_C2D4_shapefunc
     public :: monolis_C2D4_shapefunc_deriv
     public :: monolis_C2D4_get_global_position
+    public :: monolis_C2D4_get_global_deriv
 
 contains
 
