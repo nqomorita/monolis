@@ -1,5 +1,6 @@
 module mod_monolis_matrix_copy
   use mod_monolis_mat
+  use mod_monolis_com
   use mod_monolis_util
   use mod_monolis_stdlib
   implicit none
@@ -31,7 +32,7 @@ contains
     type(monolis_structure) :: mout
     integer(kint) :: ndof2
 
-    call monolis_com_copy(min, mout)
+    call monolis_com_copy(min%COM, mout%COM)
 
     mout%MAT%index => min%MAT%index
     mout%MAT%item => min%MAT%item
