@@ -11,51 +11,40 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: nnode, nbase_func, ndof, nelem, elem(:,:)
-    integer(kint) :: i, j, nz, jS, jE
     integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
 
     call monolis_convert_mesh_to_connectivity &
-     & (nelem, nbase_func, elem, ebase_func, connectivity)
+      & (nelem, nbase_func, elem, ebase_func, connectivity)
 
     call monolis_convert_connectivity_to_nodal &
-     & (nnode, nelem, ebase_func, connectivity, index, item)
+      & (nnode, nelem, ebase_func, connectivity, index, item)
 
-    monolis%MAT%N = nnode
-    monolis%MAT%NP = nnode
-    monolis%MAT%NDOF = ndof
-    allocate(monolis%MAT%X(ndof*nnode), source = 0.0d0)
-    allocate(monolis%MAT%B(ndof*nnode), source = 0.0d0)
-    allocate(monolis%MAT%index(0:nnode), source = 0)
-    do i = 1, nnode
-      monolis%MAT%index(i) = index(i+1) + i
-    enddo
-
-    nz = monolis%MAT%index(nnode)
-    allocate(monolis%MAT%A(ndof*ndof*nz), source = 0.0d0)
-    allocate(monolis%MAT%item(nz), source = 0)
-    do i = 1, nnode
-      jS = monolis%MAT%index(i-1) + 1
-      jE = monolis%MAT%index(i)
-      monolis%MAT%item(jS) = i
-      do j = jS+1, jE
-        monolis%MAT%item(j) = item(j-i) + 1
-      enddo
-      call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
-    enddo
-
-    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%index, monolis%MAT%item, &
-      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
-
-    nullify(index)
-    nullify(item)
+     call monolis_get_nonzero_pattern_by_nodal &
+       & (monolis, nnode, ndof, index, item)
   end subroutine monolis_get_nonzero_pattern
 
-  subroutine monolis_get_nonzero_pattern_by_graph(monolis, nnode, nbase_func, ndof, index, item)
+  subroutine monolis_get_nonzero_pattern_by_connectivity &
+      & (monolis, nnode, ndof, nelem, ebase_func, connectivity)
     use iso_c_binding
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint) :: nnode, nbase_func, ndof
+    integer(kint) :: nnode, ndof, nelem
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
+    integer(c_int), pointer :: index(:), item(:)
+
+    call monolis_convert_connectivity_to_nodal &
+      & (nnode, nelem, ebase_func, connectivity, index, item)
+
+     call monolis_get_nonzero_pattern_by_nodal &
+      & (monolis, nnode, ndof, index, item)
+  end subroutine monolis_get_nonzero_pattern_by_connectivity
+
+  subroutine monolis_get_nonzero_pattern_by_nodal(monolis, nnode, ndof, index, item)
+    use iso_c_binding
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nnode, ndof
     integer(kint) :: i, j, nz, jS, jE
     integer(c_int), pointer :: index(:), item(:)
 
@@ -87,7 +76,7 @@ contains
 
     nullify(index)
     nullify(item)
-  end subroutine monolis_get_nonzero_pattern_by_graph
+  end subroutine monolis_get_nonzero_pattern_by_nodal
 
   subroutine monolis_assemble_sparse_matrix(monolis, nbase_func, connectivity, stiff)
     implicit none
