@@ -31,6 +31,8 @@ contains
     type(monolis_structure) :: mout
     integer(kint) :: ndof2
 
+    call monolis_com_copy(min, mout)
+
     mout%MAT%index => min%MAT%index
     mout%MAT%item => min%MAT%item
     mout%MAT%indexR => min%MAT%indexR

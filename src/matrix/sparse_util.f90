@@ -78,6 +78,12 @@ contains
     nullify(item)
   end subroutine monolis_get_nonzero_pattern_by_nodal
 
+  !subroutine monolis_add_connectivity_array(nelem, nbase_func, elem, ebase_func, connectivity)
+  !  implicit none
+  !  integer(kint) :: nelem, nbase_func, elem(:,:)
+  !  integer(kint), pointer :: ebase_func(:), connectivity(:)
+  !end subroutine monolis_add_connectivity_array
+
   subroutine monolis_assemble_sparse_matrix(monolis, nbase_func, connectivity, stiff)
     implicit none
     type(monolis_structure) :: monolis
