@@ -13,6 +13,7 @@ contains
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     integer(kint), pointer :: part_id(:)
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
     integer(kint) :: i, n_domain
 
@@ -23,7 +24,11 @@ contains
 
     if(n_domain == 1) return
 
-    call monolis_get_mesh_to_nodal(mesh%nnode, mesh%nelem, mesh%nbase_func, mesh%elem, index, item)
+    call monolis_convert_mesh_to_connectivity &
+     & (mesh%nelem, mesh%nbase_func, mesh%elem, ebase_func, connectivity)
+
+    call monolis_convert_connectivity_to_nodal &
+     & (mesh%nnode, mesh%nelem, ebase_func, connectivity, index, item)
 
     call monolis_get_mesh_part_kway(mesh%nnode, index, item, n_domain, part_id)
 
@@ -34,41 +39,49 @@ contains
     deallocate(part_id)
   end subroutine monolis_part_graph
 
-  subroutine monolis_get_mesh_to_nodal(nnode, nelem, nbase, elem, index, item)
+  subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
     use iso_c_binding
     implicit none
-    integer(kint) :: i, j, nnode, nbase, nind, numflag
+    integer(kint) :: i, j, nnode, numflag, nb
     integer(kint) :: nelem, elem(:,:)
-    integer(kint), pointer :: eptr(:) => null()
-    integer(kint), pointer :: eind(:) => null()
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
+
+    allocate(ebase_func(nelem+1), source = 0)
+    allocate(connectivity(nelem*nb), source = 0)
+
+    do i = 1, nelem
+      ebase_func(i+1) = i*nb
+    enddo
+
+    do i = 1, nelem
+      do j = 1, nb
+        connectivity(nb*(i-1) + j) = elem(j,i) - 1
+      enddo
+    enddo
+  end subroutine monolis_convert_mesh_to_connectivity
+
+  subroutine monolis_convert_connectivity_to_nodal &
+    & (nnode, nelem, ebase_func, connectivity, index, item)
+    use iso_c_binding
+    implicit none
+    integer(kint) :: i, j, nnode, numflag
+    integer(kint) :: nelem
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
     type(c_ptr) :: xadj, adjncy
 
-    call monolis_debug_header("monolis_get_mesh_to_nodal")
+    call monolis_debug_header("monolis_convert_connectivity_to_nodal")
 
-    nind = nelem*nbase
     numflag = 0
-    allocate(eptr(nelem+1), source = 0)
-    allocate(eind(nind), source = 0)
-
-    do i = 1, nelem
-      eptr(i+1) = i*nbase
-    enddo
-
-    do i = 1, nelem
-      do j = 1, nbase
-        eind(nbase*(i-1) + j) = elem(j,i) - 1
-      enddo
-    enddo
 
 #ifdef WITH_METIS
-    call METIS_MESHTONODAL(nelem, nnode, eptr, eind, numflag, xadj, adjncy)
+    call METIS_MESHTONODAL(nelem, nnode, ebase_func, connectivity, numflag, xadj, adjncy)
     call c_f_pointer(xadj, index, shape=[nnode+1])
     call c_f_pointer(adjncy, item, shape=[index(nnode+1)])
 #else
-    call monolis_warning_header("monolis_get_mesh_to_nodal: METIS is NOT enabled")
+    call monolis_warning_header("monolis_convert_connectivity_to_nodal: METIS is NOT enabled")
 #endif
-  end subroutine monolis_get_mesh_to_nodal
+  end subroutine monolis_convert_connectivity_to_nodal
 
   subroutine monolis_get_mesh_part_kway(nnode, index, item, npart, part_id)
     use iso_c_binding

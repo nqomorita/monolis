@@ -12,9 +12,14 @@ contains
     type(monolis_structure) :: monolis
     integer(kint) :: nnode, nbase_func, ndof, nelem, elem(:,:)
     integer(kint) :: i, j, nz, jS, jE
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
 
-    call monolis_get_mesh_to_nodal(nnode, nelem, nbase_func, elem, index, item)
+    call monolis_convert_mesh_to_connectivity &
+     & (nelem, nbase_func, elem, ebase_func, connectivity)
+
+    call monolis_convert_connectivity_to_nodal &
+     & (nnode, nelem, ebase_func, connectivity, index, item)
 
     monolis%MAT%N = nnode
     monolis%MAT%NP = nnode
