@@ -59,29 +59,35 @@ contains
     mat%MAT%B = 0.0d0
   end subroutine monolis_clear_mat_value
 
-!  subroutine monolis_mat_copy_all(min, mout)
-!    implicit none
-!    type(monolis_mat) :: min
-!    type(monolis_mat) :: mout
-!    integer(kint) :: i, NZ
-!
-!    mout%N = min%N
-!    mout%NP = min%NP
-!    mout%NZ = min%NZ
-!    mout%NDOF = min%NDOF
-!
-!    NZ = min%index(min%NP)
-!    allocate(mout%index(0:min%NP))
-!    allocate(mout%item(NZ))
-!    allocate(mout%A(min%NDOF*min%NDOF*NZ))
-!    allocate(mout%X(min%NDOF*min%NP))
-!    allocate(mout%B(min%NDOF*min%NP))
-!
-!    mout%index(0:min%NP) = min%index(0:min%NP)
-!    mout%item = min%item
-!    mout%A = min%A
-!    mout%X = min%X
-!    mout%B = min%B
-!  end subroutine monolis_mat_copy_all
+  subroutine monolis_copy_mat_all(min, mout)
+    implicit none
+    type(monolis_mat) :: min
+    type(monolis_mat) :: mout
+    integer(kint) :: i, NZ
+
+    mout%N = min%N
+    mout%NP = min%NP
+    mout%NZ = min%NZ
+    mout%NDOF = min%NDOF
+
+    NZ = min%index(min%NP)
+    allocate(mout%index(0:min%NP))
+    allocate(mout%item(NZ))
+    allocate(mout%indexR(0:min%NP))
+    allocate(mout%itemR(NZ))
+    allocate(mout%permR(NZ))
+    allocate(mout%A(min%NDOF*min%NDOF*NZ))
+    allocate(mout%X(min%NDOF*min%NP))
+    allocate(mout%B(min%NDOF*min%NP))
+
+    mout%index(0:min%NP) = min%index(0:min%NP)
+    mout%item = min%item
+    mout%indexR(0:min%NP) = min%indexR(0:min%NP)
+    mout%itemR = min%itemR
+    mout%permR = min%permR
+    mout%A = min%A
+    mout%X = min%X
+    mout%B = min%B
+  end subroutine monolis_copy_mat_all
 
 end module mod_monolis_matrix_copy

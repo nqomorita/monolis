@@ -1,7 +1,7 @@
 #> monolis Makefile
 
 FC     = mpif90
-FFLAGS = -O3 -mtune=native -march=native -mfpmath=both
+FFLAGS = -O3 -mtune=native -march=native -mfpmath=both -fallow-argument-mismatch 
 
 #CC     = mpicc
 #CFLAGS =
