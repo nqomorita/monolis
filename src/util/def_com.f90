@@ -178,6 +178,15 @@ contains
     monoCOM_reorder%send_item => monoCOM%send_item
   end subroutine monolis_com_copy
 
+  function monolis_global_comm()
+    implicit none
+    integer(kint) :: monolis_global_comm
+
+#ifdef WITH_MPI
+    monolis_global_comm = MPI_COMM_WORLD
+#endif
+  end function monolis_global_comm
+
   function monolis_global_commsize()
     implicit none
     integer(kint) :: monolis_global_commsize, ierr
