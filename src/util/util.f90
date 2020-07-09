@@ -39,6 +39,8 @@ contains
   subroutine monolis_global_initialize()
     implicit none
     call monolis_mpi_initialize()
+    myrank = monolis_global_myrank()
+    mycomm = monolis_global_comm()
   end subroutine monolis_global_initialize
 
   subroutine monolis_global_finalize()

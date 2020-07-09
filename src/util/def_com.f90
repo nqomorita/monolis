@@ -184,6 +184,8 @@ contains
 
 #ifdef WITH_MPI
     monolis_global_comm = MPI_COMM_WORLD
+#else
+    monolis_global_comm = 0
 #endif
   end function monolis_global_comm
 
@@ -193,6 +195,8 @@ contains
 
 #ifdef WITH_MPI
     call MPI_comm_size(MPI_COMM_WORLD, monolis_global_commsize, ierr)
+#else
+    monolis_global_commsize = 1
 #endif
   end function monolis_global_commsize
 
@@ -202,6 +206,8 @@ contains
 
 #ifdef WITH_MPI
     call MPI_comm_rank(MPI_COMM_WORLD, monolis_global_myrank, ierr)
+#else
+    monolis_global_myrank = 0
 #endif
   end function monolis_global_myrank
 
