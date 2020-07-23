@@ -2,7 +2,9 @@
 
 FC     = mpif90
 FFLAGS = -O3 -mtune=native -march=native -mfpmath=both -std=legacy
-# -fallow-argument-mismatch 
+
+CC     = gcc
+# -fallow-argument-mismatch
 
 #CC     = mpicc
 #CFLAGS =
@@ -77,22 +79,27 @@ SRC_LIST_DIRECT = LU.f90
 SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
 SRC_LIST_MAIN   = monolis_solve.f90 monolis.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
-#SRC_LIST_WRAP  =
+SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
-SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_PART_LIST   = partitioner/partitioner.f90 $(SRC_ALL_LIST)
 SRC_TEST_LIST   = util/test.f90 $(SRC_ALL_LIST)
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
-OBJS = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
+OBJS1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
+OBJS = $(OBJS1:.c=.o)
 
 SOURCES_PART = $(addprefix $(SRC_DIR)/, $(SRC_PART_LIST))
+OBJS_PART1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
+OBJS_PART = $(OBJS_PART1:.c=.o)
+
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST_LIST))
-OBJS_PART = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
-OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
+OBJS_TEST1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
+OBJS_TEST = $(OBJS_TEST1:.c=.o)
 
 all: $(LIBTARGET) $(PARTTARGET) $(TESTTARGET)
+
 #	$(CD) sample && $(MAKE)
 
 $(LIBTARGET): $(OBJS)
@@ -106,6 +113,9 @@ $(TESTTARGET): $(OBJS_TEST)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(INCLUDE) -o $@ -c $<
 
 clean:
 	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(TESTTARGET) ./include/*.mod

@@ -18,4 +18,5 @@ module mod_monolis
   use mod_monolis_shape_util
   use mod_monolis_geom
   use mod_monolis_neighbor_search
+  use mod_monolis_wrapper
 end module mod_monolis
