@@ -1,4 +1,5 @@
 module mod_monolis_wrapper
+  use iso_c_binding
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
@@ -19,10 +20,132 @@ contains
     call monolis_global_finalize()
   end subroutine monolis_global_finalize_c
 
-  !> mat
+  subroutine monolis_initialize_c( &
+      prm_method, prm_precond, prm_curiter, prm_maxiter, prm_ierr, &
+      prm_tol, prm_curresid, &
+      !prm_is_scaling, prm_is_reordering, prm_is_init_x, prm_is_debug, &
+      !prm_show_iterlog, prm_show_time, prm_show_summary
+      N, NP, NZ, NDOF, &
+      myrank, comm, commsize, recv_n_neib, send_n_neib) &
+      bind(c, name = "monolis_initialize_c_main")
+    implicit none
+    type(monolis_structure) :: monolis
+    !> prm
+    integer(c_int), value :: prm_method
+    integer(c_int), value :: prm_precond
+    integer(c_int), value :: prm_curiter
+    integer(c_int), value :: prm_maxiter
+    integer(c_int), value :: prm_ierr
+    real(c_double), value :: prm_tol
+    real(c_double), value :: prm_curresid
+    logical :: prm_is_scaling
+    logical :: prm_is_reordering
+    logical :: prm_is_init_x
+    logical :: prm_is_debug
+    logical :: prm_show_iterlog
+    logical :: prm_show_time
+    logical :: prm_show_summary
+    !> mat
+    integer(c_int), value :: N
+    integer(c_int), value :: NP
+    integer(c_int), value :: NZ
+    integer(c_int), value :: NDOF
+    !> comm
+    integer(c_int), value :: myrank
+    integer(c_int), value :: comm
+    integer(c_int), value :: commsize
+    integer(c_int), value :: recv_n_neib
+    integer(c_int), value :: send_n_neib
 
+    call monolis_initialize(monolis)
+
+    !> prm
+    prm_method = monolis%PRM%method
+    prm_precond = monolis%PRM%precond
+    prm_curiter = monolis%PRM%curiter
+    prm_maxiter = monolis%PRM%maxiter
+    prm_ierr = monolis%PRM%ierr
+    prm_tol = monolis%PRM%tol
+    prm_curresid = monolis%PRM%curresid
+    !prm_is_scaling = monolis%PRM%is_scaling
+    !prm_is_reordering = monolis%PRM%is_reordering
+    !prm_is_init_x = monolis%PRM%is_init_x
+    !prm_is_debug = monolis%PRM%is_debug
+    !prm_show_iterlog = monolis%PRM%show_iterlog
+    !prm_show_time = monolis%PRM%show_time
+    !prm_show_summary = monolis%PRM%show_summary
+
+    !> mat
+    N = monolis%MAT%N
+    NP = monolis%MAT%NP
+    NZ = monolis%MAT%NZ
+    NDOF = monolis%MAT%NDOF
+
+    !> comm
+    myrank = monolis%COM%myrank
+    comm = monolis%COM%comm
+    commsize = monolis%COM%commsize
+    recv_n_neib = monolis%COM%recv_n_neib
+    send_n_neib = monolis%COM%send_n_neib
+  end subroutine monolis_initialize_c
+
+  subroutine monolis_finalize_c() &
+    & bind(c, name = "monolis_finalize_c_main")
+    implicit none
+    type(monolis_structure) :: monolis
+
+  end subroutine monolis_finalize_c
+
+  !> mat
+  subroutine monolis_get_nonzero_pattern_c( &
+      nnode_c, nbase_func_c, ndof_c, nelem_c, &
+      elem_c, index_c, item_c, A_c, B_c, X_c) &
+      bind(c, name = "monolis_get_nonzero_pattern_c_main")
+    use mod_monolis_sparse_util
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(c_int), value :: nnode_c, nbase_func_c, ndof_c, nelem_c
+    !integer(kint) :: nnode, nbase_func, ndof, nelem
+    !integer(kint) :: test(4,4)
+    type(c_ptr) :: elem_c
+    type(c_ptr) :: index_c, item_c
+    type(c_ptr) :: A_c, B_c, X_c
+    integer(c_int), pointer :: elem(:,:)
+    integer(c_int), pointer :: index(:), item(:)
+    real(c_double), pointer :: A(:), B(:), X(:)
+
+    !write(*,*)nnode_c, nbase_func_c, ndof_c, nelem_c
+    !call c_f_pointer(elem_c, elem, [nbase_func_c,nnode_c])
+    !write(*,*)elem
+
+    !call monolis_get_nonzero_pattern(monolis, nnode_c, nbase_func_c, ndof_c, nelem_c, test)
+  end subroutine monolis_get_nonzero_pattern_c
+
+  subroutine monolis_add_sparse_matrix_c() &
+    & bind(c, name = "monolis_add_sparse_matrix_c_main")
+    implicit none
+    type(monolis_structure) :: monolis
+
+
+  end subroutine monolis_add_sparse_matrix_c
+
+  subroutine monolis_set_Dirichlet_bc_c() &
+    & bind(c, name = "monolis_set_Dirichlet_bc_c_main")
+    implicit none
+    type(monolis_structure) :: monolis
+
+
+  end subroutine monolis_set_Dirichlet_bc_c
 
   !> solve
+  subroutine monolis_solve_c() &
+    & bind(c, name = "monolis_solve_c_main")
+    implicit none
+    type(monolis_structure) :: monolis
+
+
+  end subroutine monolis_solve_c
+
 !  subroutine monolis_c(monoCOM_c, N, NP, NZ, NDOF, A, X, B, index, item, &
 !    & method, precond, maxiter, tol, &
 !    & is_scaling, is_reordering, is_init_x, show_iterlog, show_time, show_summary) &

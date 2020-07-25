@@ -104,7 +104,7 @@ void monolis_set_Dirichlet_bc(
   double*  b,
   int      node_id,
   int      ndof_bc,
-  double*  val);
+  double   val);
 
 void monolis_solve(
   MONOLIS* mat,
