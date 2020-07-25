@@ -3,11 +3,8 @@
 FC     = mpif90
 FFLAGS = -O3 -mtune=native -march=native -mfpmath=both -std=legacy
 
-CC     = gcc
-# -fallow-argument-mismatch
-
-#CC     = mpicc
-#CFLAGS =
+CC     = mpicc
+CFLAGS = 
 
 ifdef FLAGS
 	comma:= ,
@@ -17,7 +14,7 @@ ifdef FLAGS
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
 		#FLAG_DEBUG = -DDEBUG
-		FFLAGS = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+		FFLAGS = -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 	endif
 
 	ifeq ($(findstring TEST, $(DFLAGS)), TEST)
