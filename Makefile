@@ -4,7 +4,7 @@ FC     = mpif90
 FFLAGS = -O3 -mtune=native -march=native -mfpmath=both -std=legacy
 
 CC     = mpicc
-CFLAGS = 
+CFLAGS =
 
 ifdef FLAGS
 	comma:= ,
@@ -112,7 +112,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(INCLUDE) -o $@ -c $<
+	$(CC) $(INCLUDE) $(FLAG_METIS) -o $@ -c $<
 
 clean:
 	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(TESTTARGET) ./include/*.mod

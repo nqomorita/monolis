@@ -111,6 +111,11 @@ void monolis_solve(
   double*  b,
   double*  x);
 
+void monolis_qsort_int(
+  int* array,
+  int  iS,
+  int  iE);
+
 #ifdef __cplusplus
 }
 #endif

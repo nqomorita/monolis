@@ -4,6 +4,7 @@ module mod_monolis_wrapper
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_util
+  use mod_monolis_stdlib
   implicit none
 
 contains
@@ -46,6 +47,18 @@ contains
 
 
   end subroutine monolis_solve_c
+
+  !> std lib
+  subroutine monolis_qsort_int_c(array, iS, iE) &
+    & bind(c, name = "monolis_qsort_int")
+    implicit none
+    integer(c_int), target :: array(1:iE-iS+1)
+    integer(c_int), value :: iS, iE
+
+    iS = iS
+    iE = iE
+    call monolis_qsort_int(array, iS, iE)
+  end subroutine monolis_qsort_int_c
 
 !  subroutine monolis_c(monoCOM_c, N, NP, NZ, NDOF, A, X, B, index, item, &
 !    & method, precond, maxiter, tol, &

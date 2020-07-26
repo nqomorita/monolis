@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "monolis.h"
+#include "metis.h"
 
 /* header */
 void monolis_add_sparse_matrix_c_main();
@@ -71,14 +72,9 @@ void monolis_convert_mesh_to_connectivity(
   int      nelem,
   int      nbase_func,
   int**    elem,
-  int*     conn_index,
-  int*     con)
+  idx_t*  conn_index,
+  idx_t*  con)
 {
-  //printf("%d %d \n", nelem, nbase_func);
-
-  conn_index = (int* )calloc(nelem+1, sizeof(int));
-  con = (int* )calloc(nelem*nbase_func, sizeof(int));
-
   for(int i=0; i<nelem+1; i++) {
     conn_index[i] = i*nbase_func;
   }
@@ -93,13 +89,14 @@ void monolis_convert_mesh_to_connectivity(
 void monolis_convert_connectivity_to_nodal(
   int      nnode,
   int      nelem,
-  int*     conn_index,
-  int*     con,
-  int*     index,
-  int*     item)
+  idx_t*   conn_index,
+  idx_t*   con,
+  idx_t** index,
+  idx_t** item)
 {
 #ifdef WITH_METIS
-    METIS_MESHTONODAL(nelem, nnode, conn_index, con, 0, index, item);
+  idx_t numflag = 0;
+  int ierr = METIS_MeshToNodal(&nelem, &nnode, conn_index, con, &numflag, index, item);
 #else
 
 #endif
@@ -115,27 +112,26 @@ void monolis_get_nonzero_pattern_by_nodal(
   mat->mat.N = nnode;
   mat->mat.NP = nnode;
   mat->mat.NDOF = ndof;
-  mat->mat.X = (double* )calloc(ndof*nnode, sizeof(double));
-  mat->mat.B = (double* )calloc(ndof*nnode, sizeof(double));
+  mat->mat.X = (double*)calloc(ndof*nnode, sizeof(double));
+  mat->mat.B = (double*)calloc(ndof*nnode, sizeof(double));
 
   mat->mat.index = (int* )calloc(nnode+1, sizeof(int));
-  for(int i=0; i<nnode+1; i++) {
-    //mat->mat.index[i] = index[i] + i;
+  for(int i=1; i<nnode+1; i++) {
+    mat->mat.index[i] = index[i] + i;
   }
 
-  //int nz = mat->mat.index[nnode];
-  int nz = 1;
-  mat->mat.A = (double* )calloc(ndof*ndof*nz, sizeof(double));
-  mat->mat.item = (int* )calloc(nz, sizeof(int));
+  int nz = mat->mat.index[nnode];
+  mat->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
+  mat->mat.item = (int*)calloc(nz, sizeof(int));
 
   for(int i=0; i<nnode; i++) {
-    //int jS = mat->mat.index[i];
-    //int jE = mat->mat.index[i+1];
-    //mat->mat.item[jS] = i;
-    //for(int j=jS; j<jE; j++){
-      //mat->mat.item[jS] = item[j] + 1;
-    //}
-    // monolis_qsort_int();
+    int jS = mat->mat.index[i];
+    int jE = mat->mat.index[i+1];
+    mat->mat.item[jS] = i+1;
+    for(int j=jS+1; j<jE+1; j++){
+      mat->mat.item[j] = item[j-i-1] + 1;
+    }
+    monolis_qsort_int(&(mat->mat.item[jS]), 1, jE-jS);
   }
 
   //monolis_get_CRR_format();
@@ -149,10 +145,13 @@ void monolis_get_nonzero_pattern(
   int      nelem,
   int**    elem)
 {
-  int* conn_index;
-  int* con;
-  int* index;
-  int* item;
+  idx_t* conn_index;
+  idx_t* con;
+  idx_t* index;
+  idx_t* item;
+
+  conn_index = (idx_t*)calloc(nelem+1, sizeof(idx_t));
+  con = (idx_t*)calloc(nelem*nbase_func, sizeof(idx_t));
 
   monolis_convert_mesh_to_connectivity(
     nelem,
@@ -166,8 +165,8 @@ void monolis_get_nonzero_pattern(
     nelem,
     conn_index,
     con,
-    index,
-    item);
+    &index,
+    &item);
 
   monolis_get_nonzero_pattern_by_nodal(
     mat,
@@ -176,8 +175,8 @@ void monolis_get_nonzero_pattern(
     index,
     item);
 
-  //free(conn_index);
-  //free(con);
+  free(conn_index);
+  free(con);
   //free(index);
   //free(item);
 }
