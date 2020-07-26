@@ -85,6 +85,15 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat);
 
+void monolis_get_CRR_format(
+  int      nnode,
+  int      nz,
+  int*     index,
+  int*     item,
+  int*     indexR,
+  int*     itemR,
+  int*     permR);
+
 void monolis_get_nonzero_pattern(
   MONOLIS* mat,
   int      nnode,

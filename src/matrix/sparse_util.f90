@@ -71,7 +71,11 @@ contains
       call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
     enddo
 
-    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%index, monolis%MAT%item, &
+    allocate(monolis%MAT%indexR(0:nnode), source = 0)
+    allocate(monolis%MAT%itemR(nz), source = 0)
+    allocate(monolis%MAT%permR(nz), source = 0)
+
+    call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
 
     nullify(index)
@@ -211,11 +215,11 @@ contains
     B(ndof*nnode-ndof+idof) = val
   end subroutine monolis_sparse_matrix_add_bc
 
-  subroutine monolis_get_CRR_format(N, index, item, indexR, itemR, permA)
+  subroutine monolis_get_CRR_format(N, NZ, index, item, indexR, itemR, permR)
     implicit none
-    integer(kint), intent(in) :: N, index(0:), item(:)
-    integer(kint), pointer :: indexR(:), itemR(:), temp(:), permA(:)
-    integer(kint) :: i, j, in, jS, jE, nz, m, p
+    integer(kint), intent(in) :: N, NZ, index(0:), item(:)
+    integer(kint), pointer :: indexR(:), itemR(:), temp(:), permR(:)
+    integer(kint) :: i, j, in, jS, jE, m, p
 
     allocate(temp(N), source = 0)
     do i = 1, N
@@ -226,11 +230,6 @@ contains
         temp(in) = temp(in) + 1
       enddo
     enddo
-
-    nz = index(N)
-    allocate(indexR(0:N), source = 0)
-    allocate(itemR(nz), source = 0)
-    allocate(permA(nz), source = 0)
 
     do i = 1, N
       indexR(i) = indexR(i-1) + temp(i)
@@ -246,7 +245,7 @@ contains
         temp(in) = temp(in) + 1
         p = temp(in)
         itemR(m + p) = i
-        permA(m + p) = j
+        permR(m + p) = j
       enddo
     enddo
 

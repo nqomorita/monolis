@@ -4,6 +4,7 @@ module mod_monolis_wrapper
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_util
+  use mod_monolis_sparse_util
   use mod_monolis_stdlib
   implicit none
 
@@ -23,6 +24,25 @@ contains
   end subroutine monolis_global_finalize_c
 
   !> mat
+  subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
+    & bind(c, name = "monolis_get_CRR_format")
+    implicit none
+    integer(c_int), value :: N, NZ
+    integer(c_int), target :: index(0:N)
+    integer(c_int), target :: item(NZ)
+    integer(c_int), target :: indexR(0:N)
+    integer(c_int), target :: itemR(NZ)
+    integer(c_int), target :: permR(NZ)
+    integer(kint), pointer :: indexRt(:)
+    integer(kint), pointer :: itemRt(:)
+    integer(kint), pointer :: permRt(:)
+
+    indexRt => indexR
+    itemRt => itemR
+    permRt => permR
+    call monolis_get_CRR_format(N, NZ, index, item, indexRt, itemRt, permRt)
+  end subroutine monolis_get_CRR_format_c
+
   subroutine monolis_add_sparse_matrix_c() &
     & bind(c, name = "monolis_add_sparse_matrix_c_main")
     implicit none

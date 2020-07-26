@@ -56,18 +56,6 @@ void monolis_finalize(
 
 }
 
-void monolis_get_CRR_format(
-  MONOLIS* mat,
-  int      nnode,
-  int      nbase_func,
-  int      ndof,
-  int      nelem,
-  int**    elem)
-{
-
-
-}
-
 void monolis_convert_mesh_to_connectivity(
   int      nelem,
   int      nbase_func,
@@ -134,7 +122,10 @@ void monolis_get_nonzero_pattern_by_nodal(
     monolis_qsort_int(&(mat->mat.item[jS]), 1, jE-jS);
   }
 
-  //monolis_get_CRR_format();
+  mat->mat.indexR = (int*)calloc(nnode+1, sizeof(int));
+  mat->mat.itemR = (int*)calloc(nz, sizeof(int));
+  mat->mat.permR = (int*)calloc(nz, sizeof(int));
+  monolis_get_CRR_format(nnode, nz, mat->mat.index, mat->mat.item, mat->mat.indexR, mat->mat.itemR, mat->mat.permR);
 }
 
 void monolis_get_nonzero_pattern(
