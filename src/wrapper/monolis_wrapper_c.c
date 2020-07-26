@@ -84,7 +84,14 @@ void monolis_convert_connectivity_to_nodal(
 {
 #ifdef WITH_METIS
   idx_t numflag = 0;
-  int ierr = METIS_MeshToNodal(&nelem, &nnode, conn_index, con, &numflag, index, item);
+  int ierr = METIS_MeshToNodal(
+    &nelem,
+    &nnode,
+    conn_index,
+    con,
+    &numflag,
+    index,
+    item);
 #else
 
 #endif
@@ -109,6 +116,7 @@ void monolis_get_nonzero_pattern_by_nodal(
   }
 
   int nz = mat->mat.index[nnode];
+  mat->mat.NZ = nz;
   mat->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
   mat->mat.item = (int*)calloc(nz, sizeof(int));
 
@@ -119,13 +127,23 @@ void monolis_get_nonzero_pattern_by_nodal(
     for(int j=jS+1; j<jE+1; j++){
       mat->mat.item[j] = item[j-i-1] + 1;
     }
-    monolis_qsort_int(&(mat->mat.item[jS]), 1, jE-jS);
+    monolis_qsort_int(
+      &(mat->mat.item[jS]),
+      1,
+      jE-jS);
   }
 
   mat->mat.indexR = (int*)calloc(nnode+1, sizeof(int));
   mat->mat.itemR = (int*)calloc(nz, sizeof(int));
   mat->mat.permR = (int*)calloc(nz, sizeof(int));
-  monolis_get_CRR_format(nnode, nz, mat->mat.index, mat->mat.item, mat->mat.indexR, mat->mat.itemR, mat->mat.permR);
+  monolis_get_CRR_format(
+    nnode,
+    nz,
+    mat->mat.index,
+    mat->mat.item,
+    mat->mat.indexR,
+    mat->mat.itemR,
+    mat->mat.permR);
 }
 
 void monolis_get_nonzero_pattern(
@@ -168,8 +186,8 @@ void monolis_get_nonzero_pattern(
 
   free(conn_index);
   free(con);
-  //free(index);
-  //free(item);
+  free(index);
+  free(item);
 }
 
 void monolis_add_sparse_matrix(
@@ -178,7 +196,29 @@ void monolis_add_sparse_matrix(
   int      *connectivity,
   double** local_mat)
 {
-  monolis_add_sparse_matrix_c_main();
+  int nnode = mat->mat.N;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+  double* mat_t = (double*)calloc(ndof*ndof*nbase_func*nbase_func, sizeof(double));
+
+  for(int i=1; i<nbase_func*ndof; i++) {
+    for(int j=1; j<nbase_func*ndof; j++) {
+      mat_t[i*(nbase_func*ndof)+j] = local_mat[i][j];
+    }
+  }
+
+  monolis_add_sparse_matrix_c_main(
+    nnode,
+    nz,
+    ndof,
+    nbase_func,
+    mat->mat.index,
+    mat->mat.item,
+    mat->mat.A,
+    connectivity,
+    mat_t);
+
+  free(mat_t);
 }
 
 void monolis_set_Dirichlet_bc(
@@ -188,7 +228,24 @@ void monolis_set_Dirichlet_bc(
   int      ndof_bc,
   double   val)
 {
-  monolis_set_Dirichlet_bc_c_main();
+  int nnode = mat->mat.N;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+
+  monolis_set_Dirichlet_bc_c_main(
+    nnode,
+    nz,
+    ndof,
+    mat->mat.index,
+    mat->mat.item,
+    mat->mat.indexR,
+    mat->mat.itemR,
+    mat->mat.permR,
+    mat->mat.A,
+    b,
+    node_id,
+    ndof_bc,
+    val);
 }
 
 void monolis_solve(

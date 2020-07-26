@@ -115,6 +115,21 @@ void monolis_set_Dirichlet_bc(
   int      ndof_bc,
   double   val);
 
+void monolis_set_Dirichlet_bc_c_main(
+  int      nnode,
+  int      nz,
+  int      ndof,
+  int*     index,
+  int*     item,
+  int*     indexR,
+  int*     itemR,
+  int*     permR,
+  double*  A,
+  double*  b,
+  int      node_id,
+  int      ndof_bc,
+  double   val);
+
 void monolis_solve(
   MONOLIS* mat,
   double*  b,
