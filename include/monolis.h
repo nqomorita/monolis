@@ -135,6 +135,26 @@ void monolis_solve(
   double*  b,
   double*  x);
 
+void monolis_solve_c_main(
+  int      n,
+  int      np,
+  int      nz,
+  int      ndof,
+  double*  A,
+  double*  x,
+  double*  b,
+  int*     index,
+  int*     item,
+  int      myrank,
+  int      comm,
+  int      commsize,
+  int      recv_n_neib,
+  int      send_n_neib,
+  int      method,
+  int      precond,
+  int      maxiter,
+  double   tol);
+
 void monolis_qsort_int(
   int* array,
   int  iS,

@@ -253,5 +253,28 @@ void monolis_solve(
   double*  b,
   double*  x)
 {
-  monolis_solve_c_main();
+  int n = mat->mat.N;
+  int np = mat->mat.N;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+
+  monolis_solve_c_main(
+    n,
+    np,
+    nz,
+    ndof,
+    mat->mat.A,
+    x,
+    b,
+    mat->mat.index,
+    mat->mat.item,
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    mat->com.send_n_neib,
+    mat->prm.method,
+    mat->prm.precond,
+    mat->prm.maxiter,
+    mat->prm.tol);
 }
