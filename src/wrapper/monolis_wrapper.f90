@@ -6,7 +6,6 @@ module mod_monolis_wrapper
   use mod_monolis_util
   use mod_monolis_sparse_util
   use mod_monolis_stdlib
-  use mod_monolis_solve
   implicit none
 
 contains
@@ -76,57 +75,6 @@ contains
     call monolis_sparse_matrix_add_bc(index, item, A, B, indexR, itemR, permR, &
       & ndof, nid, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_c
-
-  !> solve
-  subroutine monolis_solve_c(N, NP, NZ, NDOF, A, X, B, index, item, &
-    myrank, comm, commsize, recv_n_neib, send_n_neib, &
-    method, precond, maxiter, tol) &
-    & bind(c, name = "monolis_solve_c_main")
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(c_int), intent(in), value :: N, NP, NZ, NDOF
-    integer(c_int), intent(in), value :: myrank, comm, commsize, recv_n_neib, send_n_neib
-    integer(c_int), intent(in), value :: method, precond, maxiter
-    integer(c_int), intent(in), target :: index(0:N)
-    integer(c_int), intent(in), target :: item(NZ)
-    real(c_double), intent(in), value :: tol
-    real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), intent(in), target :: X(NDOF*N)
-    real(c_double), intent(in), target :: B(NDOF*N)
-
-    !> for monoMAT
-    monolis%MAT%N = N
-    monolis%MAT%NP = NP
-    monolis%MAT%NZ = NZ
-    monolis%MAT%NDOF = NDOF
-    monolis%MAT%A => A
-    monolis%MAT%X => X
-    monolis%MAT%B => B
-    monolis%MAT%index => index
-    monolis%MAT%item => item
-
-    !> for monoCOM
-    monoliS%COM%myrank = myrank
-    monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
-    monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%send_n_neib = send_n_neib
-
-    !> for monoPRM
-    monolis%PRM%method = method
-    monolis%PRM%precond = precond
-    monolis%PRM%maxiter = maxiter
-    monolis%PRM%tol = tol
-    monolis%PRM%is_scaling    = .false.
-    monolis%PRM%is_reordering = .false.
-    monolis%PRM%is_init_x     = .true.
-    monolis%PRM%is_debug      = .true.
-    monolis%PRM%show_iterlog  = .true.
-    monolis%PRM%show_time     = .true.
-    monolis%PRM%show_summary  = .true.
-
-    call monolis_solve(monolis, B, X)
-  end subroutine monolis_solve_c
 
   !> std lib
   subroutine monolis_qsort_int_c(array, iS, iE) &

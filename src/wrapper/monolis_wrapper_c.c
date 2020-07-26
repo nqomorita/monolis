@@ -201,8 +201,8 @@ void monolis_add_sparse_matrix(
   int nz = mat->mat.NZ;
   double* mat_t = (double*)calloc(ndof*ndof*nbase_func*nbase_func, sizeof(double));
 
-  for(int i=1; i<nbase_func*ndof; i++) {
-    for(int j=1; j<nbase_func*ndof; j++) {
+  for(int i=0; i<nbase_func*ndof; i++) {
+    for(int j=0; j<nbase_func*ndof; j++) {
       mat_t[i*(nbase_func*ndof)+j] = local_mat[i][j];
     }
   }
