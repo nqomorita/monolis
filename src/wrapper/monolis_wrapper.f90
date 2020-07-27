@@ -71,9 +71,12 @@ contains
     real(c_double), intent(in), value :: val
     real(c_double), target :: A(NDOF*NDOF*NZ)
     real(c_double), target :: B(NDOF*N)
+    integer(kint) :: nid_t, ndof_bc_t
 
+    nid_t = nid + 1
+    ndof_bc_t = ndof_bc + 1
     call monolis_sparse_matrix_add_bc(index, item, A, B, indexR, itemR, permR, &
-      & ndof, nid, ndof_bc, val)
+      & ndof, nid_t, ndof_bc_t, val)
   end subroutine monolis_set_Dirichlet_bc_c
 
   !> std lib
