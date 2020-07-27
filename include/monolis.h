@@ -8,6 +8,29 @@ extern "C" {
 
 #include <stdbool.h>
 
+const int monolis_iter_CG       = 1;
+const int monolis_iter_GropCG   = 2;
+const int monolis_iter_PipeCG   = 3;
+const int monolis_iter_PipeCR   = 4;
+const int monolis_iter_BiCGSTAB = 5;
+const int monolis_iter_PipeBiCGSTAB = 6;
+const int monolis_iter_BiCGSTAB_noprec = 7;
+const int monolis_iter_CABiCGSTAB_noprec = 8;
+const int monolis_iter_PipeBiCGSTAB_noprec = 9;
+const int monolis_iter_SOR      = 10;
+const int monolis_iter_IR       = 11;
+
+const int monolis_prec_NONE   = 0;
+const int monolis_prec_DIAG   = 1;
+const int monolis_prec_ILU    = 2;
+const int monolis_prec_JACOBI = 3;
+const int monolis_prec_SOR    = 4;
+const int monolis_prec_SAINV  = 5;
+const int monolis_prec_RIF    = 6;
+const int monolis_prec_SPIKE  = 7;
+const int monolis_prec_DIRECT = 8;
+const int monolis_prec_MUMPS  = 9;
+
 typedef struct {
   int method;
   int precond;
@@ -75,6 +98,11 @@ typedef struct {
   MONOLIS_MAT mat;
 } MONOLIS;
 
+void monolis_set_method   (MONOLIS* mat, int    flag);
+void monolis_set_precond  (MONOLIS* mat, int    flag);
+void monolis_set_maxiter  (MONOLIS* mat, int    flag);
+void monolis_set_tolerance(MONOLIS* mat, double flag);
+
 void monolis_global_initialize();
 
 void monolis_global_finalize();
@@ -107,6 +135,17 @@ void monolis_add_sparse_matrix(
   int      nbase_func,
   int      *connectivity,
   double** local_mat);
+
+void monolis_add_sparse_matrix_c_main(
+  int      nnode,
+  int      nz,
+  int      ndof,
+  int      nbf,
+  int*     index,
+  int*     item,
+  double*  A,
+  int*     con,
+  double*  mat);
 
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,

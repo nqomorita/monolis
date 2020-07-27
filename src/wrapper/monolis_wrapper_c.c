@@ -3,10 +3,10 @@
 #include "monolis.h"
 #include "metis.h"
 
-/* header */
-void monolis_add_sparse_matrix_c_main();
-void monolis_set_Dirichlet_bc_c_main();
-void monolis_solve_c_main();
+void monolis_set_method   (MONOLIS* mat, int    flag) {mat->prm.method    = flag;}
+void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag;}
+void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
+void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
 
 /* body */
 
