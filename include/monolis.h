@@ -103,6 +103,8 @@ void monolis_set_precond  (MONOLIS* mat, int    flag);
 void monolis_set_maxiter  (MONOLIS* mat, int    flag);
 void monolis_set_tolerance(MONOLIS* mat, double flag);
 
+double monolis_get_time();
+
 void monolis_global_initialize();
 
 void monolis_global_finalize();
