@@ -82,33 +82,90 @@ contains
     nullify(item)
   end subroutine monolis_get_nonzero_pattern_by_nodal
 
-  !subroutine monolis_add_connectivity_array(nelem, nbase_func, elem, ebase_func, connectivity)
-  !  implicit none
-  !  integer(kint) :: nelem, nbase_func, elem(:,:)
-  !  integer(kint), pointer :: ebase_func(:), connectivity(:)
-  !end subroutine monolis_add_connectivity_array
+  !> setter
+  subroutine monolis_sparse_matrix_set_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+    implicit none
+    integer(kint), intent(in) :: ndof
+    integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
+    real(kdouble), intent(inout) :: A(:)
+    real(kdouble), intent(in) :: val
+    integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-  subroutine monolis_assemble_sparse_matrix(monolis, nbase_func, connectivity, stiff)
+    NDOF2 = ndof*ndof
+    if(ndof < csub_i) stop "error: monolis_sparse_matrix_set_value 1"
+    if(ndof < csub_j) stop "error: monolis_sparse_matrix_set_value 2"
+
+    jS = index(ci-1) + 1
+    jE = index(ci)
+    do j = jS, jE
+      jn = item(j)
+      if(jn == cj)then
+        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        A(im) = val
+        return
+      endif
+      stop "error: monolis_sparse_matrix_set_value 3"
+    enddo
+  end subroutine monolis_sparse_matrix_set_value
+
+  !> getter
+  subroutine monolis_sparse_matrix_get_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+    implicit none
+    integer(kint), intent(in) :: ndof
+    integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
+    real(kdouble), intent(inout) :: A(:)
+    real(kdouble), intent(out) :: val
+    integer(kint) :: j, jn, im, jS, jE, NDOF2
+
+    NDOF2 = ndof*ndof
+    if(ndof < csub_i) stop "error: monolis_sparse_matrix_get_value 1"
+    if(ndof < csub_j) stop "error: monolis_sparse_matrix_get_value 2"
+
+    jS = index(ci-1) + 1
+    jE = index(ci)
+    do j = jS, jE
+      jn = item(j)
+      if(jn == cj)then
+        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        val = A(im)
+        return
+      endif
+      stop "error: monolis_sparse_matrix_get_value 3"
+    enddo
+  end subroutine monolis_sparse_matrix_get_value
+
+  !> adder
+  subroutine monolis_add_scalar_to_sparse_matrix(monolis, i, j, sub_i, sub_j, val)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: i, j, sub_i, sub_j
+    real(kdouble), intent(in) :: val
+
+    call monolis_sparse_matrix_add_value(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+  end subroutine monolis_add_scalar_to_sparse_matrix
+
+  subroutine monolis_add_matrix_to_sparse_matrix(monolis, nbase_func, connectivity, stiff)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint), intent(in) :: nbase_func, connectivity(nbase_func)
     real(kdouble), intent(in) :: stiff(:,:)
 
-    call monolis_sparse_matrix_assemble(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+    call monolis_sparse_matrix_add_matrix(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
       & nbase_func, monolis%MAT%ndof, connectivity, connectivity, stiff)
-  end subroutine monolis_assemble_sparse_matrix
+  end subroutine monolis_add_matrix_to_sparse_matrix
 
-  subroutine monolis_assemble_sparse_matrix_offdiag(monolis, nbase_func, c1, c2, stiff)
+  subroutine monolis_add_matrix_to_sparse_matrix_offdiag(monolis, nbase_func, c1, c2, stiff)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint), intent(in) :: nbase_func, c1(nbase_func), c2(nbase_func)
     real(kdouble), intent(in) :: stiff(:,:)
 
-    call monolis_sparse_matrix_assemble(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+    call monolis_sparse_matrix_add_matrix(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
       & nbase_func, monolis%MAT%ndof, c1, c2, stiff)
-  end subroutine monolis_assemble_sparse_matrix_offdiag
+  end subroutine monolis_add_matrix_to_sparse_matrix_offdiag
 
-  subroutine monolis_sparse_matrix_assemble(index, item, A, nnode, ndof, e1t, e2t, stiff)
+  subroutine monolis_sparse_matrix_add_matrix(index, item, A, nnode, ndof, e1t, e2t, stiff)
     implicit none
     integer(kint), intent(in) :: nnode, ndof
     integer(kint), intent(in) :: index(0:), item(:), e1t(nnode), e2t(nnode)
@@ -163,7 +220,32 @@ contains
         stop "error: merge"
       enddo aa
     enddo
-  end subroutine monolis_sparse_matrix_assemble
+  end subroutine monolis_sparse_matrix_add_matrix
+
+  subroutine monolis_sparse_matrix_add_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+    implicit none
+    integer(kint), intent(in) :: ndof
+    integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
+    real(kdouble), intent(inout) :: A(:)
+    real(kdouble), intent(in) :: val
+    integer(kint) :: j, jn, im, jS, jE, NDOF2
+
+    NDOF2 = ndof*ndof
+    if(ndof < csub_i) stop "error: monolis_sparse_matrix_add_value 1"
+    if(ndof < csub_j) stop "error: monolis_sparse_matrix_add_value 2"
+
+    jS = index(ci-1) + 1
+    jE = index(ci)
+    do j = jS, jE
+      jn = item(j)
+      if(jn == cj)then
+        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        A(im) = A(im) + val
+        return
+      endif
+    enddo
+    stop "error: monolis_sparse_matrix_add_value 3"
+  end subroutine monolis_sparse_matrix_add_value
 
   subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
     implicit none

@@ -138,6 +138,14 @@ void monolis_add_sparse_matrix(
   int      *connectivity,
   double** local_mat);
 
+void monolis_add_scalar_to_sparse_matrix(
+  MONOLIS* mat,
+  double   val,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j);
+
 void monolis_add_sparse_matrix_c_main(
   int      nnode,
   int      nz,
@@ -148,6 +156,19 @@ void monolis_add_sparse_matrix_c_main(
   double*  A,
   int*     con,
   double*  mat);
+
+void monolis_add_scalar_to_sparse_matrix_c_main(
+  int      nnode,
+  int      nz,
+  int      ndof,
+  int*     index,
+  int*     item,
+  double*  A,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j,
+  double   val);
 
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,

@@ -190,35 +190,30 @@ void monolis_get_nonzero_pattern(
   free(item);
 }
 
-void monolis_add_sparse_matrix(
+void monolis_add_scalar_to_sparse_matrix(
   MONOLIS* mat,
-  int      nbase_func,
-  int      *connectivity,
-  double** local_mat)
+  double   val,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j)
 {
   int nnode = mat->mat.N;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
-  double* mat_t = (double*)calloc(ndof*ndof*nbase_func*nbase_func, sizeof(double));
 
-  for(int i=0; i<nbase_func*ndof; i++) {
-    for(int j=0; j<nbase_func*ndof; j++) {
-      mat_t[i*(nbase_func*ndof)+j] = local_mat[i][j];
-    }
-  }
-
-  monolis_add_sparse_matrix_c_main(
+  monolis_add_scalar_to_sparse_matrix_c_main(
     nnode,
     nz,
     ndof,
-    nbase_func,
     mat->mat.index,
     mat->mat.item,
     mat->mat.A,
-    connectivity,
-    mat_t);
-
-  free(mat_t);
+    i,
+    j,
+    submat_i,
+    submat_j,
+    val);
 }
 
 void monolis_set_Dirichlet_bc(
