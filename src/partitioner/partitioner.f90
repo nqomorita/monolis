@@ -13,7 +13,7 @@ program monolis_partitioner
   integer(kint) :: n_domain
   logical :: is_format_id, is_overlap
 
-  call monolis_get_arg(n_domain, is_format_id, is_overlap)
+  call monolis_get_part_arg(n_domain, is_format_id, is_overlap)
 
   call monolis_input_mesh(mesh, is_format_id)
 

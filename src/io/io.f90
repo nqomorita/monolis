@@ -11,7 +11,7 @@ contains
   subroutine monolis_input_mesh(mesh, is_format_id)
     implicit none
     type(monolis_mesh) :: mesh
-    integer(kint) :: i
+    integer(kint) :: i, shift
     logical :: is_format_id
     character :: fname*100
 
@@ -21,8 +21,6 @@ contains
 
       fname = "elem.dat"
       call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
-
-      call monolis_global_to_local_elem(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
     else
       fname = "node.dat"
       call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node)
@@ -30,15 +28,20 @@ contains
       fname = "elem.dat"
       call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
 
+      shift = 0
+      if(minval(mesh%elem) == 0) shift = -1 !> for C binding
+
       allocate(mesh%nid(mesh%nnode), source = 0)
       do i = 1, mesh%nnode
-        mesh%nid(i) = i
+        mesh%nid(i) = i + shift
       enddo
       allocate(mesh%eid(mesh%nelem), source = 0)
       do i = 1, mesh%nelem
-        mesh%eid(i) = i
+        mesh%eid(i) = i + shift
       enddo
     endif
+
+    call monolis_global_to_local_elem(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
   end subroutine monolis_input_mesh
 
   subroutine monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
@@ -82,22 +85,33 @@ contains
 
   subroutine monolis_input_mesh_node(fname, nnode_in, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode_in, nnode, i
+    integer(kint) :: nnode_in, nnode, i, ierr
     real(kdouble), allocatable :: node(:,:)
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "old")
       if(present(nid))then
-        read(20,*) nnode
+        read(20,*, iostat = ierr) nnode_in, nnode
+        if(ierr /= 0)then
+          rewind(20)
+          read(20,*) nnode
+          nnode_in = nnode
+        endif
+
         allocate(node(3,nnode), source = 0.0d0)
         allocate(nid(nnode), source = 0)
         do i = 1, nnode
           read(20,*) nid(i), node(1,i), node(2,i), node(3,i)
         enddo
-        nnode_in = nnode
       else
-        read(20,*) nnode_in, nnode
+        read(20,*, iostat = ierr) nnode_in, nnode
+        if(ierr /= 0)then
+          rewind(20)
+          read(20,*) nnode
+          nnode_in = nnode
+        endif
+
         allocate(node(3,nnode), source = 0.0d0)
         do i = 1, nnode
           read(20,*) node(1,i), node(2,i), node(3,i)
@@ -341,13 +355,13 @@ contains
     close(20)
   end subroutine monolis_visual_parted_mesh
 
-  subroutine monolis_get_arg(n_domain, is_format_id, is_overlap)
+  subroutine monolis_get_part_arg(n_domain, is_format_id, is_overlap)
     implicit none
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128
     logical :: is_format_id, is_overlap
 
-    call monolis_debug_header("monolis_get_arg")
+    call monolis_debug_header("monolis_get_part_arg")
 
     call monolis_set_debug(.true.)
 
@@ -365,7 +379,7 @@ contains
 
     n_domain = 1
     is_overlap = .true.
-    is_format_id = .true.
+    is_format_id = .false.
 
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
     do i = 1, count/2
@@ -390,6 +404,6 @@ contains
     enddo
 
     call monolis_debug_int("n_domain", n_domain)
-  end subroutine monolis_get_arg
+  end subroutine monolis_get_part_arg
 
 end module mod_monolis_io
