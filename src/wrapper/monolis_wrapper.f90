@@ -23,6 +23,28 @@ contains
     call monolis_global_finalize()
   end subroutine monolis_global_finalize_c
 
+  !> getter
+  function monolis_get_global_comm_c()&
+    & bind(c, name = "monolis_get_global_comm")
+    implicit none
+    integer(c_int) :: monolis_get_global_comm_c
+    monolis_get_global_comm_c =  monolis_global_comm()
+  end function monolis_get_global_comm_c
+
+  function monolis_get_global_commsize_c()&
+    & bind(c, name = "monolis_get_global_commsize")
+    implicit none
+    integer(c_int) :: monolis_get_global_commsize_c
+    monolis_get_global_commsize_c =  monolis_global_commsize()
+  end function monolis_get_global_commsize_c
+
+  function monolis_get_global_myrank_c()&
+    & bind(c, name = "monolis_get_global_myrank")
+    implicit none
+    integer(c_int) :: monolis_get_global_myrank_c
+    monolis_get_global_myrank_c =  monolis_global_myrank()
+  end function monolis_get_global_myrank_c
+
   function monolis_get_time_c()&
     & bind(c, name = "monolis_get_time")
     implicit none

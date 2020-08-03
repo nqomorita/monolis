@@ -98,12 +98,19 @@ typedef struct {
   MONOLIS_MAT mat;
 } MONOLIS;
 
+/* getter */
+int monolis_get_global_comm();
+int monolis_get_global_commsize();
+int monolis_get_global_myrank();
+double monolis_get_time();
+
+void monolis_get_input_filename();
+
+/* setter */
 void monolis_set_method   (MONOLIS* mat, int    flag);
 void monolis_set_precond  (MONOLIS* mat, int    flag);
 void monolis_set_maxiter  (MONOLIS* mat, int    flag);
 void monolis_set_tolerance(MONOLIS* mat, double flag);
-
-double monolis_get_time();
 
 void monolis_global_initialize();
 

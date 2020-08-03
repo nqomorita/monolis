@@ -56,6 +56,29 @@ void monolis_finalize(
 
 }
 
+void monolis_get_input_filename(
+  )
+{
+/*
+    int commsize;
+    int myrank;
+    char str_myrank[8];
+
+    commsize = monolis_get_global_commsize();
+    myrank = monolis_get_global_myrank();
+    snprintf(str_myrank, sizeof(str_myrank), "%d", myrank);
+
+    if( commsize > 1){
+      strcpy(INPUT_FILENAME_NODE_PAR, INPUT_FILENAME_NODE);
+      strcpy(INPUT_FILENAME_ELEM_PAR, INPUT_FILENAME_ELEM);
+    } else {
+      strcpy(INPUT_FILENAME_NODE_PAR, INPUT_FILENAME_NODE);
+      strcpy(INPUT_FILENAME_ELEM_PAR, INPUT_FILENAME_ELEM);
+    }
+*/
+}
+
+
 void monolis_convert_mesh_to_connectivity(
   int      nelem,
   int      nbase_func,
