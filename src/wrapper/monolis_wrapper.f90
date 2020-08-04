@@ -52,6 +52,17 @@ contains
     monolis_get_time_c =  monolis_get_time()
   end function monolis_get_time_c
 
+!  function monolis_get_input_filename_c(input)&
+!    & bind(c, name = "monolis_get_input_filename")
+!    implicit none
+!    type(c_ptr), pointer :: input(:)
+!    !character(*,c_char) :: input
+!    character(c_char) :: monolis_get_input_filename_c
+!
+!    !monolis_get_input_filename_c = monolis_get_input_filename(input)
+!    !monolis_get_input_filename_c = trim(monolis_get_input_filename_c)//c_null_char
+!  end function monolis_get_input_filename_c
+
   !> mat
   subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CRR_format")
