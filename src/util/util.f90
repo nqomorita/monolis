@@ -113,6 +113,36 @@ contains
     endif
   end subroutine monolis_timer_finalize
 
+  function monolis_get_input_filename(input)
+    implicit none
+    integer(kint) :: comm_size, myrank, pos
+    character(*) :: input
+    character :: cnum*6
+    character :: monolis_get_input_filename*128
+
+    comm_size = monolis_global_commsize()
+    monolis_get_input_filename = trim(input)
+
+    if(comm_size > 1)then
+      myrank = monolis_global_myrank()
+      write(cnum,"(i0)") myrank
+
+      !> for node.dat
+      pos = index(monolis_get_input_filename, "node.dat", back = .true.)
+      if(pos > 0)then
+        monolis_get_input_filename(pos:pos+16) = "parted/node.dat."
+        monolis_get_input_filename = trim(monolis_get_input_filename) // trim(cnum)
+      endif
+
+      !> for elem.dat
+      pos = index(monolis_get_input_filename, "elem.dat", back = .true.)
+      if(pos > 0)then
+        monolis_get_input_filename(pos:pos+16) = "parted/elem.dat."
+        monolis_get_input_filename = trim(monolis_get_input_filename) // trim(cnum)
+      endif
+    endif
+  end function monolis_get_input_filename
+
   function monolis_get_time()
     implicit none
     real(kdouble) :: monolis_get_time, t1
