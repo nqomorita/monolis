@@ -50,6 +50,7 @@ LIB_DIR  = ./lib
 LIB_LIST = libmonolis.a
 MONOLIS_LIB = -L$(LIB_DIR) -lmonolis
 BIN_PART = monolis_partitioner
+BIN_REFN = monolis_refiner
 BIN_TEST = monolis_test
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
@@ -60,6 +61,7 @@ AR       = - ar ruv
 
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 PARTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PART))
+REFNTARGET = $(addprefix $(BIN_DIR)/, $(BIN_REFN))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 util.f90 stdlib.f90 hash.f90
@@ -81,6 +83,7 @@ SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
 SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_PART_LIST   = partitioner/partitioner.f90 $(SRC_ALL_LIST)
+SRC_REFN_LIST   = refiner/refiner.f90 $(SRC_ALL_LIST)
 SRC_TEST_LIST   = util/test.f90 $(SRC_ALL_LIST)
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
@@ -91,11 +94,15 @@ SOURCES_PART = $(addprefix $(SRC_DIR)/, $(SRC_PART_LIST))
 OBJS_PART1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
 OBJS_PART = $(OBJS_PART1:.c=.o)
 
+SOURCES_REFN = $(addprefix $(SRC_DIR)/, $(SRC_REFN_LIST))
+OBJS_REFN1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REFN:.f90=.o))
+OBJS_REFN = $(OBJS_REFN1:.c=.o)
+
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST_LIST))
 OBJS_TEST1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 OBJS_TEST = $(OBJS_TEST1:.c=.o)
 
-all: $(LIBTARGET) $(PARTTARGET) $(TESTTARGET)
+all: $(LIBTARGET) $(PARTTARGET) $(REFNTARGET) $(TESTTARGET)
 
 #	$(CD) sample && $(MAKE)
 
@@ -104,6 +111,9 @@ $(LIBTARGET): $(OBJS)
 
 $(PARTTARGET): $(OBJS_PART)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_PART) $(LIBRARY)
+
+$(REFNTARGET): $(OBJS_REFN)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_REFN) $(LIBRARY)
 
 $(TESTTARGET): $(OBJS_TEST)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(LIBRARY)
