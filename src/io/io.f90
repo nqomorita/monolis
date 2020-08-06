@@ -85,18 +85,22 @@ contains
 
   subroutine monolis_input_mesh_node(fname, nnode_in, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode_in, nnode, i, ierr
+    integer(kint) :: nnode_in, nnode, i, ierr, t(4)
     real(kdouble), allocatable :: node(:,:)
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "old")
       if(present(nid))then
-        read(20,*, iostat = ierr) nnode_in, nnode
+        read(20,*, iostat = ierr) t(1), t(2), t(3)
+        !read(20,*, iostat = ierr) nnode_in, nnode
         if(ierr /= 0)then
           rewind(20)
           read(20,*) nnode
           nnode_in = nnode
+        else
+          rewind(20)
+          read(20,*) nnode_in, nnode
         endif
 
         allocate(node(3,nnode), source = 0.0d0)
