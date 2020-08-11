@@ -122,6 +122,9 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat);
 
+void monolis_clear(
+  MONOLIS* mat);
+
 void monolis_get_CRR_format(
   int      nnode,
   int      nz,

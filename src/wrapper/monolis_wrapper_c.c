@@ -56,6 +56,22 @@ void monolis_finalize(
 
 }
 
+void monolis_clear(
+  MONOLIS* mat)
+{
+  int ndof = mat->mat.NDOF;
+  int ndof2 = mat->mat.NDOF*mat->mat.NDOF;
+
+  for(int i=0; i<(mat->mat.NP*ndof); i++) {
+    mat->mat.X[i] = 0.0;
+    mat->mat.B[i] = 0.0;
+  }
+
+  for(int i=0; i<(mat->mat.NZ*ndof2); i++) {
+    mat->mat.A[i] = 0.0;
+  }
+}
+
 void monolis_get_input_filename(
   )
 {
