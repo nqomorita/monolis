@@ -12,7 +12,7 @@ void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = f
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
 
-/* body */
+/* initializer */
 
 void monolis_initialize(
   MONOLIS* mat)
@@ -60,6 +60,8 @@ void monolis_finalize(
 
 }
 
+/* mat clear */
+
 void monolis_clear(
   MONOLIS* mat)
 {
@@ -79,7 +81,8 @@ void monolis_clear_mat(
 }
 
 void monolis_clear_rhs(
-  MONOLIS* mat){
+  MONOLIS* mat)
+{
   int ndof = mat->mat.NDOF;
 
   for(int i=0; i<(mat->mat.NP*ndof); i++) {
@@ -88,11 +91,78 @@ void monolis_clear_rhs(
 }
 
 void monolis_clear_solution(
-  MONOLIS* mat){
+  MONOLIS* mat)
+{
   int ndof = mat->mat.NDOF;
 
   for(int i=0; i<(mat->mat.NP*ndof); i++) {
     mat->mat.X[i] = 0.0;
+  }
+}
+
+/* mat copy */
+
+void monolis_copy_all(
+  MONOLIS* in,
+  MONOLIS* out)
+{
+  int ndof = in->mat.NDOF;
+  int nz = in->mat.NZ;
+
+  monolis_copy_nonzero_pattern(in, out);
+
+  for(int i=0; i<ndof*ndof*nz; i++) {
+    out->mat.A[i] = in->mat.A[i];
+  }
+}
+
+void monolis_copy_nonzero_pattern(
+  MONOLIS* in,
+  MONOLIS* out)
+{
+  int n = in->mat.N;
+  int np = in->mat.NP;
+  int ndof = in->mat.NDOF;
+  int nz = in->mat.NZ;
+
+  out->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
+  for(int i=0; i<ndof*ndof*nz; i++) {
+    out->mat.A[i] = 0.0;
+  }
+
+  out->mat.X = (double*)calloc(ndof*np, sizeof(double));
+  for(int i=0; i<ndof*np; i++) {
+    out->mat.X[i] = in->mat.X[i];
+  }
+
+  out->mat.B = (double*)calloc(ndof*np, sizeof(double));
+  for(int i=0; i<ndof*np; i++) {
+    out->mat.B[i] = in->mat.B[i];
+  }
+
+  out->mat.index = (int* )calloc(np+1, sizeof(int));
+  for(int i=0; i<np+1; i++) {
+    out->mat.index[i] = in->mat.index[i];
+  }
+
+  out->mat.item = (int*)calloc(nz, sizeof(int));
+  for(int i=0; i<nz; i++) {
+    out->mat.item[i] = in->mat.item[i];
+  }
+
+  out->mat.indexR = (int*)calloc(np+1, sizeof(int));
+  for(int i=0; i<np+1; i++) {
+    out->mat.indexR[i] = in->mat.indexR[i];
+  }
+
+  out->mat.itemR = (int*)calloc(nz, sizeof(int));
+  for(int i=0; i<nz; i++) {
+    out->mat.itemR[i] = in->mat.itemR[i];
+  }
+
+  out->mat.permR = (int*)calloc(nz, sizeof(int));
+  for(int i=0; i<nz; i++) {
+    out->mat.permR[i] = in->mat.permR[i];
   }
 }
 
@@ -117,7 +187,6 @@ void monolis_get_input_filename(
     }
 */
 }
-
 
 void monolis_convert_mesh_to_connectivity(
   int      nelem,

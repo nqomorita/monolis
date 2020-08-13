@@ -89,7 +89,7 @@ typedef struct {
   double* A;
   double* X;
   double* B;
-  double* diag;
+  //double* diag;
 } MONOLIS_MAT;
 
 typedef struct {
@@ -147,6 +147,15 @@ void monolis_clear_rhs(
 
 void monolis_clear_solution(
   MONOLIS* mat);
+
+/* mat copy */
+void monolis_copy_all(
+  MONOLIS* in,
+  MONOLIS* out);
+
+void monolis_copy_nonzero_pattern(
+  MONOLIS* in,
+  MONOLIS* out);
 
 void monolis_get_CRR_format(
   int      nnode,
