@@ -107,12 +107,21 @@ void monolis_copy_all(
   MONOLIS* out)
 {
   int ndof = in->mat.NDOF;
+  int np = in->mat.NP;
   int nz = in->mat.NZ;
 
   monolis_copy_nonzero_pattern(in, out);
 
   for(int i=0; i<ndof*ndof*nz; i++) {
     out->mat.A[i] = in->mat.A[i];
+  }
+
+  for(int i=0; i<ndof*np; i++) {
+    out->mat.X[i] = in->mat.X[i];
+  }
+
+  for(int i=0; i<ndof*np; i++) {
+    out->mat.B[i] = in->mat.B[i];
   }
 }
 
@@ -125,6 +134,11 @@ void monolis_copy_nonzero_pattern(
   int ndof = in->mat.NDOF;
   int nz = in->mat.NZ;
 
+  out->mat.N = n;
+  out->mat.NP = np;
+  out->mat.NDOF = ndof;
+  out->mat.NZ = nz;
+
   out->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
   for(int i=0; i<ndof*ndof*nz; i++) {
     out->mat.A[i] = 0.0;
@@ -132,12 +146,12 @@ void monolis_copy_nonzero_pattern(
 
   out->mat.X = (double*)calloc(ndof*np, sizeof(double));
   for(int i=0; i<ndof*np; i++) {
-    out->mat.X[i] = in->mat.X[i];
+    out->mat.X[i] = 0.0;
   }
 
   out->mat.B = (double*)calloc(ndof*np, sizeof(double));
   for(int i=0; i<ndof*np; i++) {
-    out->mat.B[i] = in->mat.B[i];
+    out->mat.B[i] = 0.0;
   }
 
   out->mat.index = (int* )calloc(np+1, sizeof(int));
