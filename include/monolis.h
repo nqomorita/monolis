@@ -157,6 +157,10 @@ void monolis_copy_nonzero_pattern(
   MONOLIS* in,
   MONOLIS* out);
 
+void monolis_copy_param(
+  MONOLIS* in,
+  MONOLIS* out);
+
 void monolis_get_CRR_format(
   int      nnode,
   int      nz,

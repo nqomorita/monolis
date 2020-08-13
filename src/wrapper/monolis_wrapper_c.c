@@ -134,6 +134,8 @@ void monolis_copy_nonzero_pattern(
   int ndof = in->mat.NDOF;
   int nz = in->mat.NZ;
 
+  monolis_copy_param(in, out);
+
   out->mat.N = n;
   out->mat.NP = np;
   out->mat.NDOF = ndof;
@@ -178,6 +180,39 @@ void monolis_copy_nonzero_pattern(
   for(int i=0; i<nz; i++) {
     out->mat.permR[i] = in->mat.permR[i];
   }
+}
+
+void monolis_copy_param(
+  MONOLIS* in,
+  MONOLIS* out)
+{
+  out->prm.method = in->prm.method;
+  out->prm.precond = in->prm.precond;
+  out->prm.maxiter = in->prm.maxiter;
+  out->prm.curiter = in->prm.curiter;
+  out->prm.ierr = in->prm.ierr;
+  out->prm.tol = in->prm.tol;
+  out->prm.curresid = in->prm.curresid;
+  out->prm.is_scaling = in->prm.is_scaling;
+  out->prm.is_reordering = in->prm.is_reordering;
+  out->prm.is_init_x = in->prm.is_init_x;
+  out->prm.is_debug = in->prm.is_debug;
+  out->prm.show_iterlog = in->prm.show_iterlog;
+  out->prm.show_timelog = in->prm.show_timelog;
+  out->prm.show_summary = in->prm.show_summary;
+
+  out->prm.tsol = in->prm.tsol;
+  out->prm.tprep = in->prm.tprep;
+  out->prm.tspmv = in->prm.tspmv;
+  out->prm.tdotp = in->prm.tdotp;
+  out->prm.tprec = in->prm.tprec;
+  out->prm.tcomm = in->prm.tcomm;
+
+  out->com.myrank = in->com.myrank;
+  out->com.comm = in->com.comm;
+  out->com.commsize = in->com.commsize;
+  out->com.recv_n_neib = in->com.recv_n_neib;
+  out->com.send_n_neib = in->com.send_n_neib;
 }
 
 void monolis_get_input_filename(
