@@ -29,8 +29,8 @@ void monolis_initialize(
     mat->prm.is_reordering = false;
     mat->prm.is_init_x = true;
     mat->prm.is_debug = false;
-    mat->prm.show_iterlog = true;
-    mat->prm.show_timelog = true;
+    mat->prm.show_iterlog = false;
+    mat->prm.show_timelog = false;
     mat->prm.show_summary = true;
 
     mat->prm.tsol  = 0.0;
