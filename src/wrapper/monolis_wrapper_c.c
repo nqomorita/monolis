@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "monolis.h"
 #include "metis.h"
 
@@ -7,6 +8,9 @@ void monolis_set_method   (MONOLIS* mat, int    flag) {mat->prm.method    = flag
 void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag;}
 void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
 void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
+void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
+void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_time    = flag;}
+void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
 
 /* body */
 
@@ -59,16 +63,36 @@ void monolis_finalize(
 void monolis_clear(
   MONOLIS* mat)
 {
-  int ndof = mat->mat.NDOF;
-  int ndof2 = mat->mat.NDOF*mat->mat.NDOF;
+  monolis_clear_mat(mat);
+  monolis_clear_rhs(mat);
+  monolis_clear_solution(mat);
+}
 
-  for(int i=0; i<(mat->mat.NP*ndof); i++) {
-    mat->mat.X[i] = 0.0;
-    mat->mat.B[i] = 0.0;
-  }
+void monolis_clear_mat(
+  MONOLIS* mat)
+{
+  int ndof2 = mat->mat.NDOF*mat->mat.NDOF;
 
   for(int i=0; i<(mat->mat.NZ*ndof2); i++) {
     mat->mat.A[i] = 0.0;
+  }
+}
+
+void monolis_clear_rhs(
+  MONOLIS* mat){
+  int ndof = mat->mat.NDOF;
+
+  for(int i=0; i<(mat->mat.NP*ndof); i++) {
+    mat->mat.B[i] = 0.0;
+  }
+}
+
+void monolis_clear_solution(
+  MONOLIS* mat){
+  int ndof = mat->mat.NDOF;
+
+  for(int i=0; i<(mat->mat.NP*ndof); i++) {
+    mat->mat.X[i] = 0.0;
   }
 }
 

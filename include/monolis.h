@@ -100,18 +100,31 @@ typedef struct {
 
 /* getter */
 int monolis_get_global_comm();
+
 int monolis_get_global_commsize();
+
 int monolis_get_global_myrank();
+
 double monolis_get_time();
 
 void monolis_get_input_filename();
 
 /* setter */
 void monolis_set_method   (MONOLIS* mat, int    flag);
+
 void monolis_set_precond  (MONOLIS* mat, int    flag);
+
 void monolis_set_maxiter  (MONOLIS* mat, int    flag);
+
 void monolis_set_tolerance(MONOLIS* mat, double flag);
 
+void monolis_show_iterlog (MONOLIS* mat, bool   flag);
+
+void monolis_show_timelog (MONOLIS* mat, bool   flag);
+
+void monolis_show_summary (MONOLIS* mat, bool   flag);
+
+/* mat initializer */
 void monolis_global_initialize();
 
 void monolis_global_finalize();
@@ -122,7 +135,17 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat);
 
+/* mat clear */
 void monolis_clear(
+  MONOLIS* mat);
+
+void monolis_clear_mat(
+  MONOLIS* mat);
+
+void monolis_clear_rhs(
+  MONOLIS* mat);
+
+void monolis_clear_solution(
   MONOLIS* mat);
 
 void monolis_get_CRR_format(
