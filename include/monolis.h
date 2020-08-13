@@ -48,7 +48,7 @@ typedef struct {
   bool is_debug;
   bool is_check_diag;
   bool show_iterlog;
-  bool show_time;
+  bool show_timelog;
   bool show_summary;
 
   /* time */
@@ -248,7 +248,10 @@ void monolis_solve_c_main(
   int      method,
   int      precond,
   int      maxiter,
-  double   tol);
+  double   tol,
+  int      iterlog,
+  int      timelog,
+  int      summary);
 
 void monolis_qsort_int(
   int* array,

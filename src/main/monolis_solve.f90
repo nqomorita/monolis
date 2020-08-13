@@ -141,13 +141,15 @@ contains
   !> c interface
   subroutine monolis_solve_c(N, NP, NZ, NDOF, A, X, B, index, item, &
     myrank, comm, commsize, recv_n_neib, send_n_neib, &
-    method, precond, maxiter, tol) &
+    method, precond, maxiter, tol, &
+    iterlog, timelog, sumlog) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: myrank, comm, commsize, recv_n_neib, send_n_neib
     integer(c_int), intent(in), value :: method, precond, maxiter
+    integer(c_int), intent(in), value :: iterlog, timelog, sumlog
     integer(c_int), intent(in), target :: index(0:N)
     integer(c_int), intent(in), target :: item(NZ)
     real(c_double), intent(in), value :: tol
@@ -181,10 +183,10 @@ contains
     monolis%PRM%is_scaling    = .false.
     monolis%PRM%is_reordering = .false.
     monolis%PRM%is_init_x     = .true.
-    monolis%PRM%is_debug      = .true.
-    monolis%PRM%show_iterlog  = .true.
-    monolis%PRM%show_time     = .true.
-    monolis%PRM%show_summary  = .true.
+    monolis%PRM%is_debug      = .false.
+    if(iterlog == 1) monolis%PRM%show_iterlog  = .true.
+    if(timelog == 1) monolis%PRM%show_time     = .true.
+    if(sumlog  == 1) monolis%PRM%show_summary  = .true.
 
     call monolis_solve(monolis, B, X)
   end subroutine monolis_solve_c

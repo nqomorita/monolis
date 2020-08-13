@@ -9,7 +9,7 @@ void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag
 void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
 void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
-void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_time    = flag;}
+void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
 
 /* body */
@@ -30,7 +30,7 @@ void monolis_initialize(
     mat->prm.is_init_x = true;
     mat->prm.is_debug = false;
     mat->prm.show_iterlog = true;
-    mat->prm.show_time = true;
+    mat->prm.show_timelog = true;
     mat->prm.show_summary = true;
 
     mat->prm.tsol  = 0.0;
@@ -315,6 +315,13 @@ void monolis_solve(
   int np = mat->mat.N;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
+  int iterlog = 0;
+  int timelog = 0;
+  int summary = 0;
+
+  if(mat->prm.show_iterlog) iterlog = 1;
+  if(mat->prm.show_timelog) timelog = 1;
+  if(mat->prm.show_summary) summary = 1;
 
   monolis_solve_c_main(
     n,
@@ -334,5 +341,8 @@ void monolis_solve(
     mat->prm.method,
     mat->prm.precond,
     mat->prm.maxiter,
-    mat->prm.tol);
+    mat->prm.tol,
+    iterlog,
+    timelog,
+    summary);
 }
