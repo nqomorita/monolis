@@ -9,6 +9,9 @@ extern "C" {
 #include <stdbool.h>
 #include "monolis_struct.h"
 
+void monolis_com_input_comm_table(
+  MONOLIS* mat);
+
 void monolis_add_sparse_matrix(
   MONOLIS* mat,
   int      nbase_func,

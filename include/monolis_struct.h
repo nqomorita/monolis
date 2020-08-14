@@ -8,6 +8,9 @@ extern "C" {
 
 #include <stdbool.h>
 
+const int monolis_success = 0;
+const int monolis_fail    = 1;
+
 const int monolis_iter_CG       = 1;
 const int monolis_iter_GropCG   = 2;
 const int monolis_iter_PipeCG   = 3;
@@ -74,6 +77,9 @@ typedef struct {
   int* send_neib_pe;
   int* send_index;
   int* send_item;
+
+  int* global_node_id;
+  int* global_elem_id;
 } MONOLIS_COM;
 
 typedef struct {
