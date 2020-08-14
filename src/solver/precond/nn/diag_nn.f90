@@ -17,10 +17,10 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble), allocatable :: T(:), LU(:,:)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
+    integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble), allocatable :: T(:), LU(:,:)
+    real(kdouble), pointer :: A(:), ALU(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
@@ -29,13 +29,10 @@ contains
     index => monoMAT%index
     item => monoMAT%item
 
-    allocate(T(NDOF))
-    allocate(LU(NDOF,NDOF))
-    allocate(monoMAT%monoTree%D(NDOF2*N))
+    allocate(T(NDOF), source = 0.0d0)
+    allocate(LU(NDOF,NDOF), source = 0.0d0)
+    allocate(monoMAT%monoTree%D(NDOF2*N), source = 0.0d0)
     ALU => monoMAT%monoTree%D
-    T   = 0.0d0
-    ALU = 0.0d0
-    LU  = 0.0d0
 
     do i = 1, N
       jS = index(i-1) + 1
@@ -80,10 +77,10 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, N, NDOF, NDOF2
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: ALU(:)
-    real(kind=kdouble), allocatable :: T(:)
+    integer(kint) :: i, j, k, N, NDOF, NDOF2
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble), pointer :: ALU(:)
+    real(kdouble), allocatable :: T(:)
 
     N     = monoMAT%N
     NDOF  = monoMAT%NDOF
@@ -119,7 +116,7 @@ contains
   subroutine monolis_precond_diag_nn_clear(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble), pointer :: ALU(:)
+    real(kdouble), pointer :: ALU(:)
     ALU => monoMAT%monoTree%D
     deallocate(ALU)
   end subroutine monolis_precond_diag_nn_clear

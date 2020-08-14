@@ -31,13 +31,10 @@ contains
     item => monoMAT%item
     sigma = 1.0d0
 
-    allocate(T(NDOF))
-    allocate(LU(NDOF,NDOF))
-    allocate(monoMAT%monoTree%D(NDOF2*N))
+    allocate(T(NDOF), source = 0.0d0)
+    allocate(LU(NDOF,NDOF), source = 0.0d0)
+    allocate(monoMAT%monoTree%D(NDOF2*N), source = 0.0d0)
     ALU => monoMAT%monoTree%D
-    T   = 0.0d0
-    ALU = 0.0d0
-    LU  = 0.0d0
 
     do i = 1, N
       jS = index(i-1) + 1
@@ -47,11 +44,11 @@ contains
         if(i == in)then
           do j = 1, NDOF
             do k = 1, NDOF
-              LU(j,k) = A(NDOF2*(i-1) + NDOF*(j-1) + k)
+              LU(j,k) = A(NDOF2*(ii-1) + NDOF*(j-1) + k)
             enddo
           enddo
-
           do k = 1, NDOF
+            if(LU(k,k) == 0.0d0) stop "** monolis error: zero diag in monolis_precond_sor_nn_setup"
             LU(k,k) = 1.0d0/LU(k,k)
             do l = k+1, NDOF
               LU(l,k) = LU(l,k)*LU(k,k)
