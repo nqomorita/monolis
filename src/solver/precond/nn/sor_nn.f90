@@ -17,11 +17,11 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: sigma
-    real(kind=kdouble), allocatable :: T(:), LU(:,:)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
+    integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: sigma
+    real(kdouble), allocatable :: T(:), LU(:,:)
+    real(kdouble), pointer :: A(:), ALU(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
@@ -81,12 +81,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, jE, jS, jn, k, l, N, NP, NDOF, NDOF2
-    integer(kind=kint), pointer :: index(:)
-    integer(kind=kint), pointer :: item(:)
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
-    real(kind=kdouble), allocatable :: XT(:), YT(:), ST(:)
+    integer(kint) :: i, j, jE, jS, jn, k, l, N, NP, NDOF, NDOF2
+    integer(kint), pointer :: index(:)
+    integer(kint), pointer :: item(:)
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble), pointer :: A(:), ALU(:)
+    real(kdouble), allocatable :: XT(:), YT(:), ST(:)
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -194,7 +194,7 @@ contains
   subroutine monolis_precond_sor_nn_clear(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble), pointer :: ALU(:)
+    real(kdouble), pointer :: ALU(:)
     ALU => monoMAT%monoTree%D
     deallocate(ALU)
   end subroutine monolis_precond_sor_nn_clear
