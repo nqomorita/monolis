@@ -140,18 +140,25 @@ contains
 
   !> c interface
   subroutine monolis_solve_c(N, NP, NZ, NDOF, A, X, B, index, item, &
-    myrank, comm, commsize, recv_n_neib, send_n_neib, &
+    myrank, comm, commsize, &
+    recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
+    send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog, summary) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
-    integer(c_int), intent(in), value :: myrank, comm, commsize, recv_n_neib, send_n_neib
+    integer(c_int), intent(in), value :: myrank, comm, commsize
+    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), value :: method, precond, maxiter
     integer(c_int), intent(in), value :: iterlog, timelog, summary
     integer(c_int), intent(in), target :: index(0:N)
     integer(c_int), intent(in), target :: item(NZ)
+    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
+    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
     real(c_double), intent(in), value :: tol
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(in), target :: X(NDOF*N)
@@ -173,7 +180,13 @@ contains
     monoliS%COM%comm = comm
     monoliS%COM%commsize = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
+    monoliS%COM%recv_neib_pe => recv_neib_pe
+    monoliS%COM%recv_index => recv_index
+    monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
+    monoliS%COM%send_neib_pe => send_neib_pe
+    monoliS%COM%send_index => send_index
+    monoliS%COM%send_item => send_item
 
     !> for monoPRM
     monolis%PRM%method = method

@@ -52,7 +52,7 @@ void monolis_com_input_comm_table(
 
     mat->com.send_index = (int*)calloc(nneib+1, sizeof(int));
     mat->com.send_item = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nneib; i++){
+    for(int i=0; i<nneib+1; i++){
       fscanf(fp, "%d", &(mat->com.send_index[i]));
     }
     for(int i=0; i<nitem; i++){
@@ -62,14 +62,15 @@ void monolis_com_input_comm_table(
 
   fp = monolis_open_comm_table(fp, "monolis.recv", mat->com.myrank);
     fscanf(fp, "%d %d", &nneib, &nitem);
-    mat->com.recv_neib_pe = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nitem; i++){
+    mat->com.recv_n_neib = nneib;
+    mat->com.recv_neib_pe = (int*)calloc(nneib, sizeof(int));
+    for(int i=0; i<nneib; i++){
       fscanf(fp, "%d", &(mat->com.recv_neib_pe[i]));
     }
 
     mat->com.recv_index = (int*)calloc(nneib+1, sizeof(int));
     mat->com.recv_item = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nneib; i++){
+    for(int i=0; i<nneib+1; i++){
       fscanf(fp, "%d", &(mat->com.recv_index[i]));
     }
     for(int i=0; i<nitem; i++){
@@ -510,6 +511,8 @@ void monolis_solve(
   int iterlog = 0;
   int timelog = 0;
   int summary = 0;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
@@ -525,11 +528,21 @@ void monolis_solve(
     b,
     mat->mat.index,
     mat->mat.item,
+    /* comm */
     mat->com.myrank,
     mat->com.comm,
     mat->com.commsize,
     mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
     mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item,
+    /* parameter */
     mat->prm.method,
     mat->prm.precond,
     mat->prm.maxiter,
