@@ -1,5 +1,6 @@
 module mod_monolis_c2d3_shape
   use mod_monolis_prm
+  use mod_monolis_shape_util
   implicit none
 
   private
@@ -26,6 +27,7 @@ module mod_monolis_c2d3_shape
     public :: monolis_C2D3_node_point
     public :: monolis_C2D3_shapefunc
     public :: monolis_C2D3_shapefunc_deriv
+    public :: monolis_C2D3_get_global_deriv
 
 contains
 
@@ -81,5 +83,16 @@ contains
     func(2,2) =  0.0d0
     func(3,2) =  1.0d0
   end subroutine monolis_C2D3_shapefunc_deriv
+
+  subroutine monolis_C2D3_get_global_deriv(node, r, dndx, det)
+    implicit none
+    real(kdouble) :: node(2,3), r(2), dndx(3,2), deriv(3,2)
+    real(kdouble) :: xj(2,2), inv(2,2), det
+
+    call monolis_C2D3_shapefunc_deriv(r, deriv)
+    xj = matmul(node, deriv)
+    call monolis_get_inverse_matrix_2d(xj, inv, det)
+    dndx = matmul(deriv, inv)
+  end subroutine monolis_C2D3_get_global_deriv
 
 end module mod_monolis_c2d3_shape
