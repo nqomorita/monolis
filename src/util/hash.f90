@@ -82,7 +82,7 @@ contains
   subroutine monolis_hash_push(monolis_hash_tree, key, val, is_pushed, is_exist)
     implicit none
     type(type_monolis_hash_tree) :: monolis_hash_tree
-    integer(kint) :: hash, val
+    integer(kint) :: hash, val, tmp
     character :: key*27
     logical :: is_exist, is_pushed
 
@@ -94,13 +94,14 @@ contains
     endif
 
     call monolis_hash_key(key, hash)
-    call monolis_hash_list_get(monolis_hash_tree, key, hash, val, is_exist)
+    call monolis_hash_list_get(monolis_hash_tree, key, hash, tmp, is_exist)
 
     if(.not. is_exist)then
       call monolis_hash_list_push(monolis_hash_tree, key, hash, val)
       monolis_hash_tree%n_put = monolis_hash_tree%n_put + 1
       is_pushed = .true.
     else
+write(*,*)"here", val
       call monolis_hash_list_update(monolis_hash_tree, key, hash, val)
     endif
   end subroutine monolis_hash_push
@@ -161,6 +162,7 @@ contains
       if(monolis_hash_tree%bin(index)%list(i)%key == key)then
         val = monolis_hash_tree%bin(index)%list(i)%val
         is_exist = .true.
+        return
       endif
     enddo
   end subroutine monolis_hash_list_get
