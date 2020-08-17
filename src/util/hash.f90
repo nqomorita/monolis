@@ -101,7 +101,6 @@ contains
       monolis_hash_tree%n_put = monolis_hash_tree%n_put + 1
       is_pushed = .true.
     else
-write(*,*)"here", val
       call monolis_hash_list_update(monolis_hash_tree, key, hash, val)
     endif
   end subroutine monolis_hash_push
