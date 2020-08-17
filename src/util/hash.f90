@@ -10,6 +10,7 @@ module mod_monolis_hash
   public :: monolis_hash_finalize
   public :: monolis_hash_get
   public :: monolis_hash_push
+  public :: monolis_hash_list_update
   public :: type_monolis_hash_tree
 
   integer(kint), save :: monolis_current_hash_size = 1
@@ -99,6 +100,8 @@ contains
       call monolis_hash_list_push(monolis_hash_tree, key, hash, val)
       monolis_hash_tree%n_put = monolis_hash_tree%n_put + 1
       is_pushed = .true.
+    else
+      call monolis_hash_list_update(monolis_hash_tree, key, hash, val)
     endif
   end subroutine monolis_hash_push
 
@@ -192,6 +195,22 @@ contains
     nullify(old_list)
     nullify(new_list)
   end subroutine monolis_hash_list_push
+
+  subroutine monolis_hash_list_update(monolis_hash_tree, key, hash, val)
+    implicit none
+    type(type_monolis_hash_tree) :: monolis_hash_tree
+    integer(kind=kint) :: i, n
+    integer(kind=kint) :: index, hash, val
+    character :: key*27
+
+    call monolis_index_key(hash, index, monolis_hash_tree%tree_size)
+    n = monolis_hash_tree%bin(index)%n
+    do i = 1, n
+      if(monolis_hash_tree%bin(index)%list(i)%key == key)then
+        monolis_hash_tree%bin(index)%list(i)%val = val
+      endif
+    enddo
+  end subroutine monolis_hash_list_update
 
   !> BJD2 hash function
   subroutine monolis_hash_key(key, hash)
