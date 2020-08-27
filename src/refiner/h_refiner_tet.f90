@@ -8,15 +8,11 @@ program monolis_refiner
   logical :: is_format_id
 
   call monolis_set_debug(.true.)
-  call monolis_debug_header("monolis_refiner for HEX element")
+  call monolis_debug_header("monolis_h_refiner for TET element")
+  call monolis_debug_header("*** function does not supported")
 
   !call monolis_get_refiner_arg(is_format_id)
-  is_format_id = .true.
-
-  call monolis_input_mesh(mesh, is_format_id)
-
-
-
+  !is_format_id = .true.
+  !call monolis_input_mesh(mesh, is_format_id)
   !call monolis_output_refined_mesh(mesh, is_format_id)
-
 end program monolis_refiner
