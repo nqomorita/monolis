@@ -50,7 +50,10 @@ LIB_DIR  = ./lib
 LIB_LIST = libmonolis.a
 MONOLIS_LIB = -L$(LIB_DIR) -lmonolis
 BIN_PART = monolis_partitioner
-BIN_REFN = monolis_refiner
+BIN_REF1 = monolis_h_refiner_hex
+BIN_REF2 = monolis_h_refiner_tet
+BIN_REF3 = monolis_p_refiner_hex
+BIN_REF4 = monolis_p_refiner_tet
 BIN_TEST = monolis_test
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
@@ -61,7 +64,10 @@ AR       = - ar ruv
 
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 PARTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PART))
-REFNTARGET = $(addprefix $(BIN_DIR)/, $(BIN_REFN))
+REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
+REF2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF2))
+REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
+REF4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF4))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 util.f90 stdlib.f90 hash.f90
@@ -82,41 +88,57 @@ SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
 SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix main/, $(SRC_LIST_MAIN))
-SRC_PART_LIST   = partitioner/partitioner.f90 $(SRC_ALL_LIST)
-SRC_REFN_LIST   = refiner/refiner.f90 $(SRC_ALL_LIST)
-SRC_TEST_LIST   = util/test.f90 $(SRC_ALL_LIST)
+SRC_PART_LIST   = partitioner/partitioner.f90
+SRC_REF1_LIST   = refiner/h_refiner_hex.f90
+SRC_REF2_LIST   = refiner/h_refiner_tet.f90
+SRC_REF3_LIST   = refiner/p_refiner_hex.f90
+SRC_REF4_LIST   = refiner/p_refiner_tet.f90
+SRC_TEST_LIST   = util/test.f90
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
-OBJS1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
-OBJS = $(OBJS1:.c=.o)
+OBJSt = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
+OBJS = $(OBJSt:.c=.o)
 
 SOURCES_PART = $(addprefix $(SRC_DIR)/, $(SRC_PART_LIST))
-OBJS_PART1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
-OBJS_PART = $(OBJS_PART1:.c=.o)
+OBJS_PART = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
 
-SOURCES_REFN = $(addprefix $(SRC_DIR)/, $(SRC_REFN_LIST))
-OBJS_REFN1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REFN:.f90=.o))
-OBJS_REFN = $(OBJS_REFN1:.c=.o)
+SOURCES_REF1 = $(addprefix $(SRC_DIR)/, $(SRC_REF1_LIST))
+OBJS_REF1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+
+SOURCES_REF2 = $(addprefix $(SRC_DIR)/, $(SRC_REF2_LIST))
+OBJS_REF2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+
+SOURCES_REF3 = $(addprefix $(SRC_DIR)/, $(SRC_REF3_LIST))
+OBJS_REF3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+
+SOURCES_REF4 = $(addprefix $(SRC_DIR)/, $(SRC_REF4_LIST))
+OBJS_REF4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
 
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST_LIST))
-OBJS_TEST1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
-OBJS_TEST = $(OBJS_TEST1:.c=.o)
+OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
-all: $(LIBTARGET) $(PARTTARGET) $(REFNTARGET) $(TESTTARGET)
-
-#	$(CD) sample && $(MAKE)
+all: $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET)
 
 $(LIBTARGET): $(OBJS)
 	$(AR) $@ $(OBJS)
 
 $(PARTTARGET): $(OBJS_PART)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_PART) $(LIBRARY)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_PART) $(LIBRARY) $(MONOLIS_LIB)
 
-$(REFNTARGET): $(OBJS_REFN)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_REFN) $(LIBRARY)
+$(REF1TARGET): $(OBJS_REF1)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_REF1) $(LIBRARY) $(MONOLIS_LIB)
+
+$(REF2TARGET): $(OBJS_REF2)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_REF2) $(LIBRARY) $(MONOLIS_LIB)
+
+$(REF3TARGET): $(OBJS_REF3)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_REF3) $(LIBRARY) $(MONOLIS_LIB)
+
+$(REF4TARGET): $(OBJS_REF4)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_REF4) $(LIBRARY) $(MONOLIS_LIB)
 
 $(TESTTARGET): $(OBJS_TEST)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(LIBRARY)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(LIBRARY) $(MONOLIS_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
