@@ -34,4 +34,15 @@ module mod_monolis_mesh
     integer(kint), allocatable :: recv_item_domid(:)
   end type monolis_node_list
 
+contains
+
+  subroutine monolis_get_connectivity(mesh, eid, nbase_func, conn)
+    implicit none
+    type(monolis_mesh) :: mesh
+    integer(kint) :: i, eid, nbase_func, conn(nbase_func)
+
+    do i = 1, nbase_func
+      conn(i) = mesh%elem(i,eid)
+    enddo
+  end subroutine monolis_get_connectivity
 end module mod_monolis_mesh

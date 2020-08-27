@@ -107,13 +107,13 @@ SOURCES_REF1 = $(addprefix $(SRC_DIR)/, $(SRC_REF1))
 OBJS_REF1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
 
 SOURCES_REF2 = $(addprefix $(SRC_DIR)/, $(SRC_REF2))
-OBJS_REF2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+OBJS_REF2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF2:.f90=.o))
 
 SOURCES_REF3 = $(addprefix $(SRC_DIR)/, $(SRC_REF3))
-OBJS_REF3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+OBJS_REF3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF3:.f90=.o))
 
 SOURCES_REF4 = $(addprefix $(SRC_DIR)/, $(SRC_REF4))
-OBJS_REF4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
+OBJS_REF4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF4:.f90=.o))
 
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))

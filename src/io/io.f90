@@ -61,10 +61,10 @@ contains
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = trim(output_dir)//"node."//trim(cnum)
-      call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, node_list(i)%nid, mesh%node)
+      call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%node, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem."//trim(cnum)
-      call monolis_output_mesh_elem(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
+      call monolis_output_mesh_elem_ref(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
         mesh%elem, node_list(i))
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
@@ -226,23 +226,47 @@ contains
     close(20)
   end subroutine monolis_input_mesh_restart_data
 
-  subroutine monolis_output_mesh_node(fname, nnode, nnode_in, nid, node)
+  subroutine monolis_output_mesh_node(fname, nnode, nnode_in, node, nid)
     implicit none
     integer(kint) :: nnode, nnode_in
-    integer(kint) :: i, in, nid(:)
+    integer(kint) :: i, in
+    integer(kint), optional :: nid(:)
     real(kdouble) :: node(:,:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
+    if(present(nid))then
       write(20,"(i0,x,i0)")nnode_in, nnode
       do i = 1, nnode
         in = nid(i)
         write(20,"(1p3e22.14)") node(1,in), node(2,in), node(3,in)
       enddo
+    else
+      write(20,"(i0)")nnode
+      do i = 1, nnode
+        write(20,"(1p3e22.14)") node(1,i), node(2,i), node(3,i)
+      enddo
+    endif
     close(20)
   end subroutine monolis_output_mesh_node
 
-  subroutine monolis_output_mesh_elem(fname, nelem, nbase, eid, elem, node_list)
+  subroutine monolis_output_mesh_elem(fname, nelem, nbase, elem)
+    implicit none
+    integer(kint) :: i, j, in, jn, nelem, nbase, elem(:,:)
+    character :: fname*100
+
+    open(20, file = fname, status = "replace")
+      write(20,"(i0,x,i0)")nelem, nbase
+      do i = 1, nelem
+        do j = 1, nbase
+          write(20,"(x,i0,$)") elem(j,i)
+        enddo
+        write(20,*)""
+      enddo
+    close(20)
+  end subroutine monolis_output_mesh_elem
+
+  subroutine monolis_output_mesh_elem_ref(fname, nelem, nbase, eid, elem, node_list)
     implicit none
     type(monolis_node_list) :: node_list
     integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:)
@@ -259,7 +283,7 @@ contains
         write(20,*)""
       enddo
     close(20)
-  end subroutine monolis_output_mesh_elem
+  end subroutine monolis_output_mesh_elem_ref
 
   subroutine monolis_output_mesh_global_nid(fname, nnode, global_nid, nid)
     implicit none
