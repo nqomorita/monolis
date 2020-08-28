@@ -148,10 +148,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) $(FLAG_METIS) -o $@ -c $<
 
 clean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(TESTTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET) ./include/*.mod
 
 distclean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(TESTTARGET) /include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET) /include/*.mod
 
 sampleclean:
 

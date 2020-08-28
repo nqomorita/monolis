@@ -16,10 +16,10 @@ contains
     implicit none
     type(monolis_mesh) :: mesh, mesh_ref
     integer(kint) :: itable(3,6), conn(mesh%nbase_func)
-    integer(kint) :: i, eid, i1, i2, tmp, newid, nid(6)
+    integer(kint) :: i, eid, i1, i2, tmp, newid, nid(6), maxid
     character :: ckey*27
     logical :: is_exist, is_pushed
-    integer(kint), allocatable :: tet2conn(:,:)
+    integer(kint), allocatable :: tet2conn(:,:), tet2nid(:)
     real(kdouble), allocatable :: pnode(:,:)
 
     itable(1,1) = 1; itable(2,1) = 2
@@ -30,11 +30,13 @@ contains
     itable(1,6) = 3; itable(2,6) = 4
 
     allocate(tet2conn(10,mesh%nelem), source = 0)
+    allocate(tet2nid(6*mesh%nelem), source = 0)
     allocate(pnode(3,6*mesh%nelem), source = 0.0d0)
 
     call monolis_hash_init(hash_tree)
 
     newid = 0
+    maxid = maxval(mesh%nid)
     do eid = 1, mesh%nelem
       call monolis_get_connectivity(mesh, eid, mesh%nbase_func, conn)
 
@@ -50,6 +52,7 @@ contains
         else
           newid = newid + 1
           nid(i) = mesh%nnode + newid
+          tet2nid(newid) = maxid + newid
           pnode(:,newid) = get_mid_point_position(mesh, i1, i2)
           call monolis_hash_push(hash_tree, ckey, nid(i), is_pushed, is_exist)
         endif
@@ -83,7 +86,7 @@ contains
 
     mesh_ref%nnode = mesh%nnode + newid
     mesh_ref%nelem = mesh%nelem
-    mesh_ref%nbase_func = mesh%nbase_func
+    mesh_ref%nbase_func = 10
     allocate(mesh_ref%node( 3,mesh_ref%nnode), source = 0.0d0)
     allocate(mesh_ref%elem(10,mesh_ref%nelem), source = 0)
   end subroutine alloc_mesh

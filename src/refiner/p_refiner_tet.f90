@@ -28,9 +28,10 @@ program monolis_p_refiner_tet
   call system('if [ ! -d refined ]; then (echo "** create refined"; mkdir -p refined); fi')
 
   fname = trim(output_dir)//"node.dat"
-  call monolis_output_mesh_node(fname, mesh_ref%nnode, mesh_ref%nnode, mesh%node)
+  call monolis_output_mesh_node(fname, mesh_ref%nnode, mesh_ref%nnode, mesh_ref%node)
 
   fname = trim(output_dir)//"elem.dat"
-  call monolis_output_mesh_elem(fname, mesh_ref%nelem, mesh%nbase_func, mesh_ref%elem)
+  if(minval(mesh%nid) == 0) mesh_ref%elem = mesh_ref%elem - 1
+  call monolis_output_mesh_elem(fname, mesh_ref%nelem, mesh_ref%nbase_func, mesh_ref%elem)
 end program monolis_p_refiner_tet
 
