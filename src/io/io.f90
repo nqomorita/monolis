@@ -109,11 +109,15 @@ contains
           read(20,*) nid(i), node(1,i), node(2,i), node(3,i)
         enddo
       else
-        read(20,*, iostat = ierr) nnode_in, nnode
+        read(20,*, iostat = ierr) t(1), t(2)
+        !read(20,*, iostat = ierr) nnode_in, nnode
         if(ierr /= 0)then
           rewind(20)
           read(20,*) nnode
           nnode_in = nnode
+        else
+          rewind(20)
+          read(20,*) nnode_in, nnode
         endif
 
         allocate(node(3,nnode), source = 0.0d0)
