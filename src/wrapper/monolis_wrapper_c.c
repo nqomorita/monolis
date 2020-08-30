@@ -38,6 +38,15 @@ void monolis_com_input_comm_table(
 
   if(mat->com.commsize <= 1){
     mat->com.commsize = 1;
+    mat->com.send_n_neib = 0;
+    mat->com.recv_n_neib = 0;
+    mat->com.send_neib_pe = (int*)calloc(1, sizeof(int));
+    mat->com.send_index = (int*)calloc(2, sizeof(int));
+    mat->com.send_item = (int*)calloc(1, sizeof(int));
+    mat->com.recv_neib_pe = (int*)calloc(1, sizeof(int));
+    mat->com.recv_index = (int*)calloc(2, sizeof(int));
+    mat->com.recv_item = (int*)calloc(1, sizeof(int));
+    mat->com.global_node_id = (int*)calloc(1, sizeof(int));
     return;
   }
 
@@ -511,8 +520,8 @@ void monolis_solve(
   int iterlog = 0;
   int timelog = 0;
   int summary = 0;
-  //int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
-  //int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
@@ -533,15 +542,15 @@ void monolis_solve(
     mat->com.comm,
     mat->com.commsize,
     mat->com.recv_n_neib,
-//    recv_nitem,
-//    mat->com.recv_neib_pe,
-//    mat->com.recv_index,
-//    mat->com.recv_item,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
     mat->com.send_n_neib,
-//    send_nitem,
-//    mat->com.send_neib_pe,
-//    mat->com.send_index,
-//    mat->com.send_item,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item,
     /* parameter */
     mat->prm.method,
     mat->prm.precond,
