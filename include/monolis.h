@@ -32,8 +32,9 @@ int monolis_get_global_myrank();
 /* get time */
 double monolis_get_time();
 
-/* to be updated */
-void monolis_get_input_filename();
+/* get input file name for parallel computation */
+const char* monolis_get_input_filename(
+  const char* filename_body);
 
 
 

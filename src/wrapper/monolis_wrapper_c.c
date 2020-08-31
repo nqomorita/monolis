@@ -299,26 +299,25 @@ void monolis_copy_param(
   out->com.send_n_neib = in->com.send_n_neib;
 }
 
-void monolis_get_input_filename(
-  )
+const char* monolis_get_input_filename(
+  const char* filename_body)
 {
-/*
-    int commsize;
-    int myrank;
-    char str_myrank[8];
+  int commsize;
+  int myrank;
+  int buf_size = 1000;
+  char ctmp[buf_size];
+  const char* filename;
 
-    commsize = monolis_get_global_commsize();
-    myrank = monolis_get_global_myrank();
-    snprintf(str_myrank, sizeof(str_myrank), "%d", myrank);
+  commsize = monolis_get_global_commsize();
+  myrank = monolis_get_global_myrank();
 
-    if( commsize > 1){
-      strcpy(INPUT_FILENAME_NODE_PAR, INPUT_FILENAME_NODE);
-      strcpy(INPUT_FILENAME_ELEM_PAR, INPUT_FILENAME_ELEM);
-    } else {
-      strcpy(INPUT_FILENAME_NODE_PAR, INPUT_FILENAME_NODE);
-      strcpy(INPUT_FILENAME_ELEM_PAR, INPUT_FILENAME_ELEM);
-    }
-*/
+  if(commsize > 1){
+    snprintf(ctmp, buf_size, "%s/%s.%d", "parted", filename_body, myrank);
+  } else {
+    snprintf(ctmp, buf_size, "%s", filename_body);
+  }
+  filename = &(ctmp[0]);
+  return filename;
 }
 
 void monolis_convert_mesh_to_connectivity(

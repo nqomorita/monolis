@@ -60,10 +60,10 @@ contains
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
-      fname = trim(output_dir)//"node."//trim(cnum)
+      fname = trim(output_dir)//"node.dat."//trim(cnum)
       call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%node, node_list(i)%nid)
 
-      fname = trim(output_dir)//"elem."//trim(cnum)
+      fname = trim(output_dir)//"elem.dat."//trim(cnum)
       call monolis_output_mesh_elem_ref(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
         mesh%elem, node_list(i))
 
