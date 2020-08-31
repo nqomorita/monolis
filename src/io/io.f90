@@ -17,13 +17,13 @@ contains
 
     if(is_format_id)then
       fname = "node.dat"
-      call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node, mesh%nid)
+      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node, mesh%nid)
 
       fname = "elem.dat"
       call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
     else
       fname = "node.dat"
-      call monolis_input_mesh_node(fname, mesh%nnode_in, mesh%nnode, mesh%node)
+      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
 
       fname = "elem.dat"
       call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
@@ -50,7 +50,7 @@ contains
     type(monolis_graph) :: graph
     type(monolis_com) :: comm(:)
     type(monolis_node_list) :: node_list(:)
-    integer(kint) :: i, n_domain
+    integer(kint) :: i, n_domain, shift
     character :: cnum*5, output_dir*100, fname*100
 
     call monolis_debug_header("monolis_output_mesh")
@@ -58,14 +58,17 @@ contains
     output_dir = "parted/"
     call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
 
+    shift = 0
+    if(minval(mesh%nid) == 0) shift = -1 !> for C binding
+
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = trim(output_dir)//"node.dat."//trim(cnum)
-      call monolis_output_mesh_node(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%node, node_list(i)%nid)
+      call monolis_output_mesh_node(fname, node_list(i)%nnode, mesh%node, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.dat."//trim(cnum)
       call monolis_output_mesh_elem_ref(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
-        mesh%elem, node_list(i))
+        mesh%elem, node_list(i), shift)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
@@ -76,50 +79,30 @@ contains
         comm(i)%recv_index, comm(i)%recv_item)
 
       fname = trim(output_dir)//"node.id."//trim(cnum)
-      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
+      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
       call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, mesh%nid, node_list(i)%eid)
     enddo
   end subroutine monolis_output_mesh
 
-  subroutine monolis_input_mesh_node(fname, nnode_in, nnode, node, nid)
+  subroutine monolis_input_mesh_node(fname, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode_in, nnode, i, ierr, t(4)
+    integer(kint) :: nnode, i, ierr, t(4)
     real(kdouble), allocatable :: node(:,:)
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "old")
       if(present(nid))then
-        read(20,*, iostat = ierr) t(1), t(2), t(3)
-        !read(20,*, iostat = ierr) nnode_in, nnode
-        if(ierr /= 0)then
-          rewind(20)
-          read(20,*) nnode
-          nnode_in = nnode
-        else
-          rewind(20)
-          read(20,*) nnode_in, nnode
-        endif
-
+        read(20,*) nnode
         allocate(node(3,nnode), source = 0.0d0)
         allocate(nid(nnode), source = 0)
         do i = 1, nnode
           read(20,*) nid(i), node(1,i), node(2,i), node(3,i)
         enddo
       else
-        read(20,*, iostat = ierr) t(1), t(2)
-        !read(20,*, iostat = ierr) nnode_in, nnode
-        if(ierr /= 0)then
-          rewind(20)
-          read(20,*) nnode
-          nnode_in = nnode
-        else
-          rewind(20)
-          read(20,*) nnode_in, nnode
-        endif
-
+        read(20,*) nnode
         allocate(node(3,nnode), source = 0.0d0)
         do i = 1, nnode
           read(20,*) node(1,i), node(2,i), node(3,i)
@@ -230,9 +213,9 @@ contains
     close(20)
   end subroutine monolis_input_mesh_restart_data
 
-  subroutine monolis_output_mesh_node(fname, nnode, nnode_in, node, nid)
+  subroutine monolis_output_mesh_node(fname, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode, nnode_in
+    integer(kint) :: nnode
     integer(kint) :: i, in
     integer(kint), optional :: nid(:)
     real(kdouble) :: node(:,:)
@@ -240,7 +223,7 @@ contains
 
     open(20, file = fname, status = "replace")
     if(present(nid))then
-      write(20,"(i0,x,i0)")nnode_in, nnode
+      write(20,"(i0,x,i0)")nnode
       do i = 1, nnode
         in = nid(i)
         write(20,"(1p3e22.14)") node(1,in), node(2,in), node(3,in)
@@ -270,10 +253,10 @@ contains
     close(20)
   end subroutine monolis_output_mesh_elem
 
-  subroutine monolis_output_mesh_elem_ref(fname, nelem, nbase, eid, elem, node_list)
+  subroutine monolis_output_mesh_elem_ref(fname, nelem, nbase, eid, elem, node_list, shift)
     implicit none
     type(monolis_node_list) :: node_list
-    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:)
+    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:), shift
     character :: fname*100
 
     open(20, file = fname, status = "replace")
@@ -282,20 +265,20 @@ contains
         jn = eid(i)
         do j = 1, nbase
           in = elem(j,jn)
-          write(20,"(x,i0,$)") node_list%nid_perm(in)
+          write(20,"(x,i0,$)") node_list%nid_perm(in) + shift
         enddo
         write(20,*)""
       enddo
     close(20)
   end subroutine monolis_output_mesh_elem_ref
 
-  subroutine monolis_output_mesh_global_nid(fname, nnode, global_nid, nid)
+  subroutine monolis_output_mesh_global_nid(fname, nnode, nnode_in, global_nid, nid)
     implicit none
-    integer(kint) :: i, in, nnode, global_nid(:), nid(:)
+    integer(kint) :: i, in, nnode, nnode_in, global_nid(:), nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
-      write(20,"(i0)")nnode
+      write(20,"(i0,x,i0)")nnode, nnode_in
       do i = 1, nnode
         in = nid(i)
         write(20,"(i0)") global_nid(in)
