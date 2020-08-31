@@ -140,9 +140,10 @@ contains
     close(20)
   end subroutine monolis_input_mesh_elem
 
-  subroutine monolis_input_id(fname, id)
+  subroutine monolis_input_id(fname, id, nid_out)
     implicit none
     integer(kint) :: nid, i, j
+    integer(kint), optional :: nid_out
     integer(kint), allocatable :: id(:)
     character :: fname*100
 
@@ -156,7 +157,23 @@ contains
         read(20,*) id(i)
       enddo
     close(20)
+
+    if(present(nid_out)) nid_out = nid
   end subroutine monolis_input_id
+
+  subroutine monolis_par_input_node_id(n_domain, mesh)
+    implicit none
+    type(monolis_mesh), allocatable :: mesh(:)
+    integer(kint) :: n_domain, i
+    character :: fname*100, cnum*5
+
+    allocate(mesh(n_domain))
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted/node.id."//trim(cnum)
+      call monolis_input_id(fname, mesh(i)%nid, mesh(i)%nnode)
+    enddo
+  end subroutine monolis_par_input_node_id
 
   subroutine monolis_input_condition(fname, ncond, icond, cond)
     implicit none
@@ -177,6 +194,27 @@ contains
       enddo
     close(20)
   end subroutine monolis_input_condition
+
+  subroutine monolis_input_bc_condition(fname, ncond, ndof, icond, cond)
+    implicit none
+    integer(kint) :: ncond, ndof, i, j
+    integer(kint), allocatable :: icond(:,:)
+    real(kdouble), allocatable :: cond(:,:)
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+      read(20,*) ncond, ndof
+      call monolis_debug_int("ncond", ncond)
+      call monolis_debug_int("ndof", ndof)
+
+      allocate(icond(2,ncond), source = 0)
+      allocate(cond(ndof,ncond), source = 0.0d0)
+
+      do i = 1, ncond
+        read(20,*) icond(1,i), icond(2,i), (cond(j,i), j = 1, ndof)
+      enddo
+    close(20)
+  end subroutine monolis_input_bc_condition
 
   subroutine monolis_input_mesh_restart_data(fname, n, nbase, var, gid)
     implicit none
@@ -300,6 +338,35 @@ contains
     close(20)
   end subroutine monolis_output_mesh_global_eid
 
+  subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond, ndof, icond, cond)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh(:)
+    integer(kint) :: n_domain, ncond, ndof, i, j, k, in, nid, nnode
+    integer(kint) :: icond(:,:)
+    real(kdouble) :: cond(:,:)
+    character :: fname*100, fname_body*100, cnum*5
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+
+      open(20, file = fname, status = "replace")
+        nnode = mesh(i)%nnode
+        write(20,"(i0,x,i0)") nnode, ndof
+        in = 1
+        do j = 1, nnode
+          nid = mesh(i)%nid(j)
+          write(20,"(i0,x,i0,x,$)") in, icond(2,nid)
+          do k = 1, ndof
+            write(20,"(1pe12.5,$)") cond(k,nid)
+          enddo
+          write(20,*)""
+        enddo
+      close(20)
+    enddo
+  end subroutine monolis_par_output_condition
+
   subroutine monolis_output_mesh_comm(fname, n_neib, neib_pe, index, item)
     implicit none
     integer(kint) :: n_neib
@@ -420,5 +487,45 @@ contains
 
     call monolis_debug_int("n_domain", n_domain)
   end subroutine monolis_get_part_arg
+
+  subroutine monolis_get_part_bc_arg(n_domain, fname)
+    implicit none
+    integer(kint) :: i, count, n, n_domain
+    character :: argc1*128, argc2*128, fname*100
+
+    call monolis_debug_header("monolis_get_part_arg")
+
+    call monolis_set_debug(.true.)
+
+    count = iargc()
+    if(count == 1)then
+      call getarg(1, argc1)
+      if(trim(argc1) == "-h")then
+        write(*,"(a)")"-n {num of subdomain}: the number of subdomain"
+        write(*,"(a)")"-i {input filename}: input filename"
+        write(*,"(a)")"-h: help"
+        stop
+      endif
+    endif
+
+    n_domain = 1
+    if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
+    do i = 1, count/2
+      call getarg(2*i-1, argc1)
+      call getarg(2*i  , argc2)
+
+      if(trim(argc1) == "-n")then
+        read(argc2,*) n
+        n_domain = n
+      elseif(trim(argc1) == "-i")then
+        fname = trim(argc2)
+      else
+        write(*,"(a)")"* monolis input arg error"
+        stop
+      endif
+    enddo
+
+    call monolis_debug_int("n_domain", n_domain)
+  end subroutine monolis_get_part_bc_arg
 
 end module mod_monolis_io
