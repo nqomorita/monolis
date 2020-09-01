@@ -1,13 +1,17 @@
-*.o
-*.DS_Store
-*.mod
-*.a
-*.mtx
-*.inp
-*[0-9]
-bin
-include
+# ignore all
+*
+!*/
+
+# allow any
+!*.c
+!*.cpp
+!*.h
+!*.tex
+!*.sty
+!*.f90
+!*Makefile
+!.gitignore
+!*.sh
+
 lib
-monolis
-monolis_sample
-submodule
+include
