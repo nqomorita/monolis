@@ -345,21 +345,37 @@ contains
     integer(kint) :: n_domain, ncond, ndof, i, j, k, in, nid, nnode
     integer(kint) :: icond(:,:)
     real(kdouble) :: cond(:,:)
+    integer(kint), allocatable :: temp(:), perm(:)
     character :: fname*100, fname_body*100, cnum*5
+
+    allocate(temp(ncond), source = 0)
+    allocate(perm(ncond), source = 0)
+    do i = 1, ncond
+      perm(i) = i
+    enddo
+    temp = icond(1,:)
+    call monolis_qsort_int_with_perm(temp, 1, ncond, perm)
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = "parted/"//trim(fname_body)//"."//trim(cnum)
 
+      nnode = 0
+      do j = 1, mesh(i)%nnode
+        nid = mesh(i)%nid(j)
+        call monolis_bsearch_int(temp, 1, ncond, nid, in)
+        if(in /= -1) nnode = nnode + 1
+      enddo
+
       open(20, file = fname, status = "replace")
-        nnode = mesh(i)%nnode
         write(20,"(i0,x,i0)") nnode, ndof
-        in = 1
-        do j = 1, nnode
+        do j = 1, mesh(i)%nnode
           nid = mesh(i)%nid(j)
-          write(20,"(i0,x,i0,x,$)") in, icond(2,nid)
+          call monolis_bsearch_int(temp, 1, ncond, nid, in)
+          if(in == -1) cycle
+          write(20,"(i0,x,i0,x,$)") icond(1,in), icond(2,in)
           do k = 1, ndof
-            write(20,"(1pe12.5,$)") cond(k,nid)
+            write(20,"(1pe12.5,$)") cond(k,in)
           enddo
           write(20,*)""
         enddo
@@ -509,6 +525,8 @@ contains
     endif
 
     n_domain = 1
+    fname = "D_bc.dat"
+
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
     do i = 1, count/2
       call getarg(2*i-1, argc1)
