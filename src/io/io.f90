@@ -338,48 +338,52 @@ contains
     close(20)
   end subroutine monolis_output_mesh_global_eid
 
-  subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond, ndof, icond, cond)
+  subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond_all, ndof, icond, cond)
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh(:)
-    integer(kint) :: n_domain, ncond, ndof, i, j, k, in, nid, nnode
+    integer(kint) :: n_domain, ncond_all, ndof, i, j, k, in, nid, ncond, shift
     integer(kint) :: icond(:,:)
     real(kdouble) :: cond(:,:)
     integer(kint), allocatable :: temp(:), perm(:)
     character :: fname*100, fname_body*100, cnum*5
 
-    allocate(temp(ncond), source = 0)
-    allocate(perm(ncond), source = 0)
-    do i = 1, ncond
-      perm(i) = i
-    enddo
-    temp = icond(1,:)
-    call monolis_qsort_int_with_perm(temp, 1, ncond, perm)
+    shift = -1
 
     do i = 1, n_domain
+      allocate(temp(mesh(i)%nnode), source = 0)
+      allocate(perm(mesh(i)%nnode), source = 0)
+      do j = 1, mesh(i)%nnode
+        perm(j) = j
+      enddo
+      temp = mesh(i)%nid(:)
+      call monolis_qsort_int_with_perm(temp, 1, mesh(i)%nnode, perm)
+
       write(cnum,"(i0)") i-1
       fname = "parted/"//trim(fname_body)//"."//trim(cnum)
 
-      nnode = 0
-      do j = 1, mesh(i)%nnode
-        nid = mesh(i)%nid(j)
-        call monolis_bsearch_int(temp, 1, ncond, nid, in)
-        if(in /= -1) nnode = nnode + 1
+      ncond = 0
+      do j = 1, ncond_all
+        nid = icond(1,j)
+        call monolis_bsearch_int(temp, 1, mesh(i)%nnode, nid, in)
+        if(in /= -1) ncond = ncond + 1
       enddo
 
       open(20, file = fname, status = "replace")
-        write(20,"(i0,x,i0)") nnode, ndof
-        do j = 1, mesh(i)%nnode
-          nid = mesh(i)%nid(j)
-          call monolis_bsearch_int(temp, 1, ncond, nid, in)
+        write(20,"(i0,x,i0)") ncond, ndof
+        do j = 1, ncond_all
+          nid = icond(1,j)
+          call monolis_bsearch_int(temp, 1, mesh(i)%nnode, nid, in)
           if(in == -1) cycle
-          write(20,"(i0,x,i0,x,$)") icond(1,in), icond(2,in)
+          write(20,"(i0,x,i0,x,$)") in + shift, icond(2,in)
           do k = 1, ndof
             write(20,"(1pe12.5,$)") cond(k,in)
           enddo
           write(20,*)""
         enddo
       close(20)
+      deallocate(temp)
+      deallocate(perm)
     enddo
   end subroutine monolis_par_output_condition
 
