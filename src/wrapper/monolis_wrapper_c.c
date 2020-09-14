@@ -87,8 +87,10 @@ void monolis_com_input_comm_table(
     }
   fclose(fp);
 
+  int nin;
   fp = monolis_open_comm_table(fp, "node.id", mat->com.myrank);
-    fscanf(fp, "%d", &nitem);
+    fscanf(fp, "%d %d", &nitem, &nin);
+    mat->com.intrenal_nnode = nin;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.global_node_id[i]));
@@ -513,7 +515,8 @@ void monolis_solve(
   double*  x)
 {
   int n = mat->mat.N;
-  int np = mat->mat.N;
+  if(mat->com.commsize > 1 ) n = mat->com.intrenal_nnode;
+  int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
   int iterlog = 0;

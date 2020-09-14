@@ -10,6 +10,7 @@ module mod_monolis_com
     integer(kint)          :: myrank
     integer(kint)          :: comm
     integer(kint)          :: commsize
+    integer(kint)          :: intrenal_nnode
     logical :: is_overlap = .true.
 
     integer(kint)          :: recv_n_neib

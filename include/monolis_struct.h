@@ -67,6 +67,7 @@ typedef struct {
   int myrank;
   int comm;
   int commsize;
+  int intrenal_nnode;
 
   int recv_n_neib;
   int* recv_neib_pe;
