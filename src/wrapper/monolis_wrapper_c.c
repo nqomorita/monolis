@@ -509,6 +509,19 @@ void monolis_set_Dirichlet_bc(
     val);
 }
 
+void monolis_inner_product(
+  MONOLIS* mat,
+  double*  x,
+  double*  y,
+  double   sum)
+{
+  int n = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int comm = mat->com.comm;
+
+  monolis_inner_product_c_main(n, ndof, x, y, sum, comm);
+}
+
 void monolis_solve(
   MONOLIS* mat,
   double*  b,

@@ -70,6 +70,14 @@ void monolis_set_Dirichlet_bc_c_main(
   int      ndof_bc,
   double   val);
 
+void monolis_inner_product_c_main(
+  int      n,
+  int      ndof,
+  double*  x,
+  double*  y,
+  double   sum,
+  int      comm);
+
 void monolis_solve_c_main(
   int      n,
   int      np,

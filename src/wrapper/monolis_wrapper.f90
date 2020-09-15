@@ -136,6 +136,21 @@ contains
       & ndof, nid_t, ndof_bc_t, val)
   end subroutine monolis_set_Dirichlet_bc_c
 
+  !> linenar alg
+  subroutine monolis_inner_product_c(N, NDOF, X, Y, sum, comm) &
+    & bind(c, name = "monolis_inner_product_c_main")
+    use mod_monolis_com
+    use mod_monolis_linalg
+    implicit none
+    integer(c_int), intent(in), value :: N, NDOF, comm
+    real(c_double), target :: X(NDOF*N), Y(NDOF*N)
+    real(c_double), value :: sum
+    type(monolis_com) :: monoCOM
+
+    monoCOM%comm = comm
+    call monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum)
+  end subroutine monolis_inner_product_c
+
   !> std lib
   subroutine monolis_qsort_int_c(array, iS, iE) &
     & bind(c, name = "monolis_qsort_int")

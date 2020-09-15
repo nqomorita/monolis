@@ -155,6 +155,15 @@ void monolis_set_Dirichlet_bc(
 
 
 
+/* linear algebra */
+void monolis_inner_product(
+  MONOLIS* mat,
+  double*  x,
+  double*  y,
+  double   sum);
+
+
+
 /* solver */
 void monolis_solve(
   MONOLIS* mat,
