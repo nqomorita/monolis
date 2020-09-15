@@ -464,7 +464,7 @@ void monolis_add_scalar_to_sparse_matrix(
   int      submat_i,
   int      submat_j)
 {
-  int nnode = mat->mat.N;
+  int nnode = mat->mat.NP;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
 
@@ -489,7 +489,7 @@ void monolis_set_Dirichlet_bc(
   int      ndof_bc,
   double   val)
 {
-  int nnode = mat->mat.N;
+  int nnode = mat->mat.NP;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
 

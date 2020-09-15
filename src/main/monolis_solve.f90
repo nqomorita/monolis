@@ -206,7 +206,7 @@ contains
     if(timelog == 1) monolis%PRM%show_time     = .true.
     if(summary == 1) monolis%PRM%show_summary  = .true.
 
-    call monolis_solve(monolis, B, X)
+    call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
   end subroutine monolis_solve_c
 
 end module mod_monolis_solve
