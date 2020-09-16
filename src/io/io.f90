@@ -375,9 +375,9 @@ contains
           nid = icond(1,j)
           call monolis_bsearch_int(temp, 1, mesh(i)%nnode, nid, in)
           if(in == -1) cycle
-          write(20,"(i0,x,i0,x,$)") in + shift, icond(2,in)
+          write(20,"(i0,x,i0,x,$)") perm(in) + shift, icond(2,j)
           do k = 1, ndof
-            write(20,"(1pe12.5,$)") cond(k,in)
+            write(20,"(1pe12.5,$)") cond(k,j)
           enddo
           write(20,*)""
         enddo
