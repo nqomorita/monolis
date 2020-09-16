@@ -36,6 +36,9 @@ double monolis_get_time();
 const char* monolis_get_input_filename(
   const char* filename_body);
 
+/* get output file name for parallel computation */
+const char* monolis_get_output_filename(
+  const char* filename_body);
 
 
 /* matrix initializer */
