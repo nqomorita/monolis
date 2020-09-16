@@ -329,23 +329,19 @@ const char* monolis_get_output_filename(
   int commsize;
   int myrank, idx;
   int buf_size = 1000;
+  char* head;
   char* post;
-  char ctmp[buf_size], head[buf_size], body[buf_size];
+  char ctmp[buf_size], body[buf_size];
   const char* filename;
 
   commsize = monolis_get_global_commsize();
   myrank = monolis_get_global_myrank();
 
   if(commsize > 1){
-    idx = (int)(unsigned char)'.';
     snprintf(body, buf_size, "%s", filename_body);
-    post = strrchr(body, idx);
-    if(post == NULL){
-      snprintf(ctmp, buf_size, "%s", filename_body);
-    } else {
-      strncpy(head, body, post-body);
-      snprintf(ctmp, buf_size, "%s.%d%s", head, myrank, post);
-    }
+    head = strtok(body, ".");
+    post = strtok(NULL, ".");
+    snprintf(ctmp, buf_size, "%s.%d.%s", head, myrank, post);
   } else {
     snprintf(ctmp, buf_size, "%s", filename_body);
   }
