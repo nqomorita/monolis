@@ -34,6 +34,10 @@ const int monolis_prec_SPIKE  = 7;
 const int monolis_prec_DIRECT = 8;
 const int monolis_prec_MUMPS  = 9;
 
+const int monolis_sum = 1;
+const int monolis_max = 2;
+const int monolis_min = 3;
+
 typedef struct {
   int method;
   int precond;

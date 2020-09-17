@@ -52,17 +52,6 @@ contains
     monolis_get_time_c =  monolis_get_time()
   end function monolis_get_time_c
 
-!  function monolis_get_input_filename_c(input)&
-!    & bind(c, name = "monolis_get_input_filename")
-!    implicit none
-!    type(c_ptr), pointer :: input(:)
-!    !character(*,c_char) :: input
-!    character(c_char) :: monolis_get_input_filename_c
-!
-!    !monolis_get_input_filename_c = monolis_get_input_filename(input)
-!    !monolis_get_input_filename_c = trim(monolis_get_input_filename_c)//c_null_char
-!  end function monolis_get_input_filename_c
-
   !> mat
   subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CRR_format")
@@ -150,6 +139,16 @@ contains
     monoCOM%comm = comm
     call monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum)
   end subroutine monolis_inner_product_c
+
+  subroutine monolis_allreduce_double_scalar_c(val, tag, comm) &
+    & bind(c, name = "monolis_allreduce_double_scalar_c_main")
+    use mod_monolis_linalg_com
+    implicit none
+    integer(c_int), intent(in), value :: tag, comm
+    real(c_double), value :: val
+
+    call  monolis_allreduce_R1(val, tag, comm)
+  end subroutine monolis_allreduce_double_scalar_c
 
   !> std lib
   subroutine monolis_qsort_int_c(array, iS, iE) &

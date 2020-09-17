@@ -159,11 +159,26 @@ void monolis_set_Dirichlet_bc(
 
 
 /* linear algebra */
+/* inner product */
 void monolis_inner_product(
   MONOLIS* mat,
   double*  x,
   double*  y,
   double   sum);
+
+
+
+/* MPI wrapper */
+/* all reduce
+  tag:
+    - monolis_sum: sum
+    - monolis_max: maximum value
+    - monolis_min: minimum value
+*/
+void monolis_allreduce_double_scalar(
+  MONOLIS* mat,
+  int      tag,
+  double   val);
 
 
 
