@@ -91,7 +91,7 @@ void monolis_com_input_comm_table(
   int nin;
   fp = monolis_open_comm_table(fp, "node.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
-    mat->com.intrenal_nnode = nin;
+    mat->com.internal_nnode = nin;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.global_node_id[i]));
@@ -100,7 +100,7 @@ void monolis_com_input_comm_table(
 
   fp = monolis_open_comm_table(fp, "elem.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
-    mat->com.intrenal_nelem = nin;
+    mat->com.internal_nelem = nin;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.global_elem_id[i]));
@@ -143,6 +143,8 @@ void monolis_initialize(
     // comm
     mat->com.recv_n_neib = 0;
     mat->com.send_n_neib = 0;
+    mat->com.internal_nnode = 0;
+    mat->com.internal_nelem = 0;
     mat->com.myrank = monolis_get_global_myrank();
     mat->com.comm = monolis_get_global_comm();
     mat->com.commsize = monolis_get_global_commsize();
@@ -573,7 +575,7 @@ void monolis_solve(
   double*  x)
 {
   int n = mat->mat.N;
-  if(mat->com.commsize > 1 ) n = mat->com.intrenal_nnode;
+  if(mat->com.commsize > 1 ) n = mat->com.internal_nnode;
   int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
@@ -619,4 +621,23 @@ void monolis_solve(
     iterlog,
     timelog,
     summary);
+}
+
+void monolis_get_internal_elem_1d_bool(
+  MONOLIS* mat,
+  int      nelem,
+  bool*    is_internal_elem)
+{
+  if (mat->com.commsize > 1) {
+    for(int i=0; i<nelem; i++){
+      is_internal_elem[i] = false;
+    }
+    for(int i=0; i<mat->com.internal_nelem; i++){
+      is_internal_elem[i] = true;
+    }
+  } else {
+    for(int i=0; i<nelem; i++){
+      is_internal_elem[i] = true;
+    }
+  }
 }

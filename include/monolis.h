@@ -188,6 +188,16 @@ void monolis_solve(
   double*  b,
   double*  x);
 
+
+
+/* ddm utils*/
+void monolis_get_internal_elem_1d_bool(
+  MONOLIS* mat,
+  int      nelem,
+  bool*    is_internal_elem);
+
+
+
 #ifdef __cplusplus
 }
 #endif
