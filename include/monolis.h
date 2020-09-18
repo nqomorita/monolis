@@ -175,7 +175,7 @@ void monolis_inner_product(
     - monolis_max: maximum value
     - monolis_min: minimum value
 */
-void monolis_allreduce_double_scalar(
+double monolis_allreduce_double_scalar(
   MONOLIS* mat,
   int      tag,
   double   val);

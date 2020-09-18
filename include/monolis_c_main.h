@@ -109,7 +109,7 @@ void monolis_solve_c_main(
   int      timelog,
   int      summary);
 
-void monolis_allreduce_double_scalar_c_main(
+double monolis_allreduce_double_scalar_c_main(
   double   val,
   int      tag,
   int      comm);

@@ -140,15 +140,16 @@ contains
     call monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum)
   end subroutine monolis_inner_product_c
 
-  subroutine monolis_allreduce_double_scalar_c(val, tag, comm) &
+  function monolis_allreduce_double_scalar_c(val, tag, comm) &
     & bind(c, name = "monolis_allreduce_double_scalar_c_main")
     use mod_monolis_linalg_com
     implicit none
+    real(c_double) :: monolis_allreduce_double_scalar_c
     integer(c_int), intent(in), value :: tag, comm
     real(c_double), value :: val
-
     call  monolis_allreduce_R1(val, tag, comm)
-  end subroutine monolis_allreduce_double_scalar_c
+    monolis_allreduce_double_scalar_c = val
+  end function monolis_allreduce_double_scalar_c
 
   !> std lib
   subroutine monolis_qsort_int_c(array, iS, iE) &

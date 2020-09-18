@@ -558,12 +558,13 @@ void monolis_inner_product(
   monolis_inner_product_c_main(n, ndof, x, y, sum, comm);
 }
 
-void monolis_allreduce_double_scalar(
+double monolis_allreduce_double_scalar(
   MONOLIS* mat,
   int      tag,
   double   val)
 {
-  monolis_allreduce_double_scalar_c_main(val, tag, mat->com.comm);
+  val = monolis_allreduce_double_scalar_c_main(val, tag, mat->com.comm);
+  return val;
 }
 
 void monolis_solve(
