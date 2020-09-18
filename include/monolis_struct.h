@@ -72,6 +72,7 @@ typedef struct {
   int comm;
   int commsize;
   int intrenal_nnode;
+  int intrenal_nelem;
 
   int recv_n_neib;
   int* recv_neib_pe;

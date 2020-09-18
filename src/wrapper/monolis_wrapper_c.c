@@ -97,6 +97,15 @@ void monolis_com_input_comm_table(
       fscanf(fp, "%d", &(mat->com.global_node_id[i]));
     }
   fclose(fp);
+
+  fp = monolis_open_comm_table(fp, "elem.id", mat->com.myrank);
+    fscanf(fp, "%d %d", &nitem, &nin);
+    mat->com.intrenal_nelem = nin;
+    mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
+    for(int i=0; i<nitem; i++){
+      fscanf(fp, "%d", &(mat->com.global_elem_id[i]));
+    }
+  fclose(fp);
 }
 
 void monolis_initialize(

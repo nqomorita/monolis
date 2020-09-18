@@ -18,14 +18,15 @@ contains
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     integer(kint) :: nelem, n_domain
-    integer(kint) :: i, j, in, id, id1, maxid
-    logical :: is_overlap
+    integer(kint) :: i, j, in, id, maxid, minid
+    integer(kint), allocatable :: temp(:)
 
     call monolis_debug_header("get_overlap_domain")
 
     nelem = mesh%nelem
     allocate(graph%elem_domid(nelem), source = 0)
     allocate(graph%elem_domid_uniq(nelem), source = 0)
+    allocate(temp(mesh%nbase_func), source = 0)
 
     if(n_domain == 1)then
       graph%elem_domid = 1
@@ -34,22 +35,16 @@ contains
     endif
 
     do i = 1, nelem
-      in = mesh%elem(1,i)
-      id1 = graph%node_domid_raw(in)
-      maxid = id1
-      is_overlap = .false.
-      do j = 2, mesh%nbase_func
+      temp = 0
+      do j = 1, mesh%nbase_func
         in = mesh%elem(j,i)
-        id = graph%node_domid_raw(in)
-        if(id /= id1) is_overlap = .true.
-        maxid = max(id1, id)
+        temp(j) = graph%node_domid_raw(in)
       enddo
+      minid = minval(temp)
+      maxid = maxval(temp)
       graph%elem_domid_uniq(i) = maxid
-      if(is_overlap)then
-        graph%elem_domid(i) = -1
-      else
-        graph%elem_domid(i) = id1
-      endif
+      graph%elem_domid(i) = maxid
+      if(minid /= maxid) graph%elem_domid(i) = -1
     enddo
 
     do i = 1, nelem
@@ -140,13 +135,12 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
-    integer(kint) :: nelem, nid, in, j, k
-    logical, allocatable :: is_in(:)
+    integer(kint) :: nelem, nid, in, j, k, count_in, count_out
+    logical, allocatable :: is_in(:), is_out(:)
 
     nelem = mesh%nelem
     allocate(is_in(nelem), source = .false.)
 
-    is_in = .false.
     do j = 1, nelem
       do k = 1, mesh%nbase_func
         in = mesh%elem(k,j)
@@ -164,13 +158,29 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     local_node%nelem = in
     allocate(local_node%eid(in))
 
+    !> internal element
     in = 0
+    count_in = 0
     do j = 1, nelem
-      if(is_in(j))then
+      if(is_in(j) .and. graph%elem_domid_uniq(j) == nid)then
         in = in + 1
+        count_in = count_in + 1
         local_node%eid(in) = j
       endif
     enddo
+
+    !> external element
+    count_out = 0
+    do j = 1, nelem
+      if(is_in(j) .and. graph%elem_domid_uniq(j) /= nid)then
+        in = in + 1
+        count_out = count_out + 1
+        local_node%eid(in) = j
+      endif
+    enddo
+
+    local_node%nelem_in = count_in
+    local_node%nelem_out = count_out
   end subroutine get_nelem_and_eid_at_subdomain
 
   subroutine get_neib_PE(local_node, graph, comm, n_domain)

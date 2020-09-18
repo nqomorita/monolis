@@ -82,7 +82,7 @@ contains
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
-      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, mesh%nid, node_list(i)%eid)
+      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, node_list(i)%nelem_in, mesh%nid, node_list(i)%eid)
     enddo
   end subroutine monolis_output_mesh
 
@@ -324,13 +324,13 @@ contains
     close(20)
   end subroutine monolis_output_mesh_global_nid
 
-  subroutine monolis_output_mesh_global_eid(fname, nelem, global_eid, eid)
+  subroutine monolis_output_mesh_global_eid(fname, nelem, nelem_in, global_eid, eid)
     implicit none
-    integer(kint) :: i, in, nelem, global_eid(:), eid(:)
+    integer(kint) :: i, in, nelem, nelem_in, global_eid(:), eid(:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")nelem
+      write(20,"(i0,x,i0)")nelem, nelem_in
       do i = 1, nelem
         in = eid(i)
         write(20,"(i0,x,i0)") global_eid(in)

@@ -3,9 +3,8 @@ module mod_monolis_mesh
   implicit none
 
   type monolis_mesh
-    integer(kint) :: nnode
-    integer(kint) :: nnode_in, nnode_out
-    integer(kint) :: nelem
+    integer(kint) :: nnode, nnode_in
+    integer(kint) :: nelem, nelem_in
     integer(kint) :: nbase_func
     integer(kint), allocatable :: nid(:)
     real(kdouble), allocatable :: node(:,:)
@@ -24,9 +23,8 @@ module mod_monolis_mesh
   end type monolis_graph
 
   type monolis_node_list
-    integer(kint) :: nnode
-    integer(kint) :: nnode_in, nnode_out
-    integer(kint) :: nelem
+    integer(kint) :: nnode, nnode_in, nnode_out
+    integer(kint) :: nelem, nelem_in, nelem_out
     integer(kint), allocatable :: nid(:)
     integer(kint), allocatable :: nid_perm(:)
     integer(kint), allocatable :: eid(:)
