@@ -88,7 +88,7 @@ contains
 
   subroutine monolis_input_mesh_node(fname, nnode, node, nid)
     implicit none
-    integer(kint) :: nnode, i, ierr, t(4)
+    integer(kint) :: nnode, i, t(4)
     real(kdouble), allocatable :: node(:,:)
     integer(kint), optional, allocatable :: nid(:)
     character :: fname*100
@@ -142,7 +142,7 @@ contains
 
   subroutine monolis_input_id(fname, id, nid_out)
     implicit none
-    integer(kint) :: nid, i, j
+    integer(kint) :: nid, i
     integer(kint), optional :: nid_out
     integer(kint), allocatable :: id(:)
     character :: fname*100
@@ -177,7 +177,7 @@ contains
 
   subroutine monolis_input_condition(fname, ncond, icond, cond)
     implicit none
-    integer(kint) :: ncond, i, j
+    integer(kint) :: ncond, i
     integer(kint), allocatable :: icond(:,:)
     real(kdouble), allocatable :: cond(:)
     character :: fname*100
@@ -277,7 +277,7 @@ contains
 
   subroutine monolis_output_mesh_elem(fname, nelem, nbase, elem)
     implicit none
-    integer(kint) :: i, j, in, jn, nelem, nbase, elem(:,:)
+    integer(kint) :: i, j, nelem, nbase, elem(:,:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
@@ -415,10 +415,10 @@ contains
 
   subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid, elemid)
     implicit none
-    integer(kint) :: i, j, in
+    integer(kint) :: i, j
     integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:), elemid(:)
     real(kdouble) :: node(:,:)
-    character :: etype*6, output_dir*100, fname*100
+    character :: etype*6, output_dir*100
 
     call monolis_debug_header("monolis_visual_parted_mesh")
 

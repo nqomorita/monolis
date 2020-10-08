@@ -42,7 +42,7 @@ contains
   subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
     use iso_c_binding
     implicit none
-    integer(kint) :: i, j, nnode, numflag, nb
+    integer(kint) :: i, j, nb
     integer(kint) :: nelem, elem(:,:)
     integer(kint), pointer :: ebase_func(:), connectivity(:)
 
@@ -88,8 +88,6 @@ contains
     implicit none
     integer(kint) :: nnode, ncon, npart, objval
     integer(kint), pointer :: part_id(:)
-    integer(kint), pointer :: eptr(:)   => null()
-    integer(kint), pointer :: eind(:)   => null()
     integer(kint), pointer :: vwgtm(:)  => null()
     integer(kint), pointer :: vsize(:)  => null()
     integer(kint), pointer :: adjwgt(:) => null()

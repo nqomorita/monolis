@@ -83,7 +83,6 @@ contains
   subroutine monolis_com_finalize(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kint) :: ierr
 
     if(associated(monoCOM%recv_neib_pe)) deallocate(monoCOM%recv_neib_pe)
     if(associated(monoCOM%recv_index)) deallocate(monoCOM%recv_index)
@@ -105,7 +104,7 @@ contains
   subroutine monolis_com_input_comm_table(monoCOM)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kint) :: i, nitem, jn
+    integer(kint) :: i, nitem
     character :: cnum*5, header*7
 
     if(monoCOM%commsize <= 1)then

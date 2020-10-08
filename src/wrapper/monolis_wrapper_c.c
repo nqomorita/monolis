@@ -338,7 +338,7 @@ const char* monolis_get_output_filename(
   const char* filename_body)
 {
   int commsize;
-  int myrank, idx;
+  int myrank;
   int buf_size = 1000;
   char* head;
   char* post;

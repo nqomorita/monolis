@@ -78,8 +78,7 @@ contains
 
   subroutine monolis_global_to_local_conditoin(nnode, nid, nb, b)
     implicit none
-    integer(kint) :: i, in, j, id
-    integer(kint) :: imax, imin, nb
+    integer(kint) :: i, in, id, nb
     integer(kint) :: nnode, nid(:)
     integer(kint) :: b(:,:)
     integer(kint), allocatable :: perm(:)
