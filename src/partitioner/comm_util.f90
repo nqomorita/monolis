@@ -162,7 +162,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     in = 0
     count_in = 0
     do j = 1, nelem
-      if(is_in(j) .and. graph%elem_domid_uniq(j) == nid)then
+      if(is_in(j) .and. graph%elem_domid(j) /= -1)then
         in = in + 1
         count_in = count_in + 1
         local_node%eid(in) = j
@@ -172,7 +172,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     !> external element
     count_out = 0
     do j = 1, nelem
-      if(is_in(j) .and. graph%elem_domid_uniq(j) /= nid)then
+      if(is_in(j) .and. graph%elem_domid(j) == -1)then
         in = in + 1
         count_out = count_out + 1
         local_node%eid(in) = j
