@@ -82,7 +82,7 @@ contains
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
-      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, node_list(i)%nelem_in, mesh%nid, node_list(i)%eid)
+      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, node_list(i)%nelem_in, mesh%eid, node_list(i)%eid)
     enddo
   end subroutine monolis_output_mesh
 
