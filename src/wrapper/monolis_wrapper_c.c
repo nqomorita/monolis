@@ -422,13 +422,13 @@ void monolis_get_nonzero_pattern_by_nodal(
   int nz = mat->mat.index[nnode];
   mat->mat.NZ = nz;
   mat->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
-  mat->mat.item = (int*)calloc(nz+1, sizeof(int));
+  mat->mat.item = (int*)calloc(nz, sizeof(int));
 
   for(int i=0; i<nnode; i++) {
     int jS = mat->mat.index[i];
     int jE = mat->mat.index[i+1];
     mat->mat.item[jS] = i+1;
-    for(int j=jS+1; j<jE+1; j++){
+    for(int j=jS+1; j<jE; j++){
       mat->mat.item[j] = item[j-i-1] + 1;
     }
     monolis_qsort_int(
@@ -438,8 +438,8 @@ void monolis_get_nonzero_pattern_by_nodal(
   }
 
   mat->mat.indexR = (int*)calloc(nnode+1, sizeof(int));
-  mat->mat.itemR = (int*)calloc(nz+1, sizeof(int));
-  mat->mat.permR = (int*)calloc(nz+1, sizeof(int));
+  mat->mat.itemR = (int*)calloc(nz, sizeof(int));
+  mat->mat.permR = (int*)calloc(nz, sizeof(int));
   monolis_get_CRR_format(
     nnode,
     nz,
