@@ -66,7 +66,7 @@ contains
     call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
-    tdotp = tdotp + t2 - t1
+    tdotp = tdotp + t3 - t1
     tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_I
 
@@ -92,7 +92,7 @@ contains
     call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
-    tdotp = tdotp + t2 - t1
+    tdotp = tdotp + t3 - t1
     tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_R
 
