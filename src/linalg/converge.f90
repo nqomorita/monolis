@@ -39,7 +39,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
     real(kind=kdouble) :: R(:), R2, B2, resid
-    real(kind=kdouble), optional :: tdotp, tcomm
+    real(kind=kdouble) :: tdotp, tcomm
     logical :: is_converge
 
     is_converge = .false.

@@ -70,13 +70,14 @@ module mod_monolis_prm
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.
     logical :: show_summary  = .true.
-    !> time: tsol = tspmv + tprec + tcomm + others
+    !> time: tsol
     real(kdouble) :: tsol  = 0.0d0
     real(kdouble) :: tprep = 0.0d0
     real(kdouble) :: tspmv = 0.0d0
     real(kdouble) :: tdotp = 0.0d0
     real(kdouble) :: tprec = 0.0d0
-    real(kdouble) :: tcomm = 0.0d0
+    real(kdouble) :: tcomm_dotp = 0.0d0
+    real(kdouble) :: tcomm_spmv = 0.0d0
   end type monolis_prm
 
 contains

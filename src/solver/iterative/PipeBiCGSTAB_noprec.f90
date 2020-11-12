@@ -46,16 +46,16 @@ contains
     allocate(Y (NDOF*NP), source = 0.0d0)
     allocate(V (NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
-    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
     call monolis_vec_copy_R(N, NDOF, R, R0)
 
-    call monolis_matvec(monoCOM, monoMAT, R , W0, monoPRM%tspmv, monoPRM%tcomm)
-    call monolis_matvec(monoCOM, monoMAT, W0, T , monoPRM%tspmv, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, R, R , RR, monoPRM%tdotp, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, R, W0, RW, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_matvec(monoCOM, monoMAT, R , W0, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_matvec(monoCOM, monoMAT, W0, T , monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, R , RR, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, W0, RW, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
     alpha = RR / RW
     beta  = 0.0d0
@@ -70,10 +70,10 @@ contains
         Y(i) = W0(i) - alpha* Z(i)
       enddo
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, Q, Y, CG(1), monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, Y, Y, CG(2), monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Q, Y, CG(1), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, Y, Y, CG(2), monoPRM%tdotp, monoPRM%tcomm_dotp)
 
-      call monolis_matvec(monoCOM, monoMAT, Z, V, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_matvec(monoCOM, monoMAT, Z, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       QY = CG(1)
       YY = CG(2)
@@ -83,8 +83,8 @@ contains
         do i = 1, NNDOF
           X(i) = X(i) + alpha*P(i) + omega1*T(i)
         enddo
-        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
-        call monolis_matvec(monoCOM, monoMAT, R, W0, monoPRM%tspmv, monoPRM%tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+        call monolis_matvec(monoCOM, monoMAT, R, W0, monoPRM%tspmv, monoPRM%tcomm_spmv)
       else
         do i = 1, NNDOF
           X (i) = X(i) + alpha * P(i) + omega1*Q(i)
@@ -93,13 +93,13 @@ contains
         enddo
       endif
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, R0, R, CG(1), monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R0, W0,CG(2), monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R0, S, CG(3), monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R0, Z, CG(4), monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R,  R, CG(5), monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, R, CG(1), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, W0,CG(2), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, S, CG(3), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R0, Z, CG(4), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R,  R, CG(5), monoPRM%tdotp, monoPRM%tcomm_dotp)
 
-      call monolis_matvec(monoCOM, monoMAT, W0, T, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_matvec(monoCOM, monoMAT, W0, T, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       RR1= CG(1)
       RW = CG(2)
@@ -116,7 +116,7 @@ contains
       RR    = RR1
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R )
     deallocate(R0)

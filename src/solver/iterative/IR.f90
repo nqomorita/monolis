@@ -40,7 +40,7 @@ contains
     allocate(D(NDOF*NP)); D = 0.0d0
 
     call monolis_IR_setup(monoPRM, monoCOM, monoMAT)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
     call monolis_vec_copy_R(N, NDOF, B, R)
 
@@ -49,8 +49,8 @@ contains
 
       call monolis_vec_AXPY(N, NDOF, 1.0d0, X, D, X)
 
-      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
       resid = dsqrt(R2/B2)
 
@@ -59,7 +59,7 @@ contains
     enddo
 
     call monolis_IR_clear(monoPRM, monoCOM, monoMAT)
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R)
     deallocate(D)

@@ -49,12 +49,12 @@ contains
     allocate(M(NDOF*NP), source = 0.0d0)
     allocate(S(NDOF*NP), source = 0.0d0)
 
-    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
-    call monolis_inner_product_R(monoCOM, N, NDOF, U, U, U2, monoPRM%tdotp, monoPRM%tcomm)
-    call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, U, U, U2, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
     phi  = dsqrt(R2/U2)
     utol = tol/phi
@@ -67,7 +67,7 @@ contains
       call monolis_inner_product_R_local(monoCOM, N, NDOF, U, U, CG(3))
       call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
-      call monolis_matvec(monoCOM, monoMAT, M, L, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_matvec(monoCOM, monoMAT, M, L, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       !call monolis_wait(requests, statuses)
       !gamma = buf(1)
@@ -97,9 +97,9 @@ contains
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
         call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
-        call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm)
+        call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
       else
         do i = 1, NNDOF
           U(i) = U(i) - alpha*Q(i)
@@ -111,7 +111,7 @@ contains
       alpha1 = 1.0d0/alpha
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R)
     deallocate(U)

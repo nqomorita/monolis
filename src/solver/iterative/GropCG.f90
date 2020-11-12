@@ -45,18 +45,18 @@ contains
     allocate(P(NDOF*NP)); P = 0.0d0
     allocate(S(NDOF*NP)); S = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
-    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
 
     call monolis_vec_copy_R(N, NDOF, U, P)
 
-    call monolis_matvec(monoCOM, monoMAT, P, S, monoPRM%tspmv, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_matvec(monoCOM, monoMAT, P, S, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
     do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, N, NDOF, P, S, delta, monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, P, S, delta, monoPRM%tdotp, monoPRM%tcomm_dotp)
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, S, Q)
 
       alpha = gamma/delta
@@ -67,10 +67,10 @@ contains
         U(i) = U(i) - alpha*Q(i)
       enddo
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma1, monoPRM%tdotp, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma1, monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
-      call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       beta  = gamma1/gamma
       gamma = gamma1
@@ -84,7 +84,7 @@ contains
       if(is_converge) exit
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R)
     deallocate(U)

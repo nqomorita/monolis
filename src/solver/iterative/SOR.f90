@@ -42,22 +42,22 @@ contains
 
     allocate(R(NDOF*NP)); R = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
     call monolis_solver_SOR_setup(monoMAT)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
     do iter = 1, monoPRM%maxiter
-      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, monoPRM%tspmv, monoPRM%tcomm)
-      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
+      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, monoPRM%tspmv, monoPRM%tcomm_spmv)
+      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R)
     deallocate(ALU)

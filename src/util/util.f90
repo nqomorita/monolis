@@ -79,7 +79,8 @@ contains
     monoPRM%tspmv = 0.0d0
     monoPRM%tdotp = 0.0d0
     monoPRM%tprec = 0.0d0
-    monoPRM%tcomm = 0.0d0
+    monoPRM%tcomm_dotp = 0.0d0
+    monoPRM%tcomm_spmv = 0.0d0
   end subroutine monolis_timer_initialize
 
   subroutine monolis_timer_finalize(monoPRM, monoCOM)
@@ -109,7 +110,8 @@ contains
       write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", monoPRM%tspmv
       write(*,"(a,1p4e10.3)")"  - solution/inner p time:", monoPRM%tdotp
       write(*,"(a,1p4e10.3)")"  - solution/precond time:", monoPRM%tprec
-      write(*,"(a,1p4e10.3)")"  - (solution/comm time) :", monoPRM%tcomm
+      write(*,"(a,1p4e10.3)")"  - (solution/comm dotp) :", monoPRM%tcomm_dotp
+      write(*,"(a,1p4e10.3)")"  - (solution/comm spmv) :", monoPRM%tcomm_spmv
     endif
   end subroutine monolis_timer_finalize
 

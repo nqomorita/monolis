@@ -47,12 +47,12 @@ contains
     allocate(M(NDOF*NP), source = 0.0d0)
     allocate(S(NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
-    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
-    call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm)
+    call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
     gamma = 1.0d0
     alpha = 1.0d0
@@ -64,7 +64,7 @@ contains
       call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)
-      call monolis_matvec(monoCOM, monoMAT, M, L, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_matvec(monoCOM, monoMAT, M, L, monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       gamma1 = 1.0d0/gamma
       alpha1 = 1.0d0/alpha
@@ -97,9 +97,9 @@ contains
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)
-        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
         call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
-        call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm)
+        call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
       else
         do i = 1, NNDOF
           R(i) = R(i) - alpha*S(i)
@@ -110,7 +110,7 @@ contains
       endif
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R)
     deallocate(U)
