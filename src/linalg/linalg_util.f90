@@ -66,7 +66,7 @@ contains
        & monoCOM%recv_index, monoCOM%recv_item, &
        & ws, wr, X, ndof, monoCOM%comm)
     t2 = monolis_get_time()
-    tcomm = t2 - t1
+    tcomm = tcomm + t2 - t1
 
     deallocate(ws, wr)
   end subroutine monolis_update_pre_R
