@@ -75,7 +75,7 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
 
     deallocate(R)
     deallocate(Z)
