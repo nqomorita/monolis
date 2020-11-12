@@ -19,14 +19,11 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter, iter_RR
-    real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble) :: alpha, beta, rho, rho1, c2, omega
     real(kind=kdouble) :: B2, CG(2)
     real(kind=kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
     real(kind=kdouble), pointer :: B(:), X(:)
     logical :: is_converge
-
-    t1 = monolis_get_time()
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -34,7 +31,7 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X
     B => monoMAT%B
-    iter_RR = 50
+    iter_RR = 200
 
     if(monoPRM%is_init_x) X = 0.0d0
 
@@ -101,7 +98,7 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
 
     deallocate(R )
     deallocate(RT)
@@ -111,9 +108,6 @@ contains
     deallocate(ST)
     deallocate(T )
     deallocate(V )
-
-    t2 = monolis_get_time()
-    tsol = t2 - t1
   end subroutine monolis_solver_BiCGSTAB
 
 end module mod_monolis_solver_BiCGSTAB

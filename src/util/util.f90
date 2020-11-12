@@ -109,7 +109,7 @@ contains
       write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", monoPRM%tspmv
       write(*,"(a,1p4e10.3)")"  - solution/inner p time:", monoPRM%tdotp
       write(*,"(a,1p4e10.3)")"  - solution/precond time:", monoPRM%tprec
-      write(*,"(a,1p4e10.3)")"  - solution/comm    time:", monoPRM%tcomm
+      write(*,"(a,1p4e10.3)")"  - (solution/comm time) :", monoPRM%tcomm
     endif
   end subroutine monolis_timer_finalize
 

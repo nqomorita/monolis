@@ -33,7 +33,7 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X
     B => monoMAT%B
-    iter_RR = 50
+    iter_RR = 200
 
     if(monoPRM%is_init_x) X = 0.0d0
 
