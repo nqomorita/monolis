@@ -23,11 +23,8 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NNDOF
     integer(kind=kint) :: i, iter
     real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble), pointer :: B(:), X(:)
     real(kind=kdouble), allocatable :: R(:), D(:)
-
-    t1 = monolis_get_time()
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -43,7 +40,7 @@ contains
     allocate(D(NDOF*NP)); D = 0.0d0
 
     call monolis_IR_setup(monoPRM, monoCOM, monoMAT)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
 
     call monolis_vec_copy_R(N, NDOF, B, R)
 
@@ -52,8 +49,8 @@ contains
 
       call monolis_vec_AXPY(N, NDOF, 1.0d0, X, D, X)
 
-      call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
+      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
 
       resid = dsqrt(R2/B2)
 
@@ -62,13 +59,10 @@ contains
     enddo
 
     call monolis_IR_clear(monoPRM, monoCOM, monoMAT)
-    call monolis_update_R(monoCOM, NDOF, X, tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
 
     deallocate(R)
     deallocate(D)
-
-    t2 = monolis_get_time()
-    tsol = t2 - t1
   end subroutine monolis_solver_IR
 
   subroutine monolis_IR_setup(monoPRM, monoCOM, monoMAT)

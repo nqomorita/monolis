@@ -42,13 +42,13 @@ contains
     allocate(Q(NDOF*NP), source = 0.0d0)
     allocate(P(NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
     if(is_converge) return
-    call monolis_residual(monoCOM, monoMAT, X, B, R)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
 
     do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, Z)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho, monoPRM%tdotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho, monoPRM%tdotp, monoPRM%tcomm)
 
       if(1 < iter)then
         beta = rho/rho1
@@ -57,19 +57,19 @@ contains
         call monolis_vec_copy_R(N, NDOF, Z, P)
       endif
 
-      call monolis_matvec(monoCOM, monoMAT, P, Q, monoPRM%tspmv)
-      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, monoPRM%tdotp)
+      call monolis_matvec(monoCOM, monoMAT, P, Q, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, monoPRM%tdotp, monoPRM%tcomm)
       alpha = rho/omega
 
       call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual(monoCOM, monoMAT, X, B, R)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
       else
         call monolis_vec_AXPY(N, NDOF, -alpha, Q, R, R)
       endif
 
-      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge)
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, monoPRM%tdotp, monoPRM%tcomm)
       if(is_converge) exit
 
       rho1 = rho

@@ -10,19 +10,19 @@ module mod_monolis_converge
 
 contains
 
-  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
+  subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: B(:), B2
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble) :: tdotp, tcomm
     logical :: is_converge
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_set_converge")
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
@@ -32,18 +32,18 @@ contains
 
   end subroutine monolis_set_converge
 
-  subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)
+  subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
     real(kind=kdouble) :: R(:), R2, B2, resid
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble), optional :: tdotp, tcomm
     logical :: is_converge
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
     resid = dsqrt(R2/B2)
 
     monoPRM%curiter = iter
@@ -56,14 +56,13 @@ contains
 
   end subroutine monolis_check_converge
 
-  subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge, tcomm)
+  subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: iter
     real(kind=kdouble) :: R2, B2, resid
-    real(kind=kdouble), optional :: tcomm
     logical :: is_converge
 
     is_converge = .false.

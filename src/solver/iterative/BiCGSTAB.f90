@@ -38,23 +38,23 @@ contains
 
     if(monoPRM%is_init_x) X = 0.0d0
 
-    allocate(R (NDOF*NP)); R  = 0.0d0
-    allocate(RT(NDOF*NP)); RT = 0.0d0
-    allocate(P (NDOF*NP)); P  = 0.0d0
-    allocate(PT(NDOF*NP)); PT = 0.0d0
-    allocate(S (NDOF*NP)); S  = 0.0d0
-    allocate(ST(NDOF*NP)); ST = 0.0d0
-    allocate(T (NDOF*NP)); T  = 0.0d0
-    allocate(V (NDOF*NP)); V  = 0.0d0
+    allocate(R (NDOF*NP), source = 0.0d0)
+    allocate(RT(NDOF*NP), source = 0.0d0)
+    allocate(P (NDOF*NP), source = 0.0d0)
+    allocate(PT(NDOF*NP), source = 0.0d0)
+    allocate(S (NDOF*NP), source = 0.0d0)
+    allocate(ST(NDOF*NP), source = 0.0d0)
+    allocate(T (NDOF*NP), source = 0.0d0)
+    allocate(V (NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
     if(is_converge) return
-    call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
 
     call monolis_vec_copy_R(N, NDOF, R, RT)
 
     do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, RT, rho, monoPRM%tdotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, RT, rho, monoPRM%tdotp, monoPRM%tcomm)
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
@@ -66,14 +66,14 @@ contains
       endif
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, P, PT)
-      call monolis_matvec(monoCOM, monoMAT, PT, V, monoPRM%tspmv)
-      call monolis_inner_product_R(monoCOM, N, NDOF, RT, V, c2, monoPRM%tdotp)
+      call monolis_matvec(monoCOM, monoMAT, PT, V, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, RT, V, c2, monoPRM%tdotp, monoPRM%tcomm)
 
       alpha = rho / c2
       call monolis_vec_AXPY(N, NDOF, -alpha, V, R, S)
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, S, ST)
-      call monolis_matvec(monoCOM, monoMAT, ST, T, monoPRM%tspmv)
+      call monolis_matvec(monoCOM, monoMAT, ST, T, monoPRM%tspmv, monoPRM%tcomm)
 
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, S, CG(1))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, T, CG(2))
@@ -90,12 +90,12 @@ contains
       enddo
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
+        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
       else
         call monolis_vec_AXPY(N, NDOF, -omega, T, S, R)
       endif
 
-      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tcomm)
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, monoPRM%tdotp, monoPRM%tcomm)
       if(is_converge) exit
 
       rho1 = rho

@@ -9,15 +9,15 @@ module mod_monolis_matvec
 
 contains
 
-  subroutine monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
+  subroutine monolis_residual(monoCOM, monoMAT, X, B, R, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kind=kint) :: i
     real(kind=kdouble) :: X(:), B(:), R(:)
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble) :: tspmv, tcomm
 
-    call monolis_matvec(monoCOM, monoMAT, X, R, tcomm)
+    call monolis_matvec(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
     do i = 1, monoMAT%N*monoMAT%NDOF
       R(i) = B(i) - R(i)
@@ -27,25 +27,26 @@ contains
   subroutine monolis_matvec_product(monolis, X, Y)
     implicit none
     type(monolis_structure) :: monolis
+    real(kind=kdouble) :: tspmv, tcomm
     real(kdouble) :: X(:), Y(:)
 
-    call monolis_matvec(monolis%COM, monolis%MAT, X, Y)
+    call monolis_matvec(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product
 
-  subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tspmv)
+  subroutine monolis_matvec(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2
-    real(kind=kdouble), optional :: tspmv
+    real(kind=kdouble) :: tspmv, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_matvec")
 #endif
     t1 = monolis_get_time()
 
-    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X)
+    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33(monoCOM, monoMAT, X, Y)
@@ -55,10 +56,10 @@ contains
       call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
     endif
 
-    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X)
+    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     t2 = monolis_get_time()
-    if(present(tspmv)) tspmv = tspmv + t2 - t1
+    tspmv = tspmv + t2 - t1
   end subroutine monolis_matvec
 
   subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF, tcomm)

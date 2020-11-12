@@ -134,10 +134,11 @@ contains
     integer(c_int), intent(in), value :: N, NDOF, comm
     real(c_double), target :: X(NDOF*N), Y(NDOF*N)
     real(c_double), value :: sum
+    real(c_double) :: tspmv, tcomm
     type(monolis_com) :: monoCOM
 
     monoCOM%comm = comm
-    call monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum)
+    call monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tspmv, tcomm)
   end subroutine monolis_inner_product_c
 
   function monolis_allreduce_double_scalar_c(val, tag, comm) &

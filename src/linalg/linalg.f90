@@ -44,50 +44,56 @@ contains
     enddo
   end subroutine monolis_vec_AXPY
 
-  subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tcomm)
+  subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, n, ndof, sum
     integer(kind=kint) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble) :: t1, t2, t3
+    real(kind=kdouble) :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_I")
 #endif
 
+    t1 = monolis_get_time()
     sum = 0
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
 
-    t1 = monolis_get_time()
-    call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
     t2 = monolis_get_time()
-    if(present(tcomm)) tcomm = tcomm + t2 - t1
+    call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
+    t3 = monolis_get_time()
+
+    tdotp = tdotp + t2 - t1
+    tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_I
 
-  subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tdotp)
+  subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     integer(kind=kint) :: i, n, ndof
     real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2, sum
-    real(kind=kdouble), optional :: tdotp
+    real(kind=kdouble) :: t1, t2, t3, sum
+    real(kind=kdouble) :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_R")
 #endif
-    t1 = monolis_get_time()
 
+    t1 = monolis_get_time()
     sum = 0.0d0
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
 
-    call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
     t2 = monolis_get_time()
-    if(present(tdotp)) tdotp = tdotp + t2 - t1
+    call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
+    t3 = monolis_get_time()
+
+    tdotp = tdotp + t2 - t1
+    tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_R
 
   subroutine monolis_inner_product_R_local(monoCOM, n, ndof, X, Y, sum)

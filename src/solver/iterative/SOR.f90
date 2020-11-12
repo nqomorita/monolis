@@ -24,12 +24,9 @@ contains
     integer(kind=kint) :: N, NP, NDOF, NDOF2, NNDOF
     integer(kind=kint) :: iter
     real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble) :: t1, t2, tsol, tcomm
     real(kind=kdouble), pointer :: B(:), X(:), ALU(:)
     real(kind=kdouble), allocatable :: R(:)
     logical :: is_converge
-
-    t1 = monolis_get_time()
 
     ALU => monoMAT%monoTree%D
     N     = monoMAT%N
@@ -45,28 +42,25 @@ contains
 
     allocate(R(NDOF*NP)); R = 0.0d0
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tcomm)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm)
     if(is_converge) return
     call monolis_solver_SOR_setup(monoMAT)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, tcomm)
+    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm)
 
     do iter = 1, monoPRM%maxiter
-      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tcomm)
-      call monolis_residual(monoCOM, monoMAT, X, B, R, tcomm)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, tcomm)
+      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm)
+      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm)
       resid = dsqrt(R2/B2)
 
       if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, tcomm)
+    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm)
 
     deallocate(R)
     deallocate(ALU)
-
-    t2 = monolis_get_time()
-    tsol = t2 - t1
   end subroutine monolis_solver_SOR
 
   subroutine monolis_solver_SOR_setup(monoMAT)
@@ -129,7 +123,7 @@ contains
     deallocate(LU)
   end subroutine monolis_solver_SOR_setup
 
-  subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tcomm)
+  subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -138,7 +132,7 @@ contains
     real(kind=kdouble) :: X(:), B(:), XT(NDOF), YT(NDOF), DT(NDOF), WT(NDOF)
     real(kind=kdouble), pointer :: A(:), ALU(:)
     real(kind=kdouble) :: t1, t2, omega
-    real(kind=kdouble), optional :: tcomm
+    real(kind=kdouble) :: tspmv, tcomm
 
     ALU => monoMAT%monoTree%D
     N     = monoMAT%N
