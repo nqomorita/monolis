@@ -101,7 +101,8 @@ contains
     if(npart /= 1)then
       ncon = 1
 #ifdef WITH_METIS
-      call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
+      call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
+      !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
         & options, objval, part_id)
 #else
     call monolis_warning_header("monolis_get_mesh_part_kway: METIS is NOT enabled")
