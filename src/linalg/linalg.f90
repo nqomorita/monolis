@@ -50,7 +50,7 @@ contains
     integer(kind=kint) :: i, n, ndof, sum
     integer(kind=kint) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, t3
-    real(kind=kdouble) :: tdotp, tcomm
+    real(kind=kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_I")
@@ -66,8 +66,8 @@ contains
     call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
-    tdotp = tdotp + t3 - t1
-    tcomm = tcomm + t3 - t2
+    if(present(tdotp)) tdotp = tdotp + t3 - t1
+    if(present(tcomm)) tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_I
 
   subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
@@ -76,7 +76,7 @@ contains
     integer(kind=kint) :: i, n, ndof
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble) :: t1, t2, t3, sum
-    real(kind=kdouble) :: tdotp, tcomm
+    real(kind=kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_R")
@@ -92,8 +92,8 @@ contains
     call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
-    tdotp = tdotp + t3 - t1
-    tcomm = tcomm + t3 - t2
+    if(present(tdotp)) tdotp = tdotp + t3 - t1
+    if(present(tcomm)) tcomm = tcomm + t3 - t2
   end subroutine monolis_inner_product_R
 
   subroutine monolis_inner_product_R_local(monoCOM, n, ndof, X, Y, sum)

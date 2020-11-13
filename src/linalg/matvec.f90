@@ -62,7 +62,7 @@ contains
     tspmv = tspmv + t2 - t1
   end subroutine monolis_matvec
 
-  subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF, tcomm)
+  subroutine monolis_matvec_nn(monoCOM, monoMAT, X, Y, NDOF)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -70,8 +70,6 @@ contains
     integer(kind=kint), pointer :: index(:), item(:)
     real(kind=kdouble) :: X(:), Y(:), XT(NDOF), YT(NDOF)
     real(kind=kdouble), pointer :: A(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble), optional :: tcomm
 
     N = monoMAT%N
     NDOF2 = NDOF*NDOF
@@ -100,7 +98,7 @@ contains
     enddo
   end subroutine monolis_matvec_nn
 
-  subroutine monolis_matvec_11(monoCOM, monoMAT, X, Y, tcomm)
+  subroutine monolis_matvec_11(monoCOM, monoMAT, X, Y)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -109,8 +107,6 @@ contains
     real(kind=kdouble) :: Y1
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble), pointer :: A(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble), optional :: tcomm
 
     N = monoMAT%N
     A => monoMAT%A
@@ -129,7 +125,7 @@ contains
     enddo
   end subroutine monolis_matvec_11
 
-  subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y, tcomm)
+  subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -138,8 +134,6 @@ contains
     real(kind=kdouble) :: X1, X2, X3, Y1, Y2, Y3
     real(kind=kdouble) :: X(:), Y(:)
     real(kind=kdouble), pointer :: A(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble), optional :: tcomm
 
     N = monoMAT%N
     A => monoMAT%A
