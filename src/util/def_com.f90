@@ -63,6 +63,8 @@ contains
     monoCOM%myrank = 0
     monoCOM%comm = 0
     monoCOM%commsize = 1
+    monoCOM%intrenal_nnode = 0
+    monoCOM%intrenal_nelem = 0
 
     monoCOM%recv_n_neib = 0
     monoCOM%recv_neib_pe => null()
