@@ -23,6 +23,9 @@ module mod_monolis_com
     integer(kint), pointer :: send_neib_pe(:) => null()
     integer(kint), pointer :: send_index(:)   => null()
     integer(kint), pointer :: send_item(:)    => null()
+
+    integer(kint), pointer :: global_node_id(:) => null()
+    integer(kint), pointer :: global_elem_id(:) => null()
   end type monolis_com
 
   integer(kint), parameter :: monolis_sum = 1
@@ -155,6 +158,22 @@ contains
       enddo
       do i = 1, nitem
         read(10,*) monoCOM%recv_item(i)
+      enddo
+    close(10)
+
+    open(10, file=header//"node.id."//trim(cnum), status='old')
+      read(10,*)nitem, monoCOM%intrenal_nnode
+      allocate(monoCOM%global_node_id(nitem), source = 0)
+      do i = 1, nitem
+        read(10,*) monoCOM%global_node_id(i)
+      enddo
+    close(10)
+
+    open(10, file=header//"elem.id."//trim(cnum), status='old')
+      read(10,*)nitem, monoCOM%intrenal_nelem
+      allocate(monoCOM%global_elem_id(nitem), source = 0)
+      do i = 1, nitem
+        read(10,*) monoCOM%global_elem_id(i)
       enddo
     close(10)
   end subroutine monolis_com_input_comm_table

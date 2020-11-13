@@ -58,13 +58,13 @@ typedef struct {
   bool show_timelog;
   bool show_summary;
 
-  /* time */
+  /* time
   double tsol;
   double tprep;
   double tspmv;
   double tdotp;
   double tprec;
-  double tcomm;
+  double tcomm;*/
 } MONOLIS_PRM;
 
 typedef struct {
