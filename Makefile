@@ -1,10 +1,10 @@
 #> monolis Makefile
 
 FC     = mpif90
-FFLAGS = -O3 -mtune=native -march=native -mfpmath=both -std=legacy
+FFLAGS = -O2 -mtune=native -march=native -std=legacy
 
 CC     = mpic++
-CFLAGS = -O3
+CFLAGS = -O2
 
 ifdef FLAGS
 	comma:= ,
