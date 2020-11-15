@@ -67,13 +67,15 @@ contains
     call monolis_mat_finalize(monolis%MAT)
   end subroutine monolis_finalize
 
-  subroutine monolis_timer_initialize(monoPRM)
+  subroutine monolis_timer_initialize(monoPRM, monoCOM)
     implicit none
     type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
 
     is_debug = monoPRM%is_debug
     call monolis_debug_header("monolis_timer_initialize")
 
+    call monolis_barrier(monoCOM)
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
     monoPRM%tspmv = 0.0d0
