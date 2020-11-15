@@ -51,7 +51,7 @@ contains
     monoPRM%is_debug = .true.
 #endif
 
-    call monolis_timer_initialize(monoPRM)
+    call monolis_timer_initialize(monoPRM, monoCOM)
     call monolis_check_diagonal(monoPRM, monoMAT)
     call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
