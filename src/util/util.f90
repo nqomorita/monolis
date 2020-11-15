@@ -94,6 +94,7 @@ contains
 
     call monolis_debug_header("monolis_timer_finalize")
 
+    call monolis_barrier(mycomm)
     t1 = monolis_get_time()
     monoPRM%tsol = t1 - monoPRM%tsol
 
