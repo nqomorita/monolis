@@ -77,7 +77,7 @@ contains
       monoPRM%method = i
       do j = 1, 4
         monoPRM%precond = j
-        call monolis_timer_initialize(monoPRM)
+        call monolis_timer_initialize(monoPRM, monoCOM)
         call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
         call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
         call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)
