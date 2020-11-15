@@ -75,7 +75,7 @@ contains
     is_debug = monoPRM%is_debug
     call monolis_debug_header("monolis_timer_initialize")
 
-    call monolis_barrier(monoCOM)
+    call monolis_barrier(mycomm)
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
     monoPRM%tspmv = 0.0d0
