@@ -57,9 +57,9 @@ contains
 
     if(iter == monoPRM%maxiter)then
       is_converge = .true.
-      if(.not. monoPRM%is_measurement)then
-        error stop "* monolis error: reached the maximum number of iterations"
-      endif
+      !if(.not. monoPRM%is_measurement)then
+      !  error stop "* monolis error: reached the maximum number of iterations"
+      !endif
     endif
   end subroutine monolis_check_converge
 
