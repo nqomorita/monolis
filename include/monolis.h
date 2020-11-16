@@ -82,6 +82,10 @@ void monolis_set_maxiter  (MONOLIS* mat, int    flag);
   default: 1.0e-8 */
 void monolis_set_tolerance(MONOLIS* mat, double value);
 
+/* set performance measurement flag
+  default: false */
+void monolis_set_performance_measurement (MONOLIS* mat, bool   flag);
+
 /* show convergence history (rerative residual per iteration)
   default: false */
 void monolis_show_iterlog (MONOLIS* mat, bool   flag);

@@ -53,6 +53,7 @@ typedef struct {
   bool is_init_x;
   bool is_sym_matrix;
   bool is_debug;
+  bool is_measurement;
   bool is_check_diag;
   bool show_iterlog;
   bool show_timelog;

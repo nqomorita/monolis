@@ -9,6 +9,7 @@ void monolis_set_method   (MONOLIS* mat, int    flag) {mat->prm.method    = flag
 void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag;}
 void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
 void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
+void monolis_set_performance_measurement (MONOLIS* mat, bool   flag) {mat->prm.is_measurement = flag;}
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
@@ -582,12 +583,14 @@ void monolis_solve(
   int iterlog = 0;
   int timelog = 0;
   int summary = 0;
+  int is_measurement = 0;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
   if(mat->prm.show_summary) summary = 1;
+  if(mat->prm.is_measurement) is_measurement = 1;
 
   monolis_solve_c_main(
     n,
@@ -620,7 +623,8 @@ void monolis_solve(
     mat->prm.tol,
     iterlog,
     timelog,
-    summary);
+    summary,
+    is_measurement);
 }
 
 void monolis_get_internal_elem_1d_bool(

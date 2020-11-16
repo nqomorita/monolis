@@ -29,7 +29,6 @@ contains
       monoMAT%X = 0.0d0
       is_converge = .true.
     endif
-
   end subroutine monolis_set_converge
 
   subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
@@ -48,12 +47,20 @@ contains
 
     monoPRM%curiter = iter
     monoPRM%curresid = resid
-    if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
-    if(resid < monoPRM%tol .or. iter == monoPRM%maxiter)then
+
+    if(resid < monoPRM%tol)then
       is_converge = .true.
       if(monoCOM%myrank == 0 .and. monoPRM%is_debug) write (*,"(i7, 1pe16.6)") iter, resid
+    elseif(monoCOM%myrank == 0 .and. monoPRM%show_iterlog)then
+      write (*,"(i7, 1pe16.6)") iter, resid
     endif
 
+    if(iter == monoPRM%maxiter)then
+      is_converge = .true.
+      if(.not. monoPRM%is_measurement)then
+        error stop "* monolis error: reached the maximum number of iterations"
+      endif
+    endif
   end subroutine monolis_check_converge
 
   subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge)
@@ -69,6 +76,5 @@ contains
     resid = dsqrt(R2/B2)
     if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
     if(resid < monoPRM%tol) is_converge = .true.
-
   end subroutine monolis_check_converge_2
 end module mod_monolis_converge
