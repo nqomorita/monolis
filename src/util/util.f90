@@ -273,6 +273,13 @@ contains
     monolis%PRM%is_check_diag = param
   end subroutine monolis_param_set_is_check_diag
 
+  subroutine monolis_set_performance_measurement(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    logical :: param
+    monolis%PRM%is_measurement = param
+  end subroutine monolis_set_performance_measurement
+
   subroutine monolis_param_set_show_iterlog(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
