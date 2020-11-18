@@ -6,6 +6,8 @@ FFLAGS = -O2 -mtune=native -march=native -std=legacy
 CC     = mpic++
 CFLAGS = -O2
 
+MOD_DIR  = -J ./include
+
 ifdef FLAGS
 	comma:= ,
 	empty:=
@@ -13,8 +15,15 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
-		#FLAG_DEBUG = -DDEBUG
-		FFLAGS = -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+		FFLAGS  = -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+	endif
+
+	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
+		FC      = mpiifort
+		FFLAGS  = -O2 -align array64byte
+		CC      = mpiicpc
+		CFLAGS  = -O2
+		MOD_DIR = -module ./include
 	endif
 
 	ifeq ($(findstring TEST, $(DFLAGS)), TEST)
@@ -40,8 +49,7 @@ ifdef FLAGS
 	endif
 endif
 
-INCLUDE  = -I ./include $(MUMPS_INC)
-MOD_DIR  = -J ./include
+INCLUDE  = -I ./include $(METIS_INC) -I ./include $(MUMPS_INC)
 LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
 BIN_DIR  = ./bin
 SRC_DIR  = ./src
