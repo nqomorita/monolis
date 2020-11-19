@@ -59,6 +59,7 @@ contains
     enddo
 
     nz = monolis%MAT%index(nnode)
+    monolis%MAT%NZ = nz
     allocate(monolis%MAT%A(ndof*ndof*nz), source = 0.0d0)
     allocate(monolis%MAT%item(nz), source = 0)
     do i = 1, nnode
