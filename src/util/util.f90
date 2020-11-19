@@ -29,6 +29,7 @@ module mod_monolis_util
   public :: monolis_get_time
   public :: monolis_get_time_sync
   public :: monolis_error_stop
+  public :: monolis_get_penalty_value
 
   integer(kint), save :: myrank = 0
   integer(kint), save :: mycomm
@@ -160,6 +161,35 @@ contains
     monolis_get_time_sync = t1
 #endif
   end function monolis_get_time_sync
+
+  function monolis_get_penalty_value(monoMAT)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
+    real(kdouble) :: monolis_get_penalty_value, max
+
+    call monolis_debug_header("monolis_get_penalty_value")
+
+    NP =  monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    NDOF2 = NDOF*NDOF
+    max = 0.0d0
+
+    do i = 1, NP
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        in = monoMAT%item(j)
+        if(i == in)then
+          do k = 1, NDOF
+            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
+            if(max < monoMAT%A(kn)) max = monoMAT%A(kn)
+          enddo
+        endif
+      enddo
+    enddo
+    monolis_get_penalty_value = max
+  end function monolis_get_penalty_value
 
   subroutine monolis_check_diagonal(monoPRM, monoMAT)
     implicit none
