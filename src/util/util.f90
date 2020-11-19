@@ -118,33 +118,21 @@ contains
     endif
   end subroutine monolis_timer_finalize
 
-  function monolis_get_input_filename(input)
+  function monolis_get_input_filename(fname_in)
     implicit none
-    integer(kint) :: comm_size, myrank, pos
-    character(*) :: input
-    character :: cnum*6
-    character :: monolis_get_input_filename*128
+    integer(kint) :: comm_size, myrank
+    character(*) :: fname_in
+    character :: cnum*6, output_dir*12
+    character(monolis_charlen) :: monolis_get_input_filename*128
 
     comm_size = monolis_global_commsize()
-    monolis_get_input_filename = trim(input)
-
+    myrank = monolis_global_myrank()
     if(comm_size > 1)then
-      myrank = monolis_global_myrank()
+      output_dir = "parted/"
       write(cnum,"(i0)") myrank
-
-      !> for node.dat
-      pos = index(monolis_get_input_filename, "node.dat", back = .true.)
-      if(pos > 0)then
-        monolis_get_input_filename(pos:pos+16) = "parted/node.dat."
-        monolis_get_input_filename = trim(monolis_get_input_filename) // trim(cnum)
-      endif
-
-      !> for elem.dat
-      pos = index(monolis_get_input_filename, "elem.dat", back = .true.)
-      if(pos > 0)then
-        monolis_get_input_filename(pos:pos+16) = "parted/elem.dat."
-        monolis_get_input_filename = trim(monolis_get_input_filename) // trim(cnum)
-      endif
+      monolis_get_input_filename = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
+    else
+      monolis_get_input_filename = trim(fname_in)
     endif
   end function monolis_get_input_filename
 
@@ -302,6 +290,12 @@ contains
   end subroutine monolis_param_set_show_summary
 
   !> debug section
+  subroutine monolis_print_char(header, char)
+    implicit none
+    character(*) :: header, char
+    if(myrank == 0) write(*,"(a,a)")">> "//trim(header)//": ", trim(char)
+  end subroutine monolis_print_char
+
   subroutine monolis_set_debug(flag)
     implicit none
     logical :: flag

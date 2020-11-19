@@ -5,6 +5,7 @@ module mod_monolis_prm
   integer(4), parameter :: kdouble = 8
   integer(kint), parameter :: monolis_success = 0
   integer(kint), parameter :: monolis_fail = 1
+  integer(kint), parameter :: monolis_charlen = 1024
 
   integer(kint), parameter :: monolis_iter_CG       = 1
   integer(kint), parameter :: monolis_iter_GropCG   = 2
