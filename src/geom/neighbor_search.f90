@@ -23,7 +23,7 @@ module mod_monolis_neighbor_search
     type(type_monolis_neighbor_search_main), allocatable :: cell(:)
   end type type_monolis_neighbor_search
 
-  real(kdouble), parameter :: ths = 1.0d-3
+  real(kdouble), save :: ths = 1.0d-3
 
 contains
 
@@ -31,13 +31,16 @@ contains
     implicit none
     type(type_monolis_neighbor_search) :: monolis_nbsearch
     integer(kint) :: div(3)
-    real(kdouble) :: BB(6)
+    real(kdouble) :: BB(6), minbb
     monolis_nbsearch%div = div
     monolis_nbsearch%BB = BB
     monolis_nbsearch%dx(1) = (BB(2)-BB(1))/dble(div(1))
     monolis_nbsearch%dx(2) = (BB(4)-BB(3))/dble(div(2))
     monolis_nbsearch%dx(3) = (BB(6)-BB(5))/dble(div(3))
     allocate(monolis_nbsearch%cell(div(1)*div(2)*div(3)))
+
+    minbb = min(BB(2)-BB(1), BB(4)-BB(3), BB(6)-BB(5))
+    ths = 1.0d-3*minbb
   end subroutine monolis_neighbor_search_init
 
   subroutine monolis_neighbor_search_push(monolis_nbsearch, BB, id)
