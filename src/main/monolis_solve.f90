@@ -27,17 +27,46 @@ contains
     real(kdouble) :: B(:), X(:)
     integer(kint) :: i
 
-    do i = 1, monolis%MAT%NP*monolis%MAT%NDOF
-      monolis%MAT%B(i) = B(i)
-      monolis%MAT%X(i) = X(i)
-    enddo
+    call monolis_set_RHS(monolis%MAT, B)
+    call monolis_set_initial_solution(monolis%MAT, X)
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
 
-    do i = 1, monolis%MAT%NP*monolis%MAT%NDOF
-      X(i) = monolis%MAT%X(i)
-    enddo
+    call monolis_get_solution(monolis%MAT, X)
   end subroutine monolis_solve
+
+  subroutine monolis_set_RHS(monoMAT, B)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    real(kdouble) :: B(:)
+    integer(kint) :: i
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      monoMAT%B(i) = B(i)
+    enddo
+  end subroutine monolis_set_RHS
+
+  subroutine monolis_set_initial_solution(monoMAT, X)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    real(kdouble) :: X(:)
+    integer(kint) :: i
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      monoMAT%X(i) = X(i)
+    enddo
+  end subroutine monolis_set_initial_solution
+
+  subroutine monolis_get_solution(monoMAT, X)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    real(kdouble) :: X(:)
+    integer(kint) :: i
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      X(i) = monoMAT%X(i)
+    enddo
+  end subroutine monolis_get_solution
 
   subroutine monolis_solve_(monoPRM, monoCOM, monoMAT)
     implicit none

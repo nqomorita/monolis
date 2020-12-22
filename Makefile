@@ -92,13 +92,15 @@ SRC_LIST_FACT   = 11/fact_LU_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.
 SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 precond.f90
 SRC_LIST_DIRECT = LU.f90
 SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90
-SRC_LIST_MAIN   = monolis_solve.f90 monolis.f90
+SRC_LIST_SOLVE  = monolis_solve.f90
+SRC_LIST_MAIN   = monolis.f90
+SRC_LIST_EIGEN  = Lanczos.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
 SRC_LIST_REFN   = p_refiner.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
-SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix refiner/, $(SRC_LIST_REFN)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix refiner/, $(SRC_LIST_REFN)) $(addprefix main/, $(SRC_LIST_SOLVE)) $(addprefix eigen/, $(SRC_LIST_EIGEN)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_PART        = partitioner/partitioner.f90
 SRC_PARTBC      = partitioner/partitioner_bc.f90
 SRC_REF1        = refiner/h_refiner_hex.f90
