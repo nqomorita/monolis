@@ -23,25 +23,44 @@ program main
   !>  0  3  1  2  0
   !>  0  0  2 20  5
   !>  0  0  0  5 30
-  call monolis_add_scalar_to_sparse_matrix(mat, 1, 1, 1, 1, 16.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 1, 2, 1, 1,  2.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 2, 1, 1, 1,  2.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 2, 2, 1, 1, 12.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 2, 3, 1, 1,  3.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 3, 2, 1, 1,  3.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 3, 3, 1, 1,  1.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 3, 4, 1, 1,  2.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 4, 3, 1, 1,  2.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 4, 4, 1, 1, 20.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 4, 5, 1, 1,  5.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 5, 4, 1, 1,  5.0d0)
-  call monolis_add_scalar_to_sparse_matrix(mat, 5, 5, 1, 1, 30.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 1, 1, 1, 1, 16.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 1, 2, 1, 1,  2.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 2, 1, 1, 1,  2.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 2, 2, 1, 1, 12.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 2, 3, 1, 1,  3.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 3, 2, 1, 1,  3.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 3, 3, 1, 1,  1.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 3, 4, 1, 1,  2.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 4, 3, 1, 1,  2.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 4, 4, 1, 1, 20.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 4, 5, 1, 1,  5.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 5, 4, 1, 1,  5.0d0)
+  !> call monolis_add_scalar_to_sparse_matrix(mat, 5, 5, 1, 1, 30.0d0)
+
+  !>  2  1  0  0  0
+  !>  1  2  1  0  0
+  !>  0  1  2  2  0
+  !>  0  0  1  2  1
+  !>  0  0  0  1  2
+  call monolis_add_scalar_to_sparse_matrix(mat, 1, 1, 1, 1,  2.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 1, 2, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 2, 1, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 2, 2, 1, 1,  2.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 2, 3, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 3, 2, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 3, 3, 1, 1,  2.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 3, 4, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 4, 3, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 4, 4, 1, 1,  2.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 4, 5, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 5, 4, 1, 1,  1.0d0)
+  call monolis_add_scalar_to_sparse_matrix(mat, 5, 5, 1, 1,  2.0d0)
 
   !mat%PRM%is_debug = .true.
-  mat%PRM%is_reordering = .false.
   mat%PRM%show_iterlog = .false.
   mat%PRM%show_time = .false.
-  call monolis_eigen_standard_lanczos(mat)
+  mat%PRM%show_summary = .false.
+  call monolis_eigen_inverted_standard_lanczos(mat)
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 

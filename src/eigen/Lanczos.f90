@@ -9,23 +9,23 @@ module mod_monolis_eigen_lanczos
 
 contains
 
-  subroutine monolis_eigen_standard_lanczos(monolis)
+  subroutine monolis_eigen_inverted_standard_lanczos(monolis)
     implicit none
     type(monolis_structure) :: monolis
-    call monolis_eigen_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT)
-  end subroutine monolis_eigen_standard_lanczos
+    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT)
+  end subroutine monolis_eigen_inverted_standard_lanczos
 
-  subroutine monolis_eigen_standard_lanczos_(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: N, NP, NDOF, total_dof
-    integer(kint) :: i, iter, maxiter
+    integer(kint) :: i, iter, maxiter, n_get_eigen
     real(kdouble) :: beta_t
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_standard_lanczos_")
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -34,44 +34,54 @@ contains
     total_dof = N*NDOF
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
 
-    maxiter = 100
+    n_get_eigen = 10
+    if(n_get_eigen > total_dof) n_get_eigen = total_dof
+    maxiter = 2*n_get_eigen
 
     allocate(alpha(maxiter), source = 0.0d0)
     allocate(beta(maxiter), source = 0.0d0)
     allocate(eigen_value(maxiter), source = 0.0d0)
-    allocate(q(NP*NDOF,maxiter), source = 0.0d0)
+    allocate(q(NP*NDOF,0:maxiter), source = 0.0d0)
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,maxiter), source = 0.0d0)
 
     call lanczos_initialze(NP*NDOF, q(:,1))
 
     do iter = 1, maxiter
-      write(*,*)"iter", iter
-
       call monolis_set_RHS(monoMAT, q(:,iter))
 
       call monolis_solve_(monoPRM, monoCOM, monoMAT)
 
-      call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter), monoMAT%X, p)
+      call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter-1), monoMAT%X, p)
 
       call monolis_inner_product_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter), monoPRM%tdotp, monoPRM%tcomm_dotp)
 
       call monolis_vec_AXPY(N, NDOF, -alpha(iter), q(:,iter), p, p)
 
-      !call monolis_gram_schmidt(p)
+      !call monolis_gram_schmidt(iter, q, p)
 
       call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t, monoPRM%tdotp, monoPRM%tcomm_dotp)
       beta(iter+1) = dsqrt(beta_t)
 
+write(*,*)"iter", iter
+write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
+
+      beta_t = 1.0d0/beta(iter+1)
       do i = 1, NP*NDOF
-        q(i,iter+1) = p(i)/beta(iter+1)
+        q(i,iter+1) = p(i)*beta_t
       enddo
 
       call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-      !call check_converge_Lanczos()
+      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < monoPRM%tol)then
+write(*,*)"eigen_value"
+do i = 1, iter
+  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
+enddo
+        exit
+      endif
       if(iter >= total_dof) exit
     enddo
-  end subroutine monolis_eigen_standard_lanczos_
+  end subroutine monolis_eigen_inverted_standard_lanczos_
 
 end module mod_monolis_eigen_lanczos

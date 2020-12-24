@@ -95,10 +95,13 @@ contains
     monoPRM%ierr = -1
     monoPRM%tol = 1.0d-8
     monoPRM%curresid = 0.0d0
-    monoPRM%is_scaling    = .true.
-    monoPRM%is_reordering = .true.
+    monoPRM%is_scaling    = .false.
+    monoPRM%is_reordering = .false.
     monoPRM%is_init_x     = .true.
+    monoPRM%is_sym_matrix = .true.
     monoPRM%is_debug      = .false.
+    monoPRM%is_measurement= .false.
+    monoPRM%is_check_diag = .true.
     monoPRM%show_iterlog  = .true.
     monoPRM%show_time     = .true.
     monoPRM%show_summary  = .true.

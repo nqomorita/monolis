@@ -14,7 +14,7 @@ contains
 
     norm = 0.0d0
     do i = 1, n
-      q(i) = 1.0d0
+      q(i) = dble(i)
       norm = norm + q(i)*q(i)
     enddo
 
@@ -33,16 +33,14 @@ contains
     real(kdouble), allocatable :: alpha(:), beta(:), rdum(:)
 
     !> DSTEVR
-    if(iter <= 1) return
-
     allocate(alpha(iter), source = 0.0d0)
-    allocate(beta (iter-1), source = 0.0d0)
+    allocate(beta (max(1,iter-1)), source = 0.0d0)
     allocate(isuppz(2*iter), source = 0)
     allocate(idum(10*iter), source = 0)
     allocate(rdum(20*iter), source = 0.0d0)
 
     alpha = alpha_t(1:iter)
-    beta = beta_t(1:iter-1)
+    beta = beta_t(2:max(1,iter-1)+1)
 
     vl = 0.0d0
     vu = 0.0d0
@@ -58,8 +56,10 @@ contains
     call dstevr("V", "A", n, alpha, beta, vl, vu, il, iu, abstol, m, e_value, &
         e_mode, ldz, isuppz, rdum, lwork, idum, liwork, info)
 
-    write(*,*)"e_value"
-    write(*,"(1pe12.5)")e_value(1:iter)
+    !write(*,*)"e_value"
+    !do i = 1, iter
+    !  write(*,"(1p2e12.5)")e_value(i), 1.0d0/e_value(i)
+    !enddo
 
     deallocate(alpha)
     deallocate(beta)
