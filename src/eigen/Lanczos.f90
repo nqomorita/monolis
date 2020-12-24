@@ -75,10 +75,14 @@ write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
       call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
       if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < monoPRM%tol)then
-!write(*,*)"eigen_value"
-!do i = 1, iter
-!  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
-!enddo
+write(*,*)"eigen_value"
+do i = 1, iter
+  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
+enddo
+write(*,*)"e_mode"
+do i = 1, iter
+  write(*,"(1p10e12.5)")eigen_mode(:,i)
+enddo
         exit
       endif
       if(iter >= total_dof) exit

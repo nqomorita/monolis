@@ -79,18 +79,7 @@ contains
       e_mode_t, ldz, isuppz, rdum, lwork, idum, liwork, info)
     if(info /= 0) stop "monolis_get_eigen_pair_from_tridiag"
 
-    write(*,*)"e_value"
-    do i = 1, iter
-      write(*,"(1p2e12.5)")e_value(i), 1.0d0/e_value(i)
-    enddo
-
-    !e_mode(:,1:iter) = matmul(q(:,1:iter), transpose(e_mode_t))
-    !write(*,*)"e_mode"
-    !do i = 1, iter
-      !write(*,"(1p10e12.5)")e_mode(:,i)
-      !write(*,"(1p10e12.5)")e_mode_t(:,i)
-      !write(*,"(1p10e12.5)")q(:,i)
-    !enddo
+    e_mode(:,1:iter) = matmul(q(:,1:iter), e_mode_t)
 
     deallocate(alpha)
     deallocate(beta)
