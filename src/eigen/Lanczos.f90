@@ -10,6 +10,7 @@ module mod_monolis_eigen_lanczos
 contains
 
   subroutine monolis_eigen_inverted_standard_lanczos(monolis)
+  !> subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths)
     implicit none
     type(monolis_structure) :: monolis
     call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT)
@@ -58,7 +59,7 @@ contains
 
       call monolis_vec_AXPY(N, NDOF, -alpha(iter), q(:,iter), p, p)
 
-      !call monolis_gram_schmidt(iter, q, p)
+      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
 
       call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t, monoPRM%tdotp, monoPRM%tcomm_dotp)
       beta(iter+1) = dsqrt(beta_t)
@@ -74,10 +75,10 @@ write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
       call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
       if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < monoPRM%tol)then
-write(*,*)"eigen_value"
-do i = 1, iter
-  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
-enddo
+!write(*,*)"eigen_value"
+!do i = 1, iter
+!  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
+!enddo
         exit
       endif
       if(iter >= total_dof) exit
