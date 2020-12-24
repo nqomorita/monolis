@@ -60,7 +60,7 @@ program main
   mat%PRM%show_iterlog = .false.
   mat%PRM%show_time = .false.
   mat%PRM%show_summary = .false.
-  call monolis_eigen_inverted_standard_lanczos(mat)
+  call monolis_eigen_inverted_standard_lanczos(mat, 5, 1.0d-6)
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 

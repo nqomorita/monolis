@@ -9,21 +9,22 @@ module mod_monolis_eigen_lanczos
 
 contains
 
-  subroutine monolis_eigen_inverted_standard_lanczos(monolis)
-  !> subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths)
+  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths)
     implicit none
     type(monolis_structure) :: monolis
-    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT)
+    integer(kint) :: n_get_eigen
+    real(kdouble) :: ths
+    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
   end subroutine monolis_eigen_inverted_standard_lanczos
 
-  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: N, NP, NDOF, total_dof
     integer(kint) :: i, iter, maxiter, n_get_eigen
-    real(kdouble) :: beta_t
+    real(kdouble) :: beta_t, ths
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
@@ -35,7 +36,6 @@ contains
     total_dof = N*NDOF
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
 
-    n_get_eigen = 10
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
     maxiter = 2*n_get_eigen
 
@@ -72,9 +72,9 @@ write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
+      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths)then
+        call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < monoPRM%tol)then
 write(*,*)"eigen_value"
 do i = 1, iter
   write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
@@ -83,6 +83,7 @@ write(*,*)"e_mode"
 do i = 1, iter
   write(*,"(1p10e12.5)")eigen_mode(:,i)
 enddo
+
         exit
       endif
       if(iter >= total_dof) exit
