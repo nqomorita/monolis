@@ -62,8 +62,8 @@ module mod_monolis_prm
     integer(kint) :: ierr = -1
     real(kdouble) :: tol = 1.0d-8
     real(kdouble) :: curresid = 0.0d0
-    logical :: is_scaling    = .true.
-    logical :: is_reordering = .true.
+    logical :: is_scaling    = .false.
+    logical :: is_reordering = .false.
     logical :: is_init_x     = .true.
     logical :: is_sym_matrix = .true.
     logical :: is_debug      = .false.
