@@ -45,6 +45,39 @@ contains
     enddo
   end subroutine monolis_gram_schmidt
 
+  subroutine monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda, coef)
+    implicit none
+    integer(kint) :: iter, it, lda, ldb, info, iw, N, dof
+    real(kdouble) :: Sa(3,3), Sb(3,3), lambda, coef(3), e_value(3), rw(8)
+
+    dof = 3
+    if(iter == 1) dof = 2
+
+    it = 1
+    N = dof
+    lda = dof
+    ldb = dof
+    iw = 8
+    call dsygv(it, "V", "L", N, Sa(1:dof,1:dof), lda, Sb(1:dof,1:dof), ldb, e_value(1:dof), rw, iw, info)
+
+    lambda = e_value(1)
+    coef(1) = Sa(1,1)
+    coef(2) = Sa(2,1)
+    coef(3) = Sa(3,1)
+
+!>    N = dof
+!>    M = dof
+!>    lda = dof
+!>    inv = Sb
+!>    call dgetrf(N, M, inv(1:dof,1:dof), lda, ipv(1:dof), info)
+!>
+!>    N = dof
+!>    lda = dof
+!>    iw = dof
+!>    call dgetri(N, inv(1:dof,1:dof), lda, ipv, rw(1:dof), iw, info)
+!>    mat(1:dof,1:dof) = matmul(inv(1:dof,1:dof), Sa(1:dof,1:dof))
+  end subroutine monolis_get_smallest_eigen_pair_from_3x3
+
   subroutine monolis_get_eigen_pair_from_tridiag(iter, alpha_t, beta_t, q, e_value, e_mode)
     implicit none
     integer(kint) :: iter, i, n, m, iu, il, ldz, info, liwork, lwork

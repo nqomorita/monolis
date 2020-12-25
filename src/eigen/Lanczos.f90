@@ -72,7 +72,8 @@ write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths)then
+      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths .or. &
+       & iter >= total_dof)then
         call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
 write(*,*)"eigen_value"
@@ -86,7 +87,6 @@ enddo
 
         exit
       endif
-      if(iter >= total_dof) exit
     enddo
   end subroutine monolis_eigen_inverted_standard_lanczos_
 
