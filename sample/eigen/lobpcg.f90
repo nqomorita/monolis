@@ -56,10 +56,28 @@ program main
   call monolis_add_scalar_to_sparse_matrix(mat, 5, 4, 1, 1,  1.0d0)
   call monolis_add_scalar_to_sparse_matrix(mat, 5, 5, 1, 1,  2.0d0)
 
+  !> eigen_value
+  !> 3.73205E+00
+  !> 3.00000E+00
+  !> 2.00000E+00
+  !> 1.00000E+00
+  !> 2.67949E-01
+
+  !> e_mode
+  !> 2.88675E-01 5.00000E-01 5.77350E-01 5.00000E-01 2.88675E-01
+  !> 5.00000E-01 5.00000E-01-2.42335E-16-5.00000E-01-5.00000E-01
+  !> 5.77350E-01-6.48664E-17-5.77350E-01 1.61183E-16 5.77350E-01
+  !> 5.00000E-01-5.00000E-01-2.82388E-16 5.00000E-01-5.00000E-01
+  !> 2.88675E-01-5.00000E-01 5.77350E-01-5.00000E-01 2.88675E-01
+
   !mat%PRM%is_debug = .true.
-  mat%PRM%show_iterlog = .false.
+  mat%PRM%show_iterlog = .true.
   mat%PRM%show_time = .false.
   mat%PRM%show_summary = .false.
+
+  !mat%PRM%precond = monolis_prec_JACOBI
+  mat%PRM%precond = monolis_prec_ILU
+  !mat%PRM%precond = monolis_prec_SOR
   call monolis_eigen_inverted_lobpcg(mat, 5, 1.0d-6)
 
   call monolis_finalize(mat) !> 疎行列変数の解放

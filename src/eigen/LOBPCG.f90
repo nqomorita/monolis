@@ -31,9 +31,8 @@ contains
     integer(kint), parameter :: Q = 3 !> B
     integer(kint) :: N, NP, NDOF, total_dof
     integer(kint) :: i, iter, n_get_eigen
-    real(kdouble) :: ths, mu, Sa(3,3), Sb(3,3), lambda, coef(3), norm_x, norm_p, R0
+    real(kdouble) :: ths, mu, Sa(3,3), Sb(3,3), lambda, coef(3), norm_x, norm_p, R0, R2, resid
     real(kdouble), allocatable :: A(:,:), B(:,:)
-    logical :: is_converge
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_lobpcg_")
 
@@ -47,14 +46,18 @@ contains
     allocate(A(NP*NDOF,3), source = 0.0d0)
     allocate(B(NP*NDOF,3), source = 0.0d0)
 
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+
     call lanczos_initialze(N*NDOF, A(:,X))
     call monolis_matvec(monoCOM, monoMAT, A(:,X), B(:,Y), monoPRM%tspmv, monoPRM%tcomm_spmv)
     mu = dot_product(A(:,X), B(:,Y))
 
     A(:,W) = B(:,Y) - mu*A(:,X)
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, A(:,W), R0, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,W), A(:,W))
 
-    do iter = 1, total_dof
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, A(:,W), A(:,W), R0, monoPRM%tdotp, monoPRM%tcomm_dotp)
+
+    do iter = 1, 10*total_dof
       call monolis_matvec(monoCOM, monoMAT, A(:,W), B(:,V), monoPRM%tspmv, monoPRM%tcomm_spmv)
       Sa = matmul(transpose(A), B)
       Sb = matmul(transpose(A), A)
@@ -77,15 +80,28 @@ contains
       B(:,Q) = B(:,Q)/norm_p
 
       A(:,W) = B(:,Y) - mu*A(:,X)
-      call monolis_check_converge(monoPRM, monoCOM, monoMAT, A(:,W), R0, iter, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
-      if(is_converge) exit
+      call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, A(:,W), A(:,W), R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
-      !call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,W), A(:,W))
+      resid = dsqrt(R2/R0)
+      write (*,"(i7, 1pe16.6)") iter, resid
+
+      if(resid < ths)then
+write(*,*)"eigen_value"
+write(*,"(1p2e12.5)")lambda
+
+write(*,*)"e_mode"
+write(*,"(1p10e12.5)")A(:,X)
+        exit
+      endif
+
+      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,W), A(:,W))
       norm_x = monolis_get_l2_norm(N*NDOF, A(:,W))
       if(norm_x == 0.0d0) stop "monolis_eigen_inverted_lobpcg_ norm_w"
 
       A(:,W) = A(:,W)/norm_x
     enddo
+
+    !call monolis_precond_clear(monoPRM, monoCOM, monoMAT)
   end subroutine monolis_eigen_inverted_lobpcg_
 
 end module mod_monolis_eigen_LOBPCG

@@ -116,9 +116,7 @@ contains
   subroutine monolis_precond_diag_nn_clear(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    real(kdouble), pointer :: ALU(:)
-    ALU => monoMAT%monoTree%D
-    deallocate(ALU)
+    deallocate(monoMAT%monoTree%D)
   end subroutine monolis_precond_diag_nn_clear
 
 end module mod_monolis_precond_diag_nn
