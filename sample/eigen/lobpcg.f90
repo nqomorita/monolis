@@ -78,7 +78,7 @@ program main
   !mat%PRM%precond = monolis_prec_JACOBI
   mat%PRM%precond = monolis_prec_ILU
   !mat%PRM%precond = monolis_prec_SOR
-  call monolis_eigen_inverted_lobpcg(mat, 5, 1.0d-6)
+  call monolis_eigen_inverted_lobpcg(mat, 1, 1.0d-6)
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 

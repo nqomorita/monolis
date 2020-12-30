@@ -45,6 +45,62 @@ contains
     enddo
   end subroutine monolis_gram_schmidt
 
+  subroutine monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
+    implicit none
+    integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i, j, NG
+    real(kdouble) :: Sa(:,:), Sb(:,:), lambda(:), coef(:)
+    real(kdouble) :: e_value(3*NG)
+    real(kdouble), allocatable :: rw(:)
+
+    dof = 3*NG
+    if(iter == 1) dof = 2*NG
+
+!if(iter == 1)then
+!  write(*,"(1p4e12.5)")Sa(1:dof,1:dof)
+!else
+!  write(*,"(1p6e12.5)")Sa(1:dof,1:dof)
+!endif
+
+    it = 1 !> A x = B lambda x
+    N = dof
+    lda = dof
+    ldb = dof
+    iw = 3*dof-1
+    allocate(rw(iw), source = 0.0d0)
+    call dsygv(it, "V", "L", N, Sa(1:dof,1:dof), lda, Sb(1:dof,1:dof), ldb, e_value(1:dof), rw, iw, info)
+
+    coef = 0.0d0
+    do i = 1, dof
+      coef(i) = Sa(i,1)
+    enddo
+
+!    if(iter == 1)then
+!      do i = 1, NG
+!        lambda(i) = e_value(i)
+!        do j = 1, 2
+!          coef(2*i-2+j) = Sa(j,2*i+1)
+!        enddo
+!      enddo
+!    else
+!      do i = 1, NG
+!        lambda(i) = e_value(i)
+!        do j = 1, 3
+!          coef(3*i-3+j) = Sa(j,3*i+1)
+!        enddo
+!      enddo
+!    endif
+
+if(iter == 1)then
+  write(*,"(1pe12.5)")e_value(1:dof)
+  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
+else
+  write(*,"(1pe12.5)")e_value(1:dof)
+  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
+endif
+
+    deallocate(rw)
+  end subroutine monolis_get_smallest_eigen_pair_from_ng
+
   subroutine monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda, coef)
     implicit none
     integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i
