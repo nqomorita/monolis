@@ -82,8 +82,7 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
       enddo
       Sa = matmul(transpose(A), B)
       Sb = matmul(transpose(A), A)
-      !call monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
-      call monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda(1), coef)
+      call monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
 
       do i = 1, NG
         mu(i) = 0.5d0*(lambda(i) + dot_product(A(:,NG*X+i), B(:,NG*Y+i)))

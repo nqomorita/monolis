@@ -69,6 +69,10 @@ contains
     allocate(rw(iw), source = 0.0d0)
     call dsygv(it, "V", "L", N, Sa(1:dof,1:dof), lda, Sb(1:dof,1:dof), ldb, e_value(1:dof), rw, iw, info)
 
+    do i = 1, NG
+      lambda(i) = e_value(i)
+    enddo
+
     coef = 0.0d0
     do i = 1, dof
       coef(i) = Sa(i,1)
@@ -90,13 +94,13 @@ contains
 !      enddo
 !    endif
 
-if(iter == 1)then
-  write(*,"(1pe12.5)")e_value(1:dof)
-  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
-else
-  write(*,"(1pe12.5)")e_value(1:dof)
-  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
-endif
+!if(iter == 1)then
+!  write(*,"(1pe12.5)")e_value(1:dof)
+!  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
+!else
+!  write(*,"(1pe12.5)")e_value(1:dof)
+!  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
+!endif
 
     deallocate(rw)
   end subroutine monolis_get_smallest_eigen_pair_from_ng
