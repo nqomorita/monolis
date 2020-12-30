@@ -30,11 +30,11 @@ contains
     integer(kint), parameter :: Y = 1 !> B
     integer(kint), parameter :: Q = 2 !> B
     integer(kint) :: N, NP, NDOF, NG, total_dof
-    integer(kint) :: i, iter, n_get_eigen
+    integer(kint) :: i, j, iter, n_get_eigen
     real(kdouble) :: ths
     real(kdouble), allocatable :: mu(:), Sa(:,:), Sb(:,:)
     real(kdouble), allocatable :: A(:,:), B(:,:)
-    real(kdouble), allocatable :: norm_x(:), norm_p(:), R0(:), R2(:), resid(:), lambda(:), coef(:)
+    real(kdouble), allocatable :: norm_x(:), norm_p(:), R0(:), R2(:), resid(:), lambda(:), coef(:,:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_lobpcg_mat")
 
@@ -54,7 +54,7 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
     allocate(mu(NG), source = 0.0d0)
     allocate(Sa(3*NG,3*NG), source = 0.0d0)
     allocate(Sb(3*NG,3*NG), source = 0.0d0)
-    allocate(coef(3*NG), source = 0.0d0)
+    allocate(coef(3*NG,NG), source = 0.0d0)
     allocate(R0(NG), source = 0.0d0)
     allocate(R2(NG), source = 0.0d0)
     allocate(resid(NG), source = 0.0d0)
@@ -87,10 +87,12 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
       do i = 1, NG
         mu(i) = 0.5d0*(lambda(i) + dot_product(A(:,NG*X+i), B(:,NG*Y+i)))
 
-        A(:,NG*X+i) = coef(i)*A(:,NG*W+i) + coef(NG+i)*A(:,NG*X+i) + coef(2*NG+i)*A(:,NG*P+i)
-        A(:,NG*P+i) = coef(i)*A(:,NG*W+i)                          + coef(2*NG+i)*A(:,NG*P+i)
-        B(:,NG*Y+i) = coef(i)*B(:,NG*V+i) + coef(NG+i)*B(:,NG*Y+i) + coef(2*NG+i)*B(:,NG*Q+i)
-        B(:,NG*Q+i) = coef(i)*B(:,NG*V+i)                          + coef(2*NG+i)*B(:,NG*Q+i)
+        do j = 1, NG
+          A(:,NG*X+i) = coef(i,j)*A(:,NG*W+i) + coef(NG+i,j)*A(:,NG*X+i) + coef(2*NG+i,j)*A(:,NG*P+i)
+          A(:,NG*P+i) = coef(i,j)*A(:,NG*W+i)                            + coef(2*NG+i,j)*A(:,NG*P+i)
+          B(:,NG*Y+i) = coef(i,j)*B(:,NG*V+i) + coef(NG+i,j)*B(:,NG*Y+i) + coef(2*NG+i,j)*B(:,NG*Q+i)
+          B(:,NG*Q+i) = coef(i,j)*B(:,NG*V+i)                            + coef(2*NG+i,j)*B(:,NG*Q+i)
+        enddo
 
         norm_x(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*X+i))
         if(norm_x(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_x"

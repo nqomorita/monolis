@@ -48,7 +48,7 @@ contains
   subroutine monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
     implicit none
     integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i, j, NG
-    real(kdouble) :: Sa(:,:), Sb(:,:), lambda(:), coef(:)
+    real(kdouble) :: Sa(:,:), Sb(:,:), lambda(:), coef(:,:)
     real(kdouble) :: e_value(3*NG)
     real(kdouble), allocatable :: rw(:)
 
@@ -74,25 +74,11 @@ contains
     enddo
 
     coef = 0.0d0
-    do i = 1, dof
-      coef(i) = Sa(i,1)
+    do j = 1, NG
+      do i = 1, dof
+        coef(i,j) = Sa(i,j)
+      enddo
     enddo
-
-!    if(iter == 1)then
-!      do i = 1, NG
-!        lambda(i) = e_value(i)
-!        do j = 1, 2
-!          coef(2*i-2+j) = Sa(j,2*i+1)
-!        enddo
-!      enddo
-!    else
-!      do i = 1, NG
-!        lambda(i) = e_value(i)
-!        do j = 1, 3
-!          coef(3*i-3+j) = Sa(j,3*i+1)
-!        enddo
-!      enddo
-!    endif
 
 !if(iter == 1)then
 !  write(*,"(1pe12.5)")e_value(1:dof)
