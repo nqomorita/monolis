@@ -15,8 +15,122 @@ contains
     type(monolis_structure) :: monolis
     integer(kint) :: n_get_eigen
     real(kdouble) :: ths
-    call monolis_eigen_inverted_lobpcg_mat(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
+    call monolis_eigen_inverted_lobpcg_    (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
+    call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
+    call monolis_eigen_inverted_lobpcg_mat2(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
   end subroutine monolis_eigen_inverted_lobpcg
+
+  subroutine monolis_eigen_inverted_lobpcg_mat2(monoPRM, monoCOM, monoMAT, n_get_eigen, ths)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint), parameter :: W = 0 !> A
+    integer(kint), parameter :: X = 1 !> A
+    integer(kint), parameter :: P = 2 !> A
+    integer(kint), parameter :: V = 0 !> B
+    integer(kint), parameter :: Y = 1 !> B
+    integer(kint), parameter :: Q = 2 !> B
+    integer(kint) :: N, NP, NDOF, NG, total_dof
+    integer(kint) :: i, j, iter, n_get_eigen
+    real(kdouble) :: ths
+    real(kdouble), allocatable :: mu(:), Sa(:,:), Sb(:,:)
+    real(kdouble), allocatable :: A(:,:), B(:,:), Xt(:), Yt(:), xx(:)
+    real(kdouble), allocatable :: norm_x(:), norm_p(:), R0(:), R2(:), resid(:), lambda(:), coef(:,:)
+
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_lobpcg_mat2")
+
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    NG    = n_get_eigen
+
+write(*,"(a,i8)")"n_get_eigen: ", n_get_eigen
+write(*,"(a,1pe12.5)")"ths:     ", ths
+
+    total_dof = N*NDOF
+    call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
+
+    allocate(A(NP*NDOF,3*NG), source = 0.0d0)
+    allocate(B(NP*NDOF,3*NG), source = 0.0d0)
+    allocate(Xt(NP*NDOF), source = 0.0d0)
+    allocate(Yt(NP*NDOF), source = 0.0d0)
+    allocate(mu(NG), source = 0.0d0)
+    allocate(xx(NG), source = 0.0d0)
+    allocate(Sa(3*NG,3*NG), source = 0.0d0)
+    allocate(Sb(3*NG,3*NG), source = 0.0d0)
+    allocate(coef(3*NG,NG), source = 0.0d0)
+    allocate(R0(NG), source = 0.0d0)
+    allocate(R2(NG), source = 0.0d0)
+    allocate(resid(NG), source = 0.0d0)
+    allocate(norm_x(NG), source = 0.0d0)
+    allocate(norm_p(NG), source = 0.0d0)
+    allocate(lambda(NG), source = 0.0d0)
+
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call monolis_lobpcg_initialze(A)
+    call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, A, X, NG)
+
+    do iter = 1, 2*total_dof
+      do i = 1, NG
+        call monolis_matvec(monoCOM, monoMAT, A(:,NG*X+i), B(:,NG*Y+i), monoPRM%tspmv, monoPRM%tcomm_spmv)
+
+        xx(i) = dot_product(A(:,NG*X+i), A(:,NG*X+i))
+        mu(i) = dot_product(A(:,NG*X+i), B(:,NG*Y+i)) / xx(i)
+
+        A(:,NG*W+i) = B(:,NG*Y+i) - mu(i)*A(:,NG*X+i)
+        call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, A(:,NG*W+i), A(:,NG*W+i), R2(i), &
+        &  monoPRM%tdotp, monoPRM%tcomm_dotp)
+        if(iter == 1) R0(i) = R2(i)
+        resid(i) = dsqrt(R2(i)/R0(i))
+
+        call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,NG*W+i), A(:,NG*W+i))
+
+        call monolis_matvec(monoCOM, monoMAT, A(:,NG*W+i), B(:,NG*V+i), monoPRM%tspmv, monoPRM%tcomm_spmv)
+        call monolis_matvec(monoCOM, monoMAT, A(:,NG*P+i), B(:,NG*Q+i), monoPRM%tspmv, monoPRM%tcomm_spmv)
+      enddo
+
+      write (*,"(i7, 1pe16.6)") iter, maxval(resid)
+
+      Sa = matmul(transpose(A), B)
+      Sb = matmul(transpose(A), A)
+      call monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
+
+      do i = 1, NG
+        Xt = 0.0d0
+        do j = 1, NG
+          Xt(:) = Xt(:) + coef(3*j-2,i)*A(:,NG*W+j) + coef(3*j-1,i)*A(:,NG*X+j) + coef(3*j,i)*A(:,NG*P+j)
+        enddo
+        A(:,NG*X+i) = Xt(:)
+
+        Xt = 0.0d0
+        do j = 1, NG
+          Xt(:) = Xt(:) + coef(3*j-2,i)*A(:,NG*W+j)                             + coef(3*j,i)*A(:,NG*P+j)
+        enddo
+        A(:,NG*P+i) = Xt(:)
+
+        norm_x(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*X+i))
+        if(norm_x(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_x"
+        A(:,NG*X+i) = A(:,NG*X+i)/norm_x(i)
+
+        norm_p(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*P+i))
+        if(norm_p(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_p"
+        A(:,NG*P+i) = A(:,NG*P+i)/norm_p(i)
+      enddo
+
+      call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, A, X, NG)
+      call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, A, P, NG)
+
+      if(maxval(resid) < ths)then
+write(*,*)"eigen_value"
+write(*,"(1p2e12.5)")lambda
+
+write(*,*)"e_mode"
+write(*,"(1p10e12.5)")A(:,NG*X+1)
+        exit
+      endif
+    enddo
+  end subroutine monolis_eigen_inverted_lobpcg_mat2
 
   subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths)
     implicit none
@@ -63,12 +177,13 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
     allocate(lambda(NG), source = 0.0d0)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
+    call random_number(A)
+    call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, A, X, NG)
 
     do i = 1, NG
-      call lanczos_initialze(N*NDOF, A(:,NG*X+i))
       call monolis_matvec(monoCOM, monoMAT, A(:,NG*X+i), B(:,NG*Y+i), monoPRM%tspmv, monoPRM%tcomm_spmv)
-
       mu(i) = dot_product(A(:,NG*X+i), B(:,NG*Y+i))
+
       A(:,NG*W+i) = B(:,NG*Y+i) - mu(i)*A(:,NG*X+i)
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,NG*W+i), A(:,NG*W+i))
 
@@ -95,9 +210,8 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
         enddo
 
         norm_x(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*X+i))
-        if(norm_x(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_x"
-
         norm_p(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*P+i))
+        if(norm_x(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_x"
         if(norm_p(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_p"
 
         A(:,NG*X+i) = A(:,NG*X+i)/norm_x(i)
@@ -106,12 +220,12 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
         B(:,NG*Q+i) = B(:,NG*Q+i)/norm_p(i)
 
         A(:,NG*W+i) = B(:,NG*Y+i) - mu(i)*A(:,NG*X+i)
-
         call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, A(:,NG*W+i), A(:,NG*W+i), R2(i), &
         &  monoPRM%tdotp, monoPRM%tcomm_dotp)
 
         resid(i) = dsqrt(R2(i)/R0(i))
       enddo
+
       write (*,"(i7, 1pe16.6)") iter, maxval(resid)
 
       if(maxval(resid) < ths)then
@@ -119,13 +233,12 @@ write(*,*)"eigen_value"
 write(*,"(1p2e12.5)")lambda
 
 write(*,*)"e_mode"
-write(*,"(1p10e12.5)")A(:,X)
+write(*,"(1p10e12.5)")A(:,NG*X+1)
         exit
       endif
 
       do i = 1, NG
         call monolis_precond_apply(monoPRM, monoCOM, monoMAT, A(:,NG*W+i), A(:,NG*W+i))
-
         norm_x(i) = monolis_get_l2_norm(N*NDOF, A(:,NG*W+i))
         if(norm_x(i) == 0.0d0) stop "monolis_eigen_inverted_lobpcg_mat norm_w"
 
@@ -166,7 +279,9 @@ write(*,"(1p10e12.5)")A(:,X)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT)
 
-    call lanczos_initialze(N*NDOF, A(:,X))
+    call random_number(A)
+    call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, A, X, 1)
+
     call monolis_matvec(monoCOM, monoMAT, A(:,X), B(:,Y), monoPRM%tspmv, monoPRM%tcomm_spmv)
     mu = dot_product(A(:,X), B(:,Y))
 

@@ -45,6 +45,39 @@ contains
     enddo
   end subroutine monolis_gram_schmidt
 
+  subroutine monolis_lobpcg_initialze(q)
+    implicit none
+    real(kdouble) :: q(:,:)
+    call random_number(q)
+  end subroutine monolis_lobpcg_initialze
+
+  subroutine monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, q, prm, ng)
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: i, j, k, ng, N, NDOF, prm
+    real(kdouble) :: q(:,:), norm
+
+    N    = monoMAT%N
+    NDOF = monoMAT%NDOF
+
+    do i = prm*ng + 1, prm*ng
+      do j = 1, i - 1
+        call monolis_inner_product_R(monoCOM, N, NDOF, q(:,i), q(:,j), norm, monoPRM%tdotp, monoPRM%tcomm_dotp)
+        do k = 1, N*NDOF
+          q(k,i) = q(k,i) - norm*q(k,j)
+        enddo
+      enddo
+
+      norm = 0.0d0
+      do j = 1, N*NDOF
+        norm = norm + q(j,i)*q(j,i)
+      enddo
+      q(:,i) = q(:,i)/norm
+    enddo
+  end subroutine monolis_gram_schmidt_lobpcg
+
   subroutine monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
     implicit none
     integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i, j, NG
