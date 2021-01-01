@@ -89,9 +89,11 @@ contains
     if(iter == 1) dof = 2*NG
 
 !if(iter == 1)then
-!  write(*,"(1p4e12.5)")Sa(1:dof,1:dof)
+!  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
+  !write(*,"(1p4e12.5)")Sa(1:dof,1:dof)
 !else
-!  write(*,"(1p6e12.5)")Sa(1:dof,1:dof)
+!  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
+  !write(*,"(1p6e12.5)")Sa(1:dof,1:dof)
 !endif
 
     it = 1 !> A x = B lambda x
@@ -99,9 +101,11 @@ contains
     lda = dof
     ldb = dof
     iw = 3*dof-1
+    e_value = 0.0d0
     allocate(rw(iw), source = 0.0d0)
     call dsygv(it, "V", "L", N, Sa(1:dof,1:dof), lda, Sb(1:dof,1:dof), ldb, e_value(1:dof), rw, iw, info)
 
+    lambda = 0.0d0
     do i = 1, NG
       lambda(i) = e_value(i)
     enddo
@@ -123,6 +127,28 @@ contains
 
     deallocate(rw)
   end subroutine monolis_get_smallest_eigen_pair_from_ng
+
+  subroutine monolis_get_smallest_eigen_pair(dof, Sa, val, vec)
+    implicit none
+    integer(kint) :: lda, info, iw, N, dof, i, j, iter
+    real(kdouble) :: Sa(:,:), val(:,:), vec(:,:)
+    real(kdouble) :: ev(dof)
+    real(kdouble), allocatable :: rw(:)
+
+    N = dof
+    lda = dof
+    iw = 3*dof-1
+    allocate(rw(iw), source = 0.0d0)
+    call dsyev("V", "U", N, Sa, lda, ev, rw, iw, info)
+    deallocate(rw)
+
+    vec = Sa
+
+    val = 0.0d0
+    do i = 1, dof
+      val(i,i) = ev(i)
+    enddo
+  end subroutine monolis_get_smallest_eigen_pair
 
   subroutine monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda, coef)
     implicit none

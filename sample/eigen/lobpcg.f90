@@ -75,10 +75,15 @@ program main
   mat%PRM%show_time = .false.
   mat%PRM%show_summary = .false.
 
+  !mat%PRM%precond = monolis_prec_NONE
   !mat%PRM%precond = monolis_prec_JACOBI
   mat%PRM%precond = monolis_prec_ILU
   !mat%PRM%precond = monolis_prec_SOR
   call monolis_eigen_inverted_lobpcg(mat, 1, 1.0d-6)
+  !call monolis_eigen_inverted_lobpcg(mat, 2, 1.0d-6)
+  !call monolis_eigen_inverted_lobpcg(mat, 3, 1.0d-6)
+  !call monolis_eigen_inverted_lobpcg(mat, 4, 1.0d-6)
+  !call monolis_eigen_inverted_lobpcg(mat, 5, 1.0d-6)
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 
