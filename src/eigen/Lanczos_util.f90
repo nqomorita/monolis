@@ -81,6 +81,24 @@ contains
     enddo
   end subroutine monolis_gram_schmidt_lobpcg
 
+  subroutine monolis_get_smallest_eigen_pair_m(dof, Sa, vec, val)
+    implicit none
+    integer(kint) :: lda, info, iw, N, dof
+    real(kdouble) :: Sa(:,:), vec(:,:), val(:)
+    real(kdouble) :: ev(dof)
+    real(kdouble), allocatable :: rw(:)
+
+    N = dof
+    lda = dof
+    iw = 3*dof-1
+    allocate(rw(iw), source = 0.0d0)
+    call dsyev("V", "U", N, Sa, lda, ev, rw, iw, info)
+    deallocate(rw)
+
+    vec = Sa
+    val = ev
+  end subroutine monolis_get_smallest_eigen_pair_m
+
   subroutine monolis_get_smallest_eigen_pair_3m(iter, NG, Sa, Sb, lambda, coef)
     implicit none
     integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i, j, NG
@@ -90,14 +108,6 @@ contains
 
     dof = 3*NG
     if(iter == 1) dof = 2*NG
-
-!if(iter == 1)then
-!  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
-  !write(*,"(1p4e12.5)")Sa(1:dof,1:dof)
-!else
-!  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
-  !write(*,"(1p6e12.5)")Sa(1:dof,1:dof)
-!endif
 
     it = 1 !> A x = B lambda x
     N = dof
@@ -120,34 +130,8 @@ contains
       enddo
     enddo
 
-!if(iter == 1)then
-!  write(*,"(1pe12.5)")e_value(1:dof)
-!  write(*,"(1p2e12.5)")Sa(1:dof,1:dof)
-!else
-!  write(*,"(1pe12.5)")e_value(1:dof)
-!  write(*,"(1p3e12.5)")Sa(1:dof,1:dof)
-!endif
-
     deallocate(rw)
   end subroutine monolis_get_smallest_eigen_pair_3m
-
-  subroutine monolis_get_smallest_eigen_pair_m(dof, Sa, vec, val)
-    implicit none
-    integer(kint) :: lda, info, iw, N, dof
-    real(kdouble) :: Sa(:,:), vec(:,:), val(:)
-    real(kdouble) :: ev(dof)
-    real(kdouble), allocatable :: rw(:)
-
-    N = dof
-    lda = dof
-    iw = 3*dof-1
-    allocate(rw(iw), source = 0.0d0)
-    call dsyev("V", "U", N, Sa, lda, ev, rw, iw, info)
-    deallocate(rw)
-
-    vec = Sa
-    val = ev
-  end subroutine monolis_get_smallest_eigen_pair_m
 
   subroutine monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda, coef)
     implicit none

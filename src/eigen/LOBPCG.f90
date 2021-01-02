@@ -31,7 +31,7 @@ contains
     integer(kint) :: N, NP, NDOF, NG, total_dof
     integer(kint) :: i, j, iter, maxiter,  n_get_eigen
     real(kdouble) :: ths, mu
-    real(kdouble), allocatable :: X(:,:), R(:,:), P(:,:), XAX(:,:), evec(:,:), eval(:), T(:)
+    real(kdouble), allocatable :: X(:,:), R(:,:), P(:,:), XAX(:,:), XBX(:,:), evec(:,:), eval(:), T(:)
     real(kdouble), allocatable :: A(:,:), B(:,:), R0(:), R2(:), resid(:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_lobpcg_mat")
@@ -66,18 +66,23 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
     allocate(resid(NG), source = 0.0d0)
 
     !> 0 step
-    call monolis_lobpcg_initialze(X)
-    call monolis_get_normarize_vectors(X, NP*NDOF, NG)
-    !call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, X, 0, NG)
+    !call monolis_lobpcg_initialze(X)
+    !call monolis_get_normarize_vectors(X, NP*NDOF, NG)
+    call random_number(X)
+    call monolis_gram_schmidt_lobpcg(monoPRM, monoCOM, monoMAT, X, 0, NG)
 
-    XAX = matmul(transpose(X), X)
-    call monolis_get_smallest_eigen_pair_m(NG, XAX, evec, eval)
+    do i = 1, NG
+      call monolis_matvec(monoCOM, monoMAT, X(:,i), R(:,i), monoPRM%tspmv, monoPRM%tcomm_spmv)
+    enddo
+    XAX = matmul(transpose(X), R)
+    !call monolis_get_smallest_eigen_pair_m(NG, XAX, evec, eval)
 
-    X(:,1:NG) = matmul(X, evec)
+    !X(:,1:NG) = matmul(X, evec)
     !call monolis_get_normarize_vectors(X, NP*NDOF, NG)
     do i = 1, NG
       call monolis_matvec(monoCOM, monoMAT, X(:,i), T, monoPRM%tspmv, monoPRM%tcomm_spmv)
-      R(:,i) = T - eval(i)*X(:,i)
+      !R(:,i) = T - eval(i)*X(:,i)
+      R(:,i) = T - XAX(i,i)*X(:,i)
     enddo
 
     !> 1 step
@@ -102,13 +107,18 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
     enddo
 
     XAX = matmul(transpose(A(:,1:2*NG)), B(:,1:2*NG))
-    call monolis_get_smallest_eigen_pair_m(2*NG, XAX, evec, eval)
+    XBX = matmul(transpose(A(:,1:2*NG)), A(:,1:2*NG))
+    call monolis_get_smallest_eigen_pair_3m(1, NG, XAX, XBX, eval, evec)
+    !call monolis_get_smallest_eigen_pair_m(2*NG, XAX, evec, eval)
 
     X(:,1:NG) = matmul(A(:,1:2*NG), evec(1:2*NG,1:NG))
     !call monolis_get_normarize_vectors(X, NP*NDOF, NG)
     do i = 1, NG
       call monolis_matvec(monoCOM, monoMAT, X(:,i), T, monoPRM%tspmv, monoPRM%tcomm_spmv)
+      !mu = 0.5d0*(eval(i) + dot_product(X(:,i), T))
+      !R(:,i) = T - mu*X(:,i)
       R(:,i) = T - eval(i)*X(:,i)
+      call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R(:,i), R(:,i), R0(i), monoPRM%tdotp, monoPRM%tcomm_dotp)
     enddo
 
     P(:,1:NG) = matmul(A(:,NG+1:2*NG), evec(NG+1:2*NG,1:NG))
@@ -138,31 +148,33 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
       enddo
 
       XAX = matmul(transpose(A), B)
-      call monolis_get_smallest_eigen_pair_m(3*NG, XAX, evec, eval)
+      XBX = matmul(transpose(A), A)
+      call monolis_get_smallest_eigen_pair_3m(iter+1, NG, XAX, XBX, eval, evec)
+      !call monolis_get_smallest_eigen_pair_m(3*NG, XAX, evec, eval)
 
       X(:,1:NG) = matmul(A, evec(:,1:NG))
+      P(:,1:NG) = matmul(A(:,NG+1:3*NG), evec(NG+1:3*NG,1:NG))
       !call monolis_get_normarize_vectors(X, NP*NDOF, NG)
 
       do i = 1, NG
         call monolis_matvec(monoCOM, monoMAT, X(:,i), T, monoPRM%tspmv, monoPRM%tcomm_spmv)
+        !mu = 0.5d0*(eval(i) + dot_product(X(:,i), T))
+        !R(:,i) = T - mu*X(:,i)
         R(:,i) = T - eval(i)*X(:,i)
 
         call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R(:,i), R(:,i), R2(i), monoPRM%tdotp, monoPRM%tcomm_dotp)
-        if(iter == 1) R0(i) = R2(i)
+        !if(iter == 1) R0(i) = R2(i)
         resid(i) = dsqrt(R2(i)/R0(i))
       enddo
       write (*,"(i7, 1pe16.6)") iter, maxval(resid)
 
       if(maxval(resid) < ths)then
-write(*,*)"eigen_value"
-write(*,"(1pe12.5)")eval(1:NG)
-
-write(*,*)"e_mode"
-write(*,"(1p6e12.5)")X(:,1:NG)
+!write(*,*)"eigen_value"
+!write(*,"(1pe12.5)")eval(1:NG)
+!write(*,*)"e_mode"
+!write(*,"(1p6e12.5)")X(:,1:NG)
         exit
       endif
-
-      P(:,1:NG) = matmul(A(:,NG+1:3*NG), evec(NG+1:3*NG,1:NG))
     enddo
   end subroutine monolis_eigen_inverted_lobpcg_mat
 
@@ -241,8 +253,6 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
       call monolis_get_smallest_eigen_pair_3m(iter, NG, Sa, Sb, lambda, coef)
 
       do i = 1, NG
-        mu(i) = 0.5d0*(lambda(i) + dot_product(A(:,NG*X+i), B(:,NG*Y+i)))
-
         do j = 1, NG
           A(:,NG*P+i) = coef(i,j)*A(:,NG*W+i)                            + coef(2*NG+i,j)*A(:,NG*P+i)
           B(:,NG*Q+i) = coef(i,j)*B(:,NG*V+i)                            + coef(2*NG+i,j)*B(:,NG*Q+i)
@@ -260,6 +270,7 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
         B(:,NG*Y+i) = B(:,NG*Y+i)/norm_x(i)
         B(:,NG*Q+i) = B(:,NG*Q+i)/norm_p(i)
 
+        mu(i) = 0.5d0*(lambda(i) + dot_product(A(:,NG*X+i), B(:,NG*Y+i)))
         T = B(:,NG*Y+i) - mu(i)*A(:,NG*X+i)
         call monolis_precond_apply(monoPRM, monoCOM, monoMAT, T, A(:,NG*W+i))
         call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, A(:,NG*W+i), A(:,NG*W+i), R2(i), &
