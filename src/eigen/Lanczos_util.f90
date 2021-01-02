@@ -74,11 +74,14 @@ contains
       do j = 1, N*NDOF
         norm = norm + q(j,i)*q(j,i)
       enddo
-      q(:,i) = q(:,i)/norm
+      if(norm == 0.0d0) cycle
+
+      norm = 1.0d0/dsqrt(norm)
+      q(:,i) = q(:,i)*norm
     enddo
   end subroutine monolis_gram_schmidt_lobpcg
 
-  subroutine monolis_get_smallest_eigen_pair_from_ng(iter, NG, Sa, Sb, lambda, coef)
+  subroutine monolis_get_smallest_eigen_pair_3m(iter, NG, Sa, Sb, lambda, coef)
     implicit none
     integer(kint) :: iter, it, lda, ldb, info, iw, N, dof, i, j, NG
     real(kdouble) :: Sa(:,:), Sb(:,:), lambda(:), coef(:,:)
@@ -126,12 +129,12 @@ contains
 !endif
 
     deallocate(rw)
-  end subroutine monolis_get_smallest_eigen_pair_from_ng
+  end subroutine monolis_get_smallest_eigen_pair_3m
 
-  subroutine monolis_get_smallest_eigen_pair(dof, Sa, val, vec)
+  subroutine monolis_get_smallest_eigen_pair_m(dof, Sa, vec, val)
     implicit none
-    integer(kint) :: lda, info, iw, N, dof, i, j, iter
-    real(kdouble) :: Sa(:,:), val(:,:), vec(:,:)
+    integer(kint) :: lda, info, iw, N, dof
+    real(kdouble) :: Sa(:,:), vec(:,:), val(:)
     real(kdouble) :: ev(dof)
     real(kdouble), allocatable :: rw(:)
 
@@ -143,12 +146,8 @@ contains
     deallocate(rw)
 
     vec = Sa
-
-    val = 0.0d0
-    do i = 1, dof
-      val(i,i) = ev(i)
-    enddo
-  end subroutine monolis_get_smallest_eigen_pair
+    val = ev
+  end subroutine monolis_get_smallest_eigen_pair_m
 
   subroutine monolis_get_smallest_eigen_pair_from_3x3(iter, Sa, Sb, lambda, coef)
     implicit none
@@ -216,4 +215,20 @@ contains
     deallocate(e_mode_t)
     deallocate(rdum)
   end subroutine monolis_get_eigen_pair_from_tridiag
+
+  subroutine monolis_get_normarize_vectors(vec, N, M)
+    implicit none
+    integer(kint) :: N, M, i, j
+    real(kdouble) :: vec(:,:), norm
+
+    do i = 1, M
+      norm = 0.0d0
+      do j = 1, N
+        norm = norm + vec(j,i)*vec(j,i)
+      enddo
+      if(norm == 0.0d0) cycle
+      norm = 1.0d0/dsqrt(norm)
+      vec(:,i) = vec(:,i)*norm
+    enddo
+  end subroutine monolis_get_normarize_vectors
 end module mod_monolis_eigen_lanczos_util
