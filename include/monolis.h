@@ -44,7 +44,8 @@ const char* monolis_get_output_filename(
 /* matrix initializer */
 /* initialize a monolis structure */
 void monolis_initialize(
-  MONOLIS* mat);
+  MONOLIS*    mat,
+  const char* input_file_dir);
 
 /* finalize a monolis structure */
 void monolis_finalize(
