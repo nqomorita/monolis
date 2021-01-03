@@ -59,7 +59,9 @@ monolis を利用するためには `monolis_structure` 構造体を定義する
 `monolis_structure` 構造体は、これら情報を含んだ疎行列の構造体と理解するとよい。
 `monolis_structure` 構造体をもつ変数は、`monolis_initialize` 関数による初期化の後に利用できる。
 
-初期化処理は `monolis_initialize` 関数を用いて行う。引数は `monolis_structure` 構造体である。
+初期化処理は `monolis_initialize` 関数を用いて行う。
+第1引数は `monolis_structure` 構造体である。
+第2引数は入力ファイルが存在するディレクトリを指定する文字列である。
 `monolis_global_initialize` 関数の実行後に利用できる。
 
 終了処理は `monolis_finalize` を用いて行う。引数は `monolis_structure` 構造体である。
@@ -72,7 +74,7 @@ subroutine sample
 
   !> 初期化
   call monolis_global_initialize()
-  call monolis_initialize(A)
+  call monolis_initialize(A, "./")
 
   !> 終了処理
   call monolis_finalize(A)
@@ -101,7 +103,7 @@ program main
 
   !> 初期化
   call monolis_global_initialize()
-  call monolis_initialize(A)
+  call monolis_initialize(A, "./")
 
   !> 疎行列の非零パターンの決定
   nnode = 4
