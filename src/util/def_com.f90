@@ -106,11 +106,12 @@ contains
     monoCOM%send_item => null()
   end subroutine monolis_com_finalize
 
-  subroutine monolis_com_input_comm_table(monoCOM)
+  subroutine monolis_com_input_comm_table(monoCOM, fname_in)
     implicit none
     type(monolis_com) :: monoCOM
     integer(kint) :: i, nitem
-    character :: cnum*5, header*7
+    character :: cnum*5, header*128
+    character(*) :: fname_in
 
     if(monoCOM%commsize <= 1)then
       monoCOM%commsize = 1
@@ -118,9 +119,9 @@ contains
     endif
 
     write(cnum,"(i0)")monoCOM%myrank
-    header = "parted/"
+    header = trim(fname_in)//"/parted/"
 
-    open(10, file=header//"monolis.send."//trim(cnum), status='old')
+    open(10, file=trim(header)//"monolis.send."//trim(cnum), status='old')
       read(10,*) monoCOM%send_n_neib, nitem
       allocate(monoCOM%send_neib_pe(monoCOM%send_n_neib))
       do i = 1, monoCOM%send_n_neib
@@ -141,7 +142,7 @@ contains
       enddo
     close(10)
 
-    open(10, file=header//"monolis.recv."//trim(cnum), status='old')
+    open(10, file=trim(header)//"monolis.recv."//trim(cnum), status='old')
       read(10,*)monoCOM%recv_n_neib, nitem
       if(monoCOM%send_n_neib /= monoCOM%recv_n_neib)then
         stop "** error: monolis_com_input_comm_table"
@@ -163,7 +164,7 @@ contains
       enddo
     close(10)
 
-    open(10, file=header//"node.id."//trim(cnum), status='old')
+    open(10, file=trim(header)//"node.id."//trim(cnum), status='old')
       read(10,*)nitem, monoCOM%intrenal_nnode
       allocate(monoCOM%global_node_id(nitem), source = 0)
       do i = 1, nitem
@@ -171,7 +172,7 @@ contains
       enddo
     close(10)
 
-    open(10, file=header//"elem.id."//trim(cnum), status='old')
+    open(10, file=trim(header)//"elem.id."//trim(cnum), status='old')
       read(10,*)nitem, monoCOM%intrenal_nelem
       allocate(monoCOM%global_elem_id(nitem), source = 0)
       do i = 1, nitem

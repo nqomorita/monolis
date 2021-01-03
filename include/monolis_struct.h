@@ -66,6 +66,9 @@ typedef struct {
   double tdotp;
   double tprec;
   double tcomm;
+
+  /* input */
+  char input_file_dir[1024];
 } MONOLIS_PRM;
 
 typedef struct {

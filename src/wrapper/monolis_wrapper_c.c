@@ -16,17 +16,19 @@ void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = f
 
 /* initializer */
 FILE* monolis_open_comm_table(
-    FILE*        fp,
-    const char*  filename,
-    int          myrank)
+    FILE*       fp,
+    const char* input_file_dir,
+    const char* filename,
+    int         myrank)
 {
   const char* dirname = "parted";
-  const int BUFFER_SIZE = 10000;
+  const int BUFFER_SIZE = 1024;
   char fname[BUFFER_SIZE];
-  snprintf(fname, BUFFER_SIZE, "%s/%s.%d", dirname, filename, myrank);
+  snprintf(fname, BUFFER_SIZE, "%s/%s/%s.%d", input_file_dir, dirname, filename, myrank);
 
   fp = fopen(fname, "r");
   if( fp == NULL ){
+    printf("** error: file name %s\n", fname);
     printf("** error: monolis_open_comm_table\n");
     exit(monolis_fail);
   }
@@ -34,7 +36,8 @@ FILE* monolis_open_comm_table(
 }
 
 void monolis_com_input_comm_table(
-  MONOLIS* mat)
+  MONOLIS* mat,
+  const char* input_file_dir)
 {
   FILE* fp;
 
@@ -53,7 +56,7 @@ void monolis_com_input_comm_table(
   }
 
   int nneib, nitem;
-  fp = monolis_open_comm_table(fp, "monolis.send", mat->com.myrank);
+  fp = monolis_open_comm_table(fp, input_file_dir, "monolis.send", mat->com.myrank);
     fscanf(fp, "%d %d", &nneib, &nitem);
     mat->com.send_n_neib = nneib;
     mat->com.send_neib_pe = (int*)calloc(nneib, sizeof(int));
@@ -71,7 +74,7 @@ void monolis_com_input_comm_table(
     }
   fclose(fp);
 
-  fp = monolis_open_comm_table(fp, "monolis.recv", mat->com.myrank);
+  fp = monolis_open_comm_table(fp, input_file_dir, "monolis.recv", mat->com.myrank);
     fscanf(fp, "%d %d", &nneib, &nitem);
     mat->com.recv_n_neib = nneib;
     mat->com.recv_neib_pe = (int*)calloc(nneib, sizeof(int));
@@ -90,7 +93,7 @@ void monolis_com_input_comm_table(
   fclose(fp);
 
   int nin;
-  fp = monolis_open_comm_table(fp, "node.id", mat->com.myrank);
+  fp = monolis_open_comm_table(fp, input_file_dir, "node.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
     mat->com.internal_nnode = nin;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
@@ -99,7 +102,7 @@ void monolis_com_input_comm_table(
     }
   fclose(fp);
 
-  fp = monolis_open_comm_table(fp, "elem.id", mat->com.myrank);
+  fp = monolis_open_comm_table(fp, input_file_dir, "elem.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
     mat->com.internal_nelem = nin;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
@@ -110,7 +113,8 @@ void monolis_com_input_comm_table(
 }
 
 void monolis_initialize(
-  MONOLIS* mat)
+  MONOLIS*    mat,
+  const char* input_file_dir)
 {
     // prm
     mat->prm.method = 1;
@@ -149,8 +153,8 @@ void monolis_initialize(
     mat->com.myrank = monolis_get_global_myrank();
     mat->com.comm = monolis_get_global_comm();
     mat->com.commsize = monolis_get_global_commsize();
-
-    monolis_com_input_comm_table(mat);
+    //mat->com.input_file_dir = input_file_dir;
+    monolis_com_input_comm_table(mat, input_file_dir);
 }
 
 void monolis_finalize(

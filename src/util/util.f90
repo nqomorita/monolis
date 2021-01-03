@@ -49,14 +49,15 @@ contains
     call monolis_mpi_finalize()
   end subroutine monolis_global_finalize
 
-  subroutine monolis_initialize(monolis)
+  subroutine monolis_initialize(monolis, fname_in)
     implicit none
     type(monolis_structure) :: monolis
+    character(*) :: fname_in
 
-    call monolis_prm_initialize(monolis%PRM)
+    call monolis_prm_initialize(monolis%PRM, fname_in)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
-    call monolis_com_input_comm_table(monolis%COM)
+    call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize
 
   subroutine monolis_finalize(monolis)
@@ -124,7 +125,7 @@ contains
     integer(kint) :: comm_size, myrank
     character(*) :: fname_in
     character :: cnum*6, output_dir*12
-    character(monolis_charlen) :: monolis_get_input_filename*128
+    character(monolis_charlen) :: monolis_get_input_filename
 
     comm_size = monolis_global_commsize()
     myrank = monolis_global_myrank()
