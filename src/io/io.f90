@@ -175,16 +175,17 @@ contains
     enddo
   end subroutine monolis_par_input_node_id
 
-  subroutine monolis_input_condition(fname, ncond, icond, cond)
+  subroutine monolis_input_condition(fname, ncond, ndof, icond, cond)
     implicit none
-    integer(kint) :: ncond, i
+    integer(kint) :: ncond, ndof, i, j
     integer(kint), allocatable :: icond(:,:)
     real(kdouble), allocatable :: cond(:)
     character :: fname*100
 
     open(20, file = fname, status = "old")
-      read(20,*) ncond
+      read(20,*) ncond, ndof
       call monolis_debug_int("ncond", ncond)
+      call monolis_debug_int("ndof", ndof)
 
       allocate(icond(2,ncond), source = 0)
       allocate(cond(ncond), source = 0.0d0)
@@ -194,27 +195,6 @@ contains
       enddo
     close(20)
   end subroutine monolis_input_condition
-
-  subroutine monolis_input_bc_condition(fname, ncond, ndof, icond, cond)
-    implicit none
-    integer(kint) :: ncond, ndof, i, j
-    integer(kint), allocatable :: icond(:,:)
-    real(kdouble), allocatable :: cond(:,:)
-    character :: fname*100
-
-    open(20, file = fname, status = "old")
-      read(20,*) ncond, ndof
-      call monolis_debug_int("ncond", ncond)
-      call monolis_debug_int("ndof", ndof)
-
-      allocate(icond(2,ncond), source = 0)
-      allocate(cond(ndof,ncond), source = 0.0d0)
-
-      do i = 1, ncond
-        read(20,*) icond(1,i), icond(2,i), (cond(j,i), j = 1, ndof)
-      enddo
-    close(20)
-  end subroutine monolis_input_bc_condition
 
   subroutine monolis_input_mesh_restart_data(fname, n, nbase, var, gid)
     implicit none
@@ -344,7 +324,7 @@ contains
     type(monolis_mesh) :: mesh(:)
     integer(kint) :: n_domain, ncond_all, ndof, i, j, k, in, nid, ncond, shift
     integer(kint) :: icond(:,:)
-    real(kdouble) :: cond(:,:)
+    real(kdouble) :: cond(:)
     integer(kint), allocatable :: temp(:), perm(:)
     character :: fname*100, fname_body*100, cnum*5
 
@@ -375,11 +355,7 @@ contains
           nid = icond(1,j)
           call monolis_bsearch_int(temp, 1, mesh(i)%nnode, nid, in)
           if(in == -1) cycle
-          write(20,"(i0,x,i0,x,$)") perm(in) + shift, icond(2,j)
-          do k = 1, ndof
-            write(20,"(1pe12.5,$)") cond(k,j)
-          enddo
-          write(20,*)""
+          write(20,"(i0,x,i0,x,1pe12.5)") perm(in) + shift, icond(2,j), cond(j)
         enddo
       close(20)
       deallocate(temp)
