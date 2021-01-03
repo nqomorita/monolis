@@ -81,7 +81,7 @@ module mod_monolis_prm
     real(kdouble) :: tcomm_dotp = 0.0d0
     real(kdouble) :: tcomm_spmv = 0.0d0
     !> input dir
-    character(monolis_charlen) :: input_file_dir
+    !> character(monolis_charlen) :: input_file_dir
   end type monolis_prm
 
 contains
@@ -91,7 +91,7 @@ contains
     type(monolis_prm) :: monoPRM
     character(*) :: fname_in
 
-    monoPRM%input_file_dir = trim(fname_in)
+    !> monoPRM%input_file_dir = trim(fname_in)
     monoPRM%method = 1
     monoPRM%precond = 1
     monoPRM%curiter = 0
