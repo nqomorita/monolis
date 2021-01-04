@@ -251,8 +251,9 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     !> get recv table
     do i = 1, n_domain
       n_recv = comm(i)%recv_index(comm(i)%recv_n_neib)
-      allocate(local_node(i)%recv_item_perm(n_recv))
-      allocate(local_node(i)%recv_item_domid(n_recv))
+!>>> if(n_recv == 0)
+      allocate(local_node(i)%recv_item_perm(n_recv), source = 0)
+      allocate(local_node(i)%recv_item_domid(n_recv), source = 0)
 
       !> set recv node
       n_recv = 0
@@ -332,7 +333,10 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
 
     !> get send table
-    allocate(send(n_bound_node))
+    allocate(send(n_domain))
+    do i = 1, n_domain
+      send%nnode = 0
+    enddo
 
     do i = 1, n_domain
       do j = 1, comm(i)%recv_n_neib
@@ -386,11 +390,12 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
       enddo
       comm(i)%send_n_neib = n_neib
 
-      allocate(comm(i)%send_neib_pe(n_neib))
       if(n_neib == 0)then
-        allocate(comm(i)%send_index(0:1))
+        allocate(comm(i)%send_neib_pe(1), source = 0)
+        allocate(comm(i)%send_index(0:1), source = 0)
       else
-        allocate(comm(i)%send_index(0:n_neib))
+        allocate(comm(i)%send_neib_pe(n_neib), source = 0)
+        allocate(comm(i)%send_index(0:n_neib), source = 0)
       endif
       comm(i)%send_index = 0
 
