@@ -156,7 +156,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
 
     local_node%nelem = in
-    allocate(local_node%eid(in))
+    allocate(local_node%eid(in), source = 0)
 
     !> internal element (global unique element)
     in = 0
@@ -191,7 +191,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint) :: i, in, j, jn, n_neib, n_domain
     integer(kint), allocatable :: domain(:)
 
-    allocate(domain(n_domain))
+    allocate(domain(n_domain), source = 0)
 
     do i = 1, n_domain
       domain = 0
@@ -208,11 +208,12 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
         if(domain(j) /= 0) n_neib = n_neib + 1
       enddo
       comm(i)%recv_n_neib = n_neib
-      allocate(comm(i)%recv_neib_pe(n_neib))
       if(n_neib == 0)then
-        allocate(comm(i)%recv_index(0:1))
+        allocate(comm(i)%recv_neib_pe(1), source = 0)
+        allocate(comm(i)%recv_index(0:1), source = 0)
       else
-        allocate(comm(i)%recv_index(0:n_neib))
+        allocate(comm(i)%recv_neib_pe(n_neib))
+        allocate(comm(i)%recv_index(0:n_neib), source = 0)
       endif
       comm(i)%recv_index = 0
 
@@ -284,13 +285,12 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     nnode_in = local_node%nnode_in
     nnode_out = local_node%nnode_out
 
-    allocate(comm%recv_item(nnode_out))
-    comm%recv_item = 0
+    allocate(comm%recv_item(nnode_out), source = 0)
     do i = 1, nnode_out
       comm%recv_item(i) = nnode_in + i
     enddo
 
-    allocate(temp(n_recv))
+    allocate(temp(n_recv), source = 0)
     temp = local_node%recv_item_domid
     call monolis_qsort_int_with_perm(temp, 1, n_recv, local_node%recv_item_perm)
     call monolis_qsort_int_with_perm(local_node%recv_item_domid, 1, n_recv, comm%recv_item)
@@ -360,7 +360,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint), allocatable :: temp(:)
 
     nnode = jE - jS + 1
-    allocate(temp(nnode))
+    allocate(temp(nnode), source = 0)
     temp = domid
 
     call monolis_reallocate_integer(send_list%domid    , send_list%nnode, nnode, temp)
@@ -375,7 +375,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint) :: i, in, j, n_domain, n_neib
     integer(kint), allocatable :: domain(:)
 
-    allocate(domain(n_domain))
+    allocate(domain(n_domain), source = 0)
 
     do i = 1, n_domain
       domain = 0
@@ -421,7 +421,7 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
 
     n_send = send%nnode
     if(n_send > 0)then
-      allocate(comm%send_item(n_send))
+      allocate(comm%send_item(n_send), source = 0)
       comm%send_item = send%local_nid
     else
       return
