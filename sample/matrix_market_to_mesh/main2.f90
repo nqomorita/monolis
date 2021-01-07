@@ -2,9 +2,10 @@ program main
   use mod_monolis
   implicit none
   type(monolis_structure) :: mat !> 疎行列変数
-  integer(4) :: nnode, nelem, nbase_func, i
-  integer(4), allocatable :: elem(:,:)
-  real(kdouble), allocatable :: node(:,:), coef(:)
+  integer(kint) :: nnode, nelem, nbase_func, i
+  real(kdouble) :: resid
+  integer(kint), allocatable :: elem(:,:)
+  real(kdouble), allocatable :: node(:,:), coef(:), B(:), X(:)
   character :: fname*128
 
   call monolis_set_debug(.true.)
@@ -39,7 +40,20 @@ program main
     endif
   enddo
 
-  !call monolis_solve(mat)
+  allocate(B(nnode), source = 0.0d0)
+  allocate(X(nnode), source = 0.0d0)
+
+  X = 1.0d0
+  call monolis_matvec_product(mat, X, B)
+  X = 0.0d0
+
+  call monolis_solve(mat, B, X)
+
+  resid = 0.0d0
+  do i = 1, nnode
+    resid = resid + (X(i) - 1.0d0)**2
+  enddo
+  write(*,*)"resid: ", dsqrt(resid)
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 
