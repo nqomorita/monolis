@@ -8,6 +8,46 @@ module mod_monolis_io_mtx
 
 contains
 
+  subroutine monolis_input_mtx(fname, nnode, nelem, elem, coef)
+    implicit none
+    integer(kint) :: nnode, nelem, i, in, ierr
+    integer(kint), allocatable :: elem(:,:)
+    real(kdouble), allocatable :: coef(:)
+    character :: fname*100, ctemp*100
+    logical :: is_first
+
+    !> count lines
+    is_first = .true.
+    open(20, file = trim(fname), status = "old")
+    in = 0
+
+    do
+      read(20, "(a)", iostat = ierr) ctemp
+      if(0 /= ierr) exit
+
+      if(ctemp(1:1) == "%") cycle
+
+      if(is_first)then
+        backspace(20)
+        read(20,*) nnode, i, nelem
+        call monolis_debug_int("nnode", nnode)
+        call monolis_debug_int("nelem", nelem)
+
+        allocate(elem(2,nelem), source = 0)
+        allocate(coef(nelem), source = 0.0d0)
+        is_first = .false.
+      else
+        in = in + 1
+        backspace(20)
+        read(20,*) elem(1,in), elem(2,in), coef(in)
+      endif
+      if(in == nelem) exit
+    enddo
+    !write(*,"(a,i8)")"nelem: ", nelem
+    close(20)
+
+  end subroutine monolis_input_mtx
+
   subroutine monolis_get_mtx_arg(filename)
     implicit none
     integer(kint) :: i, count
