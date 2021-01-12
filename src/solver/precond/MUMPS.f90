@@ -9,11 +9,11 @@ module mod_monolis_precond_mumps
   include 'dmumps_struc.h'
 #endif
 
-  integer(kind=kint), parameter :: mumps_mat_csr = 1
-  integer(kind=kint), parameter :: mumps_mat_coo = 2
-  integer(kind=kint), parameter :: mumps_mat_asym = 0
-  integer(kind=kint), parameter :: mumps_mat_spd = 1
-  integer(kind=kint), parameter :: mumps_mat_sym = 2
+  integer(kint), parameter :: mumps_mat_csr = 1
+  integer(kint), parameter :: mumps_mat_coo = 2
+  integer(kint), parameter :: mumps_mat_asym = 0
+  integer(kint), parameter :: mumps_mat_spd = 1
+  integer(kint), parameter :: mumps_mat_sym = 2
 
 #ifdef WITH_MUMPS
   type (dmumps_struc), save :: mumps
@@ -26,7 +26,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint), pointer :: IRN(:), JCN(:), MAP(:)
+    integer(kint) :: NDOF
+    integer(kint), pointer :: IRN(:), JCN(:), MAP(:)
 
 #ifdef WITH_MUMPS
     !> initialize
@@ -53,12 +54,14 @@ contains
     call DMUMPS(mumps)
 
     !> factorization
-    allocate(IRN(monoMAT%NZ))
-    allocate(JCN(monoMAT%NZ))
-    allocate(mumps%A(monoMAT%NZ))
+    NDOF = monoMAT%ndof
+    allocate(IRN(NDOF*NDOF*monoMAT%NZ))
+    allocate(JCN(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%A(NDOF*NDOF*monoMAT%NZ))
     !allocate(MAP(monoMAT%NZ))
-    allocate(mumps%RHS(monoMAT%N*monoMAT%NDOF))
-    call monolis_precond_mumps_get_loc(monoMAT, IRN, JCN)
+    allocate(mumps%RHS(monoMAT%N*NDOF))
+    call monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, mumps%A)
+
     mumps%JOB = 4
     mumps%N = monoMAT%N*monoMAT%NDOF
     mumps%NZ = monoMAT%NZ
@@ -67,11 +70,9 @@ contains
    ! mumps%JCN_loc => JCN
     mumps%IRN => IRN
     mumps%JCN => JCN
-    mumps%A = monoMAT%A
     !mumps%A_loc => monoMAT%A
 
     call DMUMPS(mumps)
-
 #endif
   end subroutine monolis_precond_mumps_setup
 
@@ -80,7 +81,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: X(:), Y(:)
+    real(kdouble) :: X(:), Y(:)
 
 #ifdef WITH_MUMPS
     !> solution
@@ -99,19 +100,31 @@ contains
 
   end subroutine monolis_precond_mumps_clear
 
-  subroutine monolis_precond_mumps_get_loc(monoMAT, IRN, JCN)
+  subroutine monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, A)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, in, jS, jE
-    integer(kind=kint), pointer :: IRN(:), JCN(:)
+    integer(kint) :: i, j, in, jS, jE
+    integer(kint) :: idof, jdof, jn, kn, NDOF
+    integer(kint), pointer :: IRN(:), JCN(:)
+    real(kdouble) :: A(:)
 
-    do i = 1, monoMAT%N
-      jS = monoMAT%index(i-1) + 1
-      jE = monoMAT%index(i)
-      do j = jS, jE
-        in = monoMAT%item(j)
-        IRN(j) = i
-        JCN(j) = in
+    NDOF = monoMAT%NDOF
+
+    in = 1
+    do i = 1, monoMAT%NP
+      do idof = 1, monoMAT%NDOF
+        jS = monoMAT%index(i-1) + 1
+        jE = monoMAT%index(i)
+        do j = jS, jE
+          jn = monoMAT%item(j)
+          do jdof = 1, NDOF
+            kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
+            A(in) = monoMAT%A(kn)
+            JCN(in) = NDOF*(jn - 1) + jdof
+            IRN(in) = NDOF*(i  - 1) + idof
+            in = in + 1
+          enddo
+        enddo
       enddo
     enddo
   end subroutine monolis_precond_mumps_get_loc
