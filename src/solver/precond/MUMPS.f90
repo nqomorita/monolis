@@ -45,26 +45,29 @@ contains
     !> relaxation parameter
     mumps%ICNTL(14) = 20
     !> iterative refinement
-    mumps%ICNTL(10) = 3
-    mumps%CNTL(2) = 1.0e-8
+    mumps%ICNTL(10) = 1
+    mumps%CNTL(2) = 1.0e-6
     !> Out-Of-Core: 0:IN-CORE only, 1:OOC
     mumps%ICNTL(22) = 0
+    !> Output log level
+    mumps%ICNTL(4) = 0
     !> Distributed assembled matrix input
     !mumps%ICNTL(18) = 3
+
     call DMUMPS(mumps)
 
     !> factorization
     NDOF = monoMAT%ndof
     allocate(IRN(NDOF*NDOF*monoMAT%NZ))
     allocate(JCN(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%A(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%A(NDOF*NDOF*monoMAT%NZ), source = 0.0d0)
     !allocate(MAP(monoMAT%NZ))
-    allocate(mumps%RHS(monoMAT%N*NDOF))
+    allocate(mumps%RHS(NDOF*monoMAT%N), source = 0.0d0)
     call monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, mumps%A)
 
     mumps%JOB = 4
     mumps%N = monoMAT%N*monoMAT%NDOF
-    mumps%NZ = monoMAT%NZ
+    mumps%NZ = NDOF*NDOF*monoMAT%NZ
    ! mumps%NNZ_loc = monoMAT%NZ
    ! mumps%IRN_loc => IRN
    ! mumps%JCN_loc => JCN
