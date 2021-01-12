@@ -27,12 +27,12 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: NDOF
-    integer(kint), pointer :: IRN(:), JCN(:), MAP(:)
 
 #ifdef WITH_MUMPS
     !> initialize
     mumps%JOB = -1
     mumps%COMM = monoCOM%comm
+    !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
     mumps%PAR = 1
@@ -42,38 +42,38 @@ contains
     mumps%ICNTL(7) = 7
     !> par ord: 0:auto, 1:ptscotch, 2:parmetis
     mumps%ICNTL(29) = 0
-    !> relaxation parameter
-    mumps%ICNTL(14) = 20
+    !> num of OMP
+    mumps%ICNTL(16) = 1
     !> iterative refinement
-    mumps%ICNTL(10) = 1
-    mumps%CNTL(2) = 1.0e-6
+    mumps%ICNTL(10) = 2
+    mumps%CNTL(2) = 1.0e-8
     !> Out-Of-Core: 0:IN-CORE only, 1:OOC
     mumps%ICNTL(22) = 0
-    !> Output log level
-    mumps%ICNTL(4) = 0
     !> Distributed assembled matrix input
-    !mumps%ICNTL(18) = 3
+    mumps%ICNTL(18) = 3
 
     call DMUMPS(mumps)
 
     !> factorization
     NDOF = monoMAT%ndof
-    allocate(IRN(NDOF*NDOF*monoMAT%NZ))
-    allocate(JCN(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%IRN_loc(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%JCN_loc(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%IRN(NDOF*NDOF*monoMAT%NZ))
+    allocate(mumps%JCN(NDOF*NDOF*monoMAT%NZ))
     allocate(mumps%A(NDOF*NDOF*monoMAT%NZ), source = 0.0d0)
-    !allocate(MAP(monoMAT%NZ))
-    allocate(mumps%RHS(NDOF*monoMAT%N), source = 0.0d0)
-    call monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, mumps%A)
+    allocate(mumps%RHS(NDOF*monoMAT%NP), source = 0.0d0)
+    call monolis_precond_mumps_get_loc(monoMAT, mumps%IRN_loc, mumps%JCN_loc, mumps%A)
+
+    mumps%IRN = mumps%IRN_loc
+    mumps%JCN = mumps%JCN_loc
 
     mumps%JOB = 4
-    mumps%N = monoMAT%N*monoMAT%NDOF
+    mumps%N = NDOF*monoMAT%NP
     mumps%NZ = NDOF*NDOF*monoMAT%NZ
-   ! mumps%NNZ_loc = monoMAT%NZ
-   ! mumps%IRN_loc => IRN
-   ! mumps%JCN_loc => JCN
-    mumps%IRN => IRN
-    mumps%JCN => JCN
-    !mumps%A_loc => monoMAT%A
+    mumps%NZ_loc = NDOF*NDOF*monoMAT%NZ
+
+    !> Output log level
+    mumps%ICNTL(4) = 0
 
     call DMUMPS(mumps)
 #endif
@@ -84,14 +84,24 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    integer(kint) :: i
     real(kdouble) :: X(:), Y(:)
 
 #ifdef WITH_MUMPS
+    !> Output log level
+    mumps%ICNTL(4) = 0
     !> solution
     mumps%JOB = 3
-    mumps%RHS = X
+
+    do i = 1, mumps%N
+      mumps%RHS(i) = X(i)
+    enddo
+
     call DMUMPS(mumps)
-    Y = mumps%RHS
+
+    do i = 1, mumps%N
+      Y(i) = mumps%RHS(i)
+    enddo
 #endif
   end subroutine monolis_precond_mumps_apply
 
@@ -111,22 +121,22 @@ contains
     integer(kint), pointer :: IRN(:), JCN(:)
     real(kdouble) :: A(:)
 
-    NDOF = monoMAT%NDOF
+    NDOF = monoMAT%ndof
 
-    in = 1
+    in = 0
     do i = 1, monoMAT%NP
-      do idof = 1, monoMAT%NDOF
-        jS = monoMAT%index(i-1) + 1
-        jE = monoMAT%index(i)
-        do j = jS, jE
-          jn = monoMAT%item(j)
-          do jdof = 1, NDOF
-            kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
-            A(in) = monoMAT%A(kn)
-            JCN(in) = NDOF*(jn - 1) + jdof
-            IRN(in) = NDOF*(i  - 1) + idof
-            in = in + 1
-          enddo
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        jn = monoMAT%item(j)
+        do idof = 1, NDOF
+        do jdof = 1, NDOF
+          kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
+          in = in + 1
+          A(in) = monoMAT%A(kn)
+          IRN(in) = NDOF*(i  - 1) + idof
+          JCN(in) = NDOF*(jn - 1) + jdof
+        enddo
         enddo
       enddo
     enddo
