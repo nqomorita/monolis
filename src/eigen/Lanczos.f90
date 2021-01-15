@@ -9,15 +9,17 @@ module mod_monolis_eigen_lanczos
 
 contains
 
-  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths)
+  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, vec)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: n_get_eigen
     real(kdouble) :: ths
-    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
+    real(kdouble) :: vec(:,:)
+
+    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, vec)
   end subroutine monolis_eigen_inverted_standard_lanczos
 
-  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths)
+  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, vec)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -25,6 +27,7 @@ contains
     integer(kint) :: N, NP, NDOF, total_dof
     integer(kint) :: i, iter, maxiter, n_get_eigen
     real(kdouble) :: beta_t, ths
+    real(kdouble) :: vec(:,:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
@@ -64,8 +67,8 @@ contains
       call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t, monoPRM%tdotp, monoPRM%tcomm_dotp)
       beta(iter+1) = dsqrt(beta_t)
 
-write(*,*)"iter", iter
-write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
+!write(*,*)"iter", iter
+!write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
 
       beta_t = 1.0d0/beta(iter+1)
       do i = 1, NP*NDOF
@@ -76,15 +79,15 @@ write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
        & iter >= total_dof)then
         call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-write(*,*)"eigen_value"
-do i = 1, iter
-  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
-enddo
-write(*,*)"e_mode"
-do i = 1, iter
-  write(*,"(1p10e12.5)")eigen_mode(:,i)
-enddo
-
+!write(*,*)"eigen_value"
+!do i = 1, iter
+!  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
+!enddo
+!write(*,*)"e_mode"
+!do i = 1, iter
+!  write(*,"(1p10e12.5)")eigen_mode(:,i)
+!enddo
+        vec = eigen_mode(:,1:n_get_eigen)
         exit
       endif
     enddo

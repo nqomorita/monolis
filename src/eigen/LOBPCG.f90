@@ -10,16 +10,17 @@ module mod_monolis_eigen_LOBPCG
 
 contains
 
-  subroutine monolis_eigen_inverted_lobpcg(monolis, n_get_eigen, ths)
+  subroutine monolis_eigen_inverted_lobpcg(monolis, n_get_eigen, ths, vec)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: n_get_eigen
     real(kdouble) :: ths
+    real(kdouble) :: vec(:,:)
 
-    call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
+    call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, vec)
   end subroutine monolis_eigen_inverted_lobpcg
 
-  subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths)
+  subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, vec)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -30,6 +31,7 @@ contains
     integer(kint) :: N, NP, NDOF, NG, total_dof
     integer(kint) :: i, j, iter, maxiter,  n_get_eigen
     real(kdouble) :: ths, mu
+    real(kdouble) :: vec(:,:)
     real(kdouble), allocatable :: X(:,:), R(:,:), P(:,:), XAX(:,:), XBX(:,:), evec(:,:), eval(:), T(:)
     real(kdouble), allocatable :: A(:,:), B(:,:), R0(:), R2(:), resid(:)
 
@@ -39,9 +41,6 @@ contains
     NP   = monoMAT%NP
     NDOF = monoMAT%NDOF
     NG   = n_get_eigen
-
-write(*,"(a,i8)")"n_get_eigen: ", n_get_eigen
-write(*,"(a,1pe12.5)")"ths:     ", ths
 
     total_dof = N*NDOF
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
@@ -156,10 +155,11 @@ write(*,"(a,1pe12.5)")"ths:     ", ths
       write (*,"(i7, 1pe16.6)") iter, maxval(resid)
 
       if(maxval(resid) < ths)then
-write(*,*)"eigen_value"
-write(*,"(1pe12.5)")eval(1:NG)
-write(*,*)"e_mode"
-write(*,"(1p6e12.5)")X(:,1:NG)
+!write(*,*)"eigen_value"
+!write(*,"(1pe12.5)")eval(1:NG)
+!write(*,*)"e_mode"
+!write(*,"(1p6e12.5)")X(:,1:NG)
+        vec = X
         exit
       endif
     enddo
