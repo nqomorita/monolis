@@ -10,17 +10,17 @@ module mod_monolis_eigen_LOBPCG
 
 contains
 
-  subroutine monolis_eigen_inverted_lobpcg(monolis, n_get_eigen, ths, vec)
+  subroutine monolis_eigen_inverted_lobpcg(monolis, n_get_eigen, ths, maxiter, vec)
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint) :: n_get_eigen
-    real(kdouble) :: ths
-    real(kdouble) :: vec(:,:)
+    integer(kint) :: n_get_eigen, maxiter
+    real(kdouble) :: ths, vec(:,:)
 
-    call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, vec)
+    call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, &
+      & n_get_eigen, ths, maxiter, vec)
   end subroutine monolis_eigen_inverted_lobpcg
 
-  subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, vec)
+  subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, vec)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -44,7 +44,6 @@ contains
 
     total_dof = N*NDOF
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
-    maxiter = 10*total_dof
 
     if(3*NG > total_dof)then
       stop "monolis_eigen_inverted_lobpcg_mat: 3*NG > DOF"

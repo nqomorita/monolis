@@ -9,17 +9,17 @@ module mod_monolis_eigen_lanczos
 
 contains
 
-  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, vec)
+  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, maxiter, vec)
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint) :: n_get_eigen
-    real(kdouble) :: ths
-    real(kdouble) :: vec(:,:)
+    integer(kint) :: n_get_eigen, maxiter
+    real(kdouble) :: ths, vec(:,:)
 
-    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, vec)
+    call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, &
+      & n_get_eigen, ths, maxiter, vec)
   end subroutine monolis_eigen_inverted_standard_lanczos
 
-  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, vec)
+  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, vec)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -40,10 +40,9 @@ contains
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
 
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
-    maxiter = 2*n_get_eigen
 
     allocate(alpha(maxiter), source = 0.0d0)
-    allocate(beta(maxiter), source = 0.0d0)
+    allocate(beta(maxiter+1), source = 0.0d0)
     allocate(eigen_value(maxiter), source = 0.0d0)
     allocate(q(NP*NDOF,0:maxiter), source = 0.0d0)
     allocate(p(NP*NDOF), source = 0.0d0)
@@ -67,8 +66,7 @@ contains
       call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t, monoPRM%tdotp, monoPRM%tcomm_dotp)
       beta(iter+1) = dsqrt(beta_t)
 
-!write(*,*)"iter", iter
-!write(*,"(a,1p2e12.4)")"beta", beta(iter+1), beta(iter+1)/beta(2)
+write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1), beta(iter+1)/beta(2)
 
       beta_t = 1.0d0/beta(iter+1)
       do i = 1, NP*NDOF
