@@ -18,6 +18,8 @@ contains
 
     call monolis_eigen_inverted_lobpcg_mat (monolis%PRM, monolis%COM, monolis%MAT, &
       & n_get_eigen, ths, maxiter, vec)
+
+    !call monolis_eigen_inverted_lobpcg_ (monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths)
   end subroutine monolis_eigen_inverted_lobpcg
 
   subroutine monolis_eigen_inverted_lobpcg_mat(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, vec)
@@ -154,11 +156,15 @@ contains
       write (*,"(i7, 1pe16.6)") iter, maxval(resid)
 
       if(maxval(resid) < ths)then
-!write(*,*)"eigen_value"
-!write(*,"(1pe12.5)")eval(1:NG)
+write(*,*)"eigen_value"
+write(*,"(1pe12.5)")eval(1:NG)
 !write(*,*)"e_mode"
 !write(*,"(1p6e12.5)")X(:,1:NG)
-        vec = X
+        do i = 1, NG
+          do j = 1, NP*NDOF
+            vec(j,i) = X(j,i)
+          enddo
+        enddo
         exit
       endif
     enddo
@@ -236,9 +242,8 @@ contains
       if(resid < ths .or. iter == 2*total_dof)then
 write(*,*)"eigen_value"
 write(*,"(1p2e12.5)")lambda
-
-write(*,*)"e_mode"
-write(*,"(1p10e12.5)")A(:,X)
+!write(*,*)"e_mode"
+!write(*,"(1p10e12.5)")A(:,X)
         exit
       endif
     enddo

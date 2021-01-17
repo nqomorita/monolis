@@ -9,17 +9,19 @@ module mod_monolis_eigen_lanczos
 
 contains
 
-  subroutine monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, maxiter, vec)
+  subroutine monolis_eigen_inverted_standard_lanczos &
+    & (monolis, n_get_eigen, ths, maxiter, val, vec)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: n_get_eigen, maxiter
-    real(kdouble) :: ths, vec(:,:)
+    real(kdouble) :: ths, val(:), vec(:,:)
 
     call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, &
-      & n_get_eigen, ths, maxiter, vec)
+      & n_get_eigen, ths, maxiter, val, vec)
   end subroutine monolis_eigen_inverted_standard_lanczos
 
-  subroutine monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, vec)
+  subroutine monolis_eigen_inverted_standard_lanczos_ &
+    & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -27,7 +29,7 @@ contains
     integer(kint) :: N, NP, NDOF, total_dof
     integer(kint) :: i, iter, maxiter, n_get_eigen
     real(kdouble) :: beta_t, ths
-    real(kdouble) :: vec(:,:)
+    real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
@@ -44,7 +46,7 @@ contains
     allocate(alpha(maxiter), source = 0.0d0)
     allocate(beta(maxiter+1), source = 0.0d0)
     allocate(eigen_value(maxiter), source = 0.0d0)
-    allocate(q(NP*NDOF,0:maxiter), source = 0.0d0)
+    allocate(q(NP*NDOF,0:maxiter+1), source = 0.0d0)
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,maxiter), source = 0.0d0)
 
@@ -73,14 +75,15 @@ write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1), beta(iter+
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      if(iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths .or. &
-       & iter >= total_dof)then
+      if((iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths) .or. &
+       & iter >= total_dof .or. iter == maxiter)then
         call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
 !write(*,*)"eigen_value"
-!do i = 1, iter
-!  write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
-!enddo
+        do i = 1, n_get_eigen
+          !write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
+          val(i) = 1.0d0/eigen_value(i)
+        enddo
 !write(*,*)"e_mode"
 !do i = 1, iter
 !  write(*,"(1p10e12.5)")eigen_mode(:,i)

@@ -15,6 +15,8 @@ module mod_monolis_precond_mumps
   integer(kint), parameter :: mumps_mat_spd = 1
   integer(kint), parameter :: mumps_mat_sym = 2
 
+  logical, save :: is_factored = .false.
+
 #ifdef WITH_MUMPS
   type (dmumps_struc), save :: mumps
 #endif
@@ -29,6 +31,9 @@ contains
     integer(kint) :: NDOF
 
 #ifdef WITH_MUMPS
+    if(is_factored) return
+    is_factored = .true.
+
     !> initialize
     mumps%JOB = -1
     mumps%COMM = monoCOM%comm

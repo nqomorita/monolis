@@ -116,6 +116,7 @@ contains
     iw = 3*dof-1
     e_value = 0.0d0
     allocate(rw(iw), source = 0.0d0)
+
     call dsygv(it, "V", "L", N, Sa(1:dof,1:dof), lda, Sb(1:dof,1:dof), ldb, e_value(1:dof), rw, iw, info)
 
     lambda = 0.0d0
@@ -170,6 +171,7 @@ contains
     allocate(isuppz(2*iter), source = 0)
     allocate(idum(10*iter), source = 0)
     allocate(rdum(20*iter), source = 0.0d0)
+    !allocate(rdum(2*iter-2), source = 0.0d0)
     allocate(e_mode_t(iter,iter), source = 0.0d0)
 
     alpha = alpha_t(1:iter)
@@ -179,15 +181,25 @@ contains
     vu = 0.0d0
     il = 0
     iu = 0
-    abstol = 1.0d-8
+    abstol = 1.0d-6
     n = iter
     m = iter
     ldz = iter
     lwork = 20*iter
     liwork = 10*iter
 
-    call dstevr("V", "A", n, alpha, beta, vl, vu, il, iu, abstol, m, e_value, &
-      e_mode_t, ldz, isuppz, rdum, lwork, idum, liwork, info)
+!write(*,*)"alpha"
+!write(*,"(1pe12.5)")alpha
+!write(*,*)"beta"
+!write(*,"(1pe12.5)")beta
+
+!write(*,*)"dstevr"
+    !call dstevr("V", "A", n, alpha, beta, vl, vu, il, iu, abstol, m, e_value, &
+    !  e_mode_t, ldz, isuppz, rdum, lwork, idum, liwork, info)
+    call dstev("V", n, alpha, beta, e_mode_t, ldz, rdum, info)
+    e_value = alpha
+!write(*,*)"end dstevr"
+
     if(info /= 0) stop "monolis_get_eigen_pair_from_tridiag"
 
     e_mode(:,1:iter) = matmul(q(:,1:iter), e_mode_t)
