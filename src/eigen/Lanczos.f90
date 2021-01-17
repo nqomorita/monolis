@@ -10,18 +10,19 @@ module mod_monolis_eigen_lanczos
 contains
 
   subroutine monolis_eigen_inverted_standard_lanczos &
-    & (monolis, n_get_eigen, ths, maxiter, val, vec)
+    & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: n_get_eigen, maxiter
     real(kdouble) :: ths, val(:), vec(:,:)
+    logical, optional :: is_bc(:)
 
     call monolis_eigen_inverted_standard_lanczos_(monolis%PRM, monolis%COM, monolis%MAT, &
-      & n_get_eigen, ths, maxiter, val, vec)
+      & n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_inverted_standard_lanczos
 
   subroutine monolis_eigen_inverted_standard_lanczos_ &
-    & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec)
+    & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -31,6 +32,7 @@ contains
     real(kdouble) :: beta_t, ths
     real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
+    logical, optional :: is_bc(:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
 
@@ -50,7 +52,7 @@ contains
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,maxiter), source = 0.0d0)
 
-    call lanczos_initialze(NP*NDOF, q(:,1))
+    call lanczos_initialze(NP*NDOF, q(:,1), is_bc)
 
     do iter = 1, maxiter
       call monolis_set_RHS(monoMAT, q(:,iter))
