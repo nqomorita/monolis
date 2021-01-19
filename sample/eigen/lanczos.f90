@@ -2,7 +2,7 @@ program main
   use mod_monolis
   implicit none
   integer(4) :: nnode, nelem, elem(2,4)
-  real(8), allocatable :: vec(:,:)
+  real(8), allocatable :: val(:), vec(:,:)
 
   type(monolis_structure) :: mat !> 疎行列変数
 
@@ -71,13 +71,20 @@ program main
   !> 5.00000E-01-5.00000E-01-2.82388E-16 5.00000E-01-5.00000E-01
   !> 2.88675E-01-5.00000E-01 5.77350E-01-5.00000E-01 2.88675E-01
 
+  allocate(val(5), source = 0.0d0)
   allocate(vec(5,5), source = 0.0d0)
 
   !mat%PRM%is_debug = .true.
   mat%PRM%show_iterlog = .false.
   mat%PRM%show_time = .false.
   mat%PRM%show_summary = .false.
-  call monolis_eigen_inverted_standard_lanczos(mat, 5, 1.0d-6, 5, vec)
+  call monolis_eigen_inverted_standard_lanczos(mat, 5, 1.0d-6, 5, val, vec)
+
+  write(*,*)"val"
+  write(*,"(1pe12.5)")val
+
+  write(*,*)"vec"
+  write(*,"(1p5e12.5)")vec
 
   call monolis_finalize(mat) !> 疎行列変数の解放
 

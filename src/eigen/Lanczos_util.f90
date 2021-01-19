@@ -17,12 +17,6 @@ contains
     norm = 0.0d0
     do i = 1, n
       q(i) = dble(i)
-      norm = norm + q(i)*q(i)
-    enddo
-
-    norm = 1.0d0/dsqrt(norm)
-    do i = 1, n
-      q(i) = q(i)*norm
     enddo
 
     if(present(is_bc))then
@@ -30,22 +24,32 @@ contains
         if(is_bc(i)) q(i) = 0.0d0
       enddo
     endif
+
+    do i = 1, n
+      norm = norm + q(i)*q(i)
+    enddo
+
+    norm = 1.0d0/dsqrt(norm)
+    do i = 1, n
+      q(i) = q(i)*norm
+    enddo
   end subroutine lanczos_initialze
 
-  subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
+  subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p, is_bc)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, j, iter, N, NDOF
     real(kdouble) :: q(:,0:), p(:), norm
+    real(kdouble), allocatable :: t(:)
+    logical, optional :: is_bc(:)
 
     N    = monoMAT%N
     NDOF = monoMAT%NDOF
 
-    do i = 1, iter-1
+    do i = 1, iter
       call monolis_inner_product_R(monoCOM, N, NDOF, p, q(:,i), norm, monoPRM%tdotp, monoPRM%tcomm_dotp)
-
       do j = 1, N*NDOF
         p(j) = p(j) - norm*q(j,i)
       enddo
@@ -166,55 +170,34 @@ contains
 
   subroutine monolis_get_eigen_pair_from_tridiag(iter, alpha_t, beta_t, q, e_value, e_mode)
     implicit none
-    integer(kint) :: iter, i, n, m, iu, il, ldz, info, liwork, lwork
+    integer(kint) :: iter, i, n, ldz, info
     real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:)
-    real(kdouble) :: vl, vu, abstol
     integer(kint), allocatable :: isuppz(:), idum(:)
     real(kdouble), allocatable :: alpha(:), beta(:), rdum(:), e_mode_t(:,:)
 
     !> DSTEVR
     allocate(alpha(iter), source = 0.0d0)
     allocate(beta (max(1,iter-1)), source = 0.0d0)
-    allocate(isuppz(2*iter), source = 0)
-    allocate(idum(10*iter), source = 0)
     allocate(rdum(20*iter), source = 0.0d0)
-    !allocate(rdum(2*iter-2), source = 0.0d0)
     allocate(e_mode_t(iter,iter), source = 0.0d0)
 
     alpha = alpha_t(1:iter)
     beta = beta_t(2:max(1,iter-1)+1)
 
-    vl = 0.0d0
-    vu = 0.0d0
-    il = 0
-    iu = 0
-    abstol = 1.0d-6
     n = iter
-    m = iter
     ldz = iter
-    lwork = 20*iter
-    liwork = 10*iter
 
-!write(*,*)"alpha"
-!write(*,"(1pe12.5)")alpha
-!write(*,*)"beta"
-!write(*,"(1pe12.5)")beta
-
-!write(*,*)"dstevr"
-    !call dstevr("V", "A", n, alpha, beta, vl, vu, il, iu, abstol, m, e_value, &
-    !  e_mode_t, ldz, isuppz, rdum, lwork, idum, liwork, info)
     call dstev("V", n, alpha, beta, e_mode_t, ldz, rdum, info)
-    e_value = alpha
-!write(*,*)"end dstevr"
+
+    do i = 1, iter
+      e_value(i) = 1.0d0/alpha(iter - i +1)
+      e_mode(:,i) = matmul(q(:,1:iter), e_mode_t(1:iter,iter - i +1))
+    enddo
 
     if(info /= 0) stop "monolis_get_eigen_pair_from_tridiag"
 
-    e_mode(:,1:iter) = matmul(q(:,1:iter), e_mode_t)
-
     deallocate(alpha)
     deallocate(beta)
-    deallocate(isuppz)
-    deallocate(idum)
     deallocate(e_mode_t)
     deallocate(rdum)
   end subroutine monolis_get_eigen_pair_from_tridiag

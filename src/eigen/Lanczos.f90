@@ -27,9 +27,9 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: N, NP, NDOF, total_dof
+    integer(kint) :: N, NP, NDOF, total_dof, j, k
     integer(kint) :: i, iter, maxiter, n_get_eigen
-    real(kdouble) :: beta_t, ths
+    real(kdouble) :: beta_t, ths, norm
     real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
     logical, optional :: is_bc(:)
@@ -61,35 +61,29 @@ contains
 
       call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter-1), monoMAT%X, p)
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter), monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
 
       call monolis_vec_AXPY(N, NDOF, -alpha(iter), q(:,iter), p, p)
 
-      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
+      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p, is_bc)
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t, monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t)
+
       beta(iter+1) = dsqrt(beta_t)
-
-write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1), beta(iter+1)/beta(2)
-
       beta_t = 1.0d0/beta(iter+1)
       do i = 1, NP*NDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      if((iter >= n_get_eigen .and. beta(iter+1)/beta(2) < ths) .or. &
+write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1)
+
+      if((iter >= n_get_eigen .and. beta(iter+1) < ths) .or. &
        & iter >= total_dof .or. iter == maxiter)then
         call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-!write(*,*)"eigen_value"
         do i = 1, n_get_eigen
-          !write(*,"(1p2e12.5)")1.0d0/eigen_value(i)
-          val(i) = 1.0d0/eigen_value(i)
+          val(i) = eigen_value(i)
         enddo
-!write(*,*)"e_mode"
-!do i = 1, iter
-!  write(*,"(1p10e12.5)")eigen_mode(:,i)
-!enddo
         vec = eigen_mode(:,1:n_get_eigen)
         exit
       endif
