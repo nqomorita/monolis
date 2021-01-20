@@ -35,6 +35,22 @@ module mod_monolis_util
   integer(kint), save :: mycomm
   logical, save :: is_debug
 
+  interface
+    subroutine monolis_eigen_inverted_standard_lanczos_ &
+      & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
+      use mod_monolis_prm
+      use mod_monolis_com
+      use mod_monolis_mat
+      type(monolis_prm) :: monoPRM
+      type(monolis_com) :: monoCOM
+      type(monolis_mat) :: monoMAT
+      integer(kint) :: maxiter, n_get_eigen
+      real(kdouble) :: ths
+      real(kdouble) :: vec(:,:), val(:)
+      logical, optional :: is_bc(:)
+    end subroutine monolis_eigen_inverted_standard_lanczos_
+  end interface
+
 contains
 
   subroutine monolis_global_initialize()
