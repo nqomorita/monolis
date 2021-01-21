@@ -100,7 +100,7 @@ SRC_LIST_REFN   = p_refiner.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))
-SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix refiner/, $(SRC_LIST_REFN)) $(addprefix main/, $(SRC_LIST_SOLVE)) $(addprefix eigen/, $(SRC_LIST_EIGEN)) $(addprefix main/, $(SRC_LIST_MAIN))
+SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix refiner/, $(SRC_LIST_REFN)) $(addprefix main/, $(SRC_LIST_SOLVE)) $(addprefix eigen/, $(SRC_LIST_EIGEN)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_PART        = partitioner/partitioner.f90
 SRC_PARTBC      = partitioner/partitioner_bc.f90
 SRC_REF1        = refiner/h_refiner_hex.f90
