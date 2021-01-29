@@ -3,6 +3,7 @@ module mod_monolis_precond_ROM
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_util
+  use mod_monolis_precond_rom_gs
 
   implicit none
 
@@ -26,20 +27,27 @@ contains
     real(kdouble) :: ths
     logical, allocatable :: is_bc(:)
 
+    call monolis_precond_rom_gs_setup(monoPRM, monoCOM, monoMAT)
+
     allocate(is_bc(monoMAT%NP*monoMAT%NDOF), source = .false.)
     call get_is_bc(monoPRM, monoCOM, monoMAT, is_bc, n_bc)
     !write(*,*)"n_bc", n_bc
 
-    maxiter = monoMAT%NP*monoMAT%NDOF !min(100, monoMAT%NP*monoMAT%NDOF)
-    n_get_eigen = monoMAT%NP*monoMAT%NDOF - n_bc !min(10, monoMAT%NP*monoMAT%NDOF)
-    ths = 1.0d-4
+    !maxiter = monoMAT%NP*monoMAT%NDOF
+    maxiter = min(100, monoMAT%NP*monoMAT%NDOF)
+    n_get_eigen = 40 !monoMAT%NP*monoMAT%NDOF - n_bc !min(10, monoMAT%NP*monoMAT%NDOF)
+    ths = 1.0d-6
     allocate(val(n_get_eigen), source = 0.0d0)
     allocate(vec(monoMAT%NP*monoMAT%NDOF, n_get_eigen), source = 0.0d0)
 
-    monoPRM%precond = monolis_prec_SOR
+    monoPRM%precond = monolis_prec_MUMPS
     monoPRM%show_summary = .false.
     monoPRM%show_time = .false.
     monoPRM%show_iterlog = .false.
+
+    !write(*,*)"n_get_eigen", n_get_eigen
+    !write(*,*)"maxiter", maxiter
+    !write(*,*)"ths", ths
 
     NPNDOF = monoMAT%NP*monoMAT%NDOF
     call interface_monolis_eigen_inverted_standard_lanczos_ &
@@ -89,30 +97,48 @@ contains
   end subroutine get_is_bc
 
   subroutine monolis_precond_ROM_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    use mod_monolis_matvec
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    integer(kint), save :: rom_sor_iter = 0
     integer(kint) :: i, j
-    real(kdouble) :: X(:), Y(:), phi
-    real(kdouble), allocatable :: coef(:)
+    real(kdouble) :: X(:), Y(:), phi, t1, t2
+    real(kdouble), allocatable :: coef(:), dU(:), U(:), G(:), T(:)
 
     allocate(coef(n_get_eigen), source = 0.0d0)
+    allocate(dU(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
+    allocate(U(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
+    allocate(G(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
+    allocate(T(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
+
+    U = X
+    !do i = 1, rom_sor_iter
+    !  call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, U, U)
+    !enddo
+    call monolis_residual(monoCOM, monoMAT, U, X, G, t1, t2)
 
     do i = 1, n_get_eigen
       phi = 0.0d0
       do j = 1, monoMAT%NP*monoMAT%NDOF
-        phi = phi + vec(j,i)*X(j)
+        phi = phi + vec(j,i)*G(j)
       enddo
       coef(i) = phi/val(i)
     enddo
 
-    Y = 0.0d0
+    dU = 0.0d0
     do i = 1, n_get_eigen
       do j = 1, monoMAT%NP*monoMAT%NDOF
-        Y(j) = Y(j) + vec(j,i)*coef(i)
+        dU(j) = dU(j) + vec(j,i)*coef(i)
       enddo
     enddo
+
+    U = U + dU
+    !do i = 1, rom_sor_iter
+    !  call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, U, U)
+    !enddo
+    Y = U
   end subroutine monolis_precond_ROM_apply
 
   subroutine monolis_precond_ROM_clear(monoPRM, monoCOM, monoMAT)
@@ -120,6 +146,5 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-
   end subroutine monolis_precond_ROM_clear
 end module mod_monolis_precond_ROM
