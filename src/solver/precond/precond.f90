@@ -68,10 +68,12 @@ contains
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_apply(monoPRM, monoCOM, monoMAT, X, Y)
-    else
+    elseif(monoPRM%precond == monolis_prec_NONE)then
       do i = 1, monoMAT%N*monoMAT%NDOF
         Y(i) = X(i)
       enddo
+    else
+      stop "monolis_precond_apply"
     endif
 
     t2 = monolis_get_time()

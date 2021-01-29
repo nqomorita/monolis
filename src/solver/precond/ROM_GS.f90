@@ -23,15 +23,16 @@ contains
     endif
   end subroutine monolis_precond_rom_gs_setup
 
-  subroutine monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, X, Y)
+  subroutine monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, X, Y, iter)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
+    integer(kint) :: iter
     real(kdouble) :: X(:), Y(:)
 
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_rom_gs_33_apply(monoMAT, X, Y)
+      call monolis_precond_rom_gs_33_apply(monoMAT, X, Y, iter)
     else
       stop
       !call monolis_precond_rom_gs_nn_apply(monoMAT, X, Y)

@@ -34,8 +34,8 @@ contains
     !write(*,*)"n_bc", n_bc
 
     !maxiter = monoMAT%NP*monoMAT%NDOF
-    maxiter = min(100, monoMAT%NP*monoMAT%NDOF)
-    n_get_eigen = 40 !monoMAT%NP*monoMAT%NDOF - n_bc !min(10, monoMAT%NP*monoMAT%NDOF)
+    maxiter = min(50, monoMAT%NP*monoMAT%NDOF)
+    n_get_eigen = 10 !monoMAT%NP*monoMAT%NDOF - n_bc !min(10, monoMAT%NP*monoMAT%NDOF)
     ths = 1.0d-6
     allocate(val(n_get_eigen), source = 0.0d0)
     allocate(vec(monoMAT%NP*monoMAT%NDOF, n_get_eigen), source = 0.0d0)
@@ -50,8 +50,8 @@ contains
     !write(*,*)"ths", ths
 
     NPNDOF = monoMAT%NP*monoMAT%NDOF
-    call interface_monolis_eigen_inverted_standard_lanczos_ &
-    & (monoPRM, monoCOM, monoMAT, NPNDOF, n_get_eigen, ths, maxiter, val, vec, is_bc)
+!    call interface_monolis_eigen_inverted_standard_lanczos_ &
+!    & (monoPRM, monoCOM, monoMAT, NPNDOF, n_get_eigen, ths, maxiter, val, vec, is_bc)
 
     monoPRM%show_summary = .true.
     monoPRM%show_time = .true.
@@ -102,7 +102,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint), save :: rom_sor_iter = 0
+    integer(kint), save :: rom_gs_iter = 1
     integer(kint) :: i, j
     real(kdouble) :: X(:), Y(:), phi, t1, t2
     real(kdouble), allocatable :: coef(:), dU(:), U(:), G(:), T(:)
@@ -113,32 +113,30 @@ contains
     allocate(G(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
     allocate(T(monoMAT%NP*monoMAT%NDOF), source = 0.0d0)
 
-    U = X
-    !do i = 1, rom_sor_iter
-    !  call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, U, U)
-    !enddo
-    call monolis_residual(monoCOM, monoMAT, U, X, G, t1, t2)
-
-    do i = 1, n_get_eigen
-      phi = 0.0d0
-      do j = 1, monoMAT%NP*monoMAT%NDOF
-        phi = phi + vec(j,i)*G(j)
-      enddo
-      coef(i) = phi/val(i)
-    enddo
-
-    dU = 0.0d0
-    do i = 1, n_get_eigen
-      do j = 1, monoMAT%NP*monoMAT%NDOF
-        dU(j) = dU(j) + vec(j,i)*coef(i)
-      enddo
-    enddo
-
-    U = U + dU
-    !do i = 1, rom_sor_iter
-    !  call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, U, U)
-    !enddo
-    Y = U
+    Y = X
+!    U = X
+!    !U = 0.0d0
+!    call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, X, U, rom_gs_iter)
+!    call monolis_residual(monoCOM, monoMAT, U, X, G, t1, t2)
+!
+!    do i = 1, n_get_eigen
+!      phi = 0.0d0
+!      do j = 1, monoMAT%NP*monoMAT%NDOF
+!        phi = phi + vec(j,i)*G(j)
+!      enddo
+!      coef(i) = phi/val(i)
+!    enddo
+!
+!    dU = 0.0d0
+!    do i = 1, n_get_eigen
+!      do j = 1, monoMAT%NP*monoMAT%NDOF
+!        dU(j) = dU(j) + vec(j,i)*coef(i)
+!      enddo
+!    enddo
+!
+!    U = U + dU
+!    call monolis_precond_rom_gs_apply(monoPRM, monoCOM, monoMAT, X, U, rom_gs_iter)
+!    Y = U
   end subroutine monolis_precond_ROM_apply
 
   subroutine monolis_precond_ROM_clear(monoPRM, monoCOM, monoMAT)
