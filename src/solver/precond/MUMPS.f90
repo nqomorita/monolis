@@ -79,6 +79,7 @@ contains
 
     !> Output log level
     mumps%ICNTL(4) = 0
+    mumps%ICNTL(14) = 80
 
     call DMUMPS(mumps)
 #endif

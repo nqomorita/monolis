@@ -8,6 +8,7 @@ module mod_monolis_precond
   use mod_monolis_precond_SOR
   use mod_monolis_precond_ROM
   use mod_monolis_precond_mumps
+  use mod_monolis_precond_mf
   use mod_monolis_util
 
   implicit none
@@ -36,6 +37,8 @@ contains
       call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_setup(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_MF)then
+      call monolis_precond_MF_setup(monoPRM, monoCOM, monoMAT)
     endif
 
     t2 = monolis_get_time()
@@ -68,6 +71,8 @@ contains
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    elseif(monoPRM%precond == monolis_prec_MF)then
+      call monolis_precond_MF_apply(monoPRM, monoCOM, monoMAT, X, Y)
     else
       do i = 1, monoMAT%N*monoMAT%NDOF
         Y(i) = X(i)
@@ -100,6 +105,8 @@ contains
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_clear(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_MF)then
+      call monolis_precond_MF_clear(monoPRM, monoCOM, monoMAT)
     endif
 
     t2 = monolis_get_time()

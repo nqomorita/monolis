@@ -6,12 +6,12 @@ module mod_monolis_matrix_fillin
   implicit none
 
   type monolis_fillin
-    integer(kind=kint) :: n_descendant
-    integer(kind=kint) :: n_ancestor
-    integer(kind=kint), pointer :: descendant(:)
-    integer(kind=kint), pointer :: ancestor(:)
-    integer(kind=kint), pointer :: update_index(:)
-    real(kind=kdouble), pointer :: update(:,:,:)
+    integer(kint) :: n_descendant
+    integer(kint) :: n_ancestor
+    integer(kint), pointer :: descendant(:)
+    integer(kint), pointer :: ancestor(:)
+    integer(kint), pointer :: update_index(:)
+    real(kdouble), pointer :: update(:,:,:)
     logical :: factorized
     logical :: updated
   endtype monolis_fillin
@@ -25,19 +25,19 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat_LDU) :: monoTREE
     type(monolis_fillin), pointer:: tree(:)
-    integer(kind=kint), pointer :: indexU(:), indexL(:)
-    integer(kind=kint), pointer :: itemU(:), itemL(:)
-    integer(kind=kint), pointer :: array(:)
-    integer(kind=kint), pointer :: fillin_mask(:)
-    integer(kind=kint), pointer :: child_mask(:)
-    integer(kind=kint), pointer :: parent_mask(:)
-    integer(kind=kint) :: N, NPU, NPL
-    integer(kind=kint) :: i, j, k, jS, jE, in, c
-    integer(kind=kint) :: nbytes
-    integer(kind=kint) :: is, ie
-    integer(kind=kint) :: range, parent
-    integer(kind=kint) :: bit = kint*8
-    integer(kind=kint), allocatable :: count(:)
+    integer(kint), pointer :: indexU(:), indexL(:)
+    integer(kint), pointer :: itemU(:), itemL(:)
+    integer(kint), pointer :: array(:)
+    integer(kint), pointer :: fillin_mask(:)
+    integer(kint), pointer :: child_mask(:)
+    integer(kint), pointer :: parent_mask(:)
+    integer(kint) :: N, NPU, NPL
+    integer(kint) :: i, j, k, jS, jE, in, c
+    integer(kint) :: nbytes
+    integer(kint) :: is, ie
+    integer(kint) :: range, parent
+    integer(kint) :: bit = kint*8
+    integer(kint), allocatable :: count(:)
     logical :: is_fillin, is_asym
 
     N = monoMAT%N
@@ -126,6 +126,7 @@ contains
       deallocate(fillin_mask)
     endif
 
+    !> upper part
     allocate(monoTREE%indexU(0:N))
     indexU => monoTREE%indexU
     in = 0
@@ -150,7 +151,7 @@ contains
     enddo
 
     if(is_asym)then
-      !lower part
+      !> lower part
       indexL => monoTREE%indexL
       itemL => monoTREE%itemL
 
@@ -196,15 +197,15 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat_LDU) :: monoTREE
-    integer(kind=kint), pointer :: indexU(:)
-    integer(kind=kint), pointer :: itemU(:)
-    integer(kind=kint), pointer :: indexL(:)
-    integer(kind=kint), pointer :: itemL(:)
-    real(kind=kdouble), pointer :: AU(:)
-    real(kind=kdouble), pointer :: AL(:)
-    integer(kind=kint) :: N, NPU, NPL, NDOF, NDOF2
-    integer(kind=kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
-    integer(kind=kint) :: in, jn
+    integer(kint), pointer :: indexU(:)
+    integer(kint), pointer :: itemU(:)
+    integer(kint), pointer :: indexL(:)
+    integer(kint), pointer :: itemL(:)
+    real(kdouble), pointer :: AU(:)
+    real(kdouble), pointer :: AL(:)
+    integer(kint) :: N, NPU, NPL, NDOF, NDOF2
+    integer(kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
+    integer(kint) :: in, jn
     logical :: is_asym
 
     N = monoTREE%N
