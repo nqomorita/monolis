@@ -65,7 +65,7 @@ contains
 
       call monolis_vec_AXPY(N, NDOF, -alpha(iter), q(:,iter), p, p)
 
-      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p, is_bc)
+      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
 
       call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t)
 
@@ -83,11 +83,33 @@ write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1)
 
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
+          do j = 1, NP*NDOF
+            vec(j,i) = eigen_mode(j,i)
+          enddo
         enddo
-        vec = eigen_mode(:,1:n_get_eigen)
         exit
       endif
     enddo
   end subroutine monolis_eigen_inverted_standard_lanczos_
 
 end module mod_monolis_eigen_lanczos
+
+  subroutine interface_monolis_eigen_inverted_standard_lanczos_ &
+    & (monoPRM, monoCOM, monoMAT, NPNDOF, &
+    & n_get_eigen, ths, maxiter, val, vec, is_bc)
+    use mod_monolis_prm
+    use mod_monolis_com
+    use mod_monolis_mat
+    use mod_monolis_eigen_lanczos
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: maxiter, n_get_eigen, NPNDOF
+    real(kdouble) :: ths
+    real(kdouble) :: vec(NPNDOF,n_get_eigen), val(n_get_eigen)
+    logical, optional :: is_bc(NPNDOF)
+
+    call monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, &
+      & n_get_eigen, ths, maxiter, val, vec, is_bc)
+  end subroutine interface_monolis_eigen_inverted_standard_lanczos_
