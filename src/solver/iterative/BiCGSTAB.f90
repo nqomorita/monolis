@@ -17,12 +17,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, iter, iter_RR
-    real(kind=kdouble) :: alpha, beta, rho, rho1, c2, omega
-    real(kind=kdouble) :: B2, CG(2)
-    real(kind=kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
-    real(kind=kdouble), pointer :: B(:), X(:)
+    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: i, iter, iter_RR
+    real(kdouble) :: alpha, beta, rho, rho1, c2, omega
+    real(kdouble) :: B2, CG(2)
+    real(kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
+    real(kdouble), pointer :: B(:), X(:)
     logical :: is_converge
 
     N     = monoMAT%N

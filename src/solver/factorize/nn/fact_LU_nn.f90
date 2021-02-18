@@ -10,8 +10,8 @@ module mod_monolis_fact_LU_nn
   public :: monolis_solv_LU_inner_nn
   public :: monolis_clear_LU_inner_nn
 
-  real(kind=kdouble), save, allocatable :: AD(:)
-  real(kind=kdouble), save, pointer :: AU(:)
+  real(kdouble), save, allocatable :: AD(:)
+  real(kdouble), save, pointer :: AU(:)
 
 contains
 
@@ -38,17 +38,17 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NDOF2
-    integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
-    integer(kind=kint) :: shift, imax
-    integer(kind=kint), allocatable :: is_fill(:)
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: d1, d2, d3
-    real(kind=kdouble) :: u1, u2, u3
-    real(kind=kdouble) :: l1, l2, l3
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: D(9), L(9)
-    real(kind=kdouble), allocatable :: U(:)
+    integer(kint) :: N, NP, NDOF, NDOF2
+    integer(kint) :: i, j, k, jS, jE, in, jn, kn, nn
+    integer(kint) :: shift, imax
+    integer(kint), allocatable :: is_fill(:)
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: d1, d2, d3
+    real(kdouble) :: u1, u2, u3
+    real(kdouble) :: l1, l2, l3
+    real(kdouble) :: t1, t2
+    real(kdouble) :: D(9), L(9)
+    real(kdouble), allocatable :: U(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -166,14 +166,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF
-    integer(kind=kint) :: i, j, in, jS, jE
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: X1, X2, X3
-    real(kind=kdouble) :: A1, A2, A3
-    real(kind=kdouble), allocatable :: S(:), A(:), T(:)
-    real(kind=kdouble), pointer :: X(:)
+    integer(kint) :: N, NP, NDOF
+    integer(kint) :: i, j, in, jS, jE
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: t1, t2
+    real(kdouble) :: X1, X2, X3
+    real(kdouble) :: A1, A2, A3
+    real(kdouble), allocatable :: S(:), A(:), T(:)
+    real(kdouble), pointer :: X(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP

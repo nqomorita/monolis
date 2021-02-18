@@ -68,7 +68,7 @@ contains
 
       fname = trim(output_dir)//"elem.dat."//trim(cnum)
       call monolis_output_mesh_elem_ref(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
-        mesh%elem, node_list(i), shift)
+        graph%ebase_func, graph%connectivity, node_list(i), shift)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
@@ -82,7 +82,8 @@ contains
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
-      call monolis_output_mesh_global_eid(fname, node_list(i)%nelem, node_list(i)%nelem_in, mesh%eid, node_list(i)%eid)
+      call monolis_output_mesh_global_eid(fname, mesh%nelem, node_list(i)%nelem, node_list(i)%nelem_in, &
+      &  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func)
     enddo
   end subroutine monolis_output_mesh
 
@@ -271,18 +272,30 @@ contains
     close(20)
   end subroutine monolis_output_mesh_elem
 
-  subroutine monolis_output_mesh_elem_ref(fname, nelem, nbase, eid, elem, node_list, shift)
+  subroutine monolis_output_mesh_elem_ref(fname, nelem, nbase, eid, ebase_func, conn, node_list, shift)
     implicit none
     type(monolis_node_list) :: node_list
-    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), elem(:,:), shift
+    integer(kint) :: i, j, in, jn, nelem, nbase, eid(:), ebase_func(:), conn(:), shift, jS, jE
     character :: fname*100
 
+    in = 0
+    do i = 1, nelem
+      jn = eid(i)
+      jS = ebase_func(jn) + 1
+      jE = ebase_func(jn+1)
+      if(jE-jS+1 == nbase) in = in + 1
+    enddo
+
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")nelem, nbase
+      write(20,"(i0,x,i0)")in, nbase
       do i = 1, nelem
         jn = eid(i)
-        do j = 1, nbase
-          in = elem(j,jn)
+        !do j = 1, nbase
+        jS = ebase_func(jn) + 1
+        jE = ebase_func(jn+1)
+        if(jE-jS+1 /= nbase) cycle
+        do j = jS, jE
+          in = conn(j)
           write(20,"(x,i0,$)") node_list%nid_perm(in) + shift
         enddo
         write(20,*)""
@@ -304,16 +317,30 @@ contains
     close(20)
   end subroutine monolis_output_mesh_global_nid
 
-  subroutine monolis_output_mesh_global_eid(fname, nelem, nelem_in, global_eid, eid)
+  subroutine monolis_output_mesh_global_eid(fname, nelem_all, nelem, nelem_in, global_eid, eid, &
+  &  nbase, ebase_func)
     implicit none
-    integer(kint) :: i, in, nelem, nelem_in, global_eid(:), eid(:)
+    integer(kint) :: i, in, jn, nelem, nelem_in, global_eid(:), eid(:), nelem_all, jE, jS
+    integer(kint) :: ebase_func(:), nbase
     character :: fname*100
 
+    in = 0
+    jn = 0
+    do i = 1, nelem
+      jn = eid(i)
+      jS = ebase_func(jn) + 1
+      jE = ebase_func(jn+1)
+      if(jE-jS+1 == nbase) in = in + 1
+      if(jE-jS+1 == nbase .and. i <= nelem_in) jn = jn + 1
+    enddo
+
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")nelem, nelem_in
+      write(20,"(i0,x,i0)")in, jn
       do i = 1, nelem
         in = eid(i)
-        write(20,"(i0,x,i0)") global_eid(in)
+        !if(in <= nelem_all) jn = global_eid(in)
+        if(in > nelem_all) cycle
+        write(20,"(i0,x,i0)")  global_eid(in)
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_eid

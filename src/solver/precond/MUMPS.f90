@@ -56,6 +56,7 @@ contains
     mumps%ICNTL(22) = 0
     !> Distributed assembled matrix input
     mumps%ICNTL(18) = 3
+    mumps%ICNTL(14) = 60
 
     call DMUMPS(mumps)
 
@@ -79,6 +80,7 @@ contains
 
     !> Output log level
     mumps%ICNTL(4) = 0
+    mumps%ICNTL(14) = 80
 
     call DMUMPS(mumps)
 #endif

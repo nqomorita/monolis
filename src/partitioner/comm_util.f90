@@ -18,15 +18,15 @@ contains
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     integer(kint) :: nelem, n_domain
-    integer(kint) :: i, j, in, id, maxid, minid
+    integer(kint) :: i, j, in, id, maxid, minid, jS, jE, jn
     integer(kint), allocatable :: temp(:)
 
     call monolis_debug_header("get_overlap_domain")
 
-    nelem = mesh%nelem
+    nelem = graph%nelem
     allocate(graph%elem_domid(nelem), source = 0)
     allocate(graph%elem_domid_uniq(nelem), source = 0)
-    allocate(temp(mesh%nbase_func), source = 0)
+    !allocate(temp(mesh%nbase_func), source = 0)
 
     if(n_domain == 1)then
       graph%elem_domid = 1
@@ -35,13 +35,20 @@ contains
     endif
 
     do i = 1, nelem
-      temp = 0
-      do j = 1, mesh%nbase_func
-        in = mesh%elem(j,i)
-        temp(j) = graph%node_domid_raw(in)
+      jS = graph%ebase_func(i) + 1
+      jE = graph%ebase_func(i+1)
+      allocate(temp(jE-jS+1), source = 0)
+      jn = 1
+      do j = jS, jE
+        !in = mesh%elem(j,i)
+        in = graph%connectivity(j)
+        temp(jn) = graph%node_domid_raw(in)
+        jn = jn + 1
       enddo
       minid = minval(temp)
       maxid = maxval(temp)
+      deallocate(temp)
+
       graph%elem_domid_uniq(i) = maxid
       graph%elem_domid(i) = maxid
       if(minid /= maxid) graph%elem_domid(i) = -1
@@ -57,7 +64,7 @@ contains
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
-    integer(kint) :: nnode, nid, in, j, jn, k
+    integer(kint) :: nnode, nid, in, j, jn, k, jS, jE
     integer(kint) :: count_in, count_out, avg
     logical, allocatable :: is_in(:)
 
@@ -66,8 +73,11 @@ contains
 
     do j = 1, local_node%nelem
       in = local_node%eid(j)
-      do k = 1, mesh%nbase_func
-        jn = mesh%elem(k,in)
+      jS = graph%ebase_func(in) + 1
+      jE = graph%ebase_func(in+1)
+      do k = jS, jE
+      !do k = 1, mesh%nbase_func
+        jn = graph%connectivity(k)
         is_in(jn) = .true.
       enddo
     enddo
@@ -135,17 +145,20 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
-    integer(kint) :: nelem, nid, in, j, k, count_in, count_out
+    integer(kint) :: nelem, nid, in, j, k, count_in, count_out, jS, jE, i
     logical, allocatable :: is_in(:), is_out(:)
 
-    nelem = mesh%nelem
+    nelem = graph%nelem
     allocate(is_in(nelem), source = .false.)
 
-    do j = 1, nelem
-      do k = 1, mesh%nbase_func
-        in = mesh%elem(k,j)
+    do i = 1, nelem
+      jS = graph%ebase_func(i) + 1
+      jE = graph%ebase_func(i+1)
+      do j = jS, jE
+      !do k = 1, mesh%nbase_func
+        in = graph%connectivity(j)
         if(graph%node_domid_raw(in) == nid)then
-          is_in(j) = .true.
+          is_in(i) = .true.
         endif
       enddo
     enddo
@@ -314,13 +327,16 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     logical, allocatable :: is_bound(:)
 
     nnode = mesh%nnode
-    nelem = mesh%nelem
+    nelem = graph%nelem
     !> get is_bound
     allocate(is_bound(nnode), source = .false.)
-    do j = 1, nelem
-      if(graph%elem_domid(j) == -1)then
-        do k = 1, mesh%nbase_func
-          in = mesh%elem(k,j)
+    do i = 1, nelem
+      if(graph%elem_domid(i) == -1)then
+        jS = graph%ebase_func(i) + 1
+        jE = graph%ebase_func(i+1)
+        do j = jS, jE
+        !do k = 1, mesh%nbase_func
+          in = graph%connectivity(j)
           is_bound(in) = .true.
         enddo
       endif
