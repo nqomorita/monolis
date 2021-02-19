@@ -28,7 +28,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: NDOF
+    integer(kint) :: NDOF, NZ
 
 #ifdef WITH_MUMPS
     if(is_factored) return
@@ -36,7 +36,7 @@ contains
 
     !> initialize
     mumps%JOB = -1
-    mumps%COMM = monoCOM%comm
+    mumps%COMM = mpi_comm_self !monoCOM%comm
     !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
@@ -62,21 +62,23 @@ contains
 
     !> factorization
     NDOF = monoMAT%ndof
-    allocate(mumps%IRN_loc(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%JCN_loc(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%IRN(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%JCN(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%A(NDOF*NDOF*monoMAT%NZ), source = 0.0d0)
-    allocate(mumps%RHS(NDOF*monoMAT%NP), source = 0.0d0)
+    call monolis_precond_mumps_get_nz(monoMAT, NZ)
+
+    allocate(mumps%IRN_loc(NDOF*NDOF*NZ))
+    allocate(mumps%JCN_loc(NDOF*NDOF*NZ))
+    allocate(mumps%IRN(NDOF*NDOF*NZ))
+    allocate(mumps%JCN(NDOF*NDOF*NZ))
+    allocate(mumps%A(NDOF*NDOF*NZ), source = 0.0d0)
+    allocate(mumps%RHS(NDOF*monoMAT%N), source = 0.0d0)
     call monolis_precond_mumps_get_loc(monoMAT, mumps%IRN_loc, mumps%JCN_loc, mumps%A)
 
     mumps%IRN = mumps%IRN_loc
     mumps%JCN = mumps%JCN_loc
 
     mumps%JOB = 4
-    mumps%N = NDOF*monoMAT%NP
-    mumps%NZ = NDOF*NDOF*monoMAT%NZ
-    mumps%NZ_loc = NDOF*NDOF*monoMAT%NZ
+    mumps%N = NDOF*monoMAT%N
+    mumps%NZ = NDOF*NDOF*NZ
+    mumps%NZ_loc = NDOF*NDOF*NZ
 
     !> Output log level
     mumps%ICNTL(4) = 0
@@ -87,12 +89,13 @@ contains
   end subroutine monolis_precond_mumps_setup
 
   subroutine monolis_precond_mumps_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    use mod_monolis_linalg_util
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: i
-    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: X(:), Y(:), tcomm
 
 #ifdef WITH_MUMPS
     !> Output log level
@@ -120,6 +123,27 @@ contains
 
   end subroutine monolis_precond_mumps_clear
 
+  subroutine monolis_precond_mumps_get_nz(monoMAT, NZ)
+    implicit none
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: i, j, in, jS, jE, NZ
+    integer(kint) :: idof, jdof, jn, kn, NDOF
+
+    NDOF = monoMAT%ndof
+    NZ = 0
+
+    in = 0
+    aa:do i = 1, monoMAT%N
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        jn = monoMAT%item(j)
+        if(monoMAT%N < jn) cycle aa
+        NZ = NZ + 1
+      enddo
+    enddo aa
+  end subroutine monolis_precond_mumps_get_nz
+
   subroutine monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, A)
     implicit none
     type(monolis_mat) :: monoMAT
@@ -131,11 +155,12 @@ contains
     NDOF = monoMAT%ndof
 
     in = 0
-    do i = 1, monoMAT%NP
+    aa:do i = 1, monoMAT%N
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i)
       do j = jS, jE
         jn = monoMAT%item(j)
+        if(monoMAT%N < jn) cycle aa
         do idof = 1, NDOF
         do jdof = 1, NDOF
           kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
@@ -146,6 +171,6 @@ contains
         enddo
         enddo
       enddo
-    enddo
+    enddo aa
   end subroutine monolis_precond_mumps_get_loc
 end module mod_monolis_precond_mumps
