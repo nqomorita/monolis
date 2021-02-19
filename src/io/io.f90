@@ -320,22 +320,22 @@ contains
   subroutine monolis_output_mesh_global_eid(fname, nelem_all, nelem, nelem_in, global_eid, eid, &
   &  nbase, ebase_func)
     implicit none
-    integer(kint) :: i, in, jn, nelem, nelem_in, global_eid(:), eid(:), nelem_all, jE, jS
+    integer(kint) :: i, in, jn, kn, nelem, nelem_in, global_eid(:), eid(:), nelem_all, jE, jS
     integer(kint) :: ebase_func(:), nbase
     character :: fname*100
 
     in = 0
-    jn = 0
+    kn = 0
     do i = 1, nelem
       jn = eid(i)
       jS = ebase_func(jn) + 1
       jE = ebase_func(jn+1)
       if(jE-jS+1 == nbase) in = in + 1
-      if(jE-jS+1 == nbase .and. i <= nelem_in) jn = jn + 1
+      if(jE-jS+1 == nbase .and. i <= nelem_in) kn = kn + 1
     enddo
 
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")in, jn
+      write(20,"(i0,x,i0)")in, kn
       do i = 1, nelem
         in = eid(i)
         !if(in <= nelem_all) jn = global_eid(in)
