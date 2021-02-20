@@ -33,7 +33,7 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_prec_ROM    = 10
   integer(kint), parameter :: monolis_prec_MF     = 11
 
-  character*24, dimension(11) :: monolis_str_iter = (/&
+  character*24, dimension(12) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -44,7 +44,8 @@ module mod_monolis_prm
   & "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
   & "SOR                ", &
-  & "IR                 "/)
+  & "IR                 ", &
+  & "GMRES              "/)
 
   character*24, dimension(0:11)  :: monolis_str_prec = (/&
   & "None  ", &
