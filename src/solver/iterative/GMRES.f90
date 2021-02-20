@@ -39,14 +39,15 @@ contains
     NNDOF = N*NDOF
     X => monoMAT%X
     B => monoMAT%B
+    tol = monoPRM%tol
 
     NREST = 10
     if (NREST >= NDOF*NP-1) NREST = NDOF*NP-2
 
     NRK = NREST + 7
-    allocate (H (NRK,NRK))
-    allocate (WW(NDOF*NP,NRK))
-    allocate (SS(NRK))
+    allocate (H (NRK,NRK), source = 0.0d0)
+    allocate (WW(NDOF*NP,NRK), source = 0.0d0)
+    allocate (SS(NRK), source = 0.0d0)
 
     LDH = NREST + 2
     LDW = N
@@ -57,6 +58,7 @@ contains
     call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, BNRM2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
 
+    ITER = 0
     OUTER:do
       I = 0
       call monolis_inner_product_R(monoCOM, N, NDOF, WW(:,R), WW(:,R), DNRM2, monoPRM%tdotp, monoPRM%tcomm_dotp)
@@ -172,14 +174,9 @@ contains
             X(kk)= X(kk) + WW(kk,ZQ)
           enddo
 
-          exit OUTER
+          if(iter > monoPRM%maxiter) exit OUTER
         endif
-
-!        if ( ITER.gt.MAXIT ) then
-!          exit OUTER
-!        end if
       end do
-      !C===
 
       !C-- [H]{y}= {s_tld}
       do ik= 1, NREST
@@ -220,7 +217,7 @@ contains
       WW(I+1,S)= dsqrt(DNRM2/BNRM2)
       RESID    = WW( I+1,S )
 
-      if ( RESID.le.TOL )   exit OUTER
+      if ( RESID.le.TOL ) exit OUTER
     end do OUTER
 
     call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
