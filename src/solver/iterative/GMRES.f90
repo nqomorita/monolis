@@ -29,7 +29,7 @@ contains
     integer(kint) :: i, iter, ik, irow, jj, k, kk, nrest
     real(kdouble), pointer :: B(:), X(:), SS(:)
     real(kdouble), pointer :: WW(:,:), H(:,:)
-    real(kdouble) :: LDH, LDW, BNRM2, DNRM2, RNORM, RESID, tol
+    real(kdouble) :: BNRM2, DNRM2, RNORM, RESID, tol
     real(kdouble) :: coef, val, VCS, VSN, DTEMP, AA, BB, R0, scale, RR
     logical :: is_converge
 
@@ -41,6 +41,8 @@ contains
     B => monoMAT%B
     tol = monoPRM%tol
 
+    if(monoPRM%is_init_x) X = 0.0d0
+
     NREST = 10
     if (NREST >= NDOF*NP-1) NREST = NDOF*NP-2
 
@@ -49,8 +51,6 @@ contains
     allocate (WW(NDOF*NP,NRK), source = 0.0d0)
     allocate (SS(NRK), source = 0.0d0)
 
-    LDH = NREST + 2
-    LDW = N
     CS  = NREST + 1
     SN  = CS    + 1
 
@@ -60,7 +60,6 @@ contains
 
     ITER = 0
     OUTER:do
-      I = 0
       call monolis_inner_product_R(monoCOM, N, NDOF, WW(:,R), WW(:,R), DNRM2, monoPRM%tdotp, monoPRM%tcomm_dotp)
       if (DNRM2 == 0.d0) exit ! converged
 
@@ -137,10 +136,6 @@ contains
 
         RESID = dabs ( WW(I+1,S))/dsqrt(BNRM2)
 
-!        if (my_rank.eq.0 .and. ITERlog.eq.1)                              &
-!          &    write (*, '(2i8, 1pe16.6)') iter,I+1, RESID
-        if(monoCOM%myrank == 0) write (*,"(2i7, 1pe16.6)") iter, i+1, resid
-
         if ( RESID.le.TOL ) then
           !C-- [H]{y}= {s_tld}
           do ik= 1, I
@@ -174,8 +169,10 @@ contains
             X(kk)= X(kk) + WW(kk,ZQ)
           enddo
 
-          if(iter > monoPRM%maxiter) exit OUTER
+          exit OUTER
         endif
+
+        if(iter > monoPRM%maxiter) exit OUTER
       end do
 
       !C-- [H]{y}= {s_tld}
@@ -217,7 +214,9 @@ contains
       WW(I+1,S)= dsqrt(DNRM2/BNRM2)
       RESID    = WW( I+1,S )
 
-      if ( RESID.le.TOL ) exit OUTER
+      call monolis_check_converge(monoPRM, monoCOM, monoMAT, WW(:,R), BNRM2, iter, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+      if(is_converge) exit
+      if(iter > monoPRM%maxiter) exit OUTER
     end do OUTER
 
     call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
