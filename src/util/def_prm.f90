@@ -18,6 +18,7 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
   integer(kint), parameter :: monolis_iter_SOR      = 10
   integer(kint), parameter :: monolis_iter_IR       = 11
+  integer(kint), parameter :: monolis_iter_GMRES    = 12
 
   integer(kint), parameter :: monolis_prec_NONE   = 0
   integer(kint), parameter :: monolis_prec_DIAG   = 1
@@ -29,6 +30,8 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_prec_SPIKE  = 7
   integer(kint), parameter :: monolis_prec_DIRECT = 8
   integer(kint), parameter :: monolis_prec_MUMPS  = 9
+  integer(kint), parameter :: monolis_prec_ROM    = 10
+  integer(kint), parameter :: monolis_prec_MF     = 11
 
   character*24, dimension(11) :: monolis_str_iter = (/&
   & "CG                 ", &
@@ -42,7 +45,8 @@ module mod_monolis_prm
   & "PipeBiCGSTAB_noprec", &
   & "SOR                ", &
   & "IR                 "/)
-  character*24, dimension(0:9)  :: monolis_str_prec = (/&
+
+  character*24, dimension(0:11)  :: monolis_str_prec = (/&
   & "None  ", &
   & "Diag  ", &
   & "ILU   ", &
@@ -52,7 +56,9 @@ module mod_monolis_prm
   & "RIF   ", &
   & "SPIKE ", &
   & "Direct", &
-  & "MUMPS "/)
+  & "MUMPS ", &
+  & "ROM   ", &
+  & "MF    "/)
 
   type monolis_prm
     integer(kint) :: method = 1

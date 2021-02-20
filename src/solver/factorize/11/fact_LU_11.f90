@@ -35,16 +35,16 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, k, jS, jE, in, jn, kn, nn
-    integer(kind=kint) :: imax
-    integer(kind=kint), allocatable :: is_fill(:)
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: d1, u1, l1
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: L(1)
-    real(kind=kdouble), allocatable :: U(:)
-    real(kind=kdouble), pointer :: AD(:), AU(:)
+    integer(kint) :: N, NP
+    integer(kint) :: i, j, k, jS, jE, in, jn, kn, nn
+    integer(kint) :: imax
+    integer(kint), allocatable :: is_fill(:)
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: d1, u1, l1
+    real(kdouble) :: t1, t2
+    real(kdouble) :: L(1)
+    real(kdouble), allocatable :: U(:)
+    real(kdouble), pointer :: AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -113,14 +113,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, k, in, jS, jE, kn
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: X1
-    real(kind=kdouble) :: A1
-    real(kind=kdouble), allocatable :: S(:)
-    real(kind=kdouble), pointer :: X(:), AD(:), AU(:)
+    integer(kint) :: N, NP
+    integer(kint) :: i, j, k, in, jS, jE, kn
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: t1, t2
+    real(kdouble) :: X1
+    real(kdouble) :: A1
+    real(kdouble), allocatable :: S(:)
+    real(kdouble), pointer :: X(:), AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP

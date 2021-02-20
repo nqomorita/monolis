@@ -17,8 +17,7 @@ contains
     type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      !call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
-      call monolis_init_LU_inner_nn(monoPRM, monoCOM, monoMAT)
+      call monolis_init_LU_inner_33(monoPRM, monoCOM, monoMAT)
     elseif(monoMAT%NDOF == 1)then
       call monolis_init_LU_inner_11(monoPRM, monoCOM, monoMAT)
     else
@@ -33,8 +32,7 @@ contains
     type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      !call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
-      call monolis_fact_LU_inner_nn(monoPRM, monoCOM, monoMAT)
+      call monolis_fact_LU_inner_33(monoPRM, monoCOM, monoMAT)
     elseif(monoMAT%NDOF == 1)then
       call monolis_fact_LU_inner_11(monoPRM, monoCOM, monoMAT)
     else
@@ -49,8 +47,7 @@ contains
     type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      !call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
-      call monolis_solv_LU_inner_nn(monoPRM, monoCOM, monoMAT)
+      call monolis_solv_LU_inner_33(monoPRM, monoCOM, monoMAT)
     elseif(monoMAT%NDOF == 1)then
       call monolis_solv_LU_inner_11(monoPRM, monoCOM, monoMAT)
     else
@@ -65,8 +62,7 @@ contains
     type(monolis_mat_LDU) :: monoMAT
 
     if(monoMAT%NDOF == 3)then
-      !call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
-      call monolis_clear_LU_inner_nn(monoPRM, monoCOM, monoMAT)
+      call monolis_clear_LU_inner_33(monoPRM, monoCOM, monoMAT)
     elseif(monoMAT%NDOF == 1)then
       call monolis_clear_LU_inner_11(monoPRM, monoCOM, monoMAT)
     else

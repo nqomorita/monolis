@@ -35,7 +35,7 @@ contains
     enddo
   end subroutine lanczos_initialze
 
-  subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p, is_bc)
+  subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
@@ -43,7 +43,6 @@ contains
     integer(kint) :: i, j, iter, N, NDOF
     real(kdouble) :: q(:,0:), p(:), norm
     real(kdouble), allocatable :: t(:)
-    logical, optional :: is_bc(:)
 
     N    = monoMAT%N
     NDOF = monoMAT%NDOF
