@@ -137,6 +137,7 @@ contains
 
 !        if (my_rank.eq.0 .and. ITERlog.eq.1)                              &
 !          &    write (*, '(2i8, 1pe16.6)') iter,I+1, RESID
+        if(monoCOM%myrank == 0) write (*,"(2i7, 1pe16.6)") iter, i+1, resid
 
         if ( RESID.le.TOL ) then
           !C-- [H]{y}= {s_tld}
@@ -212,7 +213,6 @@ contains
         X(kk)= X(kk) + WW(kk,ZQ)
       enddo
 
-      !C-- Compute residual vector R, find norm, then check for tolerance.
       call monolis_residual(monoCOM, monoMAT, X, B, WW(:,R), monoPRM%tspmv, monoPRM%tcomm_spmv)
 
       call monolis_inner_product_R(monoCOM, N, NDOF, WW(:,R), WW(:,R), DNRM2, monoPRM%tdotp, monoPRM%tcomm_dotp)
