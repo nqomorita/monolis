@@ -17,6 +17,7 @@ module mod_monolis_solve
   use mod_monolis_solver_PipeBiCGSTAB_noprec
   use mod_monolis_solver_SOR
   use mod_monolis_solver_IR
+  use mod_monolis_solver_GMRES
   implicit none
 
 contains
@@ -163,6 +164,9 @@ contains
 
       case (monolis_iter_IR)
         call monolis_solver_IR(monoPRM, monoCOM, monoMAT)
+
+      case (monolis_iter_GMRES)
+        call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)
 
     end select
   end subroutine monolis_solver

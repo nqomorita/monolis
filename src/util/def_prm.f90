@@ -18,6 +18,7 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
   integer(kint), parameter :: monolis_iter_SOR      = 10
   integer(kint), parameter :: monolis_iter_IR       = 11
+  integer(kint), parameter :: monolis_iter_GMRES    = 12
 
   integer(kint), parameter :: monolis_prec_NONE   = 0
   integer(kint), parameter :: monolis_prec_DIAG   = 1
