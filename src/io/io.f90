@@ -176,6 +176,20 @@ contains
     enddo
   end subroutine monolis_par_input_node_id
 
+  subroutine monolis_par_input_elem_id(n_domain, mesh)
+    implicit none
+    type(monolis_mesh), allocatable :: mesh(:)
+    integer(kint) :: n_domain, i
+    character :: fname*100, cnum*5
+
+    allocate(mesh(n_domain))
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted/elem.id."//trim(cnum)
+      call monolis_input_id(fname, mesh(i)%eid, mesh(i)%nelem)
+    enddo
+  end subroutine monolis_par_input_elem_id
+
   subroutine monolis_input_condition(fname, ncond, ndof, icond, cond)
     implicit none
     integer(kint) :: ncond, ndof, i, j
