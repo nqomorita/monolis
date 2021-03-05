@@ -55,7 +55,7 @@ contains
 
     do i = 1, nelem
       do j = 1, nb
-        connectivity(nb*(i-1) + j) = elem(j,i) - 1
+        connectivity(nb*(i-1) + j) = elem(j,i)
       enddo
     enddo
   end subroutine monolis_convert_mesh_to_connectivity
@@ -73,6 +73,9 @@ contains
     call monolis_debug_header("monolis_convert_connectivity_to_nodal")
 
     numflag = 0
+
+    !> convert to 0 origin
+    connectivity = connectivity - 1
 
 #ifdef WITH_METIS
     call METIS_MESHTONODAL(nelem, nnode, ebase_func, connectivity, numflag, xadj, adjncy)
