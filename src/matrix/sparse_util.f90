@@ -24,6 +24,25 @@ contains
        & (monolis, nnode, ndof, index, item)
   end subroutine monolis_get_nonzero_pattern
 
+  subroutine monolis_get_nonzero_pattern_with_arbitrary_dof &
+    (monolis, nnode, nbase_func, n_dof_list, nelem, elem)
+    use iso_c_binding
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nnode, nbase_func, n_dof_list(:), nelem, elem(:,:)
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
+    integer(c_int), pointer :: index(:), item(:)
+
+    call monolis_convert_mesh_to_connectivity &
+      & (nelem, nbase_func, elem, ebase_func, connectivity)
+
+    call monolis_convert_connectivity_to_nodal &
+      & (nnode, nelem, ebase_func, connectivity, index, item)
+
+     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
+       & (monolis, nnode, n_dof_list, index, item)
+  end subroutine monolis_get_nonzero_pattern_with_arbitrary_dof
+
   subroutine monolis_get_nonzero_pattern_by_connectivity &
       & (monolis, nnode, ndof, nelem, ebase_func, connectivity)
     use iso_c_binding
@@ -67,7 +86,7 @@ contains
       jE = monolis%MAT%index(i)
       monolis%MAT%item(jS) = i
       do j = jS+1, jE
-        monolis%MAT%item(j) = item(j-i) + 1
+        monolis%MAT%item(j) = item(j-i)
       enddo
       call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
     enddo
@@ -89,41 +108,67 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: nnode, n_dof_list(:)
-    integer(kint) :: i, j, nz, jS, jE, in
+    integer(kint) :: i, j, nz, jS, jE, total_dof, in, jn, kn, nrow, ncol, l
+    integer(kint), allocatable :: n_dof_index()
     integer(c_int), pointer :: index(:), item(:)
 
-    in = 0
+    total_dof = 0
     do i = 1, nnode
-      in = in + n_dof_list(i)
+      total_dof = total_dof + n_dof_list(i)
     enddo
 
-    monolis%MAT%N = in
-    monolis%MAT%NP = in
+    allocate(n_dof_index(nnode), source = 0)
+    call monolis_get_n_dof_index(nnode, n_dof_list, n_dof_index)
+
+    monolis%MAT%N = total_dof
+    monolis%MAT%NP = total_dof
     monolis%MAT%NDOF = 1
-    allocate(monolis%MAT%X(in), source = 0.0d0)
-    allocate(monolis%MAT%B(in), source = 0.0d0)
-    allocate(monolis%MAT%index(0:in), source = 0)
+    allocate(monolis%MAT%X(total_dof), source = 0.0d0)
+    allocate(monolis%MAT%B(total_dof), source = 0.0d0)
+    allocate(monolis%MAT%index(0:total_dof), source = 0)
 
+    !> count nz
+    nz = 0
     do i = 1, nnode
-      monolis%MAT%index(i) = index(i+1) + i
+      jS = index(i-1) + 1
+      jE = index(i)
+      nz = nz + n_dof_list(i)*n_dof_list(i)
+      do j = jS, jE
+        jn = item(j)
+        nz = nz +  n_dof_list(i)*n_dof_list(jn)
+      enddo
     enddo
 
-    nz = monolis%MAT%index(nnode)
     monolis%MAT%NZ = nz
     allocate(monolis%MAT%A(nz), source = 0.0d0)
     allocate(monolis%MAT%item(nz), source = 0)
 
+    !> construct index and item
+    in = 0
+    ncol = 0
     do i = 1, nnode
-      jS = monolis%MAT%index(i-1) + 1
-      jE = monolis%MAT%index(i)
-      monolis%MAT%item(jS) = i
-      do j = jS+1, jE
-        monolis%MAT%item(j) = item(j-i) + 1
+      jS = index(i-1) + 1
+      jE = index(i)
+      do k = 1, n_dof_list(i)
+        ncol = ncol + 1
+        nrow = n_dof_list(i)
+        do j = 1, n_dof_list(i)
+          in = in + 1
+          monolis%MAT%item(in) = n_dof_index(i) + j
+        enddo
+        do j = jS, jE
+          jn = item(j)
+          nrow = nrow + n_dof_list(jn)
+          do l = 1, n_dof_list(jn)
+            in = in + 1
+            monolis%MAT%item(in) = n_dof_index(jn) + l
+          enddo
+        enddo
+        monolis%MAT%index(ncol) = monolis%MAT%index(ncol-1) + nrow
       enddo
-      call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
     enddo
 
-    allocate(monolis%MAT%indexR(0:nnode), source = 0)
+    allocate(monolis%MAT%indexR(0:total_dof), source = 0)
     allocate(monolis%MAT%itemR(nz), source = 0)
     allocate(monolis%MAT%permR(nz), source = 0)
 
