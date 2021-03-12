@@ -83,6 +83,64 @@ contains
     nullify(item)
   end subroutine monolis_get_nonzero_pattern_by_nodal
 
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
+    (monolis, nnode, n_dof_list, index, item)
+    use iso_c_binding
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nnode, n_dof_list(:)
+    integer(kint) :: i, j, nz, jS, jE, in
+    integer(c_int), pointer :: index(:), item(:)
+
+    in = 0
+    do i = 1, nnode
+      in = in + n_dof_list(i)
+    enddo
+
+    monolis%MAT%N = in
+    monolis%MAT%NP = in
+    monolis%MAT%NDOF = 1
+    allocate(monolis%MAT%X(in), source = 0.0d0)
+    allocate(monolis%MAT%B(in), source = 0.0d0)
+    allocate(monolis%MAT%index(0:in), source = 0)
+
+    do i = 1, nnode
+      monolis%MAT%index(i) = index(i+1) + i
+    enddo
+
+    nz = monolis%MAT%index(nnode)
+    monolis%MAT%NZ = nz
+    allocate(monolis%MAT%A(nz), source = 0.0d0)
+    allocate(monolis%MAT%item(nz), source = 0)
+
+    do i = 1, nnode
+      jS = monolis%MAT%index(i-1) + 1
+      jE = monolis%MAT%index(i)
+      monolis%MAT%item(jS) = i
+      do j = jS+1, jE
+        monolis%MAT%item(j) = item(j-i) + 1
+      enddo
+      call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
+    enddo
+
+    allocate(monolis%MAT%indexR(0:nnode), source = 0)
+    allocate(monolis%MAT%itemR(nz), source = 0)
+    allocate(monolis%MAT%permR(nz), source = 0)
+
+    call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
+      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
+
+    nullify(index)
+    nullify(item)
+  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof
+
+  subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
+    implicit none
+    integer(kint), intent(in) :: n_node, n_dof_list(:)
+    integer(kint) :: n_dof_index(:)
+
+  end subroutine monolis_get_n_dof_index
+
   !> setter
   subroutine monolis_sparse_matrix_set_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
