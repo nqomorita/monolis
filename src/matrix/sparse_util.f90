@@ -108,8 +108,8 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: nnode, n_dof_list(:)
-    integer(kint) :: i, j, nz, jS, jE, total_dof, in, jn, kn, nrow, ncol, l
-    integer(kint), allocatable :: n_dof_index()
+    integer(kint) :: i, j, k, nz, jS, jE, total_dof, in, jn, kn, nrow, ncol, l
+    integer(kint), allocatable :: n_dof_index(:)
     integer(c_int), pointer :: index(:), item(:)
 
     total_dof = 0
