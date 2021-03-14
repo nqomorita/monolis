@@ -108,7 +108,8 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     integer(kint) :: nnode, n_dof_list(:)
-    integer(kint) :: i, j, k, nz, jS, jE, total_dof, in, jn, kn, nrow, ncol, l
+    integer(kint) :: i, j, k, nz, jS, jE, kS, kE
+    integer(kint) :: total_dof, in, jn, kn, nrow, ncol, l
     integer(kint), allocatable :: n_dof_index(:)
     integer(c_int), pointer :: index(:), item(:)
 
@@ -130,8 +131,8 @@ contains
     !> count nz
     nz = 0
     do i = 1, nnode
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i+1)
       nz = nz + n_dof_list(i)*n_dof_list(i)
       do j = jS, jE
         jn = item(j)
@@ -147,8 +148,8 @@ contains
     in = 0
     ncol = 0
     do i = 1, nnode
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i+1)
       do k = 1, n_dof_list(i)
         ncol = ncol + 1
         nrow = n_dof_list(i)
@@ -165,6 +166,10 @@ contains
           enddo
         enddo
         monolis%MAT%index(ncol) = monolis%MAT%index(ncol-1) + nrow
+
+        kS = monolis%MAT%index(ncol-1) + 1
+        kE = monolis%MAT%index(ncol)
+        call monolis_qsort_int(monolis%MAT%item(kS:kE), 1, kE-kS+1)
       enddo
     enddo
 
@@ -182,8 +187,11 @@ contains
   subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
     implicit none
     integer(kint), intent(in) :: n_node, n_dof_list(:)
-    integer(kint) :: n_dof_index(:)
+    integer(kint) :: i, n_dof_index(:)
 
+    do i = 1, n_node - 1
+      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
+    enddo
   end subroutine monolis_get_n_dof_index
 
   !> setter
