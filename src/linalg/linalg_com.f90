@@ -216,4 +216,16 @@ contains
 #endif
   end subroutine monolis_SendRecv_I
 
+  subroutine monolis_Allgather_I1(sval, rbuf, comm)
+    implicit none
+    integer(kint) :: sval    !send buffer
+    integer(kint) :: rbuf(:) !receive buffer
+    integer(kint) :: comm
+#ifndef WITH_MPI
+    integer(kint) :: ierr
+    call MPI_allgather(sval, 1, MPI_INTEGER, rbuf, 1, MPI_INTEGER, comm, ierr )
+#else
+    rbuf(1) = sval
+#endif
+  end subroutine monolis_Allgather_I1
 end module mod_monolis_linalg_com
