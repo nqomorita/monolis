@@ -62,7 +62,7 @@ contains
 
     !> factorization
     NDOF = monoMAT%ndof
-    call monolis_precond_mumps_get_nz(monoMAT, NZ)
+    call monolis_precond_mumps_get_nz(monoMAT, NZ, is_self = .false.)
 
     allocate(mumps%IRN_loc(NDOF*NDOF*NZ))
     allocate(mumps%JCN_loc(NDOF*NDOF*NZ))
@@ -70,7 +70,8 @@ contains
     allocate(mumps%JCN(NDOF*NDOF*NZ))
     allocate(mumps%A(NDOF*NDOF*NZ), source = 0.0d0)
     allocate(mumps%RHS(NDOF*monoMAT%N), source = 0.0d0)
-    call monolis_precond_mumps_get_loc(monoMAT, mumps%IRN_loc, mumps%JCN_loc, mumps%A)
+    call monolis_precond_mumps_get_loc(monoMAT, monoCOM, &
+      & mumps%IRN_loc, mumps%JCN_loc, mumps%A, is_self = .false.)
 
     mumps%IRN = mumps%IRN_loc
     mumps%JCN = mumps%JCN_loc
@@ -120,14 +121,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-
   end subroutine monolis_precond_mumps_clear
 
-  subroutine monolis_precond_mumps_get_nz(monoMAT, NZ)
+  subroutine monolis_precond_mumps_get_nz(monoMAT, NZ, is_self)
     implicit none
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, j, in, jS, jE, NZ
     integer(kint) :: idof, jdof, jn, kn, NDOF
+    logical :: is_self
 
     NDOF = monoMAT%ndof
     NZ = 0
@@ -138,21 +139,24 @@ contains
       jE = monoMAT%index(i)
       do j = jS, jE
         jn = monoMAT%item(j)
-        if(monoMAT%N < jn) cycle aa
+        if(is_self .and. monoMAT%N < jn) cycle aa
         NZ = NZ + 1
       enddo
     enddo aa
   end subroutine monolis_precond_mumps_get_nz
 
-  subroutine monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, A)
+  subroutine monolis_precond_mumps_get_loc(monoMAT, monoCOM, IRN, JCN, A, is_self)
     implicit none
     type(monolis_mat) :: monoMAT
+    type(monolis_com) :: monoCOM
     integer(kint) :: i, j, in, jS, jE
-    integer(kint) :: idof, jdof, jn, kn, NDOF
+    integer(kint) :: idof, jdof, jn, kn, NDOF, nprocs, i2, jn2
     integer(kint), pointer :: IRN(:), JCN(:)
     real(kdouble) :: A(:)
+    logical :: is_self
 
     NDOF = monoMAT%ndof
+    nprocs = monolis_global_commsize()
 
     in = 0
     aa:do i = 1, monoMAT%N
@@ -160,14 +164,21 @@ contains
       jE = monoMAT%index(i)
       do j = jS, jE
         jn = monoMAT%item(j)
-        if(monoMAT%N < jn) cycle aa
+        if(is_self .and. monoMAT%N < jn) cycle aa
         do idof = 1, NDOF
         do jdof = 1, NDOF
           kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
           in = in + 1
           A(in) = monoMAT%A(kn)
-          IRN(in) = NDOF*(i  - 1) + idof
-          JCN(in) = NDOF*(jn - 1) + jdof
+          if(is_self .or. nprocs == 1)then
+            IRN(in) = NDOF*(i  - 1) + idof
+            JCN(in) = NDOF*(jn - 1) + jdof
+          else
+            i2 = monoCOM%global_node_id(i)
+            jn2 = monoCOM%global_node_id(jn)
+            IRN(in) = NDOF*(i2  - 1) + idof
+            JCN(in) = NDOF*(jn2 - 1) + jdof
+          endif
         enddo
         enddo
       enddo
