@@ -199,6 +199,9 @@ contains
     monoCOM_reorder%send_neib_pe => monoCOM%send_neib_pe
     monoCOM_reorder%send_index => monoCOM%send_index
     monoCOM_reorder%send_item => monoCOM%send_item
+
+    monoCOM_reorder%global_node_id => monoCOM%global_node_id
+    monoCOM_reorder%global_elem_id => monoCOM%global_elem_id
   end subroutine monolis_com_copy
 
   function monolis_global_comm()

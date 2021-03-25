@@ -2,6 +2,7 @@ module mod_monolis_precond_mumps
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_linalg_com
 
   implicit none
 
@@ -36,7 +37,8 @@ contains
 
     !> initialize
     mumps%JOB = -1
-    mumps%COMM = mpi_comm_self !monoCOM%comm
+    mumps%COMM = monoCOM%comm
+    !mumps%COMM = mpi_comm_self
     !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
@@ -81,6 +83,9 @@ contains
     mumps%NZ = NDOF*NDOF*NZ
     mumps%NZ_loc = NDOF*NDOF*NZ
 
+    call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
+    call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
+
     !> Output log level
     mumps%ICNTL(4) = 0
     mumps%ICNTL(14) = 80
@@ -104,13 +109,13 @@ contains
     !> solution
     mumps%JOB = 3
 
-    do i = 1, mumps%N
+    do i = 1, monoMAT%NDOF*monoMAT%N
       mumps%RHS(i) = X(i)
     enddo
 
     call DMUMPS(mumps)
 
-    do i = 1, mumps%N
+    do i = 1, monoMAT%NDOF*monoMAT%N
       Y(i) = mumps%RHS(i)
     enddo
 #endif
