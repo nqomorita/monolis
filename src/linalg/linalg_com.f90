@@ -163,25 +163,27 @@ contains
 #endif
   end subroutine monolis_SendRecv_post_R
 
-  subroutine monolis_SendRecv_I(n_neib, neib_pe, send_index, send_item, recv_index, recv_item, &
-  & ws, wr, val, ndof, comm)
+  subroutine monolis_SendRecv_pre_I(send_n_neib, send_neib_pe, recv_n_neib, recv_neib_pe, &
+    & send_index, send_item, recv_index, recv_item, &
+    & ws, wr, val, ndof, comm)
     implicit none
-    integer(kint) :: n_neib
+    integer(kint) :: send_n_neib, recv_n_neib
     integer(kint) :: iS, in, j, k, ierr
     integer(kint) :: i, ndof, comm
-    integer(kint) :: val(:), ws(:), wr(:)
-    integer(kint), pointer :: neib_pe(:)
+    integer(kint), pointer :: send_neib_pe(:)
     integer(kint), pointer :: send_index(:)
     integer(kint), pointer :: send_item (:)
+    integer(kint), pointer :: recv_neib_pe(:)
     integer(kint), pointer :: recv_index(:)
     integer(kint), pointer :: recv_item (:)
-    integer(kint) :: sta1(monolis_status_size, n_neib)
-    integer(kint) :: sta2(monolis_status_size, n_neib)
-    integer(kint) :: req1(n_neib)
-    integer(kint) :: req2(n_neib)
+    integer(kint) :: sta1(monolis_status_size, send_n_neib)
+    integer(kint) :: sta2(monolis_status_size, recv_n_neib)
+    integer(kint) :: req1(send_n_neib)
+    integer(kint) :: req2(recv_n_neib)
+    integer(kint) :: val(:), ws(:), wr(:)
 
 #ifdef WITH_MPI
-    do i = 1, n_neib
+    do i = 1, send_n_neib
       iS = send_index(i-1)
       in = send_index(i  ) - iS
       if(in == 0) cycle
@@ -190,19 +192,19 @@ contains
           ws(ndof*(j-1)+k) = val(ndof*(send_item(j)-1)+k)
         enddo
       enddo
-      call MPI_Isend(ws(ndof*iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req1(i), ierr)
+      call MPI_Isend(ws(ndof*iS+1), ndof*in, MPI_DOUBLE_PRECISION, send_neib_pe(i), 0, comm, req1(i), ierr)
     enddo
 
-    do i = 1, n_neib
+    do i = 1, recv_n_neib
       iS = recv_index(i-1)
       in = recv_index(i  ) - iS
       if(in == 0) cycle
-      call MPI_Irecv(wr(ndof*iS+1), ndof*in, MPI_INTEGER, neib_pe(i), 0, comm, req2(i), ierr)
+      call MPI_Irecv(wr(ndof*iS+1), ndof*in, MPI_DOUBLE_PRECISION, recv_neib_pe(i), 0, comm, req2(i), ierr)
     enddo
 
-    call MPI_waitall(n_neib, req2, sta2, ierr)
+    call MPI_waitall(recv_n_neib, req2, sta2, ierr)
 
-    do i = 1, n_neib
+    do i = 1, recv_n_neib
       iS = recv_index(i-1)
       in = recv_index(i  ) - iS
       do j = iS+1, iS+in
@@ -212,9 +214,9 @@ contains
       enddo
     enddo
 
-    call MPI_waitall(n_neib, req1, sta1, ierr)
+    call MPI_waitall(send_n_neib, req1, sta1, ierr)
 #endif
-  end subroutine monolis_SendRecv_I
+  end subroutine monolis_SendRecv_pre_I
 
   subroutine monolis_allgather_I1(sval, rbuf, comm)
     implicit none

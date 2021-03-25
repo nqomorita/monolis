@@ -18,7 +18,6 @@ module mod_monolis_precond_mumps
 
   integer(kint), save, allocatable :: offset_list(:)
   integer(kint), save, allocatable :: offset_counts(:)
-  !integer(kint), save :: offset
   logical, save :: is_factored = .false.
 
 #ifdef WITH_MUMPS
@@ -67,6 +66,9 @@ contains
 
     !> factorization
     NDOF = monoMAT%ndof
+    mumps%N = NDOF*monoMAT%N
+
+    call monolis_precond_mumps_get_offset(mumps%N)
     call monolis_precond_mumps_get_nz(monoMAT, NZ, is_self = .false.)
 
     allocate(mumps%IRN_loc(NDOF*NDOF*NZ))
@@ -76,12 +78,10 @@ contains
       & mumps%IRN_loc, mumps%JCN_loc, mumps%A, is_self = .false.)
 
     mumps%JOB = 4
-    mumps%N = NDOF*monoMAT%N
     mumps%NZ = NDOF*NDOF*NZ
     mumps%NZ_loc = NDOF*NDOF*NZ
     mumps%A_loc => mumps%A
 
-    call monolis_precond_mumps_get_offset(mumps%N)
     call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
     call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
 
@@ -102,12 +102,13 @@ contains
 
   subroutine monolis_precond_mumps_apply(monoPRM, monoCOM, monoMAT, X, Y)
     use mod_monolis_linalg_util
+    use mod_monolis_matvec
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: i
-    real(kdouble) :: X(:), Y(:), tcomm
+    real(kdouble) :: X(:), Y(:), t1, t2
 
 #ifdef WITH_MUMPS
     !> Output log level
@@ -119,6 +120,7 @@ contains
     call monolis_precond_mumps_set_rhs(monoMAT%NDOF*monoMAT%N, X, mumps%RHS)
     call DMUMPS(mumps)
     call monolis_precond_mumps_get_rhs(monoMAT%NDOF*monoMAT%N, mumps%RHS, Y)
+    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, Y, t1)
 #endif
   end subroutine monolis_precond_mumps_apply
 
@@ -152,17 +154,46 @@ contains
   end subroutine monolis_precond_mumps_get_nz
 
   subroutine monolis_precond_mumps_get_loc(monoMAT, monoCOM, IRN, JCN, A, is_self)
+    use mod_monolis_linalg_util
     implicit none
     type(monolis_mat) :: monoMAT
     type(monolis_com) :: monoCOM
     integer(kint) :: i, j, in, jS, jE
-    integer(kint) :: idof, jdof, jn, kn, NDOF, nprocs, i2, jn2
+    integer(kint) :: idof, jdof, jn, kn, NDOF, nprocs, myrank, i2, jn2, offset
+    integer(kint), allocatable :: offset_id(:), offset_rank(:)
     integer(kint), pointer :: IRN(:), JCN(:)
     real(kdouble) :: A(:)
     logical :: is_self
 
     NDOF = monoMAT%ndof
     nprocs = monolis_global_commsize()
+    myrank = monolis_global_myrank()
+
+    offset = offset_list(monolis_global_myrank()+1)
+    allocate(offset_id(monoMAT%NP), source = 0)
+    allocate(offset_rank(monoMAT%NP), source = -1)
+
+    do i = 1, monoMAT%NP
+      offset_id(i) = i
+    enddo
+    call monolis_update_I(monoCOM, 1, offset_id)
+
+    do i = 1, monoCOM%recv_n_neib
+      jS = monoCOM%recv_index(i-1)+1
+      jE = monoCOM%recv_index(i)
+      do j = jS, jE
+        in = monoCOM%recv_item(j)
+        offset_rank(in) = monoCOM%recv_neib_pe(i)
+      enddo
+    enddo
+
+    do i = 1, monoMAT%NP
+      if(offset_rank(i) == -1)then
+        offset_id(i) = offset_id(i) + offset_list(myrank+1)/monoMAT%NDOF
+      else
+        offset_id(i) = offset_id(i) + offset_list(offset_rank(i)+1)/monoMAT%NDOF
+      endif
+    enddo
 
     in = 0
     aa:do i = 1, monoMAT%N
@@ -180,8 +211,8 @@ contains
             IRN(in) = NDOF*(i  - 1) + idof
             JCN(in) = NDOF*(jn - 1) + jdof
           else
-            i2 = monoCOM%global_node_id(i)
-            jn2 = monoCOM%global_node_id(jn)
+            i2 = offset_id(i)
+            jn2 = offset_id(jn)
             IRN(in) = NDOF*(i2  - 1) + idof
             JCN(in) = NDOF*(jn2 - 1) + jdof
           endif
