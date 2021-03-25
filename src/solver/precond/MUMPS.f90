@@ -17,7 +17,8 @@ module mod_monolis_precond_mumps
   integer(kint), parameter :: mumps_mat_sym = 2
 
   integer(kint), save, allocatable :: offset_list(:)
-  integer(kint), save :: offset
+  integer(kint), save, allocatable :: offset_counts(:)
+  !integer(kint), save :: offset
   logical, save :: is_factored = .false.
 
 #ifdef WITH_MUMPS
@@ -80,6 +81,7 @@ contains
     mumps%NZ_loc = NDOF*NDOF*NZ
     mumps%A_loc => mumps%A
 
+    call monolis_precond_mumps_get_offset(mumps%N)
     call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
     call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
 
@@ -114,9 +116,9 @@ contains
     mumps%JOB = 3
     mumps%ICNTL(18) = 3
 
-    call monolis_precond_mumps_set_rhs(X, mumps%RHS)
+    call monolis_precond_mumps_set_rhs(monoMAT%NDOF*monoMAT%N, X, mumps%RHS)
     call DMUMPS(mumps)
-    call monolis_precond_mumps_get_rhs(mumps%RHS, Y)
+    call monolis_precond_mumps_get_rhs(monoMAT%NDOF*monoMAT%N, mumps%RHS, Y)
 #endif
   end subroutine monolis_precond_mumps_apply
 
@@ -189,43 +191,50 @@ contains
     enddo aa
   end subroutine monolis_precond_mumps_get_loc
 
-  subroutine monolis_precond_mumps_set_rhs(X, RHS)
+  subroutine monolis_precond_mumps_set_rhs(N, X, RHS)
+    implicit none
+    integer(kint) :: N
     real(kdouble) :: X(:), RHS(:)
     if(monolis_global_commsize() == 1)then
       RHS = X
     else
-
+      call monolis_gatherv_R(X, N, &
+        RHS, offset_counts, offset_list, &
+        0, monolis_global_comm())
     endif
   end subroutine monolis_precond_mumps_set_rhs
 
-  subroutine monolis_precond_mumps_get_rhs(RHS, Y)
+  subroutine monolis_precond_mumps_get_rhs(N, RHS, Y)
+    implicit none
+    integer(kint) :: N
     real(kdouble) :: Y(:), RHS(:)
     if(monolis_global_commsize() == 1)then
       Y = RHS
     else
-
+      call monolis_scatterv_R( &
+        RHS, offset_counts, offset_list, &
+        Y, N, &
+        0, monolis_global_comm())
     endif
   end subroutine monolis_precond_mumps_get_rhs
 
   subroutine monolis_precond_mumps_get_offset(N_loc)
     implicit none
     integer(kint) :: nprocs, myrank, i, N_loc
-    integer(kint), allocatable :: counts(:)
 
     nprocs = monolis_global_commsize()
     myrank = monolis_global_myrank()
 
     allocate(offset_list(nprocs), source = 0)
-    allocate(counts(nprocs), source = 0)
+    allocate(offset_counts(nprocs), source = 0)
 
     if(1 < nprocs)then
-      call monolis_Allgather_I1(N_loc, counts, monolis_global_comm())
+      call monolis_allgather_I1(N_loc, offset_counts, monolis_global_comm())
     endif
 
     offset_list(1) = 0
     do i = 1, nprocs - 1
-      offset_list(i+1) = offset_list(i) + counts(i)
+      offset_list(i+1) = offset_list(i) + offset_counts(i)
     enddo
-    offset = offset_list(myrank + 1)
   end subroutine monolis_precond_mumps_get_offset
 end module mod_monolis_precond_mumps

@@ -216,16 +216,55 @@ contains
 #endif
   end subroutine monolis_SendRecv_I
 
-  subroutine monolis_Allgather_I1(sval, rbuf, comm)
+  subroutine monolis_allgather_I1(sval, rbuf, comm)
     implicit none
     integer(kint) :: sval    !send buffer
     integer(kint) :: rbuf(:) !receive buffer
     integer(kint) :: comm
-#ifndef WITH_MPI
+#ifdef WITH_MPI
     integer(kint) :: ierr
     call MPI_allgather(sval, 1, MPI_INTEGER, rbuf, 1, MPI_INTEGER, comm, ierr )
 #else
     rbuf(1) = sval
 #endif
-  end subroutine monolis_Allgather_I1
+  end subroutine monolis_allgather_I1
+
+  subroutine monolis_gatherv_R(sbuf, sc, &
+      &     rbuf, rcs, disp, root, comm)
+    implicit none
+    integer(kint) :: sc      !send counts
+    integer(kint) :: rcs(:)  !receive counts
+    integer(kint) :: disp(:) !displacement
+    integer(kint) :: root
+    integer(kint) :: comm
+    real(kdouble) :: sbuf(:) !send buffer
+    real(kdouble) :: rbuf(:) !receive buffer
+#ifdef WITH_MPI
+    integer(kint) :: ierr
+    call MPI_gatherv( sbuf, sc, MPI_REAL8, &
+      &     rbuf, rcs, disp, MPI_REAL8, root, comm, ierr )
+#else
+    rbuf(1:sc) = sbuf(1:sc)
+#endif
+  end subroutine monolis_gatherv_R
+
+  subroutine monolis_scatterv_R(sbuf, scs, disp, &
+      &     rbuf, rc, root, comm)
+    implicit none
+    integer(kint) :: scs(:)  !send counts
+    integer(kint) :: disp(:) !displacement
+    integer(kint) :: rc      !receive counts
+    integer(kint) :: root
+    integer(kint) :: comm
+    real(kdouble) :: rbuf(:) !receive buffer
+    real(kdouble) :: sbuf(:) !send buffer
+#ifdef WITH_MPI
+    integer(kint) :: ierr
+    call MPI_scatterv( sbuf, scs, disp, MPI_REAL8, &
+      &     rbuf, rc, MPI_REAL8, root, comm, ierr )
+#else
+    rbuf(1:rc) = sbuf(1:rc)
+#endif
+  end subroutine monolis_scatterv_R
+
 end module mod_monolis_linalg_com
