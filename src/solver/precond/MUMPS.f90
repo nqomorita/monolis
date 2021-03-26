@@ -19,6 +19,7 @@ module mod_monolis_precond_mumps
   integer(kint), save, allocatable :: offset_list(:)
   integer(kint), save, allocatable :: offset_counts(:)
   logical, save :: is_factored = .false.
+  logical, save :: is_self = .false.
 
 #ifdef WITH_MUMPS
   type (dmumps_struc), save :: mumps
@@ -36,11 +37,12 @@ contains
 #ifdef WITH_MUMPS
     if(is_factored) return
     is_factored = .true.
+    !is_self = .true.
 
     !> initialize
     mumps%JOB = -1
     mumps%COMM = monoCOM%comm
-    !mumps%COMM = mpi_comm_self
+    if(is_self) mumps%COMM = mpi_comm_self
     !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
@@ -69,23 +71,25 @@ contains
     mumps%N = NDOF*monoMAT%N
 
     call monolis_precond_mumps_get_offset(mumps%N)
-    call monolis_precond_mumps_get_nz(monoMAT, NZ, is_self = .false.)
+    call monolis_precond_mumps_get_nz(monoMAT, NZ, is_self)
 
     allocate(mumps%IRN_loc(NDOF*NDOF*NZ))
     allocate(mumps%JCN_loc(NDOF*NDOF*NZ))
     allocate(mumps%A(NDOF*NDOF*NZ), source = 0.0d0)
     call monolis_precond_mumps_get_loc(monoMAT, monoCOM, &
-      & mumps%IRN_loc, mumps%JCN_loc, mumps%A, is_self = .false.)
+      & mumps%IRN_loc, mumps%JCN_loc, mumps%A, is_self)
 
     mumps%JOB = 4
     mumps%NZ = NDOF*NDOF*NZ
     mumps%NZ_loc = NDOF*NDOF*NZ
     mumps%A_loc => mumps%A
 
-    call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
-    call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
+    if(.not. is_self)then
+      call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
+      call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
+    endif
 
-    if(monolis_global_myrank() == 0)then
+    if(monolis_global_myrank() == 0 .or. is_self)then
       allocate(mumps%RHS(mumps%N), source = 0.0d0)
     else
       allocate(mumps%RHS(1), source = 0.0d0)
@@ -117,10 +121,17 @@ contains
     mumps%JOB = 3
     mumps%ICNTL(18) = 3
 
+!Y = 1.0d0
+!call monolis_matvec(monoCOM, monoMAT, Y, X, t1, t2)
+!Y = 0.0d0
+
     call monolis_precond_mumps_set_rhs(monoMAT%NDOF*monoMAT%N, X, mumps%RHS)
     call DMUMPS(mumps)
     call monolis_precond_mumps_get_rhs(monoMAT%NDOF*monoMAT%N, mumps%RHS, Y)
     call monolis_update_pre_R(monoCOM, monoMAT%NDOF, Y, t1)
+
+!write(*,"(1p4e12.5)")Y
+!stop
 #endif
   end subroutine monolis_precond_mumps_apply
 
@@ -226,8 +237,8 @@ contains
     implicit none
     integer(kint) :: N
     real(kdouble) :: X(:), RHS(:)
-    if(monolis_global_commsize() == 1)then
-      RHS = X
+    if(monolis_global_commsize() == 1 .or. is_self)then
+      RHS = X(1:N)
     else
       call monolis_gatherv_R(X, N, &
         RHS, offset_counts, offset_list, &
@@ -239,8 +250,8 @@ contains
     implicit none
     integer(kint) :: N
     real(kdouble) :: Y(:), RHS(:)
-    if(monolis_global_commsize() == 1)then
-      Y = RHS
+    if(monolis_global_commsize() == 1 .or. is_self)then
+      Y(1:N) = RHS
     else
       call monolis_scatterv_R( &
         RHS, offset_counts, offset_list, &
