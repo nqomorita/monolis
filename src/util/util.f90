@@ -43,6 +43,7 @@ module mod_monolis_util
   public :: monolis_param_set_show_iterlog
   public :: monolis_param_set_show_time
   public :: monolis_param_set_show_summary
+  public :: monolis_get_internal_elem_1d_bool
 
   integer(kint), save :: myrank = 0
   integer(kint), save :: mycomm
