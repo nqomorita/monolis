@@ -241,6 +241,22 @@ contains
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
+  subroutine monolis_get_internal_elem_1d_bool(monolis, nelem, list)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nelem, i
+    logical :: list(:)
+
+    if(monolis_global_commsize() > 1)then
+      list = .true.
+    else
+      list = .false.
+      do i = 1, monolis%COM%internal_nelem
+        list(i) = .true.
+      enddo
+    endif
+  end subroutine monolis_get_internal_elem_1d_bool
+
   !> set parameter section
   subroutine monolis_param_set_method(monolis, param)
     implicit none

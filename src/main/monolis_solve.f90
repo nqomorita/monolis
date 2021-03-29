@@ -30,6 +30,7 @@ contains
 
     call monolis_set_RHS(monolis%MAT, B)
     call monolis_set_initial_solution(monolis%MAT, X)
+    call monolis_set_initial_comm(monolis%COM, monolis%MAT)
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
 
@@ -57,6 +58,16 @@ contains
       monoMAT%X(i) = X(i)
     enddo
   end subroutine monolis_set_initial_solution
+
+  subroutine monolis_set_initial_comm(monoCOM, monoMAT)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+
+    if(monolis_global_commsize() > 1)then
+      monoMAT%N = monoCOM%internal_nnode
+    endif
+  end subroutine monolis_set_initial_comm
 
   subroutine monolis_get_solution(monoMAT, X)
     implicit none
