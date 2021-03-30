@@ -43,7 +43,7 @@ ifdef FLAGS
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		FLAG_MUMPS = -DWITH_MUMPS
-		MUMPS_DIR = /Users/morita/git/MUMPS
+		MUMPS_DIR = .
 		MUMPS_INC = -I $(MUMPS_DIR)/include
 		MUMPS_LIB = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps
 	endif
