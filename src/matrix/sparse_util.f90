@@ -356,7 +356,6 @@ contains
         return
       endif
     enddo
-    stop "error: monolis_sparse_matrix_add_value 3"
   end subroutine monolis_sparse_matrix_add_value
 
   subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
