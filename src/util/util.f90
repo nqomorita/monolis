@@ -19,6 +19,7 @@ module mod_monolis_util
   public :: monolis_finalize
   public :: monolis_timer_initialize
   public :: monolis_timer_finalize
+  public :: monolis_get_input_filename
   public :: monolis_check_diagonal
   public :: monolis_set_debug
   public :: monolis_debug_header
