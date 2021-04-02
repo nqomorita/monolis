@@ -30,6 +30,19 @@ module mod_monolis_util
   public :: monolis_get_time_sync
   public :: monolis_error_stop
   public :: monolis_get_penalty_value
+  public :: monolis_param_set_method
+  public :: monolis_param_set_precond
+  public :: monolis_param_set_maxiter
+  public :: monolis_param_set_tol
+  public :: monolis_param_set_is_scaling
+  public :: monolis_param_set_is_reordering
+  public :: monolis_param_set_is_init_x
+  public :: monolis_param_set_is_sym_matrix
+  public :: monolis_param_set_is_debug
+  public :: monolis_param_set_is_check_diag
+  public :: monolis_param_set_show_iterlog
+  public :: monolis_param_set_show_time
+  public :: monolis_param_set_show_summary
 
   integer(kint), save :: myrank = 0
   integer(kint), save :: mycomm
@@ -249,6 +262,13 @@ contains
     integer(kint) :: param
     monolis%PRM%maxiter = param
   end subroutine monolis_param_set_maxiter
+
+  subroutine monolis_param_set_tol(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    real(kdouble) :: param
+    monolis%PRM%tol = param
+  end subroutine monolis_param_set_tol
 
   subroutine monolis_param_set_is_scaling(monolis, param)
     implicit none
