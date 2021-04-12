@@ -81,14 +81,14 @@ contains
 
       call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-      prev = eigen_value
-      if(iter >= n_get_eigen)then
+      if(iter > n_get_eigen)then
         norm = 0.0d0
-        do i = 1, iter
+        do i = 1, n_get_eigen
           norm = max(norm, dabs(prev(i) - eigen_value(i)))
         enddo
         if(norm < ths) is_converge = .true.
       endif
+      prev = eigen_value
 
 write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
 
