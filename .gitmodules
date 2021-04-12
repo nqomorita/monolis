@@ -6,3 +6,7 @@
 	path = submodule/mumps
 	url = https://github.com/scivision/mumps.git
         ignore = dirty
+[submodule "submodule/scalapack"]
+	path = submodule/scalapack
+	url = https://github.com/Reference-ScaLAPACK/scalapack.git
+        ignore = dirty
