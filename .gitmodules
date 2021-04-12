@@ -2,3 +2,7 @@
 	path = submodule/METIS
 	url = https://github.com/KarypisLab/METIS.git
 	ignore = dirty
+[submodule "submodule/mumps"]
+	path = submodule/mumps
+	url = https://github.com/scivision/mumps.git
+        ignore = dirty
