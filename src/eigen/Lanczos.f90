@@ -31,7 +31,8 @@ contains
     integer(kint) :: i, iter, maxiter, n_get_eigen
     real(kdouble) :: beta_t, ths, norm
     real(kdouble) :: vec(:,:), val(:)
-    real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:)
+    real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
+    logical :: is_converge
     logical, optional :: is_bc(:)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
@@ -39,6 +40,8 @@ contains
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
+    norm = 0.0d0
+    is_converge = .false.
 
     total_dof = N*NDOF
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
@@ -48,6 +51,7 @@ contains
     allocate(alpha(maxiter), source = 0.0d0)
     allocate(beta(maxiter+1), source = 0.0d0)
     allocate(eigen_value(maxiter), source = 0.0d0)
+    allocate(prev(maxiter), source = 0.0d0)
     allocate(q(NP*NDOF,0:maxiter+1), source = 0.0d0)
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,maxiter), source = 0.0d0)
@@ -75,12 +79,20 @@ contains
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", beta: ", beta(iter+1)
+      call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
 
-      if((iter >= n_get_eigen .and. beta(iter+1) < ths) .or. &
-       & iter >= total_dof .or. iter == maxiter)then
-        call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
+      prev = eigen_value
+      if(iter >= n_get_eigen)then
+        norm = 0.0d0
+        do i = 1, iter
+          norm = max(norm, dabs(prev(i) - eigen_value(i)))
+        enddo
+        if(norm < ths) is_converge = .true.
+      endif
 
+write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
+
+      if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
           do j = 1, NP*NDOF
