@@ -28,7 +28,7 @@ if [ "$FLAG_SCALAPACK" ]; then
     cd submodule/scalapack
     mkdir build
     cd build
-    cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
+    cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" ..
     make -j
     make install
     cd ../../..
@@ -50,3 +50,4 @@ if [ "$FLAG_METIS" ]; then
     make install
     cd ../..
 fi
+
