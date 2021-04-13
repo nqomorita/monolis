@@ -31,7 +31,7 @@ if [ "$FLAG_SCALAPACK" ]; then
     cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
     make -j
     make install
-    cd ../..
+    cd ../../..
 fi
 
 if [ "$FLAG_MUMPS" ]; then
@@ -41,7 +41,7 @@ if [ "$FLAG_MUMPS" ]; then
     cmake -Darith=d -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
     make -j
     make install
-    cd ../..
+    cd ../../..
 fi
 
 if [ "$FLAG_METIS" ]; then
