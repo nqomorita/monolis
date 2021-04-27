@@ -34,11 +34,11 @@ contains
 
     allocate(ws(ndof*ns), wr(ndof*nr))
 
-!    call monolis_SendRecv_I(monoCOM%send_n_neib, monoCOM%send_neib_pe, &
-!       & monoCOM%recv_n_neib, monoCOM%recv_neib_pe, &
-!       & monoCOM%send_index, monoCOM%send_item, &
-!       & monoCOM%recv_index, monoCOM%recv_item, &
-!       & ws, wr, X, ndof, monoCOM%comm)
+    call monolis_SendRecv_pre_I(monoCOM%send_n_neib, monoCOM%send_neib_pe, &
+       & monoCOM%recv_n_neib, monoCOM%recv_neib_pe, &
+       & monoCOM%send_index, monoCOM%send_item, &
+       & monoCOM%recv_index, monoCOM%recv_item, &
+       & ws, wr, X, ndof, monoCOM%comm)
 
     deallocate(ws, wr)
   end subroutine monolis_update_I

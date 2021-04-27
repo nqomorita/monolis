@@ -10,8 +10,8 @@ module mod_monolis_com
     integer(kint)          :: myrank
     integer(kint)          :: comm
     integer(kint)          :: commsize
-    integer(kint)          :: intrenal_nnode
-    integer(kint)          :: intrenal_nelem
+    integer(kint)          :: internal_nnode
+    integer(kint)          :: internal_nelem
     logical :: is_overlap = .true.
 
     integer(kint)          :: recv_n_neib
@@ -63,8 +63,8 @@ contains
     monoCOM%myrank = 0
     monoCOM%comm = 0
     monoCOM%commsize = 1
-    monoCOM%intrenal_nnode = 0
-    monoCOM%intrenal_nelem = 0
+    monoCOM%internal_nnode = 0
+    monoCOM%internal_nelem = 0
 
     monoCOM%recv_n_neib = 0
     monoCOM%recv_neib_pe => null()
@@ -165,7 +165,7 @@ contains
     close(10)
 
     open(10, file=trim(header)//"node.id."//trim(cnum), status='old')
-      read(10,*)nitem, monoCOM%intrenal_nnode
+      read(10,*)nitem, monoCOM%internal_nnode
       allocate(monoCOM%global_node_id(nitem), source = 0)
       do i = 1, nitem
         read(10,*) monoCOM%global_node_id(i)
@@ -173,7 +173,7 @@ contains
     close(10)
 
     open(10, file=trim(header)//"elem.id."//trim(cnum), status='old')
-      read(10,*)nitem, monoCOM%intrenal_nelem
+      read(10,*)nitem, monoCOM%internal_nelem
       allocate(monoCOM%global_elem_id(nitem), source = 0)
       do i = 1, nitem
         read(10,*) monoCOM%global_elem_id(i)
@@ -199,6 +199,9 @@ contains
     monoCOM_reorder%send_neib_pe => monoCOM%send_neib_pe
     monoCOM_reorder%send_index => monoCOM%send_index
     monoCOM_reorder%send_item => monoCOM%send_item
+
+    monoCOM_reorder%global_node_id => monoCOM%global_node_id
+    monoCOM_reorder%global_elem_id => monoCOM%global_elem_id
   end subroutine monolis_com_copy
 
   function monolis_global_comm()

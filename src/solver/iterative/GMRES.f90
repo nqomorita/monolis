@@ -60,8 +60,9 @@ contains
 
     ITER = 0
     OUTER:do
+
       call monolis_inner_product_R(monoCOM, N, NDOF, WW(:,R), WW(:,R), DNRM2, monoPRM%tdotp, monoPRM%tcomm_dotp)
-      if (DNRM2 == 0.d0) exit ! converged
+      if (DNRM2 < tol) exit OUTER ! converged
 
       RNORM= dsqrt(DNRM2)
       coef= 1.0d0/RNORM
@@ -91,7 +92,8 @@ contains
         enddo
 
         call monolis_inner_product_R(monoCOM, N, NDOF, WW(:,W), WW(:,W), val, monoPRM%tdotp, monoPRM%tcomm_dotp)
-        if (val == 0.d0) exit ! converged
+
+        if (val < tol) exit ! converged
 
         H(I+1,I)= dsqrt(val)
         coef= 1.0d0 / H(I+1,I)
@@ -179,14 +181,15 @@ contains
       do ik= 1, NREST
         SS(ik)= WW(ik,S)
       enddo
-      IROW= NREST
-      WW(IROW,Y)= SS(IROW) / H(IROW,IROW)
+
+      IROW = NREST
+      if(H(IROW,IROW) /= 0.0d0) WW(IROW,Y)= SS(IROW) / H(IROW,IROW)
 
       do kk= IROW-1, 1, -1
         do jj= IROW, kk+1, -1
           SS(kk)= SS(kk) - H(kk,jj)*WW(jj,Y)
         enddo
-        WW(kk,Y)= SS(kk) / H(kk,kk)
+        if(H(kk,kk) /= 0.0d0)  WW(kk,Y)= SS(kk) / H(kk,kk)
       enddo
 
       !C-- {x}= {x} + {y}{V}

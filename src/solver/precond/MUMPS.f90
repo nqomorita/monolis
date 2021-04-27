@@ -2,6 +2,7 @@ module mod_monolis_precond_mumps
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_linalg_com
 
   implicit none
 
@@ -15,7 +16,10 @@ module mod_monolis_precond_mumps
   integer(kint), parameter :: mumps_mat_spd = 1
   integer(kint), parameter :: mumps_mat_sym = 2
 
+  integer(kint), save, allocatable :: offset_list(:)
+  integer(kint), save, allocatable :: offset_counts(:)
   logical, save :: is_factored = .false.
+  logical, save :: is_self = .false.
 
 #ifdef WITH_MUMPS
   type (dmumps_struc), save :: mumps
@@ -28,15 +32,17 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: NDOF
+    integer(kint) :: NDOF, NZ
 
 #ifdef WITH_MUMPS
     if(is_factored) return
     is_factored = .true.
+    !is_self = .true.
 
     !> initialize
     mumps%JOB = -1
     mumps%COMM = monoCOM%comm
+    if(is_self) mumps%COMM = mpi_comm_self
     !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
@@ -56,58 +62,76 @@ contains
     mumps%ICNTL(22) = 0
     !> Distributed assembled matrix input
     mumps%ICNTL(18) = 3
+    mumps%ICNTL(14) = 60
 
     call DMUMPS(mumps)
 
     !> factorization
     NDOF = monoMAT%ndof
-    allocate(mumps%IRN_loc(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%JCN_loc(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%IRN(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%JCN(NDOF*NDOF*monoMAT%NZ))
-    allocate(mumps%A(NDOF*NDOF*monoMAT%NZ), source = 0.0d0)
-    allocate(mumps%RHS(NDOF*monoMAT%NP), source = 0.0d0)
-    call monolis_precond_mumps_get_loc(monoMAT, mumps%IRN_loc, mumps%JCN_loc, mumps%A)
+    mumps%N = NDOF*monoMAT%N
 
-    mumps%IRN = mumps%IRN_loc
-    mumps%JCN = mumps%JCN_loc
+    call monolis_precond_mumps_get_offset(mumps%N)
+    call monolis_precond_mumps_get_nz(monoMAT, NZ, is_self)
+
+    allocate(mumps%IRN_loc(NDOF*NDOF*NZ))
+    allocate(mumps%JCN_loc(NDOF*NDOF*NZ))
+    allocate(mumps%A(NDOF*NDOF*NZ), source = 0.0d0)
+    call monolis_precond_mumps_get_loc(monoMAT, monoCOM, &
+      & mumps%IRN_loc, mumps%JCN_loc, mumps%A, is_self)
 
     mumps%JOB = 4
-    mumps%N = NDOF*monoMAT%NP
-    mumps%NZ = NDOF*NDOF*monoMAT%NZ
-    mumps%NZ_loc = NDOF*NDOF*monoMAT%NZ
+    mumps%NZ = NDOF*NDOF*NZ
+    mumps%NZ_loc = NDOF*NDOF*NZ
+    mumps%A_loc => mumps%A
+
+    if(.not. is_self)then
+      call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
+      call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
+    endif
+
+    if(monolis_global_myrank() == 0 .or. is_self)then
+      allocate(mumps%RHS(mumps%N), source = 0.0d0)
+    else
+      allocate(mumps%RHS(1), source = 0.0d0)
+    endif
 
     !> Output log level
     mumps%ICNTL(4) = 0
     mumps%ICNTL(14) = 80
+    mumps%ICNTL(18) = 3
 
     call DMUMPS(mumps)
 #endif
   end subroutine monolis_precond_mumps_setup
 
   subroutine monolis_precond_mumps_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    use mod_monolis_linalg_util
+    use mod_monolis_matvec
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: i
-    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: X(:), Y(:), t1, t2
 
 #ifdef WITH_MUMPS
     !> Output log level
     mumps%ICNTL(4) = 0
     !> solution
     mumps%JOB = 3
+    mumps%ICNTL(18) = 3
 
-    do i = 1, mumps%N
-      mumps%RHS(i) = X(i)
-    enddo
+!Y = 1.0d0
+!call monolis_matvec(monoCOM, monoMAT, Y, X, t1, t2)
+!Y = 0.0d0
 
+    call monolis_precond_mumps_set_rhs(monoMAT%NDOF*monoMAT%N, X, mumps%RHS)
     call DMUMPS(mumps)
+    call monolis_precond_mumps_get_rhs(monoMAT%NDOF*monoMAT%N, mumps%RHS, Y)
+    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, Y, t1)
 
-    do i = 1, mumps%N
-      Y(i) = mumps%RHS(i)
-    enddo
+!write(*,"(1p4e12.5)")Y
+!stop
 #endif
   end subroutine monolis_precond_mumps_apply
 
@@ -116,35 +140,143 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-
   end subroutine monolis_precond_mumps_clear
 
-  subroutine monolis_precond_mumps_get_loc(monoMAT, IRN, JCN, A)
+  subroutine monolis_precond_mumps_get_nz(monoMAT, NZ, is_self)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, in, jS, jE
+    integer(kint) :: i, j, in, jS, jE, NZ
     integer(kint) :: idof, jdof, jn, kn, NDOF
-    integer(kint), pointer :: IRN(:), JCN(:)
-    real(kdouble) :: A(:)
+    logical :: is_self
 
     NDOF = monoMAT%ndof
+    NZ = 0
 
     in = 0
-    do i = 1, monoMAT%NP
+    aa:do i = 1, monoMAT%N
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i)
       do j = jS, jE
         jn = monoMAT%item(j)
+        if(is_self .and. monoMAT%N < jn) cycle aa
+        NZ = NZ + 1
+      enddo
+    enddo aa
+  end subroutine monolis_precond_mumps_get_nz
+
+  subroutine monolis_precond_mumps_get_loc(monoMAT, monoCOM, IRN, JCN, A, is_self)
+    use mod_monolis_linalg_util
+    implicit none
+    type(monolis_mat) :: monoMAT
+    type(monolis_com) :: monoCOM
+    integer(kint) :: i, j, in, jS, jE
+    integer(kint) :: idof, jdof, jn, kn, NDOF, nprocs, myrank, i2, jn2, offset
+    integer(kint), allocatable :: offset_id(:), offset_rank(:)
+    integer(kint), pointer :: IRN(:), JCN(:)
+    real(kdouble) :: A(:)
+    logical :: is_self
+
+    NDOF = monoMAT%ndof
+    nprocs = monolis_global_commsize()
+    myrank = monolis_global_myrank()
+
+    offset = offset_list(monolis_global_myrank()+1)
+    allocate(offset_id(monoMAT%NP), source = 0)
+    allocate(offset_rank(monoMAT%NP), source = -1)
+
+    do i = 1, monoMAT%NP
+      offset_id(i) = i
+    enddo
+    call monolis_update_I(monoCOM, 1, offset_id)
+
+    do i = 1, monoCOM%recv_n_neib
+      jS = monoCOM%recv_index(i-1)+1
+      jE = monoCOM%recv_index(i)
+      do j = jS, jE
+        in = monoCOM%recv_item(j)
+        offset_rank(in) = monoCOM%recv_neib_pe(i)
+      enddo
+    enddo
+
+    do i = 1, monoMAT%NP
+      if(offset_rank(i) == -1)then
+        offset_id(i) = offset_id(i) + offset_list(myrank+1)/monoMAT%NDOF
+      else
+        offset_id(i) = offset_id(i) + offset_list(offset_rank(i)+1)/monoMAT%NDOF
+      endif
+    enddo
+
+    in = 0
+    aa:do i = 1, monoMAT%N
+      jS = monoMAT%index(i-1) + 1
+      jE = monoMAT%index(i)
+      do j = jS, jE
+        jn = monoMAT%item(j)
+        if(is_self .and. monoMAT%N < jn) cycle aa
         do idof = 1, NDOF
         do jdof = 1, NDOF
           kn = NDOF*NDOF*(j-1) + NDOF*(idof-1) + jdof
           in = in + 1
           A(in) = monoMAT%A(kn)
-          IRN(in) = NDOF*(i  - 1) + idof
-          JCN(in) = NDOF*(jn - 1) + jdof
+          if(is_self .or. nprocs == 1)then
+            IRN(in) = NDOF*(i  - 1) + idof
+            JCN(in) = NDOF*(jn - 1) + jdof
+          else
+            i2 = offset_id(i)
+            jn2 = offset_id(jn)
+            IRN(in) = NDOF*(i2  - 1) + idof
+            JCN(in) = NDOF*(jn2 - 1) + jdof
+          endif
         enddo
         enddo
       enddo
-    enddo
+    enddo aa
   end subroutine monolis_precond_mumps_get_loc
+
+  subroutine monolis_precond_mumps_set_rhs(N, X, RHS)
+    implicit none
+    integer(kint) :: N
+    real(kdouble) :: X(:), RHS(:)
+    if(monolis_global_commsize() == 1 .or. is_self)then
+      RHS = X(1:N)
+    else
+      call monolis_gatherv_R(X, N, &
+        RHS, offset_counts, offset_list, &
+        0, monolis_global_comm())
+    endif
+  end subroutine monolis_precond_mumps_set_rhs
+
+  subroutine monolis_precond_mumps_get_rhs(N, RHS, Y)
+    implicit none
+    integer(kint) :: N
+    real(kdouble) :: Y(:), RHS(:)
+    if(monolis_global_commsize() == 1 .or. is_self)then
+      Y(1:N) = RHS
+    else
+      call monolis_scatterv_R( &
+        RHS, offset_counts, offset_list, &
+        Y, N, &
+        0, monolis_global_comm())
+    endif
+  end subroutine monolis_precond_mumps_get_rhs
+
+  subroutine monolis_precond_mumps_get_offset(N_loc)
+    implicit none
+    integer(kint) :: nprocs, myrank, i, N_loc
+
+    nprocs = monolis_global_commsize()
+    myrank = monolis_global_myrank()
+
+    allocate(offset_list(nprocs), source = 0)
+    allocate(offset_counts(nprocs), source = 0)
+
+    if(1 < nprocs)then
+      call monolis_allgather_I1(N_loc, offset_counts, monolis_global_comm())
+    endif
+
+    offset_list(1) = 0
+    do i = 1, nprocs - 1
+      offset_list(i+1) = offset_list(i) + offset_counts(i)
+    enddo
+  end subroutine monolis_precond_mumps_get_offset
 end module mod_monolis_precond_mumps

@@ -14,12 +14,16 @@ module mod_monolis_mesh
 
   type monolis_graph
     integer(kint) :: N = 0
+    integer(kint) :: nelem = 0
     !> node base
     integer(kint), pointer :: node_domid_raw(:) => null()
     integer(kint), pointer :: node_domid(:) => null()
     !> elem base
     integer(kint), pointer :: elem_domid(:) => null()
     integer(kint), pointer :: elem_domid_uniq(:) => null()
+    !> elem base
+    integer(kint), pointer :: ebase_func(:) => null()
+    integer(kint), pointer :: connectivity(:) => null()
   end type monolis_graph
 
   type monolis_node_list

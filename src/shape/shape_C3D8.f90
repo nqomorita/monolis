@@ -93,10 +93,11 @@ contains
     implicit none
     real(kdouble) :: node(3,8), r(3), dndx(8,3), deriv(8,3)
     real(kdouble) :: xj(3,3), inv(3,3), det
+    logical :: is_fail
 
     call monolis_C3D8_shapefunc_deriv(r, deriv)
     xj = matmul(node, deriv)
-    call monolis_get_inverse_matrix_3d(xj, inv, det)
+    call monolis_get_inverse_matrix_3d(xj, inv, det, is_fail)
     dndx = matmul(deriv, inv)
   end subroutine monolis_C3D8_get_global_deriv
 

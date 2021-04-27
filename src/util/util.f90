@@ -44,6 +44,7 @@ module mod_monolis_util
   public :: monolis_param_set_show_iterlog
   public :: monolis_param_set_show_time
   public :: monolis_param_set_show_summary
+  public :: monolis_get_internal_elem_1d_bool
 
   integer(kint), save :: myrank = 0
   integer(kint), save :: mycomm
@@ -241,6 +242,22 @@ contains
     t2 = monolis_get_time()
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
+
+  subroutine monolis_get_internal_elem_1d_bool(monolis, nelem, list)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nelem, i
+    logical :: list(:)
+
+    if(monolis_global_commsize() > 1)then
+      list = .true.
+    else
+      list = .false.
+      do i = 1, monolis%COM%internal_nelem
+        list(i) = .true.
+      enddo
+    endif
+  end subroutine monolis_get_internal_elem_1d_bool
 
   !> set parameter section
   subroutine monolis_param_set_method(monolis, param)
