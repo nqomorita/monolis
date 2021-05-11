@@ -8,6 +8,7 @@ program monolis_dbc_all_tet
   type(monolis_mesh) :: mesh
   character :: output_dir*100, fname*100
   logical :: is_format_id
+  integer(kint), allocatable :: is_surf_node(:)
 
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_dbc_all_tet")
@@ -20,9 +21,9 @@ program monolis_dbc_all_tet
     stop 1
   endif
 
-  !call monolis_get_surf_node()
+  call monolis_get_surf_node(mesh, 4, 4, 4, is_surf_node)
 
-  !call output_dbc()
+  !call output_dbc(mesh, is_surf_node)
 contains
 
 end program monolis_dbc_all_tet

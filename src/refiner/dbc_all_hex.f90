@@ -8,6 +8,7 @@ program monolis_dbc_all_hex
   type(monolis_mesh) :: mesh
   character :: output_dir*100, fname*100
   logical :: is_format_id
+  integer(kint), allocatable :: is_surf_node(:)
 
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_dbc_all_hex")
@@ -20,7 +21,7 @@ program monolis_dbc_all_hex
     stop 1
   endif
 
-  !call monolis_get_surf_node()
+  call monolis_get_surf_node(mesh, 8, 6, 4, is_surf_node)
 
   !call output_dbc()
 contains
