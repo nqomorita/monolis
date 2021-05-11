@@ -3,6 +3,7 @@ program monolis_dbc_all_tet
   use mod_monolis_com
   use mod_monolis_mesh
   use mod_monolis_io
+  use mod_monolis_dbc_all_util
   implicit none
   type(monolis_mesh) :: mesh
   character :: output_dir*100, fname*100
@@ -18,5 +19,11 @@ program monolis_dbc_all_tet
     call monolis_debug_header("ERROR: please input 1st order hex mesh")
     stop 1
   endif
+
+  !call monolis_get_surf_node()
+
+  !call output_dbc()
+contains
+
 end program monolis_dbc_all_tet
 

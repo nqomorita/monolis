@@ -136,21 +136,4 @@ contains
     get_mid_point_position(2) = (mesh%node(2,i1) + mesh%node(2,i2))/2.0d0
     get_mid_point_position(3) = (mesh%node(3,i1) + mesh%node(3,i2))/2.0d0
   end function
-
-  function get_key(i1, i2, i3)
-    implicit none
-    integer(kint) :: i1, i2, i3, array(3)
-    character :: c1*9, c2*9, c3*9, get_key*27
-
-    array(1) = i1
-    array(2) = i2
-    array(3) = i3
-    call monolis_qsort_int(array, 1, 3)
-
-    write(c1,"(i9.9)")array(1)
-    write(c2,"(i9.9)")array(2)
-    write(c3,"(i9.9)")array(3)
-    get_key = c1//c2//c3
-  end function get_key
-
 end module mod_monolis_p_refiner

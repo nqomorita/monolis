@@ -100,7 +100,7 @@ SRC_LIST_SOLVE  = monolis_solve.f90
 SRC_LIST_MAIN   = monolis.f90
 SRC_LIST_EIGEN  = Lanczos_util.f90 Lanczos.f90 LOBPCG.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
-SRC_LIST_REFN   = p_refiner.f90
+SRC_LIST_REFN   = p_refiner.f90 dbc_all_util.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/, $(SRC_LIST_PREC)) $(addprefix direct/, $(SRC_LIST_DIRC)) $(addprefix iterative/, $(SRC_LIST_ITER))

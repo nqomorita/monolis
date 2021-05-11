@@ -2,6 +2,7 @@ module mod_monolis_hash
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mat
+  use mod_monolis_stdlib
 
   implicit none
 
@@ -12,6 +13,7 @@ module mod_monolis_hash
   public :: monolis_hash_push
   public :: monolis_hash_list_update
   public :: type_monolis_hash_tree
+  public :: get_key
 
   integer(kint), save :: monolis_current_hash_size = 1
   integer(kint), parameter :: monolis_hash_size(22) = (/&
@@ -38,6 +40,22 @@ module mod_monolis_hash
   end type type_monolis_hash_tree
 
 contains
+
+  function get_key(i1, i2, i3)
+    implicit none
+    integer(kint) :: i1, i2, i3, array(3)
+    character :: c1*9, c2*9, c3*9, get_key*27
+
+    array(1) = i1
+    array(2) = i2
+    array(3) = i3
+    call monolis_qsort_int(array, 1, 3)
+
+    write(c1,"(i9.9)")array(1)
+    write(c2,"(i9.9)")array(2)
+    write(c3,"(i9.9)")array(3)
+    get_key = c1//c2//c3
+  end function get_key
 
   subroutine monolis_hash_init(monolis_hash_tree)
     implicit none
