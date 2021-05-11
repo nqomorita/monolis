@@ -63,6 +63,8 @@ BIN_REF1 = monolis_h_refiner_hex
 BIN_REF2 = monolis_h_refiner_tet
 BIN_REF3 = monolis_p_refiner_hex
 BIN_REF4 = monolis_p_refiner_tet
+BIN_DBC1 = monolis_dbc_all_tet
+BIN_DBC2 = monolis_dbc_all_hex
 BIN_TEST = monolis_test
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
@@ -78,6 +80,8 @@ REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
 REF2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF2))
 REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
 REF4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF4))
+DBC1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC1))
+DBC2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC2))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 util.f90 stdlib.f90 hash.f90
@@ -107,6 +111,8 @@ SRC_REF1        = refiner/h_refiner_hex.f90
 SRC_REF2        = refiner/h_refiner_tet.f90
 SRC_REF3        = refiner/p_refiner_hex.f90
 SRC_REF4        = refiner/p_refiner_tet.f90
+SRC_DBC1        = refiner/dbc_all_tet.f90
+SRC_DBC2        = refiner/dbc_all_hex.f90
 SRC_TEST        = util/test.f90
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
@@ -131,10 +137,17 @@ OBJS_REF3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF3:.f90=.o))
 SOURCES_REF4 = $(addprefix $(SRC_DIR)/, $(SRC_REF4))
 OBJS_REF4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF4:.f90=.o))
 
+SOURCES_DBC1 = $(addprefix $(SRC_DIR)/, $(SRC_DBC1))
+OBJS_DBC1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC1:.f90=.o))
+
+SOURCES_DBC2 = $(addprefix $(SRC_DIR)/, $(SRC_DBC2))
+OBJS_DBC2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC2:.f90=.o))
+
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
-all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET)
+all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET)
 
 $(LIBTARGET): $(OBJS)
 	$(AR) $@ $(OBJS)
@@ -157,6 +170,12 @@ $(REF3TARGET): $(OBJS_REF3)
 $(REF4TARGET): $(OBJS_REF4)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_REF4) $(MONOLIS_LIB) $(LIBRARY)
 
+$(DBC1TARGET): $(OBJS_DBC1)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC1) $(MONOLIS_LIB) $(LIBRARY)
+
+$(DBC2TARGET): $(OBJS_DBC2)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC2) $(MONOLIS_LIB) $(LIBRARY)
+
 $(TESTTARGET): $(OBJS_TEST)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(MONOLIS_LIB) $(LIBRARY)
 
@@ -167,10 +186,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) $(FLAG_METIS) -o $@ -c $<
 
 clean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) ./include/*.mod
 
 distclean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) $(TESTTARGET) /include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) /include/*.mod
 
 sampleclean:
 
