@@ -478,7 +478,7 @@ contains
     implicit none
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128
-    logical :: is_format_id, is_overlap
+    logical :: is_overlap, is_format_id
 
     call monolis_debug_header("monolis_get_part_arg")
 
@@ -490,7 +490,7 @@ contains
       if(trim(argc1) == "-h")then
         write(*,"(a)")"-n {num of subdomain}: the number of subdomain"
         write(*,"(a)")"-t {N/O}: type of domain decomposition (N:non-overlapping, O:overlapping)"
-        write(*,"(a)")"--with-id {Y/N}: node or elem id appears at the beginning of each line"
+        !write(*,"(a)")"--with-id {Y/N}: node or elem id appears at the beginning of each line"
         write(*,"(a)")"-h: help"
         stop
       endif
@@ -498,7 +498,7 @@ contains
 
     n_domain = 1
     is_overlap = .true.
-    is_format_id = .false.
+    !is_format_id = .false.
 
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
     do i = 1, count/2
@@ -512,9 +512,9 @@ contains
         if(trim(argc2) == "O") is_overlap = .true.
         if(trim(argc2) == "N") is_overlap = .false.
 
-      elseif(trim(argc1) == "--with-id")then
-        if(trim(argc2) == "Y") is_format_id = .true.
-        if(trim(argc2) == "N") is_format_id = .false.
+      !elseif(trim(argc1) == "--with-id")then
+      !  if(trim(argc2) == "Y") is_format_id = .true.
+      !  if(trim(argc2) == "N") is_format_id = .false.
 
       else
         write(*,"(a)")"* monolis input arg error"
