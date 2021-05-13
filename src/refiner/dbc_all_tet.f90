@@ -23,6 +23,6 @@ program monolis_dbc_all_tet
 
   call monolis_get_surf_node(mesh, 4, 4, 4, is_surf_node)
 
-  !call output_dbc(mesh, is_surf_node)
+  call output_dbc(mesh, is_surf_node)
 end program monolis_dbc_all_tet
 

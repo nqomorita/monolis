@@ -9,11 +9,28 @@ module mod_monolis_dbc_all_util
 
   private
   public :: monolis_get_surf_node
+  public :: output_dbc
 
   integer(kint) :: i341(3,4), i361(4,6)
   type(type_monolis_hash_tree) :: hash_tree
 
 contains
+
+  subroutine output_dbc(mesh, is_surf_node)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh
+    integer(kint) :: i, j, in, shift
+    integer(kint) :: is_surf_node(:)
+
+    shift = 0
+    open(20, file = "D_bc.dat", status = "replace")
+      write(20,*) in
+      do i = 1, mesh%nnode
+        if(is_surf_node(i) == 1) write(20,*) i - shift, 1.0d0
+      enddo
+    close(20)
+  end subroutine output_dbc
 
   subroutine monolis_get_surf_node(mesh, nbase_func, nsurf, nsurf_node, is_surf_node)
     use mod_monolis_mesh
@@ -88,7 +105,7 @@ contains
 
   function get_key_surf(nbase_func, i, conn)
     implicit none
-    integer(kint) :: nbase_func, i, conn(:), array(3)
+    integer(kint) :: nbase_func, i, conn(:), array(4)
     integer(kint) :: i1, i2, i3, i4
     character :: c1*9, c2*9, c3*9, get_key_surf*27
 
@@ -96,6 +113,7 @@ contains
       i1 = conn(i341(1,i))
       i2 = conn(i341(2,i))
       i3 = conn(i341(3,i))
+      i4 = 2100000000
     elseif(nbase_func == 8)then
       i1 = conn(i361(1,i))
       i2 = conn(i361(2,i))
@@ -108,7 +126,8 @@ contains
     array(1) = i1
     array(2) = i2
     array(3) = i3
-    call monolis_qsort_int(array, 1, 3)
+    array(4) = i4
+    call monolis_qsort_int(array, 1, 4)
 
     write(c1,"(i9.9)")array(1)
     write(c2,"(i9.9)")array(2)
