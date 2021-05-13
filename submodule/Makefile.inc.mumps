@@ -104,7 +104,7 @@ FC      = mpif90
 FL      = mpif90
 # AR : Archive object in a library
 #      keep a space at the end if options have to be separated from lib name
-AR      = ar vr
+AR      = ar vr  
 # RANLIB : generate index of an archive file
 #   (optionnal use "RANLIB = echo" in case of problem)
 RANLIB  = ranlib

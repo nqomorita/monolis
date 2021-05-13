@@ -42,7 +42,7 @@ if [ "$FLAG_MUMPS" ]; then
     mv MUMPS_5.3.3 mumps2
     cd mumps2
     #cp Make.inc/Makefile.inc.generic Makefile.inc
-    cp ../Makefile.inc.mumps ./
+    cp ../Makefile.inc.mumps ./Makefile.inc
     make d -j
     cp include/*.h ${BASE_DIR}/include
     cp lib/*.a ${BASE_DIR}/lib
