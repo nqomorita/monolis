@@ -99,9 +99,9 @@ RM      = /bin/rm -f
 # CC : C compiler
 CC      = mpicc
 # FC : Fortran 90 compiler
-FC      = mpif90
+FC      = mpif90 -std=legacy
 # FL : Fortran linker
-FL      = mpif90
+FL      = mpif90 -std=legacy
 # AR : Archive object in a library
 #      keep a space at the end if options have to be separated from lib name
 AR      = ar vr  
@@ -118,10 +118,11 @@ LAPACK = -llapack
 SCALAP  = -lscalapack -lblacs
 
 # INCLUDE DIRECTORY FOR MPI
-INCPAR  = -I/usr/include
+# INCPAR  = -I/usr/include
 
 # LIBRARIES USED BY THE PARALLEL VERSION OF MUMPS: $(SCALAP) and MPI
-LIBPAR  = $(SCALAP) $(LAPACK) -L/usr/lib -lmpi
+LIBPAR  = $(SCALAP) $(LAPACK)
+# -L/usr/lib -lmpi
 
 # The parallel version is not concerned by the next two lines.
 # They are related to the sequential library provided by MUMPS,
