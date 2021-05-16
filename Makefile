@@ -63,8 +63,8 @@ BIN_REF1 = monolis_h_refiner_hex
 BIN_REF2 = monolis_h_refiner_tet
 BIN_REF3 = monolis_p_refiner_hex
 BIN_REF4 = monolis_p_refiner_tet
-BIN_DBC1 = monolis_dbc_all_tet
-BIN_DBC2 = monolis_dbc_all_hex
+BIN_DBC1 = monolis_dbc_all_surf_tet
+BIN_DBC2 = monolis_dbc_all_surf_hex
 BIN_TEST = monolis_test
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
