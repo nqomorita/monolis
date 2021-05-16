@@ -6,13 +6,17 @@ program monolis_dbc_all_hex
   use mod_monolis_dbc_all_util
   implicit none
   type(monolis_mesh) :: mesh
-  character :: output_dir*100, fname*100
+  integer(kint) :: n_block
+  character :: output_dir*200, fnname*100, fename*100, foname*100
   logical :: is_format_id
   integer(kint), allocatable :: is_surf_node(:)
+  real(kdouble), allocatable :: val(:)
 
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_dbc_all_hex")
   is_format_id = .false.
+
+  call monolis_get_dbc_all_arg(n_block, val, fnname, fename, foname)
 
   call monolis_input_mesh(mesh, is_format_id)
 
@@ -25,4 +29,3 @@ program monolis_dbc_all_hex
 
   call output_dbc(mesh, is_surf_node)
 end program monolis_dbc_all_hex
-

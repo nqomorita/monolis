@@ -567,4 +567,60 @@ contains
     call monolis_debug_int("n_domain", n_domain)
   end subroutine monolis_get_part_bc_arg
 
+  subroutine monolis_get_dbc_all_arg(n_block, val, fnname, fename, foname)
+    implicit none
+    integer(kint) :: i, j, count, n, n_block
+    real(kdouble), allocatable :: val(:)
+    character :: argc1*128, argc2*128, fnname*100, fename*100, foname*100
+
+    call monolis_debug_header("monolis_get_dbc_all_arg")
+
+    call monolis_set_debug(.true.)
+
+    count = iargc()
+    if(count == 1)then
+      call getarg(1, argc1)
+      if(trim(argc1) == "-h")then
+        write(*,"(a)")"usage:"
+        write(*,"(a)") &
+        & "./monolis_dbc_all {options} {block size} {value 1} {value 2} ... {value n}"
+        write(*,"(a)")""
+        write(*,"(a)")"options:"
+        write(*,"(a)")"-in {input node filename}: (defualt) node.dat"
+        write(*,"(a)")"-ie {input elem filename}: (defualt) elem.dat"
+        write(*,"(a)")"-o  {output filename}: (defualt) D_bc.dat"
+        write(*,"(a)")"-h: help"
+        stop
+      endif
+    endif
+
+    fnname = "node.dat"
+    fename = "elem.dat"
+    foname = "D_bc.dat"
+
+    do i = 1, count/2
+      j = i
+      call getarg(2*i-1, argc1)
+      call getarg(2*i  , argc2)
+
+      if(trim(argc1) == "-in")then
+        fnname = trim(argc2)
+      elseif(trim(argc1) == "-ie")then
+        fename = trim(argc2)
+      elseif(trim(argc1) == "-o")then
+        foname = trim(argc2)
+      else
+        exit
+      endif
+    enddo
+
+    call getarg(2*j-1, argc1)
+    read(argc1,*) n_block
+    allocate(val(n_block), source = 0.0d0)
+
+    do i = 1, n_block
+      call getarg(2*j-1 + i, argc1)
+      read(argc1,*) val(i)
+    enddo
+  end subroutine monolis_get_dbc_all_arg
 end module mod_monolis_io
