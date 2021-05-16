@@ -27,5 +27,5 @@ program monolis_dbc_all_hex
 
   call monolis_get_surf_node(mesh, 8, 6, 4, is_surf_node)
 
-  call output_dbc(mesh, is_surf_node)
+  call output_dbc(mesh, is_surf_node, n_block, val)
 end program monolis_dbc_all_hex

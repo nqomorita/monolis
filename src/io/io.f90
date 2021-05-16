@@ -578,9 +578,9 @@ contains
     call monolis_set_debug(.true.)
 
     count = iargc()
-    if(count == 1)then
+    if(count == 0 .or. count == 1)then
       call getarg(1, argc1)
-      if(trim(argc1) == "-h")then
+      if(trim(argc1) == "-h" .or. count == 0)then
         write(*,"(a)")"usage:"
         write(*,"(a)") &
         & "./monolis_dbc_all {options} {block size} {value 1} {value 2} ... {value n}"

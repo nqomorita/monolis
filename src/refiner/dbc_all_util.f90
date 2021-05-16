@@ -16,18 +16,28 @@ module mod_monolis_dbc_all_util
 
 contains
 
-  subroutine output_dbc(mesh, is_surf_node)
+  subroutine output_dbc(mesh, is_surf_node, n_block, val)
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh
-    integer(kint) :: i, j, in, shift
+    integer(kint) :: i, j, in, shift, n_block
     integer(kint) :: is_surf_node(:)
+    real(kdouble) :: val(:)
 
     shift = 0
+    if(minval(mesh%nid) == 0) shift = -1
+
+    in = 0
+    do i = 1, mesh%nnode
+      if(is_surf_node(i) == 1) in = in + 1
+    enddo
+
     open(20, file = "D_bc.dat", status = "replace")
-      write(20,*) in
+      write(20,*) n_block*in, n_block
       do i = 1, mesh%nnode
-        if(is_surf_node(i) == 1) write(20,*) i - shift, 1.0d0
+        do j = 1, n_block
+          if(is_surf_node(i) == 1) write(20,*) i+shift, n_block+shift, val(j)
+        enddo
       enddo
     close(20)
   end subroutine output_dbc
@@ -95,7 +105,11 @@ contains
       do i = 1, nsurf
         if(is_inner(i,eid) == 1)then
           do j = 1, nsurf_node
-            in = conn(i341(j,i))
+            if(nbase_func == 4)then
+              in = conn(i341(j,i))
+            elseif(nbase_func == 8)then
+              in = conn(i361(j,i))
+            endif
             is_surf_node(in) = 1
           enddo
         endif
