@@ -19,9 +19,9 @@ program monolis_dbc_all_hex
   call monolis_get_dbc_all_arg(n_block, val, fnname, fename, foname)
 
   call monolis_debug_int("n_block", n_block)
-  call monolis_debug_char("node file", fnname)
-  call monolis_debug_char("elem file", fename)
-  call monolis_debug_char("output file", foname)
+  !call monolis_debug_char("node file", fnname)
+  !call monolis_debug_char("elem file", fename)
+  !call monolis_debug_char("output file", foname)
 
   call monolis_input_mesh(mesh, is_format_id)
 
@@ -32,5 +32,5 @@ program monolis_dbc_all_hex
 
   call monolis_get_surf_node(mesh, 8, 6, 4, is_surf_node)
 
-  call output_dbc(mesh, is_surf_node, n_block, val)
+  call output_dbc(foname, mesh, is_surf_node, n_block, val)
 end program monolis_dbc_all_hex

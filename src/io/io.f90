@@ -586,9 +586,9 @@ contains
         & "./monolis_dbc_all {options} {block size} {value 1} {value 2} ... {value n}"
         write(*,"(a)")""
         write(*,"(a)")"options:"
-        write(*,"(a)")"-in {input node filename}: (defualt) node.dat"
-        write(*,"(a)")"-ie {input elem filename}: (defualt) elem.dat"
-        write(*,"(a)")"-o  {output filename}: (defualt) D_bc.dat"
+        !write(*,"(a)")"-in {input node filename}: (defualt) node.dat"
+        !write(*,"(a)")"-ie {input elem filename}: (defualt) elem.dat"
+        !write(*,"(a)")"-o  {output filename}: (defualt) D_bc.dat"
         write(*,"(a)")"-h: help"
         stop
       endif
