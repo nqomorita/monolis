@@ -37,7 +37,7 @@ contains
       write(20,*) n_block*in, n_block
       do i = 1, mesh%nnode
         do j = 1, n_block
-          if(is_surf_node(i) == 1) write(20,*) i+shift, n_block+shift, val(j)
+          if(is_surf_node(i) == 1) write(20,*) i+shift, j+shift, val(j)
         enddo
       enddo
     close(20)
