@@ -87,6 +87,9 @@ contains
 #endif
 
     !> convert to 1 origin
+    connectivity = connectivity + 1
+
+    !> convert to 1 origin
     item = item + 1
   end subroutine monolis_convert_connectivity_to_nodal
 
