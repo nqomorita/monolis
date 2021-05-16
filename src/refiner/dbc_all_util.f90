@@ -64,6 +64,10 @@ contains
     i361(1,5) = 3; i361(2,5) = 4; i361(3,5) = 7; i361(4,5) = 8
     i361(1,6) = 4; i361(2,6) = 1; i361(3,6) = 8; i361(4,6) = 5
 
+    call monolis_debug_int("nbase_func", nbase_func)
+    call monolis_debug_int("nsurf", nsurf)
+    call monolis_debug_int("nsurf_node", nsurf_node)
+
     call monolis_hash_init(hash_tree)
 
     do eid = 1, mesh%nelem
@@ -103,7 +107,7 @@ contains
     do eid = 1, mesh%nelem
       call monolis_get_connectivity(mesh, eid, nbase_func, conn)
       do i = 1, nsurf
-        if(is_inner(i,eid) == 1)then
+        if(is_inner(i,eid) == 0)then
           do j = 1, nsurf_node
             if(nbase_func == 4)then
               in = conn(i341(j,i))

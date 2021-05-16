@@ -24,6 +24,7 @@ module mod_monolis_util
   public :: monolis_set_debug
   public :: monolis_debug_header
   public :: monolis_debug_int
+  public :: monolis_debug_real
   public :: monolis_debug_char
   public :: monolis_debug_logical
   public :: monolis_warning_header
@@ -387,6 +388,15 @@ contains
     if(.not. is_debug) return
     if(myrank == 0) write(*,"(a,i12)")"** monolis debug: "//trim(header)//": ", n
   end subroutine monolis_debug_int
+
+  subroutine monolis_debug_real(header, v)
+    implicit none
+    real(kdouble) :: v
+    character(*) :: header
+
+    if(.not. is_debug) return
+    if(myrank == 0) write(*,"(a,1pe12.4)")"** monolis debug: "//trim(header)//": ", v
+  end subroutine monolis_debug_real
 
   subroutine monolis_debug_char(header, char)
     implicit none
