@@ -26,7 +26,6 @@ contains
     nelem = graph%nelem
     allocate(graph%elem_domid(nelem), source = 0)
     allocate(graph%elem_domid_uniq(nelem), source = 0)
-    !allocate(temp(mesh%nbase_func), source = 0)
 
     if(n_domain == 1)then
       graph%elem_domid = 1
@@ -40,7 +39,6 @@ contains
       allocate(temp(jE-jS+1), source = 0)
       jn = 1
       do j = jS, jE
-        !in = mesh%elem(j,i)
         in = graph%connectivity(j)
         temp(jn) = graph%node_domid_raw(in)
         jn = jn + 1
@@ -76,7 +74,6 @@ contains
       jS = graph%ebase_func(in) + 1
       jE = graph%ebase_func(in+1)
       do k = jS, jE
-      !do k = 1, mesh%nbase_func
         jn = graph%connectivity(k)
         is_in(jn) = .true.
       enddo

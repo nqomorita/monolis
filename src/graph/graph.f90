@@ -13,7 +13,6 @@ contains
     type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     integer(kint), pointer :: part_id(:)
-    integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
     integer(kint) :: i, n_domain
 
@@ -25,13 +24,14 @@ contains
     if(n_domain == 1) return
 
     call monolis_convert_mesh_to_connectivity &
-     & (mesh%nelem, mesh%nbase_func, mesh%elem, ebase_func, connectivity)
+     & (mesh%nelem, mesh%nbase_func, mesh%elem, graph%ebase_func, graph%connectivity)
 
     call monolis_convert_connectivity_to_nodal &
-     & (mesh%nnode, mesh%nelem, ebase_func, connectivity, index, item)
+     & (mesh%nnode, mesh%nelem, graph%ebase_func, graph%connectivity, index, item)
 
     call monolis_get_mesh_part_kway(mesh%nnode, index, item, n_domain, part_id)
 
+    graph%nelem = mesh%nelem
     do i = 1, mesh%nnode
       graph%node_domid_raw(i) = part_id(i) + 1
     enddo
