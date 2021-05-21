@@ -52,6 +52,13 @@ contains
     monolis_get_time_c =  monolis_get_time()
   end function monolis_get_time_c
 
+  function monolis_get_time_sync_c()&
+    & bind(c, name = "monolis_get_time_sync")
+    implicit none
+    real(c_double) :: monolis_get_time_sync_c
+    monolis_get_time_sync_c =  monolis_get_time_sync()
+  end function monolis_get_time_sync_c
+
   !> mat
   subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CRR_format")
