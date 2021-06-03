@@ -250,7 +250,7 @@ contains
     integer(kint) :: nelem, i
     logical :: list(:)
 
-    if(monolis_global_commsize() > 1)then
+    if(monolis_global_commsize() == 1)then
       list = .true.
     else
       list = .false.
