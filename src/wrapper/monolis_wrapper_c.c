@@ -383,7 +383,7 @@ void monolis_convert_mesh_to_connectivity(
   }
 }
 
-void monolis_convert_connectivity_to_nodal(
+void monolis_convert_connectivity_to_nodal_graph(
   int      nnode,
   int      nelem,
   idx_t*   conn_index,
@@ -406,7 +406,7 @@ void monolis_convert_connectivity_to_nodal(
 #endif
 }
 
-void monolis_get_nonzero_pattern_by_nodal(
+void monolis_get_nonzero_pattern_by_nodal_graph(
   MONOLIS* mat,
   int      nnode,
   int      ndof,
@@ -478,7 +478,7 @@ void monolis_get_nonzero_pattern(
     conn_index,
     con);
 
-  monolis_convert_connectivity_to_nodal(
+  monolis_convert_connectivity_to_nodal_graph(
     nnode,
     nelem,
     conn_index,
@@ -486,7 +486,7 @@ void monolis_get_nonzero_pattern(
     &index,
     &item);
 
-  monolis_get_nonzero_pattern_by_nodal(
+  monolis_get_nonzero_pattern_by_nodal_graph(
     mat,
     nnode,
     ndof,

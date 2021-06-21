@@ -39,9 +39,8 @@ if [ "$FLAG_MUMPS" ]; then
     cd submodule
     wget http://www.kz.tsukuba.ac.jp/~nmorita/MUMPS_5.3.3.tar.gz
     tar xvf MUMPS_5.3.3.tar.gz
-    mv MUMPS_5.3.3 mumps2
-    cd mumps2
-    #cp Make.inc/Makefile.inc.generic Makefile.inc
+    mv MUMPS_5.3.3 mumps
+    cd mumps
     cp ../Makefile.inc.mumps ./Makefile.inc
     make d -j
     cp include/*.h ${BASE_DIR}/include
