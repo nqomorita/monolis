@@ -146,6 +146,16 @@ void monolis_get_nonzero_pattern(
   int      nelem,
   int**    elem);
 
+/* get nonzero pattern from nodal graph */
+void monolis_get_nonzero_pattern_by_nodal_graph(
+  MONOLIS* mat,
+  int      nnode,
+  int      ndof,
+  int*     index,
+  int*     item);
+
+
+
 /* add scalar value to sparse matrix */
 void monolis_add_scalar_to_sparse_matrix(
   MONOLIS* mat,
