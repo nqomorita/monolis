@@ -204,8 +204,8 @@ contains
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: monolis_sparse_matrix_set_value 1"
-    if(ndof < csub_j) stop "error: monolis_sparse_matrix_set_value 2"
+    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -216,7 +216,7 @@ contains
         A(im) = val
         return
       endif
-      stop "error: monolis_sparse_matrix_set_value 3"
+      stop "error: The non-zero element is not defined. The value is not accessible."
     enddo
   end subroutine monolis_sparse_matrix_set_value
 
@@ -230,8 +230,8 @@ contains
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: monolis_sparse_matrix_get_value 1"
-    if(ndof < csub_j) stop "error: monolis_sparse_matrix_get_value 2"
+    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -242,7 +242,7 @@ contains
         val = A(im)
         return
       endif
-      stop "error: monolis_sparse_matrix_get_value 3"
+      stop "error: The non-zero element is not defined. The value is not accessible."
     enddo
   end subroutine monolis_sparse_matrix_get_value
 
@@ -329,7 +329,7 @@ contains
             cycle aa
           endif
         enddo
-        stop "error: merge"
+      stop "error: The non-zero element is not defined. The value is not accessible."
       enddo aa
     enddo
   end subroutine monolis_sparse_matrix_add_matrix
@@ -343,8 +343,8 @@ contains
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: monolis_sparse_matrix_add_value 1"
-    if(ndof < csub_j) stop "error: monolis_sparse_matrix_add_value 2"
+    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -355,6 +355,7 @@ contains
         A(im) = A(im) + val
         return
       endif
+      stop "error: The non-zero element is not defined. The value is not accessible."
     enddo
   end subroutine monolis_sparse_matrix_add_value
 
