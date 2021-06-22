@@ -357,8 +357,8 @@ contains
         return
       endif
 
-      write(cerr,"(a,i0,i0,a,i0,i0,a)") "error: The non-zero element (", csub_i, csub_j, &
-        & ") DoF of at (", ci, cj, ") is not defined. The value is not accessible."
+      write(cerr,"(a,i0,a,i0,a,i0,a,i0,a)") "error: The non-zero element (", csub_i, ", ", csub_j, &
+        & ") DoF of at (", ci, ", ", cj, ") is not defined. The value is not accessible."
       stop trim(cerr)
     enddo
   end subroutine monolis_sparse_matrix_add_value
