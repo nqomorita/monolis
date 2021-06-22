@@ -383,7 +383,9 @@ contains
     real(kdouble), intent(inout) :: A(:), B(:)
     real(kdouble), intent(in) :: val
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
+    logical :: is_add
 
+    is_add = .false.
     NDOF2 = ndof*ndof
 
     jS = indexR(nnode-1) + 1
@@ -407,8 +409,11 @@ contains
       jn = item(j)
       if(jn == nnode)then
         A(NDOF2*(j-1) + (ndof+1)*(idof-1) + 1) = 1.0d0
+        is_add = .true.
       endif
     enddo
+
+    if(.not. is_add) stop "error: not find a diagonal element in monolis_sparse_matrix_add_bc"
 
     B(ndof*nnode-ndof+idof) = val
   end subroutine monolis_sparse_matrix_add_bc
