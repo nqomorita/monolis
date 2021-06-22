@@ -341,6 +341,7 @@ contains
     real(kdouble), intent(inout) :: A(:)
     real(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
+    character :: cerr*128
 
     NDOF2 = ndof*ndof
     if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
@@ -355,7 +356,10 @@ contains
         A(im) = A(im) + val
         return
       endif
-      stop "error: The non-zero element is not defined. The value is not accessible."
+
+      write(cerr,"(a,i0,i0,a,i0,i0,a)") "error: The non-zero element (", csub_i, csub_j, &
+        & ") DoF of at (", ci, cj, ") is not defined. The value is not accessible."
+      stop trim(cerr)
     enddo
   end subroutine monolis_sparse_matrix_add_value
 
