@@ -385,6 +385,8 @@ contains
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
 
+    if(ndof < idof) stop "error: a value greater than the DoF of submatrix"
+
     is_add = .false.
     NDOF2 = ndof*ndof
 
