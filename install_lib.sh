@@ -13,6 +13,9 @@ do
         SCALAPACK)
             FLAG_SCALAPACK=1
             ;;
+        METIS)
+            FLAG_METIS=1
+            ;;
     esac
 done
 
