@@ -54,10 +54,28 @@ contains
     implicit none
     type(monolis_structure) :: mat
 
-    mat%MAT%A = 0.0d0
-    mat%MAT%X = 0.0d0
-    mat%MAT%B = 0.0d0
+    call monolis_clear_A_value(mat)
+    call monolis_clear_X_value(mat)
+    call monolis_clear_B_value(mat)
   end subroutine monolis_clear_mat_value
+
+  subroutine monolis_clear_A_value(mat)
+    implicit none
+    type(monolis_structure) :: mat
+    mat%MAT%A = 0.0d0
+  end subroutine monolis_clear_A_value
+
+  subroutine monolis_clear_X_value(mat)
+    implicit none
+    type(monolis_structure) :: mat
+    mat%MAT%X = 0.0d0
+  end subroutine monolis_clear_X_value
+
+  subroutine monolis_clear_B_value(mat)
+    implicit none
+    type(monolis_structure) :: mat
+    mat%MAT%B = 0.0d0
+  end subroutine monolis_clear_B_value
 
   subroutine monolis_copy_mat_all(min, mout)
     implicit none
