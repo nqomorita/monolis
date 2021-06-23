@@ -8,6 +8,13 @@ CFLAGS = -O2
 
 MOD_DIR  = -J ./include
 
+# DEFAULT FLAGS
+FLAG_MPI   = -DWITH_MPI
+FLAG_METIS = -DWITH_METIS
+METIS_DIR = .
+METIS_INC = -I $(METIS_DIR)/include
+METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+
 ifdef FLAGS
 	comma:= ,
 	empty:=
@@ -30,16 +37,16 @@ ifdef FLAGS
 		FLAG_TEST = -DTEST
 	endif
 
-	ifeq ($(findstring MPI, $(DFLAGS)), MPI)
-		FLAG_MPI = -DWITH_MPI
-	endif
+#	ifeq ($(findstring MPI, $(DFLAGS)), MPI)
+#		FLAG_MPI = -DWITH_MPI
+#	endif
 
-	ifeq ($(findstring METIS, $(DFLAGS)), METIS)
-		FLAG_METIS = -DWITH_METIS
-		METIS_DIR = .
-		METIS_INC = -I $(METIS_DIR)/include
-		METIS_LIB = -L$(METIS_DIR)/lib -lmetis
-	endif
+#	ifeq ($(findstring METIS, $(DFLAGS)), METIS)
+#		FLAG_METIS = -DWITH_METIS
+#		METIS_DIR = .
+#		METIS_INC = -I $(METIS_DIR)/include
+#		METIS_LIB = -L$(METIS_DIR)/lib -lmetis
+#	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		FLAG_MUMPS = -DWITH_MUMPS

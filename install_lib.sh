@@ -8,9 +8,7 @@ do
     case $OPT in
         MUMPS)
             FLAG_MUMPS=1
-            ;;
-        METIS)
-            FLAG_METIS=1
+            FLAG_SCALAPACK=1
             ;;
         SCALAPACK)
             FLAG_SCALAPACK=1
@@ -19,9 +17,9 @@ do
 done
 
 if [ "$#" == 0 ]; then
-    FLAG_MUMPS=1
     FLAG_METIS=1
-    FLAG_SCALAPACK=1
+    FLAG_MUMPS=0
+    FLAG_SCALAPACK=0
 fi
 
 if [ "$FLAG_SCALAPACK" ]; then
@@ -45,12 +43,6 @@ if [ "$FLAG_MUMPS" ]; then
     make d -j
     cp include/*.h ${BASE_DIR}/include
     cp lib/*.a ${BASE_DIR}/lib
-#    cd submodule/mumps
-#    mkdir build
-#    cd build
-#    cmake -Darith=d -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
-#    make -j
-#    make install
     cd ../..
 fi
 
