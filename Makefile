@@ -66,6 +66,7 @@ LIB_LIST = libmonolis.a
 MONOLIS_LIB = -L$(LIB_DIR) -lmonolis
 BIN_PART = monolis_partitioner
 BIN_PARTBC = monolis_bc_partitioner
+BIN_PARTNG = monolis_nodal_graph_partitioner
 BIN_REF1 = monolis_h_refiner_hex
 BIN_REF2 = monolis_h_refiner_tet
 BIN_REF3 = monolis_p_refiner_hex
@@ -83,6 +84,7 @@ AR       = - ar ruv
 LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 PARTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PART))
 PARTBCTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTBC))
+PARTNGTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTNG))
 REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
 REF2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF2))
 REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
@@ -114,6 +116,7 @@ SRC_SOLVER_LIST = $(addprefix factorize/, $(SRC_LIST_FACT)) $(addprefix precond/
 SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LIST_IO)) $(addprefix graph/, $(SRC_LIST_GRAPH)) $(addprefix shape/, $(SRC_LIST_SHAPE)) $(addprefix geom/, $(SRC_LIST_GEOM)) $(addprefix linalg/, $(SRC_LIST_ALGO)) $(addprefix matrix/, $(SRC_LIST_MATRIX)) $(addprefix solver/, $(SRC_SOLVER_LIST)) $(addprefix partitioner/, $(SRC_LIST_PART)) $(addprefix refiner/, $(SRC_LIST_REFN)) $(addprefix main/, $(SRC_LIST_SOLVE)) $(addprefix eigen/, $(SRC_LIST_EIGEN)) $(addprefix wrapper/, $(SRC_LIST_WRAP)) $(addprefix main/, $(SRC_LIST_MAIN))
 SRC_PART        = partitioner/partitioner.f90
 SRC_PARTBC      = partitioner/partitioner_bc.f90
+SRC_PARTNG      = partitioner/partitioner_nodal_graph.f90
 SRC_REF1        = refiner/h_refiner_hex.f90
 SRC_REF2        = refiner/h_refiner_tet.f90
 SRC_REF3        = refiner/p_refiner_hex.f90
@@ -131,6 +134,9 @@ OBJS_PART = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PART:.f90=.o))
 
 SOURCES_PARTBC = $(addprefix $(SRC_DIR)/, $(SRC_PARTBC))
 OBJS_PARTBC = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTBC:.f90=.o))
+
+SOURCES_PARTNG = $(addprefix $(SRC_DIR)/, $(SRC_PARTNG))
+OBJS_PARTNG = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTNG:.f90=.o))
 
 SOURCES_REF1 = $(addprefix $(SRC_DIR)/, $(SRC_REF1))
 OBJS_REF1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
@@ -153,8 +159,9 @@ OBJS_DBC2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC2:.f90=.o))
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
-all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
-$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET)
+all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) \
+	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET)
 
 $(LIBTARGET): $(OBJS)
 	$(AR) $@ $(OBJS)
@@ -164,6 +171,9 @@ $(PARTTARGET): $(OBJS_PART)
 
 $(PARTBCTARGET): $(OBJS_PARTBC)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTBC) $(MONOLIS_LIB) $(LIBRARY)
+
+$(PARTNGTARGET): $(OBJS_PARTNG)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTNG) $(MONOLIS_LIB) $(LIBRARY)
 
 $(REF1TARGET): $(OBJS_REF1)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_REF1) $(MONOLIS_LIB) $(LIBRARY)
@@ -194,10 +204,12 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 clean:
 	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+	$(PARTBCTARGET) $(PARTNGTARGET) \
 	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) ./include/*.mod
 
 distclean:
 	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+	$(PARTBCTARGET) $(PARTNGTARGET) \
 	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) /include/*.mod
 
 sampleclean:

@@ -24,6 +24,9 @@ module mod_monolis_mesh
     !> elem base
     integer(kint), pointer :: ebase_func(:) => null()
     integer(kint), pointer :: connectivity(:) => null()
+    !> nodal graph
+    integer(kint), pointer :: index(:) => null()
+    integer(kint), pointer :: item(:) => null()
   end type monolis_graph
 
   type monolis_node_list

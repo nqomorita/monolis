@@ -246,6 +246,18 @@ contains
     close(20)
   end subroutine monolis_input_mesh_restart_data
 
+  subroutine monolis_input_graph(graph)
+    implicit none
+    type(monolis_graph) :: graph
+    character :: fname*100
+
+    fname = "index.dat"
+!    call monolis_input_graph_index(fname, graph%nnode, mesh%node)
+
+    fname = "item.dat"
+!    call monolis_input_graph_item(fname, graph%item, graph%item, graph%item)
+  end subroutine monolis_input_graph
+
   subroutine monolis_output_mesh_node(fname, nnode, node, nid)
     implicit none
     integer(kint) :: nnode
@@ -524,6 +536,51 @@ contains
 
     call monolis_debug_int("n_domain", n_domain)
   end subroutine monolis_get_part_arg
+
+  subroutine monolis_get_nodal_graph_part_arg(n_domain, is_overlap)
+    implicit none
+    integer(kint) :: i, count, n, n_domain
+    character :: argc1*128, argc2*128
+    logical :: is_overlap
+
+    call monolis_debug_header("monolis_get_part_arg")
+
+    call monolis_set_debug(.true.)
+
+    count = iargc()
+    if(count == 1)then
+      call getarg(1, argc1)
+      if(trim(argc1) == "-h")then
+        write(*,"(a)")"-n {num of subdomain}: the number of subdomain"
+        write(*,"(a)")"-t {N/O}: type of domain decomposition (N:non-overlapping, O:overlapping)"
+        write(*,"(a)")"-h: help"
+        stop
+      endif
+    endif
+
+    n_domain = 1
+    is_overlap = .true.
+
+    if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
+    do i = 1, count/2
+      call getarg(2*i-1, argc1)
+      call getarg(2*i  , argc2)
+      if(trim(argc1) == "-n")then
+        read(argc2,*) n
+        n_domain = n
+
+      elseif(trim(argc1) == "-t")then
+        if(trim(argc2) == "O") is_overlap = .true.
+        if(trim(argc2) == "N") is_overlap = .false.
+
+      else
+        write(*,"(a)")"* monolis input arg error"
+        stop
+      endif
+    enddo
+
+    call monolis_debug_int("n_domain", n_domain)
+  end subroutine monolis_get_nodal_graph_part_arg
 
   subroutine monolis_get_part_bc_arg(n_domain, fname)
     implicit none

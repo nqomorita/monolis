@@ -26,10 +26,10 @@ contains
     call monolis_convert_mesh_to_connectivity &
      & (mesh%nelem, mesh%nbase_func, mesh%elem, graph%ebase_func, graph%connectivity)
 
-    call monolis_convert_connectivity_to_nodal &
+    call monolis_convert_connectivity_to_nodal_graph &
      & (mesh%nnode, mesh%nelem, graph%ebase_func, graph%connectivity, index, item)
 
-    call monolis_get_mesh_part_kway(mesh%nnode, index, item, n_domain, part_id)
+    call monolis_get_partitioned_graph(mesh%nnode, index, item, n_domain, part_id)
 
     graph%nelem = mesh%nelem
     do i = 1, mesh%nnode
@@ -59,6 +59,18 @@ contains
       enddo
     enddo
   end subroutine monolis_convert_mesh_to_connectivity
+
+  subroutine monolis_convert_connectivity_to_nodal_graph &
+    & (nnode, nelem, ebase_func, connectivity, index, item)
+    use iso_c_binding
+    implicit none
+    integer(kint) :: nnode, nelem
+    integer(kint), pointer :: ebase_func(:), connectivity(:)
+    integer(c_int), pointer :: index(:), item(:)
+
+    call monolis_convert_connectivity_to_nodal &
+     & (nnode, nelem, ebase_func, connectivity, index, item)
+  end subroutine monolis_convert_connectivity_to_nodal_graph
 
   subroutine monolis_convert_connectivity_to_nodal &
     & (nnode, nelem, ebase_func, connectivity, index, item)
@@ -92,6 +104,15 @@ contains
     !> convert to 1 origin
     item = item + 1
   end subroutine monolis_convert_connectivity_to_nodal
+
+  subroutine monolis_get_partitioned_graph(nnode, index, item, n_domain, part_id)
+    use iso_c_binding
+    implicit none
+    integer(kint), pointer :: part_id(:)
+    integer(c_int), pointer :: index(:), item(:)
+    integer(kint) :: n_domain, nnode
+    call monolis_get_mesh_part_kway(nnode, index, item, n_domain, part_id)
+  end subroutine monolis_get_partitioned_graph
 
   subroutine monolis_get_mesh_part_kway(nnode, index, item, npart, part_id)
     use iso_c_binding
