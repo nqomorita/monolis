@@ -204,8 +204,8 @@ contains
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
-    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -216,7 +216,7 @@ contains
         A(im) = val
         return
       endif
-      stop "error: The non-zero element is not defined. The value is not accessible."
+      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
   end subroutine monolis_sparse_matrix_set_value
 
@@ -230,8 +230,8 @@ contains
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
-    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -242,7 +242,7 @@ contains
         val = A(im)
         return
       endif
-      stop "error: The non-zero element is not defined. The value is not accessible."
+      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
   end subroutine monolis_sparse_matrix_get_value
 
@@ -329,7 +329,7 @@ contains
             cycle aa
           endif
         enddo
-      stop "error: The non-zero element is not defined. The value is not accessible."
+      call monolis_stop_by_matrix_assemble(e1(i), e1(j))
       enddo aa
     enddo
   end subroutine monolis_sparse_matrix_add_matrix
@@ -344,8 +344,8 @@ contains
     character :: cerr*128
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) stop "error: a value greater than the DoF of submatrix"
-    if(ndof < csub_j) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -358,9 +358,7 @@ contains
       endif
     enddo
 
-    write(*,"(a,i0,a,i0,a,i0,a,i0,a)") "error: The non-zero element (", csub_i, ", ", csub_j, &
-      & ") DoF of at (", ci, ", ", cj, ") is not defined. The value is not accessible."
-    stop
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_sparse_matrix_add_value
 
   subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
@@ -385,7 +383,7 @@ contains
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
 
-    if(ndof < idof) stop "error: a value greater than the DoF of submatrix"
+    if(ndof < idof) call monolis_stop_by_submatrix_access(ndof, idof)
 
     is_add = .false.
     NDOF2 = ndof*ndof
@@ -460,5 +458,20 @@ contains
       call monolis_qsort_int(itemR(jS:jE), 1, jE-jS+1)
     enddo
   end subroutine monolis_get_CRR_format
+
+  subroutine monolis_stop_by_matrix_assemble(ci, cj)
+    integer(kint), intent(in) :: ci, cj
+    write(*,"(a,i0,a,i0,a)") "error: The non-zero element at (", ci, ", ", cj, &
+      & ") is not allocated. The value is not accessible."
+    stop
+  end subroutine monolis_stop_by_matrix_assemble
+
+  subroutine monolis_stop_by_submatrix_access(ndof, sub_dof)
+    integer(kint), intent(in) :: ndof, sub_dof
+    write(*,"(a)")   "error: set value greater than the DoF of submatrix."
+    write(*,"(a,i8)")"       the DoF of submatrix: ", ndof
+    write(*,"(a,i8)")"       value:                ", sub_dof
+    stop
+  end subroutine monolis_stop_by_submatrix_access
 
 end module mod_monolis_sparse_util
