@@ -1,5 +1,6 @@
 module mod_monolis_mesh
   use mod_monolis_prm
+  use iso_c_binding
   implicit none
 
   type monolis_mesh
@@ -25,8 +26,8 @@ module mod_monolis_mesh
     integer(kint), pointer :: ebase_func(:) => null()
     integer(kint), pointer :: connectivity(:) => null()
     !> nodal graph
-    integer(kint), pointer :: index(:) => null()
-    integer(kint), pointer :: item(:) => null()
+    integer(c_int), pointer :: index(:) => null()
+    integer(c_int), pointer :: item(:) => null()
   end type monolis_graph
 
   type monolis_node_list

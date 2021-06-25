@@ -39,6 +39,30 @@ contains
     deallocate(part_id)
   end subroutine monolis_part_graph
 
+  subroutine monolis_part_nodal_graph(graph, n_domain)
+    use iso_c_binding
+    implicit none
+    type(monolis_graph) :: graph
+    integer(kint), pointer :: part_id(:)
+    integer(c_int), pointer :: index(:), item(:)
+    integer(kint) :: i, n_domain
+
+    call monolis_debug_header("monolis_part_nodal_graph")
+
+    allocate(graph%node_domid_raw(graph%N), source = 1)
+    allocate(part_id(graph%N), source = 0)
+
+    if(n_domain == 1) return
+
+    call monolis_get_partitioned_graph(graph%N, graph%index, graph%item, n_domain, part_id)
+
+    do i = 1, graph%N
+      graph%node_domid_raw(i) = part_id(i) + 1
+    enddo
+
+    deallocate(part_id)
+  end subroutine monolis_part_nodal_graph
+
   subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
     use iso_c_binding
     implicit none

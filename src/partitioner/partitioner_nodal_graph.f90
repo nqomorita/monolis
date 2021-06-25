@@ -15,7 +15,7 @@ program monolis_partitioner_nodal_graph
 
   call monolis_input_graph(graph)
 
-  !call monolis_part_graph(graph, n_domain)
+  call monolis_part_nodal_graph(graph, n_domain)
 
   if(is_overlap)then
     !call monolis_get_overlap_commtable(mesh, graph, comm, node_list, n_domain)
@@ -26,7 +26,7 @@ program monolis_partitioner_nodal_graph
   !call monolis_visual_parted_mesh(mesh%nnode, mesh%node, mesh%nelem, mesh%nbase_func, mesh%elem, &
   !  graph%node_domid_raw, graph%elem_domid)
 
-  !call monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
+  !call monolis_output_parted_graph(graph, comm, node_list, n_domain)
 
   call monolis_part_finalize()
 

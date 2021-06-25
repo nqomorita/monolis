@@ -252,11 +252,42 @@ contains
     character :: fname*100
 
     fname = "index.dat"
-!    call monolis_input_graph_index(fname, graph%nnode, mesh%node)
+    call monolis_input_graph_index(fname, graph%N, graph%index)
 
     fname = "item.dat"
-!    call monolis_input_graph_item(fname, graph%item, graph%item, graph%item)
+    call monolis_input_graph_item(fname, (graph%index(graph%N+1)), graph%item)
   end subroutine monolis_input_graph
+
+  subroutine monolis_input_graph_index(fname, n, index)
+    use iso_c_binding
+    implicit none
+    integer(kint) :: n, i
+    integer(c_int), pointer :: index(:)
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+      read(20,*) n
+      allocate(index(n+1), source = 0)
+      do i = 1, n+1
+        read(20,*) index(i)
+      enddo
+    close(20)
+  end subroutine monolis_input_graph_index
+
+  subroutine monolis_input_graph_item(fname, n, index)
+    use iso_c_binding
+    implicit none
+    integer(kint) :: n, i
+    integer(c_int), pointer :: index(:)
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+!      allocate(index(n+1), source = 0)
+!      do i = 1, n+1
+!        read(20,*) index(i)
+!      enddo
+    close(20)
+  end subroutine monolis_input_graph_item
 
   subroutine monolis_output_mesh_node(fname, nnode, node, nid)
     implicit none
