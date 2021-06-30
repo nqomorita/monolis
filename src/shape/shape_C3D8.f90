@@ -30,10 +30,10 @@ module mod_monolis_c3d8_shape
   integer(kint), parameter :: monolis_C3D8_surf(4,6) = reshape([ &
      4, 3, 2, 1, &
      5, 6, 7, 8, &
-     1, 2, 5, 6, &
-     2, 3, 6, 7, &
-     3, 4, 7, 8, &
-     4, 1, 8, 1  ], [4,6])
+     1, 2, 6, 5, &
+     2, 3, 7, 6, &
+     3, 4, 8, 7, &
+     4, 1, 5, 8  ], [4,6])
 
     public :: monolis_C3D8_num_gauss_point
     public :: monolis_C3D8_weight
