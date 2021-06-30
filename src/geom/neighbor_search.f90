@@ -136,6 +136,8 @@ contains
     enddo
     enddo
 
+    if(nid == 0) return
+
     call monolis_qsort_int(tmp, 1, nid)
     call monolis_uniq_int(tmp, nid, newlen)
     allocate(id(newlen))
