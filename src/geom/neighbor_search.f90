@@ -136,10 +136,11 @@ contains
     enddo
     enddo
 
-    if(nid == 0) return
+    if(.not. allocated(tmp)) return
 
     call monolis_qsort_int(tmp, 1, nid)
     call monolis_uniq_int(tmp, nid, newlen)
+
     allocate(id(newlen))
     id = tmp(1:newlen)
     deallocate(tmp)
@@ -197,19 +198,15 @@ contains
       2, 4, 6  &
       ], [3,8])
 
-    is_in = .false.
+    is_in = .true.
     BB = monolis_nbsearch%BB
 
-    do i = 1, 8
-      pos(1) = BB_in(perm(1,i))
-      pos(2) = BB_in(perm(2,i))
-      pos(3) = BB_in(perm(3,i))
-      if( BB(1)-ths <= pos(1) .and. pos(1) <= BB(2)+ths .and. &
-        & BB(3)-ths <= pos(2) .and. pos(2) <= BB(4)+ths .and. &
-        & BB(5)-ths <= pos(3) .and. pos(3) <= BB(6)+ths )then
-        is_in = .true.
-      endif
-    enddo
+    if(BB_in(2) < BB(1)) is_in = .false.
+    if(BB_in(4) < BB(3)) is_in = .false.
+    if(BB_in(6) < BB(5)) is_in = .false.
+    if(BB_in(1) > BB(2)) is_in = .false.
+    if(BB_in(3) > BB(4)) is_in = .false.
+    if(BB_in(5) > BB(6)) is_in = .false.
 
     if(.not. is_in) return
 
