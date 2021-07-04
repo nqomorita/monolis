@@ -257,4 +257,45 @@ contains
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
   end subroutine monolis_solve_c
 
+  subroutine monolis_timer_finalize(monoPRM, monoCOM)
+    use mod_monolis_linalg_com
+    implicit none
+    type(monolis_prm) :: monoPRM
+    type(monolis_com) :: monoCOM
+    real(kdouble) :: t1, time(6)
+    logical :: is_output
+
+    call monolis_debug_header("monolis_timer_finalize")
+
+    call monolis_barrier(monoCOM%comm)
+    t1 = monolis_get_time()
+    monoPRM%tsol = t1 - monoPRM%tsol
+
+    if(monoPRM%show_summary .and. monoCOM%myrank == 0)then
+      write(*,"(a,i10)")" ** monolis converge iter:", monoPRM%curiter
+      write(*,"(a,1p4e10.3)")" ** monolis rel. residual:", monoPRM%curresid
+    endif
+
+    is_output = monoPRM%show_summary .or. monoPRM%show_time
+    if(is_output .and. monoCOM%myrank == 0)then
+      write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%tsol
+    endif
+
+    if(monoPRM%show_time .and. monoCOM%myrank == 0)then
+      time(1) = monoPRM%tprep
+      time(2) = monoPRM%tspmv
+      time(3) = monoPRM%tdotp
+      time(4) = monoPRM%tprec
+      time(5) = monoPRM%tcomm_dotp
+      time(6) = monoPRM%tcomm_spmv
+      call monolis_allreduce_R(6, time, monolis_sum, monoCOM%comm)
+      time = time/dble(monolis_global_commsize())
+      write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
+      write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
+      write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
+      write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
+      write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
+      write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
+    endif
+  end subroutine monolis_timer_finalize
 end module mod_monolis_solve

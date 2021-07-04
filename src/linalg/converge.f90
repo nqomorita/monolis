@@ -15,8 +15,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: B(:), B2
-    real(kind=kdouble) :: tdotp, tcomm
+    real(kdouble) :: B(:), B2
+    real(kdouble) :: tdotp, tcomm
     logical :: is_converge
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_set_converge")
@@ -36,9 +36,9 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: iter
-    real(kind=kdouble) :: R(:), R2, B2, resid
-    real(kind=kdouble) :: tdotp, tcomm
+    integer(kint) :: iter
+    real(kdouble) :: R(:), R2, B2, resid
+    real(kdouble) :: tdotp, tcomm
     logical :: is_converge
 
     is_converge = .false.
@@ -68,8 +68,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: iter
-    real(kind=kdouble) :: R2, B2, resid
+    integer(kint) :: iter
+    real(kdouble) :: R2, B2, resid
     logical :: is_converge
 
     is_converge = .false.
