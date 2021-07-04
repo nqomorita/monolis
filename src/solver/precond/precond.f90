@@ -20,7 +20,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: t1, t2
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_setup")
     t1 = monolis_get_time()
@@ -50,9 +50,9 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2
+    integer(kint) :: i
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: t1, t2
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_precond_apply")
@@ -90,7 +90,7 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: t1, t2
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_clear")
     t1 = monolis_get_time()

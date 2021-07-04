@@ -17,8 +17,8 @@ contains
 
   subroutine monolis_vec_copy_R(n, ndof, X, Y)
     implicit none
-    integer(kind=kint) :: i, n, ndof
-    real(kind=kdouble) :: X(:), Y(:)
+    integer(kint) :: i, n, ndof
+    real(kdouble) :: X(:), Y(:)
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_vec_copy_R")
@@ -31,9 +31,9 @@ contains
 
   subroutine monolis_vec_AXPY(n, ndof, alpha, X, Y, Z)
     implicit none
-    integer(kind=kint) :: i, n, ndof
-    real(kind=kdouble) :: alpha
-    real(kind=kdouble) :: X(:), Y(:), Z(:)
+    integer(kint) :: i, n, ndof
+    real(kdouble) :: alpha
+    real(kdouble) :: X(:), Y(:), Z(:)
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_vec_AXPY")
@@ -47,10 +47,10 @@ contains
   subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: i, n, ndof, sum
-    integer(kind=kint) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2, t3
-    real(kind=kdouble), optional :: tdotp, tcomm
+    integer(kint) :: i, n, ndof, sum
+    integer(kint) :: X(:), Y(:)
+    real(kdouble) :: t1, t2, t3
+    real(kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_I")
@@ -73,10 +73,10 @@ contains
   subroutine monolis_inner_product_R(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: i, n, ndof
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2, t3, sum
-    real(kind=kdouble), optional :: tdotp, tcomm
+    integer(kint) :: i, n, ndof
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: t1, t2, t3, sum
+    real(kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_inner_product_R")
@@ -99,9 +99,9 @@ contains
   subroutine monolis_inner_product_R_local(monoCOM, n, ndof, X, Y, sum)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kind=kint) :: i, n, ndof
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: sum
+    integer(kint) :: i, n, ndof
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: sum
 
     sum = 0.0d0
     do i = 1, n * ndof

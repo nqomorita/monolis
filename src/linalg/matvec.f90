@@ -13,9 +13,9 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
-    real(kind=kdouble) :: X(:), B(:), R(:)
-    real(kind=kdouble) :: tspmv, tcomm
+    integer(kint) :: i
+    real(kdouble) :: X(:), B(:), R(:)
+    real(kdouble) :: tspmv, tcomm
 
     call monolis_matvec(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
@@ -27,7 +27,7 @@ contains
   subroutine monolis_matvec_product(monolis, X, Y)
     implicit none
     type(monolis_structure) :: monolis
-    real(kind=kdouble) :: tspmv, tcomm
+    real(kdouble) :: tspmv, tcomm
     real(kdouble) :: X(:), Y(:)
 
     call monolis_matvec(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
@@ -37,9 +37,9 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: tspmv, tcomm
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble) :: t1, t2
+    real(kdouble) :: tspmv, tcomm
 
 #ifdef DEBUG
     call monolis_debug_header("monolis_matvec")
@@ -66,10 +66,10 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: X(:), Y(:), XT(NDOF), YT(NDOF)
-    real(kind=kdouble), pointer :: A(:)
+    integer(kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: X(:), Y(:), XT(NDOF), YT(NDOF)
+    real(kdouble), pointer :: A(:)
 
     N = monoMAT%N
     NDOF2 = NDOF*NDOF
@@ -102,11 +102,11 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, in, N, jS, jE
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: Y1
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: A(:)
+    integer(kint) :: i, j, in, N, jS, jE
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: Y1
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble), pointer :: A(:)
 
     N = monoMAT%N
     A => monoMAT%A
@@ -129,11 +129,11 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, in, N, jS, jE
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: X1, X2, X3, Y1, Y2, Y3
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: A(:)
+    integer(kint) :: i, j, in, N, jS, jE
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble), pointer :: A(:)
 
     N = monoMAT%N
     A => monoMAT%A

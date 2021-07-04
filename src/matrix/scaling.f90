@@ -18,13 +18,13 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NDOF2
-    integer(kind=kint) :: inod
-    integer(kind=kint) :: i, j, jS, jE, in, k, l
-    real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: A(:), X(:), B(:), diag(:)
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: t1, t2
+    integer(kint) :: N, NP, NDOF, NDOF2
+    integer(kint) :: inod
+    integer(kint) :: i, j, jS, jE, in, k, l
+    real(kdouble) :: tcomm
+    real(kdouble), pointer :: A(:), X(:), B(:), diag(:)
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_fw")
     if(.not. monoPRM%is_scaling) return
@@ -94,12 +94,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NDOF2
-    integer(kind=kint) :: i, j, k, l, in, jS, jE
-    real(kind=kdouble) :: tcomm
-    real(kind=kdouble), pointer :: A(:), B(:), X(:), diag(:)
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: t1, t2
+    integer(kint) :: N, NP, NDOF, NDOF2
+    integer(kint) :: i, j, k, l, in, jS, jE
+    real(kdouble) :: tcomm
+    real(kdouble), pointer :: A(:), B(:), X(:), diag(:)
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: t1, t2
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_bk")
     if(.not. monoPRM%is_scaling) return

@@ -107,7 +107,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    real(kdouble) :: t1
+    real(kdouble) :: t1, time(6)
     logical :: is_output
 
     call monolis_debug_header("monolis_timer_finalize")
@@ -127,12 +127,20 @@ contains
     endif
 
     if(monoPRM%show_time .and. monoCOM%myrank == 0)then
-      write(*,"(a,1p4e10.3)")"  - solution/prepost time:", monoPRM%tprep
-      write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", monoPRM%tspmv
-      write(*,"(a,1p4e10.3)")"  - solution/inner p time:", monoPRM%tdotp
-      write(*,"(a,1p4e10.3)")"  - solution/precond time:", monoPRM%tprec
-      write(*,"(a,1p4e10.3)")"  - (solution/comm dotp) :", monoPRM%tcomm_dotp
-      write(*,"(a,1p4e10.3)")"  - (solution/comm spmv) :", monoPRM%tcomm_spmv
+      time(1) = monoPRM%tprep
+      time(2) = monoPRM%tspmv
+      time(3) = monoPRM%tdotp
+      time(4) = monoPRM%tprec
+      time(5) = monoPRM%tcomm_dotp
+      time(6) = monoPRM%tcomm_spmv
+      call monolis_allreduce_R(6, time, monolis_sum, monoCOM%comm)
+      time = time/dble(monolis_global_commsize())
+      write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
+      write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
+      write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
+      write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
+      write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
+      write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
     endif
   end subroutine monolis_timer_finalize
 
