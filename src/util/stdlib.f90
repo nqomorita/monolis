@@ -81,17 +81,19 @@ contains
     integer(kint) :: i, in, id, nb
     integer(kint) :: nnode, nid(:)
     integer(kint) :: b(:,:)
-    integer(kint), allocatable :: perm(:)
+    integer(kint), allocatable :: temp(:), perm(:)
 
+    allocate(temp(nnode), source = 0)
     allocate(perm(nnode), source = 0)
     do i = 1, nnode
+      temp(i) = nid(i)
       perm(i) = i
     enddo
-    call monolis_qsort_int_with_perm(nid, 1, nnode, perm)
+    call monolis_qsort_int_with_perm(temp, 1, nnode, perm)
 
     do i = 1, nb
       in = b(1,i)
-      call monolis_bsearch_int(nid, 1, nnode, in, id)
+      call monolis_bsearch_int(temp, 1, nnode, in, id)
       if(id == -1)then
         b(1,i) = -1
       else

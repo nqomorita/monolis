@@ -281,7 +281,7 @@ contains
       write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%tsol
     endif
 
-    if(monoPRM%show_time .and. monoCOM%myrank == 0)then
+    if(monoPRM%show_time)then
       time(1) = monoPRM%tprep
       time(2) = monoPRM%tspmv
       time(3) = monoPRM%tdotp
@@ -290,12 +290,15 @@ contains
       time(6) = monoPRM%tcomm_spmv
       call monolis_allreduce_R(6, time, monolis_sum, monoCOM%comm)
       time = time/dble(monolis_global_commsize())
-      write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
-      write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
-      write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
-      write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
-      write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
-      write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
+
+      if(monoCOM%myrank == 0)then
+        write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
+        write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
+        write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
+        write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
+        write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
+        write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
+      endif
     endif
   end subroutine monolis_timer_finalize
 end module mod_monolis_solve

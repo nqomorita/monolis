@@ -135,6 +135,8 @@ contains
     integer(kint), pointer :: part_id(:)
     integer(c_int), pointer :: index(:), item(:)
     integer(kint) :: n_domain, nnode
+
+    call monolis_debug_header("monolis_get_partitioned_graph")
     call monolis_get_mesh_part_kway(nnode, index, item, n_domain, part_id)
   end subroutine monolis_get_partitioned_graph
 
