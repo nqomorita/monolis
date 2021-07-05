@@ -406,13 +406,19 @@ contains
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh(:)
-    integer(kint) :: n_domain, ncond_all, ndof, i, j, k, in, nid, ncond, shift
+    integer(kint) :: n_domain, ncond_all, ndof, i, j, k, in, nid, ncond, shift, nmin
     integer(kint) :: icond(:,:)
     real(kdouble) :: cond(:)
     integer(kint), allocatable :: temp(:), perm(:)
     character :: fname*100, fname_body*100, cnum*5
 
-    shift = -1
+    nmin = 1
+    shift = 0
+    do i = 1, n_domain
+      in = minval(mesh(i)%nid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = -1
 
     do i = 1, n_domain
       allocate(temp(mesh(i)%nnode), source = 0)
