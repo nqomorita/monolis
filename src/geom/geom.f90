@@ -8,7 +8,7 @@ module mod_monolis_geom
   public :: monolis_geom_get_local_position
 
   real(kdouble), parameter :: ths = 1.0d-8
-  real(kdouble), parameter :: threshup = 10.0d0
+  real(kdouble), parameter :: threshup = 1.0d4
 
 contains
 
