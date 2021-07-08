@@ -15,6 +15,7 @@ module mod_monolis_mesh
 
   type monolis_graph
     integer(kint) :: N = 0
+    integer(kint) :: nnode = 0
     integer(kint) :: nelem = 0
     !> node base
     integer(kint), pointer :: node_domid_raw(:) => null()
