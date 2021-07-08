@@ -20,7 +20,7 @@ program monolis_partitioner
   call monolis_part_graph(mesh, graph, n_domain)
 
   if(is_overlap)then
-    call monolis_get_overlap_commtable(mesh, graph, comm, node_list, n_domain)
+    call monolis_get_overlap_commtable(graph, comm, node_list, n_domain)
   else
     stop "monolis_partitioner: nonoverlapping partition is not supported"
   endif

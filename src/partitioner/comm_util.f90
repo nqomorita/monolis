@@ -13,9 +13,8 @@ module mod_monolis_comm_util
 
 contains
 
-  subroutine get_overlap_domain(mesh, graph, n_domain)
+  subroutine get_overlap_domain(graph, n_domain)
     implicit none
-    type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     integer(kint) :: nelem, n_domain
     integer(kint) :: i, j, in, id, maxid, minid, jS, jE, jn
@@ -57,16 +56,15 @@ contains
     enddo
   end subroutine get_overlap_domain
 
-  subroutine get_nnode_and_nid_at_subdomain(mesh, graph, local_node, nid, avg)
+  subroutine get_nnode_and_nid_at_subdomain(graph, local_node, nid, avg)
     implicit none
-    type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
     integer(kint) :: nnode, nid, in, j, jn, k, jS, jE
     integer(kint) :: count_in, count_out, avg
     logical, allocatable :: is_in(:)
 
-    nnode = mesh%nnode
+    nnode = graph%nnode
     allocate(is_in(nnode), source = .false.)
 
     do j = 1, local_node%nelem
@@ -137,9 +135,8 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
   end subroutine get_perm_node
 
-  subroutine get_nelem_and_eid_at_subdomain(mesh, graph, local_node, nid)
+  subroutine get_nelem_and_eid_at_subdomain(graph, local_node, nid)
     implicit none
-    type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
     integer(kint) :: nelem, nid, in, j, k, count_in, count_out, jS, jE, i
@@ -152,7 +149,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
       jS = graph%ebase_func(i) + 1
       jE = graph%ebase_func(i+1)
       do j = jS, jE
-      !do k = 1, mesh%nbase_func
         in = graph%connectivity(j)
         if(graph%node_domid_raw(in) == nid)then
           is_in(i) = .true.
@@ -238,16 +234,15 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
   end subroutine get_neib_PE
 
-  subroutine get_recv_table(mesh, local_node, graph, comm, n_domain)
+  subroutine get_recv_table(local_node, graph, comm, n_domain)
     implicit none
-    type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node(:)
     type(monolis_com) :: comm(:)
     integer(kint) :: i, in, j, jn, n_recv, n_domain, nnode
     integer(kint), allocatable :: node_master_localid(:)
 
-    nnode = mesh%nnode
+    nnode = graph%nnode
     allocate(node_master_localid(nnode), source = 0)
 
     do i = 1, n_domain
@@ -313,9 +308,8 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
   end subroutine reorder_recv_node
 
-  subroutine get_send_table(mesh, local_node, graph, comm, n_domain)
+  subroutine get_send_table(local_node, graph, comm, n_domain)
     implicit none
-    type(monolis_mesh) :: mesh
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node(:)
     type(monolis_com) :: comm(:)
@@ -323,16 +317,14 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     integer(kint) :: i, in, j, k, jn, jS, jE, n_domain, nnode, nelem, n_bound_node
     logical, allocatable :: is_bound(:)
 
-    nnode = mesh%nnode
-    nelem = graph%nelem
+    nnode = graph%nnode
     !> get is_bound
     allocate(is_bound(nnode), source = .false.)
-    do i = 1, nelem
+    do i = 1, graph%nelem
       if(graph%elem_domid(i) == -1)then
         jS = graph%ebase_func(i) + 1
         jE = graph%ebase_func(i+1)
         do j = jS, jE
-        !do k = 1, mesh%nbase_func
           in = graph%connectivity(j)
           is_bound(in) = .true.
         enddo

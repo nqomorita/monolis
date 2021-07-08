@@ -31,6 +31,7 @@ contains
 
     call monolis_get_partitioned_graph(mesh%nnode, index, item, n_domain, part_id)
 
+    graph%nnode = mesh%nnode
     graph%nelem = mesh%nelem
     do i = 1, mesh%nnode
       graph%node_domid_raw(i) = part_id(i) + 1
