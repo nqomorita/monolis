@@ -9,6 +9,7 @@ module mod_monolis_comm_overlap
   private
 
   public :: monolis_get_overlap_commtable
+  public :: get_commnication_table
 
 contains
 

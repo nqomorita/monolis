@@ -395,7 +395,6 @@ contains
       write(20,"(i0,x,i0)")in, kn
       do i = 1, nelem
         in = eid(i)
-        !if(in <= nelem_all) jn = global_eid(in)
         if(in > nelem_all) cycle
         write(20,"(i0,x,i0)")  global_eid(in)
       enddo
