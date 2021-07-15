@@ -31,6 +31,13 @@ module mod_monolis_mesh
     integer(c_int), pointer :: item(:) => null()
   end type monolis_graph
 
+  type monolis_graph_format
+    integer(kint) :: n_point
+    integer(kint), allocatable :: point_id(:)
+    integer(kint), allocatable :: n_adjacent(:)
+    integer(kint), allocatable :: adjacent_id(:)
+  end type monolis_graph_format
+
   type monolis_node_list
     integer(kint) :: nnode, nnode_in, nnode_out
     integer(kint) :: nelem, nelem_in, nelem_out

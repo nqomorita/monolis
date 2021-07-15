@@ -64,6 +64,28 @@ contains
     deallocate(part_id)
   end subroutine monolis_part_nodal_graph
 
+  subroutine monolis_get_graph_from_graph_format(format, graph)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_graph_format) :: format
+    integer(kint) :: i, j, in, nz
+
+    graph%N = format%n_point
+
+    nz = 0
+    do i = 1, format%n_point
+      nz = nz + format%n_adjacent(i)
+    enddo
+
+    allocate(graph%index(format%n_point+1), source = 0)
+    do i = 1, format%n_point
+      graph%index(i+1) = graph%index(i) + format%n_adjacent(i)
+    enddo
+
+    allocate(graph%item(nz), source = 0)
+    graph%item = format%adjacent_id
+  end subroutine monolis_get_graph_from_graph_format
+
   subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
     use iso_c_binding
     implicit none

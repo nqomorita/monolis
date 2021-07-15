@@ -246,48 +246,35 @@ contains
     close(20)
   end subroutine monolis_input_mesh_restart_data
 
-  subroutine monolis_input_graph(graph)
+  subroutine monolis_input_graph(fname, graph_format)
     implicit none
-    type(monolis_graph) :: graph
+    type(monolis_graph_format) :: graph_format
+    integer(kint) :: i, in, j, tmp, NZ
     character :: fname*100
 
-    fname = "index.dat"
-    call monolis_input_graph_index(fname, graph%N, graph%index)
-
-    fname = "item.dat"
-    call monolis_input_graph_item(fname, (graph%index(graph%N+1)), graph%item)
-  end subroutine monolis_input_graph
-
-  subroutine monolis_input_graph_index(fname, n, index)
-    use iso_c_binding
-    implicit none
-    integer(kint) :: n, i
-    integer(c_int), pointer :: index(:)
-    character :: fname*100
-
+    NZ = 0
     open(20, file = fname, status = "old")
-      read(20,*) n
-      allocate(index(n+1), source = 0)
-      do i = 1, n+1
-        read(20,*) index(i)
+      read(20,*) graph_format%n_point
+      do i = 1, graph_format%n_point
+        read(20,*) tmp, in, (tmp, j = 1, in)
+        NZ = NZ + in
       enddo
     close(20)
-  end subroutine monolis_input_graph_index
 
-  subroutine monolis_input_graph_item(fname, n, index)
-    use iso_c_binding
-    implicit none
-    integer(kint) :: n, i
-    integer(c_int), pointer :: index(:)
-    character :: fname*100
+    allocate(graph_format%point_id(graph_format%n_point), source = 0)
+    allocate(graph_format%n_adjacent(graph_format%n_point), source = 0)
+    allocate(graph_format%n_adjacent(NZ), source = 0)
 
+    NZ = 0
     open(20, file = fname, status = "old")
-!      allocate(index(n+1), source = 0)
-!      do i = 1, n+1
-!        read(20,*) index(i)
-!      enddo
+      read(20,*) graph_format%n_point
+      do i = 1, graph_format%n_point
+        read(20,*) graph_format%point_id(i), in, (graph_format%n_adjacent(NZ+j), j = 1, in)
+        graph_format%n_adjacent(i) = in
+        NZ = NZ + in
+      enddo
     close(20)
-  end subroutine monolis_input_graph_item
+  end subroutine monolis_input_graph
 
   subroutine monolis_output_mesh_node(fname, nnode, node, nid)
     implicit none
@@ -573,13 +560,12 @@ contains
     call monolis_debug_int("n_domain", n_domain)
   end subroutine monolis_get_part_arg
 
-  subroutine monolis_get_nodal_graph_part_arg(n_domain, is_overlap)
+  subroutine monolis_get_nodal_graph_part_arg(fname, n_domain)
     implicit none
     integer(kint) :: i, count, n, n_domain
-    character :: argc1*128, argc2*128
-    logical :: is_overlap
+    character :: argc1*128, argc2*128, fname*100
 
-    call monolis_debug_header("monolis_get_part_arg")
+    call monolis_debug_header("monolis_get_nodal_graph_part_arg")
 
     call monolis_set_debug(.true.)
 
@@ -587,15 +573,14 @@ contains
     if(count == 1)then
       call getarg(1, argc1)
       if(trim(argc1) == "-h")then
-        write(*,"(a)")"-n {num of subdomain}: the number of subdomain"
-        write(*,"(a)")"-t {N/O}: type of domain decomposition (N:non-overlapping, O:overlapping)"
+        write(*,"(a)")"-n {num of subdomain}"
+        write(*,"(a)")"-i {input file name}"
         write(*,"(a)")"-h: help"
         stop
       endif
     endif
 
     n_domain = 1
-    is_overlap = .true.
 
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
     do i = 1, count/2
@@ -605,9 +590,8 @@ contains
         read(argc2,*) n
         n_domain = n
 
-      elseif(trim(argc1) == "-t")then
-        if(trim(argc2) == "O") is_overlap = .true.
-        if(trim(argc2) == "N") is_overlap = .false.
+      elseif(trim(argc1) == "-i")then
+        fname = trim(argc2)
 
       else
         write(*,"(a)")"* monolis input arg error"
