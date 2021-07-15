@@ -116,6 +116,67 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     call get_perm_node(local_node%nnode, local_node%nid, local_node%nid_perm)
   end subroutine get_nnode_and_nid_at_subdomain
 
+  subroutine get_nnode_and_nid_at_subdomain_graph(graph, local_node, nid, avg)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_node_list) :: local_node
+    integer(kint) :: nnode, nid, in, i, j, jn, k, jS, jE
+    integer(kint) :: count_in, count_out, avg
+    logical, allocatable :: is_in(:)
+
+    nnode = graph%N
+    allocate(is_in(nnode), source = .false.)
+
+    do i = 1, nnode
+      if(graph%node_domid_raw(i) == nid)then
+        jS = graph%index(i) + 1
+        jE = graph%index(i+1)
+        do j = jS, jE
+          in = graph%item(j)
+          is_in(in) = .true.
+        enddo
+      endif
+    enddo
+
+    count_in = 0
+    count_out = 0
+    do j = 1, nnode
+      if(is_in(j))then
+        if(graph%node_domid_raw(j) /= nid)then
+          count_out = count_out + 1
+        else
+          count_in = count_in + 1
+        endif
+      endif
+    enddo
+
+    !> save to structure
+    local_node%nnode     = count_in + count_out
+    local_node%nnode_in  = count_in
+    local_node%nnode_out = count_out
+
+write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_out
+
+    avg = avg + local_node%nnode
+    allocate(local_node%nid(local_node%nnode), source = 0)
+
+    in = 1
+    do j = 1, nnode
+      if(is_in(j) .and. graph%node_domid_raw(j) == nid)then
+        local_node%nid(in) = j
+        in = in + 1
+      endif
+    enddo
+    do j = 1, nnode
+      if(is_in(j) .and. graph%node_domid_raw(j) /= nid)then
+        local_node%nid(in) = j
+        in = in + 1
+      endif
+    enddo
+
+    call get_perm_node(local_node%nnode, local_node%nid, local_node%nid_perm)
+  end subroutine get_nnode_and_nid_at_subdomain_graph
+
   subroutine get_perm_node(nnode, nid, perm)
     implicit none
     integer(kind=kint) :: i, in, nenode

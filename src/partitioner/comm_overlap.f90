@@ -8,10 +8,50 @@ module mod_monolis_comm_overlap
 
   private
 
+  public :: monolis_get_overlap_commtable_graph
   public :: monolis_get_overlap_commtable
   public :: get_commnication_table
 
 contains
+
+  subroutine monolis_get_overlap_commtable_graph(graph, comm, node_list, n_domain)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_com), allocatable :: comm(:)
+    type(monolis_node_list), allocatable :: node_list(:)
+    integer(kint) :: n_domain
+
+    call get_commnication_boundary_graph(graph, node_list, n_domain)
+    call get_commnication_table(graph, node_list, comm, n_domain)
+  end subroutine monolis_get_overlap_commtable_graph
+
+  subroutine get_commnication_boundary_graph(graph, node_list, n_domain)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_node_list), allocatable :: node_list(:)
+    integer(kint) :: n_domain
+    integer(kint) :: nid, in, j, k, avg
+
+    call monolis_debug_header("get_commnication_boundary_graph")
+
+    allocate(node_list(n_domain))
+
+    !> get local elem and eid
+    !call monolis_debug_header("get_nelem_and_eid_at_subdomain_graph")
+    !do nid =  1, n_domain
+    !  call get_nelem_and_eid_at_subdomain_graph(graph, node_list(nid), nid)
+    !enddo
+
+    !> get node and nid
+    avg = 0
+    call monolis_debug_header("get_nnode_and_nid_at_subdomain")
+    write(*,"(a)")"**     nid,    total, internal,     comm"
+    do nid =  1, n_domain
+      call get_nnode_and_nid_at_subdomain_graph(graph, node_list(nid), nid, avg)
+    enddo
+
+    write(*,"(4i10)") avg/n_domain
+  end subroutine get_commnication_boundary_graph
 
   subroutine monolis_get_overlap_commtable(graph, comm, node_list, n_domain)
     implicit none

@@ -95,7 +95,7 @@ contains
     integer(kint) :: i, n_domain, shift
     character :: cnum*5, output_dir*100, fname*100, fmain*100
 
-    call monolis_debug_header("monolis_output_mesh")
+    call monolis_debug_header("monolis_output_parted_graph")
 
     output_dir = "parted/"
     call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
@@ -106,9 +106,9 @@ contains
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
 
-      fname = trim(output_dir)//trim(fmain)//trim(cnum)
+      fname = trim(output_dir)//trim(fmain)//"."//trim(cnum)
       call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nelem, node_list(i)%eid, &
-        graph%ebase_func, graph%connectivity, shift)
+        graph%index, graph%item, shift)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
@@ -296,13 +296,13 @@ contains
 
     allocate(graph_format%point_id(graph_format%n_point), source = 0)
     allocate(graph_format%n_adjacent(graph_format%n_point), source = 0)
-    allocate(graph_format%n_adjacent(NZ), source = 0)
+    allocate(graph_format%adjacent_id(NZ), source = 0)
 
     NZ = 0
     open(20, file = fname, status = "old")
       read(20,*) graph_format%n_point
       do i = 1, graph_format%n_point
-        read(20,*) graph_format%point_id(i), in, (graph_format%n_adjacent(NZ+j), j = 1, in)
+        read(20,*) graph_format%point_id(i), in, (graph_format%adjacent_id(NZ+j), j = 1, in)
         graph_format%n_adjacent(i) = in
         NZ = NZ + in
       enddo
@@ -738,10 +738,22 @@ contains
   subroutine monolis_output_graph_format(fname, nnode, nid, nelem, eid, ebase_func, connectivity, shift)
     implicit none
     integer(kint) :: nnode, nelem
-    integer(kint) :: i, in, shift
+    integer(kint) :: i, in, j, jS, shift
     integer(kint) :: nid(:), eid(:), ebase_func(:), connectivity(:)
     character :: fname*100
 
+    open(20, file = fname, status = "replace")
+      write(20,"(i0)")nnode
+      do i = 1, nnode
+        jS = ebase_func(i)
+        in = ebase_func(i+1) - ebase_func(i)
+        write(20,"(i0,x,i0,$)") i, in
+        do j = 1, in
+          write(20,"(x,i0,$)") connectivity(jS+j)
+        enddo
+        write(20,*)""
+      enddo
+    close(20)
   end subroutine monolis_output_graph_format
 
 end module mod_monolis_io

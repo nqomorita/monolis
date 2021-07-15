@@ -20,7 +20,7 @@ program monolis_partitioner_nodal_graph
 
   call monolis_part_nodal_graph(graph, n_domain)
 
-  call monolis_get_overlap_commtable(graph, comm, node_list, n_domain)
+  call monolis_get_overlap_commtable_graph(graph, comm, node_list, n_domain)
 
   call monolis_output_parted_graph(fname, graph, comm, node_list, n_domain)
 
@@ -30,8 +30,8 @@ contains
 
   subroutine monolis_part_finalize()
     implicit none
-    !if(allocated(comm)) deallocate(comm)
-    !if(allocated(node_list)) deallocate(node_list)
+    if(allocated(comm)) deallocate(comm)
+    if(allocated(node_list)) deallocate(node_list)
   end subroutine monolis_part_finalize
 
 end program monolis_partitioner_nodal_graph
