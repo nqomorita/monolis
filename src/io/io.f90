@@ -108,8 +108,8 @@ contains
       write(cnum,"(i0)") i-1
 
       fname = trim(output_dir)//trim(fmain)//"."//trim(cnum)
-      call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nelem, node_list(i)%eid, &
-        graph%index, graph%item, shift)
+      call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nid_perm, &
+        node_list(i)%index, node_list(i)%item, shift)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
@@ -739,21 +739,32 @@ contains
     enddo
   end subroutine monolis_get_dbc_all_arg
 
-  subroutine monolis_output_graph_format(fname, nnode, nid, nelem, eid, ebase_func, connectivity, shift)
+  subroutine monolis_output_graph_format(fname, nnode, nid, perm, ebase_func, connectivity, shift)
     implicit none
-    integer(kint) :: nnode, nelem
-    integer(kint) :: i, in, j, jS, shift
-    integer(kint) :: nid(:), eid(:), ebase_func(:), connectivity(:)
+    integer(kint) :: nnode
+    integer(kint) :: i, in, j, jn, k, jS, shift, id
+    integer(kint) :: nid(:), ebase_func(:), connectivity(:), perm(:)
+    integer(kint), allocatable :: t1(:), p1(:)
     character :: fname*100
+
+    allocate(t1(nnode), source = 0)
+    allocate(p1(nnode), source = 0)
+    t1 = nid
+    do i = 1, nnode
+      p1(i) = i
+    enddo
+    call monolis_qsort_int_with_perm(t1, 1, nnode, p1)
 
     open(20, file = fname, status = "replace")
       write(20,"(i0)")nnode
       do i = 1, nnode
         jS = ebase_func(i)
         in = ebase_func(i+1) - ebase_func(i)
-        write(20,"(i0,x,i0,$)") i, in
+        write(20,"(i0,x,i0,$)") i+shift, in
         do j = 1, in
-          write(20,"(x,i0,$)") connectivity(jS+j)
+          k = connectivity(jS+j)
+          call monolis_bsearch_int(t1, 1, nnode, k, id)
+          write(20,"(x,i0,$)") p1(id)+shift
         enddo
         write(20,*)""
       enddo

@@ -36,12 +36,6 @@ contains
 
     allocate(node_list(n_domain))
 
-    !> get local elem and eid
-    !call monolis_debug_header("get_nelem_and_eid_at_subdomain_graph")
-    !do nid =  1, n_domain
-    !  call get_nelem_and_eid_at_subdomain_graph(graph, node_list(nid), nid)
-    !enddo
-
     !> get node and nid
     avg = 0
     call monolis_debug_header("get_nnode_and_nid_at_subdomain")

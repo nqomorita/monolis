@@ -117,10 +117,11 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
   end subroutine get_nnode_and_nid_at_subdomain
 
   subroutine get_nnode_and_nid_at_subdomain_graph(graph, local_node, nid, avg)
+    use mod_monolis_stdlib
     implicit none
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
-    integer(kint) :: nnode, nid, in, i, j, jn, k, jS, jE
+    integer(kint) :: nnode, nid, in, i, j, jn, k, jS, jE, id
     integer(kint) :: count_in, count_out, avg
     logical, allocatable :: is_in(:)
 
@@ -175,14 +176,48 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     enddo
 
     call get_perm_node(local_node%nnode, local_node%nid, local_node%nid_perm)
+
+    !> reconstruct nodal graph
+    allocate(local_node%index(local_node%nnode+1), source = 0)
+
+    k = 0
+    do i = 1, local_node%nnode
+      in = local_node%nid(i)
+      jS = graph%index(in) + 1
+      jE = graph%index(in+1)
+      jn = 0
+      do j = jS, jE
+        in = graph%item(j)
+        if(is_in(in)) jn = jn + 1
+      enddo
+      k = k + 1
+      local_node%index(k+1) = local_node%index(k) + jn
+    enddo
+
+    jn = local_node%index(local_node%nnode+1)
+    allocate(local_node%item(jn), source = 0)
+
+    k = 0
+    do i = 1, local_node%nnode
+      in = local_node%nid(i)
+      jS = graph%index(in) + 1
+      jE = graph%index(in+1)
+      do j = jS, jE
+        in = graph%item(j)
+        if(is_in(in))then
+          k = k + 1
+          local_node%item(k) = in
+        endif
+      enddo
+    enddo
   end subroutine get_nnode_and_nid_at_subdomain_graph
 
   subroutine get_perm_node(nnode, nid, perm)
     implicit none
-    integer(kind=kint) :: i, in, nenode
-    integer(kind=kint) :: imax, imin
-    integer(kind=kint) :: nnode, nid(:)
-    integer(kind=kint), allocatable :: perm(:)
+    integer(kint) :: i, in, nenode
+    integer(kint) :: imax, imin
+    integer(kint) :: nnode, nid(:)
+    integer(kint), allocatable :: perm(:)
 
     imax = maxval(nid)
     imin = minval(nid)

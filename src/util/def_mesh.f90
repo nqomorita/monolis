@@ -44,6 +44,8 @@ module mod_monolis_mesh
     integer(kint), allocatable :: nid(:)
     integer(kint), allocatable :: nid_perm(:)
     integer(kint), allocatable :: eid(:)
+    integer(kint), allocatable :: index(:)
+    integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: recv_item_perm(:)
     integer(kint), allocatable :: recv_item_domid(:)
   end type monolis_node_list

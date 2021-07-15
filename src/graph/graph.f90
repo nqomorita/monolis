@@ -71,6 +71,7 @@ contains
     integer(kint) :: i, j, in, nz
 
     graph%N = format%n_point
+    graph%nnode = format%n_point
 
     nz = 0
     do i = 1, format%n_point
