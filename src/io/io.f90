@@ -87,9 +87,10 @@ contains
     enddo
   end subroutine monolis_output_mesh
 
-  subroutine monolis_output_parted_graph(fmain, graph, comm, node_list, n_domain)
+  subroutine monolis_output_parted_graph(fmain, graph, graph_format, comm, node_list, n_domain)
     implicit none
     type(monolis_graph) :: graph
+    type(monolis_graph_format) :: graph_format
     type(monolis_com) :: comm(:)
     type(monolis_node_list) :: node_list(:)
     integer(kint) :: i, n_domain, shift
@@ -101,7 +102,7 @@ contains
     call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
 
     shift = 0
-    !if(minval(mesh%nid) == 0) shift = -1 !> for C binding
+    if(minval(graph_format%point_id) == 0) shift = -1 !> for C binding
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
@@ -117,6 +118,9 @@ contains
       fname = trim(output_dir)//"monolis.recv."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
         comm(i)%recv_index, comm(i)%recv_item)
+
+      fname = trim(output_dir)//"node.id."//trim(cnum)
+      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, graph_format%point_id, node_list(i)%nid)
     enddo
   end subroutine monolis_output_parted_graph
 

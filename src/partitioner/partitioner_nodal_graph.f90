@@ -22,7 +22,7 @@ program monolis_partitioner_nodal_graph
 
   call monolis_get_overlap_commtable_graph(graph, comm, node_list, n_domain)
 
-  call monolis_output_parted_graph(fname, graph, comm, node_list, n_domain)
+  call monolis_output_parted_graph(fname, graph, graph_format, comm, node_list, n_domain)
 
   call monolis_part_finalize()
 

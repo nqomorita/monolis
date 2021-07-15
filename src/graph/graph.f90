@@ -84,6 +84,8 @@ contains
 
     allocate(graph%item(nz), source = 0)
     graph%item = format%adjacent_id
+
+    if(minval(graph%item) == 0) graph%item = graph%item + 1
   end subroutine monolis_get_graph_from_graph_format
 
   subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
