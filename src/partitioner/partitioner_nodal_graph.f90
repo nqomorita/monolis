@@ -7,8 +7,8 @@ program monolis_partitioner_nodal_graph
   implicit none
   type(monolis_graph) :: graph
   type(monolis_graph_format) :: graph_format
-  !type(monolis_com), allocatable :: comm(:)
-  !type(monolis_node_list), allocatable :: node_list(:)
+  type(monolis_com), allocatable :: comm(:)
+  type(monolis_node_list), allocatable :: node_list(:)
   integer(kint) :: n_domain
   character :: fname*100
 
@@ -20,9 +20,9 @@ program monolis_partitioner_nodal_graph
 
   call monolis_part_nodal_graph(graph, n_domain)
 
-  !call monolis_get_overlap_commtable(mesh, graph, comm, node_list, n_domain)
+  call monolis_get_overlap_commtable(graph, comm, node_list, n_domain)
 
-  !call monolis_output_parted_graph(graph, comm, node_list, n_domain)
+  call monolis_output_parted_graph(fname, graph, comm, node_list, n_domain)
 
   call monolis_part_finalize()
 

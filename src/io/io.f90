@@ -87,6 +87,39 @@ contains
     enddo
   end subroutine monolis_output_mesh
 
+  subroutine monolis_output_parted_graph(fmain, graph, comm, node_list, n_domain)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_com) :: comm(:)
+    type(monolis_node_list) :: node_list(:)
+    integer(kint) :: i, n_domain, shift
+    character :: cnum*5, output_dir*100, fname*100, fmain*100
+
+    call monolis_debug_header("monolis_output_mesh")
+
+    output_dir = "parted/"
+    call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
+
+    shift = 0
+    !if(minval(mesh%nid) == 0) shift = -1 !> for C binding
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+
+      fname = trim(output_dir)//trim(fmain)//trim(cnum)
+      call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nelem, node_list(i)%eid, &
+        graph%ebase_func, graph%connectivity, shift)
+
+      fname = trim(output_dir)//"monolis.send."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
+        comm(i)%send_index, comm(i)%send_item)
+
+      fname = trim(output_dir)//"monolis.recv."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
+        comm(i)%recv_index, comm(i)%recv_item)
+    enddo
+  end subroutine monolis_output_parted_graph
+
   subroutine monolis_input_mesh_node(fname, nnode, node, nid)
     implicit none
     integer(kint) :: nnode, i, t(4)
@@ -581,6 +614,7 @@ contains
     endif
 
     n_domain = 1
+    fname = "graph.dat"
 
     if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
     do i = 1, count/2
@@ -700,4 +734,14 @@ contains
       read(argc1,*) val(i)
     enddo
   end subroutine monolis_get_dbc_all_arg
+
+  subroutine monolis_output_graph_format(fname, nnode, nid, nelem, eid, ebase_func, connectivity, shift)
+    implicit none
+    integer(kint) :: nnode, nelem
+    integer(kint) :: i, in, shift
+    integer(kint) :: nid(:), eid(:), ebase_func(:), connectivity(:)
+    character :: fname*100
+
+  end subroutine monolis_output_graph_format
+
 end module mod_monolis_io
