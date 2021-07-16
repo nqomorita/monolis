@@ -633,13 +633,14 @@ void monolis_solve(
     is_measurement);
 }
 
-int monolis_get_internal_node_number(
-  MONOLIS* mat)
+void monolis_get_internal_node_number(
+  MONOLIS* mat,
+  int*     nnode_internal)
 {
   if (mat->com.commsize > 1) {
-    return mat->com.internal_nnode;
+    *nnode_internal = mat->com.internal_nnode;
   } else {
-    return mat->mat.N;
+    *nnode_internal = mat->mat.N;
   }
 }
 
