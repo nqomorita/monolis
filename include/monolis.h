@@ -208,10 +208,22 @@ void monolis_solve(
 
 
 /* ddm utils*/
+void monolis_get_internal_node_number(
+  MONOLIS* mat,
+  int      nnode_internal);
+
+/*
+void monolis_get_internal_node_1d_bool(
+  MONOLIS* mat,
+  int      nnode,
+  bool*    is_internal_elem);
+*/
+
 void monolis_get_internal_elem_1d_bool(
   MONOLIS* mat,
   int      nelem,
   bool*    is_internal_elem);
+
 
 
 

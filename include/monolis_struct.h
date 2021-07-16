@@ -75,6 +75,8 @@ typedef struct {
   int myrank;
   int comm;
   int commsize;
+  int nnode;
+  int nelem;
   int internal_nnode;
   int internal_nelem;
 

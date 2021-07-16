@@ -95,6 +95,7 @@ void monolis_com_input_comm_table(
   int nin;
   fp = monolis_open_comm_table(fp, input_file_dir, "node.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
+    mat->com.nnode = nitem;
     mat->com.internal_nnode = nin;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
@@ -104,6 +105,7 @@ void monolis_com_input_comm_table(
 
   fp = monolis_open_comm_table(fp, input_file_dir, "elem.id", mat->com.myrank);
     fscanf(fp, "%d %d", &nitem, &nin);
+    mat->com.nelem = nitem;
     mat->com.internal_nelem = nin;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
@@ -629,6 +631,17 @@ void monolis_solve(
     timelog,
     summary,
     is_measurement);
+}
+
+void monolis_get_internal_node_number(
+  MONOLIS* mat,
+  int      nnode_internal)
+{
+  if (mat->com.commsize > 1) {
+    nnode_internal = mat->com.internal_nnode;
+  } else {
+    nnode_internal = mat->com.nnode;
+  }
 }
 
 void monolis_get_internal_elem_1d_bool(
