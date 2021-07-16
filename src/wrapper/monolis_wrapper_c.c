@@ -640,7 +640,7 @@ void monolis_get_internal_node_number(
   if (mat->com.commsize > 1) {
     nnode_internal = mat->com.internal_nnode;
   } else {
-    nnode_internal = mat->com.nnode;
+    nnode_internal = mat->mat.N;
   }
 }
 
