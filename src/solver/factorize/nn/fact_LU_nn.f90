@@ -19,8 +19,6 @@ module mod_monolis_fact_LU_nn
   integer(kint), allocatable :: FI1L(:)
   integer(kint), allocatable :: FI1U(:)
 
-  logical, save :: INITIALIZED = .false.
-
 contains
 
   subroutine monolis_init_LU_inner_nn(monoPRM, monoCOM, monoMAT)
@@ -37,6 +35,13 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
 
+    deallocate(Dlu0)
+    deallocate(ALlu0)
+    deallocate(AUlu0)
+    deallocate(inumFI1L)
+    deallocate(inumFI1U)
+    deallocate(FI1L)
+    deallocate(FI1U)
   end subroutine monolis_clear_LU_inner_nn
 
   subroutine monolis_fact_LU_inner_nn(monoPRM, monoCOM, monoMAT)

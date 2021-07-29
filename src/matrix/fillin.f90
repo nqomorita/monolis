@@ -51,7 +51,7 @@ contains
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i  )
       do j = jS, jE
-        if(i < monoMAT%item(j))then
+        if(i < monoMAT%item(j) .and. monoMAT%item(j) <= N)then
           in = in + 1
         endif
       enddo
@@ -60,7 +60,7 @@ contains
 
       in = 0
       do j = jS, jE
-        if(i < monoMAT%item(j))then
+        if(i < monoMAT%item(j) .and. monoMAT%item(j) <= N)then
           in = in + 1
           tree(i)%ancestor(in) = monoMAT%item(j)
         endif
@@ -129,8 +129,8 @@ contains
     in = 0
     monoTREE%indexU(0) = 0
     do i = 1, N
-      monoTREE%indexU(i) = monoTREE%indexU(i-1) + tree(i)%n_ancestor! + 1
-      in = in + tree(i)%n_ancestor !+ 1
+      monoTREE%indexU(i) = monoTREE%indexU(i-1) + tree(i)%n_ancestor
+      in = in + tree(i)%n_ancestor
     enddo
     NPU = in
     monoTREE%NPU = in
