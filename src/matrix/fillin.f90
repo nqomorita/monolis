@@ -25,8 +25,6 @@ contains
     type(monolis_mat) :: monoMAT
     type(monolis_mat_LDU) :: monoTREE
     type(monolis_fillin), pointer:: tree(:)
-    integer(kint), pointer :: indexU(:), indexL(:)
-    integer(kint), pointer :: itemU(:), itemL(:)
     integer(kint), pointer :: array(:)
     integer(kint), pointer :: fillin_mask(:)
     integer(kint), pointer :: child_mask(:)
@@ -128,59 +126,52 @@ contains
 
     !> upper part
     allocate(monoTREE%indexU(0:N))
-    indexU => monoTREE%indexU
     in = 0
-    indexU(0) = 0
+    monoTREE%indexU(0) = 0
     do i = 1, N
-      indexU(i) = indexU(i-1) + tree(i)%n_ancestor + 1
-      in = in + tree(i)%n_ancestor + 1
+      monoTREE%indexU(i) = monoTREE%indexU(i-1) + tree(i)%n_ancestor! + 1
+      in = in + tree(i)%n_ancestor !+ 1
     enddo
     NPU = in
     monoTREE%NPU = in
 
     allocate(monoTREE%itemU(NPU))
-    itemU => monoTREE%itemU
     in = 0
     do i = 1, N
-      in = in + 1
-      itemU(in) = i
       do j = 1, tree(i)%n_ancestor
         in = in + 1
-        itemU(in) = tree(i)%ancestor(j)
+        monoTREE%itemU(in) = tree(i)%ancestor(j)
       enddo
     enddo
 
     if(is_asym)then
       !> lower part
-      indexL => monoTREE%indexL
-      itemL => monoTREE%itemL
-
       allocate(count(N))
-      allocate(indexL(0:N))
+      allocate(monoTREE%indexL(0:N))
       count = 0
-      indexL(0) = 0
+      monoTREE%indexL(0) = 0
 
-      do i = 1, indexU(N)
-        in = itemU(i)
+      do i = 1, monoTREE%indexU(N)
+        in = monoTREE%itemU(i)
         count(in) = count(in) + 1
       enddo
 
       do i = 1, N
-        indexL(i) = indexL(i-1) + count(i)
+        monoTREE%indexL(i) = monoTREE%indexL(i-1) + count(i)
       enddo
 
       NPL = NPU
       c = 1
-      allocate(itemL(NPL))
+      allocate(monoTREE%itemL(NPL))
       do i = 1, N
         aa:do k = 1, i
-          jS = indexU(k-1) + 1
-          jE = indexU(k)
+          jS = monoTREE%indexU(k-1) + 1
+          jE = monoTREE%indexU(k)
           do j = jS, jE
-            in = itemU(j)
+            in = monoTREE%itemU(j)
             if(i < in) cycle aa
             if(i == in)then
-              itemL(c) = k
+              monoTREE%itemL(c) = k
               c = c + 1
               cycle aa
             endif
@@ -197,12 +188,6 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     type(monolis_mat_LDU) :: monoTREE
-    integer(kint), pointer :: indexU(:)
-    integer(kint), pointer :: itemU(:)
-    integer(kint), pointer :: indexL(:)
-    integer(kint), pointer :: itemL(:)
-    real(kdouble), pointer :: AU(:)
-    real(kdouble), pointer :: AL(:)
     integer(kint) :: N, NPU, NPL, NDOF, NDOF2
     integer(kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
     integer(kint) :: in, jn
@@ -212,43 +197,39 @@ contains
     NPU = monoTREE%NPU
     NDOF = monoTREE%NDOF
     NDOF2 = NDOF*NDOF
-    indexU => monoTREE%indexU
-    itemU => monoTREE%itemU
 
     !value
-    allocate(monoTREE%U(NDOF2*NPU))
-    AU => monoTREE%U
-    AU = 0.0d0
-
+    allocate(monoTREE%D(NDOF2*N), source = 0.0d0)
     do i = 1, N
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i)
       do j = jS, jE
         in = monoMAT%item(j)
         if(i == in)then
-          jn = indexU(i-1)+1
           do l = 1, NDOF2
-            AU(NDOF2*(jn-1) + l) = monoMAT%A(NDOF2*(j-1) + l)
+            monoTREE%D(NDOF2*(i-1) + l) = monoMAT%A(NDOF2*(j-1) + l)
           enddo
         endif
       enddo
     enddo
 
+    allocate(monoTREE%U(NDOF2*NPU), source = 0.0d0)
+
     do k = 1, N
-      iS = indexU(k-1) + 1
-      iE = indexU(k)
+      iS = monoTREE%indexU(k-1) + 1
+      iE = monoTREE%indexU(k)
       jS = monoMAT%index(k-1) + 1
       jE = monoMAT%index(k)
       aa:do j = jS, jE
         jn = monoMAT%item(j)
         if(k < jn)then
           do i = iS, iE
-            in = itemU(i)
+            in = monoTREE%itemU(i)
             if(jn == in)then
               lS = NDOF2*(i-1)
               lE = NDOF2*(j-1)
               do l = 1, NDOF2
-                AU(lS + l) = monoMAT%A(lE + l)
+                monoTREE%U(lS + l) = monoMAT%A(lE + l)
               enddo
               iS = iS + 1
               cycle aa
@@ -259,28 +240,25 @@ contains
     enddo
 
     if(is_asym)then
-      indexL => monoTREE%indexL
-      itemL => monoTREE%itemL
-      NPL = monoTREE%NPL
-      allocate(monoTREE%L(NDOF2*NPL))
-      AL => monoTREE%L
-      AL = 0.0d0
+      monoTREE%NPL = NPU
+      NPL = NPU
+      allocate(monoTREE%L(NDOF2*NPL), source = 0.0d0)
 
       do k = 1, N
-        iS = indexL(k-1) + 1
-        iE = indexL(k)
+        iS = monoTREE%indexL(k-1) + 1
+        iE = monoTREE%indexL(k)
         jS = monoMAT%index(k-1) + 1
         jE = monoMAT%index(k)
         bb:do j = jS, jE
           jn = monoMAT%item(j)
           if(jn < k)then
             do i = iS, iE
-              in = itemL(i)
+              in = monoTREE%itemL(i)
               if(jn == in)then
                 lS = NDOF2*(i-1)
                 lE = NDOF2*(j-1)
                 do l = 1, NDOF2
-                  AL(lS + l) = monoMAT%A(lE + l)
+                  monoTREE%L(lS + l) = monoMAT%A(lE + l)
                 enddo
                 iS = iS + 1
                 cycle bb

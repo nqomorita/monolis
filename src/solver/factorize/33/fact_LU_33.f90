@@ -35,17 +35,17 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, k, in, jn, kn, nn
-    integer(kind=kint) :: imax
-    integer(kind=kint), allocatable :: is_fill(:)
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: d1, d2, d3
-    real(kind=kdouble) :: u1, u2, u3
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: L(9)
-    real(kind=kdouble), allocatable :: U(:)
-    real(kind=kdouble), pointer :: AD(:), AU(:)
+    integer(kint) :: N, NP
+    integer(kint) :: i, j, k, in, jn, kn, nn
+    integer(kint) :: imax
+    integer(kint), allocatable :: is_fill(:)
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: d1, d2, d3
+    real(kdouble) :: u1, u2, u3
+    real(kdouble) :: t1, t2
+    real(kdouble) :: L(9)
+    real(kdouble), allocatable :: U(:)
+    real(kdouble), pointer :: AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -162,14 +162,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
-    integer(kind=kint) :: N, NP
-    integer(kind=kint) :: i, j, in, jS, jE
-    integer(kind=kint), pointer :: idxU(:), itemU(:)
-    real(kind=kdouble) :: t1, t2
-    real(kind=kdouble) :: X1, X2, X3
-    real(kind=kdouble) :: A1, A2, A3
-    real(kind=kdouble), allocatable :: S(:)
-    real(kind=kdouble), pointer :: X(:), AD(:), AU(:)
+    integer(kint) :: N, NP
+    integer(kint) :: i, j, in, jS, jE
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble) :: t1, t2
+    real(kdouble) :: X1, X2, X3
+    real(kdouble) :: A1, A2, A3
+    real(kdouble), allocatable :: S(:)
+    real(kdouble), pointer :: X(:), AD(:), AU(:)
 
     N  = monoMAT%N
     NP = monoMAT%NP
@@ -188,9 +188,9 @@ contains
       A2 = S(3*i-1)
       A3 = S(3*i  )
       in = idxU(i-1)+1
-      X(3*i-2) = AU(9*in-8)*(X(3*i-2) - A1)
-      X(3*i-1) = AU(9*in-4)*(X(3*i-1) - A2 - AU(9*in-7)*X(3*i-2))
-      X(3*i  ) = AU(9*in  )*(X(3*i  ) - A3 - AU(9*in-6)*X(3*i-2) - AU(9*in-3)*X(3*i-1))
+      X(3*i-2) = X(3*i-2) - A1
+      X(3*i-1) = X(3*i-1) - A2 - AU(9*in-7)*X(3*i-2)
+      X(3*i  ) = X(3*i  ) - A3 - AU(9*in-6)*X(3*i-2) - AU(9*in-3)*X(3*i-1)
       X1 = X(3*i-2)
       X2 = X(3*i-1)
       X3 = X(3*i  )
@@ -226,9 +226,9 @@ contains
         A3 = A3 + AU(9*j-2)*X1 + AU(9*j-1)*X2 + AU(9*j  )*X3
       enddo
       in = idxU(i-1)+1
-      X(3*i  ) = AU(9*in  )*(X(3*i  ) - A3)
-      X(3*i-1) = AU(9*in-4)*(X(3*i-1) - A2 - AU(9*in-3)*X(3*i))
-      X(3*i-2) = AU(9*in-8)*(X(3*i-2) - A1 - AU(9*in-7)*X(3*i-1) - AU(9*in-6)*X(3*i))
+      X(3*i  ) = X(3*i  ) - A3
+      X(3*i-1) = X(3*i-1) - A2 - AU(9*in-3)*X(3*i)
+      X(3*i-2) = X(3*i-2) - A1 - AU(9*in-7)*X(3*i-1) - AU(9*in-6)*X(3*i)
     enddo
 
     deallocate(S)
