@@ -108,7 +108,7 @@ contains
     integer(kint) :: conn_t(NBF)
 
     conn_t = conn + 1
-    call monolis_sparse_matrix_add_matrix(index, item, A, NBF, NDOF, conn_t, conn_t, mat)
+    call monolis_sparse_matrix_add_matrix(index, item, A, NBF, NBF, NDOF, conn_t, conn_t, mat)
   end subroutine monolis_add_sparse_matrix_c
 
   subroutine monolis_set_Dirichlet_bc_c(N, NZ, NDOF, index, item, indexR, itemR, permR, &

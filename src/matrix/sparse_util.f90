@@ -264,44 +264,48 @@ contains
     real(kdouble), intent(in) :: stiff(:,:)
 
     call monolis_sparse_matrix_add_matrix(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
-      & nbase_func, monolis%MAT%ndof, connectivity, connectivity, stiff)
+      & nbase_func, nbase_func, monolis%MAT%ndof, connectivity, connectivity, stiff)
   end subroutine monolis_add_matrix_to_sparse_matrix
 
-  subroutine monolis_add_matrix_to_sparse_matrix_offdiag(monolis, nbase_func, c1, c2, stiff)
+  subroutine monolis_add_matrix_to_sparse_matrix_offdiag(monolis, n1, n2, c1, c2, stiff)
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint), intent(in) :: nbase_func, c1(nbase_func), c2(nbase_func)
+    integer(kint), intent(in) :: n1, n2, c1(n1), c2(n2)
     real(kdouble), intent(in) :: stiff(:,:)
 
     call monolis_sparse_matrix_add_matrix(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
-      & nbase_func, monolis%MAT%ndof, c1, c2, stiff)
+      & n1, n2, monolis%MAT%ndof, c1, c2, stiff)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag
 
-  subroutine monolis_sparse_matrix_add_matrix(index, item, A, nnode, ndof, e1t, e2t, stiff)
+  subroutine monolis_sparse_matrix_add_matrix(index, item, A, n1, n2, ndof, e1t, e2t, stiff)
     implicit none
-    integer(kint), intent(in) :: nnode, ndof
-    integer(kint), intent(in) :: index(0:), item(:), e1t(nnode), e2t(nnode)
+    integer(kint), intent(in) :: n1, n2, ndof
+    integer(kint), intent(in) :: index(0:), item(:), e1t(n1), e2t(n2)
     real(kdouble), intent(inout) :: A(:)
-    real(kdouble), intent(in) :: stiff(nnode*ndof,nnode*ndof)
-    integer(kint) :: e1(nnode), e2(nnode)
+    real(kdouble), intent(in) :: stiff(n1*ndof,n2*ndof)
+    integer(kint) :: e1(n1), e2(n2)
     integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
-    integer(kint) :: eperm1(nnode), eperm2(nnode)
-    real(kdouble) :: temp(nnode*ndof,nnode*ndof)
+    integer(kint) :: eperm1(n1), eperm2(n2)
+    real(kdouble) :: temp(n1*ndof,n2*ndof)
 
     NDOF2 = ndof*ndof
+
     e1 = e1t
-    e2 = e2t
-    do i = 1, nnode
+    do i = 1, n1
       eperm1(i) = i
+    enddo
+    call monolis_qsort_int_with_perm(e1, 1, n1, eperm1)
+
+    e2 = e2t
+    do i = 1, n2
       eperm2(i) = i
     enddo
-    call monolis_qsort_int_with_perm(e1, 1, nnode, eperm1)
-    call monolis_qsort_int_with_perm(e2, 1, nnode, eperm2)
+    call monolis_qsort_int_with_perm(e2, 1, n2, eperm2)
 
     temp = 0.0d0
-    do i = 1, nnode
+    do i = 1, n2
       i1 = eperm2(i)
-      do j = 1, nnode
+      do j = 1, n1
         j1 = eperm1(j)
         do i2 = 1, ndof
           do j2 = 1, ndof
@@ -311,11 +315,11 @@ contains
       enddo
     enddo
 
-    do i = 1, nnode
+    do i = 1, n1
       in = e1(i)
       jS = index(in-1) + 1
       jE = index(in)
-      aa:do j = 1, nnode
+      aa:do j = 1, n2
         do k = jS, jE
           jn = item(k)
           if(jn == e2(j))then
@@ -329,7 +333,7 @@ contains
             cycle aa
           endif
         enddo
-      call monolis_stop_by_matrix_assemble(e1(i), e1(j))
+      call monolis_stop_by_matrix_assemble(e1(i), e2(j))
       enddo aa
     enddo
   end subroutine monolis_sparse_matrix_add_matrix
