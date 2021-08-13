@@ -122,9 +122,11 @@ program main
 end program main
 ```
 
-### 要素行列への要素行列の足し込み
+### 全体剛性行列への足し込み
 
-要素行列への行列成分の足し込みは、`monolis_assemble_sparse_matrix` 関数で行う。
+#### 要素剛性行列の足し込み
+
+要素剛性行列を全体剛性行列へ足し込む場合は、`monolis_add_matrix_to_sparse_matrix` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。
 
 ```fortran
@@ -138,14 +140,33 @@ end program main
   nbase_func = 2
   connectivity(1) = 1; connectivity(2) = 3 !> 要素番号 1 の定義
   call get_localmat(local_mat) !> user subroutine
-  call monolis_assemble_sparse_matrix(A, nbase_func, connectivity, local_mat)
+  call monolis_add_matrix_to_sparse_matrix(A, nbase_func, connectivity, local_mat)
+```
+
+#### 行列成分の足し込み
+
+行列成分を全体剛性行列へ足し込む場合は、`monolis_add_scalar_to_sparse_matrix` 関数で行う。
+`monolis_get_nonzero_pattern` 関数の実行後に利用できる。
+
+```fortran
+  type(monolis_structure) :: A !> Ax = b の係数行列
+  integer(kint) :: i !> 行列成分を足し込む行番号
+  integer(kint) :: j !> 行列成分を足し込む列番号
+  integer(kint) :: sub_i !> 行列成分を足し込む小行列の行番号
+  integer(kint) :: sub_j !> 行列成分を足し込む小行列の列番号
+  real(kdouble) :: val !> 要素剛性行列
+  !> (i, j) 番目に位置するブロック行列の (sub_i, sub_j) 自由度に値 val を足し込む
+
+  !> 疎行列への足し込み
+  do !> 行列成分の個数
+    call monolis_add_scalar_to_sparse_matrix(A, i, j, sub_i, sub_j, val)
+  enddo
 ```
 
 ### Dirichlet 境界条件の追加
 
 要素行列への Dirichlet 境界条件の追加は、`monolis_set_Dirichlet_bc` 関数で行う。
-`monolis_get_nonzero_pattern` 関数の実行後に利用できる。
-`monolis_assemble_sparse_matrix` 関数の実行後に利用するのが望ましい。
+全体剛性行列を作成した後に利用できる。
 
 ```fortran
   type(monolis_structure) :: A !> Ax = b の係数行列
