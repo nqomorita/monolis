@@ -441,9 +441,17 @@ contains
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh(:)
-    integer(kint) :: n_domain, i, j, in, nnode
+    integer(kint) :: n_domain, i, j, in, nnode, shift, nmin
     real(kdouble) :: node(:,:)
     character :: fname*100, fname_body*100, cnum*5
+
+    shift = 0
+    nmin = 1
+    do i = 1, n_domain
+      in = minval(mesh(i)%nid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = 1
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
@@ -452,8 +460,8 @@ contains
       open(20, file = fname, status = "replace")
         write(20,"(i0)") mesh(i)%nnode
         do j = 1, mesh(i)%nnode
-          in = mesh(i)%nid(j)
-          write(20,"(1p3e22.12)") mesh(i)%node(1,j), mesh(i)%node(2,j), mesh(i)%node(3,j)
+          in = mesh(i)%nid(j) + shift
+          write(20,"(1p3e22.12)") node(1,in), node(2,in), node(3,in)
         enddo
       close(20)
     enddo
