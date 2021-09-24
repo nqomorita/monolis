@@ -25,7 +25,7 @@ if [ "$#" == 0 ]; then
     FLAG_SCALAPACK=0
 fi
 
-if [ "$FLAG_SCALAPACK" ]; then
+if [ "$FLAG_SCALAPACK" == 1 ]; then
     cd submodule/scalapack
     mkdir build
     cd build
@@ -35,7 +35,7 @@ if [ "$FLAG_SCALAPACK" ]; then
     cd ../../..
 fi
 
-if [ "$FLAG_MUMPS" ]; then
+if [ "$FLAG_MUMPS" == 1 ]; then
     #cd submodule/mumps
     #mkdir build
     #cd build
@@ -57,7 +57,7 @@ if [ "$FLAG_MUMPS" ]; then
     cd ../..
 fi
 
-if [ "$FLAG_METIS" ]; then
+if [ "$FLAG_METIS" == 1 ]; then
     cd submodule/METIS
     make config prefix=$BASE_DIR
     make install

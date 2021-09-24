@@ -121,6 +121,9 @@ contains
 
       fname = trim(output_dir)//"node.id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, node_list(i)%nnode_in, graph_format%point_id, node_list(i)%nid)
+
+      fname = trim(output_dir)//"elem.id."//trim(cnum)
+      call monolis_output_mesh_global_eid_null(fname)
     enddo
   end subroutine monolis_output_parted_graph
 
@@ -424,6 +427,15 @@ contains
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_eid
+
+  subroutine monolis_output_mesh_global_eid_null(fname)
+    implicit none
+    character :: fname*100
+
+    open(20, file = fname, status = "replace")
+      write(20,"(i0,x,i0)")0, 0
+    close(20)
+  end subroutine monolis_output_mesh_global_eid_null
 
   subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond_all, ndof, icond, cond)
     use mod_monolis_mesh
