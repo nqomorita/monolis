@@ -160,20 +160,40 @@ contains
     implicit none
     integer(kint), pointer :: part_id(:)
     integer(c_int), pointer :: index(:), item(:)
+    integer(c_int), pointer :: node_wgt(:) => null()
+    integer(c_int), pointer :: edge_wgt(:) => null()
     integer(kint) :: n_domain, nnode
 
     call monolis_debug_header("monolis_get_partitioned_graph")
-    call monolis_get_mesh_part_kway(nnode, index, item, n_domain, part_id)
+    call monolis_get_mesh_part_kway(nnode, index, item, n_domain, node_wgt, edge_wgt, part_id)
   end subroutine monolis_get_partitioned_graph
 
-  subroutine monolis_get_mesh_part_kway(nnode, index, item, npart, part_id)
+  subroutine monolis_get_partitioned_graph_with_node_weight(nnode, index, item, n_domain, wgt, part_id)
+    use iso_c_binding
+    implicit none
+    integer(kint), pointer :: part_id(:), wgt(:)
+    integer(c_int), pointer :: index(:), item(:)
+    integer(c_int), pointer :: node_wgt(:)
+    integer(c_int), pointer :: edge_wgt(:) => null()
+    integer(kint) :: n_domain, nnode
+
+    call monolis_debug_header("monolis_get_partitioned_graph_with_node_weight")
+    allocate(node_wgt(nnode), source = 0)
+    node_wgt = wgt
+
+    call monolis_get_mesh_part_kway(nnode, index, item, n_domain, node_wgt, edge_wgt, part_id)
+
+    deallocate(node_wgt)
+  end subroutine monolis_get_partitioned_graph_with_node_weight
+
+  subroutine monolis_get_mesh_part_kway(nnode, index, item, npart, node_wgt, edge_wgt, part_id)
     use iso_c_binding
     implicit none
     integer(kint) :: nnode, ncon, npart, objval
     integer(kint), pointer :: part_id(:)
-    integer(kint), pointer :: vwgtm(:)  => null()
-    integer(kint), pointer :: vsize(:)  => null()
-    integer(kint), pointer :: adjwgt(:) => null()
+    integer(c_int), pointer :: node_wgt(:)
+    integer(c_int), pointer :: edge_wgt(:)
+    integer(kint), pointer :: vsize(:) => null()
     integer(kint), pointer :: ubvec(:)  => null()
     real(kdouble), pointer :: options(:) => null()
     real(kdouble), pointer :: tpwgts(:) => null()
@@ -186,8 +206,8 @@ contains
       !> convert to 0 origin
       item = item - 1
 #ifdef WITH_METIS
-      call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
-      !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, vwgtm, vsize, adjwgt, npart, tpwgts, ubvec, &
+      call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
+      !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
         & options, objval, part_id)
       !> convert to 1 origin
       item = item + 1
