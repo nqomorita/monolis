@@ -437,6 +437,28 @@ contains
     close(20)
   end subroutine monolis_output_mesh_global_eid_null
 
+  subroutine monolis_par_output_node(n_domain, mesh, fname_body, node)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh(:)
+    integer(kint) :: n_domain, i, j, in, nnode
+    real(kdouble) :: node(:,:)
+    character :: fname*100, fname_body*100, cnum*5
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+
+      open(20, file = fname, status = "replace")
+        write(20,"(i0)") mesh(i)%nnode
+        do j = 1, mesh(i)%nnode
+          in = mesh(i)%nid(j)
+          write(20,"(1p3e22.12)") mesh(i)%node(1,j), mesh(i)%node(2,j), mesh(i)%node(3,j)
+        enddo
+      close(20)
+    enddo
+  end subroutine monolis_par_output_node
+
   subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond_all, ndof, icond, cond)
     use mod_monolis_mesh
     implicit none
