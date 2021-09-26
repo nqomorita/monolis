@@ -154,6 +154,24 @@ contains
     call monolis_debug_int("nnode", nnode)
   end subroutine monolis_input_mesh_node
 
+  subroutine monolis_input_mesh_distval(fname, nnode, ndof, val, label)
+    implicit none
+    integer(kint) :: nnode, ndof, i, j
+    real(kdouble), allocatable :: val(:,:)
+    character :: fname*100, label*100
+
+    open(20, file = fname, status = "old")
+      read(20,"(a100)") label
+      read(20,*) nnode, ndof
+      allocate(val(ndof,nnode), source = 0.0d0)
+      do i = 1, nnode
+        read(20,*) (val(j,i), j = 1, ndof)
+      enddo
+    close(20)
+
+    call monolis_debug_int("nnode", nnode)
+  end subroutine monolis_input_mesh_distval
+
   subroutine monolis_input_mesh_elem(fname, nelem, nbase, elem, eid)
     implicit none
     integer(kint) :: nelem, nbase, i, j
@@ -466,6 +484,37 @@ contains
       close(20)
     enddo
   end subroutine monolis_par_output_node
+
+  subroutine monolis_par_output_distval(n_domain, mesh, fname_body, ndof, val, label)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh(:)
+    integer(kint) :: n_domain, i, j, k, in, nnode, shift, nmin, ndof
+    real(kdouble) :: val(:,:)
+    character :: fname*100, fname_body*100, cnum*5, label*100
+
+    shift = 0
+    nmin = 1
+    do i = 1, n_domain
+      in = minval(mesh(i)%nid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = 1
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+
+      open(20, file = fname, status = "replace")
+        write(20,"(a)") trim(label)
+        write(20,"(i0,x,i0)") mesh(i)%nnode, ndof
+        do j = 1, mesh(i)%nnode
+          in = mesh(i)%nid(j) + shift
+          write(20,"(1p10e22.12)") (val(k,in), k = 1, ndof)
+        enddo
+      close(20)
+    enddo
+  end subroutine monolis_par_output_distval
 
   subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond_all, ndof, icond, cond)
     use mod_monolis_mesh
