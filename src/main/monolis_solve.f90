@@ -244,7 +244,7 @@ contains
     monolis%PRM%is_reordering = .false.
     monolis%PRM%is_init_x     = .true.
     monolis%PRM%is_debug      = .false.
-    monolis%PRM%is_check_diag= .false.
+    monolis%PRM%is_check_diag= .true.
     monolis%PRM%is_measurement= .false.
     monolis%PRM%show_iterlog  = .false.
     monolis%PRM%show_time     = .false.
@@ -253,7 +253,7 @@ contains
     if(iterlog == 1) monolis%PRM%show_iterlog  = .true.
     if(timelog == 1) monolis%PRM%show_time     = .true.
     if(summary == 1) monolis%PRM%show_summary  = .true.
-    if(is_check_diag == 1) monolis%PRM%is_check_diag= .true.
+    if(is_check_diag == 0) monolis%PRM%is_check_diag= .false.
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)

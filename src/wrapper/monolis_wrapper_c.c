@@ -131,6 +131,7 @@ void monolis_initialize(
     mat->prm.is_reordering = false;
     mat->prm.is_init_x = true;
     mat->prm.is_debug = false;
+    mat->prm.is_check_diag = true;
     mat->prm.show_iterlog = false;
     mat->prm.show_timelog = false;
     mat->prm.show_summary = true;
@@ -591,7 +592,7 @@ void monolis_solve(
   int iterlog = 0;
   int timelog = 0;
   int summary = 0;
-  int is_check_diag = 0;
+  int is_check_diag = 1;
   int is_measurement = 0;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
@@ -599,7 +600,7 @@ void monolis_solve(
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
   if(mat->prm.show_summary) summary = 1;
-  if(mat->prm.is_check_diag) is_check_diag = 1;
+  if(!mat->prm.is_check_diag) is_check_diag = 0;
   if(mat->prm.is_measurement) is_measurement = 1;
 
   monolis_solve_c_main(
