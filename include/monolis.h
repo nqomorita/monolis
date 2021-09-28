@@ -89,6 +89,10 @@ void monolis_set_tolerance(MONOLIS* mat, double value);
   default: false */
 void monolis_set_performance_measurement (MONOLIS* mat, bool   flag);
 
+/* enable to check the value of diagonal components
+  default: true */
+void monolis_set_check_diag (MONOLIS* mat, bool   flag);
+
 /* show convergence history (rerative residual per iteration)
   default: false */
 void monolis_show_iterlog (MONOLIS* mat, bool   flag);

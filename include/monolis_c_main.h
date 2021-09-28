@@ -108,6 +108,7 @@ void monolis_solve_c_main(
   int      iterlog,
   int      timelog,
   int      summary,
+  int      is_check_diag,
   int      is_measurement);
 
 double monolis_allreduce_double_scalar_c_main(

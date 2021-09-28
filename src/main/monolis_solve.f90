@@ -189,7 +189,7 @@ contains
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog, summary, &
-    is_measurement) &
+    is_check_diag, is_measurement) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -198,7 +198,7 @@ contains
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), value :: method, precond, maxiter
     integer(c_int), intent(in), value :: iterlog, timelog, summary
-    integer(c_int), intent(in), value :: is_measurement
+    integer(c_int), intent(in), value :: is_check_diag, is_measurement
     integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -244,6 +244,7 @@ contains
     monolis%PRM%is_reordering = .false.
     monolis%PRM%is_init_x     = .true.
     monolis%PRM%is_debug      = .false.
+    monolis%PRM%is_check_diag= .false.
     monolis%PRM%is_measurement= .false.
     monolis%PRM%show_iterlog  = .false.
     monolis%PRM%show_time     = .false.
@@ -252,6 +253,7 @@ contains
     if(iterlog == 1) monolis%PRM%show_iterlog  = .true.
     if(timelog == 1) monolis%PRM%show_time     = .true.
     if(summary == 1) monolis%PRM%show_summary  = .true.
+    if(is_check_diag == 1) monolis%PRM%is_check_diag= .true.
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)

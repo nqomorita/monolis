@@ -179,18 +179,18 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
+    integer(kint) :: i, j, k, jS, jE, in, kn, N, NDOF, NDOF2
     real(kdouble) :: t1, t2
 
     if(.not. monoPRM%is_check_diag) return
     call monolis_debug_header("monolis_check_diagonal")
     t1 = monolis_get_time()
 
-    NP =  monoMAT%NP
+    N =  monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
-    do i = 1, NP
+    do i = 1, N
       jS = monoMAT%index(i-1) + 1
       jE = monoMAT%index(i)
       do j = jS, jE

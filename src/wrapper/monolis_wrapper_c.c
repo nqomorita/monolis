@@ -10,6 +10,7 @@ void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag
 void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
 void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
 void monolis_set_performance_measurement (MONOLIS* mat, bool   flag) {mat->prm.is_measurement = flag;}
+void monolis_set_check_diag (MONOLIS* mat, bool flag) {mat->prm.is_check_diag = flag;}
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
@@ -299,6 +300,7 @@ void monolis_copy_param(
   out->prm.tol = in->prm.tol;
   out->prm.curresid = in->prm.curresid;
   out->prm.is_scaling = in->prm.is_scaling;
+  out->prm.is_check_diag = in->prm.is_check_diag;
   out->prm.is_reordering = in->prm.is_reordering;
   out->prm.is_init_x = in->prm.is_init_x;
   out->prm.is_debug = in->prm.is_debug;
@@ -589,6 +591,7 @@ void monolis_solve(
   int iterlog = 0;
   int timelog = 0;
   int summary = 0;
+  int is_check_diag = 0;
   int is_measurement = 0;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
@@ -596,6 +599,7 @@ void monolis_solve(
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
   if(mat->prm.show_summary) summary = 1;
+  if(mat->prm.is_check_diag) is_check_diag = 1;
   if(mat->prm.is_measurement) is_measurement = 1;
 
   monolis_solve_c_main(
@@ -630,6 +634,7 @@ void monolis_solve(
     iterlog,
     timelog,
     summary,
+    is_check_diag,
     is_measurement);
 }
 
