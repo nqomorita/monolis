@@ -9,13 +9,13 @@
 ### 関数一覧
 
 - 反復解法の設定
-    - monolis_set_method(monolis, method_param)
+    - monolis_param_set_method(monolis, method_param)
 - 反復法前処理の設定
-    - monolis_set_precond(monolis, prec_param)
+    - monolis_param_set_precond(monolis, prec_param)
 - 最大反復回数の設定
-    - monolis_set_maxiter(monolis, int_param)
+    - monolis_param_set_maxiter(monolis, int_param)
 - 収束判定閾値の設定
-    - monolis_set_tolerance(monolis, double_param)
+    - monolis_param_set_tolerance(monolis, double_param)
 
 <!--
 - 入力係数行列のスケーリングの設定
@@ -39,7 +39,7 @@
 ### 反復解法の設定
 
 ```fortran
-  monolis_set_method(
+  monolis_param_set_method(
       monolis_structure   monolis,
       int                 method_param)
 ```
@@ -67,13 +67,13 @@
   use mod_monolis
   implicit none
   type(monolis_structure) :: A !> Ax = b の係数行列
-  call monolis_set_method(A, monolis_iter_CG) !> CG 法の設定
+  call monolis_param_set_method(A, monolis_iter_CG) !> CG 法の設定
 ```
 
 ### 反復法前処理の設定
 
 ```fortran
-  monolis_set_precond(
+  monolis_param_set_precond(
       monolis_structure   monolis,
       int                 prec_param)
 ```
@@ -103,13 +103,13 @@
   use mod_monolis
   implicit none
   type(monolis_structure) :: A !> Ax = b の係数行列
-  call monolis_set_precond(A, monolis_prec_DIAG) !> 対角スケーリング前処理の設定
+  call monolis_param_set_precond(A, monolis_prec_DIAG) !> 対角スケーリング前処理の設定
 ```
 
 ### 最大反復回数の設定
 
 ```fortran
-  monolis_set_maxiter(
+  monolis_param_set_maxiter(
       monolis_structure   monolis,
       int                 maxiter)
 ```
@@ -122,13 +122,13 @@
   use mod_monolis
   implicit none
   type(monolis_structure) :: A !> Ax = b の係数行列
-  call monolis_set_maxiter(A, 10000) !> 反復法の最大反復回数を 10000 回に設定
+  call monolis_param_set_maxiter(A, 10000) !> 反復法の最大反復回数を 10000 回に設定
 ```
 
 ### 収束判定閾値の設定
 
 ```fortran
-  monolis_set_tolerance(
+  monolis_param_set_tolerance(
       monolis_structure   monolis,
       double              threshold)
 ```
@@ -141,5 +141,5 @@
   use mod_monolis
   implicit none
   type(monolis_structure) :: A !> Ax = b の係数行列
-  call monolis_set_tolerance(A, 1.0d-8) !> 反復法の収束判定閾値を 1.0e-8 回に設定
+  call monolis_param_set_tolerance(A, 1.0d-8) !> 反復法の収束判定閾値を 1.0e-8 回に設定
 ```
