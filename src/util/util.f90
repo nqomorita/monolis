@@ -103,21 +103,24 @@ contains
     monoPRM%tcomm_spmv = 0.0d0
   end subroutine monolis_timer_initialize
 
-  function monolis_get_input_filename(fname_in)
+  function monolis_get_input_filename(fname_in, fname_dir)
     implicit none
     integer(kint) :: comm_size, myrank
     character(*) :: fname_in
     character :: cnum*6, output_dir*12
     character(monolis_charlen) :: monolis_get_input_filename
+    character(*), optional :: fname_dir
 
     comm_size = monolis_global_commsize()
     myrank = monolis_global_myrank()
     if(comm_size > 1)then
       output_dir = "parted/"
+      if(present(fname_dir)) output_dir = trim(fname_dir)//"/parted/"
       write(cnum,"(i0)") myrank
       monolis_get_input_filename = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
     else
       monolis_get_input_filename = trim(fname_in)
+      if(present(fname_dir)) monolis_get_input_filename = trim(fname_dir)//"/"//trim(fname_in)
     endif
   end function monolis_get_input_filename
 
