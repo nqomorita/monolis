@@ -35,6 +35,9 @@ contains
       call monolis_precond_SOR_setup(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
       call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_MUMPS_LOCAL)then
+      call monolis_precond_MUMPS_setup_local()
+      call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_setup(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_MF)then
@@ -68,6 +71,8 @@ contains
     elseif(monoPRM%precond == monolis_prec_SOR)then
       call monolis_precond_SOR_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
+      call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
+    elseif(monoPRM%precond == monolis_prec_MUMPS_LOCAL)then
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_apply(monoPRM, monoCOM, monoMAT, X, Y)
@@ -104,6 +109,8 @@ contains
     elseif(monoPRM%precond == monolis_prec_SOR)then
       call monolis_precond_SOR_clear(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_MUMPS)then
+      call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
+    elseif(monoPRM%precond == monolis_prec_MUMPS_LOCAL)then
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
     elseif(monoPRM%precond == monolis_prec_ROM)then
       call monolis_precond_ROM_clear(monoPRM, monoCOM, monoMAT)

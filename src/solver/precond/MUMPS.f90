@@ -27,6 +27,11 @@ module mod_monolis_precond_mumps
 
 contains
 
+  subroutine monolis_precond_MUMPS_setup_local()
+   implicit none
+   is_self = .true.
+  end subroutine monolis_precond_MUMPS_setup_local
+
   subroutine monolis_precond_mumps_setup(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM

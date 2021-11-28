@@ -55,10 +55,15 @@ contains
 #endif
   end subroutine monolis_mpi_finalize
 
-  subroutine monolis_com_initialize(monoCOM)
+  subroutine monolis_com_initialize(monoCOM, is_entire_in)
     implicit none
     type(monolis_com) :: monoCOM
     integer(kint) :: ierr, commsize, myrank
+    logical :: is_entire
+    logical, optional :: is_entire_in
+
+    is_entire = .false.
+    if(present(is_entire_in)) is_entire = is_entire_in
 
     monoCOM%myrank = 0
     monoCOM%comm = 0
@@ -82,6 +87,12 @@ contains
     monoCOM%comm = MPI_COMM_WORLD
     monoCOM%commsize = commsize
     monoCOM%myrank = myrank
+
+    if(is_entire)then
+      monoCOM%comm = MPI_COMM_SELF
+      monoCOM%commsize = 1
+      monoCOM%myrank = 0
+    endif
 #endif
   end subroutine monolis_com_initialize
 

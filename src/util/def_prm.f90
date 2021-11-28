@@ -32,6 +32,7 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_prec_MUMPS  = 9
   integer(kint), parameter :: monolis_prec_ROM    = 10
   integer(kint), parameter :: monolis_prec_MF     = 11
+  integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 12
 
   character*24, dimension(12) :: monolis_str_iter = (/&
   & "CG                 ", &

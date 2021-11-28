@@ -16,6 +16,7 @@ module mod_monolis_util
   public :: monolis_global_initialize
   public :: monolis_global_finalize
   public :: monolis_initialize
+  public :: monolis_initialize_entire
   public :: monolis_finalize
   public :: monolis_timer_initialize
   !public :: monolis_timer_finalize
@@ -76,6 +77,17 @@ contains
     call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize
 
+  subroutine monolis_initialize_entire(monolis, fname_in)
+    implicit none
+    type(monolis_structure) :: monolis
+    character(*) :: fname_in
+
+    call monolis_prm_initialize(monolis%PRM, fname_in)
+    call monolis_com_initialize(monolis%COM, .true.)
+    call monolis_mat_initialize(monolis%MAT)
+    call monolis_com_input_comm_table(monolis%COM, fname_in)
+  end subroutine monolis_initialize_entire
+
   subroutine monolis_finalize(monolis)
     implicit none
     type(monolis_structure) :: monolis
@@ -107,7 +119,7 @@ contains
     implicit none
     integer(kint) :: comm_size, myrank
     character(*) :: fname_in
-    character :: cnum*6, output_dir*12
+    character :: cnum*6, output_dir*100
     character(monolis_charlen) :: monolis_get_input_filename
     character(*), optional :: fname_dir
 
