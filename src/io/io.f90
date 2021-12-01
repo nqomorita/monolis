@@ -611,6 +611,7 @@ contains
         write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
       enddo
 
+      if(nbase == 3) etype = " tri  "
       if(nbase == 4) etype = " tet  "
       if(nbase == 8) etype = " hex  "
       if(nbase ==10) etype = " tet2 "
