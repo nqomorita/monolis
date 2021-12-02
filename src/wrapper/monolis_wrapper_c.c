@@ -53,6 +53,7 @@ void monolis_com_input_comm_table(
     mat->com.recv_index = (int*)calloc(2, sizeof(int));
     mat->com.recv_item = (int*)calloc(1, sizeof(int));
     mat->com.global_node_id = (int*)calloc(1, sizeof(int));
+    mat->com.global_elem_id = (int*)calloc(1, sizeof(int));
     return;
   }
 
@@ -164,7 +165,23 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat)
 {
+  free(mat->com.send_neib_pe);
+  free(mat->com.send_index);
+  free(mat->com.send_item);
+  free(mat->com.recv_neib_pe);
+  free(mat->com.recv_index);
+  free(mat->com.recv_item);
+  free(mat->com.global_node_id);
+  free(mat->com.global_elem_id);
 
+  free(mat->mat.A);
+  free(mat->mat.X);
+  free(mat->mat.B);
+  free(mat->mat.index);
+  free(mat->mat.item);
+  free(mat->mat.indexR);
+  free(mat->mat.itemR);
+  free(mat->mat.permR);
 }
 
 /* mat clear */
