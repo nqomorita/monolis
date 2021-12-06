@@ -48,7 +48,7 @@ module mod_monolis_prm
   & "IR                 ", &
   & "GMRES              "/)
 
-  character*24, dimension(0:11)  :: monolis_str_prec = (/&
+  character*24, dimension(0:12)  :: monolis_str_prec = (/&
   & "None  ", &
   & "Diag  ", &
   & "ILU   ", &
@@ -60,7 +60,8 @@ module mod_monolis_prm
   & "Direct", &
   & "MUMPS ", &
   & "ROM   ", &
-  & "MF    "/)
+  & "MF    ", &
+  & "MUMPS "/)
 
   type monolis_prm
     integer(kint) :: method = 1
