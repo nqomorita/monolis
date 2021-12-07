@@ -189,7 +189,7 @@ contains
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog, summary, &
-    is_check_diag, is_measurement) &
+    is_check_diag, is_measurement, is_init_x) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -198,7 +198,7 @@ contains
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), value :: method, precond, maxiter
     integer(c_int), intent(in), value :: iterlog, timelog, summary
-    integer(c_int), intent(in), value :: is_check_diag, is_measurement
+    integer(c_int), intent(in), value :: is_check_diag, is_measurement, is_init_x
     integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -254,6 +254,7 @@ contains
     if(timelog == 1) monolis%PRM%show_time     = .true.
     if(summary == 1) monolis%PRM%show_summary  = .true.
     if(is_check_diag == 0) monolis%PRM%is_check_diag= .false.
+    if(is_init_x == 0) monolis%PRM%is_init_x= .false.
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)

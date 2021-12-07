@@ -47,9 +47,9 @@ contains
     allocate(M(NDOF*NP), source = 0.0d0)
     allocate(S(NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
-    if(is_converge) return
     call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, R, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    if(is_converge) return
     call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
     call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
     call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)

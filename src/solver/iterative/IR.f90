@@ -40,7 +40,8 @@ contains
     allocate(D(NDOF*NP)); D = 0.0d0
 
     call monolis_IR_setup(monoPRM, monoCOM, monoMAT)
-    call monolis_inner_product_R(monoCOM, N, NDOF, B, B, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_inner_product_R(monoCOM, N, NDOF, R, R, B2, monoPRM%tdotp, monoPRM%tcomm_dotp)
 
     call monolis_vec_copy_R(N, NDOF, B, R)
 

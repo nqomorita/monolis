@@ -55,7 +55,7 @@ contains
     SN  = CS    + 1
 
     call monolis_residual(monoCOM, monoMAT, X, B, WW(:,R), monoPRM%tspmv, monoPRM%tcomm_spmv)
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, BNRM2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, WW(:,R), BNRM2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
     if(is_converge) return
 
     ITER = 0

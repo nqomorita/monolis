@@ -42,9 +42,9 @@ contains
     allocate(Q(NDOF*NP), source = 0.0d0)
     allocate(P(NDOF*NP), source = 0.0d0)
 
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
-    if(is_converge) return
     call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
+    call monolis_set_converge(monoPRM, monoCOM, monoMAT, R, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    if(is_converge) return
 
     do iter = 1, monoPRM%maxiter
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, Z)

@@ -11,6 +11,7 @@ void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag
 void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
 void monolis_set_performance_measurement (MONOLIS* mat, bool   flag) {mat->prm.is_measurement = flag;}
 void monolis_set_check_diag (MONOLIS* mat, bool flag) {mat->prm.is_check_diag = flag;}
+void monolis_set_init_x (MONOLIS* mat, bool flag) {mat->prm.is_check_diag = flag;}
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
@@ -611,6 +612,7 @@ void monolis_solve(
   int summary = 0;
   int is_check_diag = 1;
   int is_measurement = 0;
+  int is_init_x = 1;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
@@ -618,6 +620,7 @@ void monolis_solve(
   if(mat->prm.show_timelog) timelog = 1;
   if(mat->prm.show_summary) summary = 1;
   if(!mat->prm.is_check_diag) is_check_diag = 0;
+  if(!mat->prm.is_init_x) is_init_x = 0;
   if(mat->prm.is_measurement) is_measurement = 1;
 
   monolis_solve_c_main(
@@ -653,7 +656,8 @@ void monolis_solve(
     timelog,
     summary,
     is_check_diag,
-    is_measurement);
+    is_measurement,
+    is_init_x);
 }
 
 void monolis_get_internal_node_number(
