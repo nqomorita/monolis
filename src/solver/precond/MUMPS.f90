@@ -107,7 +107,8 @@ contains
 
     call DMUMPS(mumps)
 #else
-    call monolis_warning_header("monolis_precond_mumps_setup: MUMPS is NOT enabled")
+    !call monolis_warning_header("monolis_precond_mumps_setup: MUMPS is NOT enabled")
+    write(*,*)"* monolis_precond_mumps_setup: MUMPS is NOT enabled"
     stop
 #endif
   end subroutine monolis_precond_mumps_setup
