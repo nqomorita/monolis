@@ -162,7 +162,22 @@ void monolis_get_nonzero_pattern_by_nodal_graph(
   int*     index,
   int*     item);
 
+/* get mesh connectivity graph from mesh data (elem.dat) */
+void monolis_convert_mesh_to_connectivity(
+  int      nelem,
+  int      nbase_func,
+  int      elem,
+  int*     conn_index,
+  int*     conn_item);
 
+/* get nodal graph from mesh connectivity graph*/
+void monolis_convert_connectivity_to_nodal_graph(
+  int      nnode,
+  int      nelem,
+  int*     conn_index,
+  int*     conn_item,
+  int**    index,
+  int**    item);
 
 /* add scalar value to sparse matrix */
 void monolis_add_scalar_to_sparse_matrix(
