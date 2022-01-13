@@ -16,11 +16,15 @@ do
         METIS)
             FLAG_METIS=1
             ;;
+        METIS64)
+            FLAG_METIS64=1
+            ;;
     esac
 done
 
 if [ "$#" == 0 ]; then
     FLAG_METIS=1
+    FLAG_METIS64=0
     FLAG_MUMPS=0
     FLAG_SCALAPACK=0
 fi
@@ -64,3 +68,9 @@ if [ "$FLAG_METIS" == 1 ]; then
     cd ../..
 fi
 
+if [ "$FLAG_METIS64" == 1 ]; then
+    cd submodule/METIS
+    make config i64=1 prefix=$BASE_DIR
+    make install
+    cd ../..
+fi
