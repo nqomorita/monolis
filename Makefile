@@ -41,12 +41,9 @@ ifdef FLAGS
 #		FLAG_MPI = -DWITH_MPI
 #	endif
 
-#	ifeq ($(findstring METIS, $(DFLAGS)), METIS)
-#		FLAG_METIS = -DWITH_METIS
-#		METIS_DIR = .
-#		METIS_INC = -I $(METIS_DIR)/include
-#		METIS_LIB = -L$(METIS_DIR)/lib -lmetis
-#	endif
+	ifeq ($(findstring METIS64, $(DFLAGS)), METIS64)
+		FLAG_METIS = -DWITH_METIS64
+	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		FLAG_MUMPS = -DWITH_MUMPS

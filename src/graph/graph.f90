@@ -131,6 +131,11 @@ contains
     integer(kint), pointer :: ebase_func(:), connectivity(:)
     integer(c_int), pointer :: index(:), item(:)
     type(c_ptr) :: xadj, adjncy
+#if WITH_METIS64
+    integer(c_int64_t) :: nelem8, nnode8, numflag8
+    integer(c_int64_t), pointer :: ebase_func8(:), connectivity8(:)
+    integer(c_int64_t), pointer :: index8(:), item8(:)
+#endif
 
     call monolis_debug_header("monolis_convert_connectivity_to_nodal")
 
@@ -143,6 +148,21 @@ contains
     call METIS_MESHTONODAL(nelem, nnode, ebase_func, connectivity, numflag, xadj, adjncy)
     call c_f_pointer(xadj, index, shape=[nnode+1])
     call c_f_pointer(adjncy, item, shape=[index(nnode+1)])
+#elseif WITH_METIS64
+    nnode8 = nnode
+    nelem8 = nelem
+    numflag8 = numflag
+    allocate(ebase_func8(nelem+1))
+    allocate(connectivity8(ebase_func(nelem+1)))
+    ebase_func8 = ebase_func
+    connectivity8 = connectivity
+    call METIS_MESHTONODAL(nelem, nnode, ebase_func, connectivity, numflag, xadj, adjncy)
+    call c_f_pointer(xadj, index, shape=[nnode+1])
+    call c_f_pointer(adjncy, item, shape=[index(nnode+1)])
+    allocate(index(nnode+1))
+    allocate(item(index8(nnode+1)))
+    index = index8
+    item = item8
 #else
     call monolis_warning_header("monolis_convert_connectivity_to_nodal: METIS is NOT enabled")
     stop
@@ -198,6 +218,15 @@ contains
     real(kdouble), pointer :: options(:) => null()
     real(kdouble), pointer :: tpwgts(:) => null()
     integer(c_int), pointer :: index(:), item(:)
+#if WITH_METIS64
+    integer(c_int64_t) :: nnode8, ncon8, npart8, objval8
+    integer(c_int64_t), pointer :: part_id8(:)
+    integer(c_int64_t), pointer :: node_wgt8(:)
+    integer(c_int64_t), pointer :: edge_wgt8(:) => null()
+    integer(c_int64_t), pointer :: vsize(:) => null()
+    integer(c_int64_t), pointer :: ubvec(:)  => null()
+    integer(c_int64_t), pointer :: index8(:), item8(:)
+#endif
 
     call monolis_debug_header("monolis_get_mesh_part_kway")
 
@@ -205,16 +234,33 @@ contains
       ncon = 1
       !> convert to 0 origin
       item = item - 1
+
 #ifdef WITH_METIS
       call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
       !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
         & options, objval, part_id)
-      !> convert to 1 origin
-      item = item + 1
+#elseif WITH_METIS64
+      ncon8 = 1
+      npart8 = npart
+      nnode8 = nnode
+      allocate(node_wgt8(nnode))
+      node_wgt8 = node_wgt
+      allocate(index8(nnode+1))
+      index8 = index
+      allocate(item8(index(nnode+1)))
+      item8 = item
+      allocate(part_id8(nnode))
+      call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
+      !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
+        & options, objval, part_id)
+      part_id = part_id8
 #else
     call monolis_warning_header("monolis_get_mesh_part_kway: METIS is NOT enabled")
     stop
 #endif
+
+      !> convert to 1 origin
+      item = item + 1
     endif
   end subroutine monolis_get_mesh_part_kway
 
