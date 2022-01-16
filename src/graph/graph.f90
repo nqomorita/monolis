@@ -148,7 +148,7 @@ contains
     call METIS_MESHTONODAL(nelem, nnode, ebase_func, connectivity, numflag, xadj, adjncy)
     call c_f_pointer(xadj, index, shape=[nnode+1])
     call c_f_pointer(adjncy, item, shape=[index(nnode+1)])
-#elseif WITH_METIS64
+#elif WITH_METIS64
     nnode8 = nnode
     nelem8 = nelem
     numflag8 = numflag
@@ -239,7 +239,7 @@ contains
       call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
       !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
         & options, objval, part_id)
-#elseif WITH_METIS64
+#elif WITH_METIS64
       ncon8 = 1
       npart8 = npart
       nnode8 = nnode
