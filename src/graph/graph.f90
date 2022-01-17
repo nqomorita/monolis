@@ -214,7 +214,7 @@ contains
     integer(c_int), pointer :: node_wgt(:)
     integer(c_int), pointer :: edge_wgt(:)
     integer(kint), pointer :: vsize(:) => null()
-    integer(kint), pointer :: ubvec(:)  => null()
+    integer(kint), pointer :: ubvec(:) => null()
     real(kdouble), pointer :: options(:) => null()
     real(kdouble), pointer :: tpwgts(:) => null()
     integer(c_int), pointer :: index(:), item(:)
@@ -223,8 +223,8 @@ contains
     integer(c_int64_t), pointer :: part_id8(:)
     integer(c_int64_t), pointer :: node_wgt8(:)
     integer(c_int64_t), pointer :: edge_wgt8(:) => null()
-    integer(c_int64_t), pointer :: vsize(:) => null()
-    integer(c_int64_t), pointer :: ubvec(:)  => null()
+    integer(c_int64_t), pointer :: vsize8(:) => null()
+    integer(c_int64_t), pointer :: ubvec8(:)  => null()
     integer(c_int64_t), pointer :: index8(:), item8(:)
 #endif
 
@@ -250,9 +250,9 @@ contains
       allocate(item8(index(nnode+1)))
       item8 = item
       allocate(part_id8(nnode))
-      call METIS_PARTGRAPHRECURSIVE(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
+      call METIS_PARTGRAPHRECURSIVE(nnode8, ncon8, index8, item8, node_wgt8, vsize8, edge_wgt8, npart8, tpwgts, ubvec8, &
       !call METIS_PARTGRAPHKWAY(nnode, ncon, index, item, node_wgt, vsize, edge_wgt, npart, tpwgts, ubvec, &
-        & options, objval, part_id)
+        & options, objval8, part_id8)
       part_id = part_id8
 #else
     call monolis_warning_header("monolis_get_mesh_part_kway: METIS is NOT enabled")
