@@ -8,6 +8,7 @@ program main
   integer(4), allocatable :: elem(:,:), i_bc(:)
   real(8), allocatable :: coef(:)
   real(8), allocatable :: val(:), vec(:,:)
+  logical, allocatable :: is_bc(:)
 
   type(monolis_structure) :: mat !> 疎行列変数
   character :: finA*100, finBC*100
@@ -25,7 +26,14 @@ program main
 
   call input_BC(finBC, n_bc, i_bc)
 
-  call convert_matrix_by_bc(nnode, nelem, elem, coef, n_bc, i_bc)
+  allocate(is_bc(nnode), source = .false.)
+  do i = 1, n_bc
+    is_bc(i_bc(i)) = .true.
+  enddo
+
+  !call convert_matrix_by_bc(nnode, nelem, elem, coef, n_bc, i_bc)
+
+  write(*,*) "nnode: ", nnode
 
   if(n_eigs > nnode) n_eigs = nnode
 
@@ -38,7 +46,7 @@ program main
       call monolis_add_scalar_to_sparse_matrix(mat, elem(1,i), elem(2,i), 1, 1, coef(i))
     else
       call monolis_add_scalar_to_sparse_matrix(mat, elem(1,i), elem(2,i), 1, 1, coef(i))
-      call monolis_add_scalar_to_sparse_matrix(mat, elem(2,i), elem(1,i), 1, 1, coef(i))
+      !call monolis_add_scalar_to_sparse_matrix(mat, elem(2,i), elem(1,i), 1, 1, coef(i))
     endif
   enddo
 
@@ -47,20 +55,24 @@ program main
 
   call monolis_param_set_method(mat, monolis_iter_CG)
   call monolis_param_set_precond(mat, monolis_prec_MUMPS)
-  call monolis_param_set_maxiter(mat, 100000)
+  call monolis_param_set_maxiter(mat, 1000000)
   call monolis_param_set_tol(mat, 1.0d-8)
   call monolis_param_set_is_scaling(mat, .false.)
   call monolis_param_set_is_reordering(mat, .false.)
   call monolis_param_set_is_init_x(mat, .true.)
-  call monolis_param_set_is_debug(mat, .true.)
+  call monolis_param_set_is_debug(mat, .false.)
   call monolis_param_set_show_iterlog(mat, .false.)
   call monolis_param_set_show_time(mat, .false.)
   call monolis_param_set_show_summary(mat, .false.)
+
   t2 = monolis_get_time()
 
-  call monolis_eigen_inverted_standard_lanczos(mat, n_eigs, tol, maxit, val, vec)
+  write(*,"(a,1pe12.5)") "* monolis_eigen_inverted_standard_lanczos"
+  call monolis_eigen_inverted_standard_lanczos(mat, n_eigs, tol, maxit, val, vec, is_bc)
 
   t3 = monolis_get_time()
+
+  !call convet_eigval(nnode, n_bc, i_bc, n_eigs, vec)
 
   call output(nnode, n_eigs, val, vec)
 
@@ -76,6 +88,29 @@ program main
   write(*,"(a,1pe12.5)") "* total   time:", t4-t1
 
 contains
+
+  subroutine output_mm(mat)
+  type(monolis_structure) :: mat !> 疎行列変数
+    integer(4) :: n, nz, i, j, jS, jE, in, k1, k2
+    real(8) :: val
+
+    n  = mat%MAT%N*mat%MAT%NDOF
+    nz = mat%MAT%NDOF*mat%MAT%NDOF*mat%MAT%NZ
+    open(20, file = "A.test.mtx", status = "replace")
+      write(20,"(a)")"%%MatrixMarket matrix coordinate real symmetric"
+      write(20,*) n, n, nz
+
+      do i = 1, mat%MAT%N
+        jS = mat%MAT%index(i-1) + 1
+        jE = mat%MAT%index(i)
+        do j = jS, jE
+          in = mat%MAT%item(j)
+          val = mat%MAT%A(j)
+          write(20,"(i0,x,i0,x,1pe22.14)") i, j, val
+        enddo
+      enddo
+    close(20)
+  end subroutine output_mm
 
   subroutine output(N, n_eigs, eigen_val, eigen_vec)
     implicit none
@@ -105,6 +140,46 @@ contains
       close(20)
     enddo
   end subroutine output
+
+  subroutine convet_eigval(N, n_bc, i_bc, n_eigs, eigen_vec)
+    implicit none
+    integer(4) :: N, n_bc, i_bc(:), N_org, n_eigs, i, j, in, ip
+    real(8), allocatable :: eigen_vec(:,:)
+    integer(4), allocatable :: perm(:)
+    real(8), allocatable :: temp(:,:)
+    logical, allocatable :: is_use(:)
+
+    allocate(temp(N,n_eigs), source = 0.0d0)
+    temp = eigen_vec
+    deallocate(eigen_vec)
+
+    N_org = N + n_bc
+    allocate(eigen_vec(N_org,n_eigs), source = 0.0d0)
+
+    allocate(is_use(N_org), source = .true.)
+    do i = 1, n_bc
+      ip = i_bc(i)
+      is_use(ip) = .false.
+    enddo
+
+    allocate(perm(N_org), source = 0)
+    in = 1
+    do i = 1, N_org
+      if(.not. is_use(i)) cycle
+      perm(i) = in
+      in = in + 1
+    enddo
+
+    do j = 1, n_eigs
+      do i = 1, N_org
+        ip = perm(i)
+        if(ip == 0) cycle
+        eigen_vec(i,j) = temp(ip,j)
+      enddo
+    enddo
+
+    N = N_org
+  end subroutine convet_eigval
 
   subroutine convert_matrix_by_bc(nnode, nelem, elem, coef, n_bc, i_bc)
     integer(4) :: nnode, nelem, n_bc, i_bc(:)
