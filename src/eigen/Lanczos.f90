@@ -54,7 +54,7 @@ contains
     allocate(prev(maxiter), source = 0.0d0)
     allocate(q(NP*NDOF,0:maxiter+1), source = 0.0d0)
     allocate(p(NP*NDOF), source = 0.0d0)
-    allocate(eigen_mode(NP*NDOF,maxiter), source = 0.0d0)
+    allocate(eigen_mode(NP*NDOF,n_get_eigen), source = 0.0d0)
 
     call lanczos_initialze(NP*NDOF, q(:,1), is_bc)
 
@@ -79,7 +79,7 @@ contains
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, alpha, beta, q, eigen_value, eigen_mode)
+      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha, beta, q, eigen_value, eigen_mode)
 
       if(iter > n_get_eigen)then
         norm = 0.0d0

@@ -167,9 +167,9 @@ contains
     enddo
   end subroutine monolis_get_smallest_eigen_pair_from_3x3
 
-  subroutine monolis_get_eigen_pair_from_tridiag(iter, alpha_t, beta_t, q, e_value, e_mode)
+  subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha_t, beta_t, q, e_value, e_mode)
     implicit none
-    integer(kint) :: iter, i, n, ldz, info
+    integer(kint) :: iter, i, n, ldz, info, n_get_eigen
     real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:)
     integer(kint), allocatable :: isuppz(:), idum(:)
     real(kdouble), allocatable :: alpha(:), beta(:), rdum(:), e_mode_t(:,:)
@@ -188,7 +188,7 @@ contains
 
     call dstev("V", n, alpha, beta, e_mode_t, ldz, rdum, info)
 
-    do i = 1, iter
+    do i = 1, min(iter, n_get_eigen)
       e_value(i) = 1.0d0/alpha(iter - i +1)
       e_mode(:,i) = matmul(q(:,1:iter), e_mode_t(1:iter,iter - i +1))
     enddo
