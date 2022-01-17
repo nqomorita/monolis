@@ -158,7 +158,7 @@ contains
     connectivity8 = connectivity
     call METIS_MESHTONODAL(nelem8, nnode8, ebase_func8, connectivity8, numflag8, xadj, adjncy)
     call c_f_pointer(xadj, index8, shape=[nnode+1])
-    call c_f_pointer(adjncy, item8, shape=[index(nnode+1)])
+    call c_f_pointer(adjncy, item8, shape=[index8(nnode+1)])
     allocate(index(nnode+1))
     allocate(item(index8(nnode+1)))
     index = index8
