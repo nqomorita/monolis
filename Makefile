@@ -53,7 +53,7 @@ ifdef FLAGS
 	endif
 endif
 
-INCLUDE  = -I ./include $(METIS_INC) -I ./include $(MUMPS_INC)
+INCLUDE  = -I /usr/include -I ./include $(METIS_INC) $(MUMPS_INC)
 LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
 BIN_DIR  = ./bin
 SRC_DIR  = ./src
