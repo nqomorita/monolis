@@ -46,7 +46,7 @@ program main
       call monolis_add_scalar_to_sparse_matrix(mat, elem(1,i), elem(2,i), 1, 1, coef(i))
     else
       call monolis_add_scalar_to_sparse_matrix(mat, elem(1,i), elem(2,i), 1, 1, coef(i))
-      !call monolis_add_scalar_to_sparse_matrix(mat, elem(2,i), elem(1,i), 1, 1, coef(i))
+      call monolis_add_scalar_to_sparse_matrix(mat, elem(2,i), elem(1,i), 1, 1, coef(i))
     endif
   enddo
 
