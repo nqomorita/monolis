@@ -1,6 +1,6 @@
 # Monolis
 
-- Morita's non-overlapping / overlapping domain decomposition based linear equation solver
+- Monolithic non-overlapping/overlapping domain decomposition based linear solver
 
 ## Manual
 
