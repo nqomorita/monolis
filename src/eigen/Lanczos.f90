@@ -29,7 +29,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kint) :: N, NP, NDOF, total_dof, j, k
     integer(kint) :: i, iter, maxiter, n_get_eigen
-    real(kdouble) :: beta_t, ths, norm
+    real(kdouble) :: beta_t, ths, norm, tmp
     real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
     logical :: is_converge
@@ -84,7 +84,8 @@ contains
       if(iter > n_get_eigen)then
         norm = 0.0d0
         do i = 1, n_get_eigen
-          norm = max(norm, dabs(prev(i) - eigen_value(i)))
+          tmp = (prev(i) - eigen_value(i))**2/prev(i)**2
+          norm = max(norm, tmp)
         enddo
         if(norm < ths) is_converge = .true.
       endif
