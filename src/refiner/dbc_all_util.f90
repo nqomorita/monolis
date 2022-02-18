@@ -43,7 +43,7 @@ contains
     close(20)
   end subroutine output_dbc
 
-  subroutine monolis_get_surf_node(mesh, nbase_func, nsurf, nsurf_node, is_surf_node)
+  subroutine monolis_get_surf_node(mesh, nbase_func, nsurf, nsurf_node, is_surf_node, is_open_surf)
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh
@@ -52,6 +52,7 @@ contains
     character :: ckey*27
     logical :: is_exist, is_pushed
     integer(kint), allocatable :: is_inner(:,:), is_surf_node(:)
+    integer(kint), optional, allocatable :: is_open_surf(:,:)
 
     i341(1,1) = 1; i341(2,1) = 2; i341(3,1) = 3
     i341(1,2) = 1; i341(2,2) = 2; i341(3,2) = 4
@@ -88,6 +89,7 @@ contains
     enddo
 
     allocate(is_inner(nsurf,mesh%nelem), source = 0)
+    if(present(is_open_surf)) allocate(is_open_surf(nsurf,mesh%nelem), source = 1)
 
     do eid = 1, mesh%nelem
       call monolis_get_connectivity(mesh, eid, nbase_func, conn)
@@ -97,7 +99,10 @@ contains
         is_exist = .false.
         call monolis_hash_get(hash_tree, ckey, in, is_exist)
         if(.not. is_exist) stop "error: monolis_get_surf_node_tet"
-        if(in == 2) is_inner(i,eid) = 1
+        if(in == 2)then
+          is_inner(i,eid) = 1
+          if(present(is_open_surf)) is_open_surf(i,eid) = 0
+        endif
       enddo
     enddo
 
