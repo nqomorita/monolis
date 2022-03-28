@@ -29,7 +29,8 @@ end program main
 
 ### 時間計測
 
-時間計測は `monolis_get_time` 関数を用いて行う。引数なし。戻り値は倍精度浮動小数点数型である。
+時間計測は `monolis_get_time` 関数または `monolis_get_time_sync` 関数を用いて行う。引数なし。戻り値は倍精度浮動小数点数型である。
+`monolis_get_time_sync` 関数は、並列計算実行時に全プロセスの同期処理（MPI_barrier）が実行される。
 
 ```fortran
 program main
