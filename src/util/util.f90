@@ -31,6 +31,7 @@ module mod_monolis_util
   public :: monolis_warning_header
   public :: monolis_get_time
   public :: monolis_get_time_sync
+  public :: monolis_barrier
   public :: monolis_error_stop
   public :: monolis_get_penalty_value
   public :: monolis_param_set_method
@@ -105,7 +106,7 @@ contains
     is_debug = monoPRM%is_debug
     call monolis_debug_header("monolis_timer_initialize")
 
-    call monolis_barrier(monoCOM%comm)
+    call monolis_barrier_(monoCOM%comm)
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
     monoPRM%tspmv = 0.0d0
@@ -153,13 +154,22 @@ contains
     real(kdouble) :: monolis_get_time_sync, t1
 
 #ifdef WITH_MPI
-    call monolis_barrier(mycomm)
+    call monolis_barrier_(mycomm)
     monolis_get_time_sync = MPI_Wtime()
 #else
     call cpu_time(t1)
     monolis_get_time_sync = t1
 #endif
   end function monolis_get_time_sync
+
+  subroutine monolis_barrier(monolis)
+    implicit none
+    type(monolis_structure) :: monolis
+
+#ifdef WITH_MPI
+    call monolis_barrier_(monolis%COM%comm)
+#endif
+  end subroutine monolis_barrier
 
   function monolis_get_penalty_value(monoMAT)
     implicit none

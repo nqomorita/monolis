@@ -689,3 +689,9 @@ void monolis_get_internal_elem_1d_bool(
     }
   }
 }
+
+void monolis_barrier(
+  MONOLIS* mat)
+{
+  monolis_barrier_c_main(mat->com.comm);
+}

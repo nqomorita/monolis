@@ -59,6 +59,14 @@ contains
     monolis_get_time_sync_c =  monolis_get_time_sync()
   end function monolis_get_time_sync_c
 
+  subroutine monolis_barrier_c(comm)&
+    & bind(c, name = "monolis_barrier_c_main")
+    use mod_monolis_com
+    implicit none
+    integer(c_int), intent(in), value :: comm
+    call monolis_barrier_(comm)
+  end subroutine monolis_barrier_c
+
   !> mat
   subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CRR_format")

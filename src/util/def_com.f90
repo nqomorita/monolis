@@ -248,13 +248,13 @@ contains
 #endif
   end function monolis_global_myrank
 
-  subroutine monolis_barrier(comm)
+  subroutine monolis_barrier_(comm)
     implicit none
     integer(kint) :: comm
     integer(kint) :: ierr
 #ifdef WITH_MPI
     call MPI_barrier(comm, ierr)
 #endif
-  end subroutine monolis_barrier
+  end subroutine monolis_barrier_
 
 end module mod_monolis_com

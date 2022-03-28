@@ -32,7 +32,14 @@ int monolis_get_global_myrank();
 /* get time */
 double monolis_get_time();
 
+/* get time with barrier function (synchronous processing) */
 double monolis_get_time_sync();
+
+/* MPI barrier function */
+void monolis_barrier(
+  MONOLIS*    mat);
+
+
 
 /* get input file name for parallel computation */
 const char* monolis_get_input_filename(

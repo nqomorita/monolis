@@ -122,6 +122,9 @@ void monolis_qsort_int(
   int  iS,
   int  iE);
 
+void monolis_barrier_c_main(
+  int  comm);
+
 #ifdef __cplusplus
 }
 #endif

@@ -270,7 +270,7 @@ contains
 
     call monolis_debug_header("monolis_timer_finalize")
 
-    call monolis_barrier(monoCOM%comm)
+    call monolis_barrier_(monoCOM%comm)
     t1 = monolis_get_time()
     monoPRM%tsol = t1 - monoPRM%tsol
 
