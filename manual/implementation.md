@@ -236,3 +236,16 @@ end program main
   !> 行列値の初期化
   call monolis_clear_mat_value(A)
 ```
+
+### 同期処理
+
+並列計算時の同期処理は、`monolis_barrier` 関数で行う。
+
+```fortran
+  type(monolis_structure) :: A !> y = Ax の係数行列
+
+  !> 並列計算の同期処理
+  call monolis_barrier(A)
+```
+
+

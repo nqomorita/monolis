@@ -244,7 +244,7 @@ contains
     monolis%PRM%is_reordering = .false.
     monolis%PRM%is_init_x     = .true.
     monolis%PRM%is_debug      = .false.
-    monolis%PRM%is_check_diag= .true.
+    monolis%PRM%is_check_diag = .true.
     monolis%PRM%is_measurement= .false.
     monolis%PRM%show_iterlog  = .false.
     monolis%PRM%show_time     = .false.
