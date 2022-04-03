@@ -189,7 +189,7 @@ contains
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog, summary, &
-    is_check_diag, is_measurement, is_init_x) &
+    is_check_diag, is_measurement, is_init_x, time) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -209,6 +209,7 @@ contains
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(in), target :: X(NDOF*NP)
     real(c_double), intent(in), target :: B(NDOF*NP)
+    real(c_double), intent(out), target :: time(7)
 
     !> for monoMAT
     monolis%MAT%N = N
@@ -258,6 +259,14 @@ contains
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
+
+    time(1) = monolis%PRM%tsol
+    time(2) = monolis%PRM%tprep
+    time(3) = monolis%PRM%tspmv
+    time(4) = monolis%PRM%tdotp
+    time(5) = monolis%PRM%tprec
+    time(6) = monolis%PRM%tcomm_dotp
+    time(7) = monolis%PRM%tcomm_spmv
   end subroutine monolis_solve_c
 
   subroutine monolis_timer_finalize(monoPRM, monoCOM)

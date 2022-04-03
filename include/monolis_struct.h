@@ -65,7 +65,8 @@ typedef struct {
   double tspmv;
   double tdotp;
   double tprec;
-  double tcomm;
+  double tcomm_dotp;
+  double tcomm_spmv;
 
   /* input */
   // char input_file_dir[1024];

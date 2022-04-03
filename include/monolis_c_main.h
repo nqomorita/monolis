@@ -110,7 +110,8 @@ void monolis_solve_c_main(
   int      summary,
   int      is_check_diag,
   int      is_measurement,
-  int      is_init_x);
+  int      is_init_x,
+  double*  time);
 
 double monolis_allreduce_double_scalar_c_main(
   double   val,

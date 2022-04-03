@@ -72,7 +72,7 @@ void monolis_finalize(
     - monolis_iter_PipeCR:       for symmetric matrix
     - monolis_iter_BiCGSTAB:     for non-symmetric matrix
     - monolis_iter_PipeBiCGSTAB: for non-symmetric matrix */
-void monolis_set_method   (MONOLIS* mat, int    flag);
+void monolis_set_method (MONOLIS* mat, int    flag);
 
 /* set predonditioner
   default: monolis_prec_DIAG
@@ -82,15 +82,15 @@ void monolis_set_method   (MONOLIS* mat, int    flag);
     - monolis_prec_ILU
     - monolis_prec_JACOBI
     - monolis_prec_SOR */
-void monolis_set_precond  (MONOLIS* mat, int    flag);
+void monolis_set_precond (MONOLIS* mat, int    flag);
 
 /* set maximum iteration
   default: 10000 */
-void monolis_set_maxiter  (MONOLIS* mat, int    flag);
+void monolis_set_maxiter (MONOLIS* mat, int    flag);
 
 /* set convergence threshold
   default: 1.0e-8 */
-void monolis_set_tolerance(MONOLIS* mat, double value);
+void monolis_set_tolerance (MONOLIS* mat, double value);
 
 /* set performance measurement flag
   default: false */
@@ -115,6 +115,30 @@ void monolis_show_timelog (MONOLIS* mat, bool   flag);
 /* show summary log
   default: true */
 void monolis_show_summary (MONOLIS* mat, bool   flag);
+
+
+
+/* parameter getter */
+/* get totatl solver time */
+void monolis_get_time_solver (MONOLIS* mat, double* value);
+
+/* get preparing time */
+void monolis_get_time_preparing (MONOLIS* mat, double* value);
+
+/* get SpMV time */
+void monolis_get_time_spmv (MONOLIS* mat, double* value);
+
+/* get dot product time */
+void monolis_get_time_dot_product (MONOLIS* mat, double* value);
+
+/* get precondition time */
+void monolis_get_time_precondition (MONOLIS* mat, double* value);
+
+/* get communication time in dot product */
+void monolis_get_time_comm_dot_product (MONOLIS* mat, double* value);
+
+/* get communication time in SpMV time */
+void monolis_get_time_comm_spmv (MONOLIS* mat, double* value);
 
 
 
@@ -255,7 +279,12 @@ void monolis_get_internal_elem_1d_bool(
   bool*    is_internal_elem);
 
 
+/* memory handler */
+void monolis_free_int_1d(
+  int*     array);
 
+void monolis_free_double_1d(
+  double*  array);
 
 #ifdef __cplusplus
 }

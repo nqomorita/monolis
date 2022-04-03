@@ -12,9 +12,18 @@ void monolis_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag
 void monolis_set_performance_measurement (MONOLIS* mat, bool   flag) {mat->prm.is_measurement = flag;}
 void monolis_set_check_diag (MONOLIS* mat, bool flag) {mat->prm.is_check_diag = flag;}
 void monolis_set_init_x (MONOLIS* mat, bool flag) {mat->prm.is_init_x = flag;}
+
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
+
+void monolis_get_time_solver       (MONOLIS* mat, double* value) {*value = mat->prm.tsol;};
+void monolis_get_time_preparing    (MONOLIS* mat, double* value) {*value = mat->prm.tprep;};
+void monolis_get_time_spmv         (MONOLIS* mat, double* value) {*value = mat->prm.tspmv;};
+void monolis_get_time_dot_product  (MONOLIS* mat, double* value) {*value = mat->prm.tprec;};
+void monolis_get_time_precondition (MONOLIS* mat, double* value) {*value = mat->prm.tprec;};
+void monolis_get_time_comm_dot_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
+void monolis_get_time_comm_spmv    (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_spmv;};
 
 /* initializer */
 FILE* monolis_open_comm_table(
@@ -143,9 +152,18 @@ void monolis_initialize(
     mat->prm.tspmv = 0.0;
     mat->prm.tdotp = 0.0;
     mat->prm.tprec = 0.0;
-    mat->prm.tcomm = 0.0;
+    mat->prm.tcomm_dotp = 0.0;
+    mat->prm.tcomm_spmv = 0.0;
 
     // mat
+    mat->mat.A = NULL;
+    mat->mat.X = NULL;
+    mat->mat.B = NULL;
+    mat->mat.index = NULL;
+    mat->mat.item = NULL;
+    mat->mat.indexR = NULL;
+    mat->mat.itemR = NULL;
+    mat->mat.permR = NULL;
     mat->mat.N = 0;
     mat->mat.NP = 0;
     mat->mat.NZ = 0;
@@ -166,23 +184,37 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat)
 {
-  free(mat->com.send_neib_pe);
-  free(mat->com.send_index);
-  free(mat->com.send_item);
-  free(mat->com.recv_neib_pe);
-  free(mat->com.recv_index);
-  free(mat->com.recv_item);
-  free(mat->com.global_node_id);
-  free(mat->com.global_elem_id);
+  monolis_free_int_1d(mat->com.send_neib_pe);
+  monolis_free_int_1d(mat->com.send_index);
+  monolis_free_int_1d(mat->com.send_item);
+  monolis_free_int_1d(mat->com.recv_neib_pe);
+  monolis_free_int_1d(mat->com.recv_index);
+  monolis_free_int_1d(mat->com.recv_item);
+  monolis_free_int_1d(mat->com.global_node_id);
+  monolis_free_int_1d(mat->com.global_elem_id);
 
-  free(mat->mat.A);
-  free(mat->mat.X);
-  free(mat->mat.B);
-  free(mat->mat.index);
-  free(mat->mat.item);
-  free(mat->mat.indexR);
-  free(mat->mat.itemR);
-  free(mat->mat.permR);
+  monolis_free_double_1d(mat->mat.A);
+  monolis_free_double_1d(mat->mat.X);
+  monolis_free_double_1d(mat->mat.B);
+  monolis_free_int_1d(mat->mat.index);
+  monolis_free_int_1d(mat->mat.item);
+  monolis_free_int_1d(mat->mat.indexR);
+  monolis_free_int_1d(mat->mat.itemR);
+  monolis_free_int_1d(mat->mat.permR);
+}
+
+void monolis_free_int_1d(
+  int* array)
+{
+  if(array == NULL) return;
+  free(array);
+}
+
+void monolis_free_double_1d(
+  double* array)
+{
+  if(array == NULL) return;
+  free(array);
 }
 
 /* mat clear */
@@ -332,7 +364,8 @@ void monolis_copy_param(
   out->prm.tspmv = in->prm.tspmv;
   out->prm.tdotp = in->prm.tdotp;
   out->prm.tprec = in->prm.tprec;
-  out->prm.tcomm = in->prm.tcomm;
+  out->prm.tcomm_dotp = in->prm.tcomm_dotp;
+  out->prm.tcomm_spmv = in->prm.tcomm_spmv;
 
   out->com.myrank = in->com.myrank;
   out->com.comm = in->com.comm;
@@ -615,6 +648,7 @@ void monolis_solve(
   int is_init_x = 1;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  double time[7];
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
@@ -657,7 +691,16 @@ void monolis_solve(
     summary,
     is_check_diag,
     is_measurement,
-    is_init_x);
+    is_init_x,
+    time);
+
+    mat->prm.tsol = time[0];
+    mat->prm.tprep = time[1];
+    mat->prm.tspmv = time[2];
+    mat->prm.tdotp = time[3];
+    mat->prm.tprec = time[4];
+    mat->prm.tcomm_dotp = time[5];
+    mat->prm.tcomm_spmv = time[6];
 }
 
 void monolis_get_internal_node_number(
