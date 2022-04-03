@@ -129,7 +129,7 @@ void monolis_get_time_preparing (MONOLIS* mat, double* value);
 void monolis_get_time_spmv (MONOLIS* mat, double* value);
 
 /* get dot product time */
-void monolis_get_time_dot_product (MONOLIS* mat, double* value);
+void monolis_get_time_inner_product (MONOLIS* mat, double* value);
 
 /* get precondition time */
 void monolis_get_time_precondition (MONOLIS* mat, double* value);
