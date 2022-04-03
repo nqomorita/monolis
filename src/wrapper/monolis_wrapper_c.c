@@ -22,7 +22,7 @@ void monolis_get_time_preparing    (MONOLIS* mat, double* value) {*value = mat->
 void monolis_get_time_spmv         (MONOLIS* mat, double* value) {*value = mat->prm.tspmv;};
 void monolis_get_time_inner_product(MONOLIS* mat, double* value) {*value = mat->prm.tdotp;};
 void monolis_get_time_precondition (MONOLIS* mat, double* value) {*value = mat->prm.tprec;};
-void monolis_get_time_comm_dot_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
+void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
 void monolis_get_time_comm_spmv    (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_spmv;};
 
 /* initializer */

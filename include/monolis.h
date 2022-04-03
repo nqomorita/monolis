@@ -135,7 +135,7 @@ void monolis_get_time_inner_product (MONOLIS* mat, double* value);
 void monolis_get_time_precondition (MONOLIS* mat, double* value);
 
 /* get communication time in dot product */
-void monolis_get_time_comm_dot_product (MONOLIS* mat, double* value);
+void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value);
 
 /* get communication time in SpMV time */
 void monolis_get_time_comm_spmv (MONOLIS* mat, double* value);
