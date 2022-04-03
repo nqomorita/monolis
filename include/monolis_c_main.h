@@ -107,6 +107,7 @@ void monolis_solve_c_main(
   double   tol,
   int      iterlog,
   int      timelog,
+  int      timelog_statistics,
   int      summary,
   int      is_check_diag,
   int      is_measurement,

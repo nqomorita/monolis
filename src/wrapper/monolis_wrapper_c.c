@@ -15,6 +15,7 @@ void monolis_set_init_x (MONOLIS* mat, bool flag) {mat->prm.is_init_x = flag;}
 
 void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
+void monolis_show_timelog_statistics (MONOLIS* mat, bool   flag) {mat->prm.show_timelog_statistics = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
 
 void monolis_get_time_solver       (MONOLIS* mat, double* value) {*value = mat->prm.tsol;};
@@ -144,6 +145,7 @@ void monolis_initialize(
     mat->prm.is_debug = false;
     mat->prm.is_check_diag = true;
     mat->prm.show_iterlog = false;
+    mat->prm.show_timelog_statistics = false;
     mat->prm.show_timelog = false;
     mat->prm.show_summary = true;
 
@@ -357,6 +359,7 @@ void monolis_copy_param(
   out->prm.is_debug = in->prm.is_debug;
   out->prm.show_iterlog = in->prm.show_iterlog;
   out->prm.show_timelog = in->prm.show_timelog;
+  out->prm.show_timelog_statistics = in->prm.show_timelog_statistics;
   out->prm.show_summary = in->prm.show_summary;
 
   out->prm.tsol = in->prm.tsol;
@@ -642,6 +645,7 @@ void monolis_solve(
   int nz = mat->mat.NZ;
   int iterlog = 0;
   int timelog = 0;
+  int timelog_statistics = 0;
   int summary = 0;
   int is_check_diag = 1;
   int is_measurement = 0;
@@ -652,6 +656,7 @@ void monolis_solve(
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
+  if(mat->prm.show_timelog_statistics) timelog_statistics = 1;
   if(mat->prm.show_summary) summary = 1;
   if(!mat->prm.is_check_diag) is_check_diag = 0;
   if(!mat->prm.is_init_x) is_init_x = 0;
@@ -688,6 +693,7 @@ void monolis_solve(
     mat->prm.tol,
     iterlog,
     timelog,
+    timelog_statistics,
     summary,
     is_check_diag,
     is_measurement,

@@ -80,6 +80,7 @@ module mod_monolis_prm
     logical :: is_check_diag = .true.
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.
+    logical :: show_time_statistics = .false.
     logical :: show_summary  = .true.
     !> time: tsol
     real(kdouble) :: tsol  = 0.0d0

@@ -57,6 +57,7 @@ typedef struct {
   bool is_check_diag;
   bool show_iterlog;
   bool show_timelog;
+  bool show_timelog_statistics;
   bool show_summary;
 
   /* time */

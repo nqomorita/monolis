@@ -188,7 +188,7 @@ contains
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
-    iterlog, timelog, summary, &
+    iterlog, timelog_statistics, timelog, summary, &
     is_check_diag, is_measurement, is_init_x, time) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
@@ -197,7 +197,7 @@ contains
     integer(c_int), intent(in), value :: myrank, comm, commsize
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), value :: method, precond, maxiter
-    integer(c_int), intent(in), value :: iterlog, timelog, summary
+    integer(c_int), intent(in), value :: iterlog, timelog, timelog_statistics, summary
     integer(c_int), intent(in), value :: is_check_diag, is_measurement, is_init_x
     integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
@@ -253,6 +253,7 @@ contains
 
     if(iterlog == 1) monolis%PRM%show_iterlog  = .true.
     if(timelog == 1) monolis%PRM%show_time     = .true.
+    if(timelog_statistics == 1) monolis%PRM%show_time_statistics = .true.
     if(summary == 1) monolis%PRM%show_summary  = .true.
     if(is_check_diag == 0) monolis%PRM%is_check_diag= .false.
     if(is_init_x == 0) monolis%PRM%is_init_x= .false.
@@ -274,7 +275,7 @@ contains
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
-    real(kdouble) :: t1, time(6)
+    real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
     logical :: is_output
 
     call monolis_debug_header("monolis_timer_finalize")
@@ -312,5 +313,83 @@ contains
         write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
       endif
     endif
+
+    if(monoPRM%show_time_statistics)then
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")" ** monolis solution time statistics"
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"                           max       min       average   std"
+
+      time(1) = monoPRM%tprep
+      call hecmw_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/prepost time:", t_max, t_min, t_avg, t_sd
+
+      time(2) = monoPRM%tspmv
+      call hecmw_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
+
+      time(3) = monoPRM%tdotp
+      call hecmw_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/inner p time:", t_max, t_min, t_avg, t_sd
+
+      time(4) = monoPRM%tprec
+      call hecmw_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/precond time:", t_max, t_min, t_avg, t_sd
+
+      time(5) = monoPRM%tcomm_dotp
+      call hecmw_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
+
+      time(6) = monoPRM%tcomm_spmv
+      call hecmw_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
+    endif
+
+    !> get average time
+    time(1) = monoPRM%tprep
+    time(2) = monoPRM%tspmv
+    time(3) = monoPRM%tdotp
+    time(4) = monoPRM%tprec
+    time(5) = monoPRM%tcomm_dotp
+    time(6) = monoPRM%tcomm_spmv
+
+    call monolis_allreduce_R(6, time, monolis_sum, monoCOM%comm)
+    time = time/dble(monolis_global_commsize())
+
+    monoPRM%tprep = time(1)
+    monoPRM%tspmv = time(2)
+    monoPRM%tdotp = time(3)
+    monoPRM%tprec = time(4)
+    monoPRM%tcomm_dotp = time(5)
+    monoPRM%tcomm_spmv = time(6)
   end subroutine monolis_timer_finalize
+
+  subroutine hecmw_time_statistics (monoCOM, time, t_max, t_min, t_avg, t_sd)
+    implicit none
+    type(monolis_com) :: monoCOM
+    real(kdouble), intent(in) :: time
+    real(kdouble), intent(out) :: t_max, t_min, t_avg, t_sd
+    real(kdouble) :: tmp
+    integer(kint) :: np
+
+    np = monolis_global_commsize()
+
+    t_max = time
+    call monolis_allreduce_R1(t_max, monolis_max, monoCOM%comm)
+
+    t_min = time
+    call monolis_allreduce_R1(t_min, monolis_min, monoCOM%comm)
+
+    t_avg = time
+    call monolis_allreduce_R1(t_avg, monolis_sum, monoCOM%comm)
+    t_avg = t_avg / np
+
+    tmp = time*time
+    call monolis_allreduce_R1(tmp, monolis_sum, monoCOM%comm)
+    tmp = tmp / np
+
+    if(np == 1)then
+      t_sd = 0.0d0
+    else
+      t_sd = dsqrt(tmp - t_avg*t_avg)
+    endif
+  end subroutine hecmw_time_statistics
 end module mod_monolis_solve

@@ -112,6 +112,10 @@ void monolis_show_iterlog (MONOLIS* mat, bool   flag);
   default: false */
 void monolis_show_timelog (MONOLIS* mat, bool   flag);
 
+/* show execution time in statistics details
+  default: false */
+void monolis_show_timelog_statistics (MONOLIS* mat, bool   flag);
+
 /* show summary log
   default: true */
 void monolis_show_summary (MONOLIS* mat, bool   flag);
