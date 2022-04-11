@@ -3,10 +3,10 @@
 
 monolis の関数を使う場合は、`mod_monolis` モジュールを `use` することで利用することができる。
 
-- [initialize](./init.md)
-- [matrix init](./matrix_init.md)
-- [matrix add](./matrix_add.md)
-- [solve](./solve.md)
-- [linear alg](./la.md)
-- [parameter](./parameter.md)
-- [util](./util.md)
+- [initialize](./impl/init.md)
+- [matrix init](./impl/matrix_init.md)
+- [matrix add](./impl/matrix_add.md)
+- [solve](./impl/solve.md)
+- [linear alg](./impl/la.md)
+- [parameter](./impl/parameter.md)
+- [util](./impl/util.md)
