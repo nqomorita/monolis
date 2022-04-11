@@ -2,7 +2,7 @@
 
 - Monolithic non-overlapping / overlapping DDM based linear equation solver
 
-<img src="./fig/monolis.logo.svg" height=100px>
+<img src="./monolis.logo.svg" height=100px>
 
 ## manual topics
 

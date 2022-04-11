@@ -1,6 +1,3 @@
-# monolis
-
-- Morita's non-overlapping / overlapping DDM based linear equation solver
 
 ## 求解時のパラメータ設定
 

@@ -1,8 +1,8 @@
 
 
-### 全体剛性行列への足し込み
+## 全体剛性行列への足し込み
 
-#### 要素剛性行列の足し込み
+### 要素剛性行列の足し込み
 
 要素剛性行列を全体剛性行列へ足し込む場合は、`monolis_add_matrix_to_sparse_matrix` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。
@@ -21,7 +21,7 @@
   call monolis_add_matrix_to_sparse_matrix(A, nbase_func, connectivity, local_mat)
 ```
 
-#### 要素剛性行列の足し込み（副対角部分）
+### 要素剛性行列の足し込み（副対角部分）
 
 要素剛性行列を全体剛性行列の副対角部分へ足し込む場合は、`monolis_add_matrix_to_sparse_matrix_offdiag` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。
@@ -44,7 +44,7 @@
   call monolis_add_matrix_to_sparse_matrix(A, nbase_func, n1, n2, c1, c2, local_mat)
 ```
 
-#### 行列成分の足し込み
+### 行列成分の足し込み
 
 行列成分を全体剛性行列へ足し込む場合は、`monolis_add_scalar_to_sparse_matrix` 関数で行う。
 `monolis_get_nonzero_pattern` 関数の実行後に利用できる。

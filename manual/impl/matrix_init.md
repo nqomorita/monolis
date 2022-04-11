@@ -1,14 +1,14 @@
 
-### 疎行列の非零パターンの決定
+## 疎行列の非零パターンの決定
 
-#### 要素情報からの決定（要素種類が単一の場合）
+### 要素情報からの決定（要素種類が単一の場合）
 
 この関数は要素から非零パターンの決定する関数である。
 要素種類が単一の場合の疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern` 関数で行う。
 `monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
 以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
 
-<img src="./fig/nonzero.svg" height=300px>
+<img src="./nonzero.svg" height=300px>
 
 ```fortran
 program main
@@ -42,14 +42,14 @@ program main
 end program main
 ```
 
-#### 要素情報からの決定（要素種類が複数の場合）
+### 要素情報からの決定（要素種類が複数の場合）
 
 この関数は要素から非零パターンの決定する関数である。
 要素種類が複数の場合の疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern_by_connectivity` 関数で行う。
 `monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
 以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
 
-<img src="./fig/nonzero.svg" height=300px>
+<img src="./nonzero.svg" height=300px>
 
 ```fortran
 program main
@@ -88,14 +88,14 @@ program main
 end program main
 ```
 
-#### 節点グラフからの決定
+### 節点グラフからの決定
 
 この関数は節点グラフから非零パターンの決定する関数である。
 疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern_by_nodal` 関数で行う。
 `monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
 以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
 
-<img src="./fig/nonzero.svg" height=300px>
+<img src="./nonzero.svg" height=300px>
 
 ```fortran
 program main
@@ -136,7 +136,7 @@ end program main
 ```
 
 
-### 行列値の初期化
+## 行列値の初期化
 
 疎行列パターンを保持したまま行列の値を 0 初期化する場合は、`monolis_clear_mat_value` 関数で行う。
 この関数では、行列、右辺ベクトル、解ベクトルを全て 0 に初期化する。

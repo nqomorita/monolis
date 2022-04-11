@@ -1,5 +1,5 @@
 
-### 初期化と終了処理
+## 初期化と終了処理
 
 全体初期化処理は `monolis_global_initialize` 関数を用いて行う。引数なし。
 
@@ -20,7 +20,7 @@ program main
 end program main
 ```
 
-### monolis 構造体の初期化と終了処理
+## monolis 構造体の初期化と終了処理
 
 monolis を利用するためには `monolis_structure` 構造体を定義する。
 `monolis_structure` 構造体は、行列の情報、求解パラメータ、並列計算のための通信情報を保持している。
