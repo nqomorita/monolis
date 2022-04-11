@@ -30,6 +30,7 @@ module mod_monolis_c2d6_shape
     !public :: monolis_C2D6_node_point
     public :: monolis_C2D6_shapefunc
     public :: monolis_C2D6_shapefunc_deriv
+    public :: monolis_C2D6_shapefunc_2nd_deriv
 
 contains
 
@@ -106,4 +107,22 @@ contains
     func(6,2) = 4.0d0*(st - et)
   end subroutine monolis_C2D6_shapefunc_deriv
 
+  subroutine monolis_C2D6_shapefunc_2nd_deriv(func)
+    implicit none
+    real(kdouble) :: func(6,2,2)
+
+    func(1,1,1) = 4.d0;  func(1,1,2) = 4.d0
+    func(2,1,1) = 4.d0;  func(2,1,2) = 0.d0
+    func(3,1,1) = 0.d0;  func(3,1,2) = 0.d0
+    func(4,1,1) =-8.d0;  func(4,1,2) =-4.d0
+    func(5,1,1) = 0.d0;  func(5,1,2) = 4.d0
+    func(6,1,1) = 0.d0;  func(6,1,2) =-4.d0
+
+    func(1,2,1) = 4.d0;  func(1,2,2) = 4.d0
+    func(2,2,1) = 0.d0;  func(2,2,2) = 0.d0
+    func(3,2,1) = 0.d0;  func(3,2,2) = 4.d0
+    func(4,2,1) =-4.d0;  func(4,2,2) = 0.d0
+    func(5,2,1) = 4.d0;  func(5,2,2) = 0.d0
+    func(6,2,1) =-4.d0;  func(6,2,2) =-8.d0
+  end subroutine monolis_C2D6_shapefunc_2nd_deriv
 end module mod_monolis_c2d6_shape

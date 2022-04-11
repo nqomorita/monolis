@@ -1,10 +1,10 @@
-# monolis
-
-- Morita's non-overlapping / overlapping DDM based linear equation solver
 
 ## 既存ソルバへの組み込み
 
 monolis の関数を使う場合は、`mod_monolis` モジュールを `use` することで利用することができる。
+
+
+
 
 ### 初期化と終了処理
 
@@ -26,6 +26,9 @@ program main
   call monolis_global_finalize()
 end program main
 ```
+
+
+
 
 ### 時間計測
 
@@ -52,6 +55,9 @@ program main
   call monolis_global_finalize()
 end program main
 ```
+
+
+
 
 ### monolis 構造体の初期化と終了処理
 
@@ -83,9 +89,14 @@ subroutine sample
 end subroutine
 ```
 
+
+
 ### 疎行列の非零パターンの決定
 
-疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern` 関数で行う。
+#### 要素情報からの決定（要素種類が単一の場合）
+
+この関数は要素から非零パターンの決定する関数である。
+要素種類が単一の場合の疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern` 関数で行う。
 `monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
 以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
 
@@ -123,6 +134,102 @@ program main
 end program main
 ```
 
+#### 要素情報からの決定（要素種類が複数の場合）
+
+この関数は要素から非零パターンの決定する関数である。
+要素種類が複数の場合の疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern_by_connectivity` 関数で行う。
+`monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
+以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
+
+<img src="./nonzero.svg" height=300px>
+
+```fortran
+program main
+  use mod_monolis
+  implicit none
+  type(monolis_structure) :: A !> Ax = b の係数行列
+  integer(kint) :: nnode !> 節点数
+  integer(kint) :: nelem !> 要素数
+  integer(kint) :: index(:) !> 要素定義の index 配列
+  integer(kint) :: item(:) !> 要素定義の item 配列
+  integer(kint) :: ndof !> 1 節点あたりの自由度
+
+  !> 初期化
+  call monolis_global_initialize()
+  call monolis_initialize(A, "./")
+
+  !> 疎行列の非零パターンの決定
+  nnode = 4
+  nelem = 3
+  ndof = 2
+
+  index(0) = 0
+  index(1) = 2
+  index(2) = 4
+  index(3) = 6
+  index(4) = 8
+  item(1) = 1; item(2) = 3 !> 要素番号 1 の定義
+  item(3) = 3; item(4) = 2 !> 要素番号 2 の定義
+  item(5) = 2; item(6) = 4 !> 要素番号 3 の定義
+
+  call monolis_get_nonzero_pattern_by_connectivity(A, nnode, ndof, nelem, index, item)
+
+  !> 終了処理
+  call monolis_finalize(A)
+  call monolis_global_finalize()
+end program main
+```
+
+#### 節点グラフからの決定
+
+この関数は節点グラフから非零パターンの決定する関数である。
+疎行列の非零パターンの取得は、`monolis_get_nonzero_pattern_by_nodal` 関数で行う。
+`monolis_global_initialize` 関数および `monolis_initialize` 関数の実行後に利用できる。
+以下に図示する 2 節点トラス 3 要素からなる行列における例を示す。
+
+<img src="./nonzero.svg" height=300px>
+
+```fortran
+program main
+  use mod_monolis
+  implicit none
+  type(monolis_structure) :: A !> Ax = b の係数行列
+  integer(kint) :: nnode !> 節点数
+  integer(kint) :: index(:) !> 要素定義の index 配列
+  integer(kint) :: item(:) !> 要素定義の item 配列
+  integer(kint) :: ndof !> 1 節点あたりの自由度
+
+  !> 初期化
+  call monolis_global_initialize()
+  call monolis_initialize(A, "./")
+
+  !> 疎行列の非零パターンの決定
+  nnode = 4
+  ndof = 2
+
+  index(0) = 0
+  index(1) = 1
+  index(2) = 3
+  index(3) = 5
+  index(4) = 6
+  !> 自身の節点番号は含まない
+  item(1) = 3 !> 節点 1 と接続している節点番号
+  item(2) = 3 !> 節点 2 と接続している節点番号
+  item(3) = 4 !> 節点 2 と接続している節点番号
+  item(4) = 1 !> 節点 3 と接続している節点番号
+  item(5) = 2 !> 節点 3 と接続している節点番号
+  item(6) = 2 !> 節点 4 と接続している節点番号
+  call monolis_get_nonzero_pattern_by_nodal(A, nnode, ndof, index, item)
+
+  !> 終了処理
+  call monolis_finalize(A)
+  call monolis_global_finalize()
+end program main
+```
+
+
+
+
 ### 全体剛性行列への足し込み
 
 #### 要素剛性行列の足し込み
@@ -142,6 +249,29 @@ end program main
   connectivity(1) = 1; connectivity(2) = 3 !> 要素番号 1 の定義
   call get_localmat(local_mat) !> user subroutine
   call monolis_add_matrix_to_sparse_matrix(A, nbase_func, connectivity, local_mat)
+```
+
+#### 要素剛性行列の足し込み（副対角部分）
+
+要素剛性行列を全体剛性行列の副対角部分へ足し込む場合は、`monolis_add_matrix_to_sparse_matrix_offdiag` 関数で行う。
+`monolis_get_nonzero_pattern` 関数の実行後に利用できる。
+
+```fortran
+  type(monolis_structure) :: A !> Ax = b の係数行列
+  integer(kint) :: n1 !> 行列成分を足し込む行番号の個数
+  integer(kint) :: n2 !> 行列成分を足し込む列番号の個数
+  integer(kint) :: c1(2) !> 要素を構成する行番号
+  integer(kint) :: c2(2) !> 要素を構成する列番号
+  real(kdouble) :: local_mat(4,4) !> 要素剛性行列
+                                  !> local_mat(n1*ndof, n2*ndof)
+
+  !> 疎行列への足し込み
+  n1 = 2
+  n2 = 2
+  c1(1) = 1; c1(2) = 3 !> 要素を構成する行番号
+  c2(1) = 3; c2(2) = 4 !> 要素を構成する列番号
+  call get_localmat(local_mat) !> user subroutine
+  call monolis_add_matrix_to_sparse_matrix(A, nbase_func, n1, n2, c1, c2, local_mat)
 ```
 
 #### 行列成分の足し込み
@@ -164,6 +294,9 @@ end program main
   enddo
 ```
 
+
+
+
 ### Dirichlet 境界条件の追加
 
 要素行列への Dirichlet 境界条件の追加は、`monolis_set_Dirichlet_bc` 関数で行う。
@@ -185,6 +318,9 @@ end program main
   call monolis_set_Dirichlet_bc(A, b, node_id, ndof_bc, val)
 ```
 
+
+
+
 ### 方程式の求解
 
 解ベクトルの取得は、`monolis_solve` 関数で行う。
@@ -204,6 +340,9 @@ end program main
   call monolis_solve(A, b, x)
 ```
 
+
+
+
 ### 行列ベクトル積
 
 行列ベクトル積の計算は、`monolis_matvec_product` 関数で行う。
@@ -220,9 +359,13 @@ end program main
   call monolis_matvec_product(A, x, y)
 ```
 
+
+
 ### ベクトル内積
 
 ベクトル内積の計算は、`monolis_inner_product` 関数で行う。
+
+
 
 
 ### 行列値の初期化
@@ -236,6 +379,8 @@ end program main
   !> 行列値の初期化
   call monolis_clear_mat_value(A)
 ```
+
+
 
 ### 同期処理
 
