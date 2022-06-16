@@ -31,6 +31,11 @@ contains
     ALU => monoMAT%monoTree%D
     ALU = 0.0d0
 
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item) &
+!$omp & firstprivate(N) &
+!$omp & private(T, P, i, j, k, jS, jE, in)
+!$omp do
     do i = 1, N
       jS = index(i-1) + 1
       jE = index(i)
@@ -49,7 +54,8 @@ contains
         endif
       enddo
     enddo
-
+!$omp end do
+!$omp do
     do l = 1, N
       T(1,1) = ALU(9*l-8)
       T(1,2) = ALU(9*l-7)
@@ -82,6 +88,8 @@ contains
       ALU(9*l-1) = T(3,2)
       ALU(9*l  ) = T(3,3)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_precond_diag_33_setup
 
   subroutine monolis_precond_diag_33_apply(monoMAT, X, Y)
@@ -95,6 +103,11 @@ contains
     real(kind=kdouble), pointer :: ALU(:)
 
     ALU => monoMAT%monoTree%D
+
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, ALU, X, Y) &
+!$omp & private(i, X1, X2, X3)
+!$omp do
     do i = 1, monoMAT%N
       X1 = X(3*i-2)
       X2 = X(3*i-1)
@@ -108,6 +121,8 @@ contains
       Y(3*i-1) = X2
       Y(3*i  ) = X3
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_precond_diag_33_apply
 
   subroutine monolis_precond_diag_33_clear(monoMAT)

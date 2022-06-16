@@ -34,6 +34,11 @@ contains
     allocate(monoMAT%monoTree%D(NDOF2*N), source = 0.0d0)
     ALU => monoMAT%monoTree%D
 
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(T, LU, i, j, k, jS, jE, in)
+!$omp do
     do i = 1, N
       jS = index(i-1) + 1
       jE = index(i)
@@ -67,6 +72,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     deallocate(T)
     deallocate(LU)
@@ -90,6 +97,11 @@ contains
     allocate(T(NDOF))
     T = 0.0d0
 
+!$omp parallel default(none) &
+!$omp & shared(ALU, X, Y) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(i, j, k, T)
+!$omp do
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)
@@ -109,6 +121,8 @@ contains
         Y(NDOF*(i-1) + k) = T(k)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     deallocate(T)
   end subroutine monolis_precond_diag_nn_apply

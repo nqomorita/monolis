@@ -24,9 +24,16 @@ contains
     call monolis_debug_header("monolis_vec_copy_R")
 #endif
 
+!$omp parallel default(none) &
+!$omp & shared(X, Y) &
+!$omp & firstprivate(n, ndof) &
+!$omp & private(i)
+!$omp do
     do i = 1, n * ndof
       Y(i) = X(i)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_vec_copy_R
 
   subroutine monolis_vec_AXPY(n, ndof, alpha, X, Y, Z)
@@ -39,9 +46,16 @@ contains
     call monolis_debug_header("monolis_vec_AXPY")
 #endif
 
+!$omp parallel default(none) &
+!$omp & shared(X, Y, Z) &
+!$omp & firstprivate(n, ndof, alpha) &
+!$omp & private(i)
+!$omp do
     do i = 1, n * ndof
       Z(i) = alpha*X(i) + Y(i)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_vec_AXPY
 
   subroutine monolis_inner_product_I(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
@@ -58,9 +72,16 @@ contains
 
     t1 = monolis_get_time()
     sum = 0
+!$omp parallel default(none) &
+!$omp & shared(X, Y, sum) &
+!$omp & firstprivate(n, ndof) &
+!$omp & private(i)
+!$omp do reduction(+:sum)
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     t2 = monolis_get_time()
     call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
@@ -84,9 +105,16 @@ contains
 
     t1 = monolis_get_time()
     sum = 0.0d0
+!$omp parallel default(none) &
+!$omp & shared(X, Y, sum) &
+!$omp & firstprivate(n, ndof) &
+!$omp & private(i)
+!$omp do reduction(+:sum)
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     t2 = monolis_get_time()
     call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
@@ -104,8 +132,15 @@ contains
     real(kdouble) :: sum
 
     sum = 0.0d0
+!$omp parallel default(none) &
+!$omp & shared(X, Y, sum) &
+!$omp & firstprivate(n, ndof) &
+!$omp & private(i)
+!$omp do reduction(+:sum)
     do i = 1, n * ndof
       sum = sum + X(i)*Y(i)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_inner_product_R_local
 end module mod_monolis_linalg

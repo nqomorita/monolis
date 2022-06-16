@@ -51,6 +51,10 @@ ifdef FLAGS
 		MUMPS_INC = -I $(MUMPS_DIR)/include
 		MUMPS_LIB = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps
 	endif
+
+	ifeq ($(findstring OPENMP, $(DFLAGS)), OPENMP)
+		FC += -fopenmp
+	endif
 endif
 
 INCLUDE  = -I /usr/include -I ./include $(METIS_INC) $(MUMPS_INC)

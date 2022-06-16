@@ -19,9 +19,15 @@ contains
 
     call monolis_matvec(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, B, R) &
+!$omp & private(i)
+!$omp do
     do i = 1, monoMAT%N*monoMAT%NDOF
       R(i) = B(i) - R(i)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_residual
 
   subroutine monolis_matvec_product(monolis, X, Y)
@@ -77,6 +83,11 @@ contains
     index => monoMAT%index
     item  => monoMAT%item
 
+!$omp parallel default(none) &
+!$omp & shared(A, Y, X, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp do
     do i = 1, N
       YT = 0.0d0
       jS = index(i-1) + 1
@@ -96,6 +107,8 @@ contains
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_matvec_nn
 
   subroutine monolis_matvec_11(monoCOM, monoMAT, X, Y)
@@ -113,6 +126,11 @@ contains
     index => monoMAT%index
     item  => monoMAT%item
 
+!$omp parallel default(none) &
+!$omp & shared(A, Y, X, index, item) &
+!$omp & firstprivate(N) &
+!$omp & private(Y1, i, j, jS, jE, in)
+!$omp do
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i-1) + 1
@@ -123,6 +141,8 @@ contains
       enddo
       Y(i) = Y1
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_matvec_11
 
   subroutine monolis_matvec_33(monoCOM, monoMAT, X, Y)
@@ -140,6 +160,11 @@ contains
     index => monoMAT%index
     item  => monoMAT%item
 
+!$omp parallel default(none) &
+!$omp & shared(A, Y, X, index, item) &
+!$omp & firstprivate(N) &
+!$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
+!$omp do
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
@@ -159,6 +184,8 @@ contains
       Y(3*i-1) = Y2
       Y(3*i  ) = Y3
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_matvec_33
 
 end module mod_monolis_matvec
