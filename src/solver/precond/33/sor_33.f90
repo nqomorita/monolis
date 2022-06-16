@@ -31,6 +31,11 @@ contains
     allocate(monoMAT%monoTree%D(9*N), source = 0.0d0)
     ALU => monoMAT%monoTree%D
 
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item) &
+!$omp & firstprivate(N) &
+!$omp & private(P, T, i, j, k, jS, jE, in)
+!$omp do
     do i = 1, N
       jS = index(i-1) + 1
       jE = index(i)
@@ -49,7 +54,8 @@ contains
         endif
       enddo
     enddo
-
+!$omp end do
+!$omp do
     do l = 1, N
       T(1,1) = ALU(9*l-8)
       T(1,2) = ALU(9*l-7)
@@ -82,6 +88,8 @@ contains
       ALU(9*l-1) = T(3,2)
       ALU(9*l  ) = T(3,3)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_precond_sor_33_setup
 
   subroutine monolis_precond_sor_33_apply(monoMAT, X, Y)
@@ -101,10 +109,15 @@ contains
     A => monoMAT%A
     ALU => monoMAT%monoTree%D
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, A, ALU, index, item, X, Y) &
+!$omp & private(i, j, jn, jS, jE, S1, S2, S3, X1, X2, X3)
+!$omp do
     do i = 1, monoMAT%NP*monoMAT%NDOF
       Y(i) = X(i)
     enddo
-
+!$omp end do
+!$omp do
     do i = 1, monoMAT%N
       S1 = Y(3*i-2)
       S2 = Y(3*i-1)
@@ -134,7 +147,8 @@ contains
       Y(3*i-1) = X2
       Y(3*i  ) = X3
     enddo
-
+!$omp end do
+!$omp do
     do i = monoMAT%N, 1, -1
       S1 = 0.0d0
       S2 = 0.0d0
@@ -164,6 +178,8 @@ contains
       Y(3*i-1) = Y(3*i-1) - X2
       Y(3*i  ) = Y(3*i  ) - X3
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_precond_sor_33_apply
 
   subroutine monolis_precond_sor_33_clear(monoMAT)

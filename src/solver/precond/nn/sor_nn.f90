@@ -36,6 +36,11 @@ contains
     allocate(monoMAT%monoTree%D(NDOF2*N), source = 0.0d0)
     ALU => monoMAT%monoTree%D
 
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(T, LU, i, j, k, jS, jE, in)
+!$omp do
     do i = 1, N
       jS = index(i-1) + 1
       jE = index(i)
@@ -68,6 +73,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     deallocate(T)
     deallocate(LU)
@@ -105,6 +112,11 @@ contains
     YT = 0.0d0
     ST = 0.0d0
 
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item, Y) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(ST, XT, i, j, jn, k, l, jS, jE)
+!$omp do
     do i = 1, N
       do j = 1, NDOF
         ST(j) = Y(NDOF*(i-1)+j)
@@ -143,7 +155,8 @@ contains
         Y(NDOF*(i-1)+k) = XT(k)
       enddo
     enddo
-
+!$omp end do
+!$omp do
     do i = N, 1, -1
       do j = 1, NDOF
         ST(j) = 0.0d0
@@ -182,6 +195,8 @@ contains
         Y(NDOF*(i-1)+k) = Y(NDOF*(i-1)+k) - XT(k)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     deallocate(XT)
     deallocate(YT)
