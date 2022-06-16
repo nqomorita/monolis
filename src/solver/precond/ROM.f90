@@ -26,7 +26,7 @@ contains
     real(kdouble) :: ths
     logical, allocatable :: is_bc(:)
 
-    call monolis_precond_rom_gs_setup(monoPRM, monoCOM, monoMAT)
+    !call monolis_precond_rom_gs_setup(monoPRM, monoCOM, monoMAT)
 
     allocate(is_bc(monoMAT%NP*monoMAT%NDOF), source = .false.)
     call get_is_bc(monoPRM, monoCOM, monoMAT, is_bc, n_bc)
