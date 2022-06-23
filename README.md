@@ -1,6 +1,6 @@
 # Monolis
 
-- Monolithic non-overlapping/overlapping domain decomposition based linear solver
+- Monolithic domain decomposition based linear solver
 
 ## Manual
 
@@ -43,37 +43,21 @@ https://morita.gitlab.io/monolis/
 ## Miscellanies
 
 - MPI parallelization
-- Reordering with metis version 5
+- OpenMP parallelization
+- Reordering with METIS version 5
 
-## Compile
-
-Confirm and set the following variables in Makefile.
-
-```
-FC     = mpif90
-FFLAGS = -O2
-```
-
-### with MPI and METIS
+### Compile flags
 
 ```
 ./install_lib.sh
-make FLAGS=MPI,METIS
+make FLAGS=MPI,OPENMP,METIS,MUMPS
 ```
 
-### with MPI
-
-```
-./install_lib.sh
-make FLAGS=MPI
-```
-
-### with METIS
-
-```
-./install_lib.sh
-make FLAGS=METIS
-```
+- MPI: Enable MPI parallelization
+- OPENMP: Enable OpenMP parallelization
+- METIS: Enable METIS
+- MUMPS: Enable MUMPS
+- DEBUG: Enable DEBUG
 
 ## License
 
