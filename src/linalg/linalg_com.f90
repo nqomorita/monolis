@@ -218,6 +218,20 @@ contains
 #endif
   end subroutine monolis_SendRecv_pre_I
 
+  subroutine monolis_Isend_I(n, ws, pe_id, comm, req)
+    implicit none
+    integer(kint) :: ws(:), n, pe_id, comm, req, ierr
+
+    call MPI_Isend(ws, n, MPI_INTEGER, pe_id, 0, comm, req, ierr)
+  end subroutine monolis_Isend_I
+
+  subroutine monolis_Irecv_I(n, ws, pe_id, comm, req)
+    implicit none
+    integer(kint) :: ws(:), n, pe_id, comm, req, ierr
+
+    call MPI_Irecv(ws, n, MPI_INTEGER, pe_id, 0, comm, req, ierr)
+  end subroutine monolis_Irecv_I
+
   subroutine monolis_allgather_I1(sval, rbuf, comm)
     implicit none
     integer(kint) :: sval    !send buffer
