@@ -108,6 +108,9 @@ contains
     if(associated(monoCOM%send_index)) deallocate(monoCOM%send_index)
     if(associated(monoCOM%send_item)) deallocate(monoCOM%send_item)
 
+    if(associated(monoCOM%global_node_id)) deallocate(monoCOM%global_node_id)
+    if(associated(monoCOM%global_elem_id)) deallocate(monoCOM%global_elem_id)
+
     monoCOM%recv_neib_pe => null()
     monoCOM%recv_index => null()
     monoCOM%recv_item => null()
@@ -115,6 +118,9 @@ contains
     monoCOM%send_neib_pe => null()
     monoCOM%send_index => null()
     monoCOM%send_item => null()
+
+    monoCOM%global_node_id => null()
+    monoCOM%global_elem_id => null()
   end subroutine monolis_com_finalize
 
   subroutine monolis_com_input_comm_table(monoCOM, fname_in)

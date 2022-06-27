@@ -20,9 +20,14 @@ contains
     call monolis_convert_connectivity_to_nodal &
       & (nnode, nelem, ebase_func, connectivity, index, item)
 
-     call monolis_get_nonzero_pattern_by_nodal &
-       & (monolis, nnode, ndof, index, item)
-  end subroutine monolis_get_nonzero_pattern
+    call monolis_get_nonzero_pattern_by_nodal &
+      & (monolis, nnode, ndof, index, item)
+
+    deallocate(ebase_func); nullify(ebase_func)
+    deallocate(connectivity); nullify(connectivity)
+    deallocate(index); nullify(index)
+    deallocate(item); nullify(item)
+      end subroutine monolis_get_nonzero_pattern
 
   subroutine monolis_get_nonzero_pattern_with_arbitrary_dof &
     (monolis, nnode, nbase_func, n_dof_list, nelem, elem)
@@ -97,9 +102,6 @@ contains
 
     call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
-
-    nullify(index)
-    nullify(item)
   end subroutine monolis_get_nonzero_pattern_by_nodal
 
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
@@ -425,7 +427,8 @@ contains
   subroutine monolis_get_CRR_format(N, NZ, index, item, indexR, itemR, permR)
     implicit none
     integer(kint), intent(in) :: N, NZ, index(0:), item(:)
-    integer(kint), pointer :: indexR(:), itemR(:), temp(:), permR(:)
+    integer(kint), pointer :: indexR(:), itemR(:), permR(:)
+    integer(kint), allocatable :: temp(:)
     integer(kint) :: i, j, in, jS, jE, m, p
 
     allocate(temp(N), source = 0)
@@ -461,6 +464,7 @@ contains
       jE = indexR(i)
       call monolis_qsort_int(itemR(jS:jE), 1, jE-jS+1)
     enddo
+    deallocate(temp)
   end subroutine monolis_get_CRR_format
 
   subroutine monolis_stop_by_matrix_assemble(ci, cj)
