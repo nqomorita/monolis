@@ -82,7 +82,7 @@ $ make
 実行例：MPI,OpenMPによる並列計算と、METIS、MUMPS ライブラリを有効にする場合
 
 ```bash
-$ make FLAG=MPI,OPENMP,METIS,MUMPS
+$ make FLAGS=MPI,OPENMP,METIS,MUMPS
 ```
 
 
