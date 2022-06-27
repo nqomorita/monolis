@@ -95,3 +95,15 @@ $ make FLAG=MPI,OPENMP,METIS,MUMPS
 $ ls bin
 $ ls lib
 ```
+
+
+### 4. git による monolis のアップデート
+
+monolis にアップデートが生じた場合は、monolis トップディレクトリにおいて、
+以下の git コマンドを利用することにより最新のソースにアップデートできる。
+
+```
+$ make clean
+$ git pull
+$ make
+```
