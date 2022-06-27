@@ -70,6 +70,22 @@ monolis ディレクトリにおいて以下のコマンドを実行する。
 $ make
 ```
 
+`make` と実行した場合は、MPIによる並列計算機能と、グラフ分割ライブラリMETISが有効になる。
+`make` 実行時のオプションは以下の通り。
+
+- MPI: MPI による並列計算の有効
+- OPENMP: OpenMP による並列計算の有効
+- METIS: グラフ分割ライブラリ METIS を利用
+- MUMPS: 直接法ライブラリ MUMPS を利用
+- DEBUG: DEBUG オプションを有効
+
+実行例：MPI,OpenMPによる並列計算と、METIS、MUMPS ライブラリを有効にする場合
+
+```bash
+$ make FLAG=MPI,OPENMP,METIS,MUMPS
+```
+
+
 ### 3. インストールの確認
 
 インストールが成功していれば、`monolis/bin` に `monolis_partitioner`、`monolis/lib` に `libmonolis.a` が生成されている。
