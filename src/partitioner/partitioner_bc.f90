@@ -13,6 +13,8 @@ program monolis_partitioner_bc
 
   call monolis_input_condition(fname, ncond, ndof, icond, cond)
 
+  allocate(mesh(n_domain))
+
   call monolis_par_input_node_id(n_domain, mesh)
 
   call monolis_par_output_condition(n_domain, mesh, fname, ncond, ndof, icond, cond)

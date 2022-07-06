@@ -77,6 +77,7 @@ BIN_TEST = monolis_test
 BIN_PART   = gedatsu_simple_mesh_partitioner
 BIN_PARTBC = gedatsu_bc_partitioner
 BIN_PARTNG = gedatsu_graph_partitioner
+BIN_PARTCN = gedatsu_connectivity_partitioner
 BIN_PARTDR = gedatsu_dist_value_r_partitioner
 BIN_PARTDI = gedatsu_dist_value_i_partitioner
 
@@ -91,6 +92,7 @@ LIBTARGET  = $(addprefix $(LIB_DIR)/, $(LIB_LIST))
 PARTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PART))
 PARTBCTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTBC))
 PARTNGTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTNG))
+PARTCNTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTCN))
 PARTDRTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTDR))
 PARTDITARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTDI))
 REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
@@ -125,6 +127,7 @@ SRC_ALL_LIST    = $(addprefix util/, $(SRC_LIST_UTIL)) $(addprefix io/, $(SRC_LI
 SRC_PART        = partitioner/partitioner.f90
 SRC_PARTBC      = partitioner/partitioner_bc.f90
 SRC_PARTNG      = partitioner/partitioner_nodal_graph.f90
+SRC_PARTCN      = partitioner/partitioner_connectivity_graph.f90
 SRC_PARTDR      = partitioner/partitioner_distval_r.f90
 SRC_PARTDI      = partitioner/partitioner_distval_i.f90
 SRC_REF1        = refiner/h_refiner_hex.f90
@@ -147,6 +150,9 @@ OBJS_PARTBC = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTBC:.f90=.o))
 
 SOURCES_PARTNG = $(addprefix $(SRC_DIR)/, $(SRC_PARTNG))
 OBJS_PARTNG = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTNG:.f90=.o))
+
+SOURCES_PARTCN = $(addprefix $(SRC_DIR)/, $(SRC_PARTCN))
+OBJS_PARTCN = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTCN:.f90=.o))
 
 SOURCES_PARTDR = $(addprefix $(SRC_DIR)/, $(SRC_PARTDR))
 OBJS_PARTDR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTDR:.f90=.o))
@@ -175,7 +181,8 @@ OBJS_DBC2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC2:.f90=.o))
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
-all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTDRTARGET) $(PARTDITARGET) \
+all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTCNTARGET) \
+	$(PARTDRTARGET) $(PARTDITARGET) \
 	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
 	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET)
 
@@ -190,6 +197,9 @@ $(PARTBCTARGET): $(OBJS_PARTBC)
 
 $(PARTNGTARGET): $(OBJS_PARTNG)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTNG) $(MONOLIS_LIB) $(LIBRARY)
+
+$(PARTCNTARGET): $(OBJS_PARTCN)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTCN) $(MONOLIS_LIB) $(LIBRARY)
 
 $(PARTDRTARGET): $(OBJS_PARTDR)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTDR) $(MONOLIS_LIB) $(LIBRARY)

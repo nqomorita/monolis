@@ -131,8 +131,68 @@ contains
       fname = trim(output_dir)//"monolis.recv."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
         comm(i)%recv_index, comm(i)%recv_item)
+
+      fname = trim(output_dir)//"node.n_internal."//trim(cnum)
+      call monolis_output_mesh_n_internal(fname, node_list(i)%nnode_in)
     enddo
   end subroutine monolis_output_parted_nodal_graph
+
+  subroutine monolis_output_parted_connectivity_graph(fmain, graph, graph_format, node_list, n_domain)
+    implicit none
+    type(monolis_graph) :: graph
+    type(monolis_graph_format) :: graph_format
+    type(monolis_node_list) :: node_list(:)
+    integer(kint) :: i, n_domain, shift, in, j, jn, kS, kE, k
+    character :: cnum*5, output_dir*100, fname*100, fmain*100
+
+    call monolis_debug_header("monolis_output_parted_connectivity_graph")
+
+    output_dir = "parted.0/"
+    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
+
+    shift = 0
+    if(minval(graph_format%point_id) == 0) shift = -1 !> for C binding
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+
+      fname = trim(output_dir)//"connectivity.dat."//trim(cnum)
+      !call monolis_output_connectivity_graph(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nid_perm, &
+      !  node_list(i)%index, node_list(i)%item, shift)
+      open(20, file = fname, status = "replace")
+        in = node_list(i)%nelem_in + node_list(i)%nelem_out
+        write(20,"(i0)")in
+        do j = 1, in
+          jn = node_list(i)%eid(j)
+          kS = graph%index(jn) + 1
+          kE = graph%index(jn+1)
+          write(20,"(i0,x,i0,$)")j, kE-kS+1
+          do k = kS, kE
+            write(20,"(x,i0,$)")graph%item(k)
+          enddo
+          write(20,"(a)")""
+        enddo
+      close(20)
+
+      fname = trim(output_dir)//"connectivity.id."//trim(cnum)
+      !call monolis_output_connectivity_global_eid(fname, mesh%nelem, node_list(i)%nelem, node_list(i)%nelem_in, &
+      !&  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func)
+      open(20, file = fname, status = "replace")
+        in = node_list(i)%nelem_in + node_list(i)%nelem_out
+        write(20,"(i0)")in
+        do j = 1, in
+          write(20,"(i0,x,i0,x,i0)") j, 1, node_list(i)%eid(j)
+        enddo
+      close(20)
+
+      fname = trim(output_dir)//"connectivity.n_internal."//trim(cnum)
+      !call monolis_output_connectivity_global_eid(fname, mesh%nelem, node_list(i)%nelem, node_list(i)%nelem_in, &
+      !&  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func)
+      open(20, file = fname, status = "replace")
+        write(20,"(i0)")node_list(i)%nelem_in
+      close(20)
+    enddo
+  end subroutine monolis_output_parted_connectivity_graph
 
   subroutine monolis_input_mesh_node(fname, nnode, node, nid)
     implicit none
@@ -251,7 +311,6 @@ contains
     integer(kint) :: n_domain, i
     character :: fname*100, cnum*5
 
-    allocate(mesh(n_domain))
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = "parted.0/node.id."//trim(cnum)
@@ -265,13 +324,25 @@ contains
     integer(kint) :: n_domain, i
     character :: fname*100, cnum*5
 
-    allocate(mesh(n_domain))
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
       fname = "parted.0/connectivity.id."//trim(cnum)
       call monolis_input_id(fname, mesh(i)%eid, mesh(i)%nelem)
     enddo
   end subroutine monolis_par_input_elem_id
+
+  subroutine monolis_par_input_node_n_internal(n_domain, mesh)
+    implicit none
+    type(monolis_mesh), allocatable :: mesh(:)
+    integer(kint) :: n_domain, i
+    character :: fname*100, cnum*5
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted.0/node.n_internal."//trim(cnum)
+      call monolis_input_n_internal(fname, mesh(i)%nnode_in)
+    enddo
+  end subroutine monolis_par_input_node_n_internal
 
   subroutine monolis_input_condition(fname, ncond, ndof, icond, cond)
     implicit none
@@ -368,6 +439,16 @@ contains
       write(20,"(i0)")n_in
     close(20)
   end subroutine monolis_output_mesh_n_internal
+
+  subroutine monolis_input_n_internal(fname, n_in)
+    implicit none
+    integer(kint) :: n_in
+    character :: fname*100
+
+    open(20, file = fname, status = "old")
+      read(20,*)n_in
+    close(20)
+  end subroutine monolis_input_n_internal
 
   subroutine monolis_output_mesh_node(fname, nnode, node, nid)
     implicit none
