@@ -156,12 +156,6 @@ contains
       do i = 1, nitem
         read(10,*) monoCOM%send_item(i)
       enddo
-
-      !> for non-overlap
-      read(10,*) j, j
-
-      !> for internal
-      read(10,*) monoCOM%internal_nnode, monoCOM%internal_nelem
     close(10)
 
     open(10, file=trim(header)//"monolis.recv."//trim(cnum), status='old')
@@ -193,12 +187,20 @@ contains
       enddo
     close(10)
 
-    open(10, file=trim(header)//"elem.id."//trim(cnum), status='old')
+    open(10, file=trim(header)//"connectivity.id."//trim(cnum), status='old')
       read(10,*)nitem
       allocate(monoCOM%global_elem_id(nitem), source = 0)
       do i = 1, nitem
         read(10,*) monoCOM%global_elem_id(i)
       enddo
+    close(10)
+
+    open(10, file=trim(header)//"node.n_internal."//trim(cnum), status='old')
+      read(10,*)monoCOM%internal_nnode
+    close(10)
+
+    open(10, file=trim(header)//"connectivity.n_internal."//trim(cnum), status='old')
+      read(10,*)monoCOM%internal_nelem
     close(10)
   end subroutine monolis_com_input_comm_table
 

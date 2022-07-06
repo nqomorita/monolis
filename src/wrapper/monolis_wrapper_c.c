@@ -85,13 +85,7 @@ void monolis_com_input_comm_table(
     for(int i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.send_item[i]));
     }
-
-    fscanf(fp, "%d %d", &nin, &ein);
-    fscanf(fp, "%d %d", &nin, &ein);
   fclose(fp);
-
-  mat->com.internal_nnode = nin;
-  mat->com.internal_nelem = ein;
 
   fp = monolis_open_comm_table(fp, input_file_dir, "monolis.recv", mat->com.myrank);
     fscanf(fp, "%d %d", &nneib, &nitem);
@@ -121,13 +115,23 @@ void monolis_com_input_comm_table(
     }
   fclose(fp);
 
-  fp = monolis_open_comm_table(fp, input_file_dir, "elem.id", mat->com.myrank);
+  fp = monolis_open_comm_table(fp, input_file_dir, "connectivity.id", mat->com.myrank);
     fscanf(fp, "%d", &nitem);
     mat->com.nelem = nitem;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
       fscanf(fp, "%d %d %d", &nin, &nin, &(mat->com.global_elem_id[i]));
     }
+  fclose(fp);
+
+  fp = monolis_open_comm_table(fp, input_file_dir, "node.n_internal", mat->com.myrank);
+    fscanf(fp, "%d", &nin);
+    mat->com.internal_nnode = nin;
+  fclose(fp);
+
+  fp = monolis_open_comm_table(fp, input_file_dir, "connectivity.n_internal", mat->com.myrank);
+    fscanf(fp, "%d", &nin);
+    mat->com.internal_nelem = nin;
   fclose(fp);
 }
 
