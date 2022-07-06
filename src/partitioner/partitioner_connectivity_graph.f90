@@ -34,7 +34,7 @@ program monolis_partitioner_nodal_graph
     call get_connectivity_at_subdomain(graph, mesh(nid), node_list(nid), nid)
   enddo
 
-  call monolis_output_parted_connectivity_graph(fname, graph, graph_format, node_list, n_domain)
+  call monolis_output_parted_connectivity_graph(fname, mesh, graph, graph_format, node_list, n_domain)
 
   call monolis_part_finalize()
 

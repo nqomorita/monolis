@@ -137,12 +137,14 @@ contains
     enddo
   end subroutine monolis_output_parted_nodal_graph
 
-  subroutine monolis_output_parted_connectivity_graph(fmain, graph, graph_format, node_list, n_domain)
+  subroutine monolis_output_parted_connectivity_graph(fmain, mesh, graph, graph_format, node_list, n_domain)
     implicit none
+    type(monolis_mesh) :: mesh(:)
     type(monolis_graph) :: graph
     type(monolis_graph_format) :: graph_format
     type(monolis_node_list) :: node_list(:)
-    integer(kint) :: i, n_domain, shift, in, j, jn, kS, kE, k
+    integer(kint) :: i, n_domain, shift, in, j, jn, kS, kE, k, kn, idx, nnode
+    integer(kint), allocatable :: perm(:)
     character :: cnum*5, output_dir*100, fname*100, fmain*100
 
     call monolis_debug_header("monolis_output_parted_connectivity_graph")
@@ -156,6 +158,13 @@ contains
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
 
+      nnode = mesh(i)%nnode
+      allocate(perm(nnode), source = 0)
+      do j = 1, nnode
+        perm(j) = j
+      enddo
+      call monolis_qsort_int_with_perm(mesh(i)%nid, 1, nnode, perm)
+
       fname = trim(output_dir)//"connectivity.dat."//trim(cnum)
       !call monolis_output_connectivity_graph(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nid_perm, &
       !  node_list(i)%index, node_list(i)%item, shift)
@@ -168,7 +177,9 @@ contains
           kE = graph%index(jn+1)
           write(20,"(i0,x,i0,$)")j, kE-kS+1
           do k = kS, kE
-            write(20,"(x,i0,$)")graph%item(k)
+            kn = graph%item(k)
+            call monolis_bsearch_int(mesh(i)%nid, 1, nnode, kn, idx)
+            write(20,"(x,i0,$)")perm(idx)
           enddo
           write(20,"(a)")""
         enddo
@@ -191,6 +202,8 @@ contains
       open(20, file = fname, status = "replace")
         write(20,"(i0)")node_list(i)%nelem_in
       close(20)
+
+      deallocate(perm)
     enddo
   end subroutine monolis_output_parted_connectivity_graph
 
