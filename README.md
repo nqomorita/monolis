@@ -1,6 +1,7 @@
 # Monolis
 
 - Monolithic domain decomposition based linear solver
+- version 0.0.0
 
 ## Manual
 

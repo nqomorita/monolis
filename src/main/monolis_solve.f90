@@ -137,7 +137,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver")
+    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver v0.0.0")
 
     if(monoPRM%show_summary .and. monoCOM%myrank == 0) write(*,"(a)")" ** monolis solver: "// &
     & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))
