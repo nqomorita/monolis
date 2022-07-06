@@ -3,6 +3,7 @@ program monolis_dbc_all_tet
   use mod_monolis_com
   use mod_monolis_mesh
   use mod_monolis_io
+  use mod_monolis_io_arg
   use mod_monolis_dbc_all_util
   implicit none
   type(monolis_mesh) :: mesh

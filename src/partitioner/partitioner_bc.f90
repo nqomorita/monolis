@@ -1,6 +1,7 @@
 program monolis_partitioner_bc
   use mod_monolis_mesh
   use mod_monolis_io
+  use mod_monolis_io_arg
   implicit none
   integer(kint) :: n_domain, ncond, ndof
   type(monolis_mesh), allocatable :: mesh(:)

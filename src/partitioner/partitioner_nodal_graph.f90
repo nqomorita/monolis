@@ -4,6 +4,7 @@ program monolis_partitioner_nodal_graph
   use mod_monolis_graph
   use mod_monolis_comm_overlap
   use mod_monolis_io
+  use mod_monolis_io_arg
   implicit none
   type(monolis_graph) :: graph
   type(monolis_graph_format) :: graph_format

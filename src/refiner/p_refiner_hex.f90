@@ -3,6 +3,7 @@ program monolis_refiner
   use mod_monolis_com
   use mod_monolis_mesh
   use mod_monolis_io
+  use mod_monolis_io_arg
   implicit none
   type(monolis_mesh) :: mesh
   logical :: is_format_id
