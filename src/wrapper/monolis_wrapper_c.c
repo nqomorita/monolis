@@ -615,7 +615,7 @@ void monolis_inner_product(
   MONOLIS* mat,
   double*  x,
   double*  y,
-  double   sum)
+  double*  sum)
 {
   int n = mat->mat.NP;
   int ndof = mat->mat.NDOF;

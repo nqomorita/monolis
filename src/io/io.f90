@@ -115,8 +115,8 @@ contains
       fname = trim(output_dir)//"node.id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, graph_format%point_id, node_list(i)%nid)
 
-      fname = trim(output_dir)//"elem.id."//trim(cnum)
-      call monolis_output_mesh_global_eid_null(fname)
+      !fname = trim(output_dir)//"elem.id."//trim(cnum)
+      !call monolis_output_mesh_global_eid_null(fname)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &

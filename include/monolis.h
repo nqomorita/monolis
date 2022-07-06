@@ -239,7 +239,7 @@ void monolis_inner_product(
   MONOLIS* mat,
   double*  x,
   double*  y,
-  double   sum);
+  double*  sum);
 
 
 
@@ -272,6 +272,13 @@ void monolis_get_internal_node_number(
 
 /*
 void monolis_get_internal_node_1d_bool(
+  MONOLIS* mat,
+  int      nnode,
+  bool*    is_internal_elem);
+*/
+
+/*
+void monolis_get_internal_elem_number(
   MONOLIS* mat,
   int      nnode,
   bool*    is_internal_elem);

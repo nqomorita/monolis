@@ -75,7 +75,7 @@ void monolis_inner_product_c_main(
   int      ndof,
   double*  x,
   double*  y,
-  double   sum,
+  double*  sum,
   int      comm);
 
 void monolis_solve_c_main(

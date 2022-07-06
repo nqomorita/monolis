@@ -226,12 +226,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 clean:
 	$(RM) $(OBJS) $(LIBTARGET) \
-	./obj/refiner/*.o ./obj/partitioner/*.o \
 	./include/*.mod ./bin/*
 
 distclean:
 	$(RM) $(OBJS) $(LIBTARGET) \
-	./obj/refiner/*.o ./obj/partitioner/*.o \
 	/include/*.mod ./bin/*
 
 sampleclean:
