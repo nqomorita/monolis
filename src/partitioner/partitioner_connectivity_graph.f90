@@ -11,7 +11,7 @@ program monolis_partitioner_nodal_graph
   type(monolis_graph_format) :: graph_format
   type(monolis_mesh), allocatable :: mesh(:)
   type(monolis_node_list), allocatable :: node_list(:)
-  integer(kint) :: n_domain, nid
+  integer(kint) :: n_domain, nid, shift
   character :: fname*100
 
   call monolis_get_nodal_graph_part_arg(fname, n_domain)
@@ -28,10 +28,10 @@ program monolis_partitioner_nodal_graph
 
   allocate(node_list(n_domain))
 
-  call get_elem_domid_uniq(graph, n_domain, mesh)
+  call get_elem_domid_uniq(graph, n_domain, mesh, shift)
 
   do nid =  1, n_domain
-    call get_connectivity_at_subdomain(graph, mesh(nid), node_list(nid), nid)
+    call get_connectivity_at_subdomain(graph, mesh(nid), node_list(nid), nid, shift)
   enddo
 
   call monolis_output_parted_connectivity_graph(fname, mesh, graph, graph_format, node_list, n_domain)
@@ -40,16 +40,18 @@ program monolis_partitioner_nodal_graph
 
 contains
 
-  subroutine get_elem_domid_uniq(graph, n_domain, mesh)
+  subroutine get_elem_domid_uniq(graph, n_domain, mesh, shift)
     implicit none
     type(monolis_graph) :: graph
     type(monolis_mesh) :: mesh(:)
     integer(kint) :: n_domain
-    integer(kint) :: i, j, in, nnode_all, nelem, jS, jE
+    integer(kint) :: i, j, in, nnode_all, nelem, jS, jE, shift
 
     nnode_all = 0
+    shift = 0
     do i = 1, n_domain
       nnode_all = nnode_all + mesh(i)%nnode_in
+      if(minval(mesh(i)%nid) == 0) shift = 1
     enddo
 
     allocate(graph%node_domid_raw(nnode_all), source = 0)
@@ -57,7 +59,7 @@ contains
     nnode_all = 0
     do i = 1, n_domain
       do j = 1, mesh(i)%nnode_in
-        in = mesh(i)%nid(j)
+        in = mesh(i)%nid(j) + shift
         graph%node_domid_raw(in) = i
       enddo
     enddo
@@ -76,19 +78,19 @@ contains
     enddo
   end subroutine get_elem_domid_uniq
 
-  subroutine get_connectivity_at_subdomain(graph, mesh, local_node, nid)
+  subroutine get_connectivity_at_subdomain(graph, mesh, local_node, nid, shift)
     implicit none
     type(monolis_graph) :: graph
     type(monolis_mesh) :: mesh
     type(monolis_node_list) :: local_node
-    integer(kint) :: nelem, nnode_all, i, j, jS, jE, jn, nid, count_in, count_out, in
+    integer(kint) :: nelem, nnode_all, i, j, jS, jE, jn, nid, count_in, count_out, in, shift
     logical, allocatable :: is_node_used(:), is_in(:)
 
     nnode_all = maxval(graph%item)
     allocate(is_node_used(nnode_all), source = .false.)
 
     do i = 1, mesh%nnode
-      in = mesh%nid(i)
+      in = mesh%nid(i) + shift
       if(nnode_all < in) cycle
       is_node_used(in) = .true.
     enddo

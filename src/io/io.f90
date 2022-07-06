@@ -153,7 +153,7 @@ contains
     call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
 
     shift = 0
-    if(minval(graph_format%point_id) == 0) shift = -1 !> for C binding
+    if(minval(graph_format%adjacent_id) == 0) shift = -1 !> for C binding
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
@@ -177,9 +177,9 @@ contains
           kE = graph%index(jn+1)
           write(20,"(i0,x,i0,$)")j, kE-kS+1
           do k = kS, kE
-            kn = graph%item(k)
+            kn = graph%item(k) + shift
             call monolis_bsearch_int(mesh(i)%nid, 1, nnode, kn, idx)
-            write(20,"(x,i0,$)")perm(idx)
+            write(20,"(x,i0,$)")perm(idx) + shift
           enddo
           write(20,"(a)")""
         enddo
@@ -192,7 +192,7 @@ contains
         in = node_list(i)%nelem_in + node_list(i)%nelem_out
         write(20,"(i0)")in
         do j = 1, in
-          write(20,"(i0,x,i0,x,i0)") j, 1, node_list(i)%eid(j)
+          write(20,"(i0,x,i0,x,i0)") j, 1, node_list(i)%eid(j) + shift
         enddo
       close(20)
 
