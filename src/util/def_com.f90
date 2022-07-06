@@ -126,7 +126,7 @@ contains
   subroutine monolis_com_input_comm_table(monoCOM, fname_in)
     implicit none
     type(monolis_com) :: monoCOM
-    integer(kint) :: i, nitem
+    integer(kint) :: i, j, nitem
     character :: cnum*5, header*128
     character(*) :: fname_in
 
@@ -139,15 +139,14 @@ contains
     header = trim(fname_in)//"/parted.0/"
 
     open(10, file=trim(header)//"monolis.send."//trim(cnum), status='old')
+      !> for overlap
       read(10,*) monoCOM%send_n_neib, nitem
       allocate(monoCOM%send_neib_pe(monoCOM%send_n_neib))
       do i = 1, monoCOM%send_n_neib
         read(10,*) monoCOM%send_neib_pe(i)
       enddo
-      allocate(monoCOM%send_index(0:monoCOM%send_n_neib))
-      allocate(monoCOM%send_item(nitem))
-      monoCOM%send_index = 0
-      monoCOM%send_item = 0
+      allocate(monoCOM%send_index(0:monoCOM%send_n_neib), source = 0)
+      allocate(monoCOM%send_item(nitem), source = 0)
 
       if(monoCOM%send_n_neib == 0) return
 
@@ -157,6 +156,12 @@ contains
       do i = 1, nitem
         read(10,*) monoCOM%send_item(i)
       enddo
+
+      !> for non-overlap
+      read(10,*) j, j
+
+      !> for internal
+      read(10,*) monoCOM%internal_nnode, monoCOM%internal_nelem
     close(10)
 
     open(10, file=trim(header)//"monolis.recv."//trim(cnum), status='old')
@@ -169,10 +174,9 @@ contains
       do i = 1, monoCOM%recv_n_neib
         read(10,*) monoCOM%recv_neib_pe(i)
       enddo
-      allocate(monoCOM%recv_index(0:monoCOM%recv_n_neib))
-      allocate(monoCOM%recv_item(nitem))
-      monoCOM%recv_index = 0
-      monoCOM%recv_item = 0
+      allocate(monoCOM%recv_index(0:monoCOM%recv_n_neib), source = 0)
+      allocate(monoCOM%recv_item(nitem), source = 0)
+
       do i = 0, monoCOM%recv_n_neib
         read(10,*) monoCOM%recv_index(i)
       enddo
@@ -182,7 +186,7 @@ contains
     close(10)
 
     open(10, file=trim(header)//"node.id."//trim(cnum), status='old')
-      read(10,*)nitem, monoCOM%internal_nnode
+      read(10,*)nitem
       allocate(monoCOM%global_node_id(nitem), source = 0)
       do i = 1, nitem
         read(10,*) monoCOM%global_node_id(i)
@@ -190,7 +194,7 @@ contains
     close(10)
 
     open(10, file=trim(header)//"elem.id."//trim(cnum), status='old')
-      read(10,*)nitem, monoCOM%internal_nelem
+      read(10,*)nitem
       allocate(monoCOM%global_elem_id(nitem), source = 0)
       do i = 1, nitem
         read(10,*) monoCOM%global_elem_id(i)

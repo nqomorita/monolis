@@ -71,20 +71,20 @@ contains
       call monolis_output_mesh_elem_ref(fname, node_list(i)%nelem, mesh%nbase_func, node_list(i)%eid, &
         graph%ebase_func, graph%connectivity, node_list(i), shift)
 
-      fname = trim(output_dir)//"monolis.send."//trim(cnum)
-      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
-        comm(i)%send_index, comm(i)%send_item)
-
-      fname = trim(output_dir)//"monolis.recv."//trim(cnum)
-      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
-        comm(i)%recv_index, comm(i)%recv_item)
-
       fname = trim(output_dir)//"node.id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
       call monolis_output_mesh_global_eid(fname, mesh%nelem, node_list(i)%nelem, node_list(i)%nelem_in, &
       &  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func)
+
+      fname = trim(output_dir)//"monolis.send."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
+        comm(i)%send_index, comm(i)%send_item, node_list(i)%nnode_in, node_list(i)%nelem_in)
+
+      fname = trim(output_dir)//"monolis.recv."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
+        comm(i)%recv_index, comm(i)%recv_item, node_list(i)%nnode_in, node_list(i)%nelem_in)
     enddo
   end subroutine monolis_output_mesh
 
@@ -112,19 +112,19 @@ contains
       call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nid_perm, &
         node_list(i)%index, node_list(i)%item, shift)
 
-      fname = trim(output_dir)//"monolis.send."//trim(cnum)
-      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
-        comm(i)%send_index, comm(i)%send_item)
-
-      fname = trim(output_dir)//"monolis.recv."//trim(cnum)
-      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
-        comm(i)%recv_index, comm(i)%recv_item)
-
       fname = trim(output_dir)//"node.id."//trim(cnum)
       call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, graph_format%point_id, node_list(i)%nid)
 
       fname = trim(output_dir)//"elem.id."//trim(cnum)
       call monolis_output_mesh_global_eid_null(fname)
+
+      fname = trim(output_dir)//"monolis.send."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
+        comm(i)%send_index, comm(i)%send_item, node_list(i)%nnode_in, 0)
+
+      fname = trim(output_dir)//"monolis.recv."//trim(cnum)
+      call monolis_output_mesh_comm(fname, comm(i)%recv_n_neib, comm(i)%recv_neib_pe, &
+        comm(i)%recv_index, comm(i)%recv_item, node_list(i)%nnode_in, 0)
     enddo
   end subroutine monolis_output_parted_graph
 
@@ -436,9 +436,10 @@ contains
       if(jE-jS+1 == nbase) in = in + 1
       if(jE-jS+1 == nbase .and. i <= nelem_in) kn = kn + 1
     enddo
+    nelem_in = kn
 
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")in!, kn
+      write(20,"(i0,x,i0)")in
       do i = 1, nelem
         in = eid(i)
         if(in > nelem_all) cycle
@@ -452,7 +453,7 @@ contains
     character :: fname*100
 
     open(20, file = fname, status = "replace")
-      write(20,"(i0,x,i0)")0, 0
+      write(20,"(i0,x,i0)")0
     close(20)
   end subroutine monolis_output_mesh_global_eid_null
 
@@ -568,13 +569,13 @@ contains
     enddo
   end subroutine monolis_par_output_condition
 
-  subroutine monolis_output_mesh_comm(fname, n_neib, neib_pe, index, item)
+  subroutine monolis_output_mesh_comm(fname, n_neib, neib_pe, index, item, nnode_in, nelem_in)
     implicit none
     integer(kint) :: n_neib
     integer(kint) :: neib_pe(:)
     integer(kint) :: index(0:n_neib)
     integer(kint) :: item(:)
-    integer(kint) :: i
+    integer(kint) :: i, nnode_in, nelem_in
     character :: fname*100
 
     open(20, file = fname, status = "replace")
@@ -593,6 +594,9 @@ contains
 
       !> for non-overlap
       write(20,"(i0,x,i0)")0, 0
+
+      !> for internal dof
+      write(20,"(i0,x,i0)")nnode_in, nelem_in
     close(20)
   end subroutine monolis_output_mesh_comm
 
