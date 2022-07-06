@@ -55,8 +55,8 @@ contains
 
     call monolis_debug_header("monolis_output_mesh")
 
-    output_dir = "parted/"
-    call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
+    output_dir = "parted.0/"
+    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
 
     shift = 0
     if(minval(mesh%nid) == 0) shift = -1 !> for C binding
@@ -98,8 +98,8 @@ contains
 
     call monolis_debug_header("monolis_output_parted_graph")
 
-    output_dir = "parted/"
-    call system('if [ ! -d parted ]; then (echo "** create parted"; mkdir -p parted); fi')
+    output_dir = "parted.0/"
+    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
 
     shift = 0
     if(minval(graph_format%point_id) == 0) shift = -1 !> for C binding
@@ -229,7 +229,7 @@ contains
     allocate(mesh(n_domain))
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
-      fname = "parted/node.id."//trim(cnum)
+      fname = "parted.0/node.id."//trim(cnum)
       call monolis_input_id(fname, mesh(i)%nid, mesh(i)%nnode)
     enddo
   end subroutine monolis_par_input_node_id
@@ -243,7 +243,7 @@ contains
     allocate(mesh(n_domain))
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
-      fname = "parted/elem.id."//trim(cnum)
+      fname = "parted.0/elem.id."//trim(cnum)
       call monolis_input_id(fname, mesh(i)%eid, mesh(i)%nelem)
     enddo
   end subroutine monolis_par_input_elem_id
@@ -473,7 +473,7 @@ contains
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
-      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+      fname = "parted.0/"//trim(fname_body)//"."//trim(cnum)
 
       open(20, file = fname, status = "replace")
         write(20,"(i0)") mesh(i)%nnode
@@ -503,7 +503,7 @@ contains
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1
-      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+      fname = "parted.0/"//trim(fname_body)//"."//trim(cnum)
 
       open(20, file = fname, status = "replace")
         write(20,"(a)") trim(label)
@@ -544,7 +544,7 @@ contains
       call monolis_qsort_int_with_perm(temp, 1, mesh(i)%nnode, perm)
 
       write(cnum,"(i0)") i-1
-      fname = "parted/"//trim(fname_body)//"."//trim(cnum)
+      fname = "parted.0/"//trim(fname_body)//"."//trim(cnum)
 
       ncond = 0
       do j = 1, ncond_all

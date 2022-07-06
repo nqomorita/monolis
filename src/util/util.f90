@@ -127,8 +127,8 @@ contains
     comm_size = monolis_global_commsize()
     myrank = monolis_global_myrank()
     if(comm_size > 1)then
-      output_dir = "parted/"
-      if(present(fname_dir)) output_dir = trim(fname_dir)//"/parted/"
+      output_dir = "parted.0/"
+      if(present(fname_dir)) output_dir = trim(fname_dir)//"/parted.0/"
       write(cnum,"(i0)") myrank
       monolis_get_input_filename = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
     else

@@ -136,7 +136,7 @@ contains
     endif
 
     write(cnum,"(i0)")monoCOM%myrank
-    header = trim(fname_in)//"/parted/"
+    header = trim(fname_in)//"/parted.0/"
 
     open(10, file=trim(header)//"monolis.send."//trim(cnum), status='old')
       read(10,*) monoCOM%send_n_neib, nitem

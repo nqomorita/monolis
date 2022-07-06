@@ -33,7 +33,7 @@ FILE* monolis_open_comm_table(
     const char* filename,
     int         myrank)
 {
-  const char* dirname = "parted";
+  const char* dirname = "parted.0";
   const int BUFFER_SIZE = 1024;
   char fname[BUFFER_SIZE];
   snprintf(fname, BUFFER_SIZE, "%s/%s/%s.%d", input_file_dir, dirname, filename, myrank);
@@ -390,7 +390,7 @@ const char* monolis_get_input_filename(
   myrank = monolis_get_global_myrank();
 
   if(commsize > 1){
-    snprintf(ctmp, buf_size, "%s/%s.%d", "parted", filename_body, myrank);
+    snprintf(ctmp, buf_size, "%s/%s.%d", "parted.0", filename_body, myrank);
   } else {
     snprintf(ctmp, buf_size, "%s", filename_body);
   }
