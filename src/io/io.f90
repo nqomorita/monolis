@@ -155,7 +155,7 @@ contains
     call monolis_debug_int("nnode", nnode)
   end subroutine monolis_input_mesh_node
 
-  subroutine monolis_input_mesh_distval(fname, nnode, ndof, val, label)
+  subroutine monolis_input_mesh_distval_r(fname, nnode, ndof, val, label)
     implicit none
     integer(kint) :: nnode, ndof, i, j
     real(kdouble), allocatable :: val(:,:)
@@ -171,7 +171,25 @@ contains
     close(20)
 
     call monolis_debug_int("nnode", nnode)
-  end subroutine monolis_input_mesh_distval
+  end subroutine monolis_input_mesh_distval_r
+
+  subroutine monolis_input_mesh_distval_i(fname, nnode, ndof, val, label)
+    implicit none
+    integer(kint) :: nnode, ndof, i, j
+    integer(kint), allocatable :: val(:,:)
+    character :: fname*100, label*100
+
+    open(20, file = fname, status = "old")
+      read(20,"(a100)") label
+      read(20,*) nnode, ndof
+      allocate(val(ndof,nnode), source = 0.0d0)
+      do i = 1, nnode
+        read(20,*) (val(j,i), j = 1, ndof)
+      enddo
+    close(20)
+
+    call monolis_debug_int("nnode", nnode)
+  end subroutine monolis_input_mesh_distval_i
 
   subroutine monolis_input_mesh_elem(fname, nelem, nbase, elem, eid)
     implicit none

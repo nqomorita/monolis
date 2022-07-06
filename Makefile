@@ -213,14 +213,14 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) $(FLAG_METIS) -o $@ -c $<
 
 clean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
-	$(PARTBCTARGET) $(PARTNGTARGET) $(PARTDVTARGET) $(OBJS_PART) $(OBJS_PARTBC) $(OBJS_PARTNG) \
-	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) ./include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) \
+	./obj/refiner/*.o ./obj/partitioner/*.o \
+	./include/*.mod ./bin/*
 
 distclean:
-	$(RM) $(OBJS) $(LIBTARGET) $(PARTTARGET) $(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
-	$(PARTBCTARGET) $(PARTNGTARGET) $(PARTDVTARGET) $(OBJS_PART) $(OBJS_PARTBC) $(OBJS_PARTNG) \
-	$(DBC1TARGET) $(DBC2TARGET) $(TESTTARGET) /include/*.mod
+	$(RM) $(OBJS) $(LIBTARGET) \
+	./obj/refiner/*.o ./obj/partitioner/*.o \
+	/include/*.mod ./bin/*
 
 sampleclean:
 

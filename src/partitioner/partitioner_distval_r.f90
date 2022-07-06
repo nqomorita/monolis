@@ -10,7 +10,7 @@ program monolis_partitioner_distval
 
   call monolis_get_part_bc_arg(n_domain, fname)
 
-  call monolis_input_mesh_distval(fname, nnode, ndof, val, label)
+  call monolis_input_mesh_distval_r(fname, nnode, ndof, val, label)
 
   call monolis_par_input_node_id(n_domain, mesh)
 
