@@ -26,6 +26,9 @@ void monolis_get_time_precondition (MONOLIS* mat, double* value) {*value = mat->
 void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
 void monolis_get_time_comm_spmv    (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_spmv;};
 
+void monolis_get_converge_iter     (MONOLIS* mat, int* value) {*value = mat->prm.curiter;};
+void monolis_get_converge_residual (MONOLIS* mat, double* value) {*value = mat->prm.curresid;};
+
 /* initializer */
 FILE* monolis_open_comm_table(
     FILE*       fp,
@@ -660,6 +663,8 @@ void monolis_solve(
   int is_init_x = 1;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int curiter;
+  double curresid;
   double time[7];
 
   if(mat->prm.show_iterlog) iterlog = 1;
@@ -706,6 +711,8 @@ void monolis_solve(
     is_check_diag,
     is_measurement,
     is_init_x,
+    &curiter,
+    &curresid,
     time);
 
     mat->prm.tsol = time[0];
@@ -715,6 +722,8 @@ void monolis_solve(
     mat->prm.tprec = time[4];
     mat->prm.tcomm_dotp = time[5];
     mat->prm.tcomm_spmv = time[6];
+    mat->prm.curiter = curiter;
+    mat->prm.curresid = curresid;
 }
 
 void monolis_get_internal_node_number(

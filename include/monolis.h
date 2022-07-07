@@ -144,6 +144,12 @@ void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value);
 /* get communication time in SpMV time */
 void monolis_get_time_comm_spmv (MONOLIS* mat, double* value);
 
+/* get converge iteration */
+void monolis_get_converge_iter (MONOLIS* mat, int* value);
+
+/* get converge residual */
+void monolis_get_converge_residual (MONOLIS* mat, double* value);
+
 
 
 /* matrix clearing handler */

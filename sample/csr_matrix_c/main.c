@@ -5,7 +5,8 @@
 int main(int argc, char *args[]) {
   MONOLIS monolis;
   const char* dir_name;
-  double time[7];
+  int iter;
+  double time[7], res;
 
   dir_name = ".";
   printf("* test: monolis in C\n");
@@ -37,13 +38,16 @@ int main(int argc, char *args[]) {
       monolis.mat.B,
       monolis.mat.X);
 
-  monolis_get_time_solver           (&monolis, &time[0]);
-  monolis_get_time_preparing        (&monolis, &time[1]);
-  monolis_get_time_spmv             (&monolis, &time[2]);
-  monolis_get_time_dot_product      (&monolis, &time[3]);
-  monolis_get_time_precondition     (&monolis, &time[4]);
-  monolis_get_time_comm_dot_product (&monolis, &time[5]);
-  monolis_get_time_comm_spmv        (&monolis, &time[6]);
+  monolis_get_time_solver            (&monolis, &time[0]);
+  monolis_get_time_preparing         (&monolis, &time[1]);
+  monolis_get_time_spmv              (&monolis, &time[2]);
+  monolis_get_time_inner_product     (&monolis, &time[3]);
+  monolis_get_time_precondition      (&monolis, &time[4]);
+  monolis_get_time_comm_inner_product(&monolis, &time[5]);
+  monolis_get_time_comm_spmv         (&monolis, &time[6]);
+  monolis_get_converge_iter          (&monolis, &iter);
+  monolis_get_converge_residual      (&monolis, &res);
+
 
   printf("* monolis_get_time_solver           %e\n", time[0]);
   printf("* monolis_get_time_preparing        %e\n", time[1]);
@@ -52,6 +56,8 @@ int main(int argc, char *args[]) {
   printf("* monolis_get_time_precondition     %e\n", time[4]);
   printf("* monolis_get_time_comm_dot_product %e\n", time[5]);
   printf("* monolis_get_time_comm_spmv        %e\n", time[6]);
+  printf("* monolis_get_converge_iter         %d\n", iter);
+  printf("* monolis_get_converge_residual     %e\n", res);
 
   printf("* monolis_finalize\n");
   monolis_finalize(&monolis);

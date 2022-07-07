@@ -189,7 +189,7 @@ contains
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog_statistics, timelog, summary, &
-    is_check_diag, is_measurement, is_init_x, time) &
+    is_check_diag, is_measurement, is_init_x, curiter, curresid, time) &
     & bind(c, name = "monolis_solve_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -205,10 +205,12 @@ contains
     integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    integer(c_int), intent(out), target :: curiter
     real(c_double), intent(in), value :: tol
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(in), target :: X(NDOF*NP)
     real(c_double), intent(in), target :: B(NDOF*NP)
+    real(c_double), intent(out), target :: curresid
     real(c_double), intent(out), target :: time(7)
 
     !> for monoMAT
@@ -261,6 +263,8 @@ contains
 
     call monolis_solve_(monolis%PRM, monolis%COM, monolis%MAT)
 
+    curiter = monolis%PRM%curiter
+    curresid = monolis%PRM%curresid
     time(1) = monolis%PRM%tsol
     time(2) = monolis%PRM%tprep
     time(3) = monolis%PRM%tspmv
