@@ -134,6 +134,9 @@ contains
 
       fname = trim(output_dir)//"node.n_internal."//trim(cnum)
       call monolis_output_mesh_n_internal(fname, node_list(i)%nnode_in)
+
+      fname = trim(output_dir)//"connectivity.n_internal."//trim(cnum)
+      call monolis_output_mesh_n_internal(fname, 0)
     enddo
   end subroutine monolis_output_parted_nodal_graph
 
