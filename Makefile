@@ -76,8 +76,8 @@ BIN_PARTNG = gedatsu_graph_partitioner
 BIN_PARTCN = gedatsu_connectivity_partitioner
 BIN_PARTDR = gedatsu_nodal_value_r_partitioner
 BIN_PARTDI = gedatsu_nodal_value_i_partitioner
-#BIN_PARTCR = gedatsu_connectivity_value_r_partitioner
-#BIN_PARTCI = gedatsu_connectivity_value_i_partitioner
+BIN_PARTCR = gedatsu_connectivity_value_r_partitioner
+BIN_PARTCI = gedatsu_connectivity_value_i_partitioner
 
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
@@ -111,7 +111,8 @@ SRC_LIST_SHAPE  = shape_util.f90 shape_C2D3.f90 shape_C2D4.f90 shape_C2D6.f90 sh
 SRC_LIST_GEOM   = geom.f90 neighbor_search.f90
 SRC_LIST_ALGO   = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90
 SRC_LIST_FACT   = 11/fact_LU_11.f90 11/fact_MF_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90 fact_MF.f90
-SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 ROM.f90 MF.f90 precond.f90
+SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 \
+diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 ROM.f90 MF.f90 precond.f90
 SRC_LIST_DIRECT = LU.f90
 SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 \
 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90 GMRES.f90
@@ -119,7 +120,7 @@ SRC_LIST_SOLVE  = monolis_solve.f90
 SRC_LIST_MAIN   = monolis.f90
 SRC_LIST_EIGEN  = Lanczos_util.f90 Lanczos.f90 LOBPCG.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
-SRC_LIST_REFN   = p_refiner.f90 dbc_all_util.f90
+SRC_LIST_REFN   = p_refiner_util.f90 dbc_all_util.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = \
@@ -144,7 +145,7 @@ $(addprefix eigen/, $(SRC_LIST_EIGEN)) \
 $(addprefix wrapper/, $(SRC_LIST_WRAP)) \
 $(addprefix main/, $(SRC_LIST_MAIN))
 
-SRC_PART        = partitioner/partitioner.f90
+SRC_PART        = partitioner/partitioner_simple_mesh.f90
 SRC_PARTBC      = partitioner/partitioner_bc.f90
 SRC_PARTNG      = partitioner/partitioner_nodal_graph.f90
 SRC_PARTCN      = partitioner/partitioner_connectivity_graph.f90
