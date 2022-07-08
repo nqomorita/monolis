@@ -78,8 +78,8 @@ BIN_PART   = gedatsu_simple_mesh_partitioner
 BIN_PARTBC = gedatsu_bc_partitioner
 BIN_PARTNG = gedatsu_graph_partitioner
 BIN_PARTCN = gedatsu_connectivity_partitioner
-BIN_PARTDR = gedatsu_dist_value_r_partitioner
-BIN_PARTDI = gedatsu_dist_value_i_partitioner
+BIN_PARTDR = gedatsu_nodal_value_r_partitioner
+BIN_PARTDI = gedatsu_nodal_value_i_partitioner
 
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
