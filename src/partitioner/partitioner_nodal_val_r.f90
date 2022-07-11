@@ -16,6 +16,6 @@ program monolis_partitioner_distval
 
   call monolis_par_input_node_id(n_domain, mesh)
 
-  call monolis_par_output_distval_r(n_domain, mesh, fname, ndof, val, label)
+  call monolis_par_output_nodal_val_r(n_domain, mesh, fname, ndof, val, label)
 
 end program monolis_partitioner_distval

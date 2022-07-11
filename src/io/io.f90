@@ -334,7 +334,7 @@ contains
     enddo
   end subroutine monolis_par_input_node_id
 
-  subroutine monolis_par_input_elem_id(n_domain, mesh)
+  subroutine monolis_par_input_connectivity_id(n_domain, mesh)
     implicit none
     type(monolis_mesh), allocatable :: mesh(:)
     integer(kint) :: n_domain, i
@@ -345,7 +345,7 @@ contains
       fname = "parted.0/connectivity.id."//trim(cnum)
       call monolis_input_id(fname, mesh(i)%eid, mesh(i)%nelem)
     enddo
-  end subroutine monolis_par_input_elem_id
+  end subroutine monolis_par_input_connectivity_id
 
   subroutine monolis_par_input_node_n_internal(n_domain, mesh)
     implicit none
@@ -618,7 +618,7 @@ contains
     enddo
   end subroutine monolis_par_output_node
 
-  subroutine monolis_par_output_distval_r(n_domain, mesh, fname_body, ndof, val, label)
+  subroutine monolis_par_output_nodal_val_r(n_domain, mesh, fname_body, ndof, val, label)
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh(:)
@@ -647,13 +647,75 @@ contains
         enddo
       close(20)
     enddo
-  end subroutine monolis_par_output_distval_r
+  end subroutine monolis_par_output_nodal_val_r
 
-  subroutine monolis_par_output_distval_i(n_domain, mesh, fname_body, ndof, val, label)
+  subroutine monolis_par_output_nodal_val_i(n_domain, mesh, fname_body, ndof, val, label)
     use mod_monolis_mesh
     implicit none
     type(monolis_mesh) :: mesh(:)
     integer(kint) :: n_domain, i, j, k, in, nnode, shift, nmin, ndof
+    integer(kint) :: val(:,:)
+    character :: fname*100, fname_body*100, cnum*5, label*100
+
+    shift = 0
+    nmin = 1
+    do i = 1, n_domain
+      in = minval(mesh(i)%eid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = 1
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted.0/"//trim(fname_body)//"."//trim(cnum)
+
+      open(20, file = fname, status = "replace")
+        write(20,"(a)") trim(label)
+        write(20,"(i0,x,i0)") mesh(i)%nnode, ndof
+        do j = 1, mesh(i)%nnode
+          in = mesh(i)%eid(j) + shift
+          write(20,"(20(i0,x))") (val(k,in), k = 1, ndof)
+        enddo
+      close(20)
+    enddo
+  end subroutine monolis_par_output_nodal_val_i
+
+  subroutine monolis_par_output_connectivity_val_r(n_domain, mesh, fname_body, ndof, val, label)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh(:)
+    integer(kint) :: n_domain, i, j, k, in, nelem, shift, nmin, ndof
+    real(kdouble) :: val(:,:)
+    character :: fname*100, fname_body*100, cnum*5, label*100
+
+    shift = 0
+    nmin = 1
+    do i = 1, n_domain
+      in = minval(mesh(i)%eid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = 1
+
+    do i = 1, n_domain
+      write(cnum,"(i0)") i-1
+      fname = "parted.0/"//trim(fname_body)//"."//trim(cnum)
+
+      open(20, file = fname, status = "replace")
+        write(20,"(a)") trim(label)
+        write(20,"(i0,x,i0)") mesh(i)%nelem, ndof
+        do j = 1, mesh(i)%nelem
+          in = mesh(i)%eid(j) + shift
+          write(20,"(1p20e22.12)") (val(k,in), k = 1, ndof)
+        enddo
+      close(20)
+    enddo
+  end subroutine monolis_par_output_connectivity_val_r
+
+  subroutine monolis_par_output_connectivity_val_i(n_domain, mesh, fname_body, ndof, val, label)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh(:)
+    integer(kint) :: n_domain, i, j, k, in, nelem, shift, nmin, ndof
     integer(kint) :: val(:,:)
     character :: fname*100, fname_body*100, cnum*5, label*100
 
@@ -671,14 +733,14 @@ contains
 
       open(20, file = fname, status = "replace")
         write(20,"(a)") trim(label)
-        write(20,"(i0,x,i0)") mesh(i)%nnode, ndof
-        do j = 1, mesh(i)%nnode
+        write(20,"(i0,x,i0)") mesh(i)%nelem, ndof
+        do j = 1, mesh(i)%nelem
           in = mesh(i)%nid(j) + shift
           write(20,"(20(i0,x))") (val(k,in), k = 1, ndof)
         enddo
       close(20)
     enddo
-  end subroutine monolis_par_output_distval_i
+  end subroutine monolis_par_output_connectivity_val_i
 
   subroutine monolis_par_output_condition(n_domain, mesh, fname_body, ncond_all, ndof, icond, cond)
     use mod_monolis_mesh
