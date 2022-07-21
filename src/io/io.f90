@@ -195,7 +195,7 @@ contains
         in = node_list(i)%nelem_in + node_list(i)%nelem_out
         write(20,"(i0)")in
         do j = 1, in
-          write(20,"(i0,x,i0,x,i0)") j, 1, node_list(i)%eid(j) + shift
+          write(20,"(i0)") node_list(i)%eid(j) + shift
         enddo
       close(20)
 
@@ -300,10 +300,9 @@ contains
     close(20)
   end subroutine monolis_input_mesh_elem
 
-  subroutine monolis_input_id(fname, id, nid_out)
+  subroutine monolis_input_id(fname, id, nid)
     implicit none
     integer(kint) :: nid, i, j
-    integer(kint), optional :: nid_out
     integer(kint), allocatable :: id(:)
     character :: fname*100
 
@@ -314,11 +313,9 @@ contains
       allocate(id(nid), source = 0)
 
       do i = 1, nid
-        read(20,*) j, j, id(i)
+        read(20,*) id(i)
       enddo
     close(20)
-
-    if(present(nid_out)) nid_out = nid
   end subroutine monolis_input_id
 
   subroutine monolis_par_input_node_id(n_domain, mesh)
@@ -546,7 +543,7 @@ contains
       write(20,"(i0)")nnode
       do i = 1, nnode
         in = nid(i)
-        write(20,"(i0,x,i0,x,i0)") i, 1, global_nid(in)
+        write(20,"(i0)") global_nid(in)
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_nid
@@ -574,7 +571,7 @@ contains
       do i = 1, nelem
         in = eid(i)
         if(in > nelem_all) cycle
-        write(20,"(i0,x,i0,x,i0)") i, 1, global_eid(in)
+        write(20,"(i0)") global_eid(in)
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_eid

@@ -114,7 +114,7 @@ void monolis_com_input_comm_table(
     mat->com.nnode = nitem;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
-      fscanf(fp, "%d %d %d", &nin, &nin, &(mat->com.global_node_id[i]));
+      fscanf(fp, "%d", &(mat->com.global_node_id[i]));
     }
   fclose(fp);
 
@@ -123,7 +123,7 @@ void monolis_com_input_comm_table(
     mat->com.nelem = nitem;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
     for(int i=0; i<nitem; i++){
-      fscanf(fp, "%d %d %d", &nin, &nin, &(mat->com.global_elem_id[i]));
+      fscanf(fp, "%d", &(mat->com.global_elem_id[i]));
     }
   fclose(fp);
 
