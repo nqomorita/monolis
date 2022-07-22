@@ -394,18 +394,17 @@ const char* monolis_get_input_filename(
   int commsize;
   int myrank;
   int buf_size = 1000;
-  char ctmp[buf_size];
-  const char* filename;
+  char* filename;
 
   commsize = monolis_get_global_commsize();
   myrank = monolis_get_global_myrank();
+  filename = (char*)malloc(sizeof(char)*buf_size);
 
   if(commsize > 1){
-    snprintf(ctmp, buf_size, "%s/%s.%d", "parted.0", filename_body, myrank);
+    snprintf(filename, buf_size, "%s/%s.%d", "parted.0", filename_body, myrank);
   } else {
-    snprintf(ctmp, buf_size, "%s", filename_body);
+    snprintf(filename, buf_size, "%s", filename_body);
   }
-  filename = &(ctmp[0]);
   return filename;
 }
 
@@ -418,20 +417,20 @@ const char* monolis_get_output_filename(
   char* head;
   char* post;
   char ctmp[buf_size], body[buf_size];
-  const char* filename;
+  char* filename;
 
   commsize = monolis_get_global_commsize();
   myrank = monolis_get_global_myrank();
+  filename = (char*)malloc(sizeof(char)*buf_size);
 
   if(commsize > 1){
     snprintf(body, buf_size, "%s", filename_body);
     head = strtok(body, ".");
     post = strtok(NULL, ".");
-    snprintf(ctmp, buf_size, "%s.%d.%s", head, myrank, post);
+    snprintf(filename, buf_size, "%s.%d.%s", head, myrank, post);
   } else {
-    snprintf(ctmp, buf_size, "%s", filename_body);
+    snprintf(filename, buf_size, "%s", filename_body);
   }
-  filename = &(ctmp[0]);
   return filename;
 }
 
