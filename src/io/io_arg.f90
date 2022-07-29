@@ -212,9 +212,9 @@ contains
     call monolis_set_debug(.true.)
 
     count = iargc()
-    if(count == 0 .or. count == 1)then
+    if(count == 1)then
       call getarg(1, argc1)
-      if(trim(argc1) == "-h" .or. count == 0)then
+      if(trim(argc1) == "-h")then
         write(*,"(a)")"usage:"
         write(*,"(a)") &
         & "./monolis_dbc_all {options} {block size} {value 1} {value 2} ... {value n}"
@@ -246,15 +246,6 @@ contains
       else
         exit
       endif
-    enddo
-
-    call getarg(2*j-1, argc1)
-    read(argc1,*) n_block
-    allocate(val(n_block), source = 0.0d0)
-
-    do i = 1, n_block
-      call getarg(2*j-1 + i, argc1)
-      read(argc1,*) val(i)
     enddo
   end subroutine monolis_get_extract_all_arg
 

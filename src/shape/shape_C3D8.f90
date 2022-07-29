@@ -35,6 +35,13 @@ module mod_monolis_c3d8_shape
      3, 4, 8, 7, &
      4, 1, 5, 8  ], [4,6])
 
+     !1, 2, 3, 4
+     !8, 7, 6, 5
+     !5, 6, 2, 1
+     !6, 7, 3, 2
+     !7, 8, 4, 3
+     !8, 5, 1, 4
+
     public :: monolis_C3D8_num_gauss_point
     public :: monolis_C3D8_weight
     public :: monolis_C3D8_integral_point
