@@ -10,6 +10,7 @@ module mod_monolis_dbc_all_util
   private
   public :: monolis_get_surf_node
   public :: output_dbc
+  public :: output_surf
 
   integer(kint) :: i341(3,4), i361(4,6)
   type(type_monolis_hash_tree) :: hash_tree
