@@ -43,6 +43,58 @@ contains
     close(20)
   end subroutine output_dbc
 
+  subroutine output_surf(foname, mesh, nbase_func, nsurf, nsurf_node, is_open_surf)
+    use mod_monolis_mesh
+    implicit none
+    type(monolis_mesh) :: mesh
+    integer(kint) :: i, j, in, shift, conn(nbase_func), nbase_func, nsurf, nsurf_node
+    integer(kint) :: is_open_surf(:,:), eid
+    character :: foname*100
+
+    i341(1,1) = 1; i341(2,1) = 2; i341(3,1) = 3
+    i341(1,2) = 1; i341(2,2) = 2; i341(3,2) = 4
+    i341(1,3) = 2; i341(2,3) = 3; i341(3,3) = 4
+    i341(1,4) = 3; i341(2,4) = 1; i341(3,4) = 4
+
+    i361(1,1) = 1; i361(2,1) = 2; i361(3,1) = 3; i361(4,1) = 4
+    i361(1,2) = 5; i361(2,2) = 6; i361(3,2) = 7; i361(4,2) = 8
+    i361(1,3) = 1; i361(2,3) = 2; i361(3,3) = 5; i361(4,3) = 6
+    i361(1,4) = 2; i361(2,4) = 3; i361(3,4) = 6; i361(4,4) = 7
+    i361(1,5) = 3; i361(2,5) = 4; i361(3,5) = 7; i361(4,5) = 8
+    i361(1,6) = 4; i361(2,6) = 1; i361(3,6) = 8; i361(4,6) = 5
+
+    shift = 0
+    if(minval(mesh%nid) == 0) shift = -1
+
+    in = 0
+    do i = 1, mesh%nelem
+      do j = 1, nbase_func
+        if(is_open_surf(j,i) == 1) in = in + 1
+      enddo
+    enddo
+
+    open(20, file = trim(foname), status = "replace")
+      write(20,*) in
+
+      do eid = 1, mesh%nelem
+        call monolis_get_connectivity(mesh, eid, nbase_func, conn)
+        do i = 1, nsurf
+          if(is_open_surf(j,i) == 1)then
+            do j = 1, nsurf_node
+              if(nbase_func == 4)then
+                in = conn(i341(j,i))
+              elseif(nbase_func == 8)then
+                in = conn(i361(j,i))
+              endif
+              write(20,*) in-shift
+            enddo
+            write(20,*)""
+          endif
+        enddo
+      enddo
+    close(20)
+  end subroutine output_surf
+
   subroutine monolis_get_surf_node(mesh, nbase_func, nsurf, nsurf_node, is_surf_node, is_open_surf)
     use mod_monolis_mesh
     implicit none

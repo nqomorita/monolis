@@ -68,6 +68,8 @@ BIN_REF3 = monolis_p_refiner_hex
 BIN_REF4 = monolis_p_refiner_tet
 BIN_DBC1 = monolis_dbc_all_surf_tet
 BIN_DBC2 = monolis_dbc_all_surf_hex
+BIN_DBC3 = monolis_extract_all_surf_tet
+BIN_DBC4 = monolis_extract_all_surf_hex
 BIN_TEST = monolis_test
 
 BIN_PART   = gedatsu_simple_mesh_partitioner
@@ -101,6 +103,8 @@ REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
 REF4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF4))
 DBC1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC1))
 DBC2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC2))
+DBC3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC3))
+DBC4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC4))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 util.f90 stdlib.f90 hash.f90
@@ -161,6 +165,8 @@ SRC_REF3        = refiner/p_refiner_hex.f90
 SRC_REF4        = refiner/p_refiner_tet.f90
 SRC_DBC1        = extractor/dbc_all_tet.f90
 SRC_DBC2        = extractor/dbc_all_hex.f90
+SRC_DBC3        = extractor/extract_all_tet.f90
+SRC_DBC4        = extractor/extract_all_hex.f90
 SRC_TEST        = util/test.f90
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
@@ -208,6 +214,12 @@ OBJS_DBC1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC1:.f90=.o))
 
 SOURCES_DBC2 = $(addprefix $(SRC_DIR)/, $(SRC_DBC2))
 OBJS_DBC2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC2:.f90=.o))
+
+SOURCES_DBC3 = $(addprefix $(SRC_DIR)/, $(SRC_DBC3))
+OBJS_DBC3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC3:.f90=.o))
+
+SOURCES_DBC4 = $(addprefix $(SRC_DIR)/, $(SRC_DBC4))
+OBJS_DBC4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC4:.f90=.o))
 
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
@@ -261,6 +273,12 @@ $(DBC1TARGET): $(OBJS_DBC1)
 
 $(DBC2TARGET): $(OBJS_DBC2)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC2) $(MONOLIS_LIB) $(LIBRARY)
+
+$(DBC3TARGET): $(OBJS_DBC3)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC3) $(MONOLIS_LIB) $(LIBRARY)
+
+$(DBC4TARGET): $(OBJS_DBC4)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC4) $(MONOLIS_LIB) $(LIBRARY)
 
 $(TESTTARGET): $(OBJS_TEST)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(MONOLIS_LIB) $(LIBRARY)
