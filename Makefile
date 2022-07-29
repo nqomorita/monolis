@@ -120,7 +120,8 @@ SRC_LIST_SOLVE  = monolis_solve.f90
 SRC_LIST_MAIN   = monolis.f90
 SRC_LIST_EIGEN  = Lanczos_util.f90 Lanczos.f90 LOBPCG.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
-SRC_LIST_REFN   = p_refiner_util.f90 dbc_all_util.f90
+SRC_LIST_REFN   = p_refiner_util.f90
+SRC_LIST_EXTR   = dbc_all_util.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = \
@@ -140,6 +141,7 @@ $(addprefix matrix/, $(SRC_LIST_MATRIX)) \
 $(addprefix solver/, $(SRC_SOLVER_LIST)) \
 $(addprefix partitioner/, $(SRC_LIST_PART)) \
 $(addprefix refiner/, $(SRC_LIST_REFN)) \
+$(addprefix extractor/, $(SRC_LIST_EXTR)) \
 $(addprefix main/, $(SRC_LIST_SOLVE)) \
 $(addprefix eigen/, $(SRC_LIST_EIGEN)) \
 $(addprefix wrapper/, $(SRC_LIST_WRAP)) \
@@ -157,8 +159,8 @@ SRC_REF1        = refiner/h_refiner_hex.f90
 SRC_REF2        = refiner/h_refiner_tet.f90
 SRC_REF3        = refiner/p_refiner_hex.f90
 SRC_REF4        = refiner/p_refiner_tet.f90
-SRC_DBC1        = refiner/dbc_all_tet.f90
-SRC_DBC2        = refiner/dbc_all_hex.f90
+SRC_DBC1        = extractor/dbc_all_tet.f90
+SRC_DBC2        = extractor/dbc_all_hex.f90
 SRC_TEST        = util/test.f90
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
