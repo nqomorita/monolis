@@ -13,7 +13,7 @@ Gitlab の [SSH keys](https://gitlab.com/profile/keys) から、公開鍵を登�
 - make
 - cmake
 - git
-- gcc (gfortran)
+- gcc / gfortran
 - MPI
 
 #### 1.a Ubuntu
@@ -105,7 +105,7 @@ $ make
 - MUMPS: 直接法ライブラリ MUMPS を利用
 - DEBUG: DEBUG オプションを有効
 
-実行例：MPI,OpenMPによる並列計算と、METIS、MUMPS ライブラリを有効にする場合
+実行例：MPI、OpenMPによる並列計算と、METIS、MUMPS ライブラリを有効にする場合
 
 ```bash
 $ make FLAGS=MPI,OPENMP,METIS,MUMPS
