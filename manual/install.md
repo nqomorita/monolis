@@ -42,7 +42,7 @@ sudo yum install -y openmpi openmpi-devel
 ```
 
 MacOS 環境では、
-はじめにパッケージ管理ソフト brew をインストールする（(参考リンク)[https://brew.sh/index_ja]）。
+はじめにパッケージ管理ソフト brew をインストールする（[参考リンク](https://brew.sh/index_ja)）。
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
