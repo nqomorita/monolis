@@ -18,6 +18,8 @@ build_book:
   artifacts:
     paths:
       - book
+  only:
+    - master
 
 pages:
   stage: deploy
@@ -28,3 +30,5 @@ pages:
   artifacts:
     paths:
       - public
+  only:
+    - master

@@ -28,6 +28,7 @@ sudo apt install -y git
 sudo apt install -y wget
 sudo apt install -y openmpi-doc openmpi-bin libopenmpi-dev
 ```
+
 CentOS 環境では、以下のコマンドでインストールできる。
 
 ```bash
@@ -38,6 +39,25 @@ sudo yum install -y cmake
 sudo yum install -y git
 sudo yum install -y wget
 sudo yum install -y openmpi openmpi-devel
+```
+
+MacOS 環境では、
+はじめにパッケージ管理ソフト brew をインストールする（(参考リンク)[https://brew.sh/index_ja]）。
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+その後、以下のコマンドでインストールできる。
+
+```bash
+brew update
+brew upgrade
+brew install gcc
+brew install cmake
+brew install git
+brew install wget
+brew install open-mpi
+brew install openblas
 ```
 
 ### 2. クローン
