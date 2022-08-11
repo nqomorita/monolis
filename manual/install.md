@@ -16,6 +16,8 @@ Gitlab の [SSH keys](https://gitlab.com/profile/keys) から、公開鍵を登�
 - gcc (gfortran)
 - MPI
 
+#### 1.a Ubuntu
+
 Ubuntu 環境では、以下のコマンドでインストールできる。
 
 ```bash
@@ -29,6 +31,8 @@ sudo apt install -y wget
 sudo apt install -y openmpi-doc openmpi-bin libopenmpi-dev
 ```
 
+#### 1.b CentOS
+
 CentOS 環境では、以下のコマンドでインストールできる。
 
 ```bash
@@ -40,6 +44,8 @@ sudo yum install -y git
 sudo yum install -y wget
 sudo yum install -y openmpi openmpi-devel
 ```
+
+#### 1.c MacOS
 
 MacOS 環境では、
 はじめにパッケージ管理ソフト brew をインストールする（[参考リンク](https://brew.sh/index_ja)）。
