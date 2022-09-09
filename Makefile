@@ -80,6 +80,7 @@ BIN_PARTDR = gedatsu_nodal_value_r_partitioner
 BIN_PARTDI = gedatsu_nodal_value_i_partitioner
 BIN_PARTCR = gedatsu_connectivity_value_r_partitioner
 BIN_PARTCI = gedatsu_connectivity_value_i_partitioner
+BIN_CONVMG = gedatsu_converter_simple_mesh2graph
 
 CPP      = -cpp $(FLAG_MPI) $(FLAG_METIS) $(FLAG_MUMPS) $(FLAG_TEST) $(FLAG_DEBUG)
 
@@ -97,6 +98,7 @@ PARTDRTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTDR))
 PARTDITARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTDI))
 PARTCRTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTCR))
 PARTCITARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTCI))
+CONVMGTARGET = $(addprefix $(BIN_DIR)/, $(BIN_CONVMG))
 REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
 REF2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF2))
 REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
@@ -159,6 +161,7 @@ SRC_PARTDR      = partitioner/partitioner_nodal_val_r.f90
 SRC_PARTDI      = partitioner/partitioner_nodal_val_i.f90
 SRC_PARTCR      = partitioner/partitioner_connectivity_val_r.f90
 SRC_PARTCI      = partitioner/partitioner_connectivity_val_i.f90
+SRC_CONVMG      = converter/converter_simple_mesh2graph.f90
 SRC_REF1        = refiner/h_refiner_hex.f90
 SRC_REF2        = refiner/h_refiner_tet.f90
 SRC_REF3        = refiner/p_refiner_hex.f90
@@ -197,6 +200,9 @@ OBJS_PARTCR = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTCR:.f90=.o))
 SOURCES_PARTCI = $(addprefix $(SRC_DIR)/, $(SRC_PARTCI))
 OBJS_PARTCI = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTCI:.f90=.o))
 
+SOURCES_CONVMG = $(addprefix $(SRC_DIR)/, $(SRC_CONVMG))
+OBJS_CONVMG = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_CONVMG:.f90=.o))
+
 SOURCES_REF1 = $(addprefix $(SRC_DIR)/, $(SRC_REF1))
 OBJS_REF1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
 
@@ -226,6 +232,7 @@ OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
 all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTCNTARGET) \
 	$(PARTDRTARGET) $(PARTDITARGET) $(PARTCRTARGET) $(PARTCITARGET) \
+	$(CONVMGTARGET) \
 	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
 	$(DBC1TARGET) $(DBC2TARGET) $(DBC3TARGET) $(DBC4TARGET) $(TESTTARGET)
 
@@ -255,6 +262,9 @@ $(PARTCRTARGET): $(OBJS_PARTCR)
 
 $(PARTCITARGET): $(OBJS_PARTCI)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_PARTCI) $(MONOLIS_LIB) $(LIBRARY)
+
+$(CONVMGTARGET): $(OBJS_CONVMG)
+	$(FC) $(FFLAGS) -o $@ $(OBJS_CONVMG) $(MONOLIS_LIB) $(LIBRARY)
 
 $(REF1TARGET): $(OBJS_REF1)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_REF1) $(MONOLIS_LIB) $(LIBRARY)
@@ -293,6 +303,7 @@ clean:
 	$(RM) $(OBJS) $(LIBTARGET) \
 	$(OBJS_PART) $(OBJS_PARTBC) $(OBJS_PARTNG) $(OBJS_PARTCN) $(OBJS_PARTDR) $(OBJS_PARTDI) $(OBJS_PARTCR) $(OBJS_PARTCI) \
 	$(OBJS_REF1) $(OBJS_REF2) $(OBJS_REF3) $(OBJS_REF4) $(OBJS_DBC1) $(OBJS_DBC2) $(OBJS_DBC3) $(OBJS_DBC4) \
+	$(OBJS_CONVMG) \
 	./include/*.mod ./bin/*
 
 distclean:

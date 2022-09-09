@@ -90,7 +90,6 @@ contains
   end subroutine monolis_get_graph_from_graph_format
 
   subroutine monolis_convert_mesh_to_connectivity(nelem, nb, elem, ebase_func, connectivity)
-    use iso_c_binding
     implicit none
     integer(kint) :: i, j, nb
     integer(kint) :: nelem, elem(:,:)

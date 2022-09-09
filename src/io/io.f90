@@ -115,7 +115,7 @@ contains
       write(cnum,"(i0)") i-1
 
       fname = trim(output_dir)//trim(fmain)//"."//trim(cnum)
-      call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, node_list(i)%nid_perm, &
+      call monolis_output_graph_format(fname, node_list(i)%nnode, node_list(i)%nid, &
         node_list(i)%index, node_list(i)%item, shift)
 
       fname = trim(output_dir)//"node.id."//trim(cnum)
@@ -866,11 +866,11 @@ contains
     close(20)
   end subroutine monolis_visual_parted_mesh
 
-  subroutine monolis_output_graph_format(fname, nnode, nid, perm, ebase_func, connectivity, shift)
+  subroutine monolis_output_graph_format(fname, nnode, nid, ebase_func, connectivity, shift)
     implicit none
     integer(kint) :: nnode
     integer(kint) :: i, in, j, jn, k, jS, shift, id
-    integer(kint) :: nid(:), ebase_func(:), connectivity(:), perm(:)
+    integer(kint) :: nid(:), ebase_func(:), connectivity(:)
     integer(kint), allocatable :: t1(:), p1(:)
     character :: fname*100
 
