@@ -72,7 +72,7 @@ void monolis_finalize(
     - monolis_iter_PipeCR:       for symmetric matrix
     - monolis_iter_BiCGSTAB:     for non-symmetric matrix
     - monolis_iter_PipeBiCGSTAB: for non-symmetric matrix */
-void monolis_set_method (MONOLIS* mat, int    flag);
+void monolis_param_set_method (MONOLIS* mat, int    flag);
 
 /* set predonditioner
   default: monolis_prec_DIAG
@@ -82,43 +82,43 @@ void monolis_set_method (MONOLIS* mat, int    flag);
     - monolis_prec_ILU
     - monolis_prec_JACOBI
     - monolis_prec_SOR */
-void monolis_set_precond (MONOLIS* mat, int    flag);
+void monolis_param_set_precond (MONOLIS* mat, int    flag);
 
 /* set maximum iteration
   default: 10000 */
-void monolis_set_maxiter (MONOLIS* mat, int    flag);
+void monolis_param_set_maxiter (MONOLIS* mat, int    flag);
 
 /* set convergence threshold
   default: 1.0e-8 */
-void monolis_set_tolerance (MONOLIS* mat, double value);
+void monolis_param_set_tolerance (MONOLIS* mat, double value);
 
 /* set performance measurement flag
   default: false */
-void monolis_set_performance_measurement (MONOLIS* mat, bool   flag);
+void monolis_param_set_performance_measurement (MONOLIS* mat, bool   flag);
+
+/* enable to check the value of diagonal components
+  default: false */
+void monolis_param_set_check_diag (MONOLIS* mat, bool   flag);
 
 /* enable to check the value of diagonal components
   default: true */
-void monolis_set_check_diag (MONOLIS* mat, bool   flag);
-
-/* enable to check the value of diagonal components
-  default: true */
-void monolis_set_init_x (MONOLIS* mat, bool   flag);
+void monolis_param_set_init_x (MONOLIS* mat, bool   flag);
 
 /* show convergence history (rerative residual per iteration)
   default: false */
-void monolis_show_iterlog (MONOLIS* mat, bool   flag);
+void monolis_param_set_show_iterlog (MONOLIS* mat, bool   flag);
 
 /* show execution time in details
   default: false */
-void monolis_show_timelog (MONOLIS* mat, bool   flag);
+void monolis_param_set_show_timelog (MONOLIS* mat, bool   flag);
 
 /* show execution time in statistics details
   default: false */
-void monolis_show_timelog_statistics (MONOLIS* mat, bool   flag);
+void monolis_param_set_show_timelog_statistics (MONOLIS* mat, bool   flag);
 
 /* show summary log
   default: true */
-void monolis_show_summary (MONOLIS* mat, bool   flag);
+void monolis_param_set_show_summary (MONOLIS* mat, bool   flag);
 
 
 
@@ -302,6 +302,66 @@ void monolis_free_int_1d(
 
 void monolis_free_double_1d(
   double*  array);
+
+/* to be deleted */
+
+/* parameter setter */
+/* set iterative method
+  default: monolis_iter_CG
+  flags:
+    - monolis_iter_CG:           for symmetric positive define matrix
+    - monolis_iter_GropCG:       for symmetric positive define matrix
+    - monolis_iter_PipeCG:       for symmetric positive define matrix
+    - monolis_iter_PipeCR:       for symmetric matrix
+    - monolis_iter_BiCGSTAB:     for non-symmetric matrix
+    - monolis_iter_PipeBiCGSTAB: for non-symmetric matrix */
+void monolis_set_method (MONOLIS* mat, int    flag);
+
+/* set predonditioner
+  default: monolis_prec_DIAG
+  flags:
+    - monolis_prec_NONE
+    - monolis_prec_DIAG
+    - monolis_prec_ILU
+    - monolis_prec_JACOBI
+    - monolis_prec_SOR */
+void monolis_set_precond (MONOLIS* mat, int    flag);
+
+/* set maximum iteration
+  default: 10000 */
+void monolis_set_maxiter (MONOLIS* mat, int    flag);
+
+/* set convergence threshold
+  default: 1.0e-8 */
+void monolis_set_tolerance (MONOLIS* mat, double value);
+
+/* set performance measurement flag
+  default: false */
+void monolis_set_performance_measurement (MONOLIS* mat, bool   flag);
+
+/* enable to check the value of diagonal components
+  default: false */
+void monolis_set_check_diag (MONOLIS* mat, bool   flag);
+
+/* enable to check the value of diagonal components
+  default: true */
+void monolis_set_init_x (MONOLIS* mat, bool   flag);
+
+/* show convergence history (rerative residual per iteration)
+  default: false */
+void monolis_show_iterlog (MONOLIS* mat, bool   flag);
+
+/* show execution time in details
+  default: false */
+void monolis_show_timelog (MONOLIS* mat, bool   flag);
+
+/* show execution time in statistics details
+  default: false */
+void monolis_show_timelog_statistics (MONOLIS* mat, bool   flag);
+
+/* show summary log
+  default: true */
+void monolis_show_summary (MONOLIS* mat, bool   flag);
 
 #ifdef __cplusplus
 }

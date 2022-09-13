@@ -19,7 +19,6 @@ module mod_monolis_util
   public :: monolis_initialize_entire
   public :: monolis_finalize
   public :: monolis_timer_initialize
-  !public :: monolis_timer_finalize
   public :: monolis_get_input_filename
   public :: monolis_check_diagonal
   public :: monolis_set_debug
@@ -37,13 +36,13 @@ module mod_monolis_util
   public :: monolis_param_set_method
   public :: monolis_param_set_precond
   public :: monolis_param_set_maxiter
-  public :: monolis_param_set_tol
-  public :: monolis_param_set_is_scaling
-  public :: monolis_param_set_is_reordering
-  public :: monolis_param_set_is_init_x
-  public :: monolis_param_set_is_sym_matrix
-  public :: monolis_param_set_is_debug
-  public :: monolis_param_set_is_check_diag
+  public :: monolis_param_set_tolerance
+  public :: monolis_param_set_scaling
+  public :: monolis_param_set_reordering
+  public :: monolis_param_set_init_x
+  public :: monolis_param_set_sym_matrix
+  public :: monolis_param_set_debug
+  public :: monolis_param_set_check_diag
   public :: monolis_param_set_show_iterlog
   public :: monolis_param_set_show_time
   public :: monolis_param_set_show_summary
@@ -274,54 +273,63 @@ contains
     monolis%PRM%maxiter = param
   end subroutine monolis_param_set_maxiter
 
+!> to be deleted >>>
   subroutine monolis_param_set_tol(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     real(kdouble) :: param
     monolis%PRM%tol = param
   end subroutine monolis_param_set_tol
+!> to be deleted <<<
 
-  subroutine monolis_param_set_is_scaling(monolis, param)
+  subroutine monolis_param_set_tolerance(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    real(kdouble) :: param
+    monolis%PRM%tol = param
+  end subroutine monolis_param_set_tolerance
+
+  subroutine monolis_param_set_scaling(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_scaling = param
-  end subroutine monolis_param_set_is_scaling
+  end subroutine monolis_param_set_scaling
 
-  subroutine monolis_param_set_is_reordering(monolis, param)
+  subroutine monolis_param_set_reordering(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_reordering = param
-  end subroutine monolis_param_set_is_reordering
+  end subroutine monolis_param_set_reordering
 
-  subroutine monolis_param_set_is_init_x(monolis, param)
+  subroutine monolis_param_set_init_x(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_init_x = param
-  end subroutine monolis_param_set_is_init_x
+  end subroutine monolis_param_set_init_x
 
-  subroutine monolis_param_set_is_sym_matrix(monolis, param)
+  subroutine monolis_param_set_sym_matrix(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_sym_matrix = param
-  end subroutine monolis_param_set_is_sym_matrix
+  end subroutine monolis_param_set_sym_matrix
 
-  subroutine monolis_param_set_is_debug(monolis, param)
+  subroutine monolis_param_set_debug(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_debug = param
-  end subroutine monolis_param_set_is_debug
+  end subroutine monolis_param_set_debug
 
-  subroutine monolis_param_set_is_check_diag(monolis, param)
+  subroutine monolis_param_set_check_diag(monolis, param)
     implicit none
     type(monolis_structure) :: monolis
     logical :: param
     monolis%PRM%is_check_diag = param
-  end subroutine monolis_param_set_is_check_diag
+  end subroutine monolis_param_set_check_diag
 
   subroutine monolis_set_performance_measurement(monolis, param)
     implicit none

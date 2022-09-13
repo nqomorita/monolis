@@ -5,6 +5,31 @@
 #include "monolis.h"
 #include "metis.h"
 
+void monolis_param_set_method   (MONOLIS* mat, int    flag) {mat->prm.method    = flag;}
+void monolis_param_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag;}
+void monolis_param_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
+void monolis_param_set_tolerance(MONOLIS* mat, double flag) {mat->prm.tol       = flag;}
+void monolis_param_set_performance_measurement (MONOLIS* mat, bool   flag) {mat->prm.is_measurement = flag;}
+void monolis_param_set_check_diag (MONOLIS* mat, bool flag) {mat->prm.is_check_diag = flag;}
+void monolis_param_set_init_x (MONOLIS* mat, bool flag) {mat->prm.is_init_x = flag;}
+
+void monolis_param_set_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = flag;}
+void monolis_param_set_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
+void monolis_param_set_show_timelog_statistics (MONOLIS* mat, bool   flag) {mat->prm.show_timelog_statistics = flag;}
+void monolis_param_set_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
+
+void monolis_get_time_solver       (MONOLIS* mat, double* value) {*value = mat->prm.tsol;};
+void monolis_get_time_preparing    (MONOLIS* mat, double* value) {*value = mat->prm.tprep;};
+void monolis_get_time_spmv         (MONOLIS* mat, double* value) {*value = mat->prm.tspmv;};
+void monolis_get_time_inner_product(MONOLIS* mat, double* value) {*value = mat->prm.tdotp;};
+void monolis_get_time_precondition (MONOLIS* mat, double* value) {*value = mat->prm.tprec;};
+void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
+void monolis_get_time_comm_spmv    (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_spmv;};
+
+void monolis_get_converge_iter     (MONOLIS* mat, int* value) {*value = mat->prm.curiter;};
+void monolis_get_converge_residual (MONOLIS* mat, double* value) {*value = mat->prm.curresid;};
+
+/* to be deleted >>>*/
 void monolis_set_method   (MONOLIS* mat, int    flag) {mat->prm.method    = flag;}
 void monolis_set_precond  (MONOLIS* mat, int    flag) {mat->prm.precond   = flag;}
 void monolis_set_maxiter  (MONOLIS* mat, int    flag) {mat->prm.maxiter   = flag;}
@@ -17,17 +42,7 @@ void monolis_show_iterlog (MONOLIS* mat, bool   flag) {mat->prm.show_iterlog = f
 void monolis_show_timelog (MONOLIS* mat, bool   flag) {mat->prm.show_timelog = flag;}
 void monolis_show_timelog_statistics (MONOLIS* mat, bool   flag) {mat->prm.show_timelog_statistics = flag;}
 void monolis_show_summary (MONOLIS* mat, bool   flag) {mat->prm.show_summary = flag;}
-
-void monolis_get_time_solver       (MONOLIS* mat, double* value) {*value = mat->prm.tsol;};
-void monolis_get_time_preparing    (MONOLIS* mat, double* value) {*value = mat->prm.tprep;};
-void monolis_get_time_spmv         (MONOLIS* mat, double* value) {*value = mat->prm.tspmv;};
-void monolis_get_time_inner_product(MONOLIS* mat, double* value) {*value = mat->prm.tdotp;};
-void monolis_get_time_precondition (MONOLIS* mat, double* value) {*value = mat->prm.tprec;};
-void monolis_get_time_comm_inner_product (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_dotp;};
-void monolis_get_time_comm_spmv    (MONOLIS* mat, double* value) {*value = mat->prm.tcomm_spmv;};
-
-void monolis_get_converge_iter     (MONOLIS* mat, int* value) {*value = mat->prm.curiter;};
-void monolis_get_converge_residual (MONOLIS* mat, double* value) {*value = mat->prm.curresid;};
+/* to be deleted <<<*/
 
 /* initializer */
 FILE* monolis_open_comm_table(
