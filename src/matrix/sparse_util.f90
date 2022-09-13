@@ -6,7 +6,17 @@ module mod_monolis_sparse_util
 
 contains
 
+!> to be deleted >>>
   subroutine monolis_get_nonzero_pattern(monolis, nnode, nbase_func, ndof, nelem, elem)
+    use iso_c_binding
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint) :: nnode, nbase_func, ndof, nelem, elem(:,:)
+    call monolis_get_nonzero_pattern_by_simple_mesh(monolis, nnode, nbase_func, ndof, nelem, elem)
+  end subroutine monolis_get_nonzero_pattern
+!> <<< to be deleted
+
+  subroutine monolis_get_nonzero_pattern_by_simple_mesh(monolis, nnode, nbase_func, ndof, nelem, elem)
     use iso_c_binding
     implicit none
     type(monolis_structure) :: monolis
@@ -27,7 +37,7 @@ contains
     deallocate(connectivity); nullify(connectivity)
     deallocate(index); nullify(index)
     deallocate(item); nullify(item)
-      end subroutine monolis_get_nonzero_pattern
+  end subroutine monolis_get_nonzero_pattern_by_simple_mesh
 
   subroutine monolis_get_nonzero_pattern_with_arbitrary_dof &
     (monolis, nnode, nbase_func, n_dof_list, nelem, elem)
@@ -64,7 +74,7 @@ contains
       & (monolis, nnode, ndof, index, item)
   end subroutine monolis_get_nonzero_pattern_by_connectivity
 
-  subroutine monolis_get_nonzero_pattern_by_nodal(monolis, nnode, ndof, index, item)
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph(monolis, nnode, ndof, index, item)
     use iso_c_binding
     implicit none
     type(monolis_structure) :: monolis
@@ -102,7 +112,7 @@ contains
 
     call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
-  end subroutine monolis_get_nonzero_pattern_by_nodal
+  end subroutine monolis_get_nonzero_pattern_by_nodal_graph
 
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
     (monolis, nnode, n_dof_list, index, item)
