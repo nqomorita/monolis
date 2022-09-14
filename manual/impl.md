@@ -15,7 +15,6 @@ monolis を使った連立一次方程式の求解はおもに以下の手順で
 1. monolis 構造体の終了処理：[initialize](./impl/init.md)
 1. monolis 全体の修了処理：[initialize](./impl/init.md)
 
-
 ## 関数一覧
 
 - [initialize](./impl/init.md)
