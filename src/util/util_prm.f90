@@ -19,6 +19,8 @@ module mod_monolis_util_prm
   public :: monolis_param_set_show_time
   public :: monolis_param_set_show_summary
 
+  public :: monolis_param_set_tol
+
 contains
 
   !> set parameter section
@@ -42,15 +44,6 @@ contains
     integer(kint) :: param
     monolis%PRM%maxiter = param
   end subroutine monolis_param_set_maxiter
-
-!> to be deleted >>>
-  subroutine monolis_param_set_tol(monolis, param)
-    implicit none
-    type(monolis_structure) :: monolis
-    real(kdouble) :: param
-    monolis%PRM%tol = param
-  end subroutine monolis_param_set_tol
-!> to be deleted <<<
 
   subroutine monolis_param_set_tolerance(monolis, param)
     implicit none
@@ -129,4 +122,12 @@ contains
     monolis%PRM%show_summary = param
   end subroutine monolis_param_set_show_summary
 
+!> to be deleted >>>
+  subroutine monolis_param_set_tol(monolis, param)
+    implicit none
+    type(monolis_structure) :: monolis
+    real(kdouble) :: param
+    monolis%PRM%tol = param
+  end subroutine monolis_param_set_tol
+!> to be deleted <<<
 end module mod_monolis_util_prm

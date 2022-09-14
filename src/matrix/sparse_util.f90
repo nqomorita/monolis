@@ -30,7 +30,7 @@ contains
     call monolis_convert_connectivity_to_nodal &
       & (nnode, nelem, ebase_func, connectivity, index, item)
 
-    call monolis_get_nonzero_pattern_by_nodal &
+    call monolis_get_nonzero_pattern_by_nodal_graph &
       & (monolis, nnode, ndof, index, item)
 
     deallocate(ebase_func); nullify(ebase_func)
@@ -70,7 +70,7 @@ contains
     call monolis_convert_connectivity_to_nodal &
       & (nnode, nelem, ebase_func, connectivity, index, item)
 
-     call monolis_get_nonzero_pattern_by_nodal &
+     call monolis_get_nonzero_pattern_by_nodal_graph &
       & (monolis, nnode, ndof, index, item)
   end subroutine monolis_get_nonzero_pattern_by_connectivity
 
