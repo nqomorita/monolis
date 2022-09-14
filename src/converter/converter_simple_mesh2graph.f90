@@ -12,6 +12,8 @@ program gedatsu_conveter_mesh2graph
   logical :: is_format_id
   character :: fname*100
 
+  call monolis_global_initialize()
+
   is_format_id = .false.
   call monolis_input_mesh(mesh, is_format_id)
 
@@ -27,6 +29,7 @@ program gedatsu_conveter_mesh2graph
   fname = "graph.dat"
   call output_graph_format(fname, mesh%nnode, mesh%nid, index, item, shift)
 
+  call monolis_global_finalize()
 contains
 
   subroutine output_graph_format(fname, nnode, nid, ebase_func, connectivity, shift)

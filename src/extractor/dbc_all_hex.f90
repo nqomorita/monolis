@@ -13,6 +13,8 @@ program monolis_dbc_all_hex
   integer(kint), allocatable :: is_surf_node(:)
   real(kdouble), allocatable :: val(:)
 
+  call monolis_global_initialize()
+
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_dbc_all_hex")
   is_format_id = .false.
@@ -34,4 +36,7 @@ program monolis_dbc_all_hex
   call monolis_get_surf_node(mesh, 8, 6, 4, is_surf_node)
 
   call output_dbc(foname, mesh, is_surf_node, n_block, val)
+
+  call monolis_global_finalize()
+
 end program monolis_dbc_all_hex

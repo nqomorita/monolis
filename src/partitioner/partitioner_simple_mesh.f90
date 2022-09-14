@@ -14,6 +14,8 @@ program monolis_partitioner
   integer(kint) :: n_domain
   logical :: is_format_id, is_overlap
 
+  call monolis_global_initialize()
+
   call monolis_get_part_arg(n_domain, is_format_id, is_overlap)
 
   call monolis_input_mesh(mesh, is_format_id)
@@ -32,6 +34,8 @@ program monolis_partitioner
   call monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
 
   call monolis_part_finalize()
+
+  call monolis_global_finalize()
 
 contains
 

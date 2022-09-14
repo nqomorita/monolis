@@ -14,6 +14,8 @@ program monolis_partitioner_nodal_graph
   integer(kint) :: n_domain, nid, shift
   character :: fname*100
 
+  call monolis_global_initialize()
+
   call monolis_get_nodal_graph_part_arg(fname, n_domain)
 
   call monolis_input_graph(fname, graph_format)
@@ -37,6 +39,8 @@ program monolis_partitioner_nodal_graph
   call monolis_output_parted_connectivity_graph(fname, mesh, graph, graph_format, node_list, n_domain)
 
   call monolis_part_finalize()
+
+  call monolis_global_finalize()
 
 contains
 

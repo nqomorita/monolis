@@ -8,6 +8,8 @@ program monolis_refiner
   type(monolis_mesh) :: mesh
   logical :: is_format_id
 
+  call monolis_global_initialize()
+
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_h_refiner for HEX element")
   call monolis_debug_header("*** function does not supported")
@@ -16,4 +18,5 @@ program monolis_refiner
   !is_format_id = .true.
   !call monolis_input_mesh(mesh, is_format_id)
   !call monolis_output_refined_mesh(mesh, is_format_id)
+  call monolis_global_finalize()
 end program monolis_refiner

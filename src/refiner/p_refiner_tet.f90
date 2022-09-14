@@ -10,6 +10,8 @@ program monolis_p_refiner_tet
   character :: output_dir*100, fname*100
   logical :: is_format_id
 
+  call monolis_global_initialize()
+
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_p_refiner for TET element")
 
@@ -34,5 +36,7 @@ program monolis_p_refiner_tet
   fname = trim(output_dir)//"elem.dat"
   if(minval(mesh%nid) == 0) mesh_ref%elem = mesh_ref%elem - 1
   call monolis_output_mesh_elem(fname, mesh_ref%nelem, mesh_ref%nbase_func, mesh_ref%elem)
+
+  call monolis_global_finalize()
 end program monolis_p_refiner_tet
 

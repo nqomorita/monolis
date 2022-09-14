@@ -8,6 +8,8 @@ program monolis_partitioner_distval
   real(kdouble), allocatable :: val(:,:)
   character :: fname*100, label*100
 
+  call monolis_global_initialize()
+
   call monolis_get_part_bc_arg(n_domain, fname)
 
   call monolis_input_mesh_distval_r(fname, nelem, ndof, val, label)
@@ -17,5 +19,7 @@ program monolis_partitioner_distval
   call monolis_par_input_connectivity_id(n_domain, mesh)
 
   call monolis_par_output_connectivity_val_r(n_domain, mesh, fname, ndof, val, label)
+
+  call monolis_global_finalize()
 
 end program monolis_partitioner_distval

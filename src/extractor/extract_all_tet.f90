@@ -13,6 +13,8 @@ program monolis_extract_all_tet
   integer(kint), allocatable :: is_surf_node(:), is_open_surf(:,:)
   real(kdouble), allocatable :: val(:)
 
+  call monolis_global_initialize()
+
   call monolis_set_debug(.true.)
   call monolis_debug_header("monolis_extract_all_tet")
   is_format_id = .false.
@@ -29,5 +31,7 @@ program monolis_extract_all_tet
   call monolis_get_surf_node(mesh, 4, 4, 3, is_surf_node, is_open_surf)
 
   call output_surf(foname, mesh, 4, 4, 3, is_open_surf)
+
+  call monolis_global_finalize()
 end program monolis_extract_all_tet
 
