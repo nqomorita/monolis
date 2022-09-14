@@ -1,5 +1,6 @@
 module mod_monolis_comm_overlap
   use mod_monolis_util
+  use mod_monolis_util_debug
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_mesh

@@ -2,6 +2,7 @@ module mod_monolis_io_arg
   use mod_monolis_prm
   use mod_monolis_com
   use mod_monolis_util
+  use mod_monolis_util_debug
   use mod_monolis_mesh
   use mod_monolis_stdlib
   implicit none

@@ -3,6 +3,7 @@ program monolis_test
   use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_util
+  use mod_monolis_util_debug
   use mod_monolis_neighbor_search
   implicit none
   type(type_monolis_neighbor_search) :: monolis_nbsearch

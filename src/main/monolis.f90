@@ -8,6 +8,8 @@ module mod_monolis
   use mod_monolis_util
   use mod_monolis_util_com
   use mod_monolis_util_prm
+  use mod_monolis_util_debug
+  use mod_monolis_util_time
   use mod_monolis_matrix_copy
   use mod_monolis_sparse_util
   use mod_monolis_stdlib
