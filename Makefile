@@ -109,7 +109,7 @@ DBC3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC3))
 DBC4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC4))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
-SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 util.f90 util_time.f90 util_com.f90 util_prm.f90 util_debug.f90 stdlib.f90 hash.f90
+SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 stdlib.f90 util.f90 util_time.f90 util_com.f90 util_prm.f90 util_debug.f90 hash.f90
 SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 matrix_copy.f90 reorder.f90 sparse_util.f90
 SRC_LIST_IO     = io_arg.f90 io.f90 io_mtx.f90
 SRC_LIST_GRAPH  = graph.f90

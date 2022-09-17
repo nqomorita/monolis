@@ -97,7 +97,7 @@ $ make
 ```
 
 `make` と実行した場合は、MPIによる並列計算機能と、グラフ分割ライブラリMETISが有効になる。
-`make` 実行時のオプションは以下の通り。
+`make FLAGS=options` 実行時のオプションは以下の通り。
 
 - MPI: MPI による並列計算の有効
 - OPENMP: OpenMP による並列計算の有効
@@ -110,6 +110,8 @@ $ make
 ```bash
 $ make FLAGS=MPI,OPENMP,METIS,MUMPS
 ```
+
+`make lib` と実行した場合、ライブラリ `libmonolis.a` のみが生成される。
 
 
 ### 3. インストールの確認
