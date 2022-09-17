@@ -207,30 +207,25 @@ contains
   end subroutine monolis_get_n_dof_index
 
   !> setter
-  subroutine monolis_sparse_matrix_set_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_set_scalar_to_sparse_matrix(monolis, i, j, sub_i, sub_j, val)
     implicit none
-    integer(kint), intent(in) :: ndof
-    integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
-    real(kdouble), intent(inout) :: A(:)
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: i, j, sub_i, sub_j
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-    NDOF2 = ndof*ndof
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    call monolis_sparse_matrix_set_value(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+  end subroutine monolis_set_scalar_to_sparse_matrix
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
-        A(im) = val
-        return
-      endif
-      call monolis_stop_by_matrix_assemble(ci, cj)
-    enddo
-  end subroutine monolis_sparse_matrix_set_value
+  subroutine monolis_set_matrix_to_sparse_matrix(monolis, i, j, val)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: i, j
+    real(kdouble), intent(in) :: val(:,:)
+
+    call monolis_sparse_matrix_set_block(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & monolis%MAT%ndof, i, j, val)
+  end subroutine monolis_set_matrix_to_sparse_matrix
 
   !> getter
   subroutine monolis_sparse_matrix_get_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
@@ -350,6 +345,33 @@ contains
     enddo
   end subroutine monolis_sparse_matrix_add_matrix
 
+  subroutine monolis_sparse_matrix_set_block(index, item, A, ndof, e1, e2, val)
+    implicit none
+    integer(kint), intent(in) :: e1, e2, ndof
+    integer(kint), intent(in) :: index(0:), item(:)
+    real(kdouble), intent(inout) :: A(:)
+    real(kdouble), intent(in) :: val(ndof,ndof)
+    integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, i1, NDOF2
+
+    NDOF2 = ndof*ndof
+    in = e1
+    jS = index(in-1) + 1
+    jE = index(in)
+    do k = jS, jE
+      jn = item(k)
+      if(jn == e2)then
+        do i1 = 1, ndof
+        do i2 = 1, ndof
+          im = NDOF2*(k-1) + ndof*(i1-1) + i2
+          A(im) = val(ndof*(j-1)+i2, ndof*(i-1)+i1)
+        enddo
+        enddo
+        return
+      endif
+    enddo
+    call monolis_stop_by_matrix_assemble(e1, e2)
+  end subroutine monolis_sparse_matrix_set_block
+
   subroutine monolis_sparse_matrix_add_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
     integer(kint), intent(in) :: ndof
@@ -376,6 +398,31 @@ contains
 
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_sparse_matrix_add_value
+
+  subroutine monolis_sparse_matrix_set_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+    implicit none
+    integer(kint), intent(in) :: ndof
+    integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
+    real(kdouble), intent(inout) :: A(:)
+    real(kdouble), intent(in) :: val
+    integer(kint) :: j, jn, im, jS, jE, NDOF2
+
+    NDOF2 = ndof*ndof
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+
+    jS = index(ci-1) + 1
+    jE = index(ci)
+    do j = jS, jE
+      jn = item(j)
+      if(jn == cj)then
+        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        A(im) = val
+        return
+      endif
+      call monolis_stop_by_matrix_assemble(ci, cj)
+    enddo
+  end subroutine monolis_sparse_matrix_set_value
 
   subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
     implicit none
