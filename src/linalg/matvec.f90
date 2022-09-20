@@ -5,6 +5,7 @@ module mod_monolis_matvec
   use mod_monolis_linalg_util
   use mod_monolis_linalg_com
   use mod_monolis_util
+  use mod_monolis_util_debug
   implicit none
 
 contains

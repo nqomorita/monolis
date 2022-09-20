@@ -5,6 +5,7 @@ module mod_monolis_eigen_LOBPCG
   use mod_monolis_solve
   use mod_monolis_converge
   use mod_monolis_eigen_lanczos_util
+  use mod_monolis_util_debug
 
   implicit none
 

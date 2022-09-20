@@ -10,6 +10,7 @@ module mod_monolis_precond
   use mod_monolis_precond_mumps
   use mod_monolis_precond_mf
   use mod_monolis_util
+  use mod_monolis_util_debug
 
   implicit none
 

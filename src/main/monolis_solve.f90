@@ -6,6 +6,8 @@ module mod_monolis_solve
   use mod_monolis_precond
   use mod_monolis_reorder
   use mod_monolis_util
+  use mod_monolis_util_debug
+  use mod_monolis_util_time
   use mod_monolis_solver_CG
   use mod_monolis_solver_BiCGSTAB
   use mod_monolis_solver_BiCGSTAB_noprec

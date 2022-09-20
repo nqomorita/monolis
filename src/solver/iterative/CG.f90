@@ -8,6 +8,7 @@ module mod_monolis_solver_CG
   use mod_monolis_linalg_util
   use mod_monolis_converge
   use mod_monolis_util
+  use mod_monolis_util_debug
 
   implicit none
 

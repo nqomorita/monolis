@@ -5,6 +5,7 @@ program monolis_extract_all_hex
   use mod_monolis_io
   use mod_monolis_io_arg
   use mod_monolis_dbc_all_util
+  use mod_monolis_util_debug
   implicit none
   type(monolis_mesh) :: mesh
   integer(kint) :: n_block

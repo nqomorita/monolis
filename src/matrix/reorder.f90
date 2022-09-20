@@ -5,6 +5,7 @@ module mod_monolis_reorder
   use mod_monolis_restruct
   use mod_monolis_matrix_copy
   use mod_monolis_util
+  use mod_monolis_util_debug
   implicit none
 
   type monolis_edge_info

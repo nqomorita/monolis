@@ -11,8 +11,6 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
 
-    call monolis_debug_header("monolis_timer_initialize")
-
     call monolis_barrier_(monoCOM%comm)
     monoPRM%tsol  = monolis_get_time()
     monoPRM%tprep = 0.0d0
