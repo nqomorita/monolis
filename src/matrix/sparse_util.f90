@@ -433,6 +433,15 @@ contains
     real(kdouble), intent(in) :: A(:)
     integer(kint) :: i
 
+    if(associated(monolis%MAT%index))  deallocate(monolis%MAT%index)
+    if(associated(monolis%MAT%item))   deallocate(monolis%MAT%item)
+    if(associated(monolis%MAT%A))      deallocate(monolis%MAT%A)
+    if(associated(monolis%MAT%X))      deallocate(monolis%MAT%X)
+    if(associated(monolis%MAT%B))      deallocate(monolis%MAT%B)
+    if(associated(monolis%MAT%indexR)) deallocate(monolis%MAT%indexR)
+    if(associated(monolis%MAT%itemR))  deallocate(monolis%MAT%itemR)
+    if(associated(monolis%MAT%permR))  deallocate(monolis%MAT%permR)
+
     monolis%MAT%N = N
     monolis%MAT%NP = NP
     monolis%MAT%NDOF = NDOF
