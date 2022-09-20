@@ -13,6 +13,8 @@ program monolis_partitioner_bc
 
   call monolis_get_part_bc_arg(n_domain, fname)
 
+  if(n_domain <= 1) return
+
   call monolis_input_condition(fname, ncond, ndof, icond, cond)
 
   allocate(mesh(n_domain))

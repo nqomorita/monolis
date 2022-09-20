@@ -17,6 +17,8 @@ program monolis_partitioner_nodal_graph
 
   call monolis_get_nodal_graph_part_arg(fname, n_domain)
 
+  if(n_domain <= 1) return
+
   call monolis_input_graph(fname, graph_format)
 
   call monolis_get_graph_from_graph_format(graph_format, graph)
