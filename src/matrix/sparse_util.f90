@@ -424,6 +424,44 @@ contains
     enddo
   end subroutine monolis_sparse_matrix_set_value
 
+  !> CSR data setter
+  subroutine monolis_set_matrix_BCSR(monolis, N, NP, NDOF, NZ, A, index, item)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: N, NP, NDOF, NZ
+    integer(kint), intent(in) :: index(0:), item(:)
+    real(kdouble), intent(in) :: A(:)
+    integer(kint) :: i
+
+    monolis%MAT%N = N
+    monolis%MAT%NP = NP
+    monolis%MAT%NDOF = NDOF
+
+    allocate(monolis%MAT%index(0:NP), source = 0)
+    allocate(monolis%MAT%item(NZ), source = 0)
+    allocate(monolis%MAT%A(NDOF*NDOF*NZ), source = 0.0d0)
+    allocate(monolis%MAT%X(NDOF*NP), source = 0.0d0)
+    allocate(monolis%MAT%B(NDOF*NP), source = 0.0d0)
+
+    do i = 1, NP
+      monolis%MAT%index(i) = index(i)
+    enddo
+    do i = 1, NZ
+      monolis%MAT%item(i) = item(i)
+    enddo
+    do i = 1, NDOF*NDOF*NZ
+      monolis%MAT%A(i) = A(i)
+    enddo
+
+    allocate(monolis%MAT%indexR(0:NP), source = 0)
+    allocate(monolis%MAT%itemR(NZ), source = 0)
+    allocate(monolis%MAT%permR(NZ), source = 0)
+
+    call monolis_get_CRR_format(monolis%MAT%N, NZ, monolis%MAT%index, monolis%MAT%item, &
+      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
+  end subroutine monolis_set_matrix_BCSR
+
+  !> boundary condition
   subroutine monolis_set_Dirichlet_bc(monolis, B, node_id, ndof_bc, val)
     implicit none
     type(monolis_structure) :: monolis
