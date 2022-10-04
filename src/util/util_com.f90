@@ -270,11 +270,11 @@ contains
     do i = 1, n_neib_recv
       monolis%COM%recv_neib_pe(i) = recv_list(i)%domid
     enddo
-    allocate(monolis%COM%recv_index(n_neib_recv+1), source = 0)
+    allocate(monolis%COM%recv_index(0:n_neib_recv), source = 0)
     do i = 1, n_neib_recv
-      monolis%COM%recv_index(i+1) = monolis%COM%recv_index(i) + recv_list(i)%nnode
+      monolis%COM%recv_index(i) = monolis%COM%recv_index(i-1) + recv_list(i)%nnode
     enddo
-    in = monolis%COM%recv_index(n_neib_recv+1)
+    in = monolis%COM%recv_index(n_neib_recv)
     allocate(monolis%COM%recv_item(in), source = 0)
     in = 0
     do i = 1, n_neib_recv
@@ -291,12 +291,15 @@ contains
     do i = 1, n_neib_send
       monolis%COM%send_neib_pe(i) = send_list(i)%domid
     enddo
-    allocate(monolis%COM%send_index(n_neib_send+1), source = 0)
+    allocate(monolis%COM%send_index(0:n_neib_send), source = 0)
     do i = 1, n_neib_send
-      monolis%COM%send_index(i+1) = monolis%COM%send_index(i) + send_list(i)%nnode
+      monolis%COM%send_index(i) = monolis%COM%send_index(i-1) + send_list(i)%nnode
     enddo
-    in = monolis%COM%send_index(n_neib_send+1)
+    in = monolis%COM%send_index(n_neib_send)
     allocate(monolis%COM%send_item(in), source = 0)
+    do i = 1, in
+      monolis%COM%send_item(i) = i
+    enddo
 
     !> slave から master に global_nid を送信
 
