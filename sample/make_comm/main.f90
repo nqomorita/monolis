@@ -12,6 +12,11 @@ program main
 
   call monolis_global_initialize()
 
+  if(monolis_global_commsize() /= 2)then
+    write(*,*) "error: mpirun -np 2"
+    stop
+  endif
+
   allocate(nid(3), source = 0)
   if(monolis_global_myrank() == 0)then
     nid(1) = 1
