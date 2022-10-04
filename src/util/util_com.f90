@@ -68,14 +68,18 @@ contains
     integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
     integer(kint), allocatable :: send_n_list(:)
     integer(kint), allocatable :: ws(:), wr(:)
+    integer(kint), allocatable :: sta1(:,:)
+    integer(kint), allocatable :: sta2(:,:)
+    integer(kint), allocatable :: req1(:)
+    integer(kint), allocatable :: req2(:)
 
     !if(monolis%MAT%NP /= size(nid))then
     !  write(*,*)"*** ERROR: The number of matrix DoF and the number of global column id are different."
     !  stop
     !endif
 
-    write(*,*)size(nid)
-    write(*,*)nid
+    write(100+monolis_global_myrank(),*)size(nid)
+    write(100+monolis_global_myrank(),*)nid
 
     myrank = monolis_global_myrank()
     commsize = monolis_global_commsize()
@@ -265,6 +269,7 @@ contains
     enddo
 
     !> monolis com の構築
+    !> recv
     monolis%COM%recv_n_neib = n_neib_recv
     allocate(monolis%COM%recv_neib_pe(n_neib_recv), source = 0)
     do i = 1, n_neib_recv
@@ -286,6 +291,7 @@ contains
       enddo
     enddo
 
+    !> send
     monolis%COM%send_n_neib = n_neib_send
     allocate(monolis%COM%send_neib_pe(n_neib_send), source = 0)
     do i = 1, n_neib_send
@@ -297,40 +303,63 @@ contains
     enddo
     in = monolis%COM%send_index(n_neib_send)
     allocate(monolis%COM%send_item(in), source = 0)
-    do i = 1, in
-      monolis%COM%send_item(i) = i
-    enddo
 
     !> slave から master に global_nid を送信
+    !allocate(ws(ns))
+    !allocate(wr(nr))
+    allocate(sta1(monolis_status_size,monolis%COM%recv_n_neib))
+    allocate(sta2(monolis_status_size,monolis%COM%send_n_neib))
+    allocate(req1(monolis%COM%recv_n_neib))
+    allocate(req2(monolis%COM%send_n_neib))
 
-    !> 受信
-    ns = monolis%COM%send_index(monolis%COM%send_n_neib)
-    nr = monolis%COM%recv_index(monolis%COM%recv_n_neib)
+    in = monolis%COM%recv_index(n_neib_recv)
+    allocate(ws(in), source = 0)
 
-    allocate(ws(ns), wr(nr))
+    do i = 1, monolis%COM%recv_n_neib
+      id = recv_list(i)%domid
+      in = recv_list(i)%nnode
+      jS = monolis%COM%recv_index(i-1) + 1
+      jE = monolis%COM%recv_index(i)
+      do j = jS, jE
+        idx = monolis%COM%recv_item(j)
+        ws(j) = nid(idx)
+      enddo
+      call MPI_Isend(ws(jS:jE), in, MPI_INTEGER, id, 0, monolis%COM%comm, req1(i), ierr)
+    enddo
 
-    local_nid = 0
+    in = monolis%COM%send_index(n_neib_send)
+    allocate(wr(in), source = 0)
+    do i = 1, monolis%COM%send_n_neib
+      id = send_list(i)%domid
+      in = send_list(i)%nnode
+      jS = monolis%COM%send_index(i-1) + 1
+      jE = monolis%COM%send_index(i)
+      call MPI_Irecv(wr(jS:jE), in, MPI_INTEGER, id, 0, monolis%COM%comm, req2(i), ierr)
+    enddo
 
-    call monolis_SendRecv_pre_I(monolis%COM%send_n_neib, monolis%COM%send_neib_pe, &
-       & monolis%COM%recv_n_neib, monolis%COM%recv_neib_pe, &
-       & monolis%COM%send_index, monolis%COM%send_item, &
-       & monolis%COM%recv_index, monolis%COM%recv_item, &
-       & ws, wr, local_nid, 1, monolis%COM%comm)
+    call MPI_waitall(monolis%COM%recv_n_neib, req2, sta2, ierr)
 
-    write(100+monolis_global_myrank(),*)"monolis_SendRecv_pre_I"
-    write(100+monolis_global_myrank(),*)local_nid
+    write(100+monolis_global_myrank(),*)"wr"
+    write(100+monolis_global_myrank(),*)wr
+
+    call MPI_waitall(monolis%COM%send_n_neib, req1, sta1, ierr)
 
     !> local_nid に変換
+    in = monolis%COM%send_index(n_neib_send)
+    do i = 1, in
+      call monolis_bsearch_int(temp, 1, NP, wr(i), id)
+      monolis%COM%send_item(i) = local_nid(id)
+    enddo
 
-    !integer(kint)          :: recv_n_neib
-    !integer(kint), pointer :: recv_neib_pe(:) => null()
-    !integer(kint), pointer :: recv_index(:)   => null()
-    !integer(kint), pointer :: recv_item(:)    => null()
+    write(100+monolis_global_myrank(),*)"temp"
+    write(100+monolis_global_myrank(),*)temp
+    write(100+monolis_global_myrank(),*)"local_nid"
+    write(100+monolis_global_myrank(),*)local_nid
+    write(100+monolis_global_myrank(),*)"wr"
+    write(100+monolis_global_myrank(),*)wr
 
-    !integer(kint)          :: send_n_neib
-    !integer(kint), pointer :: send_neib_pe(:) => null()
-    !integer(kint), pointer :: send_index(:)   => null()
-    !integer(kint), pointer :: send_item(:)    => null()
+    write(100+monolis_global_myrank(),*)"monolis%COM%send_item"
+    write(100+monolis_global_myrank(),*)monolis%COM%send_item
   end subroutine monolis_com_get_comm_table
 
 end module mod_monolis_util_com
