@@ -17,7 +17,6 @@ module mod_monolis_util_com
   type monolis_node_list
     integer(kint) :: nnode = 0
     integer(kint) :: domid = -1
-    !integer(kint), allocatable :: domid(:)
     integer(kint), allocatable :: local_nid(:)
   end type monolis_node_list
 
@@ -171,14 +170,8 @@ contains
       endif
     enddo
 
-    write(100+monolis_global_myrank(),*)"n_neib_recv"
-    write(100+monolis_global_myrank(),*)n_neib_recv
-    write(100+monolis_global_myrank(),*)"neib_id"
-    write(100+monolis_global_myrank(),*)neib_id
-
-    allocate(recv_list(n_neib_recv))
-
     !> recv の作成
+    allocate(recv_list(n_neib_recv))
     allocate(local_nid(NP), source = 0)
     allocate(temp(NP), source = 0)
 
@@ -217,13 +210,6 @@ contains
           recv_list(i)%local_nid(n_data) = local_nid(idx)
         endif
       enddo
-
-      write(100+monolis_global_myrank(),*)"recv_list(i)%nnode"
-      write(100+monolis_global_myrank(),*)recv_list(i)%nnode
-      write(100+monolis_global_myrank(),*)"recv_list(i)%domid"
-      write(100+monolis_global_myrank(),*)recv_list(i)%domid
-      write(100+monolis_global_myrank(),*)"recv_list(i)%local_nid"
-      write(100+monolis_global_myrank(),*)recv_list(i)%local_nid
     enddo
 
     !> send の作成
@@ -239,17 +225,11 @@ contains
     call mpi_alltoall(send_n_list, 1, MPI_INTEGER, &
       send_n_list, 1, MPI_INTEGER, monolis%COM%comm, ierr)
 
-    write(100+monolis_global_myrank(),*)"send_n_list"
-    write(100+monolis_global_myrank(),*)send_n_list
-
     !> send 個数の確保
     n_neib_send = 0
     do i = 1, commsize
       if(send_n_list(i) > 0) n_neib_send = n_neib_send + 1
     enddo
-
-    write(100+monolis_global_myrank(),*)"n_neib_send"
-    write(100+monolis_global_myrank(),*)n_neib_send
 
     allocate(send_list(n_neib_send))
 
@@ -261,10 +241,6 @@ contains
         n_data = send_n_list(i)
         send_list(n_neib_send)%nnode = n_data
         allocate(send_list(n_neib_send)%local_nid(n_data), source = 0)
-        !write(100+monolis_global_myrank(),*)"send_list(i)%nnode"
-        !write(100+monolis_global_myrank(),*)send_list(n_neib_send)%nnode
-        !write(100+monolis_global_myrank(),*)"send_list(i)%domid"
-        !write(100+monolis_global_myrank(),*)send_list(n_neib_send)%domid
       endif
     enddo
 
@@ -305,8 +281,6 @@ contains
     allocate(monolis%COM%send_item(in), source = 0)
 
     !> slave から master に global_nid を送信
-    !allocate(ws(ns))
-    !allocate(wr(nr))
     allocate(sta1(monolis_status_size,monolis%COM%recv_n_neib))
     allocate(sta2(monolis_status_size,monolis%COM%send_n_neib))
     allocate(req1(monolis%COM%recv_n_neib))
@@ -338,10 +312,6 @@ contains
     enddo
 
     call MPI_waitall(monolis%COM%recv_n_neib, req2, sta2, ierr)
-
-    write(100+monolis_global_myrank(),*)"wr"
-    write(100+monolis_global_myrank(),*)wr
-
     call MPI_waitall(monolis%COM%send_n_neib, req1, sta1, ierr)
 
     !> local_nid に変換
@@ -350,16 +320,6 @@ contains
       call monolis_bsearch_int(temp, 1, NP, wr(i), id)
       monolis%COM%send_item(i) = local_nid(id)
     enddo
-
-    write(100+monolis_global_myrank(),*)"temp"
-    write(100+monolis_global_myrank(),*)temp
-    write(100+monolis_global_myrank(),*)"local_nid"
-    write(100+monolis_global_myrank(),*)local_nid
-    write(100+monolis_global_myrank(),*)"wr"
-    write(100+monolis_global_myrank(),*)wr
-
-    write(100+monolis_global_myrank(),*)"monolis%COM%send_item"
-    write(100+monolis_global_myrank(),*)monolis%COM%send_item
   end subroutine monolis_com_get_comm_table
 
 end module mod_monolis_util_com
