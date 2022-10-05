@@ -102,9 +102,12 @@ contains
     !> 隣接領域の取得
     allocate(is_neib(commsize), source = 0)
 
-    do i = 1, n_outer
-      j = outer_dom_id_all(i)
-      is_neib(j + 1) = 1
+    in = myrank + 1
+    jS = displs(in) + 1
+    jE = displs(in + 1)
+    do j = jS, jE
+      id = outer_dom_id_all(j)
+      is_neib(id + 1) = 1
     enddo
     is_neib(myrank + 1) = 0
 
