@@ -112,7 +112,7 @@ TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 stdlib.f90 util.f90 util_time.f90 util_com.f90 util_prm.f90 util_debug.f90 hash.f90
 SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 matrix_copy.f90 reorder.f90 sparse_util.f90
 SRC_LIST_IO     = io_arg.f90 io.f90 io_mtx.f90
-SRC_LIST_GRAPH  = graph.f90
+SRC_LIST_GRAPH  = graph.f90 graph_comm.f90
 SRC_LIST_SHAPE  = shape_util.f90 shape_C2D3.f90 shape_C2D4.f90 shape_C2D6.f90 shape_C3D4.f90 shape_C3D8.f90 shape_C3D10.f90
 SRC_LIST_GEOM   = geom.f90 neighbor_search.f90
 SRC_LIST_ALGO   = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90
@@ -139,10 +139,10 @@ $(addprefix iterative/, $(SRC_LIST_ITER))
 SRC_ALL_LIST    = \
 $(addprefix util/, $(SRC_LIST_UTIL)) \
 $(addprefix io/, $(SRC_LIST_IO)) \
-$(addprefix graph/, $(SRC_LIST_GRAPH)) \
 $(addprefix shape/, $(SRC_LIST_SHAPE)) \
 $(addprefix geom/, $(SRC_LIST_GEOM)) \
 $(addprefix linalg/, $(SRC_LIST_ALGO)) \
+$(addprefix graph/, $(SRC_LIST_GRAPH)) \
 $(addprefix matrix/, $(SRC_LIST_MATRIX)) \
 $(addprefix solver/, $(SRC_SOLVER_LIST)) \
 $(addprefix partitioner/, $(SRC_LIST_PART)) \

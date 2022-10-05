@@ -2,24 +2,27 @@ module mod_monolis_graph_comm
   use mod_monolis_prm
   use mod_monolis_mesh
   use mod_monolis_util
+  use mod_monolis_com
+  use mod_monolis_linalg_com
+  use mod_monolis_stdlib
 
   implicit none
   private
   public :: monolis_com_get_comm_table
 
-  type monolis_node_list
+  type monolis_comm_node_list
     integer(kint) :: nnode = 0
     integer(kint) :: domid = -1
     integer(kint), allocatable :: local_nid(:)
-  end type monolis_node_list
+  end type monolis_comm_node_list
 
 contains
 
   subroutine monolis_com_get_comm_table(monolis, N, NP, nid)
     implicit none
     type(monolis_structure) :: monolis
-    type(monolis_node_list), allocatable :: send_list(:)
-    type(monolis_node_list), allocatable :: recv_list(:)
+    type(monolis_comm_node_list), allocatable :: send_list(:)
+    type(monolis_comm_node_list), allocatable :: recv_list(:)
     integer(kint), intent(in) :: N, NP
     integer(kint), intent(in) :: nid(:)
     integer(kint) :: M, n_outer, myrank, commsize, ierr
@@ -40,13 +43,11 @@ contains
     !  stop
     !endif
 
-    write(100+monolis_global_myrank(),*)size(nid)
-    write(100+monolis_global_myrank(),*)nid
-
     myrank = monolis_global_myrank()
     commsize = monolis_global_commsize()
 
     M = NP - N
+    monolis%COM%internal_nnode = N
 
     !> 外点を全体で共有
     allocate(counts(commsize), source = 0)
@@ -64,19 +65,11 @@ contains
       displs(i + 1) = displs(i) + counts(i)
     enddo
 
-    write(100+monolis_global_myrank(),*)"counts"
-    write(100+monolis_global_myrank(),*)counts
-    write(100+monolis_global_myrank(),*)"displs"
-    write(100+monolis_global_myrank(),*)displs
-
     n_outer = displs(commsize + 1)
     allocate(outer_node_id_all(n_outer), source = 0)
 
     call mpi_allgatherv(outer_node_id_local, M, MPI_INTEGER, &
       outer_node_id_all, counts, displs, MPI_INTEGER, monolis%COM%comm, ierr)
-
-    write(100+monolis_global_myrank(),*)"outer_node_id_all"
-    write(100+monolis_global_myrank(),*)outer_node_id_all
 
     !> 外点が属する領域番号を取得
     allocate(internal_node_id(N), source = 0)
@@ -105,9 +98,6 @@ contains
 
     !> reduce に修正して効率化可能
     call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_min, monolis%COM%comm)
-
-    write(100+monolis_global_myrank(),*)"outer_dom_id_all"
-    write(100+monolis_global_myrank(),*)outer_dom_id_all
 
     !> 隣接領域の取得
     allocate(is_neib(commsize), source = 0)
