@@ -226,18 +226,17 @@ endif
     integer(c_int), intent(in), value :: method, precond, maxiter
     integer(c_int), intent(in), value :: iterlog, timelog, timelog_statistics, summary
     integer(c_int), intent(in), value :: is_check_diag, is_measurement, is_init_x
+    integer(c_int), intent(in), value :: n_get_eigen
+    integer(c_int), intent(in), value :: eigen_maxiter
     integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
     integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
-    integer(c_int), intent(in), target :: n_get_eigen
-    integer(c_int), intent(in), target :: eigen_maxiter
-    integer(c_int), intent(out), target :: curiter
     integer(c_int), intent(in), target :: is_bc_int(NDOF*NP)
-    real(c_double), intent(in), value :: tol
-    real(c_double), intent(in), value :: ths
+    integer(c_int), intent(out), target :: curiter
+    real(c_double), intent(in), value :: tol, ths
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(inout), target :: eigen_value(NDOF*NP)
     real(c_double), intent(inout), target :: eigen_mode_tmp(NDOF*NP*n_get_eigen)
@@ -349,18 +348,17 @@ endif
     integer(c_int), intent(in), value :: method, precond, maxiter
     integer(c_int), intent(in), value :: iterlog, timelog, timelog_statistics, summary
     integer(c_int), intent(in), value :: is_check_diag, is_measurement, is_init_x
+    integer(c_int), intent(in), value :: n_get_eigen
+    integer(c_int), intent(in), value :: eigen_maxiter
     integer(c_int), intent(in), target :: index(0:NP)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
     integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
-    integer(c_int), intent(in), target :: n_get_eigen
-    integer(c_int), intent(in), target :: eigen_maxiter
-    integer(c_int), intent(out), target :: curiter
     integer(c_int), intent(in), target :: is_bc_int(NDOF*NP)
-    real(c_double), intent(in), value :: tol
-    real(c_double), intent(in), value :: ths
+    integer(c_int), intent(out), target :: curiter
+    real(c_double), intent(in), value :: tol, ths
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(inout), target :: eigen_value(NDOF*NP)
     real(c_double), intent(inout), target :: eigen_mode_tmp(NDOF*NP*n_get_eigen)
