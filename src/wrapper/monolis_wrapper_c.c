@@ -765,11 +765,22 @@ void monolis_eigen_inverted_standard_lanczos(
   int is_init_x = 1;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
-  int curiter;
+  int curiter, i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
   double curresid;
   double time[7];
+
+  eigen_mode_tmp = (double*)calloc(np*ndof*n_get_eigen, sizeof(double));
+  is_Dirichlet_bc_int = (int*)calloc(np*ndof, sizeof(int));
+
+  for(int i = 0; i < np*ndof; i++){
+    if (is_Dirichlet_bc[i]) {
+      is_Dirichlet_bc_int[i] = 1;
+    } else {
+      is_Dirichlet_bc_int[i] = 0;
+    }
+  }
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
@@ -832,6 +843,15 @@ void monolis_eigen_inverted_standard_lanczos(
     mat->prm.tcomm_spmv = time[6];
     mat->prm.curiter = curiter;
     mat->prm.curresid = curresid;
+
+    for(int i = 0; i < n_get_eigen; i++){
+      for(int j = 0; j < np*ndof; j++){
+        eigen_mode[i][j] = eigen_mode_tmp[np*ndof*i + j];
+      }
+    }
+
+    free(eigen_mode_tmp);
+    free(is_Dirichlet_bc_int);
 }
 
 /* eigen solver (forwared Lnaczos) */
@@ -858,11 +878,22 @@ void monolis_eigen_standard_lanczos(
   int is_init_x = 1;
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
-  int curiter;
+  int curiter, i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
   double curresid;
   double time[7];
+
+  eigen_mode_tmp = (double*)calloc(np*ndof*n_get_eigen, sizeof(double));
+  is_Dirichlet_bc_int = (int*)calloc(np*ndof, sizeof(int));
+
+  for(int i = 0; i < np*ndof; i++){
+    if (is_Dirichlet_bc[i]) {
+      is_Dirichlet_bc_int[i] = 1;
+    } else {
+      is_Dirichlet_bc_int[i] = 0;
+    }
+  }
 
   if(mat->prm.show_iterlog) iterlog = 1;
   if(mat->prm.show_timelog) timelog = 1;
@@ -925,6 +956,15 @@ void monolis_eigen_standard_lanczos(
     mat->prm.tcomm_spmv = time[6];
     mat->prm.curiter = curiter;
     mat->prm.curresid = curresid;
+
+    for(int i = 0; i < n_get_eigen; i++){
+      for(int j = 0; j < np*ndof; j++){
+        eigen_mode[i][j] = eigen_mode_tmp[np*ndof*i + j];
+      }
+    }
+
+    free(eigen_mode_tmp);
+    free(is_Dirichlet_bc_int);
 }
 
 void monolis_get_internal_node_number(

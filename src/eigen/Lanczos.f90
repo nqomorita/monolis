@@ -209,13 +209,14 @@ endif
   end subroutine monolis_eigen_standard_lanczos_
 
   !> c interface
-  subroutine monolis_eigen_inverted_standard_lanczos_c(N, NP, NZ, NDOF, A, X, B, index, item, &
+  subroutine monolis_eigen_inverted_standard_lanczos_c(N, NP, NZ, NDOF, A, index, item, &
     myrank, comm, commsize, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog_statistics, timelog, summary, &
-    is_check_diag, is_measurement, is_init_x, curiter, curresid, time) &
+    is_check_diag, is_measurement, is_init_x, curiter, curresid, time, &
+    n_get_eigen, ths, eigen_maxiter, eigen_value, eigen_mode_tmp, is_bc_int) &
     & bind(c, name = "monolis_eigen_inverted_standard_lanczos_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -231,17 +232,28 @@ endif
     integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    integer(c_int), intent(in), target :: n_get_eigen
+    integer(c_int), intent(in), target :: eigen_maxiter
     integer(c_int), intent(out), target :: curiter
+    integer(c_int), intent(in), target :: is_bc_int(NDOF*NP)
     real(c_double), intent(in), value :: tol
+    real(c_double), intent(in), value :: ths
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), intent(in), target :: X(NDOF*NP)
-    real(c_double), intent(in), target :: B(NDOF*NP)
+    real(c_double), intent(inout), target :: eigen_value(NDOF*NP)
+    real(c_double), intent(inout), target :: eigen_mode_tmp(NDOF*NP*n_get_eigen)
     real(c_double), intent(out), target :: curresid
     real(c_double), intent(out), target :: time(7)
-    integer(kint) :: n_get_eigen
-    real(kdouble) :: ths
+    integer(kint) :: i, j
     real(kdouble), allocatable :: vec(:,:), val(:)
     logical, allocatable :: is_bc(:)
+
+    allocate(val(NDOF*NP), source = 0.0d0)
+    allocate(vec(NDOF*NP,n_get_eigen), source = 0.0d0)
+    allocate(is_bc(NDOF*NP), source = .false.)
+
+    do i = 1, NDOF*NP
+      if(is_bc_int(i) == 1) is_bc(i) = .true.
+    enddo
 
     !> for monoMAT
     monolis%MAT%N = N
@@ -249,8 +261,10 @@ endif
     monolis%MAT%NZ = NZ
     monolis%MAT%NDOF = NDOF
     monolis%MAT%A => A
-    monolis%MAT%X => X
-    monolis%MAT%B => B
+    !monolis%MAT%X => X
+    !monolis%MAT%B => B
+    allocate(monolis%MAT%X(NDOF*NP), source = 0.0d0)
+    allocate(monolis%MAT%B(NDOF*NP), source = 0.0d0)
     monolis%MAT%index => index
     monolis%MAT%item => item
 
@@ -291,7 +305,17 @@ endif
     if(is_init_x == 0) monolis%PRM%is_init_x= .false.
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
-    call monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    call monolis_eigen_inverted_standard_lanczos(monolis, n_get_eigen, ths, eigen_maxiter, val, vec, is_bc)
+
+    do i = 1, n_get_eigen
+      eigen_value(i) = val(i)
+    enddo
+
+    do j = 1, n_get_eigen
+      do i = 1, NDOF*NP
+        eigen_mode_tmp(NDOF*NP*(j-1) + i) = vec(i,j)
+      enddo
+    enddo
 
     curiter = monolis%PRM%curiter
     curresid = monolis%PRM%curresid
@@ -302,16 +326,20 @@ endif
     time(5) = monolis%PRM%tprec
     time(6) = monolis%PRM%tcomm_dotp
     time(7) = monolis%PRM%tcomm_spmv
+
+    deallocate(monolis%MAT%X)
+    deallocate(monolis%MAT%B)
   end subroutine monolis_eigen_inverted_standard_lanczos_c
 
   !> c interface
-  subroutine monolis_eigen_standard_lanczos_c(N, NP, NZ, NDOF, A, X, B, index, item, &
+  subroutine monolis_eigen_standard_lanczos_c(N, NP, NZ, NDOF, A, index, item, &
     myrank, comm, commsize, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     method, precond, maxiter, tol, &
     iterlog, timelog_statistics, timelog, summary, &
-    is_check_diag, is_measurement, is_init_x, curiter, curresid, time) &
+    is_check_diag, is_measurement, is_init_x, curiter, curresid, time, &
+    n_get_eigen, ths, eigen_maxiter, eigen_value, eigen_mode_tmp, is_bc_int) &
     & bind(c, name = "monolis_eigen_standard_lanczos_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -327,17 +355,28 @@ endif
     integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    integer(c_int), intent(in), target :: n_get_eigen
+    integer(c_int), intent(in), target :: eigen_maxiter
     integer(c_int), intent(out), target :: curiter
+    integer(c_int), intent(in), target :: is_bc_int(NDOF*NP)
     real(c_double), intent(in), value :: tol
+    real(c_double), intent(in), value :: ths
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), intent(in), target :: X(NDOF*NP)
-    real(c_double), intent(in), target :: B(NDOF*NP)
+    real(c_double), intent(inout), target :: eigen_value(NDOF*NP)
+    real(c_double), intent(inout), target :: eigen_mode_tmp(NDOF*NP*n_get_eigen)
     real(c_double), intent(out), target :: curresid
     real(c_double), intent(out), target :: time(7)
-    integer(kint) :: n_get_eigen
-    real(kdouble) :: ths
+    integer(kint) :: i, j
     real(kdouble), allocatable :: vec(:,:), val(:)
     logical, allocatable :: is_bc(:)
+
+    allocate(val(NDOF*NP), source = 0.0d0)
+    allocate(vec(NDOF*NP,n_get_eigen), source = 0.0d0)
+    allocate(is_bc(NDOF*NP), source = .false.)
+
+    do i = 1, NDOF*NP
+      if(is_bc_int(i) == 1) is_bc(i) = .true.
+    enddo
 
     !> for monoMAT
     monolis%MAT%N = N
@@ -345,8 +384,10 @@ endif
     monolis%MAT%NZ = NZ
     monolis%MAT%NDOF = NDOF
     monolis%MAT%A => A
-    monolis%MAT%X => X
-    monolis%MAT%B => B
+    !monolis%MAT%X => X
+    !monolis%MAT%B => B
+    allocate(monolis%MAT%X(NDOF*NP), source = 0.0d0)
+    allocate(monolis%MAT%B(NDOF*NP), source = 0.0d0)
     monolis%MAT%index => index
     monolis%MAT%item => item
 
@@ -387,7 +428,17 @@ endif
     if(is_init_x == 0) monolis%PRM%is_init_x= .false.
     if(is_measurement == 1) monolis%PRM%is_measurement= .true.
 
-    call monolis_eigen_standard_lanczos(monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    call monolis_eigen_standard_lanczos(monolis, n_get_eigen, ths, eigen_maxiter, val, vec, is_bc)
+
+    do i = 1, n_get_eigen
+      eigen_value(i) = val(i)
+    enddo
+
+    do j = 1, n_get_eigen
+      do i = 1, NDOF*NP
+        eigen_mode_tmp(NDOF*NP*(j-1) + i) = vec(i,j)
+      enddo
+    enddo
 
     curiter = monolis%PRM%curiter
     curresid = monolis%PRM%curresid
@@ -398,6 +449,9 @@ endif
     time(5) = monolis%PRM%tprec
     time(6) = monolis%PRM%tcomm_dotp
     time(7) = monolis%PRM%tcomm_spmv
+
+    deallocate(monolis%MAT%X)
+    deallocate(monolis%MAT%B)
   end subroutine monolis_eigen_standard_lanczos_c
 
 end module mod_monolis_eigen_lanczos
