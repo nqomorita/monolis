@@ -263,11 +263,33 @@ double monolis_allreduce_double_scalar(
 
 
 
-/* solver */
+/* linear solver */
 void monolis_solve(
   MONOLIS* mat,
   double*  b,
   double*  x);
+
+
+
+/* eigen solver (inverted Lnaczos)*/
+void monolis_eigen_inverted_standard_lanczos(
+  MONOLIS* mat,
+  int      n_get_eigen,
+  double   ths,
+  int      maxiter,
+  double*  eigen_value,
+  double** eigen_mode,
+  bool*    is_Dirichlet_bc);
+
+/* eigen solver (forwared Lnaczos */
+void monolis_eigen_standard_lanczos(
+  MONOLIS* mat,
+  int      n_get_eigen,
+  double   ths,
+  int      maxiter,
+  double*  eigen_value,
+  double** eigen_mode,
+  bool*    is_Dirichlet_bc);
 
 
 

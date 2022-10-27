@@ -740,6 +740,193 @@ void monolis_solve(
     mat->prm.curresid = curresid;
 }
 
+
+/* eigen solver (inverted Lnaczos)*/
+void monolis_eigen_inverted_standard_lanczos(
+  MONOLIS* mat,
+  int      n_get_eigen,
+  double   ths,
+  int      maxiter,
+  double*  eigen_value,
+  double** eigen_mode,
+  bool*    is_Dirichlet_bc)
+{
+  int n = mat->mat.N;
+  if(mat->com.commsize > 1 ) n = mat->com.internal_nnode;
+  int np = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+  int iterlog = 0;
+  int timelog = 0;
+  int timelog_statistics = 0;
+  int summary = 0;
+  int is_check_diag = 1;
+  int is_measurement = 0;
+  int is_init_x = 1;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int curiter;
+  int* is_Dirichlet_bc_int;
+  double* eigen_mode_tmp;
+  double curresid;
+  double time[7];
+
+  if(mat->prm.show_iterlog) iterlog = 1;
+  if(mat->prm.show_timelog) timelog = 1;
+  if(mat->prm.show_timelog_statistics) timelog_statistics = 1;
+  if(mat->prm.show_summary) summary = 1;
+  if(!mat->prm.is_check_diag) is_check_diag = 0;
+  if(!mat->prm.is_init_x) is_init_x = 0;
+  if(mat->prm.is_measurement) is_measurement = 1;
+
+  monolis_eigen_inverted_standard_lanczos_c_main(
+    n,
+    np,
+    nz,
+    ndof,
+    mat->mat.A,
+    mat->mat.index,
+    mat->mat.item,
+    /* comm */
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
+    mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item,
+    /* parameter */
+    mat->prm.method,
+    mat->prm.precond,
+    mat->prm.maxiter,
+    mat->prm.tol,
+    iterlog,
+    timelog,
+    timelog_statistics,
+    summary,
+    is_check_diag,
+    is_measurement,
+    is_init_x,
+    &curiter,
+    &curresid,
+    time,
+    n_get_eigen,
+    ths,
+    maxiter,
+    eigen_value,
+    eigen_mode_tmp,
+    is_Dirichlet_bc_int);
+
+    mat->prm.tsol = time[0];
+    mat->prm.tprep = time[1];
+    mat->prm.tspmv = time[2];
+    mat->prm.tdotp = time[3];
+    mat->prm.tprec = time[4];
+    mat->prm.tcomm_dotp = time[5];
+    mat->prm.tcomm_spmv = time[6];
+    mat->prm.curiter = curiter;
+    mat->prm.curresid = curresid;
+}
+
+/* eigen solver (forwared Lnaczos) */
+void monolis_eigen_standard_lanczos(
+  MONOLIS* mat,
+  int      n_get_eigen,
+  double   ths,
+  int      maxiter,
+  double*  eigen_value,
+  double** eigen_mode,
+  bool*    is_Dirichlet_bc)
+{
+  int n = mat->mat.N;
+  if(mat->com.commsize > 1 ) n = mat->com.internal_nnode;
+  int np = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+  int iterlog = 0;
+  int timelog = 0;
+  int timelog_statistics = 0;
+  int summary = 0;
+  int is_check_diag = 1;
+  int is_measurement = 0;
+  int is_init_x = 1;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int curiter;
+  int* is_Dirichlet_bc_int;
+  double* eigen_mode_tmp;
+  double curresid;
+  double time[7];
+
+  if(mat->prm.show_iterlog) iterlog = 1;
+  if(mat->prm.show_timelog) timelog = 1;
+  if(mat->prm.show_timelog_statistics) timelog_statistics = 1;
+  if(mat->prm.show_summary) summary = 1;
+  if(!mat->prm.is_check_diag) is_check_diag = 0;
+  if(!mat->prm.is_init_x) is_init_x = 0;
+  if(mat->prm.is_measurement) is_measurement = 1;
+
+  monolis_eigen_standard_lanczos_c_main(
+    n,
+    np,
+    nz,
+    ndof,
+    mat->mat.A,
+    mat->mat.index,
+    mat->mat.item,
+    /* comm */
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
+    mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item,
+    /* parameter */
+    mat->prm.method,
+    mat->prm.precond,
+    mat->prm.maxiter,
+    mat->prm.tol,
+    iterlog,
+    timelog,
+    timelog_statistics,
+    summary,
+    is_check_diag,
+    is_measurement,
+    is_init_x,
+    &curiter,
+    &curresid,
+    time,
+    n_get_eigen,
+    ths,
+    maxiter,
+    eigen_value,
+    eigen_mode_tmp,
+    is_Dirichlet_bc_int);
+
+    mat->prm.tsol = time[0];
+    mat->prm.tprep = time[1];
+    mat->prm.tspmv = time[2];
+    mat->prm.tdotp = time[3];
+    mat->prm.tprec = time[4];
+    mat->prm.tcomm_dotp = time[5];
+    mat->prm.tcomm_spmv = time[6];
+    mat->prm.curiter = curiter;
+    mat->prm.curresid = curresid;
+}
+
 void monolis_get_internal_node_number(
   MONOLIS* mat,
   int*     nnode_internal)
