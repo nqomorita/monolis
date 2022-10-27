@@ -12,18 +12,16 @@ contains
     implicit none
     integer(kint) :: i, n
     real(kdouble) :: q(:), norm
-    logical, optional :: is_bc(:)
+    logical :: is_bc(:)
 
     norm = 0.0d0
     do i = 1, n
       q(i) = dble(i)
     enddo
 
-    if(present(is_bc))then
-      do i = 1, n
-        if(is_bc(i)) q(i) = 0.0d0
-      enddo
-    endif
+    do i = 1, n
+      if(is_bc(i)) q(i) = 0.0d0
+    enddo
 
     do i = 1, n
       norm = norm + q(i)*q(i)

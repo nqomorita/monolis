@@ -468,7 +468,7 @@ end module mod_monolis_eigen_lanczos
     integer(kint) :: maxiter, n_get_eigen, NPNDOF
     real(kdouble) :: ths
     real(kdouble) :: vec(NPNDOF,n_get_eigen), val(n_get_eigen)
-    logical, optional :: is_bc(NPNDOF)
+    logical :: is_bc(NPNDOF)
 
     call monolis_eigen_inverted_standard_lanczos_(monoPRM, monoCOM, monoMAT, &
       & n_get_eigen, ths, maxiter, val, vec, is_bc)
