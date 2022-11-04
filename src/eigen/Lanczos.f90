@@ -297,6 +297,7 @@ endif
     monolis%MAT%item => item
 
     !> for monoCOM
+    monoliS%COM%internal_nnode = N
     monoliS%COM%myrank = myrank
     monoliS%COM%comm = comm
     monoliS%COM%commsize = commsize
@@ -419,6 +420,7 @@ endif
     monolis%MAT%item => item
 
     !> for monoCOM
+    monoliS%COM%internal_nnode = N
     monoliS%COM%myrank = myrank
     monoliS%COM%comm = comm
     monoliS%COM%commsize = commsize
