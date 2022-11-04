@@ -1,7 +1,7 @@
 #> monolis Makefile
 
 FC     = mpif90
-FFLAGS = -O2 -mtune=native -march=native -std=legacy
+FFLAGS = -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 
 CC     = mpic++
 CFLAGS = -O2
@@ -22,7 +22,7 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
-		FFLAGS  = -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+		FFLAGS  = -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow -Wno-missing-include-dirs
 	endif
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)

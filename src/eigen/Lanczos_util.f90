@@ -8,30 +8,49 @@ module mod_monolis_eigen_lanczos_util
 
 contains
 
-  subroutine lanczos_initialze(n, q, is_bc)
+  subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc, beta)
+    use mod_monolis_linalg_util
     implicit none
-    integer(kint) :: i, n
-    real(kdouble) :: q(:), norm
+    type(monolis_com) :: monoCOM
+    integer(kint) :: i, N, NDOF
+    real(kdouble) :: q(:), norm, t1, t2, beta
     logical :: is_bc(:)
 
-    norm = 0.0d0
-    do i = 1, n
-      q(i) = dble(i)
-    enddo
+    call get_rundom_number(N*NDOF, q, monolis_global_myrank())
 
-    do i = 1, n
+    do i = 1, N*NDOF
       if(is_bc(i)) q(i) = 0.0d0
     enddo
 
-    do i = 1, n
-      norm = norm + q(i)*q(i)
-    enddo
+    call monolis_update_R(monoCOM, NDOF, q, t1)
 
+    call monolis_inner_product_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
+
+    beta = dsqrt(norm)
     norm = 1.0d0/dsqrt(norm)
-    do i = 1, n
+    do i = 1, N*NDOF
       q(i) = q(i)*norm
     enddo
   end subroutine lanczos_initialze
+
+  subroutine get_rundom_number(N, X, SHIFT)
+    implicit none
+    real(kdouble) :: X(N), INVM
+    integer(kint), parameter :: MM = 1664501
+    integer(kint), parameter :: LAMBDA = 1229
+    integer(kint), parameter :: MU = 351750
+    integer(kint) :: i, N, IR, SHIFT
+
+    IR = 0
+    INVM = 1.0D0 / MM
+    do I = 1, SHIFT
+      IR = mod( LAMBDA * IR + MU, MM)
+    enddo
+    do I = SHIFT+1, SHIFT+N
+      IR = mod( LAMBDA * IR + MU, MM)
+      X(I-SHIFT) = INVM * IR
+    enddo
+  end subroutine get_rundom_number
 
   subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
     implicit none
@@ -167,7 +186,8 @@ contains
 
   subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha_t, beta_t, q, e_value, e_mode)
     implicit none
-    integer(kint) :: iter, i, n, ldz, info, n_get_eigen
+    integer(kint), intent(in) :: iter
+    integer(kint) :: i, n, ldz, info, n_get_eigen
     real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:)
     integer(kint), allocatable :: isuppz(:), idum(:)
     real(kdouble), allocatable :: alpha(:), beta(:), rdum(:), e_mode_t(:,:)
@@ -180,6 +200,7 @@ contains
 
     alpha = alpha_t(1:iter)
     beta = beta_t(2:max(1,iter-1)+1)
+    if(iter == 1) beta = 0.0d0
 
     n = iter
     ldz = iter

@@ -41,7 +41,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: N, NP, NDOF, total_dof, j, k
-    integer(kint) :: i, iter, maxiter, n_get_eigen
+    integer(kint) :: i, iter, maxiter, n_get_eigen, n_bc
     real(kdouble) :: beta_t, ths, norm, tmp
     real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
@@ -50,6 +50,8 @@ contains
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
 
+    call monolis_set_initial_comm(monoCOM, monoMAT)
+
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
@@ -57,7 +59,15 @@ contains
     is_converge = .false.
 
     total_dof = N*NDOF
+
+    n_bc = 0
+    do i = 1, N*NDOF
+      if(is_bc(i)) n_bc = n_bc + 1
+    enddo
+
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_I1(n_bc, monolis_sum, monoCOM%comm)
+    total_dof = total_dof - n_bc
 
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
 
@@ -69,12 +79,16 @@ contains
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,n_get_eigen), source = 0.0d0)
 
-    call lanczos_initialze(NP*NDOF, q(:,1), is_bc)
+    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc, beta(1))
 
     do iter = 1, maxiter
       call monolis_set_RHS(monoMAT, q(:,iter))
 
       call monolis_solve_(monoPRM, monoCOM, monoMAT)
+
+      do i = 1, N*NDOF
+        if(is_bc(i)) monoMAT%X(i) = 0.0d0
+      enddo
 
       call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter-1), monoMAT%X, p)
 
@@ -126,13 +140,15 @@ endif
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: N, NP, NDOF, total_dof, j, k
+    integer(kint) :: N, NP, NDOF, total_dof, n_bc, j, k
     integer(kint) :: i, iter, maxiter, n_get_eigen
     real(kdouble) :: beta_t, ths, norm, tmp
     real(kdouble) :: vec(:,:), val(:)
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
     logical :: is_converge
     logical :: is_bc(:)
+
+    call monolis_set_initial_comm(monoCOM, monoMAT)
 
     if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_standard_lanczos_")
 
@@ -143,7 +159,16 @@ endif
     is_converge = .false.
 
     total_dof = N*NDOF
+    write(*,*)N, NP, NDOF
+
+    n_bc = 0
+    do i = 1, N*NDOF
+      if(is_bc(i)) n_bc = n_bc + 1
+    enddo
+
     call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_I1(n_bc, monolis_sum, monoCOM%comm)
+    total_dof = total_dof - n_bc
 
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
 
@@ -155,10 +180,14 @@ endif
     allocate(p(NP*NDOF), source = 0.0d0)
     allocate(eigen_mode(NP*NDOF,n_get_eigen), source = 0.0d0)
 
-    call lanczos_initialze(NP*NDOF, q(:,1), is_bc)
+    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc, beta(1))
 
     do iter = 1, maxiter
       call monolis_matvec(monoCOM, monoMAT, q(:,iter), monoMAT%X, monoPRM%tspmv, monoPRM%tcomm_spmv)
+
+      do i = 1, N*NDOF
+        if(is_bc(i)) monoMAT%X(i) = 0.0d0
+      enddo
 
       call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter-1), monoMAT%X, p)
 

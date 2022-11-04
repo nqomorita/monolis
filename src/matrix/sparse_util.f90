@@ -363,7 +363,7 @@ contains
         do i1 = 1, ndof
         do i2 = 1, ndof
           im = NDOF2*(k-1) + ndof*(i1-1) + i2
-          A(im) = val(ndof*(j-1)+i2, ndof*(i-1)+i1)
+          A(im) = val(i2, i1)
         enddo
         enddo
         return
