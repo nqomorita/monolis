@@ -207,7 +207,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph(
 void monolis_convert_mesh_to_connectivity(
   int      nelem,
   int      nbase_func,
-  int      elem,
+  int**    elem,
   int*     conn_index,
   int*     conn_item);
 

@@ -10,7 +10,8 @@ extern "C" {
 #include "monolis_struct.h"
 
 void monolis_com_input_comm_table(
-  MONOLIS* mat);
+  MONOLIS* mat,
+  const char* input_file_dir);
 
 void monolis_add_sparse_matrix(
   MONOLIS* mat,
