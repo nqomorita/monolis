@@ -12,7 +12,7 @@ program monolis_partitioner_distval
 
   call monolis_get_part_bc_arg(n_domain, fname)
 
-  if(n_domain <= 1) return
+  if(n_domain <= 1) stop
 
   call monolis_input_mesh_distval_r(fname, nelem, ndof, val, label)
 

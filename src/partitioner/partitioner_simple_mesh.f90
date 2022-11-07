@@ -18,7 +18,7 @@ program monolis_partitioner
 
   call monolis_get_part_arg(n_domain, is_format_id, is_overlap)
 
-  if(n_domain <= 1) return
+  if(n_domain <= 1) stop
 
   call monolis_input_mesh(mesh, is_format_id)
 
