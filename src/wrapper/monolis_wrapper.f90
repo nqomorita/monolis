@@ -147,7 +147,7 @@ contains
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
     & bind(c, name = "monolis_matvec_product_c_main")
     use mod_monolis_com
-    use mod_monolis_linalg
+    use mod_monolis_matvec
     implicit none
     type(monolis_structure) :: monolis
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
