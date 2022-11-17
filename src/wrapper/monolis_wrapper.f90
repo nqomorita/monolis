@@ -141,6 +141,55 @@ contains
   end subroutine monolis_set_Dirichlet_bc_c
 
   !> linenar alg
+  subroutine monolis_matvec_product_c(N, NP, NZ, NDOF, A, X, Y, index, item, &
+    myrank, comm, commsize, &
+    recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
+    send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
+    & bind(c, name = "monolis_matvec_product_c_main")
+    use mod_monolis_com
+    use mod_monolis_linalg
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(c_int), intent(in), value :: N, NP, NZ, NDOF
+    integer(c_int), intent(in), value :: myrank, comm, commsize
+    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(in), target :: index(0:NP)
+    integer(c_int), intent(in), target :: item(NZ)
+    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
+    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
+    real(c_double), intent(in), target :: X(NDOF*NP)
+    real(c_double), intent(in), target :: Y(NDOF*NP)
+
+    !> for monoMAT
+    monolis%MAT%N = N
+    monolis%MAT%NP = NP
+    monolis%MAT%NZ = NZ
+    monolis%MAT%NDOF = NDOF
+    monolis%MAT%A => A
+    monolis%MAT%X => X
+    monolis%MAT%B => Y
+    monolis%MAT%index => index
+    monolis%MAT%item => item
+
+    !> for monoCOM
+    monoliS%COM%myrank = myrank
+    monoliS%COM%comm = comm
+    monoliS%COM%commsize = commsize
+    monoliS%COM%recv_n_neib = recv_n_neib
+    monoliS%COM%recv_neib_pe => recv_neib_pe
+    monoliS%COM%recv_index => recv_index
+    monoliS%COM%recv_item => recv_item
+    monoliS%COM%send_n_neib = send_n_neib
+    monoliS%COM%send_neib_pe => send_neib_pe
+    monoliS%COM%send_index => send_index
+    monoliS%COM%send_item => send_item
+
+    call monolis_matvec_product(monolis, monolis%MAT%X, monolis%MAT%B)
+  end subroutine monolis_matvec_product_c
+
   subroutine monolis_inner_product_c(N, NDOF, X, Y, sum, comm) &
     & bind(c, name = "monolis_inner_product_c_main")
     use mod_monolis_com

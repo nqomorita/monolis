@@ -636,6 +636,47 @@ void monolis_set_Dirichlet_bc(
     val);
 }
 
+
+void monolis_matvec_product(
+  MONOLIS* mat,
+  double*  x,
+  double*  y)
+{
+  int n = mat->mat.N;
+  if(mat->com.commsize > 1 ) n = mat->com.internal_nnode;
+  int np = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+
+  monolis_matvec_product_c_main(
+    /* mat */
+    n,
+    np,
+    nz,
+    ndof,
+    mat->mat.A,
+    x,
+    y,
+    mat->mat.index,
+    mat->mat.item,
+    /* comm */
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
+    mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item);
+}
+
 void monolis_inner_product(
   MONOLIS* mat,
   double*  x,
@@ -690,6 +731,7 @@ void monolis_solve(
   if(mat->prm.is_measurement) is_measurement = 1;
 
   monolis_solve_c_main(
+    /* mat */
     n,
     np,
     nz,

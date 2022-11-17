@@ -240,6 +240,12 @@ void monolis_set_Dirichlet_bc(
 
 
 /* linear algebra */
+/* matvec product */
+void monolis_matvec_product(
+  MONOLIS* mat,
+  double*  x,
+  double*  y);
+
 /* inner product */
 void monolis_inner_product(
   MONOLIS* mat,

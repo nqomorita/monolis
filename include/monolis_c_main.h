@@ -71,6 +71,30 @@ void monolis_set_Dirichlet_bc_c_main(
   int      ndof_bc,
   double   val);
 
+void monolis_matvec_product_c_main(
+  int      n,
+  int      np,
+  int      nz,
+  int      ndof,
+  double*  A,
+  double*  x,
+  double*  y,
+  int*     index,
+  int*     item,
+  int      myrank,
+  int      comm,
+  int      commsize,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
+
 void monolis_inner_product_c_main(
   int      n,
   int      ndof,
