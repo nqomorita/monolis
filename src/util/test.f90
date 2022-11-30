@@ -11,6 +11,8 @@ program monolis_test
   real(kdouble) :: BB(6), pos(3), ths
   integer(kint), allocatable :: ngrp(:)
 
+  call monolis_global_initialize()
+
   call monolis_set_debug(.true.)
   call monolis_debug_header("test section")
 
@@ -93,4 +95,7 @@ program monolis_test
   write(*,*)nngrp, ngrp
 
   call monolis_neighbor_search_finalize(monolis_nbsearch)
+
+  call monolis_global_finalize()
+
 end program monolis_test
