@@ -609,6 +609,50 @@ void monolis_add_scalar_to_sparse_matrix(
     val);
 }
 
+/* set BCSR information */
+void monolis_set_matrix_BCSR(
+  MONOLIS* mat,
+  int      n,
+  int      np,
+  int      ndof,
+  int      nz,
+  double*  A,
+  int*     index,
+  int*     item){
+
+  mat->mat.N = n;
+  mat->mat.NP = np;
+  mat->mat.NDOF = ndof;
+  mat->mat.NZ = nz;
+  mat->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
+  mat->mat.X = (double*)calloc(ndof*np, sizeof(double));
+  mat->mat.B = (double*)calloc(ndof*np, sizeof(double));
+  mat->mat.index = (int* )calloc(np+1, sizeof(int));
+  mat->mat.item = (int*)calloc(nz, sizeof(int));
+
+  int i;
+  for(i = 1; i < np + 1; i++) {
+    mat->mat.index[i] = index[i];
+  }
+
+  for(i = 1; i < nz + 1; i++) {
+    mat->mat.item[i] = item[i];
+  }
+
+  mat->mat.indexR = (int*)calloc(np+1, sizeof(int));
+  mat->mat.itemR = (int*)calloc(nz, sizeof(int));
+  mat->mat.permR = (int*)calloc(nz, sizeof(int));
+
+  monolis_get_CRR_format(
+    np,
+    nz,
+    mat->mat.index,
+    mat->mat.item,
+    mat->mat.indexR,
+    mat->mat.itemR,
+    mat->mat.permR);
+}
+
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,
   double*  b,

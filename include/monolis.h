@@ -229,6 +229,17 @@ void monolis_add_scalar_to_sparse_matrix(
   int      submat_i,
   int      submat_j);
 
+/* set BCSR information */
+void monolis_set_matrix_BCSR(
+  MONOLIS* mat,
+  int      n,
+  int      np,
+  int      ndof,
+  int      nz,
+  double*  A,
+  int*     index,
+  int*     item);
+
 /* set Dirichlet boundary condition to sparse matrix */
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,
