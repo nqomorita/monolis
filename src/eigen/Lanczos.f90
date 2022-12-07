@@ -106,17 +106,10 @@ contains
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha, beta, q, eigen_value, eigen_mode)
+      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+        & alpha, beta, q, eigen_value, eigen_mode, norm)
 
-      if(iter > n_get_eigen)then
-        norm = 0.0d0
-        do i = 1, n_get_eigen
-          tmp = (prev(i) - eigen_value(i))**2/prev(i)**2
-          norm = max(norm, tmp)
-        enddo
-        if(norm < ths) is_converge = .true.
-      endif
-      prev = eigen_value
+      if(norm < ths) is_converge = .true.
 
 if(monolis_global_myrank() == 0)then
   write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
@@ -205,21 +198,14 @@ endif
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha, beta, q, eigen_value, eigen_mode)
+      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+        & alpha, beta, q, eigen_value, eigen_mode, norm)
 
       do i = 1, min(iter, n_get_eigen)
         eigen_value(i) = 1.0d0/eigen_value(i)
       enddo
 
-      if(iter > n_get_eigen)then
-        norm = 0.0d0
-        do i = 1, n_get_eigen
-          tmp = (prev(i) - eigen_value(i))**2/prev(i)**2
-          norm = max(norm, tmp)
-        enddo
-        if(norm < ths) is_converge = .true.
-      endif
-      prev = eigen_value
+      if(norm < ths) is_converge = .true.
 
 if(monolis_global_myrank() == 0)then
   write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm

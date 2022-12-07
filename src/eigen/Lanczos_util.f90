@@ -184,11 +184,12 @@ contains
     enddo
   end subroutine monolis_get_smallest_eigen_pair_from_3x3
 
-  subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, alpha_t, beta_t, q, e_value, e_mode)
+  subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+    & alpha_t, beta_t, q, e_value, e_mode, norm)
     implicit none
     integer(kint), intent(in) :: iter
     integer(kint) :: i, n, ldz, info, n_get_eigen
-    real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:)
+    real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:), norm
     integer(kint), allocatable :: isuppz(:), idum(:)
     real(kdouble), allocatable :: alpha(:), beta(:), rdum(:), e_mode_t(:,:)
 
@@ -207,9 +208,13 @@ contains
 
     call dstev("V", n, alpha, beta, e_mode_t, ldz, rdum, info)
 
+    norm = 0.0d0
     do i = 1, min(iter, n_get_eigen)
       e_value(i) = 1.0d0/alpha(iter - i +1)
-      e_mode(:,i) = matmul(q(:,1:iter), e_mode_t(1:iter,iter - i +1))
+      e_mode(:,i) = matmul(q(:,1:iter), e_mode_t(1:iter,iter - i + 1))
+      if(norm < sqrt(e_mode_t(iter,iter - i + 1)**2)*beta_t(iter+1))then
+        norm = sqrt(e_mode_t(iter,iter - i + 1)**2)*beta_t(iter+1)
+      endif
     enddo
 
     if(info /= 0) stop "monolis_get_eigen_pair_from_tridiag"

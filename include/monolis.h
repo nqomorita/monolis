@@ -248,6 +248,12 @@ void monolis_set_Dirichlet_bc(
   int      ndof_bc,
   double   val);
 
+/* get communication table */
+void monolis_com_get_comm_table(
+  MONOLIS* mat,
+  int      n,
+  int      np,
+  int*     nid);
 
 
 /* linear algebra */

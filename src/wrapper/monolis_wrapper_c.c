@@ -680,6 +680,14 @@ void monolis_set_Dirichlet_bc(
     val);
 }
 
+/* get communication table */
+void monolis_com_get_comm_table(
+  MONOLIS* mat,
+  int      n,
+  int      np,
+  int*     nid){
+
+}
 
 void monolis_matvec_product(
   MONOLIS* mat,
