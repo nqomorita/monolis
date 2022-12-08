@@ -176,6 +176,7 @@ contains
     fename = "elem.dat"
     foname = "D_bc.dat"
 
+    j = 0
     do i = 1, count/2
       j = i
       call getarg(2*i-1, argc1)
@@ -233,6 +234,7 @@ contains
     fename = "elem.dat"
     foname = "surf.dat"
 
+    j = 0
     do i = 1, count/2
       j = i
       call getarg(2*i-1, argc1)

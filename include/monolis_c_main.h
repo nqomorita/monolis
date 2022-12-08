@@ -71,6 +71,32 @@ void monolis_set_Dirichlet_bc_c_main(
   int      ndof_bc,
   double   val);
 
+void monolis_com_get_comm_table_analysis_c_main(
+  int      n,
+  int      np,
+  int*     nid,
+  int      n_neib_recv,
+  int      recv_item,
+  int      n_neib_send,
+  int      send_item,
+  int      comm);
+
+void monolis_com_get_comm_table_set_c_main(
+  int      n,
+  int      np,
+  int*     nid,
+  int      comm,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
+
 void monolis_matvec_product_c_main(
   int      n,
   int      np,

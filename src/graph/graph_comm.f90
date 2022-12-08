@@ -278,4 +278,199 @@ contains
     enddo
   end subroutine monolis_com_get_comm_table
 
+  subroutine monolis_com_get_comm_table_analysis_c(N, NP, nid, &
+    & n_neib_recv, recv_item, n_neib_send, send_item, comm) &
+    & bind(c, name = "monolis_com_get_comm_table_analysis_c_main")
+    use mod_monolis_com
+    implicit none
+    integer(c_int), intent(in), value :: N, NP, n_neib_recv, recv_item, n_neib_send, send_item, comm
+    integer(c_int), intent(inout), target :: nid(NP)
+
+    nid = nid + 1
+
+    call monolis_com_get_comm_table_analysis(N, NP, nid, &
+    & n_neib_recv, recv_item, n_neib_send, send_item, comm)
+
+    nid = nid - 1
+  end subroutine monolis_com_get_comm_table_analysis_c
+
+  subroutine monolis_com_get_comm_table_analysis(N, NP, nid, &
+    & n_neib_recv, recv_item, n_neib_send, send_item, comm)
+    implicit none
+    type(monolis_comm_node_list), allocatable :: send_list(:)
+    type(monolis_comm_node_list), allocatable :: recv_list(:)
+    integer(kint), intent(in) :: N, NP
+    integer(kint), intent(in) :: nid(:)
+    integer(kint) :: M, n_outer, myrank, commsize, ierr, comm
+    integer(kint) :: i, in, id, idx, j, jS, jE, recv_rank, ns, nr, send_item, recv_item
+    integer(kint) :: n_neib_recv, n_neib_send, local_id, global_id, n_data
+    integer(kint), allocatable :: counts(:), outer_node_id_local(:), local_nid(:)
+    integer(kint), allocatable :: outer_node_id_all(:), outer_dom_id_all(:)
+    integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
+    integer(kint), allocatable :: send_n_list(:)
+
+    myrank = monolis_global_myrank()
+    commsize = monolis_global_commsize()
+
+    M = NP - N
+
+    !> 外点を全体で共有
+    allocate(counts(commsize), source = 0)
+
+    call mpi_allgather(M, 1, MPI_INTEGER, counts, 1, MPI_INTEGER, comm, ierr)
+
+    allocate(outer_node_id_local(M), source = 0)
+    allocate(displs(commsize + 1), source = 0)
+
+    do i = N + 1, NP
+      outer_node_id_local(i-N) = nid(i)
+    enddo
+
+    do i = 1, commsize
+      displs(i + 1) = displs(i) + counts(i)
+    enddo
+
+    n_outer = displs(commsize + 1)
+    allocate(outer_node_id_all(n_outer), source = 0)
+
+    call mpi_allgatherv(outer_node_id_local, M, MPI_INTEGER, &
+      outer_node_id_all, counts, displs, MPI_INTEGER, comm, ierr)
+
+    !> 外点が属する領域番号を取得
+    allocate(internal_node_id(N), source = 0)
+    do i = 1, N
+      internal_node_id(i) = nid(i)
+    enddo
+    call monolis_qsort_int(internal_node_id, 1, N)
+
+    allocate(outer_dom_id_all(n_outer), source = 0)
+    outer_dom_id_all(:) = commsize + 1
+
+    aa:do i = 1, commsize
+      !> 自領域であればスキップ
+      if(i == myrank + 1) cycle
+      !> 他領域の外点と自領域の内点が重複するか判定
+      jS = displs(i) + 1
+      jE = displs(i + 1)
+      do j = jS, jE
+        id = outer_node_id_all(j)
+        call monolis_bsearch_int(internal_node_id, 1, N, id, idx)
+        if(idx /= -1)then
+          outer_dom_id_all(j) = myrank
+        endif
+      enddo
+    enddo aa
+
+    !> reduce に修正して効率化可能
+    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_min, comm)
+
+    !> 隣接領域の取得
+    allocate(is_neib(commsize), source = 0)
+
+    in = myrank + 1
+    jS = displs(in) + 1
+    jE = displs(in + 1)
+    do j = jS, jE
+      id = outer_dom_id_all(j)
+      is_neib(id + 1) = 1
+    enddo
+    is_neib(myrank + 1) = 0
+
+    n_neib_recv = 0
+    do i = 1, commsize
+      if(is_neib(i) == 1) n_neib_recv = n_neib_recv + 1
+    enddo
+
+    allocate(neib_id(n_neib_recv), source = 0)
+
+    j = 0
+    do i = 1, commsize
+      if(is_neib(i) == 1)then
+        j = j + 1
+        neib_id(j) = i - 1
+      endif
+    enddo
+
+    !> recv の作成
+    allocate(recv_list(n_neib_recv))
+
+    do i = 1, n_neib_recv
+      recv_rank = neib_id(i)
+      in = myrank + 1
+      jS = displs(in) + 1
+      jE = displs(in + 1)
+
+      n_data = 0
+      do j = jS, jE
+        id = outer_dom_id_all(j)
+        if(recv_rank == id)then
+          n_data = n_data + 1
+        endif
+      enddo
+
+      recv_list(i)%nnode = n_data
+      recv_list(i)%domid = recv_rank
+    enddo
+
+    !> send の作成
+    !> slave から master に個数を送信
+    allocate(send_n_list(commsize), source = 0)
+
+    do i = 1, n_neib_recv
+      id = recv_list(i)%domid
+      in = recv_list(i)%nnode
+      send_n_list(id + 1) = in
+    enddo
+
+    call mpi_alltoall(send_n_list, 1, MPI_INTEGER, &
+      send_n_list, 1, MPI_INTEGER, comm, ierr)
+
+    !> send 個数の確保
+    n_neib_send = 0
+    do i = 1, commsize
+      if(send_n_list(i) > 0) n_neib_send = n_neib_send + 1
+    enddo
+
+    allocate(send_list(n_neib_send))
+
+    n_neib_send = 0
+    do i = 1, commsize
+      if(send_n_list(i) > 0)then
+        n_neib_send = n_neib_send + 1
+        send_list(n_neib_send)%domid = i - 1
+        n_data = send_n_list(i)
+        send_list(n_neib_send)%nnode = n_data
+      endif
+    enddo
+
+    !> monolis com の構築
+    recv_item = 0
+    do i = 1, n_neib_recv
+      recv_item = recv_item + recv_list(i)%nnode
+    enddo
+
+    send_item = 0
+    do i = 1, n_neib_send
+      send_item = send_item + send_list(i)%nnode
+    enddo
+  end subroutine monolis_com_get_comm_table_analysis
+
+  subroutine monolis_com_get_comm_table_set_c(N, NP, NID, comm, &
+    recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
+    send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
+    & bind(c, name = "monolis_com_get_comm_table_set_c_main")
+    implicit none
+    integer(c_int), intent(in), value :: N, NP, COMM
+    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(inout), target :: NID(NP)
+    integer(c_int), intent(inout), target :: recv_neib_pe(recv_n_neib)
+    integer(c_int), intent(inout), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
+    integer(c_int), intent(inout), target :: send_neib_pe(send_n_neib)
+    integer(c_int), intent(inout), target :: send_index(0:send_n_neib), send_item(send_nitem)
+
+    nid = nid + 1
+    !call monolis_com_get_comm_table_set
+    nid = nid - 1
+  end subroutine monolis_com_get_comm_table_set_c
+
 end module mod_monolis_graph_comm
