@@ -687,21 +687,29 @@ void monolis_com_get_comm_table(
   int      np,
   int*     nid){
   int n_neib_recv;
-  int recv_item;
+  int n_recv_item;
   int n_neib_send;
-  int send_item;
+  int n_send_item;
 
-  monolis_com_get_comm_table_analysis_c_main(n, np, nid, n_neib_recv, recv_item, n_neib_send, send_item, mat->com.comm);
+  monolis_com_get_comm_table_analysis_c_main(
+    n,
+    np,
+    nid,
+    &n_neib_recv,
+    &n_recv_item,
+    &n_neib_send,
+    &n_send_item,
+    mat->com.comm);
 
   mat->com.recv_n_neib = n_neib_recv;
   mat->com.recv_neib_pe = (int*)calloc(n_neib_recv, sizeof(int));
   mat->com.recv_index = (int*)calloc(n_neib_recv + 1, sizeof(int));
-  mat->com.recv_item = (int*)calloc(recv_item, sizeof(int));
+  mat->com.recv_item = (int*)calloc(n_recv_item, sizeof(int));
 
   mat->com.send_n_neib = n_neib_send;
   mat->com.send_neib_pe = (int*)calloc(n_neib_send, sizeof(int));
   mat->com.send_index = (int*)calloc(n_neib_send + 1, sizeof(int));
-  mat->com.send_item = (int*)calloc(send_item, sizeof(int));
+  mat->com.send_item = (int*)calloc(n_send_item, sizeof(int));
 
   monolis_com_get_comm_table_set_c_main(
     n,
@@ -709,12 +717,12 @@ void monolis_com_get_comm_table(
     nid,
     mat->com.comm,
     mat->com.recv_n_neib,
-    recv_item,
+    n_recv_item,
     mat->com.recv_neib_pe,
     mat->com.recv_index,
     mat->com.recv_item,
     mat->com.send_n_neib,
-    send_item,
+    n_send_item,
     mat->com.send_neib_pe,
     mat->com.send_index,
     mat->com.send_item);

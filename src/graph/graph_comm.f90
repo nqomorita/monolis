@@ -282,7 +282,8 @@ contains
     & bind(c, name = "monolis_com_get_comm_table_analysis_c_main")
     use mod_monolis_com
     implicit none
-    integer(c_int), intent(in), value :: N, NP, n_neib_recv, recv_item, n_neib_send, send_item, comm
+    integer(c_int), intent(in), value :: N, NP, comm
+    integer(c_int), intent(inout), target :: n_neib_recv, recv_item, n_neib_send, send_item
     integer(c_int), intent(inout), target :: nid(NP)
 
     nid = nid + 1

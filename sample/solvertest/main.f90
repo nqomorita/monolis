@@ -75,11 +75,11 @@ program main
 !    write(100+monolis_global_myrank(),*)"BEFORE"
 !    write(100+monolis_global_myrank(),*)"recv_n_neib_pe", mat%com%recv_n_neib
 !    write(100+monolis_global_myrank(),*)"recv_neib_pe", mat%com%recv_neib_pe
-!    write(100+monolis_global_myrank(),*)"recv_item", mat%com%recv_item
+!    write(100+monolis_global_myrank(),*)"recv_index", mat%com%recv_index
 !    write(100+monolis_global_myrank(),*)"recv_item", mat%com%recv_item
 !    write(100+monolis_global_myrank(),*)"send_n_neib_pe", mat%com%send_n_neib
 !    write(100+monolis_global_myrank(),*)"send_neib_pe", mat%com%send_neib_pe
-!    write(100+monolis_global_myrank(),*)"send_item", mat%com%send_item
+!    write(100+monolis_global_myrank(),*)"send_index", mat%com%send_index
 !    write(100+monolis_global_myrank(),*)"send_item", mat%com%send_item
 
     deallocate(mat%com%recv_neib_pe)
@@ -95,11 +95,11 @@ program main
 !    write(100+monolis_global_myrank(),*)"AFTER"
 !    write(100+monolis_global_myrank(),*)"recv_n_neib_pe", mat%com%recv_n_neib
 !    write(100+monolis_global_myrank(),*)"recv_neib_pe", mat%com%recv_neib_pe
-!    write(100+monolis_global_myrank(),*)"recv_item", mat%com%recv_item
+!    write(100+monolis_global_myrank(),*)"recv_index", mat%com%recv_index
 !    write(100+monolis_global_myrank(),*)"recv_item", mat%com%recv_item
 !    write(100+monolis_global_myrank(),*)"send_n_neib_pe", mat%com%send_n_neib
 !    write(100+monolis_global_myrank(),*)"send_neib_pe", mat%com%send_neib_pe
-!    write(100+monolis_global_myrank(),*)"send_item", mat%com%send_item
+!    write(100+monolis_global_myrank(),*)"send_index", mat%com%send_index
 !    write(100+monolis_global_myrank(),*)"send_item", mat%com%send_item
 
     !> solver

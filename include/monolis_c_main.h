@@ -75,10 +75,10 @@ void monolis_com_get_comm_table_analysis_c_main(
   int      n,
   int      np,
   int*     nid,
-  int      n_neib_recv,
-  int      recv_item,
-  int      n_neib_send,
-  int      send_item,
+  int*     n_neib_recv,
+  int*     recv_item,
+  int*     n_neib_send,
+  int*     send_item,
   int      comm);
 
 void monolis_com_get_comm_table_set_c_main(

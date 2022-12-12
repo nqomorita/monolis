@@ -37,7 +37,6 @@ void monolis_input_mesh_node_c(
   FILE *fp = NULL;
   double a,b,c;
   char buf[100];
-  // printf("%s\n", fname);
   fp = fopen(fname, "r");
   if(fp == NULL){
     printf("%s cant open file\n", fname);
@@ -72,8 +71,6 @@ void monolis_input_mesh_elem_c(
   allocate_2d_matrix_I(elem, *nelem, *nbase);
   for(int i = 0; i < *nelem; i++){
     fscanf(fp, "%d %d", &(*elem)[i][0], &(*elem)[i][1]);  //要素毎節点数を可変にする必要あり
-    (*elem)[i][0] -= 1;
-    (*elem)[i][1] -= 1;
   }
   fclose(fp);
   printf("succeed input %s\n", fname);
@@ -100,8 +97,6 @@ void monolis_input_id_c(
 
   for(int i = 0; i < nid; i++){
     fscanf(fp, "%d %d %d", &i1, &i2, &(*global_eid)[i]);  //要素毎節点数を可変にする必要あり
-    (*global_eid)[i] -= 1;
-    //printf("%d\n", (*global_eid)[i]);
   }
   fclose(fp);
 
@@ -126,7 +121,6 @@ void monolis_input_coef_c(
   fscanf(fp, "%d", ncoef);
   allocate_2d_matrix_D(coef, *ncoef, 2);
   for(int i = 0; i < *ncoef; i++){
-    //fscanf(fp, "%lf %lf", &(*coef)[i][0], &(*coef)[i][1]);
     fscanf(fp, "%lf", &(*coef)[i][0]);
   }
   fclose(fp);
@@ -140,7 +134,6 @@ void get_coef_val_c(
   int eid,
   double* val)
 {
-  //*val = CMPLX(coef[eid][0], coef[eid][1]);
   *val = coef[eid][0];
   return;
 }
@@ -212,7 +205,6 @@ void monolis_solver_COCG_test(){
   imag = 1.0;
   for(i = 0; i < nnode; i++){
     b_th[i] = 1.0;
-    //CMPLX(real, imag);
   }
 
   monolis_matvec_product(&mat, b_th, b);
@@ -235,7 +227,7 @@ void monolis_solver_COCG_test(){
 
   printf("get comm\n");
 
-  monolis_com_get_comm_table(&mat, mat.mat.N, mat.mat.NP, mat.com.global_node_id);
+  monolis_com_get_comm_table(&mat, mat.com.internal_nnode, mat.mat.NP, mat.com.global_node_id);
 
   printf("monolis_solve\n");
 
