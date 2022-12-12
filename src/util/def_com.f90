@@ -183,7 +183,7 @@ contains
       read(10,*)nitem
       allocate(monoCOM%global_node_id(nitem), source = 0)
       do i = 1, nitem
-        read(10,*) monoCOM%global_node_id(i)
+        read(10,*) j, j, monoCOM%global_node_id(i)
       enddo
     close(10)
 
@@ -191,7 +191,7 @@ contains
       read(10,*)nitem
       allocate(monoCOM%global_elem_id(nitem), source = 0)
       do i = 1, nitem
-        read(10,*) monoCOM%global_elem_id(i)
+        read(10,*) j, j, monoCOM%global_elem_id(i)
       enddo
     close(10)
 
