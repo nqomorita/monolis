@@ -240,6 +240,16 @@ void monolis_set_matrix_BCSR(
   int*     index,
   int*     item);
 
+/* get scalar value from sparse matrix */
+void monolis_get_scalar_from_sparse_matrix(
+  MONOLIS* mat,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j,
+  double*  val,
+  bool*    is_find);
+
 /* set Dirichlet boundary condition to sparse matrix */
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,
@@ -253,7 +263,7 @@ void monolis_com_get_comm_table(
   MONOLIS* mat,
   int      n,
   int      np,
-  int*     nid);
+  int*     glonal_node_id);
 
 
 /* linear algebra */

@@ -228,17 +228,32 @@ contains
   end subroutine monolis_set_matrix_to_sparse_matrix
 
   !> getter
-  subroutine monolis_sparse_matrix_get_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_get_scalar_from_sparse_matrix(monolis, i, j, sub_i, sub_j, val, is_find)
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(kint), intent(in) :: i, j, sub_i, sub_j
+    real(kdouble) :: val
+    logical :: is_find
+
+    call monolis_sparse_matrix_get_value(monolis%MAT%index, monolis%MAT%item, monolis%MAT%A, &
+      & monolis%MAT%ndof, i, j, sub_i, sub_j, val, is_find)
+  end subroutine monolis_get_scalar_from_sparse_matrix
+
+  subroutine monolis_sparse_matrix_get_value(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
     implicit none
     integer(kint), intent(in) :: ndof
     integer(kint), intent(in) :: index(0:), item(:), ci, cj, csub_i, csub_j
     real(kdouble), intent(inout) :: A(:)
     real(kdouble), intent(out) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
+    logical :: is_find
+
+    val = 0.0d0
+    is_find = .false.
 
     NDOF2 = ndof*ndof
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) return
+    if(ndof < csub_j) return
 
     jS = index(ci-1) + 1
     jE = index(ci)
@@ -247,9 +262,9 @@ contains
       if(jn == cj)then
         im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
         val = A(im)
+        is_find = .true.
         return
       endif
-      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
   end subroutine monolis_sparse_matrix_get_value
 

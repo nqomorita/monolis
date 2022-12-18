@@ -56,6 +56,20 @@ void monolis_add_scalar_to_sparse_matrix_c_main(
   int      submat_j,
   double   val);
 
+void monolis_get_scalar_from_sparse_matrix_c_main(
+  int      nnode,
+  int      nz,
+  int      ndof,
+  int*     index,
+  int*     item,
+  double*  A,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j,
+  double*  val,
+  int*     is_find_t);
+
 void monolis_set_Dirichlet_bc_c_main(
   int      nnode,
   int      nz,

@@ -609,6 +609,35 @@ void monolis_add_scalar_to_sparse_matrix(
     val);
 }
 
+void monolis_get_scalar_from_sparse_matrix(
+  MONOLIS* mat,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j,
+  double*  val,
+  bool*    is_find)
+{
+  int n = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int nz = mat->mat.NZ;
+  int* is_find_t;
+
+  monolis_get_scalar_from_sparse_matrix_c_main(
+    n,
+    nz,
+    ndof,
+    mat->mat.index,
+    mat->mat.item,
+    mat->mat.A,
+    i,
+    j,
+    submat_i,
+    submat_j,
+    val,
+    is_find_t);
+}
+
 /* set BCSR information */
 void monolis_set_matrix_BCSR(
   MONOLIS* mat,
@@ -685,7 +714,7 @@ void monolis_com_get_comm_table(
   MONOLIS* mat,
   int      n,
   int      np,
-  int*     nid){
+  int*     glonal_node_id){
   int n_neib_recv;
   int n_recv_item;
   int n_neib_send;
@@ -694,7 +723,7 @@ void monolis_com_get_comm_table(
   monolis_com_get_comm_table_analysis_c_main(
     n,
     np,
-    nid,
+    glonal_node_id,
     &n_neib_recv,
     &n_recv_item,
     &n_neib_send,
@@ -714,7 +743,7 @@ void monolis_com_get_comm_table(
   monolis_com_get_comm_table_set_c_main(
     n,
     np,
-    nid,
+    glonal_node_id,
     mat->com.comm,
     mat->com.recv_n_neib,
     n_recv_item,
