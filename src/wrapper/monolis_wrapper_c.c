@@ -619,9 +619,9 @@ void monolis_get_scalar_from_sparse_matrix(
   bool*    is_find)
 {
   int n = mat->mat.NP;
-  int ndof = mat->mat.NDOF;
   int nz = mat->mat.NZ;
-  int* is_find_t;
+  int ndof = mat->mat.NDOF;
+  int is_find_t = 0;
 
   monolis_get_scalar_from_sparse_matrix_c_main(
     n,
@@ -635,7 +635,12 @@ void monolis_get_scalar_from_sparse_matrix(
     submat_i,
     submat_j,
     val,
-    is_find_t);
+    &is_find_t);
+
+  *is_find = false;
+  if(is_find_t == 1){
+    *is_find = true;
+  }
 }
 
 /* set BCSR information */
