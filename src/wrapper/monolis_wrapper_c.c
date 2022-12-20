@@ -153,11 +153,9 @@ void monolis_com_input_comm_table(
   fclose(fp);
 }
 
-void monolis_initialize(
-  MONOLIS*    mat,
-  const char* input_file_dir)
+void monolis_prm_initialize(
+  MONOLIS*    mat)
 {
-    // prm
     mat->prm.method = 1;
     mat->prm.precond = 1;
     mat->prm.maxiter = 1000;
@@ -183,7 +181,11 @@ void monolis_initialize(
     mat->prm.tcomm_dotp = 0.0;
     mat->prm.tcomm_spmv = 0.0;
 
-    // mat
+}
+
+void monolis_com_initialize(
+  MONOLIS*    mat)
+{
     mat->mat.A = NULL;
     mat->mat.X = NULL;
     mat->mat.B = NULL;
@@ -196,8 +198,11 @@ void monolis_initialize(
     mat->mat.NP = 0;
     mat->mat.NZ = 0;
     mat->mat.NDOF = 0;
+}
 
-    // comm
+void monolis_mat_initialize(
+  MONOLIS*    mat)
+{
     mat->com.recv_n_neib = 0;
     mat->com.send_n_neib = 0;
     mat->com.internal_nnode = 0;
@@ -205,7 +210,15 @@ void monolis_initialize(
     mat->com.myrank = monolis_get_global_myrank();
     mat->com.comm = monolis_get_global_comm();
     mat->com.commsize = monolis_get_global_commsize();
-    //mat->com.input_file_dir = input_file_dir;
+}
+
+void monolis_initialize(
+  MONOLIS*    mat,
+  const char* input_file_dir)
+{
+    monolis_prm_initialize(mat);
+    monolis_com_initialize(mat);
+    monolis_mat_initialize(mat);
     monolis_com_input_comm_table(mat, input_file_dir);
 }
 
@@ -665,11 +678,11 @@ void monolis_set_matrix_BCSR(
   mat->mat.item = (int*)calloc(nz, sizeof(int));
 
   int i;
-  for(i = 1; i < np + 1; i++) {
+  for(i = 0; i < np + 1; i++) {
     mat->mat.index[i] = index[i];
   }
 
-  for(i = 1; i < nz + 1; i++) {
+  for(i = 0; i < nz; i++) {
     mat->mat.item[i] = item[i];
   }
 

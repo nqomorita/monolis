@@ -9,6 +9,15 @@ extern "C" {
 #include <stdbool.h>
 #include "monolis_struct.h"
 
+void monolis_prm_initialize(
+  MONOLIS*    mat);
+
+void monolis_com_initialize(
+  MONOLIS*    mat);
+
+void monolis_mat_initialize(
+  MONOLIS*    mat);
+
 void monolis_com_input_comm_table(
   MONOLIS* mat,
   const char* input_file_dir);
