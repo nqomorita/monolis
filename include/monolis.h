@@ -220,16 +220,9 @@ void monolis_convert_connectivity_to_nodal_graph(
   int**    index,
   int**    item);
 
-/* add scalar value to sparse matrix */
-void monolis_add_scalar_to_sparse_matrix(
-  MONOLIS* mat,
-  double   val,
-  int      i,
-  int      j,
-  int      submat_i,
-  int      submat_j);
 
-/* set BCSR information */
+
+/* sparse matrix handler */
 void monolis_set_matrix_BCSR(
   MONOLIS* mat,
   int      n,
@@ -239,6 +232,18 @@ void monolis_set_matrix_BCSR(
   double*  A,
   int*     index,
   int*     item);
+
+
+
+/* sparse matrix handler */
+/* add scalar value to sparse matrix */
+void monolis_add_scalar_to_sparse_matrix(
+  MONOLIS* mat,
+  double   val,
+  int      i,
+  int      j,
+  int      submat_i,
+  int      submat_j);
 
 /* get scalar value from sparse matrix */
 void monolis_get_scalar_from_sparse_matrix(
@@ -250,6 +255,9 @@ void monolis_get_scalar_from_sparse_matrix(
   double*  val,
   bool*    is_find);
 
+
+
+/* sparse matrix handler */
 /* set Dirichlet boundary condition to sparse matrix */
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,
@@ -264,6 +272,7 @@ void monolis_com_get_comm_table(
   int      n,
   int      np,
   int*     glonal_node_id);
+
 
 
 /* linear algebra */

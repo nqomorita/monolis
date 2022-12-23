@@ -686,6 +686,10 @@ void monolis_set_matrix_BCSR(
     mat->mat.item[i] = item[i];
   }
 
+  for(i = 0; i < ndof*ndof*nz; i++) {
+    mat->mat.A[i] = A[i];
+  }
+
   mat->mat.indexR = (int*)calloc(np+1, sizeof(int));
   mat->mat.itemR = (int*)calloc(nz, sizeof(int));
   mat->mat.permR = (int*)calloc(nz, sizeof(int));
