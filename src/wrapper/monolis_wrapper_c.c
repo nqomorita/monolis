@@ -710,6 +710,7 @@ void monolis_set_matrix_BCSR_mat_val(
   int      nz,
   double*  A){
 
+  int i;
   for(i = 0; i < ndof*ndof*nz; i++) {
     mat->mat.A[i] = A[i];
   }
