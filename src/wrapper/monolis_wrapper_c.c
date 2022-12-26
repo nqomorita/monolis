@@ -683,7 +683,7 @@ void monolis_set_matrix_BCSR(
   }
 
   for(i = 0; i < nz; i++) {
-    mat->mat.item[i] = item[i];
+    mat->mat.item[i] = item[i] + 1;
   }
 
   for(i = 0; i < ndof*ndof*nz; i++) {
