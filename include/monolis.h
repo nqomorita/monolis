@@ -233,6 +233,13 @@ void monolis_set_matrix_BCSR(
   int*     index,
   int*     item);
 
+/* sparse matrix handler */
+void monolis_set_matrix_BCSR_mat_val(
+  MONOLIS* mat,
+  int      ndof,
+  int      nz,
+  double*  A);
+
 
 
 /* sparse matrix handler */

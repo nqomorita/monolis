@@ -704,6 +704,18 @@ void monolis_set_matrix_BCSR(
     mat->mat.permR);
 }
 
+void monolis_set_matrix_BCSR_mat_val(
+  MONOLIS* mat,
+  int      ndof,
+  int      nz,
+  double*  A){
+
+  for(i = 0; i < ndof*ndof*nz; i++) {
+    mat->mat.A[i] = A[i];
+  }
+}
+
+
 void monolis_set_Dirichlet_bc(
   MONOLIS* mat,
   double*  b,
