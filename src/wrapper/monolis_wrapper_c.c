@@ -186,6 +186,18 @@ void monolis_prm_initialize(
 void monolis_com_initialize(
   MONOLIS*    mat)
 {
+    mat->com.recv_n_neib = 0;
+    mat->com.send_n_neib = 0;
+    mat->com.internal_nnode = 0;
+    mat->com.internal_nelem = 0;
+    mat->com.myrank = monolis_get_global_myrank();
+    mat->com.comm = monolis_get_global_comm();
+    mat->com.commsize = monolis_get_global_commsize();
+}
+
+void monolis_mat_initialize(
+  MONOLIS*    mat)
+{
     mat->mat.A = NULL;
     mat->mat.X = NULL;
     mat->mat.B = NULL;
@@ -198,18 +210,6 @@ void monolis_com_initialize(
     mat->mat.NP = 0;
     mat->mat.NZ = 0;
     mat->mat.NDOF = 0;
-}
-
-void monolis_mat_initialize(
-  MONOLIS*    mat)
-{
-    mat->com.recv_n_neib = 0;
-    mat->com.send_n_neib = 0;
-    mat->com.internal_nnode = 0;
-    mat->com.internal_nelem = 0;
-    mat->com.myrank = monolis_get_global_myrank();
-    mat->com.comm = monolis_get_global_comm();
-    mat->com.commsize = monolis_get_global_commsize();
 }
 
 void monolis_initialize(
