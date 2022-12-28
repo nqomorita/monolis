@@ -103,6 +103,49 @@ contains
     call monolis_debug_int("n_domain", n_domain)
   end subroutine monolis_get_nodal_graph_part_arg
 
+  subroutine monolis_get_connectivity_part_arg(fname, n_domain)
+    implicit none
+    integer(kint) :: i, count, n, n_domain
+    character :: argc1*128, argc2*128, fname*100
+
+    call monolis_debug_header("monolis_get_connectivity_part_arg")
+
+    call monolis_set_debug(.true.)
+
+    count = iargc()
+    if(count == 1)then
+      call getarg(1, argc1)
+      if(trim(argc1) == "-h")then
+        write(*,"(a)")"-n {num of subdomain}"
+        write(*,"(a)")"-i {input file name}"
+        write(*,"(a)")"-h: help"
+        stop
+      endif
+    endif
+
+    n_domain = 1
+    fname = "connectivity.dat"
+
+    if(mod(count,2) /= 0) stop "* monolis partitioner input arg error"
+    do i = 1, count/2
+      call getarg(2*i-1, argc1)
+      call getarg(2*i  , argc2)
+      if(trim(argc1) == "-n")then
+        read(argc2,*) n
+        n_domain = n
+
+      elseif(trim(argc1) == "-i")then
+        fname = trim(argc2)
+
+      else
+        write(*,"(a)")"* monolis input arg error"
+        stop
+      endif
+    enddo
+
+    call monolis_debug_int("n_domain", n_domain)
+  end subroutine monolis_get_connectivity_part_arg
+
   subroutine monolis_get_part_bc_arg(n_domain, fname)
     implicit none
     integer(kint) :: i, count, n, n_domain

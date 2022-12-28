@@ -147,7 +147,7 @@ contains
     type(monolis_graph) :: graph
     type(monolis_graph_format) :: graph_format
     type(monolis_node_list) :: node_list(:)
-    integer(kint) :: i, n_domain, shift, in, j, jn, kS, kE, k, kn, idx, nnode
+    integer(kint) :: i, n_domain, shift, in, j, jn, kS, kE, k, kn, idx, nnode, nmin
     integer(kint), allocatable :: perm(:)
     character :: cnum*5, output_dir*100, fname*100, fmain*100
 
@@ -157,7 +157,12 @@ contains
     call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
 
     shift = 0
-    if(minval(graph_format%adjacent_id) == 0) shift = -1 !> for C binding
+    nmin = 1
+    do i = 1, n_domain
+      in = minval(mesh(i)%nid)
+      if(in < nmin) nmin = in
+    enddo
+    if(nmin == 0) shift = -1 !> for C binding
 
     do i = 1, n_domain
       write(cnum,"(i0)") i-1

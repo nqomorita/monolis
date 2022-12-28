@@ -16,7 +16,7 @@ program monolis_partitioner_nodal_graph
 
   call monolis_global_initialize()
 
-  call monolis_get_nodal_graph_part_arg(fname, n_domain)
+  call monolis_get_connectivity_part_arg(fname, n_domain)
 
   if(n_domain <= 1) stop
 
