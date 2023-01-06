@@ -63,7 +63,7 @@ contains
 
   subroutine monolis_C2D4_get_global_position(node, r, pos)
     implicit none
-    real(kdouble) :: node(3,4), r(2), pos(3)
+    real(kdouble) :: node(2,4), r(2), pos(2)
     real(kdouble) :: func(4)
 
     call monolis_C2D4_shapefunc(r, func)
