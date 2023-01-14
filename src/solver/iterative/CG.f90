@@ -38,9 +38,6 @@ contains
 
     if(monoPRM%is_init_x) X = 0.0d0
 
-write(*,*)N,NP,NDOF,X,B,monoMAT%A
-write(*,*)monoMAT%index, monoMAT%item
-
     allocate(R(NDOF*NP), source = 0.0d0)
     allocate(Z(NDOF*NP), source = 0.0d0)
     allocate(Q(NDOF*NP), source = 0.0d0)
