@@ -790,6 +790,13 @@ void monolis_com_get_comm_table(
     mat->com.send_neib_pe,
     mat->com.send_index,
     mat->com.send_item);
+
+  mat->com.global_node_id = (int*)calloc(np, sizeof(int));
+  mat->com.global_elem_id = (int*)calloc(1, sizeof(int));
+
+  for(int i=0; i<np; i++){
+    mat->com.global_node_id[i] = glonal_node_id[i];
+  }
 }
 
 void monolis_matvec_product(
