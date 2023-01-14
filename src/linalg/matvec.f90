@@ -53,7 +53,7 @@ contains
 #endif
     t1 = monolis_get_time()
 
-    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33(monoCOM, monoMAT, X, Y)
@@ -62,8 +62,6 @@ contains
     else
       call monolis_matvec_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
     endif
-
-    call monolis_update_post_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     t2 = monolis_get_time()
     tspmv = tspmv + t2 - t1
