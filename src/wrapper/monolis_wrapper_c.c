@@ -854,6 +854,62 @@ double monolis_allreduce_double_scalar(
   return val;
 }
 
+void monolis_update_double_array(
+  MONOLIS* mat,
+  double*  x)
+{
+  int np = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+
+  monolis_update_double_array_c_main(
+    np,
+    ndof,
+    x,
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
+    mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item);
+}
+
+void monolis_update_int_array(
+  MONOLIS* mat,
+  int*     x)
+{
+  int np = mat->mat.NP;
+  int ndof = mat->mat.NDOF;
+  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
+  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+
+  monolis_update_int_array_c_main(
+    np,
+    ndof,
+    x,
+    mat->com.myrank,
+    mat->com.comm,
+    mat->com.commsize,
+    mat->com.recv_n_neib,
+    recv_nitem,
+    mat->com.recv_neib_pe,
+    mat->com.recv_index,
+    mat->com.recv_item,
+    mat->com.send_n_neib,
+    send_nitem,
+    mat->com.send_neib_pe,
+    mat->com.send_index,
+    mat->com.send_item);
+}
+
 void monolis_solve(
   MONOLIS* mat,
   double*  b,

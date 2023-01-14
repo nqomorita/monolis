@@ -279,6 +279,42 @@ double monolis_allreduce_double_scalar_c_main(
   int      tag,
   int      comm);
 
+void monolis_update_double_array_c_main(
+  int      np,
+  int      ndof,
+  double*  x,
+  int      myrank,
+  int      comm,
+  int      commsize,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
+
+void monolis_update_int_array_c_main(
+  int      np,
+  int      ndof,
+  int*  x,
+  int      myrank,
+  int      comm,
+  int      commsize,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
+
 void monolis_qsort_int(
   int* array,
   int  iS,

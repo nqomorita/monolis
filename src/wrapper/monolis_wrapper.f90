@@ -237,6 +237,81 @@ contains
     monolis_allreduce_double_scalar_c = val
   end function monolis_allreduce_double_scalar_c
 
+  subroutine monolis_update_R_c(NP, NDOF, X, &
+    myrank, comm, commsize, &
+    recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
+    send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
+    & bind(c, name = "monolis_update_double_array_c_main")
+    use mod_monolis_com
+    use mod_monolis_matvec
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(c_int), intent(in), value :: NP, NDOF
+    integer(c_int), intent(in), value :: myrank, comm, commsize
+    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
+    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    real(c_double), intent(in), target :: X(NDOF*NP)
+    real(kdouble) :: tcomm
+
+    monolis%MAT%X => X
+
+    !> for monoCOM
+    monoliS%COM%myrank = myrank
+    monoliS%COM%comm = comm
+    monoliS%COM%commsize = commsize
+    monoliS%COM%recv_n_neib = recv_n_neib
+    monoliS%COM%recv_neib_pe => recv_neib_pe
+    monoliS%COM%recv_index => recv_index
+    monoliS%COM%recv_item => recv_item
+    monoliS%COM%send_n_neib = send_n_neib
+    monoliS%COM%send_neib_pe => send_neib_pe
+    monoliS%COM%send_index => send_index
+    monoliS%COM%send_item => send_item
+
+    call monolis_update_R(monoliS%COM, NDOF, monolis%MAT%X, tcomm)
+  end subroutine monolis_update_R_c
+
+  subroutine monolis_update_I_c(NP, NDOF, X, &
+    myrank, comm, commsize, &
+    recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
+    send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
+    & bind(c, name = "monolis_update_int_array_c_main")
+    use mod_monolis_com
+    use mod_monolis_matvec
+    implicit none
+    type(monolis_structure) :: monolis
+    integer(c_int), intent(in), value :: NP, NDOF
+    integer(c_int), intent(in), value :: myrank, comm, commsize
+    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(c_int), intent(in), target :: recv_index(0:recv_n_neib), recv_item(recv_nitem)
+    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(c_int), intent(in), target :: send_index(0:send_n_neib), send_item(send_nitem)
+    integer(c_int), intent(in), target :: X(NDOF*NP)
+    integer(kint), pointer :: Xt(:)
+    real(kdouble) :: tcomm
+
+    Xt => X
+
+    !> for monoCOM
+    monoliS%COM%myrank = myrank
+    monoliS%COM%comm = comm
+    monoliS%COM%commsize = commsize
+    monoliS%COM%recv_n_neib = recv_n_neib
+    monoliS%COM%recv_neib_pe => recv_neib_pe
+    monoliS%COM%recv_index => recv_index
+    monoliS%COM%recv_item => recv_item
+    monoliS%COM%send_n_neib = send_n_neib
+    monoliS%COM%send_neib_pe => send_neib_pe
+    monoliS%COM%send_index => send_index
+    monoliS%COM%send_item => send_item
+
+    call monolis_update_I(monoliS%COM, NDOF, Xt, tcomm)
+  end subroutine monolis_update_I_c
+
   !> std lib
   subroutine monolis_qsort_int_c(array, iS, iE) &
     & bind(c, name = "monolis_qsort_int")

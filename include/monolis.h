@@ -310,6 +310,16 @@ double monolis_allreduce_double_scalar(
   int      tag,
   double   val);
 
+/* vector update */
+void monolis_update_double_array(
+  MONOLIS* mat,
+  double*  x);
+
+/* vector update */
+void monolis_update_int_array(
+  MONOLIS* mat,
+  int*     x);
+
 
 
 /* linear solver */
