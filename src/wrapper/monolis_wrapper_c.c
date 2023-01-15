@@ -767,6 +767,8 @@ void monolis_com_get_comm_table(
     &n_send_item,
     mat->com.comm);
 
+  mat->com.internal_nnode = n;
+
   mat->com.recv_n_neib = n_neib_recv;
   mat->com.recv_neib_pe = (int*)calloc(n_neib_recv, sizeof(int));
   mat->com.recv_index = (int*)calloc(n_neib_recv + 1, sizeof(int));
