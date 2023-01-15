@@ -33,7 +33,8 @@ void monolis_copy_param(
   MONOLIS* out);
 
 void monolis_get_CRR_format(
-  int      nnode,
+  int      ncol,
+  int      nrow,
   int      nz,
   int*     index,
   int*     item,

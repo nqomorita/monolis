@@ -110,7 +110,8 @@ contains
     allocate(monolis%MAT%itemR(nz), source = 0)
     allocate(monolis%MAT%permR(nz), source = 0)
 
-    call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
+    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%N, nz, &
+      & monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph
 
@@ -189,7 +190,8 @@ contains
     allocate(monolis%MAT%itemR(nz), source = 0)
     allocate(monolis%MAT%permR(nz), source = 0)
 
-    call monolis_get_CRR_format(monolis%MAT%N, nz, monolis%MAT%index, monolis%MAT%item, &
+    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%N, nz, &
+      & monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
 
     nullify(index)
@@ -481,7 +483,8 @@ contains
     allocate(monolis%MAT%itemR(NZ), source = 0)
     allocate(monolis%MAT%permR(NZ), source = 0)
 
-    call monolis_get_CRR_format(monolis%MAT%N, NZ, monolis%MAT%index, monolis%MAT%item, &
+    call monolis_get_CRR_format(N, NP, NZ, &
+      & monolis%MAT%index, monolis%MAT%item, &
       & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
   end subroutine monolis_set_matrix_BCSR
 
@@ -543,15 +546,15 @@ contains
     B(ndof*nnode-ndof+idof) = val
   end subroutine monolis_sparse_matrix_add_bc
 
-  subroutine monolis_get_CRR_format(N, NZ, index, item, indexR, itemR, permR)
+  subroutine monolis_get_CRR_format(NC, NR, NZ, index, item, indexR, itemR, permR)
     implicit none
-    integer(kint), intent(in) :: N, NZ, index(0:), item(:)
+    integer(kint), intent(in) :: NC, NR, NZ, index(0:), item(:)
     integer(kint), pointer :: indexR(:), itemR(:), permR(:)
     integer(kint), allocatable :: temp(:)
     integer(kint) :: i, j, in, jS, jE, m, p
 
-    allocate(temp(N), source = 0)
-    do i = 1, N
+    allocate(temp(NR), source = 0)
+    do i = 1, NC
       jS = index(i-1) + 1
       jE = index(i)
       do j = jS, jE
@@ -560,12 +563,12 @@ contains
       enddo
     enddo
 
-    do i = 1, N
+    do i = 1, NR
       indexR(i) = indexR(i-1) + temp(i)
     enddo
 
     temp = 0
-    do i = 1, N
+    do i = 1, NC
       jS = index(i-1) + 1
       jE = index(i)
       do j = jS, jE
@@ -578,7 +581,7 @@ contains
       enddo
     enddo
 
-    do i = 1, N
+    do i = 1, NR
       jS = indexR(i-1) + 1
       jE = indexR(i)
       call monolis_qsort_int(itemR(jS:jE), 1, jE-jS+1)

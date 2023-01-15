@@ -544,6 +544,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph(
   mat->mat.permR = (int*)calloc(nz, sizeof(int));
   monolis_get_CRR_format(
     nnode,
+    nnode,
     nz,
     mat->mat.index,
     mat->mat.item,
@@ -695,6 +696,7 @@ void monolis_set_matrix_BCSR(
   mat->mat.permR = (int*)calloc(nz, sizeof(int));
 
   monolis_get_CRR_format(
+    n,
     np,
     nz,
     mat->mat.index,

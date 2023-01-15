@@ -68,13 +68,13 @@ contains
   end subroutine monolis_barrier_c
 
   !> mat
-  subroutine monolis_get_CRR_format_c(N, NZ, index, item, indexR, itemR, permR) &
+  subroutine monolis_get_CRR_format_c(NC, NR, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CRR_format")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ
-    integer(c_int), intent(in), target :: index(0:N)
+    integer(c_int), intent(in), value :: NC, NR, NZ
+    integer(c_int), intent(in), target :: index(0:NC)
     integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), target :: indexR(0:N)
+    integer(c_int), target :: indexR(0:NR)
     integer(c_int), target :: itemR(NZ)
     integer(c_int), target :: permR(NZ)
     integer(kint), pointer :: indexRt(:)
@@ -84,7 +84,7 @@ contains
     indexRt => indexR
     itemRt => itemR
     permRt => permR
-    call monolis_get_CRR_format(N, NZ, index, item, indexRt, itemRt, permRt)
+    call monolis_get_CRR_format(NC, NR, NZ, index, item, indexRt, itemRt, permRt)
   end subroutine monolis_get_CRR_format_c
 
   subroutine monolis_sparse_matrix_add_value_c(N, NZ, NDOF, index, item, A, i, j, sub_i, sub_j, val) &
