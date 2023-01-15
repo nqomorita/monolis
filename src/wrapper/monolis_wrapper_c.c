@@ -86,21 +86,22 @@ void monolis_com_input_comm_table(
     return;
   }
 
+  int i;
   int nneib, nitem, nin, ein;
   fp = monolis_open_comm_table(fp, input_file_dir, "monolis.send", mat->com.myrank);
     fscanf(fp, "%d %d", &nneib, &nitem);
     mat->com.send_n_neib = nneib;
     mat->com.send_neib_pe = (int*)calloc(nneib, sizeof(int));
-    for(int i=0; i<nneib; i++){
+    for(i=0; i<nneib; i++){
       fscanf(fp, "%d", &(mat->com.send_neib_pe[i]));
     }
 
     mat->com.send_index = (int*)calloc(nneib+1, sizeof(int));
     mat->com.send_item = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nneib+1; i++){
+    for(i=0; i<nneib+1; i++){
       fscanf(fp, "%d", &(mat->com.send_index[i]));
     }
-    for(int i=0; i<nitem; i++){
+    for(i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.send_item[i]));
     }
   fclose(fp);
@@ -109,16 +110,16 @@ void monolis_com_input_comm_table(
     fscanf(fp, "%d %d", &nneib, &nitem);
     mat->com.recv_n_neib = nneib;
     mat->com.recv_neib_pe = (int*)calloc(nneib, sizeof(int));
-    for(int i=0; i<nneib; i++){
+    for(i=0; i<nneib; i++){
       fscanf(fp, "%d", &(mat->com.recv_neib_pe[i]));
     }
 
     mat->com.recv_index = (int*)calloc(nneib+1, sizeof(int));
     mat->com.recv_item = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nneib+1; i++){
+    for(i=0; i<nneib+1; i++){
       fscanf(fp, "%d", &(mat->com.recv_index[i]));
     }
-    for(int i=0; i<nitem; i++){
+    for(i=0; i<nitem; i++){
       fscanf(fp, "%d", &(mat->com.recv_item[i]));
     }
 
@@ -128,7 +129,7 @@ void monolis_com_input_comm_table(
     fscanf(fp, "%d", &nitem);
     mat->com.nnode = nitem;
     mat->com.global_node_id = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nitem; i++){
+    for(i=0; i<nitem; i++){
       fscanf(fp, "%d %d %d", &nin, &nin, &(mat->com.global_node_id[i]));
     }
   fclose(fp);
@@ -137,7 +138,7 @@ void monolis_com_input_comm_table(
     fscanf(fp, "%d", &nitem);
     mat->com.nelem = nitem;
     mat->com.global_elem_id = (int*)calloc(nitem, sizeof(int));
-    for(int i=0; i<nitem; i++){
+    for(i=0; i<nitem; i++){
       fscanf(fp, "%d %d %d", &nin, &nin, &(mat->com.global_elem_id[i]));
     }
   fclose(fp);
@@ -271,9 +272,10 @@ void monolis_clear(
 void monolis_clear_mat(
   MONOLIS* mat)
 {
+  int i;
   int ndof2 = mat->mat.NDOF*mat->mat.NDOF;
 
-  for(int i=0; i<(mat->mat.NZ*ndof2); i++) {
+  for(i=0; i<(mat->mat.NZ*ndof2); i++) {
     mat->mat.A[i] = 0.0;
   }
 }
@@ -281,9 +283,10 @@ void monolis_clear_mat(
 void monolis_clear_rhs(
   MONOLIS* mat)
 {
+  int i;
   int ndof = mat->mat.NDOF;
 
-  for(int i=0; i<(mat->mat.NP*ndof); i++) {
+  for(i=0; i<(mat->mat.NP*ndof); i++) {
     mat->mat.B[i] = 0.0;
   }
 }
@@ -291,9 +294,10 @@ void monolis_clear_rhs(
 void monolis_clear_solution(
   MONOLIS* mat)
 {
+  int i;
   int ndof = mat->mat.NDOF;
 
-  for(int i=0; i<(mat->mat.NP*ndof); i++) {
+  for(i=0; i<(mat->mat.NP*ndof); i++) {
     mat->mat.X[i] = 0.0;
   }
 }
@@ -304,21 +308,22 @@ void monolis_copy_all(
   MONOLIS* in,
   MONOLIS* out)
 {
+  int i;
   int ndof = in->mat.NDOF;
   int np = in->mat.NP;
   int nz = in->mat.NZ;
 
   monolis_copy_nonzero_pattern(in, out);
 
-  for(int i=0; i<ndof*ndof*nz; i++) {
+  for(i=0; i<ndof*ndof*nz; i++) {
     out->mat.A[i] = in->mat.A[i];
   }
 
-  for(int i=0; i<ndof*np; i++) {
+  for(i=0; i<ndof*np; i++) {
     out->mat.X[i] = in->mat.X[i];
   }
 
-  for(int i=0; i<ndof*np; i++) {
+  for(i=0; i<ndof*np; i++) {
     out->mat.B[i] = in->mat.B[i];
   }
 }
@@ -327,6 +332,7 @@ void monolis_copy_nonzero_pattern(
   MONOLIS* in,
   MONOLIS* out)
 {
+  int i;
   int n = in->mat.N;
   int np = in->mat.NP;
   int ndof = in->mat.NDOF;
@@ -340,42 +346,42 @@ void monolis_copy_nonzero_pattern(
   out->mat.NZ = nz;
 
   out->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
-  for(int i=0; i<ndof*ndof*nz; i++) {
+  for(i=0; i<ndof*ndof*nz; i++) {
     out->mat.A[i] = 0.0;
   }
 
   out->mat.X = (double*)calloc(ndof*np, sizeof(double));
-  for(int i=0; i<ndof*np; i++) {
+  for(i=0; i<ndof*np; i++) {
     out->mat.X[i] = 0.0;
   }
 
   out->mat.B = (double*)calloc(ndof*np, sizeof(double));
-  for(int i=0; i<ndof*np; i++) {
+  for(i=0; i<ndof*np; i++) {
     out->mat.B[i] = 0.0;
   }
 
   out->mat.index = (int* )calloc(np+1, sizeof(int));
-  for(int i=0; i<np+1; i++) {
+  for(i=0; i<np+1; i++) {
     out->mat.index[i] = in->mat.index[i];
   }
 
   out->mat.item = (int*)calloc(nz, sizeof(int));
-  for(int i=0; i<nz; i++) {
+  for(i=0; i<nz; i++) {
     out->mat.item[i] = in->mat.item[i];
   }
 
   out->mat.indexR = (int*)calloc(np+1, sizeof(int));
-  for(int i=0; i<np+1; i++) {
+  for(i=0; i<np+1; i++) {
     out->mat.indexR[i] = in->mat.indexR[i];
   }
 
   out->mat.itemR = (int*)calloc(nz, sizeof(int));
-  for(int i=0; i<nz; i++) {
+  for(i=0; i<nz; i++) {
     out->mat.itemR[i] = in->mat.itemR[i];
   }
 
   out->mat.permR = (int*)calloc(nz, sizeof(int));
-  for(int i=0; i<nz; i++) {
+  for(i=0; i<nz; i++) {
     out->mat.permR[i] = in->mat.permR[i];
   }
 }
@@ -469,12 +475,13 @@ void monolis_convert_mesh_to_connectivity(
   idx_t*  conn_index,
   idx_t*  con)
 {
-  for(int i=0; i<nelem+1; i++) {
+  int i, j;
+  for(i=0; i<nelem+1; i++) {
     conn_index[i] = i*nbase_func;
   }
 
-  for(int i=0; i<nelem; i++) {
-    for(int j=0; j<nbase_func; j++) {
+  for(i=0; i<nelem; i++) {
+    for(j=0; j<nbase_func; j++) {
       con[nbase_func*i+j] = elem[i][j];
     }
   }
@@ -510,6 +517,9 @@ void monolis_get_nonzero_pattern_by_nodal_graph(
   int*     index,
   int*     item)
 {
+  int i, j;
+  int nz, jS, jE;
+
   mat->mat.N = nnode;
   mat->mat.NP = nnode;
   mat->mat.NDOF = ndof;
@@ -517,20 +527,20 @@ void monolis_get_nonzero_pattern_by_nodal_graph(
   mat->mat.B = (double*)calloc(ndof*nnode, sizeof(double));
 
   mat->mat.index = (int* )calloc(nnode+1, sizeof(int));
-  for(int i=1; i<nnode+1; i++) {
+  for(i=1; i<nnode+1; i++) {
     mat->mat.index[i] = index[i] + i;
   }
 
-  int nz = mat->mat.index[nnode];
+  nz = mat->mat.index[nnode];
   mat->mat.NZ = nz;
   mat->mat.A = (double*)calloc(ndof*ndof*nz, sizeof(double));
   mat->mat.item = (int*)calloc(nz, sizeof(int));
 
-  for(int i=0; i<nnode; i++) {
-    int jS = mat->mat.index[i];
-    int jE = mat->mat.index[i+1];
+  for(i=0; i<nnode; i++) {
+    jS = mat->mat.index[i];
+    jE = mat->mat.index[i+1];
     mat->mat.item[jS] = i+1;
-    for(int j=jS+1; j<jE; j++){
+    for(j=jS+1; j<jE; j++){
       mat->mat.item[j] = item[j-i-1] + 1;
     }
     monolis_qsort_int(
@@ -752,6 +762,7 @@ void monolis_com_get_comm_table(
   int      n,
   int      np,
   int*     glonal_node_id){
+  int i;
   int n_neib_recv;
   int n_recv_item;
   int n_neib_send;
@@ -798,7 +809,7 @@ void monolis_com_get_comm_table(
   mat->com.global_node_id = (int*)calloc(np, sizeof(int));
   mat->com.global_elem_id = (int*)calloc(1, sizeof(int));
 
-  for(int i=0; i<np; i++){
+  for(i=0; i<np; i++){
     mat->com.global_node_id[i] = glonal_node_id[i];
   }
 }
@@ -1038,7 +1049,7 @@ void monolis_eigen_inverted_standard_lanczos(
   eigen_mode_tmp = (double*)calloc(np*ndof*n_get_eigen, sizeof(double));
   is_Dirichlet_bc_int = (int*)calloc(np*ndof, sizeof(int));
 
-  for(int i = 0; i < np*ndof; i++){
+  for(i = 0; i < np*ndof; i++){
     if (is_Dirichlet_bc[i]) {
       is_Dirichlet_bc_int[i] = 1;
     } else {
@@ -1108,8 +1119,8 @@ void monolis_eigen_inverted_standard_lanczos(
     mat->prm.curiter = curiter;
     mat->prm.curresid = curresid;
 
-    for(int i = 0; i < n_get_eigen; i++){
-      for(int j = 0; j < np*ndof; j++){
+    for(i = 0; i < n_get_eigen; i++){
+      for(j = 0; j < np*ndof; j++){
         eigen_mode[i][j] = eigen_mode_tmp[np*ndof*i + j];
       }
     }
@@ -1151,7 +1162,7 @@ void monolis_eigen_standard_lanczos(
   eigen_mode_tmp = (double*)calloc(np*ndof*n_get_eigen, sizeof(double));
   is_Dirichlet_bc_int = (int*)calloc(np*ndof, sizeof(int));
 
-  for(int i = 0; i < np*ndof; i++){
+  for(i = 0; i < np*ndof; i++){
     if (is_Dirichlet_bc[i]) {
       is_Dirichlet_bc_int[i] = 1;
     } else {
@@ -1221,8 +1232,8 @@ void monolis_eigen_standard_lanczos(
     mat->prm.curiter = curiter;
     mat->prm.curresid = curresid;
 
-    for(int i = 0; i < n_get_eigen; i++){
-      for(int j = 0; j < np*ndof; j++){
+    for(i = 0; i < n_get_eigen; i++){
+      for(j = 0; j < np*ndof; j++){
         eigen_mode[i][j] = eigen_mode_tmp[np*ndof*i + j];
       }
     }
@@ -1247,15 +1258,16 @@ void monolis_get_internal_elem_1d_bool(
   int      nelem,
   bool*    is_internal_elem)
 {
+  int i;
   if (mat->com.commsize > 1) {
-    for(int i=0; i<nelem; i++){
+    for(i=0; i<nelem; i++){
       is_internal_elem[i] = false;
     }
-    for(int i=0; i<mat->com.internal_nelem; i++){
+    for(i=0; i<mat->com.internal_nelem; i++){
       is_internal_elem[i] = true;
     }
   } else {
-    for(int i=0; i<nelem; i++){
+    for(i=0; i<nelem; i++){
       is_internal_elem[i] = true;
     }
   }

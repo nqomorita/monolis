@@ -3,7 +3,7 @@
 FC     = mpif90
 FFLAGS = -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 
-CC     = mpic++
+CC     = mpicc
 CFLAGS = -O2
 
 MOD_DIR  = -J ./include
@@ -28,8 +28,8 @@ ifdef FLAGS
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
 		FC      = mpiifort
 		FFLAGS  = -O2 -align array64byte
-		CC      = mpiicpc
-		CFLAGS  = -O2
+		CC      = mpiicc 
+		CFLAGS  = -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
 	endif
 
