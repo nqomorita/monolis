@@ -218,7 +218,7 @@ contains
     implicit none
     integer(c_int), intent(in), value :: N, NDOF, comm
     real(c_double), target :: X(NDOF*N), Y(NDOF*N)
-    real(c_double), value :: sum
+    real(c_double), target :: sum
     real(c_double) :: tspmv, tcomm
     type(monolis_com) :: monoCOM
 
