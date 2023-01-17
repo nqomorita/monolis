@@ -35,7 +35,7 @@ contains
     integer(kint), allocatable :: counts(:), outer_node_id_local(:), local_nid(:)
     integer(kint), allocatable :: outer_node_id_all(:), outer_dom_id_all(:), temp(:)
     integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
-    integer(kint), allocatable :: send_n_list(:)
+    integer(kint), allocatable :: send_n_list(:), rbuf(:)
     integer(kint), allocatable :: ws(:), wr(:)
     integer(kint), allocatable :: sta1(:,:)
     integer(kint), allocatable :: sta2(:,:)
@@ -170,6 +170,7 @@ contains
     !> send の作成
     !> slave から master に個数を送信
     allocate(send_n_list(commsize), source = 0)
+    allocate(rbuf(commsize), source = 0)
 
     do i = 1, n_neib_recv
       id = recv_list(i)%domid
@@ -178,7 +179,8 @@ contains
     enddo
 
     call mpi_alltoall(send_n_list, 1, MPI_INTEGER, &
-      send_n_list, 1, MPI_INTEGER, monolis%COM%comm, ierr)
+      rbuf, 1, MPI_INTEGER, monolis%COM%comm, ierr)
+    send_n_list = rbuf
 
     !> send 個数の確保
     n_neib_send = 0
@@ -307,7 +309,7 @@ contains
     integer(kint), allocatable :: counts(:), outer_node_id_local(:), local_nid(:)
     integer(kint), allocatable :: outer_node_id_all(:), outer_dom_id_all(:)
     integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
-    integer(kint), allocatable :: send_n_list(:)
+    integer(kint), allocatable :: send_n_list(:), rbuf(:)
 
     myrank = monolis_global_myrank()
     commsize = monolis_global_commsize()
@@ -415,6 +417,7 @@ contains
     !> send の作成
     !> slave から master に個数を送信
     allocate(send_n_list(commsize), source = 0)
+    allocate(rbuf(commsize), source = 0)
 
     do i = 1, n_neib_recv
       id = recv_list(i)%domid
@@ -423,7 +426,8 @@ contains
     enddo
 
     call mpi_alltoall(send_n_list, 1, MPI_INTEGER, &
-      send_n_list, 1, MPI_INTEGER, comm, ierr)
+      rbuf, 1, MPI_INTEGER, comm, ierr)
+    send_n_list = rbuf
 
     !> send 個数の確保
     n_neib_send = 0
@@ -504,7 +508,7 @@ contains
     integer(kint), allocatable :: counts(:), outer_node_id_local(:), local_nid(:)
     integer(kint), allocatable :: outer_node_id_all(:), outer_dom_id_all(:), temp(:)
     integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
-    integer(kint), allocatable :: send_n_list(:)
+    integer(kint), allocatable :: send_n_list(:), rbuf(:)
     integer(kint), allocatable :: ws(:), wr(:)
     integer(kint), allocatable :: sta1(:,:)
     integer(kint), allocatable :: sta2(:,:)
@@ -639,6 +643,7 @@ contains
     !> send の作成
     !> slave から master に個数を送信
     allocate(send_n_list(commsize), source = 0)
+    allocate(rbuf(commsize), source = 0)
 
     do i = 1, n_neib_recv
       id = recv_list(i)%domid
@@ -648,6 +653,7 @@ contains
 
     call mpi_alltoall(send_n_list, 1, MPI_INTEGER, &
       send_n_list, 1, MPI_INTEGER, monolis%COM%comm, ierr)
+    send_n_list = rbuf
 
     !> send 個数の確保
     n_neib_send = 0
