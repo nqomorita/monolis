@@ -3,7 +3,7 @@
 FC     = mpif90
 FFLAGS = -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 
-CC     = mpicc
+CC     = mpic++
 CFLAGS = -O2
 
 MOD_DIR  = -J ./include
