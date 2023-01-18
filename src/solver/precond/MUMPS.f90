@@ -137,7 +137,7 @@ contains
     call monolis_precond_mumps_set_rhs(monoMAT%NDOF*monoMAT%N, X, mumps%RHS)
     call DMUMPS(mumps)
     call monolis_precond_mumps_get_rhs(monoMAT%NDOF*monoMAT%N, mumps%RHS, Y)
-    call monolis_update_pre_R(monoCOM, monoMAT%NDOF, Y, t1)
+    call monolis_update_R(monoCOM, monoMAT%NDOF, Y, t1)
 
 !write(*,"(1p4e12.5)")Y
 !stop
