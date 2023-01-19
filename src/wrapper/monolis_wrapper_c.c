@@ -860,7 +860,8 @@ void monolis_inner_product(
   double*  y,
   double*  sum)
 {
-  int n = mat->mat.NP;
+  int n = mat->mat.N;
+  if(mat->com.commsize > 1) n = mat->com.internal_nnode;
   int ndof = mat->mat.NDOF;
   int comm = mat->com.comm;
 
