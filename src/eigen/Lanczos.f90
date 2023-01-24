@@ -84,6 +84,7 @@ contains
     do iter = 1, maxiter
       call monolis_set_RHS(monoMAT, q(:,iter))
 
+      monoPRM%is_prec_stored = .true.
       call monolis_solve_(monoPRM, monoCOM, monoMAT)
 
       do i = 1, N*NDOF

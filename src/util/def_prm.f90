@@ -78,6 +78,7 @@ module mod_monolis_prm
     logical :: is_debug      = .false.
     logical :: is_measurement= .false.
     logical :: is_check_diag = .false.
+    logical :: is_prec_stored= .false.
     logical :: show_iterlog  = .true.
     logical :: show_time     = .true.
     logical :: show_time_statistics = .false.

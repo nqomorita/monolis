@@ -212,6 +212,7 @@ contains
     monoCOM_reorder%myrank = monoCOM%myrank
     monoCOM_reorder%comm = monoCOM%comm
     monoCOM_reorder%commsize = monoCOM%commsize
+    monoCOM_reorder%internal_nnode = monoCOM%internal_nnode
 
     monoCOM_reorder%recv_n_neib = monoCOM%recv_n_neib
     monoCOM_reorder%recv_neib_pe => monoCOM%recv_neib_pe

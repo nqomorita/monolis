@@ -32,6 +32,7 @@ contains
     X => monoMAT%X
     B => monoMAT%B
     iter_RR = 200
+    omega = 0.0d0
 
     if(monoPRM%is_init_x) X = 0.0d0
 

@@ -325,27 +325,27 @@ contains
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"                           max       min       average   std"
 
       time(1) = monoPRM%tprep
-      call hecmw_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/prepost time:", t_max, t_min, t_avg, t_sd
 
       time(2) = monoPRM%tspmv
-      call hecmw_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
 
       time(3) = monoPRM%tdotp
-      call hecmw_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/inner p time:", t_max, t_min, t_avg, t_sd
 
       time(4) = monoPRM%tprec
-      call hecmw_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - solution/precond time:", t_max, t_min, t_avg, t_sd
 
       time(5) = monoPRM%tcomm_dotp
-      call hecmw_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
 
       time(6) = monoPRM%tcomm_spmv
-      call hecmw_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
+      call monolis_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
       if(monoCOM%myrank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
     endif
 
@@ -368,7 +368,7 @@ contains
     monoPRM%tcomm_spmv = time(6)
   end subroutine monolis_timer_finalize
 
-  subroutine hecmw_time_statistics (monoCOM, time, t_max, t_min, t_avg, t_sd)
+  subroutine monolis_time_statistics (monoCOM, time, t_max, t_min, t_avg, t_sd)
     implicit none
     type(monolis_com) :: monoCOM
     real(kdouble), intent(in) :: time
@@ -397,5 +397,5 @@ contains
     else
       t_sd = dsqrt(tmp - t_avg*t_avg)
     endif
-  end subroutine hecmw_time_statistics
+  end subroutine monolis_time_statistics
 end module mod_monolis_solve
