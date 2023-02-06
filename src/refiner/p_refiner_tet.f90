@@ -1,6 +1,5 @@
 program monolis_p_refiner_tet
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mesh
   use mod_monolis_io
   use mod_monolis_io_arg

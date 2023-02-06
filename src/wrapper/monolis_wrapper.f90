@@ -1,11 +1,9 @@
 module mod_monolis_wrapper
   use iso_c_binding
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_util
   use mod_monolis_sparse_util
-  use mod_monolis_stdlib
   implicit none
 
 contains
@@ -28,21 +26,21 @@ contains
     & bind(c, name = "monolis_get_global_comm")
     implicit none
     integer(c_int) :: monolis_get_global_comm_c
-    monolis_get_global_comm_c =  monolis_global_comm()
+    monolis_get_global_comm_c =  monolis_mpi_global_comm()
   end function monolis_get_global_comm_c
 
   function monolis_get_global_commsize_c()&
     & bind(c, name = "monolis_get_global_commsize")
     implicit none
     integer(c_int) :: monolis_get_global_commsize_c
-    monolis_get_global_commsize_c =  monolis_global_commsize()
+    monolis_get_global_commsize_c =  monolis_mpi_global_comm_size()
   end function monolis_get_global_commsize_c
 
   function monolis_get_global_myrank_c()&
     & bind(c, name = "monolis_get_global_myrank")
     implicit none
     integer(c_int) :: monolis_get_global_myrank_c
-    monolis_get_global_myrank_c =  monolis_global_myrank()
+    monolis_get_global_myrank_c =  monolis_mpi_global_my_rank()
   end function monolis_get_global_myrank_c
 
   function monolis_get_time_c()&
@@ -56,12 +54,11 @@ contains
     & bind(c, name = "monolis_get_time_sync")
     implicit none
     real(c_double) :: monolis_get_time_sync_c
-    monolis_get_time_sync_c =  monolis_get_time_sync()
+    monolis_get_time_sync_c =  monolis_get_time_global_sync()
   end function monolis_get_time_sync_c
 
   subroutine monolis_barrier_c(comm)&
     & bind(c, name = "monolis_barrier_c_main")
-    use mod_monolis_com
     implicit none
     integer(c_int), intent(in), value :: comm
     call monolis_barrier_(comm)
@@ -167,7 +164,6 @@ contains
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
     & bind(c, name = "monolis_matvec_product_c_main")
-    use mod_monolis_com
     use mod_monolis_matvec
     implicit none
     type(monolis_structure) :: monolis
@@ -196,25 +192,25 @@ contains
     monolis%MAT%item => item
 
     !> for monoCOM
-    monoliS%COM%myrank = myrank
+    monoliS%COM%my_rank = myrank
     monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
+    monoliS%COM%comm_size = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     call monolis_matvec_product(monolis, monolis%MAT%X, monolis%MAT%B)
   end subroutine monolis_matvec_product_c
 
   subroutine monolis_inner_product_c(N, NDOF, X, Y, sum, comm) &
     & bind(c, name = "monolis_inner_product_c_main")
-    use mod_monolis_com
     use mod_monolis_linalg
+    use iso_c_binding
     implicit none
     integer(c_int), intent(in), value :: N, NDOF, comm
     real(c_double), target :: X(NDOF*N), Y(NDOF*N)
@@ -228,7 +224,7 @@ contains
 
   function monolis_allreduce_double_scalar_c(val, tag, comm) &
     & bind(c, name = "monolis_allreduce_double_scalar_c_main")
-    use mod_monolis_linalg_com
+    use iso_c_binding
     implicit none
     real(c_double) :: monolis_allreduce_double_scalar_c
     integer(c_int), intent(in), value :: tag, comm
@@ -242,7 +238,6 @@ contains
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
     & bind(c, name = "monolis_update_double_array_c_main")
-    use mod_monolis_com
     use mod_monolis_matvec
     implicit none
     type(monolis_structure) :: monolis
@@ -259,17 +254,17 @@ contains
     monolis%MAT%X => X
 
     !> for monoCOM
-    monoliS%COM%myrank = myrank
+    monoliS%COM%my_rank = myrank
     monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
+    monoliS%COM%comm_size = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     call monolis_update_R(monoliS%COM, NDOF, monolis%MAT%X, tcomm)
   end subroutine monolis_update_R_c
@@ -279,7 +274,6 @@ contains
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
     & bind(c, name = "monolis_update_int_array_c_main")
-    use mod_monolis_com
     use mod_monolis_matvec
     implicit none
     type(monolis_structure) :: monolis
@@ -297,17 +291,17 @@ contains
     Xt => X
 
     !> for monoCOM
-    monoliS%COM%myrank = myrank
+    monoliS%COM%my_rank = myrank
     monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
+    monoliS%COM%comm_size = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     call monolis_update_I(monoliS%COM, NDOF, Xt, tcomm)
   end subroutine monolis_update_I_c

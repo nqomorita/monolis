@@ -2,7 +2,6 @@ module mod_monolis_graph
   use mod_monolis_prm
   use mod_monolis_mesh
   use mod_monolis_util
-  use mod_monolis_util_debug
 
   implicit none
 

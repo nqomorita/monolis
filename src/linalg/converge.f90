@@ -1,12 +1,8 @@
 module mod_monolis_converge
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
-  use mod_monolis_linalg_com
   use mod_monolis_util
-  use mod_monolis_util_debug
   implicit none
 
 contains
@@ -26,7 +22,7 @@ contains
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
-      if(monoCOM%myrank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
+      if(monoCOM%my_rank == 0) write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
       monoMAT%X = 0.0d0
       is_converge = .true.
     endif
@@ -51,8 +47,8 @@ contains
 
     if(resid < monoPRM%tol)then
       is_converge = .true.
-      if(monoCOM%myrank == 0 .and. monoPRM%is_debug) write (*,"(i7, 1pe16.6)") iter, resid
-    elseif(monoCOM%myrank == 0 .and. monoPRM%show_iterlog)then
+      if(monoCOM%my_rank == 0 .and. monoPRM%is_debug) write (*,"(i7, 1pe16.6)") iter, resid
+    elseif(monoCOM%my_rank == 0 .and. monoPRM%show_iterlog)then
       write (*,"(i7, 1pe16.6)") iter, resid
     endif
 
@@ -75,7 +71,7 @@ contains
 
     is_converge = .false.
     resid = dsqrt(R2/B2)
-    if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
+    if(monoCOM%my_rank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
     if(resid < monoPRM%tol) is_converge = .true.
   end subroutine monolis_check_converge_2
 end module mod_monolis_converge

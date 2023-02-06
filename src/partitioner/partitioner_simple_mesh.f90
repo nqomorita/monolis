@@ -1,6 +1,5 @@
 program monolis_partitioner
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_graph
   use mod_monolis_mesh
   use mod_monolis_comm_overlap

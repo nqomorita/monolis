@@ -1,11 +1,9 @@
 module mod_monolis_solver_BiCGSTAB
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none
@@ -75,7 +73,7 @@ contains
 
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, S, CG(1))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, T, CG(2))
-      call monolis_allreduce_R(2, CG, monolis_sum, monoCOM%comm)
+      call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
 
       if(CG(2) /= 0.0d0)then
         omega = CG(1) / CG(2)

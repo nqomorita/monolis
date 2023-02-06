@@ -1,6 +1,5 @@
 module mod_monolis_fact_LU_asym_33
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
 
   implicit none

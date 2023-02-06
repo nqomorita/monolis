@@ -1,8 +1,6 @@
 module mod_monolis_precond_mumps
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
-  use mod_monolis_linalg_com
 
   implicit none
 
@@ -90,8 +88,8 @@ contains
     mumps%A_loc => mumps%A
 
     if(.not. is_self)then
-      call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_global_comm())
-      call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_global_comm())
+      call monolis_allreduce_I1(mumps%N,  monolis_sum, monolis_mpi_global_comm())
+      call monolis_allreduce_I1(mumps%NZ, monolis_sum, monolis_mpi_global_comm())
     endif
 
     if(monolis_global_myrank() == 0 .or. is_self)then
@@ -114,7 +112,6 @@ contains
   end subroutine monolis_precond_mumps_setup
 
   subroutine monolis_precond_mumps_apply(monoPRM, monoCOM, monoMAT, X, Y)
-    use mod_monolis_linalg_util
     use mod_monolis_matvec
     implicit none
     type(monolis_prm) :: monoPRM
@@ -188,7 +185,6 @@ contains
   end subroutine monolis_precond_mumps_get_nz
 
   subroutine monolis_precond_mumps_get_loc(monoMAT, monoCOM, IRN, JCN, A, is_self)
-    use mod_monolis_linalg_util
     implicit none
     type(monolis_mat) :: monoMAT
     type(monolis_com) :: monoCOM
@@ -200,10 +196,10 @@ contains
     logical :: is_self
 
     NDOF = monoMAT%ndof
-    nprocs = monolis_global_commsize()
-    myrank = monolis_global_myrank()
+    nprocs = monolis_mpi_global_comm_size()
+    myrank = monolis_mpi_global_my_rank()
 
-    offset = offset_list(monolis_global_myrank()+1)
+    offset = offset_list(monolis_mpi_global_my_rank()+1)
     allocate(offset_id(monoMAT%NP), source = 0)
     allocate(offset_rank(monoMAT%NP), source = -1)
 
@@ -260,12 +256,12 @@ contains
     implicit none
     integer(kint) :: N
     real(kdouble) :: X(:), RHS(:)
-    if(monolis_global_commsize() == 1 .or. is_self)then
+    if(monolis_mpi_global_comm_size() == 1 .or. is_self)then
       RHS = X(1:N)
     else
       call monolis_gatherv_R(X, N, &
         RHS, offset_counts, offset_list, &
-        0, monolis_global_comm())
+        0, monolis_mpi_global_comm())
     endif
   end subroutine monolis_precond_mumps_set_rhs
 
@@ -273,13 +269,13 @@ contains
     implicit none
     integer(kint) :: N
     real(kdouble) :: Y(:), RHS(:)
-    if(monolis_global_commsize() == 1 .or. is_self)then
+    if(monolis_mpi_global_comm_size() == 1 .or. is_self)then
       Y(1:N) = RHS
     else
       call monolis_scatterv_R( &
         RHS, offset_counts, offset_list, &
         Y, N, &
-        0, monolis_global_comm())
+        0, monolis_mpi_global_comm())
     endif
   end subroutine monolis_precond_mumps_get_rhs
 
@@ -287,14 +283,14 @@ contains
     implicit none
     integer(kint) :: nprocs, myrank, i, N_loc
 
-    nprocs = monolis_global_commsize()
-    myrank = monolis_global_myrank()
+    nprocs = monolis_mpi_global_comm_size()
+    myrank = monolis_mpi_global_my_rank()
 
     allocate(offset_list(nprocs), source = 0)
     allocate(offset_counts(nprocs), source = 0)
 
     if(1 < nprocs)then
-      call monolis_allgather_I1(N_loc, offset_counts, monolis_global_comm())
+      call monolis_allgather_I1(N_loc, offset_counts, monolis_mpi_global_comm())
     endif
 
     offset_list(1) = 0

@@ -1,10 +1,8 @@
 module mod_monolis_eigen_lanczos
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_solve
   use mod_monolis_eigen_lanczos_util
-  use mod_monolis_util_debug
 
   implicit none
 
@@ -65,8 +63,8 @@ contains
       if(is_bc(i)) n_bc = n_bc + 1
     enddo
 
-    call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
-    call monolis_allreduce_I1(n_bc, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_I1(total_dof, monolis_mpi_sum, monoCOM%comm)
+    call monolis_allreduce_I1(n_bc, monolis_mpi_sum, monoCOM%comm)
     total_dof = total_dof - n_bc
 
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
@@ -112,7 +110,7 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-if(monolis_global_myrank() == 0)then
+if(monolis_mpi_global_comm_size() == 0)then
   write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
 endif
 
@@ -160,8 +158,8 @@ endif
       if(is_bc(i)) n_bc = n_bc + 1
     enddo
 
-    call monolis_allreduce_I1(total_dof, monolis_sum, monoCOM%comm)
-    call monolis_allreduce_I1(n_bc, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_I1(total_dof, monolis_mpi_sum, monoCOM%comm)
+    call monolis_allreduce_I1(n_bc, monolis_mpi_sum, monoCOM%comm)
     total_dof = total_dof - n_bc
 
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
@@ -208,7 +206,7 @@ endif
 
       if(norm < ths) is_converge = .true.
 
-if(monolis_global_myrank() == 0)then
+if(monolis_mpi_global_comm_size() == 0)then
   write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
 endif
 
@@ -234,6 +232,7 @@ endif
     is_check_diag, is_measurement, is_init_x, curiter, curresid, time, &
     n_get_eigen, ths, eigen_maxiter, eigen_value, eigen_mode_tmp, is_bc_int) &
     & bind(c, name = "monolis_eigen_inverted_standard_lanczos_c_main")
+    use iso_c_binding
     implicit none
     type(monolis_structure) :: monolis
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
@@ -284,18 +283,18 @@ endif
     monolis%MAT%item => item
 
     !> for monoCOM
-    monoliS%COM%internal_nnode = N
-    monoliS%COM%myrank = myrank
+    monoliS%COM%n_internal_vertex = N
+    monoliS%COM%my_rank = myrank
     monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
+    monoliS%COM%comm_size = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     !> for monoPRM
     monolis%PRM%method = method
@@ -357,6 +356,7 @@ endif
     is_check_diag, is_measurement, is_init_x, curiter, curresid, time, &
     n_get_eigen, ths, eigen_maxiter, eigen_value, eigen_mode_tmp, is_bc_int) &
     & bind(c, name = "monolis_eigen_standard_lanczos_c_main")
+    use iso_c_binding
     implicit none
     type(monolis_structure) :: monolis
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
@@ -407,18 +407,18 @@ endif
     monolis%MAT%item => item
 
     !> for monoCOM
-    monoliS%COM%internal_nnode = N
-    monoliS%COM%myrank = myrank
+    monoliS%COM%n_internal_vertex = N
+    monoliS%COM%my_rank = myrank
     monoliS%COM%comm = comm
-    monoliS%COM%commsize = commsize
+    monoliS%COM%comm_size = commsize
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
     monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     !> for monoPRM
     monolis%PRM%method = method
@@ -476,7 +476,6 @@ end module mod_monolis_eigen_lanczos
     & (monoPRM, monoCOM, monoMAT, NPNDOF, &
     & n_get_eigen, ths, maxiter, val, vec, is_bc)
     use mod_monolis_prm
-    use mod_monolis_com
     use mod_monolis_mat
     use mod_monolis_eigen_lanczos
     implicit none

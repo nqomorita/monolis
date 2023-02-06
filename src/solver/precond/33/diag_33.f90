@@ -1,6 +1,5 @@
 module mod_monolis_precond_diag_33
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
 
   implicit none

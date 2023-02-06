@@ -2,9 +2,6 @@ module mod_monolis_graph_comm
   use mod_monolis_prm
   use mod_monolis_mesh
   use mod_monolis_util
-  use mod_monolis_com
-  use mod_monolis_linalg_com
-  use mod_monolis_stdlib
 
   implicit none
   private
@@ -42,11 +39,11 @@ contains
     integer(kint), allocatable :: req1(:)
     integer(kint), allocatable :: req2(:)
 
-    myrank = monolis_global_myrank()
-    commsize = monolis_global_commsize()
+    myrank = monolis_mpi_local_my_rank(monolis%COM%comm)
+    commsize = monolis_mpi_local_comm_size(monolis%COM%comm)
 
     M = NP - N
-    monolis%COM%internal_nnode = N
+    monolis%COM%n_internal_vertex = N
 
     !> 外点を全体で共有
     allocate(counts(commsize), source = 0)
@@ -96,7 +93,7 @@ contains
     enddo aa
 
     !> reduce に修正して効率化可能
-    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_min, monolis%COM%comm)
+    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_mpi_min, monolis%COM%comm)
 
     !> 隣接領域の取得
     allocate(is_neib(commsize), source = 0)
@@ -238,8 +235,8 @@ contains
     allocate(monolis%COM%send_item(in), source = 0)
 
     !> slave から master に global_nid を送信
-    allocate(sta1(monolis_status_size,monolis%COM%recv_n_neib))
-    allocate(sta2(monolis_status_size,monolis%COM%send_n_neib))
+    allocate(sta1(monolis_mpi_status_size,monolis%COM%recv_n_neib))
+    allocate(sta2(monolis_mpi_status_size,monolis%COM%send_n_neib))
     allocate(req1(monolis%COM%recv_n_neib))
     allocate(req2(monolis%COM%send_n_neib))
 
@@ -282,7 +279,6 @@ contains
   subroutine monolis_com_get_comm_table_analysis_c(N, NP, nid, &
     & n_neib_recv, recv_item, n_neib_send, send_item, comm) &
     & bind(c, name = "monolis_com_get_comm_table_analysis_c_main")
-    use mod_monolis_com
     implicit none
     integer(c_int), intent(in), value :: N, NP, comm
     integer(c_int), intent(inout), target :: n_neib_recv, recv_item, n_neib_send, send_item
@@ -311,8 +307,8 @@ contains
     integer(kint), allocatable :: displs(:), internal_node_id(:), is_neib(:), neib_id(:)
     integer(kint), allocatable :: send_n_list(:), rbuf(:)
 
-    myrank = monolis_global_myrank()
-    commsize = monolis_global_commsize()
+    myrank = monolis_mpi_local_my_rank(comm)
+    commsize = monolis_mpi_local_comm_size(comm)
 
     M = NP - N
 
@@ -364,7 +360,7 @@ contains
     enddo aa
 
     !> reduce に修正して効率化可能
-    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_min, comm)
+    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_mpi_min, comm)
 
     !> 隣接領域の取得
     allocate(is_neib(commsize), source = 0)
@@ -482,13 +478,13 @@ contains
     !> for monoCOM
     monoliS%COM%comm = comm
     monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
-    monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    !monoliS%COM%recv_neib_pe => recv_neib_pe
+    !monoliS%COM%recv_index => recv_index
+    !monoliS%COM%recv_item => recv_item
+    !monoliS%COM%send_n_neib = send_n_neib
+    !monoliS%COM%send_neib_pe => send_neib_pe
+    !monoliS%COM%send_index => send_index
+    !monoliS%COM%send_item => send_item
 
     call monolis_com_get_comm_table_set(monolis, N, NP, nid)
 
@@ -515,11 +511,11 @@ contains
     integer(kint), allocatable :: req1(:)
     integer(kint), allocatable :: req2(:)
 
-    myrank = monolis_global_myrank()
-    commsize = monolis_global_commsize()
+    myrank = monolis_mpi_local_my_rank(monolis%COM%comm)
+    commsize = monolis_mpi_local_comm_size(monolis%COM%comm)
 
     M = NP - N
-    monolis%COM%internal_nnode = N
+    monolis%COM%n_internal_vertex = N
 
     !> 外点を全体で共有
     allocate(counts(commsize), source = 0)
@@ -569,7 +565,7 @@ contains
     enddo aa
 
     !> reduce に修正して効率化可能
-    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_min, monolis%COM%comm)
+    call monolis_allreduce_I(n_outer, outer_dom_id_all, monolis_mpi_min, monolis%COM%comm)
 
     !> 隣接領域の取得
     allocate(is_neib(commsize), source = 0)
@@ -711,8 +707,8 @@ contains
     !allocate(monolis%COM%send_item(in), source = 0)
 
     !> slave から master に global_nid を送信
-    allocate(sta1(monolis_status_size,monolis%COM%recv_n_neib))
-    allocate(sta2(monolis_status_size,monolis%COM%send_n_neib))
+    allocate(sta1(monolis_mpi_status_size,monolis%COM%recv_n_neib))
+    allocate(sta2(monolis_mpi_status_size,monolis%COM%send_n_neib))
     allocate(req1(monolis%COM%recv_n_neib))
     allocate(req2(monolis%COM%send_n_neib))
 

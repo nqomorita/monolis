@@ -1,6 +1,5 @@
 module mod_monolis_sparse_util
   use mod_monolis_util
-  use mod_monolis_stdlib
   use mod_monolis_graph
   implicit none
 

@@ -1,13 +1,10 @@
 module mod_monolis_p_refiner
   use mod_monolis_util
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mesh
-  use mod_monolis_hash
-  use mod_monolis_stdlib
   implicit none
 
-  type(type_monolis_hash_tree) :: hash_tree
+  type(monolis_hash_structure) :: hash_tree
 
 contains
 
@@ -17,7 +14,7 @@ contains
     type(monolis_mesh) :: mesh, mesh_ref
     integer(kint) :: itable(3,6), conn(mesh%nbase_func)
     integer(kint) :: i, eid, i1, i2, tmp, newid, nid(6), maxid
-    character :: ckey*27
+    character :: ckey*18, ckey1*9, ckey2*9
     logical :: is_exist, is_pushed
     integer(kint), allocatable :: tet2conn(:,:), tet2nid(:)
     real(kdouble), allocatable :: pnode(:,:)
@@ -33,7 +30,7 @@ contains
     allocate(tet2nid(6*mesh%nelem), source = 0)
     allocate(pnode(3,6*mesh%nelem), source = 0.0d0)
 
-    call monolis_hash_init(hash_tree)
+    call monolis_hash_init(hash_tree, 18)
 
     newid = 0
     maxid = maxval(mesh%nid)
@@ -43,7 +40,9 @@ contains
       do i = 1, 6
         i1 = conn(itable(1, i))
         i2 = conn(itable(2, i))
-        ckey = get_key(i1, i2, 0)
+        call monolis_hash_get_key_I(9, i1, ckey1)
+        call monolis_hash_get_key_I(9, i2, ckey2)
+        ckey = ckey1//ckey2
 
         is_exist = .false.
         call monolis_hash_get(hash_tree, ckey, tmp, is_exist)

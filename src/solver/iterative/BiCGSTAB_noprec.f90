@@ -1,11 +1,9 @@
 module mod_monolis_solver_BiCGSTAB_noprec
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none
@@ -17,12 +15,12 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, iter, iter_RR
-    real(kind=kdouble) :: alpha, beta, rho, rho1, c2, omega
-    real(kind=kdouble) :: CG(2), B2
-    real(kind=kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
-    real(kind=kdouble), pointer :: B(:), X(:)
+    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: i, iter, iter_RR
+    real(kdouble) :: alpha, beta, rho, rho1, c2, omega
+    real(kdouble) :: CG(2), B2
+    real(kdouble), allocatable :: R(:), RT(:), P(:), PT(:), S(:), ST(:), T(:), V(:)
+    real(kdouble), pointer :: B(:), X(:)
     logical :: is_converge
 
     N     = monoMAT%N
@@ -73,7 +71,7 @@ contains
 
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, S, CG(1))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, T, T, CG(2))
-      call monolis_allreduce_R(2, CG, monolis_sum, monoCOM%comm)
+      call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
 
       omega = CG(1) / CG(2)
 

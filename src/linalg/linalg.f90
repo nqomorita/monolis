@@ -1,10 +1,7 @@
 module mod_monolis_linalg
-  use mod_monolis_prm
-  use mod_monolis_com
-  use mod_monolis_mat
-  use mod_monolis_linalg_com
   use mod_monolis_util
-  use mod_monolis_util_debug
+  use mod_monolis_prm
+  use mod_monolis_mat
   implicit none
 
   private
@@ -85,7 +82,7 @@ contains
 !$omp end parallel
 
     t2 = monolis_get_time()
-    call monolis_allreduce_I1(sum, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_I1(sum, monolis_mpi_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
     if(present(tdotp)) tdotp = tdotp + t3 - t1
@@ -118,7 +115,7 @@ contains
 !$omp end parallel
 
     t2 = monolis_get_time()
-    call monolis_allreduce_R1(sum, monolis_sum, monoCOM%comm)
+    call monolis_allreduce_R1(sum, monolis_mpi_sum, monoCOM%comm)
     t3 = monolis_get_time()
 
     if(present(tdotp)) tdotp = tdotp + t3 - t1

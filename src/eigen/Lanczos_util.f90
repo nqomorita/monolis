@@ -1,6 +1,5 @@
 module mod_monolis_eigen_lanczos_util
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_linalg
 
@@ -9,14 +8,13 @@ module mod_monolis_eigen_lanczos_util
 contains
 
   subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc, beta)
-    use mod_monolis_linalg_util
     implicit none
     type(monolis_com) :: monoCOM
     integer(kint) :: i, N, NDOF
     real(kdouble) :: q(:), norm, t1, t2, beta
     logical :: is_bc(:)
 
-    call get_rundom_number(N*NDOF, q, monolis_global_myrank())
+    call get_rundom_number(N*NDOF, q, monolis_mpi_global_comm_size())
 
     do i = 1, N*NDOF
       if(is_bc(i)) q(i) = 0.0d0

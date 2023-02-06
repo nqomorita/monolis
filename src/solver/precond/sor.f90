@@ -1,6 +1,5 @@
 module mod_monolis_precond_sor
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond_sor_33
   use mod_monolis_precond_sor_nn

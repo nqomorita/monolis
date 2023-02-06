@@ -1,11 +1,9 @@
 module mod_monolis_solver_PipeCG
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none
@@ -17,14 +15,14 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, iter, iter_RR
-    !integer(kind=kint) :: requests(1)
-    !integer(kind=kint) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta
-    real(kind=kdouble) :: buf(3), CG(3), B2, R2
-    real(kind=kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
-    real(kind=kdouble), pointer :: B(:), X(:)
+    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: i, iter, iter_RR
+    !integer(kint) :: requests(1)
+    !integer(kint) :: statuses(monolis_status_size,1)
+    real(kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta
+    real(kdouble) :: buf(3), CG(3), B2, R2
+    real(kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
+    real(kdouble), pointer :: B(:), X(:)
     logical :: is_converge
 
     N     = monoMAT%N
@@ -61,7 +59,7 @@ contains
       call monolis_inner_product_R_local(monoCOM, N, NDOF, R, U, CG(1))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, V, U, CG(2))
       call monolis_inner_product_R_local(monoCOM, N, NDOF, R, R, CG(3))
-      call monolis_allreduce_R(3, CG, monolis_sum, monoCOM%comm)
+      call monolis_allreduce_R(3, CG, monolis_mpi_sum, monoCOM%comm)
 
       call monolis_precond_apply(monoPRM, monoCOM, monoMAT, V, M)
       call monolis_matvec(monoCOM, monoMAT, M, L, monoPRM%tspmv, monoPRM%tcomm_spmv)

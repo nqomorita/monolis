@@ -36,26 +36,6 @@ module mod_monolis_mat
 
 contains
 
-!  subroutine monolis_mat_nullify(monoMAT)
-!    implicit none
-!    type(monolis_mat) :: monoMAT
-!
-!    monoMAT%N = 0
-!    monoMAT%NP = 0
-!    monoMAT%NZ = 0
-!    monoMAT%NDOF = 0
-!    monoMAT%index => null()
-!    monoMAT%item => null()
-!    monoMAT%perm => null()
-!    monoMAT%iperm => null()
-!    monoMAT%indexR => null()
-!    monoMAT%itemR => null()
-!    monoMAT%permR => null()
-!    monoMAT%A => null()
-!    monoMAT%X => null()
-!    monoMAT%B => null()
-!  end subroutine monolis_mat_nullify
-
   subroutine monolis_mat_initialize(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT

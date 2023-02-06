@@ -1,11 +1,6 @@
 module mod_monolis_prm
+  use mod_monolis_utils
   implicit none
-
-  integer(4), parameter :: kint    = 4
-  integer(4), parameter :: kdouble = 8
-  integer(kint), parameter :: monolis_success = 0
-  integer(kint), parameter :: monolis_fail = 1
-  integer(kint), parameter :: monolis_charlen = 1024
 
   integer(kint), parameter :: monolis_iter_CG       = 1
   integer(kint), parameter :: monolis_iter_GropCG   = 2
@@ -91,8 +86,6 @@ module mod_monolis_prm
     real(kdouble) :: tprec = 0.0d0
     real(kdouble) :: tcomm_dotp = 0.0d0
     real(kdouble) :: tcomm_spmv = 0.0d0
-    !> input dir
-    !> character(monolis_charlen) :: input_file_dir
   end type monolis_prm
 
 contains
@@ -102,7 +95,6 @@ contains
     type(monolis_prm) :: monoPRM
     character(*) :: fname_in
 
-    !> monoPRM%input_file_dir = trim(fname_in)
     monoPRM%method = 1
     monoPRM%precond = 1
     monoPRM%curiter = 0

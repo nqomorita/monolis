@@ -1,11 +1,9 @@
 module mod_monolis_solver_IR
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none
@@ -14,17 +12,16 @@ contains
 
   subroutine monolis_solver_IR(monoPRM, monoCOM, monoMAT)
     use mod_monolis_prm
-    use mod_monolis_com
     use mod_monolis_mat
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, iter
-    real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble), pointer :: B(:), X(:)
-    real(kind=kdouble), allocatable :: R(:), D(:)
+    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: i, iter
+    real(kdouble) :: tol, resid, R2, B2
+    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), allocatable :: R(:), D(:)
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -55,7 +52,7 @@ contains
 
       resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
+      if(monoCOM%my_rank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
     enddo
 
@@ -82,8 +79,8 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
-    real(kind=kdouble) :: X(:), Y(:)
+    integer(kint) :: i
+    real(kdouble) :: X(:), Y(:)
 
     if(monoPRM%precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply(monoPRM, monoCOM, monoMAT, X, Y)

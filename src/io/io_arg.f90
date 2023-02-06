@@ -1,10 +1,8 @@
-module mod_monolis_io_arg
-  use mod_monolis_prm
-  use mod_monolis_com
+module mod_monolis_solver_io_arg
   use mod_monolis_util
-  use mod_monolis_util_debug
+  use mod_monolis_utils
+  use mod_monolis_prm
   use mod_monolis_mesh
-  use mod_monolis_stdlib
   implicit none
 
 contains
@@ -295,4 +293,4 @@ contains
     enddo
   end subroutine monolis_get_extract_all_arg
 
-end module mod_monolis_io_arg
+end module mod_monolis_solver_io_arg

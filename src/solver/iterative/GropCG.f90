@@ -1,11 +1,9 @@
 module mod_monolis_solver_GropCG
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none

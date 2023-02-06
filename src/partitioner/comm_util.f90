@@ -1,8 +1,6 @@
 module mod_monolis_comm_util
   use mod_monolis_util
-  use mod_monolis_util_debug
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mesh
   implicit none
 
@@ -118,7 +116,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
   end subroutine get_nnode_and_nid_at_subdomain
 
   subroutine get_nnode_and_nid_at_subdomain_graph(graph, local_node, nid, avg)
-    use mod_monolis_stdlib
     implicit none
     type(monolis_graph) :: graph
     type(monolis_node_list) :: local_node
@@ -377,7 +374,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
   end subroutine get_recv_table
 
   subroutine reorder_recv_node(comm, local_node, n_recv)
-    use mod_monolis_stdlib
     implicit none
     type(monolis_com) :: comm
     type(monolis_node_list) :: local_node
@@ -454,7 +450,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
   end subroutine get_send_table
 
   subroutine append_send_node(send_list, domid, jS, jE, recv_item_perm)
-    use mod_monolis_stdlib
     implicit none
     type(monolis_send_list) :: send_list
     integer(kint) :: i, j, k, in, domid, jS, jE, nnode
@@ -515,7 +510,6 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
   end subroutine rebuild_send_table
 
   subroutine reorder_send_node(comm, send)
-    use mod_monolis_stdlib
     implicit none
     type(monolis_com) :: comm
     type(monolis_send_list) :: send

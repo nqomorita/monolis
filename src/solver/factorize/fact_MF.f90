@@ -1,6 +1,5 @@
 module mod_monolis_fact_MF
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_fact_MF_11
 

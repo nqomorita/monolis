@@ -1,6 +1,5 @@
 module mod_monolis_precond_sor_nn
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
 
   implicit none

@@ -1,11 +1,7 @@
 module mod_monolis_dbc_all_util
   use mod_monolis_util
-  use mod_monolis_util_debug
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mesh
-  use mod_monolis_hash
-  use mod_monolis_stdlib
   implicit none
 
   private
@@ -14,7 +10,7 @@ module mod_monolis_dbc_all_util
   public :: output_surf
 
   integer(kint) :: i341(3,4), i361(4,6)
-  type(type_monolis_hash_tree) :: hash_tree
+  type(monolis_hash_structure) :: hash_tree
 
 contains
 
@@ -124,7 +120,7 @@ contains
     call monolis_debug_int("nsurf", nsurf)
     call monolis_debug_int("nsurf_node", nsurf_node)
 
-    call monolis_hash_init(hash_tree)
+    call monolis_hash_init(hash_tree, 27)
 
     do eid = 1, mesh%nelem
       call monolis_get_connectivity(mesh, eid, nbase_func, conn)

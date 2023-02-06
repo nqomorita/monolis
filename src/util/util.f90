@@ -1,6 +1,6 @@
 module mod_monolis_util
+  use mod_monolis_utils
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
 
   implicit none
@@ -18,12 +18,8 @@ module mod_monolis_util
   public :: monolis_initialize
   public :: monolis_initialize_entire
   public :: monolis_finalize
-  public :: monolis_get_time
-  public :: monolis_get_time_sync
-  public :: monolis_get_input_filename
   public :: monolis_check_diagonal
   public :: monolis_get_penalty_value
-  public :: monolis_get_internal_elem_1d_bool
 
 contains
 
@@ -54,7 +50,7 @@ contains
     character(*) :: fname_in
 
     call monolis_prm_initialize(monolis%PRM, fname_in)
-    call monolis_com_initialize(monolis%COM, .true.)
+    call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
     call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize_entire
@@ -67,58 +63,6 @@ contains
     call monolis_com_finalize(monolis%COM)
     call monolis_mat_finalize(monolis%MAT)
   end subroutine monolis_finalize
-
-  function monolis_get_time()
-    implicit none
-    real(kdouble) :: monolis_get_time, t1
-
-#ifdef WITH_MPI
-    monolis_get_time = MPI_Wtime()
-#else
-    call cpu_time(t1)
-    monolis_get_time = t1
-#endif
-  end function monolis_get_time
-
-  function monolis_get_time_sync(comm)
-    implicit none
-    real(kdouble) :: monolis_get_time_sync, t1
-    integer(kint) :: mycomm
-    integer(kint), optional :: comm
-
-#ifdef WITH_MPI
-    if(.not. present(comm))then
-      mycomm = monolis_global_comm()
-    endif
-
-    call monolis_barrier_(mycomm)
-    monolis_get_time_sync = MPI_Wtime()
-#else
-    call cpu_time(t1)
-    monolis_get_time_sync = t1
-#endif
-  end function monolis_get_time_sync
-
-  function monolis_get_input_filename(fname_in, fname_dir)
-    implicit none
-    integer(kint) :: comm_size, myrank
-    character(*) :: fname_in
-    character :: cnum*6, output_dir*100
-    character(monolis_charlen) :: monolis_get_input_filename
-    character(*), optional :: fname_dir
-
-    comm_size = monolis_global_commsize()
-    myrank = monolis_global_myrank()
-    if(comm_size > 1)then
-      output_dir = "parted.0/"
-      if(present(fname_dir)) output_dir = trim(fname_dir)//"/parted.0/"
-      write(cnum,"(i0)") myrank
-      monolis_get_input_filename = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
-    else
-      monolis_get_input_filename = trim(fname_in)
-      if(present(fname_dir)) monolis_get_input_filename = trim(fname_dir)//"/"//trim(fname_in)
-    endif
-  end function monolis_get_input_filename
 
   function monolis_get_penalty_value(monoMAT)
     implicit none
@@ -182,20 +126,19 @@ contains
     monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
-  subroutine monolis_get_internal_elem_1d_bool(monolis, nelem, list)
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nelem, i
-    logical :: list(:)
-
-    if(monolis_global_commsize() == 1)then
-      list = .true.
-    else
-      list = .false.
-      do i = 1, monolis%COM%internal_nelem
-        list(i) = .true.
-      enddo
-    endif
-  end subroutine monolis_get_internal_elem_1d_bool
+  !subroutine monolis_get_internal_elem_1d_bool(monolis, nelem, list)
+  !  implicit none
+  !  type(monolis_structure) :: monolis
+  !  integer(kint) :: nelem, i
+  !  logical :: list(:)
+  !  if(monolis_global_commsize() == 1)then
+  !    list = .true.
+  !  else
+  !    list = .false.
+  !    do i = 1, monolis%COM%internal_nelem
+  !      list(i) = .true.
+  !    enddo
+  !  endif
+  !end subroutine monolis_get_internal_elem_1d_bool
 
 end module mod_monolis_util

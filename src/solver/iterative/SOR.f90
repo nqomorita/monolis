@@ -1,18 +1,16 @@
 module mod_monolis_solver_SOR
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
-  use mod_monolis_linalg_util
   use mod_monolis_converge
 
   implicit none
   private
   public monolis_solver_SOR
 
-  real(kind=kdouble), allocatable :: ALU(:)
+  real(kdouble), allocatable :: ALU(:)
 
 contains
 
@@ -21,11 +19,11 @@ contains
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NDOF2, NNDOF
-    integer(kind=kint) :: iter
-    real(kind=kdouble) :: tol, resid, R2, B2
-    real(kind=kdouble), pointer :: B(:), X(:), ALU(:)
-    real(kind=kdouble), allocatable :: R(:)
+    integer(kint) :: N, NP, NDOF, NDOF2, NNDOF
+    integer(kint) :: iter
+    real(kdouble) :: tol, resid, R2, B2
+    real(kdouble), pointer :: B(:), X(:), ALU(:)
+    real(kdouble), allocatable :: R(:)
     logical :: is_converge
 
     ALU => monoMAT%monoTree%D
@@ -54,7 +52,7 @@ contains
       call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
       resid = dsqrt(R2/B2)
 
-      if(monoCOM%myrank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
+      if(monoCOM%my_rank == 0 .and. monoPRM%show_iterlog) write (*,"(i7, 1pe16.6)") iter, resid
       if(resid <= tol) exit
     enddo
 
@@ -67,10 +65,10 @@ contains
   subroutine monolis_solver_SOR_setup(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, ii, j, jS, jE, in, k, l, N, NP, NDOF, NDOF2
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
-    real(kind=kdouble), allocatable :: T(:), LU(:,:)
+    integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NP, NDOF, NDOF2
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble), pointer :: A(:), ALU(:)
+    real(kdouble), allocatable :: T(:), LU(:,:)
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -128,12 +126,12 @@ contains
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: X(:), B(:), XT(NDOF), YT(NDOF), DT(NDOF), WT(NDOF)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
-    real(kind=kdouble) :: t1, t2, omega
-    real(kind=kdouble) :: tspmv, tcomm
+    integer(kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: X(:), B(:), XT(NDOF), YT(NDOF), DT(NDOF), WT(NDOF)
+    real(kdouble), pointer :: A(:), ALU(:)
+    real(kdouble) :: t1, t2, omega
+    real(kdouble) :: tspmv, tcomm
 
     ALU => monoMAT%monoTree%D
     N     = monoMAT%N

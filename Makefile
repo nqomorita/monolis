@@ -53,8 +53,8 @@ ifdef FLAGS
 	endif
 endif
 
-INCLUDE  = -I /usr/include -I ./include $(METIS_INC) $(MUMPS_INC)
-LIBRARY  = $(METIS_LIB) $(MUMPS_LIB)
+INCLUDE  = -I /usr/include -I ./include $(METIS_INC) $(MUMPS_INC) -I /Users/morita/git/monolis_utils/include
+LIBRARY  = -L/Users/morita/git/monolis_utils/lib -lmonolis_utils $(METIS_LIB) $(MUMPS_LIB)
 BIN_DIR  = ./bin
 SRC_DIR  = ./src
 OBJ_DIR  = ./obj
@@ -109,16 +109,14 @@ DBC3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC3))
 DBC4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC4))
 TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
-SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_com.f90 def_mesh.f90 stdlib.f90 util.f90 util_time.f90 util_com.f90 util_prm.f90 util_debug.f90 hash.f90
+SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_mesh.f90 util.f90 util_prm.f90
 SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 matrix_copy.f90 reorder.f90 sparse_util.f90
-SRC_LIST_IO     = io_arg.f90 io.f90 io_mtx.f90
+SRC_LIST_IO     = io_arg.f90 io.f90
 SRC_LIST_GRAPH  = graph.f90 graph_comm.f90
-SRC_LIST_SHAPE  = shape_util.f90 shape_C2D3.f90 shape_C2D4.f90 shape_C2D6.f90 shape_C3D4.f90 shape_C3D8.f90 shape_C3D10.f90
-SRC_LIST_GEOM   = geom.f90 neighbor_search.f90
-SRC_LIST_ALGO   = linalg_com.f90 linalg_util.f90 linalg.f90 matvec.f90 matmat.f90 converge.f90
+SRC_LIST_ALGO   = linalg.f90 matvec.f90 matmat.f90 converge.f90
 SRC_LIST_FACT   = 11/fact_LU_11.f90 11/fact_MF_11.f90 33/fact_LU_33.f90 nn/fact_LU_nn.f90 fact_LU.f90 fact_MF.f90
 SRC_LIST_PREC   = 33/diag_33.f90 33/sor_33.f90 nn/diag_nn.f90 nn/sor_nn.f90 \
-diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 ROM.f90 MF.f90 precond.f90
+diag.f90 ilu.f90 sor.f90 Jacobi.f90 MUMPS.f90 MF.f90 precond.f90
 SRC_LIST_DIRECT = LU.f90
 SRC_LIST_ITER   = IR.f90 SOR.f90 CG.f90 GropCG.f90 PipeCR.f90 PipeCG.f90 BiCGSTAB.f90 \
 BiCGSTAB_noprec.f90 CABiCGSTAB_noprec.f90 PipeBiCGSTAB.f90 PipeBiCGSTAB_noprec.f90 GMRES.f90
@@ -139,8 +137,6 @@ $(addprefix iterative/, $(SRC_LIST_ITER))
 SRC_ALL_LIST    = \
 $(addprefix util/, $(SRC_LIST_UTIL)) \
 $(addprefix io/, $(SRC_LIST_IO)) \
-$(addprefix shape/, $(SRC_LIST_SHAPE)) \
-$(addprefix geom/, $(SRC_LIST_GEOM)) \
 $(addprefix linalg/, $(SRC_LIST_ALGO)) \
 $(addprefix graph/, $(SRC_LIST_GRAPH)) \
 $(addprefix matrix/, $(SRC_LIST_MATRIX)) \
@@ -230,11 +226,12 @@ OBJS_DBC4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC4:.f90=.o))
 SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
 OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
 
-all: $(LIBTARGET) $(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTCNTARGET) \
-	$(PARTDRTARGET) $(PARTDITARGET) $(PARTCRTARGET) $(PARTCITARGET) \
-	$(CONVMGTARGET) \
-	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
-	$(DBC1TARGET) $(DBC2TARGET) $(DBC3TARGET) $(DBC4TARGET) $(TESTTARGET)
+all: $(LIBTARGET)
+#	$(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTCNTARGET) \
+#	$(PARTDRTARGET) $(PARTDITARGET) $(PARTCRTARGET) $(PARTCITARGET) \
+#	$(CONVMGTARGET) \
+#	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
+#	$(DBC1TARGET) $(DBC2TARGET) $(DBC3TARGET) $(DBC4TARGET) $(TESTTARGET)
 
 lib: $(LIBTARGET)
 
