@@ -6,7 +6,7 @@ program main
   real(kdouble), allocatable :: coef(:)
   character :: filename*128
 
-  call monolis_set_debug(.true.)
+  call monolis_std_debug_log_flag(.true.)
 
   call monolis_get_mtx_arg(filename)
   write(*,*) "filename: ", trim(filename)

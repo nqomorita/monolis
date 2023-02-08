@@ -1,10 +1,11 @@
 program monolis_partitioner_nodal_graph
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_graph
   use mod_monolis_comm_overlap
   use mod_monolis_io
   use mod_monolis_io_arg
+  use mod_monolis_solver_io_arg
+  use mod_monolis_util
   implicit none
   type(monolis_graph) :: graph
   type(monolis_graph_format) :: graph_format
@@ -19,7 +20,7 @@ program monolis_partitioner_nodal_graph
 
   if(n_domain <= 1) stop
 
-  call monolis_input_graph(fname, graph_format)
+  !call monolis_input_graph(fname, graph_format)
 
   call monolis_get_graph_from_graph_format(graph_format, graph)
 
@@ -27,7 +28,7 @@ program monolis_partitioner_nodal_graph
 
   call monolis_get_overlap_commtable_graph(graph, comm, node_list, n_domain)
 
-  call monolis_output_parted_nodal_graph(fname, graph, graph_format, comm, node_list, n_domain)
+  !call monolis_output_parted_nodal_graph(fname, graph, graph_format, comm, node_list, n_domain)
 
   call monolis_part_finalize()
 

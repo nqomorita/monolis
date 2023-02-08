@@ -31,13 +31,13 @@ contains
     integer(kint) :: n_domain
     integer(kint) :: nid, in, j, k, avg
 
-    call monolis_debug_header("get_commnication_boundary_graph")
+    call monolis_std_debug_log_header("get_commnication_boundary_graph")
 
     allocate(node_list(n_domain))
 
     !> get node and nid
     avg = 0
-    call monolis_debug_header("get_nnode_and_nid_at_subdomain")
+    call monolis_std_debug_log_header("get_nnode_and_nid_at_subdomain")
     write(*,"(a)")"**     nid,    total, internal,     comm"
     do nid =  1, n_domain
       call get_nnode_and_nid_at_subdomain_graph(graph, node_list(nid), nid, avg)
@@ -65,19 +65,19 @@ contains
     integer(kint) :: n_domain
     integer(kint) :: nid, in, j, k, avg
 
-    call monolis_debug_header("get_commnication_boundary")
+    call monolis_std_debug_log_header("get_commnication_boundary")
 
     allocate(node_list(n_domain))
 
     !> get local elem and eid
-    call monolis_debug_header("get_nelem_and_eid_at_subdomain")
+    call monolis_std_debug_log_header("get_nelem_and_eid_at_subdomain")
     do nid =  1, n_domain
       call get_nelem_and_eid_at_subdomain(graph, node_list(nid), nid)
     enddo
 
     !> get node and nid
     avg = 0
-    call monolis_debug_header("get_nnode_and_nid_at_subdomain")
+    call monolis_std_debug_log_header("get_nnode_and_nid_at_subdomain")
     write(*,"(a)")"**     nid,    total, internal,     comm"
     do nid =  1, n_domain
       call get_nnode_and_nid_at_subdomain(graph, node_list(nid), nid, avg)
@@ -93,7 +93,7 @@ contains
     type(monolis_com), allocatable :: comm(:)
     integer(kint) :: nnode, nelem, n_domain
 
-    call monolis_debug_header("get_commnication_table")
+    call monolis_std_debug_log_header("get_commnication_table")
 
     allocate(comm(n_domain))
 

@@ -1,11 +1,12 @@
 program monolis_partitioner_nodal_graph
   use mod_monolis_prm
-  use mod_monolis_com
   use mod_monolis_graph
   use mod_monolis_comm_overlap
   use mod_monolis_io
   use mod_monolis_io_arg
   use mod_monolis_comm_util
+  use mod_monolis_solver_io_arg
+  use mod_monolis_util
   implicit none
   type(monolis_graph) :: graph
   type(monolis_graph_format) :: graph_format
@@ -20,15 +21,15 @@ program monolis_partitioner_nodal_graph
 
   if(n_domain <= 1) stop
 
-  call monolis_input_graph(fname, graph_format)
+  !call monolis_input_graph(fname, graph_format)
 
   call monolis_get_graph_from_graph_format(graph_format, graph)
 
   allocate(mesh(n_domain))
 
-  call monolis_par_input_node_id(n_domain, mesh)
+  !call monolis_par_input_node_id(n_domain, mesh)
 
-  call monolis_par_input_node_n_internal(n_domain, mesh)
+  !call monolis_par_input_node_n_internal(n_domain, mesh)
 
   allocate(node_list(n_domain))
 
@@ -38,7 +39,7 @@ program monolis_partitioner_nodal_graph
     call get_connectivity_at_subdomain(graph, mesh(nid), node_list(nid), nid, shift)
   enddo
 
-  call monolis_output_parted_connectivity_graph(fname, mesh, graph, graph_format, node_list, n_domain)
+  !call monolis_output_parted_connectivity_graph(fname, mesh, graph, graph_format, node_list, n_domain)
 
   call monolis_part_finalize()
 

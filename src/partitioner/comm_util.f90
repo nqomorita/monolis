@@ -19,7 +19,7 @@ contains
     integer(kint) :: i, j, in, id, maxid, minid, jS, jE, jn
     integer(kint), allocatable :: temp(:)
 
-    call monolis_debug_header("get_overlap_domain")
+    call monolis_std_debug_log_header("get_overlap_domain")
 
     nelem = graph%nelem
     allocate(graph%elem_domid(nelem), source = 0)
@@ -390,14 +390,14 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
 
     allocate(temp(n_recv), source = 0)
     temp = local_node%recv_item_domid
-    call monolis_qsort_int_with_perm(temp, 1, n_recv, local_node%recv_item_perm)
-    call monolis_qsort_int_with_perm(local_node%recv_item_domid, 1, n_recv, comm%recv_item)
+    call monolis_qsort_I_2d(temp, local_node%recv_item_perm, 1, n_recv)
+    call monolis_qsort_I_2d(local_node%recv_item_domid, comm%recv_item, 1, n_recv)
 
     do i = 1, comm%recv_n_neib
       jS = comm%recv_index(i-1) + 1
       jE = comm%recv_index(i)
       n_recv = jE - jS + 1
-      call monolis_qsort_int_with_perm(local_node%recv_item_perm(jS:jE), 1, n_recv, comm%recv_item(jS:jE))
+      call monolis_qsort_I_2d(local_node%recv_item_perm(jS:jE), comm%recv_item(jS:jE), 1, n_recv)
     enddo
   end subroutine reorder_recv_node
 
@@ -460,8 +460,8 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
     allocate(temp(nnode), source = 0)
     temp = domid
 
-    call monolis_reallocate_integer(send_list%domid    , send_list%nnode, nnode, temp)
-    call monolis_reallocate_integer(send_list%local_nid, send_list%nnode, nnode, recv_item_perm)
+    !call monolis_realloc_I_1d(send_list%domid    , send_list%nnode, nnode, temp)
+    !call monolis_realloc_I_1d(send_list%local_nid, send_list%nnode, nnode, recv_item_perm)
     send_list%nnode = send_list%nnode + nnode
   end subroutine append_send_node
 
@@ -523,13 +523,13 @@ write(*,"(4i10)") nid, local_node%nnode, local_node%nnode_in, local_node%nnode_o
       return
     endif
 
-    call monolis_qsort_int_with_perm(send%domid, 1, n_send, comm%send_item)
+    call monolis_qsort_I_2d(send%domid, comm%send_item, 1, n_send)
 
     do i = 1, comm%send_n_neib
       jS = comm%send_index(i-1) + 1
       jE = comm%send_index(i)
       n_send = jE - jS + 1
-      call monolis_qsort_int(comm%send_item(jS:jE), 1, n_send)
+      call monolis_qsort_I_1d(comm%send_item(jS:jE), 1, n_send)
     enddo
   end subroutine reorder_send_node
 end module mod_monolis_comm_util

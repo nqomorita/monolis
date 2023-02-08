@@ -72,7 +72,7 @@ contains
     do i = 1, N
       internal_node_id(i) = nid(i)
     enddo
-    call monolis_qsort_int(internal_node_id, 1, N)
+    call monolis_qsort_I_1d(internal_node_id, 1, N)
 
     allocate(outer_dom_id_all(n_outer), source = 0)
     outer_dom_id_all(:) = commsize + 1
@@ -132,7 +132,7 @@ contains
       local_nid(i) = i
     enddo
 
-    call monolis_qsort_int_with_perm(temp, 1, NP, local_nid)
+    call monolis_qsort_I_1d_with_perm(temp, 1, NP, local_nid)
 
     do i = 1, n_neib_recv
       recv_rank = neib_id(i)
@@ -339,7 +339,7 @@ contains
     do i = 1, N
       internal_node_id(i) = nid(i)
     enddo
-    call monolis_qsort_int(internal_node_id, 1, N)
+    call monolis_qsort_I_1d(internal_node_id, 1, N)
 
     allocate(outer_dom_id_all(n_outer), source = 0)
     outer_dom_id_all(:) = commsize + 1
@@ -544,7 +544,7 @@ contains
     do i = 1, N
       internal_node_id(i) = nid(i)
     enddo
-    call monolis_qsort_int(internal_node_id, 1, N)
+    call monolis_qsort_I_1d(internal_node_id, 1, N)
 
     allocate(outer_dom_id_all(n_outer), source = 0)
     outer_dom_id_all(:) = commsize + 1
@@ -604,7 +604,7 @@ contains
       local_nid(i) = i
     enddo
 
-    call monolis_qsort_int_with_perm(temp, 1, NP, local_nid)
+    call monolis_qsort_I_1d_with_perm(temp, 1, NP, local_nid)
 
     do i = 1, n_neib_recv
       recv_rank = neib_id(i)

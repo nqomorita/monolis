@@ -16,7 +16,7 @@ contains
     real(kdouble) :: tdotp, tcomm
     logical :: is_converge
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_set_converge")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_set_converge")
 
     is_converge = .false.
     call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)

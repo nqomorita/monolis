@@ -5,6 +5,9 @@ program monolis_partitioner
   use mod_monolis_comm_overlap
   use mod_monolis_io_arg
   use mod_monolis_io
+  use mod_monolis_solver_io
+  use mod_monolis_solver_io_arg
+  use mod_monolis_util
   implicit none
   type(monolis_mesh) :: mesh
   type(monolis_graph) :: graph
@@ -19,7 +22,7 @@ program monolis_partitioner
 
   if(n_domain <= 1) stop
 
-  call monolis_input_mesh(mesh, is_format_id)
+  call monolis_input_mesh(mesh)
 
   call monolis_part_graph(mesh, graph, n_domain)
 

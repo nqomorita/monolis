@@ -14,7 +14,7 @@ contains
     real(kdouble) :: tspmv, tcomm
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_matmat")
+    call monolis_std_debug_log_header("monolis_matmat")
 #endif
     t1 = monolis_get_time()
 

@@ -13,9 +13,9 @@ contains
     character :: argc1*128, argc2*128
     logical :: is_overlap, is_format_id
 
-    call monolis_debug_header("monolis_get_part_arg")
+    call monolis_std_debug_log_header("monolis_get_part_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 1)then
@@ -55,7 +55,7 @@ contains
       endif
     enddo
 
-    call monolis_debug_int("n_domain", n_domain)
+    call monolis_std_debug_log_I1("n_domain", n_domain)
   end subroutine monolis_get_part_arg
 
   subroutine monolis_get_nodal_graph_part_arg(fname, n_domain)
@@ -63,9 +63,9 @@ contains
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128, fname*100
 
-    call monolis_debug_header("monolis_get_nodal_graph_part_arg")
+    call monolis_std_debug_log_header("monolis_get_nodal_graph_part_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 1)then
@@ -98,7 +98,7 @@ contains
       endif
     enddo
 
-    call monolis_debug_int("n_domain", n_domain)
+    call monolis_std_debug_log_I1("n_domain", n_domain)
   end subroutine monolis_get_nodal_graph_part_arg
 
   subroutine monolis_get_connectivity_part_arg(fname, n_domain)
@@ -106,9 +106,9 @@ contains
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128, fname*100
 
-    call monolis_debug_header("monolis_get_connectivity_part_arg")
+    call monolis_std_debug_log_header("monolis_get_connectivity_part_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 1)then
@@ -141,7 +141,7 @@ contains
       endif
     enddo
 
-    call monolis_debug_int("n_domain", n_domain)
+    call monolis_std_debug_log_I1("n_domain", n_domain)
   end subroutine monolis_get_connectivity_part_arg
 
   subroutine monolis_get_part_bc_arg(n_domain, fname)
@@ -149,9 +149,9 @@ contains
     integer(kint) :: i, count, n, n_domain
     character :: argc1*128, argc2*128, fname*100
 
-    call monolis_debug_header("monolis_get_part_arg")
+    call monolis_std_debug_log_header("monolis_get_part_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 1)then
@@ -183,7 +183,7 @@ contains
       endif
     enddo
 
-    call monolis_debug_int("n_domain", n_domain)
+    call monolis_std_debug_log_I1("n_domain", n_domain)
   end subroutine monolis_get_part_bc_arg
 
   subroutine monolis_get_dbc_all_arg(n_block, val, fnname, fename, foname)
@@ -192,9 +192,9 @@ contains
     real(kdouble), allocatable :: val(:)
     character :: argc1*128, argc2*128, fnname*100, fename*100, foname*100
 
-    call monolis_debug_header("monolis_get_dbc_all_arg")
+    call monolis_std_debug_log_header("monolis_get_dbc_all_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 0 .or. count == 1)then
@@ -250,9 +250,9 @@ contains
     real(kdouble), allocatable :: val(:)
     character :: argc1*128, argc2*128, fnname*100, fename*100, foname*100
 
-    call monolis_debug_header("monolis_get_extract_all_arg")
+    call monolis_std_debug_log_header("monolis_get_extract_all_arg")
 
-    call monolis_set_debug(.true.)
+    call monolis_std_debug_log_flag(.true.)
 
     count = iargc()
     if(count == 1)then

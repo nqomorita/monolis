@@ -102,7 +102,7 @@ contains
       do j = jS+1, jE
         monolis%MAT%item(j) = item(j-i)
       enddo
-      call monolis_qsort_int(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
+      call monolis_qsort_I_1d(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
     enddo
 
     allocate(monolis%MAT%indexR(0:nnode), source = 0)
@@ -181,7 +181,7 @@ contains
 
         kS = monolis%MAT%index(ncol-1) + 1
         kE = monolis%MAT%index(ncol)
-        call monolis_qsort_int(monolis%MAT%item(kS:kE), 1, kE-kS+1)
+        call monolis_qsort_I_1d(monolis%MAT%item(kS:kE), 1, kE-kS+1)
       enddo
     enddo
 
@@ -317,13 +317,13 @@ contains
     do i = 1, n1
       eperm1(i) = i
     enddo
-    call monolis_qsort_int_with_perm(e1, 1, n1, eperm1)
+    call monolis_qsort_I_2d(e1, eperm1, 1, n1)
 
     e2 = e2t
     do i = 1, n2
       eperm2(i) = i
     enddo
-    call monolis_qsort_int_with_perm(e2, 1, n2, eperm2)
+    call monolis_qsort_I_2d(e2, eperm2, 1, n2)
 
     temp = 0.0d0
     do i = 1, n2
@@ -583,7 +583,7 @@ contains
     do i = 1, NR
       jS = indexR(i-1) + 1
       jE = indexR(i)
-      call monolis_qsort_int(itemR(jS:jE), 1, jE-jS+1)
+      call monolis_qsort_I_1d(itemR(jS:jE), 1, jE-jS+1)
     enddo
     deallocate(temp)
   end subroutine monolis_get_CRR_format

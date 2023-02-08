@@ -16,7 +16,7 @@ contains
     integer(c_int), pointer :: index(:), item(:)
     integer(kint) :: i, n_domain
 
-    call monolis_debug_header("monolis_part_graph")
+    call monolis_std_debug_log_header("monolis_part_graph")
 
     allocate(graph%node_domid_raw(mesh%nnode), source = 1)
     allocate(part_id(mesh%nnode), source = 0)
@@ -48,7 +48,7 @@ contains
     integer(c_int), pointer :: index(:), item(:)
     integer(kint) :: i, n_domain
 
-    call monolis_debug_header("monolis_part_nodal_graph")
+    call monolis_std_debug_log_header("monolis_part_nodal_graph")
 
     allocate(graph%node_domid_raw(graph%N), source = 1)
     allocate(part_id(graph%N), source = 0)
@@ -136,7 +136,7 @@ contains
     integer(c_int64_t), pointer :: index8(:), item8(:)
 #endif
 
-    call monolis_debug_header("monolis_convert_connectivity_to_nodal")
+    call monolis_std_debug_log_header("monolis_convert_connectivity_to_nodal")
 
     numflag = 0
 
@@ -183,7 +183,7 @@ contains
     integer(c_int), pointer :: edge_wgt(:) => null()
     integer(kint) :: n_domain, nnode
 
-    call monolis_debug_header("monolis_get_partitioned_graph")
+    call monolis_std_debug_log_header("monolis_get_partitioned_graph")
     call monolis_get_mesh_part_kway(nnode, index, item, n_domain, node_wgt, edge_wgt, part_id)
   end subroutine monolis_get_partitioned_graph
 
@@ -196,7 +196,7 @@ contains
     integer(c_int), pointer :: edge_wgt(:) => null()
     integer(kint) :: n_domain, nnode
 
-    call monolis_debug_header("monolis_get_partitioned_graph_with_node_weight")
+    call monolis_std_debug_log_header("monolis_get_partitioned_graph_with_node_weight")
     allocate(node_wgt(nnode), source = 0)
     node_wgt = wgt
 
@@ -227,7 +227,7 @@ contains
     integer(c_int64_t), pointer :: index8(:), item8(:)
 #endif
 
-    call monolis_debug_header("monolis_get_mesh_part_kway")
+    call monolis_std_debug_log_header("monolis_get_mesh_part_kway")
 
     if(npart /= 1)then
       ncon = 1

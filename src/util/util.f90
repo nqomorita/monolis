@@ -41,7 +41,7 @@ contains
     call monolis_prm_initialize(monolis%PRM, fname_in)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
-    call monolis_com_input_comm_table(monolis%COM, fname_in)
+    !call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize
 
   subroutine monolis_initialize_entire(monolis, fname_in)
@@ -52,7 +52,7 @@ contains
     call monolis_prm_initialize(monolis%PRM, fname_in)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
-    call monolis_com_input_comm_table(monolis%COM, fname_in)
+    !call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize_entire
 
   subroutine monolis_finalize(monolis)

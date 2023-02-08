@@ -2,6 +2,8 @@ program monolis_partitioner_distval
   use mod_monolis_mesh
   use mod_monolis_io
   use mod_monolis_io_arg
+  use mod_monolis_solver_io_arg
+  use mod_monolis_util
   implicit none
   integer(kint) :: n_domain, nelem, ndof
   type(monolis_mesh), allocatable :: mesh(:)
@@ -14,13 +16,13 @@ program monolis_partitioner_distval
 
   if(n_domain <= 1) stop
 
-  call monolis_input_mesh_distval_r(fname, nelem, ndof, val, label)
+  !call monolis_input_mesh_distval_r(fname, nelem, ndof, val, label)
 
   allocate(mesh(n_domain))
 
-  call monolis_par_input_connectivity_id(n_domain, mesh)
+  !call monolis_par_input_connectivity_id(n_domain, mesh)
 
-  call monolis_par_output_connectivity_val_r(n_domain, mesh, fname, ndof, val, label)
+  !call monolis_par_output_connectivity_val_r(n_domain, mesh, fname, ndof, val, label)
 
   call monolis_global_finalize()
 

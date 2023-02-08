@@ -136,7 +136,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver v0.0.0")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_solver v0.0.0")
 
     if(monoPRM%show_summary .and. monoCOM%my_rank == 0) write(*,"(a)")" ** monolis solver: "// &
     & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))
@@ -281,7 +281,7 @@ contains
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
     logical :: is_output
 
-    call monolis_debug_header("monolis_timer_finalize")
+    call monolis_std_debug_log_header("monolis_timer_finalize")
 
     call monolis_barrier_(monoCOM%comm)
     t1 = monolis_get_time()

@@ -2,6 +2,8 @@ program monolis_partitioner_bc
   use mod_monolis_mesh
   use mod_monolis_io
   use mod_monolis_io_arg
+  use mod_monolis_solver_io_arg
+  use mod_monolis_util
   implicit none
   integer(kint) :: n_domain, ncond, ndof
   type(monolis_mesh), allocatable :: mesh(:)
@@ -15,13 +17,13 @@ program monolis_partitioner_bc
 
   if(n_domain <= 1) stop
 
-  call monolis_input_condition(fname, ncond, ndof, icond, cond)
+  !call monolis_input_condition(fname, ncond, ndof, icond, cond)
 
   allocate(mesh(n_domain))
 
-  call monolis_par_input_node_id(n_domain, mesh)
+  !call monolis_par_input_node_id(n_domain, mesh)
 
-  call monolis_par_output_condition(n_domain, mesh, fname, ncond, ndof, icond, cond)
+  !call monolis_par_output_condition(n_domain, mesh, fname, ncond, ndof, icond, cond)
 
   call monolis_global_finalize()
 

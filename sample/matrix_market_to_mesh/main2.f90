@@ -8,7 +8,7 @@ program main
   real(kdouble), allocatable :: node(:,:), coef(:), B(:), X(:)
   character :: fname*128
 
-  call monolis_set_debug(.true.)
+  call monolis_std_debug_log_flag(.true.)
 
   call monolis_global_initialize()
 

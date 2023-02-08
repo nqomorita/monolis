@@ -24,7 +24,7 @@ contains
     integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_fw")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_scaling_fw")
     if(.not. monoPRM%is_scaling) return
     t1 = monolis_get_time()
 
@@ -99,7 +99,7 @@ contains
     integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_scaling_bk")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_scaling_bk")
     if(.not. monoPRM%is_scaling) return
     t1 = monolis_get_time()
 

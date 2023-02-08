@@ -20,7 +20,7 @@ contains
     type(monolis_mat) :: monoMAT
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_setup")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_precond_setup")
     t1 = monolis_get_time()
 
     if(monoPRM%precond == monolis_prec_DIAG)then
@@ -54,7 +54,7 @@ contains
     real(kdouble) :: t1, t2
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_precond_apply")
+    call monolis_std_debug_log_header("monolis_precond_apply")
 #endif
     t1 = monolis_get_time()
 
@@ -91,7 +91,7 @@ contains
     type(monolis_mat) :: monoMAT
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_precond_clear")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_precond_clear")
     t1 = monolis_get_time()
 
     if(monoPRM%precond == monolis_prec_DIAG)then

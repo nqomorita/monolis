@@ -7,59 +7,48 @@ module mod_monolis_solver_io
 
 contains
 
-!  subroutine monolis_input_mesh(mesh, is_format_id)
-!    implicit none
-!    type(monolis_mesh) :: mesh
-!    integer(kint) :: i, shift
-!    logical :: is_format_id
-!    character :: fname*100
-!
-!    if(is_format_id)then
-!      fname = "node.dat"
-!      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node, mesh%nid)
-!
-!      fname = "elem.dat"
-!      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
-!    else
-!      fname = "node.dat"
-!      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
-!
-!      fname = "elem.dat"
-!      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
-!
-!      shift = 0
-!      if(minval(mesh%elem) == 0) shift = -1 !> for C binding
-!
-!      allocate(mesh%nid(mesh%nnode), source = 0)
-!      do i = 1, mesh%nnode
-!        mesh%nid(i) = i + shift
-!      enddo
-!      allocate(mesh%eid(mesh%nelem), source = 0)
-!      do i = 1, mesh%nelem
-!        mesh%eid(i) = i + shift
-!      enddo
-!    endif
-!
-!    call monolis_global_to_local_elem(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
-!  end subroutine monolis_input_mesh
-!
-!  subroutine monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
-!    implicit none
-!    type(monolis_mesh) :: mesh
-!    type(monolis_graph) :: graph
-!    type(monolis_com) :: comm(:)
-!    type(monolis_node_list) :: node_list(:)
-!    integer(kint) :: i, n_domain, shift
-!    character :: cnum*5, output_dir*100, fname*100
-!
-!    call monolis_debug_header("monolis_output_mesh")
-!
-!    output_dir = "parted.0/"
-!    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
-!
-!    shift = 0
-!    if(minval(mesh%nid) == 0) shift = -1 !> for C binding
-!
+  subroutine monolis_input_mesh(mesh)
+    implicit none
+    type(monolis_mesh) :: mesh
+    integer(kint) :: i, shift
+    character :: fname*100
+
+    fname = "node.dat"
+    call monolis_input_node(fname, mesh%nnode, mesh%node)
+
+    fname = "elem.dat"
+    call monolis_input_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+
+    shift = 0
+    if(minval(mesh%elem) == 0) shift = -1 !> for C binding
+
+    allocate(mesh%nid(mesh%nnode), source = 0)
+    do i = 1, mesh%nnode
+      mesh%nid(i) = i + shift
+    enddo
+    allocate(mesh%eid(mesh%nelem), source = 0)
+    do i = 1, mesh%nelem
+      mesh%eid(i) = i + shift
+    enddo
+  end subroutine monolis_input_mesh
+
+  subroutine monolis_output_mesh(mesh, graph, comm, node_list, n_domain)
+    implicit none
+    type(monolis_mesh) :: mesh
+    type(monolis_graph) :: graph
+    type(monolis_com) :: comm(:)
+    type(monolis_node_list) :: node_list(:)
+    integer(kint) :: i, n_domain, shift
+    character :: cnum*5, output_dir*100, fname*100
+
+    call monolis_std_debug_log_header("monolis_output_mesh")
+
+    output_dir = "parted.0/"
+    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
+
+    shift = 0
+    if(minval(mesh%nid) == 0) shift = -1 !> for C binding
+
 !    do i = 1, n_domain
 !      write(cnum,"(i0)") i-1
 !      fname = trim(output_dir)//"node.dat."//trim(cnum)
@@ -90,8 +79,8 @@ contains
 !      fname = trim(output_dir)//"connectivity.n_internal."//trim(cnum)
 !      call monolis_output_mesh_n_internal(fname, node_list(i)%nelem_in)
 !    enddo
-!  end subroutine monolis_output_mesh
-!
+  end subroutine monolis_output_mesh
+
 !  subroutine monolis_output_parted_nodal_graph(fmain, graph, graph_format, comm, node_list, n_domain)
 !    implicit none
 !    type(monolis_graph) :: graph
@@ -101,7 +90,7 @@ contains
 !    integer(kint) :: i, n_domain, shift
 !    character :: cnum*5, output_dir*100, fname*100, fmain*100
 !
-!    call monolis_debug_header("monolis_output_parted_nodal_graph")
+!    call monolis_std_debug_log_header("monolis_output_parted_nodal_graph")
 !
 !    output_dir = "parted.0/"
 !    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
@@ -148,7 +137,7 @@ contains
 !    integer(kint), allocatable :: perm(:)
 !    character :: cnum*5, output_dir*100, fname*100, fmain*100
 !
-!    call monolis_debug_header("monolis_output_parted_connectivity_graph")
+!    call monolis_std_debug_log_header("monolis_output_parted_connectivity_graph")
 !
 !    output_dir = "parted.0/"
 !    call system('if [ ! -d parted.0 ]; then (echo "** create parted.0"; mkdir -p parted.0); fi')
@@ -212,52 +201,52 @@ contains
 !      deallocate(perm)
 !    enddo
 !  end subroutine monolis_output_parted_connectivity_graph
-!
-!  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid, elemid)
-!    implicit none
-!    integer(kint) :: i, j
-!    integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:), elemid(:)
-!    real(kdouble) :: node(:,:)
-!    character :: etype*6, output_dir*100
-!
-!    call monolis_debug_header("monolis_visual_parted_mesh")
-!
-!    output_dir = "visual/"
-!    call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
-!
-!    open(20, file = trim(output_dir)//"mesh.parted.inp", status = "replace")
-!      write(20,"(5i12)") nnode, nelem, 1, 1, 0
-!      do i = 1, nnode
-!        write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
-!      enddo
-!
-!      if(nbase == 3) etype = " tri  "
-!      if(nbase == 4) etype = " tet  "
-!      if(nbase == 8) etype = " hex  "
-!      if(nbase ==10) etype = " tet2 "
-!
-!      do i = 1, nelem
-!        write(20,"(i0,i4,a,$)") i, 0, etype
-!        do j = 1, nbase
-!          write(20,"(i12,$)") elem(j,i)
-!        enddo
-!        write(20,*)""
-!      enddo
-!
-!      write(20,"(a)")"1 1"
-!      write(20,"(a)")"node_domid, unknown"
-!      do i = 1, nnode
-!        write(20,"(i0,x,i0,x,i0,x,i0)") i, nodeid(i)!, bp_graph%elem_domid(i), in
-!      enddo
-!
-!      write(20,"(a)")"1 1"
-!      write(20,"(a)")"elem_domid, unknown"
-!      do i = 1, nelem
-!        write(20,"(i0,x,i0,x,i0,x,i0)") i, elemid(i)!, bp_graph%elem_domid(i), in
-!      enddo
-!    close(20)
-!  end subroutine monolis_visual_parted_mesh
-!
+
+  subroutine monolis_visual_parted_mesh(nnode, node, nelem, nbase, elem, nodeid, elemid)
+    implicit none
+    integer(kint) :: i, j
+    integer(kint) :: nnode, nelem, nbase, elem(:,:), nodeid(:), elemid(:)
+    real(kdouble) :: node(:,:)
+    character :: etype*6, output_dir*100
+
+    call monolis_std_debug_log_header("monolis_visual_parted_mesh")
+
+    output_dir = "visual/"
+    call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
+
+    open(20, file = trim(output_dir)//"mesh.parted.inp", status = "replace")
+      write(20,"(5i12)") nnode, nelem, 1, 1, 0
+      do i = 1, nnode
+        write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
+      enddo
+
+      if(nbase == 3) etype = " tri  "
+      if(nbase == 4) etype = " tet  "
+      if(nbase == 8) etype = " hex  "
+      if(nbase ==10) etype = " tet2 "
+
+      do i = 1, nelem
+        write(20,"(i0,i4,a,$)") i, 0, etype
+        do j = 1, nbase
+          write(20,"(i12,$)") elem(j,i)
+        enddo
+        write(20,*)""
+      enddo
+
+      write(20,"(a)")"1 1"
+      write(20,"(a)")"node_domid, unknown"
+      do i = 1, nnode
+        write(20,"(i0,x,i0,x,i0,x,i0)") i, nodeid(i)!, bp_graph%elem_domid(i), in
+      enddo
+
+      write(20,"(a)")"1 1"
+      write(20,"(a)")"elem_domid, unknown"
+      do i = 1, nelem
+        write(20,"(i0,x,i0,x,i0,x,i0)") i, elemid(i)!, bp_graph%elem_domid(i), in
+      enddo
+    close(20)
+  end subroutine monolis_visual_parted_mesh
+
 !  subroutine monolis_output_graph_format(fname, nnode, nid, ebase_func, connectivity, shift)
 !    implicit none
 !    integer(kint) :: nnode

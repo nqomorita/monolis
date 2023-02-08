@@ -15,7 +15,7 @@ program gedatsu_conveter_mesh2graph
   call monolis_global_initialize()
 
   is_format_id = .false.
-  call monolis_input_mesh(mesh, is_format_id)
+  !call monolis_input_mesh(mesh, is_format_id)
 
   call monolis_convert_mesh_to_connectivity &
    & (mesh%nelem, mesh%nbase_func, mesh%elem, graph%ebase_func, graph%connectivity)

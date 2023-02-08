@@ -19,7 +19,7 @@ contains
     real(kdouble) :: X(:), Y(:)
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_vec_copy_R")
+    call monolis_std_debug_log_header("monolis_vec_copy_R")
 #endif
 
 !$omp parallel default(none) &
@@ -41,7 +41,7 @@ contains
     real(kdouble) :: X(:), Y(:), Z(:)
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_vec_AXPY")
+    call monolis_std_debug_log_header("monolis_vec_AXPY")
 #endif
 
 !$omp parallel default(none) &
@@ -65,7 +65,7 @@ contains
     real(kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_inner_product_I")
+    call monolis_std_debug_log_header("monolis_inner_product_I")
 #endif
 
     t1 = monolis_get_time()
@@ -98,7 +98,7 @@ contains
     real(kdouble), optional :: tdotp, tcomm
 
 #ifdef DEBUG
-    call monolis_debug_header("monolis_inner_product_R")
+    call monolis_std_debug_log_header("monolis_inner_product_R")
 #endif
 
     t1 = monolis_get_time()

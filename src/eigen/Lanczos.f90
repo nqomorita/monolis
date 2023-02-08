@@ -46,7 +46,7 @@ contains
     logical :: is_converge
     logical :: is_bc(:)
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_inverted_standard_lanczos_")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_eigen_inverted_standard_lanczos_")
 
     call monolis_set_initial_comm(monoCOM, monoMAT)
 
@@ -142,7 +142,7 @@ endif
 
     call monolis_set_initial_comm(monoCOM, monoMAT)
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_eigen_standard_lanczos_")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_eigen_standard_lanczos_")
 
     N     = monoMAT%N
     NP    = monoMAT%NP

@@ -23,7 +23,7 @@ contains
     integer(kint), pointer ::  perm(:), iperm(:)
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_fw")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_reorder_matrix_fw")
     t1 = monolis_get_time()
 
     if(monoPRM%is_reordering)then
@@ -60,7 +60,7 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     real(kdouble) :: t1, t2
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_bk")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_reorder_matrix_bk")
     t1 = monolis_get_time()
 
     if(monoPRM%is_reordering)then

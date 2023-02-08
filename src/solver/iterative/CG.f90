@@ -23,7 +23,7 @@ contains
     real(kdouble), pointer :: B(:), X(:)
     logical :: is_converge
 
-    if(monoPRM%is_debug) call monolis_debug_header("monolis_solver_CG")
+    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_solver_CG")
 
     N     = monoMAT%N
     NP    = monoMAT%NP
