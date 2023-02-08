@@ -62,16 +62,6 @@ LIB_DIR  = ./lib
 LIB_LIST = libmonolis.a
 MONOLIS_LIB = -L$(LIB_DIR) -lmonolis
 
-BIN_REF1 = monolis_h_refiner_hex
-BIN_REF2 = monolis_h_refiner_tet
-BIN_REF3 = monolis_p_refiner_hex
-BIN_REF4 = monolis_p_refiner_tet
-BIN_DBC1 = monolis_dbc_all_surf_tet
-BIN_DBC2 = monolis_dbc_all_surf_hex
-BIN_DBC3 = monolis_extract_all_surf_tet
-BIN_DBC4 = monolis_extract_all_surf_hex
-BIN_TEST = monolis_test
-
 BIN_PART   = gedatsu_simple_mesh_partitioner
 BIN_PARTBC = gedatsu_bc_partitioner
 BIN_PARTNG = gedatsu_graph_partitioner
@@ -99,15 +89,6 @@ PARTDITARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTDI))
 PARTCRTARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTCR))
 PARTCITARGET = $(addprefix $(BIN_DIR)/, $(BIN_PARTCI))
 CONVMGTARGET = $(addprefix $(BIN_DIR)/, $(BIN_CONVMG))
-REF1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF1))
-REF2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF2))
-REF3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF3))
-REF4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_REF4))
-DBC1TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC1))
-DBC2TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC2))
-DBC3TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC3))
-DBC4TARGET = $(addprefix $(BIN_DIR)/, $(BIN_DBC4))
-TESTTARGET = $(addprefix $(BIN_DIR)/, $(BIN_TEST))
 
 SRC_LIST_UTIL   = def_prm.f90 def_mat.f90 def_mesh.f90 util.f90 util_prm.f90
 SRC_LIST_MATRIX = fillin.f90 scaling.f90 restruct.f90 matrix_copy.f90 reorder.f90 sparse_util.f90
@@ -124,8 +105,6 @@ SRC_LIST_SOLVE  = monolis_solve.f90
 SRC_LIST_MAIN   = monolis.f90
 SRC_LIST_EIGEN  = Lanczos_util.f90 Lanczos.f90 LOBPCG.f90
 SRC_LIST_PART   = comm_util.f90 comm_overlap.f90
-SRC_LIST_REFN   = p_refiner_util.f90
-SRC_LIST_EXTR   = dbc_all_util.f90
 SRC_LIST_WRAP   = monolis_wrapper_c.c monolis_wrapper.f90
 
 SRC_SOLVER_LIST = \
@@ -142,8 +121,6 @@ $(addprefix graph/, $(SRC_LIST_GRAPH)) \
 $(addprefix matrix/, $(SRC_LIST_MATRIX)) \
 $(addprefix solver/, $(SRC_SOLVER_LIST)) \
 $(addprefix partitioner/, $(SRC_LIST_PART)) \
-$(addprefix refiner/, $(SRC_LIST_REFN)) \
-$(addprefix extractor/, $(SRC_LIST_EXTR)) \
 $(addprefix main/, $(SRC_LIST_SOLVE)) \
 $(addprefix eigen/, $(SRC_LIST_EIGEN)) \
 $(addprefix wrapper/, $(SRC_LIST_WRAP)) \
@@ -158,15 +135,6 @@ SRC_PARTDI      = partitioner/partitioner_nodal_val_i.f90
 SRC_PARTCR      = partitioner/partitioner_connectivity_val_r.f90
 SRC_PARTCI      = partitioner/partitioner_connectivity_val_i.f90
 SRC_CONVMG      = converter/converter_simple_mesh2graph.f90
-SRC_REF1        = refiner/h_refiner_hex.f90
-SRC_REF2        = refiner/h_refiner_tet.f90
-SRC_REF3        = refiner/p_refiner_hex.f90
-SRC_REF4        = refiner/p_refiner_tet.f90
-SRC_DBC1        = extractor/dbc_all_tet.f90
-SRC_DBC2        = extractor/dbc_all_hex.f90
-SRC_DBC3        = extractor/extract_all_tet.f90
-SRC_DBC4        = extractor/extract_all_hex.f90
-SRC_TEST        = util/test.f90
 
 SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL_LIST))
 OBJSt = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
@@ -199,39 +167,10 @@ OBJS_PARTCI = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_PARTCI:.f90=.o))
 SOURCES_CONVMG = $(addprefix $(SRC_DIR)/, $(SRC_CONVMG))
 OBJS_CONVMG = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_CONVMG:.f90=.o))
 
-SOURCES_REF1 = $(addprefix $(SRC_DIR)/, $(SRC_REF1))
-OBJS_REF1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF1:.f90=.o))
-
-SOURCES_REF2 = $(addprefix $(SRC_DIR)/, $(SRC_REF2))
-OBJS_REF2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF2:.f90=.o))
-
-SOURCES_REF3 = $(addprefix $(SRC_DIR)/, $(SRC_REF3))
-OBJS_REF3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF3:.f90=.o))
-
-SOURCES_REF4 = $(addprefix $(SRC_DIR)/, $(SRC_REF4))
-OBJS_REF4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_REF4:.f90=.o))
-
-SOURCES_DBC1 = $(addprefix $(SRC_DIR)/, $(SRC_DBC1))
-OBJS_DBC1 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC1:.f90=.o))
-
-SOURCES_DBC2 = $(addprefix $(SRC_DIR)/, $(SRC_DBC2))
-OBJS_DBC2 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC2:.f90=.o))
-
-SOURCES_DBC3 = $(addprefix $(SRC_DIR)/, $(SRC_DBC3))
-OBJS_DBC3 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC3:.f90=.o))
-
-SOURCES_DBC4 = $(addprefix $(SRC_DIR)/, $(SRC_DBC4))
-OBJS_DBC4 = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_DBC4:.f90=.o))
-
-SOURCES_TEST = $(addprefix $(SRC_DIR)/, $(SRC_TEST))
-OBJS_TEST = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES_TEST:.f90=.o))
-
 all: $(LIBTARGET)
 #	$(PARTTARGET) $(PARTBCTARGET) $(PARTNGTARGET) $(PARTCNTARGET) \
 #	$(PARTDRTARGET) $(PARTDITARGET) $(PARTCRTARGET) $(PARTCITARGET) \
 #	$(CONVMGTARGET) \
-#	$(REF1TARGET) $(REF2TARGET) $(REF3TARGET) $(REF4TARGET) \
-#	$(DBC1TARGET) $(DBC2TARGET) $(DBC3TARGET) $(DBC4TARGET) $(TESTTARGET)
 
 lib: $(LIBTARGET)
 
@@ -265,33 +204,6 @@ $(PARTCITARGET): $(OBJS_PARTCI)
 $(CONVMGTARGET): $(OBJS_CONVMG)
 	$(FC) $(FFLAGS) -o $@ $(OBJS_CONVMG) $(MONOLIS_LIB) $(LIBRARY)
 
-$(REF1TARGET): $(OBJS_REF1)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_REF1) $(MONOLIS_LIB) $(LIBRARY)
-
-$(REF2TARGET): $(OBJS_REF2)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_REF2) $(MONOLIS_LIB) $(LIBRARY)
-
-$(REF3TARGET): $(OBJS_REF3)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_REF3) $(MONOLIS_LIB) $(LIBRARY)
-
-$(REF4TARGET): $(OBJS_REF4)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_REF4) $(MONOLIS_LIB) $(LIBRARY)
-
-$(DBC1TARGET): $(OBJS_DBC1)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC1) $(MONOLIS_LIB) $(LIBRARY)
-
-$(DBC2TARGET): $(OBJS_DBC2)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC2) $(MONOLIS_LIB) $(LIBRARY)
-
-$(DBC3TARGET): $(OBJS_DBC3)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC3) $(MONOLIS_LIB) $(LIBRARY)
-
-$(DBC4TARGET): $(OBJS_DBC4)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_DBC4) $(MONOLIS_LIB) $(LIBRARY)
-
-$(TESTTARGET): $(OBJS_TEST)
-	$(FC) $(FFLAGS) -o $@ $(OBJS_TEST) $(MONOLIS_LIB) $(LIBRARY)
-
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
@@ -301,7 +213,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 clean:
 	$(RM) $(OBJS) $(LIBTARGET) \
 	$(OBJS_PART) $(OBJS_PARTBC) $(OBJS_PARTNG) $(OBJS_PARTCN) $(OBJS_PARTDR) $(OBJS_PARTDI) $(OBJS_PARTCR) $(OBJS_PARTCI) \
-	$(OBJS_REF1) $(OBJS_REF2) $(OBJS_REF3) $(OBJS_REF4) $(OBJS_DBC1) $(OBJS_DBC2) $(OBJS_DBC3) $(OBJS_DBC4) \
 	$(OBJS_CONVMG) \
 	./include/*.mod ./bin/*
 
