@@ -1,6 +1,7 @@
 module mod_monolis_matrix_copy
+  use mod_monolis_utils
+  use mod_monolis_struc
   use mod_monolis_mat
-  use mod_monolis_util
   implicit none
 
 contains

@@ -1,9 +1,10 @@
 module mod_monolis_reorder
-  use mod_monolis_prm
+  use mod_monolis_utils
+  use mod_monolis_struc
   use mod_monolis_mat
+  use mod_monolis_prm
   use mod_monolis_restruct
   use mod_monolis_matrix_copy
-  use mod_monolis_util
   implicit none
 
   type monolis_edge_info

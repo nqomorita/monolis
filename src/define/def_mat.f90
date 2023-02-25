@@ -1,5 +1,5 @@
-module mod_monolis_mat
-  use mod_monolis_prm
+module mod_monolis_def_mat
+  use mod_monolis_utils
   implicit none
 
   type monolis_mat_LDU
@@ -110,4 +110,4 @@ contains
     monoMAT%B => null()
   end subroutine monolis_mat_tree_finalize
 
-end module mod_monolis_mat
+end module mod_monolis_def_mat

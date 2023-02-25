@@ -1,6 +1,6 @@
-module mod_monolis_util_prm
-  use mod_monolis_util
-  use mod_monolis_prm
+module mod_monolis_def_solver_util
+  use mod_monolis_utils
+  use mod_monolis_def_struc
 
   implicit none
 
@@ -118,4 +118,4 @@ contains
     logical :: param
     monolis%PRM%show_summary = param
   end subroutine monolis_param_set_show_summary
-end module mod_monolis_util_prm
+end module mod_monolis_def_solver_util

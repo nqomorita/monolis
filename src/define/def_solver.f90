@@ -1,4 +1,5 @@
-module mod_monolis_prm
+!> ソルバパラメータの定義
+module mod_monolis_def_solver
   use mod_monolis_utils
   implicit none
 
@@ -23,7 +24,7 @@ module mod_monolis_prm
   integer(kint), parameter :: monolis_prec_SAINV  = 5
   integer(kint), parameter :: monolis_prec_RIF    = 6
   integer(kint), parameter :: monolis_prec_SPIKE  = 7
-  integer(kint), parameter :: monolis_prec_DIRECT = 8
+  integer(kint), parameter :: monolis_prec_LU     = 8
   integer(kint), parameter :: monolis_prec_MUMPS  = 9
   integer(kint), parameter :: monolis_prec_ROM    = 10
   integer(kint), parameter :: monolis_prec_MF     = 11
@@ -52,11 +53,44 @@ module mod_monolis_prm
   & "SAINV ", &
   & "RIF   ", &
   & "SPIKE ", &
-  & "Direct", &
+  & "LU    ", &
   & "MUMPS ", &
   & "ROM   ", &
   & "MF    ", &
-  & "MUMPS "/)
+  & "MUMPSL"/)
+
+  integer(kint), parameter :: monolis_prm_Iarray_size = 100
+  integer(kint), parameter :: monolis_prm_Rarray_size = 100
+  integer(kint), parameter :: monolis_prm_Iarray(monolis_prm_Iarray_size)
+  real(kdouble), parameter :: monolis_prm_Rarray(monolis_prm_Rarray_size)
+
+  integer(kint), parameter :: monolis_prm_method = 1
+  integer(kint), parameter :: monolis_prm_precond = 2
+  integer(kint), parameter :: monolis_prm_max_iter = 3
+  integer(kint), parameter :: monolis_prm_cur_iter = 4
+  integer(kint), parameter :: monolis_prm_ierr = 5
+  integer(kint), parameter :: monolis_prm_is_scaling = 6
+  integer(kint), parameter :: monolis_prm_is_reordering = 7
+  integer(kint), parameter :: monolis_prm_is_init_x = 8
+  integer(kint), parameter :: monolis_prm_is_sym_matrix = 9
+  integer(kint), parameter :: monolis_prm_is_debug = 10
+  integer(kint), parameter :: monolis_prm_is_measurement = 11
+  integer(kint), parameter :: monolis_prm_is_check_diag = 12
+  integer(kint), parameter :: monolis_prm_is_prec_stored = 13
+  integer(kint), parameter :: monolis_prm_show_iterlog = 14
+  integer(kint), parameter :: monolis_prm_show_time = 15
+  integer(kint), parameter :: monolis_prm_show_time_statistics = 16
+  integer(kint), parameter :: monolis_prm_show_summary = 17
+
+  integer(kint), parameter :: monolis_prm_tol = 1
+  integer(kint), parameter :: monolis_prm_cur_resid = 2
+  integer(kint), parameter :: monolis_time_sol = 3
+  integer(kint), parameter :: monolis_time_prep = 4
+  integer(kint), parameter :: monolis_time_spmv = 5
+  integer(kint), parameter :: monolis_time_dotp = 6
+  integer(kint), parameter :: monolis_time_prec = 7
+  integer(kint), parameter :: monolis_time_comm_dotp = 8
+  integer(kint), parameter :: monolis_time_comm_spmv = 9
 
   type monolis_prm
     integer(kint) :: method = 1
@@ -119,5 +153,4 @@ contains
     type(monolis_prm) :: monoPRM
 
   end subroutine monolis_prm_finalize
-
-end module mod_monolis_prm
+end module mod_monolis_def_solver
