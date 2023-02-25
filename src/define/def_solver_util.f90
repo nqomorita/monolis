@@ -4,21 +4,6 @@ module mod_monolis_def_solver_util
 
   implicit none
 
-  private
-  public :: monolis_param_set_method
-  public :: monolis_param_set_precond
-  public :: monolis_param_set_maxiter
-  public :: monolis_param_set_tolerance
-  public :: monolis_param_set_scaling
-  public :: monolis_param_set_reordering
-  public :: monolis_param_set_init_x
-  public :: monolis_param_set_sym_matrix
-  public :: monolis_param_set_debug
-  public :: monolis_param_set_check_diag
-  public :: monolis_param_set_show_iterlog
-  public :: monolis_param_set_show_time
-  public :: monolis_param_set_show_summary
-
 contains
 
   subroutine monolis_param_set_method(monolis, param)

@@ -33,10 +33,12 @@ contains
   !> monolis 構造体の初期化処理
   subroutine monolis_initialize(monolis, fname_in)
     implicit none
+    !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> 読込ディレクトリ
     character(*) :: fname_in
 
-    call monolis_prm_initialize(monolis%PRM, fname_in)
+    call monolis_prm_initialize(monolis%PRM)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
     !call monolis_com_input_comm_table(monolis%COM, fname_in)
@@ -45,6 +47,7 @@ contains
   !> monoils 構造体の終了処理
   subroutine monolis_finalize(monolis)
     implicit none
+    !> monolis 構造体
     type(monolis_structure) :: monolis
 
     call monolis_prm_finalize(monolis%PRM)

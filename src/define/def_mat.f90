@@ -1,7 +1,9 @@
+!> 行列構造体の定義
 module mod_monolis_def_mat
   use mod_monolis_utils
   implicit none
 
+  !> 行列構造体（セパレート CSR 構造）
   type monolis_mat_LDU
     integer(kint) :: N, NP, NPU, NPL, NDOF
     integer(kint), pointer :: indexU(:) => null()
@@ -15,6 +17,7 @@ module mod_monolis_def_mat
     real(kdouble), pointer :: B(:) => null()
   end type monolis_mat_LDU
 
+  !> 行列構造体（標準 CSR 構造）
   type monolis_mat
     type(monolis_mat_LDU) :: monoTREE
     integer(kint) :: N, NP, NZ, NDOF
