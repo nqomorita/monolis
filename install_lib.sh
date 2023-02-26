@@ -25,7 +25,6 @@ mkdir build
 cd build
 cmake ..
 make -DCMAKE_INSTALL_PREFIX=$BASE_DIR -j
-make install
 cd ../../..
 
 #> monolis_utils
