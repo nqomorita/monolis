@@ -26,16 +26,16 @@ contains
     logical :: is_asym
     type(monolis_fillin), allocatable :: tree(:)
     integer(kint), pointer :: array(:)
-    integer(kint), pointer :: fillin_mask(:)
-    integer(kint), pointer :: child_mask(:)
-    integer(kint), pointer :: parent_mask(:)
+    integer(kint), allocatable :: fillin_mask(:)
+    integer(kint), allocatable :: child_mask(:)
+    integer(kint), allocatable :: parent_mask(:)
+    integer(kint), allocatable :: count(:)
     integer(kint) :: N, NPU, NPL
     integer(kint) :: i, j, k, jS, jE, in, c
     integer(kint) :: nbytes
     integer(kint) :: is, ie
     integer(kint) :: range, parent
     integer(kint) :: bit = kint*8
-    integer(kint), allocatable :: count(:)
 
     N = CSR%N
     allocate(tree(N))
@@ -65,9 +65,10 @@ contains
     enddo
 
     nbytes = N/bit+1
-    allocate(child_mask (nbytes))
-    allocate(parent_mask(nbytes))
-    allocate(fillin_mask(nbytes))
+
+    call monolis_alloc_I_1d(child_mask, nbytes)
+    call monolis_alloc_I_1d(parent_mask, nbytes)
+    call monolis_alloc_I_1d(fillin_mask, nbytes)
 
     do i = 1, N
       if(tree(i)%n_ancestor < 2) cycle
@@ -83,6 +84,7 @@ contains
         child_mask(ie) = ibset(child_mask(ie), mod(in,bit))
         range = in
       enddo
+
       k = tree(parent)%n_ancestor
       do j = 1, k
         in = tree(parent)%ancestor(j)
@@ -90,8 +92,8 @@ contains
         parent_mask(ie) = ibset(parent_mask(ie), mod(in,bit))
         range = max(range,in)
       enddo
-      ie = range/bit + 1
 
+      ie = range/bit + 1
       fillin_mask(is:ie) = ior(child_mask(is:ie), parent_mask(is:ie))
 
       c = 0
@@ -115,22 +117,26 @@ contains
         tree(parent)%ancestor => array
       endif
     enddo
-    deallocate(child_mask )
-    deallocate(parent_mask)
-    deallocate(fillin_mask)
+
+    call monolis_dealloc_I_1d(child_mask )
+    call monolis_dealloc_I_1d(parent_mask)
+    call monolis_dealloc_I_1d(fillin_mask)
 
     !> upper part
-    allocate(SCSR%indexU(0:N))
+    call monolis_alloc_I_1d(SCSR%indexU, N + 1)
+
     in = 0
     SCSR%indexU(0) = 0
     do i = 1, N
       SCSR%indexU(i) = SCSR%indexU(i-1) + tree(i)%n_ancestor
       in = in + tree(i)%n_ancestor
     enddo
+
     NPU = in
     SCSR%NPU = in
 
-    allocate(SCSR%itemU(NPU))
+    call monolis_alloc_I_1d(SCSR%itemU, NPU)
+
     in = 0
     do i = 1, N
       do j = 1, tree(i)%n_ancestor
@@ -141,8 +147,8 @@ contains
 
     if(is_asym)then
       !> lower part
-      allocate(count(N))
-      allocate(SCSR%indexL(0:N))
+      call monolis_alloc_I_1d(count, N)
+      call monolis_alloc_I_1d(SCSR%indexL, N + 1)
       count = 0
       SCSR%indexL(0) = 0
 
@@ -157,7 +163,7 @@ contains
 
       NPL = NPU
       c = 1
-      allocate(SCSR%itemL(NPL))
+      call monolis_alloc_I_1d(SCSR%itemL, NPL)
       do i = 1, N
         aa:do k = 1, i
           jS = SCSR%indexU(k-1) + 1
@@ -173,7 +179,7 @@ contains
           enddo
         enddo aa
       enddo
-      deallocate(count)
+      call monolis_dealloc_I_1d(count)
     endif
   end subroutine monolis_matrix_get_fillin
 

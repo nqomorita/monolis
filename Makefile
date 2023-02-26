@@ -58,12 +58,14 @@ def_struc.f90 \
 def_solver_util.f90
 
 SRC_MAT = \
-spmat_fillin.f90 \
-spmat_copy.f90 \
-spmat_reorder.f90 \
-spmat_scaling.f90 \
 spmat_nonzero_pattern.f90 \
 spmat_handler.f90
+
+#spmat_fillin.f90 \
+#spmat_copy.f90 \
+#spmat_reorder.f90 \
+#spmat_scaling.f90 \
+
 
 #SRC_LINALG = \
 #matvec.f90 \
@@ -71,7 +73,7 @@ spmat_handler.f90
 #innerp.f90 \
 #mat_converge.f90 \
 #vec_util.f90
-#
+
 #SRC_FACT = \
 #11/fact_LU_11.f90 \
 #11/fact_MF_11.f90 \
@@ -79,7 +81,7 @@ spmat_handler.f90
 #nn/fact_LU_nn.f90 \
 #fact_LU.f90 \
 #fact_MF.f90
-#
+
 #SRC_PREC = \
 #33/diag_33.f90 \
 #33/sor_33.f90 \
@@ -92,7 +94,7 @@ spmat_handler.f90
 #MF.f90 \
 #MUMPS.f90 \
 #precond.f90
-#
+
 #SRC_ITER = \
 #BiCGSTAB.f90 \
 #BiCGSTAB_noprec.f90 \
@@ -106,10 +108,10 @@ spmat_handler.f90
 #PipeCG.f90 \
 #PipeCR.f90 \
 #SOR.f90
-#
+
 #SRC_SOLV = \
 #solver.f90
-#
+
 #SRC_EIGEN = \
 #Lanczos_util.f90 \
 Lanczos.f90
