@@ -58,6 +58,8 @@ def_struc.f90 \
 def_solver_util.f90
 
 SRC_MAT = \
+spmat_handler_util.f90 \
+spmat_nonzero_pattern_util.f90 \
 spmat_nonzero_pattern.f90 \
 spmat_handler.f90
 

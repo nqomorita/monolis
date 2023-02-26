@@ -101,9 +101,9 @@ module mod_monolis_def_solver
   !> パラメータ：エラー番号
   integer(kint), parameter :: monolis_prm_ierr = 5
   !> パラメータ：スケーリングの有無
-  integer(kint), parameter :: monolis_prm_is_scaling = 6
+  !integer(kint), parameter :: monolis_prm_is_scaling = 6
   !> パラメータ：リオーダリングの有無
-  integer(kint), parameter :: monolis_prm_is_reordering = 7
+  !integer(kint), parameter :: monolis_prm_is_reordering = 7
   !> パラメータ：解ベクトル初期化の有無
   integer(kint), parameter :: monolis_prm_is_init_x = 8
   !> パラメータ：対称行列向け処理の有無
@@ -165,8 +165,8 @@ contains
     monoPRM%monolis_prm_Iarray(monolis_prm_max_iter) = 1000
     monoPRM%monolis_prm_Iarray(monolis_prm_cur_iter) = 0
     monoPRM%monolis_prm_Iarray(monolis_prm_ierr) = -1
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_scaling) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_reordering) = monolis_I_false
+    !monoPRM%monolis_prm_Iarray(monolis_prm_is_scaling) = monolis_I_false
+    !monoPRM%monolis_prm_Iarray(monolis_prm_is_reordering) = monolis_I_false
     monoPRM%monolis_prm_Iarray(monolis_prm_is_init_x) = monolis_I_true
     monoPRM%monolis_prm_Iarray(monolis_prm_is_sym_matrix) = monolis_I_false
     monoPRM%monolis_prm_Iarray(monolis_prm_is_debug) = monolis_I_false

@@ -58,28 +58,28 @@ contains
   end subroutine monolis_get_error_tag
 
   !> スケーリングの有無の設定
-  subroutine monolis_set_scaling(monolis, param)
-    implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> パラメータ
-    logical :: param
-    integer(kint) :: iparam
+  !subroutine monolis_set_scaling(monolis, param)
+  !  implicit none
+  !  !> monolis 構造体
+  !  type(monolis_structure) :: monolis
+  !  !> パラメータ
+  !  logical :: param
+  !  integer(kint) :: iparam
 
-    monolis%PRM%monolis_prm_Iarray(monolis_prm_is_scaling) = monolis_conv_L2I(param)
-  end subroutine monolis_set_scaling
+  !  monolis%PRM%monolis_prm_Iarray(monolis_prm_is_scaling) = monolis_conv_L2I(param)
+  !end subroutine monolis_set_scaling
 
   !> リオーダリングの有無の設定
-  subroutine monolis_set_reordering(monolis, param)
-    implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> パラメータ
-    logical :: param
-    integer(kint) :: iparam
+  !subroutine monolis_set_reordering(monolis, param)
+  !  implicit none
+  !  !> monolis 構造体
+  !  type(monolis_structure) :: monolis
+  !  !> パラメータ
+  !  logical :: param
+  !  integer(kint) :: iparam
 
-    monolis%PRM%monolis_prm_Iarray(monolis_prm_is_reordering) = monolis_conv_L2I(param)
-  end subroutine monolis_set_reordering
+  !  monolis%PRM%monolis_prm_Iarray(monolis_prm_is_reordering) = monolis_conv_L2I(param)
+  !end subroutine monolis_set_reordering
 
   !> 解ベクトル初期化の有無の設定
   subroutine monolis_set_init_x(monolis, param)

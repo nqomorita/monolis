@@ -1,4 +1,4 @@
-module mod_monolis_sparse_util
+module mod_monolis_spmat_handler
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
@@ -6,198 +6,6 @@ module mod_monolis_sparse_util
   implicit none
 
 contains
-
-  subroutine monolis_get_nonzero_pattern_by_simple_mesh(monolis, nnode, nbase_func, ndof, nelem, elem)
-    use iso_c_binding
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nnode, nbase_func, ndof, nelem, elem(:,:)
-    integer(kint), pointer :: ebase_func(:), connectivity(:)
-    integer(c_int), pointer :: index(:), item(:)
-
-!    call monolis_convert_mesh_to_connectivity &
-!      & (nelem, nbase_func, elem, ebase_func, connectivity)
-!
-!    call monolis_convert_connectivity_to_nodal &
-!      & (nnode, nelem, ebase_func, connectivity, index, item)
-!
-!    call monolis_get_nonzero_pattern_by_nodal_graph &
-!      & (monolis, nnode, ndof, index, item)
-!
-!    deallocate(ebase_func); nullify(ebase_func)
-!    deallocate(connectivity); nullify(connectivity)
-!    deallocate(index); nullify(index)
-!    deallocate(item); nullify(item)
-  end subroutine monolis_get_nonzero_pattern_by_simple_mesh
-
-  subroutine monolis_get_nonzero_pattern_with_arbitrary_dof &
-    (monolis, nnode, nbase_func, n_dof_list, nelem, elem)
-    use iso_c_binding
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nnode, nbase_func, n_dof_list(:), nelem, elem(:,:)
-    integer(kint), pointer :: ebase_func(:), connectivity(:)
-    integer(c_int), pointer :: index(:), item(:)
-
-!    call monolis_convert_mesh_to_connectivity &
-!      & (nelem, nbase_func, elem, ebase_func, connectivity)
-!
-!    call monolis_convert_connectivity_to_nodal &
-!      & (nnode, nelem, ebase_func, connectivity, index, item)
-!
-!     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
-!       & (monolis, nnode, n_dof_list, index, item)
-  end subroutine monolis_get_nonzero_pattern_with_arbitrary_dof
-
-  subroutine monolis_get_nonzero_pattern_by_connectivity &
-      & (monolis, nnode, ndof, nelem, ebase_func, connectivity)
-    use iso_c_binding
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nnode, ndof, nelem
-    integer(kint), pointer :: ebase_func(:), connectivity(:)
-    integer(c_int), pointer :: index(:), item(:)
-
-!    call monolis_convert_connectivity_to_nodal &
-!      & (nnode, nelem, ebase_func, connectivity, index, item)
-!
-!     call monolis_get_nonzero_pattern_by_nodal_graph &
-!      & (monolis, nnode, ndof, index, item)
-  end subroutine monolis_get_nonzero_pattern_by_connectivity
-
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph(monolis, nnode, ndof, index, item)
-    use iso_c_binding
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nnode, ndof
-    integer(kint) :: i, j, nz, jS, jE
-    integer(c_int), pointer :: index(:), item(:)
-
-!    monolis%MAT%N = nnode
-!    monolis%MAT%NP = nnode
-!    monolis%MAT%NDOF = ndof
-!    allocate(monolis%MAT%X(ndof*nnode), source = 0.0d0)
-!    allocate(monolis%MAT%B(ndof*nnode), source = 0.0d0)
-!    allocate(monolis%MAT%index(0:nnode), source = 0)
-!    do i = 1, nnode
-!      monolis%MAT%index(i) = index(i+1) + i
-!    enddo
-!
-!    nz = monolis%MAT%index(nnode)
-!    monolis%MAT%NZ = nz
-!    allocate(monolis%MAT%A(ndof*ndof*nz), source = 0.0d0)
-!    allocate(monolis%MAT%item(nz), source = 0)
-!    do i = 1, nnode
-!      jS = monolis%MAT%index(i-1) + 1
-!      jE = monolis%MAT%index(i)
-!      monolis%MAT%item(jS) = i
-!      do j = jS+1, jE
-!        monolis%MAT%item(j) = item(j-i)
-!      enddo
-!      call monolis_qsort_I_1d(monolis%MAT%item(jS:jE), 1, jE - jS + 1)
-!    enddo
-!
-!    allocate(monolis%MAT%indexR(0:nnode), source = 0)
-!    allocate(monolis%MAT%itemR(nz), source = 0)
-!    allocate(monolis%MAT%permR(nz), source = 0)
-!
-!    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%N, nz, &
-!      & monolis%MAT%index, monolis%MAT%item, &
-!      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
-  end subroutine monolis_get_nonzero_pattern_by_nodal_graph
-
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof &
-    (monolis, nnode, n_dof_list, index, item)
-    use iso_c_binding
-    implicit none
-    type(monolis_structure) :: monolis
-    integer(kint) :: nnode, n_dof_list(:)
-    integer(kint) :: i, j, k, nz, jS, jE, kS, kE
-    integer(kint) :: total_dof, in, jn, kn, nrow, ncol, l
-    integer(kint), allocatable :: n_dof_index(:)
-    integer(c_int), pointer :: index(:), item(:)
-
-!    total_dof = 0
-!    do i = 1, nnode
-!      total_dof = total_dof + n_dof_list(i)
-!    enddo
-!
-!    allocate(n_dof_index(nnode), source = 0)
-!    call monolis_get_n_dof_index(nnode, n_dof_list, n_dof_index)
-!
-!    monolis%MAT%N = total_dof
-!    monolis%MAT%NP = total_dof
-!    monolis%MAT%NDOF = 1
-!    allocate(monolis%MAT%X(total_dof), source = 0.0d0)
-!    allocate(monolis%MAT%B(total_dof), source = 0.0d0)
-!    allocate(monolis%MAT%index(0:total_dof), source = 0)
-!
-!    !> count nz
-!    nz = 0
-!    do i = 1, nnode
-!      jS = index(i) + 1
-!      jE = index(i+1)
-!      nz = nz + n_dof_list(i)*n_dof_list(i)
-!      do j = jS, jE
-!        jn = item(j)
-!        nz = nz +  n_dof_list(i)*n_dof_list(jn)
-!      enddo
-!    enddo
-!
-!    monolis%MAT%NZ = nz
-!    allocate(monolis%MAT%A(nz), source = 0.0d0)
-!    allocate(monolis%MAT%item(nz), source = 0)
-!
-!    !> construct index and item
-!    in = 0
-!    ncol = 0
-!    do i = 1, nnode
-!      jS = index(i) + 1
-!      jE = index(i+1)
-!      do k = 1, n_dof_list(i)
-!        ncol = ncol + 1
-!        nrow = n_dof_list(i)
-!        do j = 1, n_dof_list(i)
-!          in = in + 1
-!          monolis%MAT%item(in) = n_dof_index(i) + j
-!        enddo
-!        do j = jS, jE
-!          jn = item(j)
-!          nrow = nrow + n_dof_list(jn)
-!          do l = 1, n_dof_list(jn)
-!            in = in + 1
-!            monolis%MAT%item(in) = n_dof_index(jn) + l
-!          enddo
-!        enddo
-!        monolis%MAT%index(ncol) = monolis%MAT%index(ncol-1) + nrow
-!
-!        kS = monolis%MAT%index(ncol-1) + 1
-!        kE = monolis%MAT%index(ncol)
-!        call monolis_qsort_I_1d(monolis%MAT%item(kS:kE), 1, kE-kS+1)
-!      enddo
-!    enddo
-!
-!    allocate(monolis%MAT%indexR(0:total_dof), source = 0)
-!    allocate(monolis%MAT%itemR(nz), source = 0)
-!    allocate(monolis%MAT%permR(nz), source = 0)
-!
-!    call monolis_get_CRR_format(monolis%MAT%N, monolis%MAT%N, nz, &
-!      & monolis%MAT%index, monolis%MAT%item, &
-!      & monolis%MAT%indexR, monolis%MAT%itemR, monolis%MAT%permR)
-!
-!    nullify(index)
-!    nullify(item)
-  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof
-
-  subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
-    implicit none
-    integer(kint), intent(in) :: n_node, n_dof_list(:)
-    integer(kint) :: i, n_dof_index(:)
-
-!    do i = 1, n_node - 1
-!      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
-!    enddo
-  end subroutine monolis_get_n_dof_index
 
   !> setter
   subroutine monolis_set_scalar_to_sparse_matrix(monolis, i, j, sub_i, sub_j, val)
@@ -537,48 +345,6 @@ contains
 !    B(ndof*nnode-ndof+idof) = val
   end subroutine monolis_sparse_matrix_add_bc
 
-  subroutine monolis_get_CRR_format(NC, NR, NZ, index, item, indexR, itemR, permR)
-    implicit none
-    integer(kint), intent(in) :: NC, NR, NZ, index(0:), item(:)
-    integer(kint), pointer :: indexR(:), itemR(:), permR(:)
-    integer(kint), allocatable :: temp(:)
-    integer(kint) :: i, j, in, jS, jE, m, p
-
-!    allocate(temp(NR), source = 0)
-!    do i = 1, NC
-!      jS = index(i-1) + 1
-!      jE = index(i)
-!      do j = jS, jE
-!        in = item(j)
-!        temp(in) = temp(in) + 1
-!      enddo
-!    enddo
-
-!    do i = 1, NR
-!      indexR(i) = indexR(i-1) + temp(i)
-!    enddo
-
-!    temp = 0
-!    do i = 1, NC
-!      jS = index(i-1) + 1
-!      jE = index(i)
-!      do j = jS, jE
-!        in = item(j)
-!        m = indexR(in-1)
-!        temp(in) = temp(in) + 1
-!        p = temp(in)
-!        itemR(m + p) = i
-!        permR(m + p) = j
-!      enddo
-!    enddo
-
-!    do i = 1, NR
-!      jS = indexR(i-1) + 1
-!      jE = indexR(i)
-!      call monolis_qsort_I_1d(itemR(jS:jE), 1, jE-jS+1)
-!    enddo
-!    deallocate(temp)
-  end subroutine monolis_get_CRR_format
 
   subroutine monolis_stop_by_matrix_assemble(ci, cj)
     integer(kint), intent(in) :: ci, cj
@@ -595,11 +361,11 @@ contains
     stop
   end subroutine monolis_stop_by_submatrix_access
 
-  function monolis_get_penalty_value(monoMAT)
+  subroutine monolis_get_penalty_value(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
-    real(kdouble) :: monolis_get_penalty_value, max
+    real(kdouble) :: max
 
 !    NP =  monoMAT%NP
 !    NDOF  = monoMAT%NDOF
@@ -620,7 +386,7 @@ contains
 !      enddo
 !    enddo
 !    monolis_get_penalty_value = max
-  end function monolis_get_penalty_value
+  end subroutine monolis_get_penalty_value
 
   subroutine monolis_check_diagonal(monoPRM, monoMAT)
     implicit none
@@ -657,4 +423,4 @@ contains
 !    monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_check_diagonal
 
-end module mod_monolis_sparse_util
+end module mod_monolis_spmat_handler

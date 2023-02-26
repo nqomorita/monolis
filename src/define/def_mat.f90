@@ -64,7 +64,7 @@ module mod_monolis_def_mat
     !> 全自由度数
     integer(kint) :: NP
     !> 非零個数
-    integer(kint) :: NPZ
+    integer(kint) :: NZ
     !> 1 ブロックの自由度
     integer(kint) :: NDOF
     !> index 配列
@@ -169,7 +169,7 @@ contains
 
     CSR%N = 0
     CSR%NP = 0
-    CSR%NPZ = 0
+    CSR%NZ = 0
     CSR%NDOF = 0
     call monolis_dealloc_I_1d(CSR%index)
     call monolis_dealloc_I_1d(CSR%item)
@@ -252,7 +252,7 @@ contains
 
     CSR%N = 0
     CSR%NP = 0
-    CSR%NPZ = 0
+    CSR%NZ = 0
     CSR%NDOF = 0
     call monolis_dealloc_I_1d(CSR%index)
     call monolis_dealloc_I_1d(CSR%item)
