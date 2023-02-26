@@ -6,52 +6,52 @@ module mod_monolis_def_solver
   !> パラメータ：CG 法
   integer(kint), parameter :: monolis_iter_CG       = 1
   !> パラメータ：GropCG 法
-  integer(kint), parameter :: monolis_iter_GropCG   = 2
+  !integer(kint), parameter :: monolis_iter_GropCG   = 2
   !> パラメータ：Pipelined CG 法
-  integer(kint), parameter :: monolis_iter_PipeCG   = 3
+  !integer(kint), parameter :: monolis_iter_PipeCG   = 3
   !> パラメータ：Pipelined CR 法
-  integer(kint), parameter :: monolis_iter_PipeCR   = 4
+  !integer(kint), parameter :: monolis_iter_PipeCR   = 4
   !> パラメータ：BiCGSTAB 法
   integer(kint), parameter :: monolis_iter_BiCGSTAB = 5
   !> パラメータ：Pipelined BiCGSTAB 法
-  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB = 6
+  !integer(kint), parameter :: monolis_iter_PipeBiCGSTAB = 6
   !> パラメータ：BiCGSTAB 法（前処理なし）
-  integer(kint), parameter :: monolis_iter_BiCGSTAB_noprec = 7
+  !integer(kint), parameter :: monolis_iter_BiCGSTAB_noprec = 7
   !> パラメータ：Communication Avoiding BiCGSTAB 法（前処理なし）
-  integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
+  !integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
-  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
+  !integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
   !> パラメータ：SOR 法
-  integer(kint), parameter :: monolis_iter_SOR      = 10
+  !integer(kint), parameter :: monolis_iter_SOR      = 10
   !> パラメータ：Iterative Refinement 法
-  integer(kint), parameter :: monolis_iter_IR       = 11
+  !integer(kint), parameter :: monolis_iter_IR       = 11
   !> パラメータ：GMRES 法
-  integer(kint), parameter :: monolis_iter_GMRES    = 12
+  !integer(kint), parameter :: monolis_iter_GMRES    = 12
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
   !> パラメータ：対角スケーリング前処理
   integer(kint), parameter :: monolis_prec_DIAG   = 1
   !> パラメータ：ブロック ILU 前処理
-  integer(kint), parameter :: monolis_prec_ILU    = 2
+  !integer(kint), parameter :: monolis_prec_ILU    = 2
   !> パラメータ：ブロック Jacobi 前処理
-  integer(kint), parameter :: monolis_prec_JACOBI = 3
+  !integer(kint), parameter :: monolis_prec_JACOBI = 3
   !> パラメータ：ブロック SOR 前処理
   integer(kint), parameter :: monolis_prec_SOR    = 4
   !> パラメータ：ブロック SAINV 前処理
-  integer(kint), parameter :: monolis_prec_SAINV  = 5
+  !integer(kint), parameter :: monolis_prec_SAINV  = 5
   !> パラメータ：ブロック RIF 前処理
-  integer(kint), parameter :: monolis_prec_RIF    = 6
+  !integer(kint), parameter :: monolis_prec_RIF    = 6
   !> パラメータ：SPIKE 前処理
-  integer(kint), parameter :: monolis_prec_SPIKE  = 7
+  !integer(kint), parameter :: monolis_prec_SPIKE  = 7
   !> パラメータ：LU 分解
-  integer(kint), parameter :: monolis_prec_LU     = 8
+  !integer(kint), parameter :: monolis_prec_LU     = 8
   !> パラメータ：LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS  = 9
   !> パラメータ：ROM 前処理
-  integer(kint), parameter :: monolis_prec_ROM    = 10
+  !integer(kint), parameter :: monolis_prec_ROM    = 10
   !> パラメータ：LU 分解（MF 法）
-  integer(kint), parameter :: monolis_prec_MF     = 11
+  !integer(kint), parameter :: monolis_prec_MF     = 11
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 12
 

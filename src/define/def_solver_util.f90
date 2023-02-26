@@ -281,8 +281,6 @@ contains
     param = monolis%PRM%monolis_prm_Rarray(monolis_time_comm_dotp)
   end subroutine monolis_get_time_comm_inner_product
 
-  integer(kint), parameter :: monolis_time_comm_dotp = 8
-
   !> 疎行列ベクトル積の通信時間の取得
   subroutine monolis_get_time_comm_spmv(monolis, param)
     implicit none

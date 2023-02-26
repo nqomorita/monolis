@@ -142,8 +142,8 @@ TST_OBJS    = $(TST_OBJSt:.c=_test.o)
 
 ##> target
 all: \
-	$(LIB_TARGET)
-#	$(TEST_TARGET)
+	$(LIB_TARGET) \
+	$(TEST_TARGET)
 
 lib: \
 	$(LIB_TARGET)
