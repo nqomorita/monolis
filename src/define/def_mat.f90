@@ -89,21 +89,17 @@ module mod_monolis_def_mat
 
   !> 行列構造体
   type monolis_mat
+    !> 行列構造体（実数型）
     type(monolis_mat_val_R) :: R
+    !> 行列構造体（複素数型）
     type(monolis_mat_val_C) :: C
+    !> 行列構造体（セパレート CSR 構造）
     type(monolis_mat_separated_CSR) :: SCSR
+    !> 行列構造体（CSR 構造）
     type(monolis_mat_CSR) :: CSR
+    !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
   end type monolis_mat
-
-  !> 前処理行列構造体
-  type monolis_prec
-    type(monolis_mat_val_R) :: R
-    type(monolis_mat_val_C) :: C
-    type(monolis_mat_separated_CSR) :: SCSR
-    type(monolis_mat_CSR) :: CSR
-    type(monolis_mat_CSC) :: CSC
-  end type monolis_prec
 
 contains
 

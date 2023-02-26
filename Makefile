@@ -57,14 +57,14 @@ def_mat.f90 \
 def_struc.f90 \
 def_solver_util.f90
 
-#SRC_MAT = \
-#spmat_fillin.f90 \
-#spmat_restruct.f90 \
-#spmat_copy.f90 \
-#spmat_reorder.f90 \
-#spmat_scaling.f90 \
-#spmat_handler.f90
-#
+SRC_MAT = \
+spmat_fillin.f90 \
+spmat_copy.f90 \
+spmat_reorder.f90 \
+spmat_scaling.f90 \
+spmat_nonzero_pattern.f90 \
+spmat_handler.f90
+
 #SRC_LINALG = \
 #matvec.f90 \
 #matmat.f90 \
