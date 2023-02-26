@@ -17,7 +17,7 @@ module mod_monolis_def_mat
     real(kdouble), pointer :: B(:) => null()
   end type monolis_mat_LDU
 
-  !> 行列構造体（標準 CSR 構造）
+  !> 行列構造体（CSR 構造）
   type monolis_mat
     type(monolis_mat_LDU) :: monoTREE
     integer(kint) :: N, NP, NZ, NDOF
