@@ -659,7 +659,7 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, j, k, jS, jE, in, kn, N, NDOF, NDOF2
 
-    if(monoPRM%monolis_prm_Iarray(monolis_prm_is_check_diag) == monolis_I_false) return
+    if(monoPRM%Iarray(monolis_prm_I_is_check_diag) == monolis_I_false) return
 
     N =  monoMAT%CSR%N
     NDOF  = monoMAT%CSR%NDOF

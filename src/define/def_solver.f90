@@ -91,65 +91,65 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_Rarray_size = 100
 
   !> パラメータ：ソルバ
-  integer(kint), parameter :: monolis_prm_method = 1
+  integer(kint), parameter :: monolis_prm_I_method = 1
   !> パラメータ：前処理
-  integer(kint), parameter :: monolis_prm_precond = 2
+  integer(kint), parameter :: monolis_prm_I_precond = 2
   !> パラメータ：最大反復回数
-  integer(kint), parameter :: monolis_prm_max_iter = 3
+  integer(kint), parameter :: monolis_prm_I_max_iter = 3
   !> パラメータ：現在の反復回数
-  integer(kint), parameter :: monolis_prm_cur_iter = 4
+  integer(kint), parameter :: monolis_prm_I_cur_iter = 4
   !> パラメータ：エラー番号
-  integer(kint), parameter :: monolis_prm_ierr = 5
+  integer(kint), parameter :: monolis_prm_I_ierr = 5
   !> パラメータ：スケーリングの有無
-  !integer(kint), parameter :: monolis_prm_is_scaling = 6
+  !integer(kint), parameter :: monolis_prm_I_is_scaling = 6
   !> パラメータ：リオーダリングの有無
-  !integer(kint), parameter :: monolis_prm_is_reordering = 7
+  !integer(kint), parameter :: monolis_prm_I_is_reordering = 7
   !> パラメータ：解ベクトル初期化の有無
-  integer(kint), parameter :: monolis_prm_is_init_x = 8
+  integer(kint), parameter :: monolis_prm_I_is_init_x = 8
   !> パラメータ：対称行列向け処理の有無
-  integer(kint), parameter :: monolis_prm_is_sym_matrix = 9
+  integer(kint), parameter :: monolis_prm_I_is_sym_matrix = 9
   !> パラメータ：デバッグ出力の有無
-  integer(kint), parameter :: monolis_prm_is_debug = 10
+  integer(kint), parameter :: monolis_prm_I_is_debug = 10
   !> パラメータ：詳細な計算時間測定の有無
-  integer(kint), parameter :: monolis_prm_is_measurement = 11
+  integer(kint), parameter :: monolis_prm_I_is_measurement = 11
   !> パラメータ：行列対角成分確認の有無
-  integer(kint), parameter :: monolis_prm_is_check_diag = 12
+  integer(kint), parameter :: monolis_prm_I_is_check_diag = 12
   !> パラメータ：前処理情報保存の有無
-  integer(kint), parameter :: monolis_prm_is_prec_stored = 13
+  integer(kint), parameter :: monolis_prm_I_is_prec_stored = 13
   !> パラメータ：反復回数と残差履歴の表示
-  integer(kint), parameter :: monolis_prm_show_iterlog = 14
+  integer(kint), parameter :: monolis_prm_I_show_iterlog = 14
   !> パラメータ：詳細な計算時間の表示
-  integer(kint), parameter :: monolis_prm_show_time = 15
+  integer(kint), parameter :: monolis_prm_I_show_time = 15
   !> パラメータ：ソルバ収束後のサマリの表示
-  integer(kint), parameter :: monolis_prm_show_summary = 16
+  integer(kint), parameter :: monolis_prm_I_show_summary = 16
   !> パラメータ：計算時間の統計的処理結果の表示
-  integer(kint), parameter :: monolis_prm_show_time_statistics = 17
+  integer(kint), parameter :: monolis_prm_I_show_time_statistics = 17
 
   !> パラメータ：収束判定閾値
-  integer(kint), parameter :: monolis_prm_tol = 1
+  integer(kint), parameter :: monolis_prm_R_tol = 1
   !> パラメータ：現在の残差
-  integer(kint), parameter :: monolis_prm_cur_resid = 2
+  integer(kint), parameter :: monolis_prm_R_cur_resid = 2
   !> パラメータ：ソルバの全計算時間
-  integer(kint), parameter :: monolis_time_sol = 3
+  integer(kint), parameter :: monolis_R_time_sol = 3
   !> パラメータ：前処理時間（生成時間）
-  integer(kint), parameter :: monolis_time_prep = 4
+  integer(kint), parameter :: monolis_R_time_prep = 4
   !> パラメータ：疎行列ベクトル積時間
-  integer(kint), parameter :: monolis_time_spmv = 5
+  integer(kint), parameter :: monolis_R_time_spmv = 5
   !> パラメータ：ベクトル内積時間
-  integer(kint), parameter :: monolis_time_dotp = 6
+  integer(kint), parameter :: monolis_R_time_dotp = 6
   !> パラメータ：前処理時間（適用時間）
-  integer(kint), parameter :: monolis_time_prec = 7
+  integer(kint), parameter :: monolis_R_time_prec = 7
   !> パラメータ：ベクトル内積の通信時間
-  integer(kint), parameter :: monolis_time_comm_dotp = 8
+  integer(kint), parameter :: monolis_R_time_comm_dotp = 8
   !> パラメータ：疎行列ベクトル積の通信時間
-  integer(kint), parameter :: monolis_time_comm_spmv = 9
+  integer(kint), parameter :: monolis_R_time_comm_spmv = 9
 
   !> パラメータ 構造体
   type monolis_prm
     !> 整数パラメータ
-    integer(kint) :: monolis_prm_Iarray(monolis_prm_Iarray_size) = 0
+    integer(kint) :: Iarray(monolis_prm_Iarray_size) = 0
     !> 実数パラメータ
-    real(kdouble) :: monolis_prm_Rarray(monolis_prm_Rarray_size) = 0.0d0
+    real(kdouble) :: Rarray(monolis_prm_Rarray_size) = 0.0d0
   end type monolis_prm
 
 contains
@@ -160,33 +160,33 @@ contains
     !> パラメータ 構造体
     type(monolis_prm) :: monoPRM
 
-    monoPRM%monolis_prm_Iarray(monolis_prm_method) = 1
-    monoPRM%monolis_prm_Iarray(monolis_prm_precond) = 1
-    monoPRM%monolis_prm_Iarray(monolis_prm_max_iter) = 1000
-    monoPRM%monolis_prm_Iarray(monolis_prm_cur_iter) = 0
-    monoPRM%monolis_prm_Iarray(monolis_prm_ierr) = -1
-    !monoPRM%monolis_prm_Iarray(monolis_prm_is_scaling) = monolis_I_false
-    !monoPRM%monolis_prm_Iarray(monolis_prm_is_reordering) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_init_x) = monolis_I_true
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_sym_matrix) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_debug) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_measurement) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_check_diag) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_is_prec_stored) = monolis_I_false
-    monoPRM%monolis_prm_Iarray(monolis_prm_show_iterlog) = monolis_I_true
-    monoPRM%monolis_prm_Iarray(monolis_prm_show_time) = monolis_I_true
-    monoPRM%monolis_prm_Iarray(monolis_prm_show_summary) = monolis_I_true
-    monoPRM%monolis_prm_Iarray(monolis_prm_show_time_statistics) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_method) = 1
+    monoPRM%Iarray(monolis_prm_I_precond) = 1
+    monoPRM%Iarray(monolis_prm_I_max_iter) = 1000
+    monoPRM%Iarray(monolis_prm_I_cur_iter) = 0
+    monoPRM%Iarray(monolis_prm_I_ierr) = -1
+    !monoPRM%Iarray(monolis_prm_I_is_scaling) = monolis_I_false
+    !monoPRM%Iarray(monolis_prm_I_is_reordering) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_init_x) = monolis_I_true
+    monoPRM%Iarray(monolis_prm_I_is_sym_matrix) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_debug) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_measurement) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_check_diag) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_show_iterlog) = monolis_I_true
+    monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
+    monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
+    monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
 
-    monoPRM%monolis_prm_Rarray(monolis_prm_tol) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_prm_cur_resid) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_sol) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_prep) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_spmv) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_dotp) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_prec) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_comm_dotp) = 0.0d0
-    monoPRM%monolis_prm_Rarray(monolis_time_comm_spmv) = 0.0d0
+    monoPRM%Rarray(monolis_prm_R_tol) = 0.0d0
+    monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_prep) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_spmv) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_dotp) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_prec) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_comm_dotp) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_comm_spmv) = 0.0d0
   end subroutine monolis_prm_initialize
 
   !> パラメータ 構造体の終了処理
@@ -195,7 +195,7 @@ contains
     !> パラメータ 構造体
     type(monolis_prm) :: monoPRM
 
-    monoPRM%monolis_prm_Iarray = 0
-    monoPRM%monolis_prm_Rarray = 0.0d0
+    monoPRM%Iarray = 0
+    monoPRM%Rarray = 0.0d0
   end subroutine monolis_prm_finalize
 end module mod_monolis_def_solver
