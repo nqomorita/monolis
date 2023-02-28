@@ -1,3 +1,4 @@
+!> 収束判定モジュール
 module mod_monolis_converge
   use mod_monolis_utils
   use mod_monolis_def_mat
@@ -6,6 +7,8 @@ module mod_monolis_converge
 
 contains
 
+  !> @ingroup dev_linalg
+  !> 収束判定閾値の設定
   subroutine monolis_set_converge(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
@@ -29,6 +32,8 @@ contains
     !endif
   end subroutine monolis_set_converge
 
+  !> @ingroup dev_linalg
+  !> 収束の判定
   subroutine monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
     implicit none
     type(monolis_prm) :: monoPRM
@@ -61,6 +66,8 @@ contains
     !endif
   end subroutine monolis_check_converge
 
+  !> @ingroup dev_linalg
+  !> 収束の判定（）
   subroutine monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge)
     implicit none
     type(monolis_prm) :: monoPRM

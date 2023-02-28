@@ -29,6 +29,26 @@ contains
       & monolis%MAT%R%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_set_scalar_to_sparse_matrix_R
 
+  !> スカラ値を疎行列に設定（複素数型）
+  subroutine monolis_set_scalar_to_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 行番号
+    integer(kint), intent(in) :: i
+    !> 列番号
+    integer(kint), intent(in) :: j
+    !> ブロック中の行番号
+    integer(kint), intent(in) :: sub_i
+    !> ブロック中の列番号
+    integer(kint), intent(in) :: sub_j
+    !> 行列値
+    complex(kdouble), intent(in) :: val
+
+    call monolis_set_scalar_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val)
+  end subroutine monolis_set_scalar_to_sparse_matrix_C
+
   !> ブロック行列を疎行列に設定（実数型）
   subroutine monolis_set_block_to_sparse_matrix_R(monolis, i, j, val)
     implicit none
@@ -44,6 +64,22 @@ contains
     call monolis_set_block_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, monolis%MAT%CSR%ndof, i, j, val)
   end subroutine monolis_set_block_to_sparse_matrix_R
+
+  !> ブロック行列を疎行列に設定（複素数型）
+  subroutine monolis_set_block_to_sparse_matrix_C(monolis, i, j, val)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 行番号
+    integer(kint), intent(in) :: i
+    !> 列番号
+    integer(kint), intent(in) :: j
+    !> 行列値（サイズ：[ndof, ndof]）
+    complex(kdouble), intent(in) :: val(:,:)
+
+    call monolis_set_block_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, monolis%MAT%CSR%ndof, i, j, val)
+  end subroutine monolis_set_block_to_sparse_matrix_C
 
   !# getter
   !> スカラ値を疎行列から取得（実数型）
@@ -68,6 +104,28 @@ contains
       & monolis%MAT%R%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val, is_find)
   end subroutine monolis_get_scalar_from_sparse_matrix_R
 
+  !> スカラ値を疎行列から取得（複素数型）
+  subroutine monolis_get_scalar_from_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val, is_find)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 行番号
+    integer(kint), intent(in) :: i
+    !> 列番号
+    integer(kint), intent(in) :: j
+    !> ブロック中の行番号
+    integer(kint), intent(in) :: sub_i
+    !> ブロック中の列番号
+    integer(kint), intent(in) :: sub_j
+    !> 行列値
+    complex(kdouble), intent(out) :: val
+    !> 取得判定フラグ
+    logical :: is_find
+
+    call monolis_get_scalar_from_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val, is_find)
+  end subroutine monolis_get_scalar_from_sparse_matrix_C
+
   !# adder
   !> スカラ値を疎行列に足込（実数型）
   subroutine monolis_add_scalar_to_sparse_matrix_R(monolis, i, j, sub_i, sub_j, val)
@@ -89,6 +147,26 @@ contains
       & monolis%MAT%R%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_add_scalar_to_sparse_matrix_R
 
+  !> スカラ値を疎行列に足込（複素数型）
+  subroutine monolis_add_scalar_to_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 行番号
+    integer(kint), intent(in) :: i
+    !> 列番号
+    integer(kint), intent(in) :: j
+    !> ブロック中の行番号
+    integer(kint), intent(in) :: sub_i
+    !> ブロック中の列番号
+    integer(kint), intent(in) :: sub_j
+    !> 行列値
+    complex(kdouble), intent(in) :: val
+
+    call monolis_add_scalar_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, monolis%MAT%CSR%ndof, i, j, sub_i, sub_j, val)
+  end subroutine monolis_add_scalar_to_sparse_matrix_C
+
   !> 行列を疎行列に足込（実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_R(monolis, n_base, connectivity, mat)
     implicit none
@@ -104,6 +182,22 @@ contains
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, n_base, n_base, monolis%MAT%CSR%ndof, connectivity, connectivity, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_R
+
+  !> 行列を疎行列に足込（複素数型）
+  subroutine monolis_add_matrix_to_sparse_matrix_C(monolis, n_base, connectivity, mat)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 節点数
+    integer(kint), intent(in) :: n_base
+    !> 要素コネクティビティ
+    integer(kint), intent(in) :: connectivity(n_base)
+    !> 行列値
+    complex(kdouble), intent(in) :: mat(:,:)
+
+    call monolis_add_matrix_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, n_base, n_base, monolis%MAT%CSR%ndof, connectivity, connectivity, mat)
+  end subroutine monolis_add_matrix_to_sparse_matrix_C
 
   !> 行列を疎行列の非対角部分に足込（実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R(monolis, n_base_i, n_base_j, &
@@ -125,6 +219,27 @@ contains
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, n_base_i, n_base_j, monolis%MAT%CSR%ndof, connectivity_i, connectivity_j, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R
+
+  !> 行列を疎行列の非対角部分に足込（複素数型）
+  subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C(monolis, n_base_i, n_base_j, &
+    & connectivity_i, connectivity_j, mat)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 節点数
+    integer(kint), intent(in) :: n_base_i
+    !> 節点数
+    integer(kint), intent(in) :: n_base_j
+    !> 要素コネクティビティ
+    integer(kint), intent(in) :: connectivity_i(n_base_i)
+    !> 要素コネクティビティ
+    integer(kint), intent(in) :: connectivity_j(n_base_j)
+    !> 行列値
+    complex(kdouble), intent(in) :: mat(:,:)
+
+    call monolis_add_matrix_to_sparse_matrix_main_(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%C%A, n_base_i, n_base_j, monolis%MAT%CSR%ndof, connectivity_i, connectivity_j, mat)
+  end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C
 
   !# CSR data setter
   !> BCSR 形式の疎行列を直接設定（実数型）
@@ -225,4 +340,23 @@ contains
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
       & monolis%MAT%CSR%ndof, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_R
+
+  !> 境界条件処理（実数型）
+  subroutine monolis_set_Dirichlet_bc_C(monolis, B, node_id, ndof_bc, val)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 右辺ベクトル
+    complex(kdouble) :: B(:)
+    !> 自由度番号
+    integer(kint), intent(in) :: node_id
+    !> ブロック番号
+    integer(kint), intent(in) :: ndof_bc
+    !> 境界条件の設定値
+    complex(kdouble), intent(in) :: val
+
+    call monolis_set_Dirichlet_bc_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, monolis%MAT%C%A, B, &
+      & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
+      & monolis%MAT%CSR%ndof, node_id, ndof_bc, val)
+  end subroutine monolis_set_Dirichlet_bc_C
 end module mod_monolis_spmat_handler
