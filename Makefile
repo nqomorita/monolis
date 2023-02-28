@@ -68,11 +68,11 @@ spmat_handler.f90
 #spmat_reorder.f90 \
 #spmat_scaling.f90 \
 
-#SRC_LINALG = \
-#matvec.f90 \
-#inner_product.f90 \
-#mat_converge.f90 \
-#vec_util.f90
+SRC_LINALG = \
+matvec.f90 \
+inner_product.f90 \
+mat_converge.f90 \
+vec_util.f90
 
 #matmat.f90 \
 
