@@ -1,9 +1,10 @@
-module mod_monolis_linalg
+module mod_monolis_vec_util
   use mod_monolis_utils
   implicit none
 
 contains
 
+  !> @ingroup dev_linalg
   subroutine monolis_vec_copy_R(n, ndof, X, Y)
     implicit none
     integer(kint) :: i, n, ndof
@@ -25,6 +26,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_copy_R
 
+  !> @ingroup dev_linalg
   subroutine monolis_vec_AXPY(n, ndof, alpha, X, Y, Z)
     implicit none
     integer(kint) :: i, n, ndof
@@ -47,4 +49,4 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_AXPY
 
-end module mod_monolis_linalg
+end module mod_monolis_vec_util

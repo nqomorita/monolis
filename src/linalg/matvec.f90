@@ -7,6 +7,7 @@ module mod_monolis_matvec
 
 contains
 
+  !> @ingroup linalg
   !> 疎行列ベクトル積（実数型）
   subroutine monolis_matvec_product_R(monolis, X, Y)
     implicit none
@@ -21,6 +22,7 @@ contains
     call monolis_matvec_product_main_R(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_R
 
+  !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、メイン関数）
   subroutine monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
@@ -54,6 +56,7 @@ contains
     tspmv = tspmv + t2 - t1
   end subroutine monolis_matvec_product_main_R
 
+  !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、nxn ブロック）
   subroutine monolis_matvec_nn_R(monoCOM, monoMAT, X, Y, NDOF)
     implicit none
@@ -106,6 +109,7 @@ contains
 !$omp end parallel
   end subroutine monolis_matvec_nn_R
 
+  !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、1x1 ブロック）
   subroutine monolis_matvec_11_R(monoCOM, monoMAT, X, Y)
     implicit none
@@ -146,6 +150,7 @@ contains
 !$omp end parallel
   end subroutine monolis_matvec_11_R
 
+  !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、3x3 ブロック）
   subroutine monolis_matvec_33_R(monoCOM, monoMAT, X, Y)
     implicit none
@@ -195,6 +200,7 @@ contains
 !$omp end parallel
   end subroutine monolis_matvec_33_R
 
+  !> @ingroup dev_linalg
   !> 残差ベクトルの取得（実数型、メイン関数）
   subroutine monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm)
     implicit none
