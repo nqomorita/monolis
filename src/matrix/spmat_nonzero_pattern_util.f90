@@ -1,3 +1,4 @@
+!> 非零構造決定モジュール（メイン関数群）
 module mod_monolis_spmat_nonzero_pattern_util
   use mod_monolis_utils
   use mod_monolis_def_mat

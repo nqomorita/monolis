@@ -1,3 +1,4 @@
+!> 非零構造決定モジュール
 module mod_monolis_spmat_nonzero_pattern
   use mod_monolis_utils
   use mod_monolis_def_mat

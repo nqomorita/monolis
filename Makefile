@@ -68,7 +68,6 @@ spmat_handler.f90
 #spmat_reorder.f90 \
 #spmat_scaling.f90 \
 
-
 #SRC_LINALG = \
 #matvec.f90 \
 #matmat.f90 \
