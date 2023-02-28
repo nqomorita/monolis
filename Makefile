@@ -70,10 +70,11 @@ spmat_handler.f90
 
 #SRC_LINALG = \
 #matvec.f90 \
-#matmat.f90 \
-#innerp.f90 \
+#inner_product.f90 \
 #mat_converge.f90 \
 #vec_util.f90
+
+#matmat.f90 \
 
 #SRC_FACT = \
 #11/fact_LU_11.f90 \
@@ -89,18 +90,21 @@ spmat_handler.f90
 #nn/diag_nn.f90 \
 #nn/sor_nn.f90 \
 #diag.f90 \
-#ilu.f90 \
-#Jacobi.f90 \
 #sor.f90 \
-#MF.f90 \
 #MUMPS.f90 \
 #precond.f90
 
+#ilu.f90 \
+#Jacobi.f90 \
+#MF.f90 \
+
 #SRC_ITER = \
+#CG.f90 \
 #BiCGSTAB.f90 \
+#COCG.f90 \
+
 #BiCGSTAB_noprec.f90 \
 #CABiCGSTAB_noprec.f90 \
-#CG.f90 \
 #GMRES.f90 \
 #GropCG.f90 \
 #IR.f90 \

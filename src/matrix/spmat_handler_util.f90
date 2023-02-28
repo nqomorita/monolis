@@ -331,66 +331,50 @@ contains
     stop
   end subroutine monolis_stop_by_submatrix_access
 
-
-  subroutine monolis_get_max_matrix_component(monoMAT)
+  !> 行列の最大値の取得（実数型、メイン関数）
+  subroutine monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
     implicit none
+    !> monolis MAT 構造体
     type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, k, jS, jE, in, kn, NP, NDOF, NDOF2
-    real(kdouble) :: max
+    !> monolis COM 構造体
+    type(monolis_com) :: monoCOM
+    !> 最大値
+    real(kdouble) :: max_val
 
-!    NP =  monoMAT%NP
-!    NDOF  = monoMAT%NDOF
-!    NDOF2 = NDOF*NDOF
-!    max = 0.0d0
-!
-!    do i = 1, NP
-!      jS = monoMAT%index(i-1) + 1
-!      jE = monoMAT%index(i)
-!      do j = jS, jE
-!        in = monoMAT%item(j)
-!        if(i == in)then
-!          do k = 1, NDOF
-!            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
-!            if(max < monoMAT%A(kn)) max = monoMAT%A(kn)
-!          enddo
-!        endif
-!      enddo
-!    enddo
-!    monolis_get_penalty_value = max
-  end subroutine monolis_get_max_matrix_component
+    max_val = maxval(monoMAT%R%A)
+    call monolis_allreduce_R1(max_val, monolis_mpi_max, monoCOM%comm)
+  end subroutine monolis_get_max_matrix_component_main_R
 
-  subroutine monolis_check_diagonal_zero_component(monoPRM, monoMAT)
+  !> 行列の対角成分の 0 チェック（実数型、メイン関数）
+  subroutine monolis_check_diagonal_zero_component_main_R(monoPRM, monoMAT)
     implicit none
+    !> monolis PRM 構造体
     type(monolis_prm) :: monoPRM
+    !> monolis MAT 構造体
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, j, k, jS, jE, in, kn, N, NDOF, NDOF2
-    real(kdouble) :: t1, t2
 
-!    if(.not. monoPRM%is_check_diag) return
-!    t1 = monolis_get_time()
-!
-!    N =  monoMAT%N
-!    NDOF  = monoMAT%NDOF
-!    NDOF2 = NDOF*NDOF
-!
-!    do i = 1, N
-!      jS = monoMAT%index(i-1) + 1
-!      jE = monoMAT%index(i)
-!      do j = jS, jE
-!        in = monoMAT%item(j)
-!        if(i == in)then
-!          do k = 1, NDOF
-!            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
-!            if(monoMAT%A(kn) == 0.0d0)then
-!              write(*,"(a,i8,a,i8)")" ** monolis error: zero diagonal at node:", i, " , dof: ", k
-!              stop
-!            endif
-!          enddo
-!        endif
-!      enddo
-!    enddo
-!
-!    t2 = monolis_get_time()
-!    monoPRM%tprep = monoPRM%tprep + t2 - t1
-  end subroutine monolis_check_diagonal_zero_component
+    if(monoPRM%monolis_prm_Iarray(monolis_prm_is_check_diag) == monolis_I_false) return
+
+    N =  monoMAT%CSR%N
+    NDOF  = monoMAT%CSR%NDOF
+    NDOF2 = NDOF*NDOF
+
+    do i = 1, N
+      jS = monoMAT%CSR%index(i) + 1
+      jE = monoMAT%CSR%index(i + 1)
+      do j = jS, jE
+        in = monoMAT%CSR%item(j)
+        if(i == in)then
+          do k = 1, NDOF
+            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
+            if(monoMAT%R%A(kn) == 0.0d0)then
+              !write(*,"(a,i8,a,i8)")" ** monolis error: zero diagonal at node:", i, " , dof: ", k
+              stop
+            endif
+          enddo
+        endif
+      enddo
+    enddo
+  end subroutine monolis_check_diagonal_zero_component_main_R
 end module mod_monolis_spmat_handler_util
