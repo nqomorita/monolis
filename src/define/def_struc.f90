@@ -14,6 +14,8 @@ module mod_monolis_def_struc
     type(monolis_com) :: COM
     !> 行列構造体
     type(monolis_mat) :: MAT
+    !> 前処理構造体
+    type(monolis_mat) :: PREC
   end type monolis_structure
 
 contains
@@ -41,6 +43,7 @@ contains
     call monolis_prm_initialize(monolis%PRM)
     call monolis_com_initialize(monolis%COM)
     call monolis_mat_initialize(monolis%MAT)
+    call monolis_mat_initialize(monolis%PREC)
     !call monolis_com_input_comm_table(monolis%COM, fname_in)
   end subroutine monolis_initialize
 
@@ -53,5 +56,6 @@ contains
     call monolis_prm_finalize(monolis%PRM)
     call monolis_com_finalize(monolis%COM)
     call monolis_mat_finalize(monolis%MAT)
+    call monolis_mat_finalize(monolis%PREC)
   end subroutine monolis_finalize
 end module mod_monolis_def_struc

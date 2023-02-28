@@ -97,24 +97,26 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （整数型）
-  subroutine monolis_vec_AXPY_I(n, ndof, alpha, X, Y, Z)
+  subroutine monolis_vec_AXPBY_I(n, ndof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
     integer(kint) :: ndof
-    !> ベクトル 1
+    !> 係数 1
     integer(kint) :: alpha
     !> ベクトル 1
     integer(kint) :: X(:)
+    !> 係数 2
+    integer(kint) :: beta
     !> ベクトル 2
     integer(kint) :: Y(:)
-    !> ベクトル 3
+    !> 結果ベクトル
     integer(kint) :: Z(:)
     integer(kint) :: i
 
 #ifdef DEBUG
-    call monolis_std_debug_log_header("monolis_vec_AXPY_I")
+    call monolis_std_debug_log_header("monolis_vec_AXPBY_I")
 #endif
 
 !$omp parallel default(none) &
@@ -127,28 +129,30 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_vec_AXPY_I
+  end subroutine monolis_vec_AXPBY_I
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （実数型）
-  subroutine monolis_vec_AXPY_R(n, ndof, alpha, X, Y, Z)
+  subroutine monolis_vec_AXPBY_R(n, ndof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
     integer(kint) :: ndof
-    !> ベクトル 1
+    !> 係数 1
     real(kdouble) :: alpha
     !> ベクトル 1
     real(kdouble) :: X(:)
+    !> 係数 2
+    real(kdouble) :: beta
     !> ベクトル 2
     real(kdouble) :: Y(:)
-    !> ベクトル 3
+    !> 結果ベクトル
     real(kdouble) :: Z(:)
     integer(kint) :: i
 
 #ifdef DEBUG
-    call monolis_std_debug_log_header("monolis_vec_AXPY_R")
+    call monolis_std_debug_log_header("monolis_vec_AXPBY_R")
 #endif
 
 !$omp parallel default(none) &
@@ -161,28 +165,30 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_vec_AXPY_R
+  end subroutine monolis_vec_AXPBY_R
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （複素数型）
-  subroutine monolis_vec_AXPY_C(n, ndof, alpha, X, Y, Z)
+  subroutine monolis_vec_AXPBY_C(n, ndof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
     integer(kint) :: ndof
-    !> ベクトル 1
+    !> 係数 1
     complex(kdouble) :: alpha
     !> ベクトル 1
     complex(kdouble) :: X(:)
+    !> 係数 2
+    complex(kdouble) :: beta
     !> ベクトル 2
     complex(kdouble) :: Y(:)
-    !> ベクトル 3
+    !> 結果ベクトル
     complex(kdouble) :: Z(:)
     integer(kint) :: i
 
 #ifdef DEBUG
-    call monolis_std_debug_log_header("monolis_vec_AXPY_C")
+    call monolis_std_debug_log_header("monolis_vec_AXPBY_C")
 #endif
 
 !$omp parallel default(none) &
@@ -195,5 +201,5 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_vec_AXPY_C
+  end subroutine monolis_vec_AXPBY_C
 end module mod_monolis_vec_util

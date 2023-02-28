@@ -1,34 +1,33 @@
+!> 対角スケーリング前処理（3x3 ブロック）
 module mod_monolis_precond_diag_33
-  use mod_monolis_prm
-  use mod_monolis_mat
+  use mod_monolis_utils
+  use mod_monolis_def_mat
+  use mod_monolis_def_struc
 
   implicit none
 
-  private
-  public :: monolis_precond_diag_33_setup
-  public :: monolis_precond_diag_33_apply
-  public :: monolis_precond_diag_33_clear
-
 contains
 
-  subroutine monolis_precond_diag_33_setup(monoMAT)
+  !> 前処理生成：対角スケーリング前処理（3x3 ブロック）
+  subroutine monolis_precond_diag_33_setup_R(monoMAT, monoPREC)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i, j, jS, jE, in, k, l, N
-    integer(kind=kint), pointer :: index(:), item(:)
-    real(kind=kdouble) :: T(3,3), P(3)
-    real(kind=kdouble), pointer :: A(:), ALU(:)
+    !> 行列構造体
+    type(monolis_mat), target :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat), target :: monoPREC
+    integer(kint) :: i, j, jS, jE, in, k, l, N
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble) :: T(3,3), P(3)
+    real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoMAT%N
-    A => monoMAT%A
-    index => monoMAT%index
-    item => monoMAT%item
+    N =  monoMAT%CSR%N
+    A => monoMAT%R%A
+    index => monoMAT%CSR%index
+    item => monoMAT%CSR%item
 
-    allocate(monoMAT%monoTree%D(9*N))
-    ALU => monoMAT%monoTree%D
-    ALU = 0.0d0
+    call monolis_alloc_R_1d(monoPREC%R%D, 9*N)
+    monoPREC%CSR%N =  monoMAT%CSR%N
+    ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &
@@ -89,25 +88,26 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_precond_diag_33_setup
+  end subroutine monolis_precond_diag_33_setup_R
 
-  subroutine monolis_precond_diag_33_apply(monoMAT, X, Y)
+  !> 前処理適用：対角スケーリング前処理（3x3 ブロック）
+  subroutine monolis_precond_diag_33_apply_R(monoPREC, X, Y)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: i
-    real(kind=kdouble) :: X1, X2, X3
-    real(kind=kdouble) :: X(:), Y(:)
-    real(kind=kdouble), pointer :: ALU(:)
+    !> 前処理構造体
+    type(monolis_mat), target :: monoPREC
+    integer(kint) :: i, N
+    real(kdouble) :: X1, X2, X3
+    real(kdouble) :: X(:), Y(:)
+    real(kdouble), pointer :: ALU(:)
 
-    ALU => monoMAT%monoTree%D
+    N =  monoPREC%CSR%N
+    ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
 !$omp & shared(monoMAT, ALU, X, Y) &
 !$omp & private(i, X1, X2, X3)
 !$omp do
-    do i = 1, monoMAT%N
+    do i = 1, N
       X1 = X(3*i-2)
       X2 = X(3*i-1)
       X3 = X(3*i  )
@@ -122,14 +122,15 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_precond_diag_33_apply
+  end subroutine monolis_precond_diag_33_apply_R
 
-  subroutine monolis_precond_diag_33_clear(monoMAT)
+  !> 前処理初期化：対角スケーリング前処理（3x3 ブロック）
+  subroutine monolis_precond_diag_33_clear_R(monoPREC)
     implicit none
-    type(monolis_mat) :: monoMAT
-    real(kind=kdouble), pointer :: ALU(:)
-    ALU => monoMAT%monoTree%D
-    deallocate(ALU)
-  end subroutine monolis_precond_diag_33_clear
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
+
+    call monolis_dealloc_R_1d(monoPREC%R%D)
+  end subroutine monolis_precond_diag_33_clear_R
 
 end module mod_monolis_precond_diag_33

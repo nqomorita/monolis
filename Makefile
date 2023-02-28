@@ -84,15 +84,16 @@ vec_util.f90
 #fact_LU.f90 \
 #fact_MF.f90
 
-#SRC_PREC = \
-#33/diag_33.f90 \
-#33/sor_33.f90 \
-#nn/diag_nn.f90 \
-#nn/sor_nn.f90 \
-#diag.f90 \
-#sor.f90 \
+SRC_PREC = \
+33/diag_33.f90 \
+33/sor_33.f90 \
+nn/diag_nn.f90 \
+nn/sor_nn.f90 \
+diag.f90 \
+sor.f90 \
+precond.f90
+
 #MUMPS.f90 \
-#precond.f90
 
 #ilu.f90 \
 #Jacobi.f90 \
