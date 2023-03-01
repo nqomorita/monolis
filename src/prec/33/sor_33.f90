@@ -1,34 +1,34 @@
+!> SOR 前処理（3x3 ブロック）
 module mod_monolis_precond_sor_33
-  use mod_monolis_prm
-  use mod_monolis_mat
+  use mod_monolis_utils
+  use mod_monolis_def_mat
+  use mod_monolis_def_struc
 
   implicit none
 
-  private
-  public :: monolis_precond_sor_33_setup
-  public :: monolis_precond_sor_33_apply
-  public :: monolis_precond_sor_33_clear
-
 contains
 
-  subroutine monolis_precond_sor_33_setup(monoMAT)
+  !> 前処理生成：SOR 前処理（3x3 ブロック）
+  subroutine monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
+    !> 行列構造体
+    type(monolis_mat), target :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat), target :: monoPREC
     integer(kint) :: i, j, jS, jE, in, k, l, N
     integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: T(3,3), P(3), sigma
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoMAT%N
-    A => monoMAT%A
-    index => monoMAT%index
-    item => monoMAT%item
+    N =  monoMAT%CSR%N
+    A => monoMAT%R%A
+    index => monoMAT%CSR%index
+    item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    allocate(monoMAT%monoTree%D(9*N), source = 0.0d0)
-    ALU => monoMAT%monoTree%D
+    call monolis_alloc_R_1d(monoPREC%R%D, 9*N)
+    monoPREC%CSR%N =  monoMAT%CSR%N
+    ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item, N) &
@@ -88,36 +88,38 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-  end subroutine monolis_precond_sor_33_setup
+  end subroutine monolis_precond_sor_33_setup_R
 
-  subroutine monolis_precond_sor_33_apply(monoMAT, X, Y)
+  !> 前処理適用：SOR 前処理（3x3 ブロック）
+  subroutine monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, jS, jE, jn
+    !> 行列構造体
+    type(monolis_mat), target :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat), target :: monoPREC
+    integer(kint) :: i, j, jS, jE, jn, N
     integer(kint), pointer :: index(:)
     integer(kint), pointer :: item(:)
     real(kdouble) :: X1, X2, X3, S1, S2, S3
     real(kdouble) :: X(:), Y(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    index => monoMAT%index
-    item => monoMAT%item
-    A => monoMAT%A
-    ALU => monoMAT%monoTree%D
+    N =  monoPREC%CSR%N
+    ALU => monoPREC%R%D
+    index => monoMAT%CSR%index
+    item => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(monoMAT, X, Y) &
 !$omp & private(i)
 !$omp do
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    do i = 1, monoMAT%CSR%NP*monoMAT%CSR%NDOF
       Y(i) = X(i)
     enddo
 !$omp end do
 !$omp end parallel
 
-    do i = 1, monoMAT%N
+    do i = 1, N
       S1 = Y(3*i-2)
       S2 = Y(3*i-1)
       S3 = Y(3*i  )
@@ -147,7 +149,7 @@ contains
       Y(3*i  ) = X3
     enddo
 
-    do i = monoMAT%N, 1, -1
+    do i = N, 1, -1
       S1 = 0.0d0
       S2 = 0.0d0
       S3 = 0.0d0
@@ -176,14 +178,15 @@ contains
       Y(3*i-1) = Y(3*i-1) - X2
       Y(3*i  ) = Y(3*i  ) - X3
     enddo
-  end subroutine monolis_precond_sor_33_apply
+  end subroutine monolis_precond_sor_33_apply_R
 
-  subroutine monolis_precond_sor_33_clear(monoMAT)
+  !> 前処理初期化：SOR 前処理（3x3 ブロック）
+  subroutine monolis_precond_sor_33_clear_R(monoPREC)
     implicit none
-    type(monolis_mat) :: monoMAT
-    real(kdouble), pointer :: ALU(:)
-    ALU => monoMAT%monoTree%D
-    deallocate(ALU)
-  end subroutine monolis_precond_sor_33_clear
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
+
+    call monolis_dealloc_R_1d(monoPREC%R%D)
+  end subroutine monolis_precond_sor_33_clear_R
 
 end module mod_monolis_precond_sor_33

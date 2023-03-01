@@ -91,8 +91,10 @@ contains
   end subroutine monolis_precond_diag_33_setup_R
 
   !> 前処理適用：対角スケーリング前処理（3x3 ブロック）
-  subroutine monolis_precond_diag_33_apply_R(monoPREC, X, Y)
+  subroutine monolis_precond_diag_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
+    !> 行列構造体
+    type(monolis_mat), target :: monoMAT
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, N
