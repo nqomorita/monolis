@@ -27,6 +27,8 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_IR       = 11
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 12
+  !> パラメータ：COCG 法
+  integer(kint), parameter :: monolis_iter_COCG       = 13
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0

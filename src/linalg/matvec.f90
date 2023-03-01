@@ -42,14 +42,14 @@ contains
 #endif
     t1 = monolis_get_time()
 
-    call monolis_update_R(monoCOM, monoMAT%CSR%NDOF, X, tcomm)
+    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
-    if(monoMAT%CSR%NDOF == 3)then
+    if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoCOM, monoMAT, X, Y)
-    elseif(monoMAT%CSR%NDOF == 1)then
+    elseif(monoMAT%NDOF == 1)then
       call monolis_matvec_11_R(monoCOM, monoMAT, X, Y)
     else
-      call monolis_matvec_nn_R(monoCOM, monoMAT, X, Y, monoMAT%CSR%NDOF)
+      call monolis_matvec_nn_R(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
     endif
 
     t2 = monolis_get_time()
@@ -75,7 +75,7 @@ contains
     integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:)
 
-    N = monoMAT%CSR%N
+    N = monoMAT%N
     NDOF2 = NDOF*NDOF
     A => monoMAT%R%A
     index => monoMAT%CSR%index
@@ -126,7 +126,7 @@ contains
     real(kdouble) :: Y1
     real(kdouble), pointer :: A(:)
 
-    N = monoMAT%CSR%N
+    N = monoMAT%N
     A => monoMAT%R%A
     index => monoMAT%CSR%index
     item  => monoMAT%CSR%item
@@ -167,7 +167,7 @@ contains
     real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
     real(kdouble), pointer :: A(:)
 
-    N = monoMAT%CSR%N
+    N = monoMAT%N
     A => monoMAT%R%A
     index => monoMAT%CSR%index
     item  => monoMAT%CSR%item
@@ -226,7 +226,7 @@ contains
 !$omp & shared(monoMAT, B, R) &
 !$omp & private(i)
 !$omp do
-    do i = 1, monoMAT%CSR%N*monoMAT%CSR%NDOF
+    do i = 1, monoMAT%N*monoMAT%NDOF
       R(i) = B(i) - R(i)
     enddo
 !$omp end do

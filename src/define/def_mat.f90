@@ -37,16 +37,6 @@ module mod_monolis_def_mat
 
   !> 行列構造体（セパレート CSR 構造）
   type monolis_mat_separated_CSR
-    !> 内部自由度数
-    integer(kint) :: N
-    !> 全自由度数
-    integer(kint) :: NP
-    !> 非零個数（狭義上三角）
-    integer(kint) :: NPU
-    !> 非零個数（狭義下三角）
-    integer(kint) :: NPL
-    !> 1 ブロックの自由度
-    integer(kint) :: NDOF
     !> index 配列（狭義上三角）
     integer(kint), allocatable :: indexU(:)
     !> item 配列（狭義上三角）
@@ -59,14 +49,6 @@ module mod_monolis_def_mat
 
   !> 行列構造体（CSR 構造）
   type monolis_mat_CSR
-    !> 内部自由度数
-    integer(kint) :: N
-    !> 全自由度数
-    integer(kint) :: NP
-    !> 非零個数
-    integer(kint) :: NZ
-    !> 1 ブロックの自由度
-    integer(kint) :: NDOF
     !> index 配列
     integer(kint), allocatable :: index(:)
     !> item 配列
@@ -89,6 +71,12 @@ module mod_monolis_def_mat
 
   !> 行列構造体
   type monolis_mat
+    !> 内部自由度数
+    integer(kint) :: N
+    !> 全自由度数
+    integer(kint) :: NP
+    !> 1 ブロックの自由度
+    integer(kint) :: NDOF
     !> 行列構造体（実数型）
     type(monolis_mat_val_R) :: R
     !> 行列構造体（複素数型）
@@ -108,6 +96,10 @@ contains
     implicit none
     !> 行列構造体
     type(monolis_mat) :: monoMAT
+
+    monoMAT%N = 0
+    monoMAT%NP = 0
+    monoMAT%NDOF = 0
 
     call monolis_mat_initialize_val_R(monoMAT%R)
     call monolis_mat_initialize_val_C(monoMAT%C)
@@ -150,11 +142,6 @@ contains
     !> 行列構造体
     type(monolis_mat_separated_CSR) :: SCSR
 
-    SCSR%N = 0
-    SCSR%NP = 0
-    SCSR%NPU = 0
-    SCSR%NPL = 0
-    SCSR%NDOF = 0
     call monolis_dealloc_I_1d(SCSR%indexU)
     call monolis_dealloc_I_1d(SCSR%itemU)
     call monolis_dealloc_I_1d(SCSR%indexL)
@@ -167,10 +154,6 @@ contains
     !> 行列構造体
     type(monolis_mat_CSR) :: CSR
 
-    CSR%N = 0
-    CSR%NP = 0
-    CSR%NZ = 0
-    CSR%NDOF = 0
     call monolis_dealloc_I_1d(CSR%index)
     call monolis_dealloc_I_1d(CSR%item)
   end subroutine monolis_mat_initialize_CSR
@@ -191,6 +174,10 @@ contains
     implicit none
     !> 行列構造体
     type(monolis_mat) :: monoMAT
+
+    monoMAT%N = 0
+    monoMAT%NP = 0
+    monoMAT%NDOF = 0
 
     call monolis_mat_finalize_val_R(monoMAT%R)
     call monolis_mat_finalize_val_C(monoMAT%C)
@@ -233,11 +220,6 @@ contains
     !> 行列構造体
     type(monolis_mat_separated_CSR) :: SCSR
 
-    SCSR%N = 0
-    SCSR%NP = 0
-    SCSR%NPU = 0
-    SCSR%NPL = 0
-    SCSR%NDOF = 0
     call monolis_dealloc_I_1d(SCSR%indexU)
     call monolis_dealloc_I_1d(SCSR%itemU)
     call monolis_dealloc_I_1d(SCSR%indexL)
@@ -250,10 +232,6 @@ contains
     !> 行列構造体
     type(monolis_mat_CSR) :: CSR
 
-    CSR%N = 0
-    CSR%NP = 0
-    CSR%NZ = 0
-    CSR%NDOF = 0
     call monolis_dealloc_I_1d(CSR%index)
     call monolis_dealloc_I_1d(CSR%item)
   end subroutine monolis_mat_finalize_CSR

@@ -22,7 +22,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    if(monoMAT%CSR%NDOF == 3)then
+    if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_setup(monoMAT, monoPREC)
     else
       call monolis_precond_diag_nn_setup(monoMAT, monoPREC)
@@ -42,7 +42,7 @@ contains
     type(monolis_mat) :: monoPREC
     real(kdouble) :: X(:), Y(:)
 
-    if(monoMAT%CSR%NDOF == 3)then
+    if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_apply(monoMAT, monoPREC, X, Y)
     else
       call monolis_precond_diag_nn_apply(monoMAT, monoPREC, X, Y)
@@ -61,7 +61,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    if(monoMAT%CSR%NDOF == 3)then
+    if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_clear(monoPREC)
     else
       call monolis_precond_diag_nn_clear(monoPREC)

@@ -16,18 +16,17 @@ contains
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, j, jS, jE, in, k, l, N
-    integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: T(3,3), P(3), sigma
+    integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoMAT%CSR%N
+    N =  monoMAT%N
     A => monoMAT%R%A
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
     call monolis_alloc_R_1d(monoPREC%R%D, 9*N)
-    monoPREC%CSR%N =  monoMAT%CSR%N
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
@@ -98,13 +97,12 @@ contains
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, j, jS, jE, jn, N
-    integer(kint), pointer :: index(:)
-    integer(kint), pointer :: item(:)
     real(kdouble) :: X1, X2, X3, S1, S2, S3
     real(kdouble) :: X(:), Y(:)
+    integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoPREC%CSR%N
+    N =  monoPREC%N
     ALU => monoPREC%R%D
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
@@ -113,7 +111,7 @@ contains
 !$omp & shared(monoMAT, X, Y) &
 !$omp & private(i)
 !$omp do
-    do i = 1, monoMAT%CSR%NP*monoMAT%CSR%NDOF
+    do i = 1, monoMAT%NP*monoMAT%NDOF
       Y(i) = X(i)
     enddo
 !$omp end do

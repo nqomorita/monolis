@@ -1,5 +1,5 @@
-!> CG 法モジュール
-module mod_monolis_solver_CG
+!> COCG 法モジュール
+module mod_monolis_solver_COCG
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
@@ -13,7 +13,7 @@ module mod_monolis_solver_CG
 contains
 
   !> CG 法
-  subroutine monolis_solver_CG(monoPRM, monoCOM, monoMAT, monoPREC)
+  subroutine monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -31,7 +31,7 @@ contains
     logical :: is_converge
 
 #ifdef DEBUG
-    call monolis_std_debug_log_header("monolis_solver_CG")
+    call monolis_std_debug_log_header("monolis_solver_COCG")
 #endif
 
     N     = monoMAT%N
@@ -88,6 +88,6 @@ contains
     call monolis_dealloc_R_1d(Z)
     call monolis_dealloc_R_1d(Q)
     call monolis_dealloc_R_1d(P)
-  end subroutine monolis_solver_CG
+  end subroutine monolis_solver_COCG
 
-end module mod_monolis_solver_CG
+end module mod_monolis_solver_COCG

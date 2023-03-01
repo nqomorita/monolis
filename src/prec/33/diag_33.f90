@@ -16,17 +16,16 @@ contains
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, j, jS, jE, in, k, l, N
-    integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: T(3,3), P(3)
+    integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoMAT%CSR%N
+    N =  monoMAT%N
     A => monoMAT%R%A
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
 
     call monolis_alloc_R_1d(monoPREC%R%D, 9*N)
-    monoPREC%CSR%N =  monoMAT%CSR%N
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
@@ -102,7 +101,7 @@ contains
     real(kdouble) :: X(:), Y(:)
     real(kdouble), pointer :: ALU(:)
 
-    N =  monoPREC%CSR%N
+    N =  monoPREC%N
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &

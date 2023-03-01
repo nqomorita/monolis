@@ -23,9 +23,9 @@ contains
     integer(kint) :: item(:)
     integer(kint) :: i, j, nz, jS, jE
 
-    monolis%MAT%CSR%N = n_node
-    monolis%MAT%CSR%NP = n_node
-    monolis%MAT%CSR%NDOF = ndof
+    monolis%MAT%N = n_node
+    monolis%MAT%NP = n_node
+    monolis%MAT%NDOF = ndof
 
     call monolis_alloc_I_1d(monolis%MAT%CSR%index, n_node + 1)
 
@@ -34,7 +34,6 @@ contains
     enddo
 
     nz = monolis%MAT%CSR%index(n_node + 1)
-    monolis%MAT%CSR%NZ = nz
 
     call monolis_alloc_I_1d(monolis%MAT%CSR%item, nz)
 
@@ -52,7 +51,7 @@ contains
     call monolis_alloc_I_1d(monolis%MAT%CSC%item, nz)
     call monolis_alloc_I_1d(monolis%MAT%CSC%perm, nz)
 
-    call monolis_get_CSC_format(monolis%MAT%CSR%N, monolis%MAT%CSR%N, nz, &
+    call monolis_get_CSC_format(monolis%MAT%N, monolis%MAT%N, nz, &
       & monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_main
@@ -84,9 +83,9 @@ contains
 
     call monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
 
-    monolis%MAT%CSR%N = total_dof
-    monolis%MAT%CSR%NP = total_dof
-    monolis%MAT%CSR%NDOF = 1
+    monolis%MAT%N = total_dof
+    monolis%MAT%NP = total_dof
+    monolis%MAT%NDOF = 1
 
     call monolis_alloc_I_1d(monolis%MAT%CSR%index, total_dof + 1)
 
@@ -102,7 +101,6 @@ contains
       enddo
     enddo
 
-    monolis%MAT%CSR%NZ = nz
     call monolis_alloc_I_1d(monolis%MAT%CSR%item, nz)
 
     !# construct index and item
@@ -138,7 +136,7 @@ contains
     call monolis_alloc_I_1d(monolis%MAT%CSC%item, nz)
     call monolis_alloc_I_1d(monolis%MAT%CSC%perm, nz)
 
-    call monolis_get_CSC_format(monolis%MAT%CSR%N, monolis%MAT%CSR%N, nz, &
+    call monolis_get_CSC_format(monolis%MAT%N, monolis%MAT%N, nz, &
       & monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main
@@ -164,12 +162,15 @@ contains
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
-    integer(kint) :: NDOF
+    integer(kint) :: NP, NDOF, NZ
 
-    NDOF = monolis%MAT%CSR%NDOF
-    call monolis_alloc_R_1d(monolis%MAT%R%A, monolis%MAT%CSR%NZ*NDOF)
-    call monolis_alloc_R_1d(monolis%MAT%R%B, monolis%MAT%CSR%NZ*NDOF*NDOF)
-    call monolis_alloc_R_1d(monolis%MAT%R%X, monolis%MAT%CSR%NZ*NDOF*NDOF)
+    NDOF = monolis%MAT%NDOF
+    NP = monolis%MAT%NP
+    NZ = monolis%MAT%CSR%index(NP + 1)
+
+    call monolis_alloc_R_1d(monolis%MAT%R%A, NZ*NDOF)
+    call monolis_alloc_R_1d(monolis%MAT%R%B, NZ*NDOF*NDOF)
+    call monolis_alloc_R_1d(monolis%MAT%R%X, NZ*NDOF*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
   !> 疎行列の行列成分のメモリ確保（複素数型）
@@ -177,12 +178,15 @@ contains
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
-    integer(kint) :: NDOF
+    integer(kint) :: NDOF, NP, NZ
 
-    NDOF = monolis%MAT%CSR%NDOF
-    call monolis_alloc_C_1d(monolis%MAT%C%A, monolis%MAT%CSR%NZ*NDOF)
-    call monolis_alloc_C_1d(monolis%MAT%C%B, monolis%MAT%CSR%NZ*NDOF*NDOF)
-    call monolis_alloc_C_1d(monolis%MAT%C%X, monolis%MAT%CSR%NZ*NDOF*NDOF)
+    NDOF = monolis%MAT%NDOF
+    NP = monolis%MAT%NP
+    NZ = monolis%MAT%CSR%index(NP + 1)
+
+    call monolis_alloc_C_1d(monolis%MAT%C%A, NZ*NDOF)
+    call monolis_alloc_C_1d(monolis%MAT%C%B, NZ*NDOF*NDOF)
+    call monolis_alloc_C_1d(monolis%MAT%C%X, NZ*NDOF*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C
 
   !> CSR 形式から CSC 形式のデータを生成

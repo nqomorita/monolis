@@ -99,10 +99,10 @@ precond.f90
 #Jacobi.f90 \
 #MF.f90 \
 
-#SRC_ITER = \
-#CG.f90 \
-#BiCGSTAB.f90 \
-#COCG.f90 \
+SRC_ITER = \
+CG.f90 \
+BiCGSTAB.f90 \
+COCG.f90 \
 
 #BiCGSTAB_noprec.f90 \
 #CABiCGSTAB_noprec.f90 \
@@ -115,8 +115,8 @@ precond.f90
 #PipeCR.f90 \
 #SOR.f90
 
-#SRC_SOLV = \
-#solver.f90
+SRC_SOLV = \
+solver.f90
 
 #SRC_EIGEN = \
 #Lanczos_util.f90 \

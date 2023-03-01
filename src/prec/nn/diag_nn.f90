@@ -16,12 +16,12 @@ contains
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
-    integer(kint), pointer :: index(:), item(:)
     real(kdouble), allocatable :: T(:), LU(:,:)
+    integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoMAT%CSR%N
-    NDOF =  monoMAT%CSR%NDOF
+    N =  monoMAT%N
+    NDOF =  monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     A => monoMAT%R%A
     index => monoMAT%CSR%index
@@ -30,7 +30,6 @@ contains
     call monolis_alloc_R_1d(T, NDOF)
     call monolis_alloc_R_2d(LU, NDOF, NDOF)
     call monolis_alloc_R_1d(monoPREC%R%D, NDOF2*N)
-    monoPREC%CSR%N =  monoMAT%CSR%N
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
@@ -90,8 +89,8 @@ contains
     real(kdouble), pointer :: ALU(:)
     real(kdouble), allocatable :: T(:)
 
-    N =  monoPREC%CSR%N
-    NDOF  = monoMAT%CSR%NDOF
+    N =  monoPREC%N
+    NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     ALU => monoPREC%R%D
 

@@ -33,7 +33,7 @@ contains
 #endif
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%CSR%N, monoMAT%CSR%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
@@ -69,7 +69,7 @@ contains
     real(kdouble) :: R2, resid
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%CSR%N, monoMAT%CSR%NDOF, R, R, R2, tdotp, tcomm)
+    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
     resid = dsqrt(R2/B2)
 
     monoPRM%Iarray(monolis_prm_I_cur_iter) = iter

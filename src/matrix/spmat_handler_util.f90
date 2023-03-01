@@ -661,8 +661,8 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_check_diag) == monolis_I_false) return
 
-    N =  monoMAT%CSR%N
-    NDOF  = monoMAT%CSR%NDOF
+    N =  monoMAT%N
+    NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
     do i = 1, N
