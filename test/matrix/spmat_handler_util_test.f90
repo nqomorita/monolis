@@ -6,7 +6,7 @@ module mod_monolis_spmat_handler_util_test
 
 contains
 
-  subroutine monolis_spmat_handler_util_test
+  subroutine monolis_spmat_handler_util_test()
     implicit none
 
     !call monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)

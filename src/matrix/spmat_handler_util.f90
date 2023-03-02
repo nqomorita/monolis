@@ -32,8 +32,8 @@ contains
     real(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -46,7 +46,7 @@ contains
         A(im) = val
         return
       endif
-      !call monolis_stop_by_matrix_assemble(ci, cj)
+      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
   end subroutine monolis_set_scalar_to_sparse_matrix_main_R
 
@@ -73,8 +73,8 @@ contains
     complex(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -87,7 +87,7 @@ contains
         A(im) = val
         return
       endif
-      !call monolis_stop_by_matrix_assemble(ci, cj)
+      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
   end subroutine monolis_set_scalar_to_sparse_matrix_main_C
 
@@ -126,7 +126,7 @@ contains
         return
       endif
     enddo
-    !call monolis_stop_by_matrix_assemble(ci, cj)
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_block_to_sparse_matrix_main_R
 
   !> 小行列を疎行列に設定（メイン関数、複素数型）
@@ -164,7 +164,7 @@ contains
         return
       endif
     enddo
-    !call monolis_stop_by_matrix_assemble(ci, cj)
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_block_to_sparse_matrix_main_C
 
   !# getter
@@ -282,8 +282,8 @@ contains
     real(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -298,7 +298,7 @@ contains
       endif
     enddo
 
-    !call monolis_stop_by_matrix_assemble(ci, cj)
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_R
 
   !> スカラ値を疎行列に足込（メイン関数、複素数型）
@@ -324,8 +324,8 @@ contains
     complex(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -340,7 +340,7 @@ contains
       endif
     enddo
 
-    !call monolis_stop_by_matrix_assemble(ci, cj)
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_C
 
   !> 行列値を疎行列に足込（メイン関数、実数型）
@@ -369,8 +369,8 @@ contains
     integer(kint) :: eperm1(n1), eperm2(n2)
     real(kdouble) :: temp(n1*ndof,n2*ndof)
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -444,8 +444,8 @@ contains
     integer(kint) :: eperm1(n1), eperm2(n2)
     complex(kdouble) :: temp(n1*ndof,n2*ndof)
 
-    !if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    !if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     NDOF2 = ndof*ndof
 
@@ -522,7 +522,7 @@ contains
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
 
-    !if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
+    if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
 
     is_add = .false.
     NDOF2 = ndof*ndof
@@ -552,7 +552,9 @@ contains
       endif
     enddo
 
-    !if(.not. is_add) stop "error: not find a diagonal element in monolis_sparse_matrix_add_bc"
+    if(.not. is_add)then
+      call monolis_stop_by_set_DBC(node_id)
+    endif
 
     B(ndof*node_id - ndof + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_R
@@ -586,7 +588,7 @@ contains
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
 
-    !if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
+    if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
 
     is_add = .false.
     NDOF2 = ndof*ndof
@@ -616,25 +618,64 @@ contains
       endif
     enddo
 
-    !if(.not. is_add) stop "error: not find a diagonal element in monolis_sparse_matrix_add_bc"
+    if(.not. is_add)then
+      call monolis_stop_by_set_DBC(node_id)
+    endif
 
     B(ndof*node_id - ndof + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_C
 
+  !> 非零要素がメモリ確保されていない場合にエラーストップ
   subroutine monolis_stop_by_matrix_assemble(ci, cj)
-    integer(kint), intent(in) :: ci, cj
-    write(*,"(a,i0,a,i0,a)") "error: The non-zero element at (", ci, ", ", cj, &
+    !> 行番号
+    integer(kint), intent(in) :: ci
+    !> 列番号
+    integer(kint), intent(in) :: cj
+
+    call monolis_std_error_string("")
+    write(*,"(a,i0,a,i0,a)") "The non-zero element at (", ci, ", ", cj, &
       & ") is not allocated. The value is not accessible."
-    stop
+    call monolis_std_error_stop()
   end subroutine monolis_stop_by_matrix_assemble
 
+  !> ブロックサイズより大きい部分へのアクサス時にエラーストップ
   subroutine monolis_stop_by_submatrix_access(ndof, sub_dof)
-    integer(kint), intent(in) :: ndof, sub_dof
-    write(*,"(a)")   "error: set value greater than the DoF of submatrix."
+    !> 行番号
+    integer(kint), intent(in) :: ndof
+    !> ブロック番号
+    integer(kint), intent(in) :: sub_dof
+
+    call monolis_std_error_string("")
+    write(*,"(a)")   "input value is greater than the DoF of submatrix."
     write(*,"(a,i8)")"       the DoF of submatrix: ", ndof
     write(*,"(a,i8)")"       value:                ", sub_dof
-    stop
+    call monolis_std_error_stop()
   end subroutine monolis_stop_by_submatrix_access
+
+  !> 対角成分が見つからない場合にエラーストップ
+  subroutine monolis_stop_by_set_DBC(node_id)
+    !> 行番号
+    integer(kint), intent(in) :: node_id
+
+    call monolis_std_error_string("")
+    write(*,"(a)")   "The diagonal component is not found."
+    write(*,"(a,i8)")"       tdiagonal number     : ", node_id
+    call monolis_std_error_stop()
+  end subroutine monolis_stop_by_set_DBC
+
+  !> 対角成分が零の場合にエラーストップ
+  subroutine monolis_stop_by_set_zero_diag_component(node_id, ndof)
+    !> 行番号
+    integer(kint), intent(in) :: node_id
+    !> ブロック自由度
+    integer(kint), intent(in) :: ndof
+
+    call monolis_std_error_string("")
+    write(*,"(a)")   "The diagonal component is zero."
+    write(*,"(a,i8)")"       diagonal number     : ", node_id
+    write(*,"(a,i8)")"       the DoF of submatrix: ", ndof
+    call monolis_std_error_stop()
+  end subroutine monolis_stop_by_set_zero_diag_component
 
   !> 行列の最大値の取得（実数型、メイン関数）
   subroutine monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
@@ -674,7 +715,7 @@ contains
           do k = 1, NDOF
             kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
             if(monoMAT%R%A(kn) == 0.0d0)then
-              !write(*,"(a,i8,a,i8)")" ** monolis error: zero diagonal at node:", i, " , dof: ", k
+              call monolis_stop_by_set_zero_diag_component(i, k)
               stop
             endif
           enddo

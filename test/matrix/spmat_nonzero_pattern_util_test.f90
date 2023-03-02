@@ -274,10 +274,10 @@ contains
     monolis%MAT%CSR%index(6) = 10
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
-
+write(*,*)size(monolis%MAT%R%A)
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 1", size(monolis%MAT%R%A), 40)
-    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 2", size(monolis%MAT%R%B), 10)
-    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 3", size(monolis%MAT%R%X), 10)
+    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 2", size(monolis%MAT%R%B), 20)
+    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 3", size(monolis%MAT%R%X), 20)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R_test
 
   subroutine monolis_alloc_nonzero_pattern_mat_val_C_test()
@@ -298,8 +298,8 @@ contains
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
 
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 1", size(monolis%MAT%C%A), 40)
-    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 2", size(monolis%MAT%C%B), 10)
-    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 3", size(monolis%MAT%C%X), 10)
+    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 2", size(monolis%MAT%C%B), 20)
+    call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 3", size(monolis%MAT%C%X), 20)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C_test
 
   subroutine monolis_get_CSC_format_test()

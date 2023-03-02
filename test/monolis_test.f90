@@ -13,5 +13,5 @@ program monolis_test
   call monolis_def_struc_test()
 
   call monolis_spmat_nonzero_pattern_util_test()
-
+  call monolis_spmat_handler_util_test()
 end program monolis_test

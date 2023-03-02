@@ -168,9 +168,9 @@ contains
     NP = monolis%MAT%NP
     NZ = monolis%MAT%CSR%index(NP + 1)
 
-    call monolis_alloc_R_1d(monolis%MAT%R%A, NZ*NDOF)
-    call monolis_alloc_R_1d(monolis%MAT%R%B, NZ*NDOF*NDOF)
-    call monolis_alloc_R_1d(monolis%MAT%R%X, NZ*NDOF*NDOF)
+    call monolis_alloc_R_1d(monolis%MAT%R%A, NZ*NDOF*NDOF)
+    call monolis_alloc_R_1d(monolis%MAT%R%B, NZ*NDOF)
+    call monolis_alloc_R_1d(monolis%MAT%R%X, NZ*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
   !> 疎行列の行列成分のメモリ確保（複素数型）
@@ -184,9 +184,9 @@ contains
     NP = monolis%MAT%NP
     NZ = monolis%MAT%CSR%index(NP + 1)
 
-    call monolis_alloc_C_1d(monolis%MAT%C%A, NZ*NDOF)
-    call monolis_alloc_C_1d(monolis%MAT%C%B, NZ*NDOF*NDOF)
-    call monolis_alloc_C_1d(monolis%MAT%C%X, NZ*NDOF*NDOF)
+    call monolis_alloc_C_1d(monolis%MAT%C%A, NZ*NDOF*NDOF)
+    call monolis_alloc_C_1d(monolis%MAT%C%B, NZ*NDOF)
+    call monolis_alloc_C_1d(monolis%MAT%C%X, NZ*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C
 
   !> CSR 形式から CSC 形式のデータを生成
