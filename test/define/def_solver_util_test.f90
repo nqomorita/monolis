@@ -12,6 +12,8 @@ contains
     integer(kint) :: i_param
     real(kdouble) :: r_param
 
+    call monolis_std_log_string("monolis_def_solver_util_test")
+
     monolis%PRM%Iarray = 0
 
     call monolis_set_method(monolis, 1)

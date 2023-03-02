@@ -124,10 +124,10 @@ contains
             monolis%MAT%CSR%item(in) = n_dof_index(jn) + l
           enddo
         enddo
-        monolis%MAT%CSR%index(ncol) = monolis%MAT%CSR%index(ncol-1) + nrow
+        monolis%MAT%CSR%index(ncol + 1) = monolis%MAT%CSR%index(ncol) + nrow
 
-        kS = monolis%MAT%CSR%index(ncol-1) + 1
-        kE = monolis%MAT%CSR%index(ncol)
+        kS = monolis%MAT%CSR%index(ncol) + 1
+        kE = monolis%MAT%CSR%index(ncol + 1)
         call monolis_qsort_I_1d(monolis%MAT%CSR%item(kS:kE), 1, kE-kS+1)
       enddo
     enddo
@@ -203,11 +203,11 @@ contains
     !> item 配列（CSR 形式）
     integer(kint), intent(in) :: item(:)
     !> index 配列（CSC 形式）
-    integer(kint), allocatable :: indexR(:)
+    integer(kint) :: indexR(:)
     !> index 配列（CSC 形式）
-    integer(kint), allocatable :: itemR(:)
+    integer(kint) :: itemR(:)
     !> index 配列（CSC 形式）
-    integer(kint), allocatable :: permR(:)
+    integer(kint) :: permR(:)
     integer(kint), allocatable :: temp(:)
     integer(kint) :: i, j, in, jS, jE, m, p
 
