@@ -1,4 +1,22 @@
 !> 疎行列操作関数群（メイン関数）
+!# monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+!# monolis_set_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+!# monolis_set_block_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, val)
+!# monolis_set_block_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, val)
+!# monolis_get_scalar_from_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
+!# monolis_get_scalar_from_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
+!# monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+!# monolis_add_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+!# monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, ndof, e1, e2, val)
+!# monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n1, n2, ndof, e1, e2, val)
+!# monolis_set_Dirichlet_bc_main_R(index, item, A, B, indexR, itemR, permA, &
+!# monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
+!# monolis_stop_by_matrix_assemble(ci, cj)
+!# monolis_stop_by_submatrix_access(ndof, sub_dof)
+!# monolis_stop_by_set_DBC(node_id)
+!# monolis_stop_by_set_zero_diag_component(node_id, ndof)
+!# monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
+!# monolis_check_diagonal_zero_component_main_R(monoPRM, monoMAT)
 module mod_monolis_spmat_handler_util
   use mod_monolis_utils
   use mod_monolis_def_mat
@@ -37,8 +55,8 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -46,8 +64,9 @@ contains
         A(im) = val
         return
       endif
-      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
+
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_R
 
   !> スカラ値を疎行列に設定（メイン関数、複素数型）
@@ -78,8 +97,8 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -87,8 +106,9 @@ contains
         A(im) = val
         return
       endif
-      call monolis_stop_by_matrix_assemble(ci, cj)
     enddo
+
+    call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_C
 
   !> 小行列を疎行列に設定（メイン関数、実数型）
@@ -112,15 +132,15 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do k = jS, jE
       jn = item(k)
       if(jn == cj)then
         do i1 = 1, ndof
         do i2 = 1, ndof
           im = NDOF2*(k-1) + ndof*(i1-1) + i2
-          A(im) = val(i2, i1)
+          A(im) = val(i1, i2)
         enddo
         enddo
         return
@@ -150,15 +170,15 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do k = jS, jE
       jn = item(k)
       if(jn == cj)then
         do i1 = 1, ndof
         do i2 = 1, ndof
           im = NDOF2*(k-1) + ndof*(i1-1) + i2
-          A(im) = val(i2, i1)
+          A(im) = val(i1, i2)
         enddo
         enddo
         return
@@ -200,8 +220,8 @@ contains
     if(ndof < csub_i) return
     if(ndof < csub_j) return
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -245,8 +265,8 @@ contains
     if(ndof < csub_i) return
     if(ndof < csub_j) return
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -287,8 +307,8 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -329,8 +349,8 @@ contains
 
     NDOF2 = ndof*ndof
 
-    jS = index(ci-1) + 1
-    jE = index(ci)
+    jS = index(ci) + 1
+    jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
@@ -369,9 +389,6 @@ contains
     integer(kint) :: eperm1(n1), eperm2(n2)
     real(kdouble) :: temp(n1*ndof,n2*ndof)
 
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
     NDOF2 = ndof*ndof
 
     e1t = e1
@@ -389,7 +406,7 @@ contains
         j1 = eperm1(j)
         do i2 = 1, ndof
           do j2 = 1, ndof
-            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(j1-1)+j2, ndof*(i1-1)+i2)
+            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(i1-1)+i2, ndof*(j1-1)+j2)
           enddo
         enddo
       enddo
@@ -397,8 +414,8 @@ contains
 
     do i = 1, n1
       in = e1t(i)
-      jS = index(in-1) + 1
-      jE = index(in)
+      jS = index(in) + 1
+      jE = index(in + 1)
       aa:do j = 1, n2
         do k = jS, jE
           jn = item(k)
@@ -406,7 +423,7 @@ contains
             do i1 = 1, ndof
             do i2 = 1, ndof
               im = NDOF2*(k-1) + ndof*(i1-1) + i2
-              A(im) = A(im) + temp(ndof*(j-1)+i2, ndof*(i-1)+i1)
+              A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
             enddo
             enddo
             jS = k + 1
@@ -444,9 +461,6 @@ contains
     integer(kint) :: eperm1(n1), eperm2(n2)
     complex(kdouble) :: temp(n1*ndof,n2*ndof)
 
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
     NDOF2 = ndof*ndof
 
     e1t = e1
@@ -464,7 +478,7 @@ contains
         j1 = eperm1(j)
         do i2 = 1, ndof
           do j2 = 1, ndof
-            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(j1-1)+j2, ndof*(i1-1)+i2)
+            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(i1-1)+i2, ndof*(j1-1)+j2)
           enddo
         enddo
       enddo
@@ -472,8 +486,8 @@ contains
 
     do i = 1, n1
       in = e1t(i)
-      jS = index(in-1) + 1
-      jE = index(in)
+      jS = index(in) + 1
+      jE = index(in + 1)
       aa:do j = 1, n2
         do k = jS, jE
           jn = item(k)
@@ -481,7 +495,7 @@ contains
             do i1 = 1, ndof
             do i2 = 1, ndof
               im = NDOF2*(k-1) + ndof*(i1-1) + i2
-              A(im) = A(im) + temp(ndof*(j-1)+i2, ndof*(i-1)+i1)
+              A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
             enddo
             enddo
             jS = k + 1
@@ -527,8 +541,8 @@ contains
     is_add = .false.
     NDOF2 = ndof*ndof
 
-    jS = indexR(node_id-1) + 1
-    jE = indexR(node_id)
+    jS = indexR(node_id) + 1
+    jE = indexR(node_id + 1)
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
@@ -538,8 +552,8 @@ contains
       enddo
     enddo
 
-    jS = index(node_id-1) + 1
-    jE = index(node_id)
+    jS = index(node_id) + 1
+    jE = index(node_id + 1)
     do j = jS, jE
       do k = 1, ndof
         A(NDOF2*(j-1) + ndof*(ndof_bc-1) + k) = 0.0d0
@@ -593,8 +607,8 @@ contains
     is_add = .false.
     NDOF2 = ndof*ndof
 
-    jS = indexR(node_id-1) + 1
-    jE = indexR(node_id)
+    jS = indexR(node_id) + 1
+    jE = indexR(node_id + 1)
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
@@ -604,8 +618,8 @@ contains
       enddo
     enddo
 
-    jS = index(node_id-1) + 1
-    jE = index(node_id)
+    jS = index(node_id) + 1
+    jE = index(node_id + 1)
     do j = jS, jE
       do k = 1, ndof
         A(NDOF2*(j-1) + ndof*(ndof_bc-1) + k) = 0.0d0
