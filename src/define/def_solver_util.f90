@@ -37,7 +37,7 @@ contains
     monolis%PRM%Iarray(monolis_prm_I_max_iter) = param
   end subroutine monolis_set_maxiter
 
-  !> 現在の反復回数の設定
+  !> 現在の反復回数の取得
   subroutine monolis_get_converge_iter(monolis, param)
     implicit none
     !> monolis 構造体
