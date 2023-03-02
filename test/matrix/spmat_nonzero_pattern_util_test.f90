@@ -274,7 +274,7 @@ contains
     monolis%MAT%CSR%index(6) = 10
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
-write(*,*)size(monolis%MAT%R%A)
+
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 1", size(monolis%MAT%R%A), 40)
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 2", size(monolis%MAT%R%B), 20)
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 3", size(monolis%MAT%R%X), 20)

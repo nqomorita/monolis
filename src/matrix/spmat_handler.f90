@@ -3,6 +3,8 @@ module mod_monolis_spmat_handler
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_spmat_handler_util
+  use mod_monolis_spmat_nonzero_pattern_util
 
   implicit none
 
@@ -237,7 +239,7 @@ contains
     !> 行列値
     complex(kdouble), intent(in) :: mat(:,:)
 
-    call monolis_add_matrix_to_sparse_matrix_main_(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+    call monolis_add_matrix_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%C%A, n_base_i, n_base_j, monolis%MAT%ndof, connectivity_i, connectivity_j, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C
 
@@ -298,7 +300,7 @@ contains
     call monolis_alloc_I_1d(monolis%MAT%CSC%item, NZ)
     call monolis_alloc_I_1d(monolis%MAT%CSC%perm, NZ)
 
-    call monolis_get_CRR_format(N, NP, NZ, &
+    call monolis_get_CSC_format(N, NP, NZ, &
       & monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
   end subroutine monolis_set_matrix_BCSR_R
