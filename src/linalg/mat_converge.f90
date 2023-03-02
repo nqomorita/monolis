@@ -3,6 +3,7 @@ module mod_monolis_converge
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_linalg
   implicit none
 
 contains
@@ -33,11 +34,11 @@ contains
 #endif
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
-        !write (*,"(a,1pe16.6)")" ** monolis warning: bnorm ", B2
+        call monolis_std_error_string("norm of RHS vector B is 0.0")
       endif
       monoMAT%R%X = 0.0d0
       is_converge = .true.
@@ -69,7 +70,7 @@ contains
     real(kdouble) :: R2, resid
 
     is_converge = .false.
-    call monolis_inner_product_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
     resid = dsqrt(R2/B2)
 
     monoPRM%Iarray(monolis_prm_I_cur_iter) = iter
@@ -78,14 +79,15 @@ contains
     if(resid < monoPRM%Rarray(monolis_prm_R_tol))then
       is_converge = .true.
       if(monoCOM%my_rank == 0 .and. monoPRM%Iarray(monolis_prm_I_show_iterlog) == monolis_I_true)then
-        !write (*,"(i7, 1pe16.6)") iter, resid
+        write (*,"(i7, 1pe16.6)") iter, resid
       endif
     endif
 
     if(iter == monoPRM%Iarray(monolis_prm_I_max_iter))then
       !is_converge = .true.
       if(monoPRM%Iarray(monolis_prm_I_is_measurement) == monolis_I_false)then
-        !error stop "* monolis error: reached the maximum number of iterations"
+        call monolis_std_error_string("reached the maximum number of iterations")
+        call monolis_std_error_stop()
       endif
     endif
   end subroutine monolis_check_converge_R

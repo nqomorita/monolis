@@ -9,7 +9,12 @@ program monolis_test
   use mod_monolis_spmat_handler_util_test
   use mod_monolis_spmat_handler_test
   use mod_monolis_vec_util_test
+  use mod_monolis_linalg_test
+  use mod_monolis_converge_test
+  use mod_monolis_matvec_test
   implicit none
+
+  call monolis_global_initialize()
 
   call monolis_def_mat_test()
   call monolis_def_solver_test()
@@ -22,4 +27,10 @@ program monolis_test
   call monolis_spmat_handler_test()
 
   call monolis_vec_util_test()
+  call monolis_linalg_test()
+  call monolis_converge_test()
+  call monolis_matvec_test()
+
+  call monolis_global_finalize()
+
 end program monolis_test
