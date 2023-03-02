@@ -160,6 +160,7 @@ contains
     integer(kint) :: cj
     !> 設定値
     real(kdouble) :: val(2,2)
+    real(kdouble) :: B(5)
     integer(kint) :: e(1)
 
     call monolis_std_log_string("monolis_set_block_to_sparse_matrix_main_R_test")
@@ -211,8 +212,6 @@ contains
     call monolis_test_check_eq_R1("monolis_set_block_to_sparse_matrix_main_R_test 3", A(15), 6.0d0)
     call monolis_test_check_eq_R1("monolis_set_block_to_sparse_matrix_main_R_test 4", A(16), 8.0d0)
   end subroutine monolis_set_block_to_sparse_matrix_main_R_test
-
-    !call monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, ndof, e1, e2, val)
 
   subroutine monolis_set_block_to_sparse_matrix_main_C_test()
     implicit none
@@ -276,10 +275,4 @@ contains
     call monolis_test_check_eq_C1("monolis_set_block_to_sparse_matrix_main_C_test 3", A(15), (6.0d0, 6.0d0))
     call monolis_test_check_eq_C1("monolis_set_block_to_sparse_matrix_main_C_test 4", A(16), (8.0d0, 8.0d0))
   end subroutine monolis_set_block_to_sparse_matrix_main_C_test
-
-    !call monolis_set_Dirichlet_bc_main_R(index, item, A, B, indexR, itemR, permA, &
-    !call monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
-    !call monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
-    !call monolis_check_diagonal_zero_component_main_R(monoPRM, monoMAT)
-
 end module mod_monolis_spmat_handler_util_test
