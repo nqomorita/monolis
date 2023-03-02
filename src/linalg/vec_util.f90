@@ -125,7 +125,7 @@ contains
 !$omp & private(i)
 !$omp do
     do i = 1, n * ndof
-      Z(i) = alpha*X(i) + Y(i)
+      Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
 !$omp end parallel
@@ -161,7 +161,7 @@ contains
 !$omp & private(i)
 !$omp do
     do i = 1, n * ndof
-      Z(i) = alpha*X(i) + Y(i)
+      Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
 !$omp end parallel
@@ -197,7 +197,7 @@ contains
 !$omp & private(i)
 !$omp do
     do i = 1, n * ndof
-      Z(i) = alpha*X(i) + Y(i)
+      Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
 !$omp end parallel
