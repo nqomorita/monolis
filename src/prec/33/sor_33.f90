@@ -103,6 +103,7 @@ contains
     real(kdouble), pointer :: A(:), ALU(:)
 
     N =  monoPREC%N
+    A => monoMAT%R%A
     ALU => monoPREC%R%D
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item

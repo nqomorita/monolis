@@ -96,6 +96,7 @@ contains
     NP = monoMAT%NP
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
+    A => monoMAT%R%A
     ALU => monoPREC%R%D
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
