@@ -29,9 +29,9 @@ contains
     !> monolis 構造体
     type(monolis_structure) :: monolis
     !> 右辺ベクトル
-    real(kdouble) :: X(:)
+    complex(kdouble) :: X(:)
     !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    complex(kdouble) :: Y(:)
     real(kdouble) :: tspmv, tcomm
 
     call monolis_matvec_product_main_C(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
@@ -80,9 +80,9 @@ contains
     !> monolis 構造体
     type(monolis_mat) :: monoMAT
     !> 右辺ベクトル
-    real(kdouble) :: X(:)
+    complex(kdouble) :: X(:)
     !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    complex(kdouble) :: Y(:)
     real(kdouble) :: t1, t2
     real(kdouble) :: tspmv, tcomm
 
@@ -446,7 +446,7 @@ contains
     real(kdouble) :: tcomm
     integer(kint) :: i
 
-    call monolis_matvec_product_main_R(monoCOM, monoMAT, X, R, tspmv, tcomm)
+    call monolis_matvec_product_main_C(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
 !$omp parallel default(none) &
 !$omp & shared(monoMAT, B, R) &

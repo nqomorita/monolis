@@ -1,5 +1,6 @@
 !> ベクトル演算テストモジュール
 module mod_monolis_vec_util_test
+  use mod_monolis
   use mod_monolis_utils
   use mod_monolis_vec_util
   implicit none
