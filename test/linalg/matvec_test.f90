@@ -14,6 +14,9 @@ contains
 
     call monolis_matvec_33_R_test()
     call monolis_matvec_33_C_test()
+
+    call monolis_matvec_nn_R_test()
+    call monolis_matvec_nn_C_test()
   end subroutine monolis_matvec_test
 
   subroutine monolis_matvec_11_R_test()
@@ -263,4 +266,121 @@ contains
     call monolis_finalize(mat)
   end subroutine monolis_matvec_33_C_test
 
+  subroutine monolis_matvec_nn_R_test()
+    implicit none
+    type(monolis_structure) :: mat
+    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: i1, i2, j1, j2
+    real(kdouble) :: val
+    real(kdouble) :: a(8), b(8), b_th(8), mat_dense(8,8)
+    logical :: is_find
+
+    call monolis_std_log_string("monolis_matvec_nn_R_test")
+
+    call monolis_initialize(mat, "./")
+
+    nnode = 4
+
+    nelem = 3
+
+    elem(1,1) = 1; elem(2,1) = 2;
+    elem(1,2) = 2; elem(2,2) = 3;
+    elem(1,3) = 3; elem(2,3) = 4;
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, 2, nelem, elem)
+
+    do i1 = 1, 3
+      do i2 = 1, 2
+      do j2 = 1, 2
+        call random_number(val)
+        val = val + 1.0d0
+        call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i1), elem(2,i1), i2, j2, val)
+        call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i1), elem(1,i1), j2, i2, val)
+      enddo
+      enddo
+    enddo
+
+    a = 1.0d0
+
+    call monolis_matvec_product_R(mat, a, b)
+
+    mat_dense = 0.0d0
+
+    do i1 = 1, 4
+    do j1 = 1, 4
+      do i2 = 1, 2
+      do j2 = 1, 2
+        call monolis_get_scalar_from_sparse_matrix_R(mat, i1, j1, i2, j2, val, is_find)
+        mat_dense(2*i1-2+i2, 2*j1-2+j2) = val
+      enddo
+      enddo
+    enddo
+    enddo
+
+    b_th = matmul(mat_dense, a)
+
+    call monolis_test_check_eq_R("monolis_matvec_nn_R_test", b, b_th)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_matvec_nn_R_test
+
+  subroutine monolis_matvec_nn_C_test()
+    implicit none
+    type(monolis_structure) :: mat
+    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: i1, i2, j1, j2
+    real(kdouble) :: v1, v2
+    complex(kdouble) :: val
+    complex(kdouble) :: a(8), b(8), b_th(8), mat_dense(8,8)
+    logical :: is_find
+
+    call monolis_std_log_string("monolis_matvec_nn_C_test")
+
+    call monolis_initialize(mat, "./")
+
+    nnode = 4
+
+    nelem = 3
+
+    elem(1,1) = 1; elem(2,1) = 2;
+    elem(1,2) = 2; elem(2,2) = 3;
+    elem(1,3) = 3; elem(2,3) = 4;
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, nnode, 2, 2, nelem, elem)
+
+    do i1 = 1, 3
+      do i2 = 1, 2
+      do j2 = 1, 2
+        call random_number(v1)
+        call random_number(v2)
+        val = cmplx(v1, v2) + (1.0d0, 1.0d0)
+        call monolis_add_scalar_to_sparse_matrix_C(mat, elem(1,i1), elem(2,i1), i2, j2, val)
+        call monolis_add_scalar_to_sparse_matrix_C(mat, elem(2,i1), elem(1,i1), j2, i2, val)
+      enddo
+      enddo
+    enddo
+
+    a = (1.0d0, 1.0d0)
+
+    call monolis_matvec_product_C(mat, a, b)
+
+    mat_dense = (0.0d0, 0.0d0)
+
+    do i1 = 1, 4
+    do j1 = 1, 4
+      do i2 = 1, 2
+      do j2 = 1, 2
+        call monolis_get_scalar_from_sparse_matrix_C(mat, i1, j1, i2, j2, val, is_find)
+        mat_dense(2*i1-2+i2, 2*j1-2+j2) = val
+      enddo
+      enddo
+    enddo
+    enddo
+
+    b_th = matmul(mat_dense, a)
+
+    call monolis_test_check_eq_C("monolis_matvec_nn_C_test", b, b_th)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_matvec_nn_C_test
 end module mod_monolis_matvec_test
