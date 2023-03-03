@@ -20,30 +20,19 @@ contains
 
   subroutine monolis_set_scalar_to_sparse_matrix_R_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 行番号
     integer(kint) :: i
-    !> 列番号
     integer(kint) :: j
-    !> ブロック中の行番号
     integer(kint) :: sub_i
-    !> ブロック中の列番号
     integer(kint) :: sub_j
-    !> 行列値
     real(kdouble) :: val
     real(kdouble) :: bval(2,2)
     real(kdouble) :: B(8)
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: ndof
-    !> 要素数
     integer(kint) :: n_elem
     integer(kint) :: e(1), f(1)
-    !> 要素
     integer(kint) :: elem(2,3)
     logical :: is_find
 
@@ -140,30 +129,19 @@ contains
 
   subroutine monolis_set_scalar_to_sparse_matrix_C_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 行番号
     integer(kint) :: i
-    !> 列番号
     integer(kint) :: j
-    !> ブロック中の行番号
     integer(kint) :: sub_i
-    !> ブロック中の列番号
     integer(kint) :: sub_j
-    !> 行列値
     complex(kdouble) :: val
     complex(kdouble) :: bval(2,2)
     complex(kdouble) :: B(8)
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: ndof
-    !> 要素数
     integer(kint) :: n_elem
     integer(kint) :: e(1), f(1)
-    !> 要素
     integer(kint) :: elem(2,3)
     logical :: is_find
 

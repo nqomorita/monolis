@@ -9,23 +9,14 @@ contains
 
   subroutine monolis_converge_test()
     implicit none
-    !> パラメータ構造体
     type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
-    !> 行列構造体
     type(monolis_mat) :: monoMAT
-    !> 残差ベクトル
     real(kdouble) :: R(4)
-    !> L2 相対誤差の分母値
     real(kdouble) :: B2
-    !> 反復回数
     integer(kint) :: iter
-    !> 収束判定フラグ
     logical :: is_converge
-    !> 内積時間
     real(kdouble) :: tdotp
-    !> 通信時間
     real(kdouble) :: tcomm
 
     call monolis_std_log_string("monolis_converge_test")

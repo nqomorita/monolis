@@ -18,23 +18,14 @@ contains
 
   subroutine monolis_set_scalar_to_sparse_matrix_main_R_test()
     implicit none
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(10)
-    !> 係数行列
     real(kdouble) :: A(40)
-    !> ブロック自由度
     integer(kint) :: ndof
-    !> 行番号
     integer(kint) :: ci
-    !> 列番号
     integer(kint) :: cj
-    !> ブロック中の行番号
     integer(kint) :: csub_i
-    !> ブロック中の列番号
     integer(kint) :: csub_j
-    !> 設定値
     real(kdouble) :: val
     logical :: is_find
 
@@ -82,23 +73,14 @@ contains
 
   subroutine monolis_set_scalar_to_sparse_matrix_main_C_test()
     implicit none
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(10)
-    !> 係数行列
     complex(kdouble) :: A(40)
-    !> ブロック自由度
     integer(kint) :: ndof
-    !> 行番号
     integer(kint) :: ci
-    !> 列番号
     integer(kint) :: cj
-    !> ブロック中の行番号
     integer(kint) :: csub_i
-    !> ブロック中の列番号
     integer(kint) :: csub_j
-    !> 設定値
     complex(kdouble) :: val
     logical :: is_find
 
@@ -146,19 +128,12 @@ contains
 
   subroutine monolis_set_block_to_sparse_matrix_main_R_test()
     implicit none
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(10)
-    !> 係数行列
     real(kdouble) :: A(40)
-    !> ブロック自由度
     integer(kint) :: ndof
-    !> 行番号
     integer(kint) :: ci
-    !> 列番号
     integer(kint) :: cj
-    !> 設定値
     real(kdouble) :: val(2,2)
     real(kdouble) :: B(5)
     integer(kint) :: e(1)
@@ -215,19 +190,12 @@ contains
 
   subroutine monolis_set_block_to_sparse_matrix_main_C_test()
     implicit none
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(10)
-    !> 係数行列
     complex(kdouble) :: A(40)
-    !> ブロック自由度
     integer(kint) :: ndof
-    !> 行番号
     integer(kint) :: ci
-    !> 列番号
     integer(kint) :: cj
-    !> 設定値
     complex(kdouble) :: val(2,2)
     integer(kint) :: e(1)
 

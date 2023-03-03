@@ -20,15 +20,10 @@ contains
 
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_main_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 自由度数
     integer(kint) :: ndof
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(6)
 
     call monolis_std_log_string("monolis_get_nonzero_pattern_by_nodal_graph_main_test")
@@ -104,15 +99,10 @@ contains
 
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 自由度リスト
     integer(kint) :: n_dof_list(4)
-    !> index 配列
     integer(kint) :: index(5)
-    !> item 配列
     integer(kint) :: item(6)
 
     call monolis_std_log_string("monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main_test")
@@ -232,11 +222,8 @@ contains
 
   subroutine monolis_get_n_dof_index_test()
     implicit none
-    !> 節点数
     integer(kint) :: n_node
-    !> 節点自由度リスト
     integer(kint) :: n_dof_list(3)
-    !> 節点自由度 index
     integer(kint) :: n_dof_index(3)
 
     call monolis_std_log_string("monolis_get_n_dof_index_test")
@@ -260,7 +247,6 @@ contains
 
   subroutine monolis_alloc_nonzero_pattern_mat_val_R_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
 
     call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_R_test")
@@ -282,7 +268,6 @@ contains
 
   subroutine monolis_alloc_nonzero_pattern_mat_val_C_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
 
     call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_C_test")
@@ -304,21 +289,13 @@ contains
 
   subroutine monolis_get_CSC_format_test()
     implicit none
-    !> 行数
     integer(kint) :: NC
-    !> 列数
     integer(kint) :: NR
-    !> 非零要素数
     integer(kint) :: NZ
-    !> index 配列（CSR 形式）
     integer(kint) :: index(5)
-    !> item 配列（CSR 形式）
     integer(kint) :: item(10)
-    !> index 配列（CSC 形式）
     integer(kint) :: indexR(5)
-    !> index 配列（CSC 形式）
     integer(kint) :: itemR(10)
-    !> index 配列（CSC 形式）
     integer(kint) :: permR(10)
 
     call monolis_std_log_string("monolis_get_CSC_format_test")

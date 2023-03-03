@@ -8,11 +8,8 @@ contains
 
   subroutine monolis_linalg_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 自由度数
     integer(kint) :: n
-    !> ブロックサイズ
     integer(kint) :: ndof
     integer(kint) :: iX(4), iY(4), isum
     real(kdouble) :: rX(4), rY(4), rsum

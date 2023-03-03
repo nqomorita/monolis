@@ -15,11 +15,8 @@ contains
 
   subroutine monolis_vec_copy_test()
     implicit none
-    !> 自由度数
     integer(kint) :: n
-    !> ブロックサイズ
     integer(kint) :: ndof
-    !> ベクトル 1
     integer(kint) :: iX(4), iY(4)
     real(kdouble) :: rX(4), rY(4)
     complex(kdouble) :: cX(4), cY(4)

@@ -25,17 +25,11 @@ contains
 
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_R_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: ndof
-    !> 要素数
     integer(kint) :: n_elem
-    !> 要素
     integer(kint) :: elem(2,3)
 
     call monolis_std_log_string("monolis_get_nonzero_pattern_by_simple_mesh_R_test")
@@ -110,17 +104,11 @@ contains
 
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_C_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: ndof
-    !> 要素数
     integer(kint) :: n_elem
-    !> 要素
     integer(kint) :: elem(2,3)
 
     call monolis_std_log_string("monolis_get_nonzero_pattern_by_simple_mesh_C_test")
@@ -195,17 +183,11 @@ contains
 
   subroutine monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: n_dof_list(4)
-    !> 要素数
     integer(kint) :: n_elem
-    !> 要素
     integer(kint) :: elem(2,3)
 
     call monolis_std_log_string("monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test")
@@ -320,17 +302,11 @@ contains
 
   subroutine monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test()
     implicit none
-    !> monolis 構造体
     type(monolis_structure) :: monolis
-    !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
     integer(kint) :: n_base
-    !> 自由度数
     integer(kint) :: n_dof_list(4)
-    !> 要素数
     integer(kint) :: n_elem
-    !> 要素
     integer(kint) :: elem(2,3)
 
     call monolis_std_log_string("monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test")
