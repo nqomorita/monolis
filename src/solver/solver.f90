@@ -11,56 +11,28 @@ module mod_monolis_solve
 
 contains
 
+  !> 線形ソルバ関数
   subroutine monolis_solve(monolis, B, X)
     implicit none
+    !> monolis 構造体
     type(monolis_structure) :: monolis
-    real(kdouble) :: B(:), X(:)
-    integer(kint) :: i
+    !> 右辺ベクトル
+    real(kdouble) :: B(:)
+    !> 解ベクトル
+    real(kdouble) :: X(:)
 
-    !call monolis_set_RHS(monolis%MAT, B)
+    call monolis_set_RHS(monolis%MAT, B)
 
-    !call monolis_set_initial_solution(monolis%MAT, X)
+    call monolis_set_initial_solution(monolis%MAT, X)
 
     !call monolis_set_initial_comm(monolis%COM, monolis%MAT)
 
     call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
-    !call monolis_get_solution(monolis%MAT, X)
+    call monolis_get_solution(monolis%MAT, X)
   end subroutine monolis_solve
 
-  subroutine monolis_set_RHS(monoMAT, B)
-    implicit none
-    type(monolis_mat) :: monoMAT
-    real(kdouble) :: B(:)
-    integer(kint) :: i
-
-    do i = 1, monoMAT%NP*monoMAT%NDOF
-      monoMAT%R%B(i) = B(i)
-    enddo
-  end subroutine monolis_set_RHS
-
-  subroutine monolis_set_initial_solution(monoMAT, X)
-    implicit none
-    type(monolis_mat) :: monoMAT
-    real(kdouble) :: X(:)
-    integer(kint) :: i
-
-    do i = 1, monoMAT%NP*monoMAT%NDOF
-      monoMAT%R%X(i) = X(i)
-    enddo
-  end subroutine monolis_set_initial_solution
-
-  subroutine monolis_get_solution(monoMAT, X)
-    implicit none
-    type(monolis_mat) :: monoMAT
-    real(kdouble) :: X(:)
-    integer(kint) :: i
-
-    do i = 1, monoMAT%NP*monoMAT%NDOF
-      X(i) = monoMAT%R%X(i)
-    enddo
-  end subroutine monolis_get_solution
-
+  !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
@@ -141,96 +113,5 @@ contains
         call monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
     end select
   end subroutine monolis_solver
-
-  subroutine monolis_timer_finalize(monoPRM, monoCOM)
-    implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
-    logical :: is_output
-
-!    call monolis_std_debug_log_header("monolis_timer_finalize")
-!
-!    call monolis_barrier_(monoCOM%comm)
-!    t1 = monolis_get_time()
-!    monoPRM%tsol = t1 - monoPRM%tsol
-!
-!    if(monoPRM%show_summary .and. monoCOM%my_rank == 0)then
-!      write(*,"(a,i10)")" ** monolis converge iter:", monoPRM%curiter
-!      write(*,"(a,1p4e10.3)")" ** monolis rel. residual:", monoPRM%curresid
-!    endif
-!
-!    is_output = monoPRM%show_summary .or. monoPRM%show_time
-!    if(is_output .and. monoCOM%my_rank == 0)then
-!      write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%tsol
-!    endif
-!
-!    if(monoPRM%show_time)then
-!      time(1) = monoPRM%tprep
-!      time(2) = monoPRM%tspmv
-!      time(3) = monoPRM%tdotp
-!      time(4) = monoPRM%tprec
-!      time(5) = monoPRM%tcomm_dotp
-!      time(6) = monoPRM%tcomm_spmv
-!      call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-!      time = time/dble(monolis_mpi_global_comm_size())
-!
-!      if(monoCOM%my_rank == 0)then
-!        write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
-!        write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
-!        write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
-!        write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
-!        write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
-!        write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
-!      endif
-!    endif
-!
-!    if(monoPRM%show_time_statistics)then
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" ** monolis solution time statistics"
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"                           max       min       average   std"
-!
-!      time(1) = monoPRM%tprep
-!      call monolis_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/prepost time:", t_max, t_min, t_avg, t_sd
-!
-!      time(2) = monoPRM%tspmv
-!      call monolis_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
-!
-!      time(3) = monoPRM%tdotp
-!      call monolis_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/inner p time:", t_max, t_min, t_avg, t_sd
-!
-!      time(4) = monoPRM%tprec
-!      call monolis_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/precond time:", t_max, t_min, t_avg, t_sd
-!
-!      time(5) = monoPRM%tcomm_dotp
-!      call monolis_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
-!
-!      time(6) = monoPRM%tcomm_spmv
-!      call monolis_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
-!      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
-!    endif
-!
-!    !> get average time
-!    time(1) = monoPRM%tprep
-!    time(2) = monoPRM%tspmv
-!    time(3) = monoPRM%tdotp
-!    time(4) = monoPRM%tprec
-!    time(5) = monoPRM%tcomm_dotp
-!    time(6) = monoPRM%tcomm_spmv
-!
-!    call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-!    time = time/dble(monolis_mpi_global_comm_size())
-!
-!    monoPRM%tprep = time(1)
-!    monoPRM%tspmv = time(2)
-!    monoPRM%tdotp = time(3)
-!    monoPRM%tprec = time(4)
-!    monoPRM%tcomm_dotp = time(5)
-!    monoPRM%tcomm_spmv = time(6)
-  end subroutine monolis_timer_finalize
 
 end module mod_monolis_solve

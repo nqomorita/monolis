@@ -10,10 +10,8 @@ contains
 
   !> @ingroup dev_linalg
   !> 収束判定閾値の設定
-  subroutine monolis_set_converge_R(monoPRM, monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
+  subroutine monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
     !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
     !> 行列構造体

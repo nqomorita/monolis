@@ -26,9 +26,10 @@ contains
     integer(kint) :: N, NP, NDOF, NNDOF
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
+    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
+    logical :: is_converge
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
     real(kdouble), pointer :: B(:), X(:)
-    logical :: is_converge
 
 #ifdef DEBUG
     call monolis_std_debug_log_header("monolis_solver_CG")
@@ -42,47 +43,59 @@ contains
     B => monoMAT%R%B
     iter_RR = 200
 
-    !if(monoPRM%is_init_x) X = 0.0d0
+    tspmv = monoPRM%Rarray(monolis_R_time_spmv)
+    tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
+    tdotp = monoPRM%Rarray(monolis_R_time_dotp)
+    tcomm_dotp = monoPRM%Rarray(monolis_R_time_comm_dotp)
+
+    if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
+      X = 0.0d0
+    endif
 
     call monolis_alloc_R_1d(R, NDOF*NP)
     call monolis_alloc_R_1d(Z, NDOF*NP)
     call monolis_alloc_R_1d(Q, NDOF*NP)
     call monolis_alloc_R_1d(P, NDOF*NP)
 
-!    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
-!    call monolis_set_converge(monoPRM, monoCOM, monoMAT, R, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
-!    if(is_converge) return
-!
-!    do iter = 1, monoPRM%maxiter
-!      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, Z)
-!      call monolis_inner_product_R(monoCOM, N, NDOF, R, Z, rho, monoPRM%tdotp, monoPRM%tcomm_dotp)
-!
-!      if(1 < iter)then
-!        beta = rho/rho1
-!        call monolis_vec_AXPY(N, NDOF, beta, P, Z, P)
-!      else
-!        call monolis_vec_copy_R(N, NDOF, Z, P)
-!      endif
-!
-!      call monolis_matvec(monoCOM, monoMAT, P, Q, monoPRM%tspmv, monoPRM%tcomm_spmv)
-!      call monolis_inner_product_R(monoCOM, N, NDOF, P, Q, omega, monoPRM%tdotp, monoPRM%tcomm_dotp)
-!      alpha = rho/omega
-!
-!      call monolis_vec_AXPY(N, NDOF, alpha, P, X, X)
-!
-!      if(mod(iter, iter_RR) == 0)then
-!        call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
-!      else
-!        call monolis_vec_AXPY(N, NDOF, -alpha, Q, R, R)
-!      endif
-!
-!      call monolis_check_converge(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
-!      if(is_converge) exit
-!
-!      rho1 = rho
-!    enddo
-!
-!    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    if(is_converge) return
+
+    do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
+      call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, R, Z, rho, tdotp, tcomm_dotp)
+
+      if(1 < iter)then
+        beta = rho/rho1
+        call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, Z, P)
+      else
+        call monolis_vec_copy_R(N, NDOF, Z, P)
+      endif
+
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, P, Q, omega, tdotp, tcomm_dotp)
+      alpha = rho/omega
+
+      call monolis_vec_AXPBY_R(N, NDOF, alpha, P, 1.0d0, X, X)
+
+      if(mod(iter, iter_RR) == 0)then
+        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      else
+        call monolis_vec_AXPBY(N, NDOF, -alpha, Q, 1.0d0, R, R)
+      endif
+
+      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+      if(is_converge) exit
+
+      rho1 = rho
+    enddo
+
+    call monolis_update_R(monoCOM, NDOF, X, tcomm_spmv)
+
+    monoPRM%Rarray(monolis_R_time_spmv) = tspmv
+    monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
+    monoPRM%Rarray(monolis_R_time_dotp) = tdotp
+    monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
 
     call monolis_dealloc_R_1d(R)
     call monolis_dealloc_R_1d(Z)

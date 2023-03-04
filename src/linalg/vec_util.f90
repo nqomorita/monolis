@@ -7,12 +7,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル配列コピー（整数型）
-  subroutine monolis_vec_copy_I(n, ndof, X, Y)
+  subroutine monolis_vec_copy_I(n, n_dof, X, Y)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> ベクトル 1
     integer(kint) :: X(:)
     !> ベクトル 2
@@ -25,10 +25,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
-!$omp & firstprivate(n, ndof) &
+!$omp & firstprivate(n, n_dof) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Y(i) = X(i)
     enddo
 !$omp end do
@@ -37,12 +37,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル配列コピー（実数型）
-  subroutine monolis_vec_copy_R(n, ndof, X, Y)
+  subroutine monolis_vec_copy_R(n, n_dof, X, Y)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> ベクトル 1
     real(kdouble) :: X(:)
     !> ベクトル 2
@@ -55,10 +55,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
-!$omp & firstprivate(n, ndof) &
+!$omp & firstprivate(n, n_dof) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Y(i) = X(i)
     enddo
 !$omp end do
@@ -67,12 +67,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル配列コピー（複素数型）
-  subroutine monolis_vec_copy_C(n, ndof, X, Y)
+  subroutine monolis_vec_copy_C(n, n_dof, X, Y)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> ベクトル 1
     complex(kdouble) :: X(:)
     !> ベクトル 2
@@ -85,10 +85,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
-!$omp & firstprivate(n, ndof) &
+!$omp & firstprivate(n, n_dof) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Y(i) = X(i)
     enddo
 !$omp end do
@@ -97,12 +97,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （整数型）
-  subroutine monolis_vec_AXPBY_I(n, ndof, alpha, X, beta, Y, Z)
+  subroutine monolis_vec_AXPBY_I(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> 係数 1
     integer(kint) :: alpha
     !> ベクトル 1
@@ -121,10 +121,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(n, ndof, alpha) &
+!$omp & firstprivate(n, n_dof, alpha) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
@@ -133,12 +133,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （実数型）
-  subroutine monolis_vec_AXPBY_R(n, ndof, alpha, X, beta, Y, Z)
+  subroutine monolis_vec_AXPBY_R(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> 係数 1
     real(kdouble) :: alpha
     !> ベクトル 1
@@ -157,10 +157,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(n, ndof, alpha) &
+!$omp & firstprivate(n, n_dof, alpha) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
@@ -169,12 +169,12 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル和 $z = \alpha * x + y$ （複素数型）
-  subroutine monolis_vec_AXPBY_C(n, ndof, alpha, X, beta, Y, Z)
+  subroutine monolis_vec_AXPBY_C(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
-    integer(kint) :: ndof
+    integer(kint) :: n_dof
     !> 係数 1
     complex(kdouble) :: alpha
     !> ベクトル 1
@@ -193,10 +193,10 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(n, ndof, alpha) &
+!$omp & firstprivate(n, n_dof, alpha) &
 !$omp & private(i)
 !$omp do
-    do i = 1, n * ndof
+    do i = 1, n * n_dof
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
 !$omp end do
