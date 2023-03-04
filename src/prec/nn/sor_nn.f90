@@ -40,8 +40,8 @@ contains
 !$omp & private(T, LU, i, j, k, jS, jE, in)
 !$omp do
     do i = 1, N
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do ii = jS, jE
         in = item(ii)
         if(i == in)then
@@ -119,8 +119,8 @@ contains
       do j = 1, NDOF
         ST(j) = Y(NDOF*(i-1)+j)
       enddo
-      jS = index(i-1) + 1
-      jE = index(i  )
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jS, jE
         jn = item(j)
         if(jn < i)then
@@ -158,8 +158,8 @@ contains
       do j = 1, NDOF
         ST(j) = 0.0d0
       enddo
-      jS = index(i-1) + 1
-      jE = index(i  )
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jE, jS, -1
         jn = item(j)
         if(i < jn)then

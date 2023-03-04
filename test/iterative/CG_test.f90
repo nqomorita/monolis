@@ -8,23 +8,27 @@ contains
 
   subroutine monolis_solver_CG_test()
     implicit none
+    integer(kint) :: n_dof
 
-    call monolis_solver_CG_33_test(monolis_prec_NONE)
-    call monolis_solver_CG_33_test(monolis_prec_DIAG)
-    call monolis_solver_CG_33_test(monolis_prec_SOR)
-    !call monolis_solver_CG_33_test(monolis_prec_MUMPS)
+    do n_dof = 1, 3
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_NONE)
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
+    enddo
   end subroutine monolis_solver_CG_test
 
-  subroutine monolis_solver_CG_33_test(prec)
+  subroutine monolis_solver_CG_test_main(n_dof, prec)
     implicit none
     type(monolis_structure) :: mat
     integer(kint) :: nnode, nelem, elem(2,9)
     integer(kint) :: i1, i2, j1, j2
-    integer(kint) :: prec
+    integer(kint) :: n_dof, prec
     real(kdouble) :: val
-    real(kdouble) :: a(30), b(30)
+    real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
-    call monolis_std_log_string("monolis_solver_CG_33_test")
+    call monolis_std_log_string("monolis_solver_CG_test_main")
+    call monolis_std_log_I1("DOF", n_dof)
+    call monolis_std_log_I1("PRECOND", prec)
 
     call monolis_initialize(mat, "./")
 
@@ -42,10 +46,10 @@ contains
     elem(1,8) = 8; elem(2,8) = 9;
     elem(1,9) = 9; elem(2,9) =10;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, 3, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, n_dof, nelem, elem)
 
     do i1 = 1, 10
-      do i2 = 1, 3
+      do i2 = 1, n_dof
         call random_number(val)
         val = val + 1.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
@@ -53,8 +57,8 @@ contains
     enddo
 
     do i1 = 1, 9
-      do i2 = 1, 3
-      do j2 = 1, 3
+      do i2 = 1, n_dof
+      do j2 = 1, n_dof
         call random_number(val)
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i1), elem(2,i1), i2, j2, val)
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i1), elem(1,i1), j2, i2, val)
@@ -73,8 +77,9 @@ contains
 
     b = 1.0d0
 
-    call monolis_test_check_eq_R("monolis_solver_CG_33_test", a, b)
+    call monolis_test_check_eq_R("monolis_solver_CG_test_main", a, b)
 
     call monolis_finalize(mat)
-  end subroutine monolis_solver_CG_33_test
+  end subroutine monolis_solver_CG_test_main
+
 end module mod_monolis_solver_CG_test
