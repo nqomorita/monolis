@@ -50,9 +50,7 @@ contains
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_inner_product_main_I")
-#endif
 
     t1 = monolis_get_time()
     sum = 0
@@ -119,9 +117,7 @@ contains
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_inner_product_main_R")
-#endif
 
     t1 = monolis_get_time()
     sum = 0.0d0
@@ -188,9 +184,7 @@ contains
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_inner_product_main_C")
-#endif
 
     t1 = monolis_get_time()
     sum = 0.0d0

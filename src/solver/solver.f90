@@ -6,6 +6,7 @@ module mod_monolis_solve
   use mod_monolis_solver_CG
   use mod_monolis_solver_BiCGSTAB
   use mod_monolis_solver_COCG
+  use mod_monolis_precond
 
   implicit none
 
@@ -20,6 +21,8 @@ contains
     real(kdouble) :: B(:)
     !> 解ベクトル
     real(kdouble) :: X(:)
+
+    !call monolis_std_debug_log_flag(.true.)
 
     call monolis_set_RHS(monolis%MAT, B)
 
@@ -44,13 +47,19 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
+    call monolis_std_debug_log_header("monolis_solve_main")
+
     !call monolis_timer_initialize(monoPRM, monoCOM)
     !call monolis_check_diagonal(monoPRM, monoMAT)
     !call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
     !call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
-    !call monolis_precond_setup(monoPRM, monoCOM_reorder, monoMAT_reorder)
+
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
+
     call monolis_solver(monoPRM, monoCOM, monoMAT, monoPREC)
-    !call monolis_precond_clear(monoPRM, monoCOM_reorder, monoMAT_reorder)
+
+    call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
+
     !call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
     !call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
     !call monolis_timer_finalize(monoPRM, monoCOM)
@@ -67,7 +76,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-!    if(monoPRM%is_debug) call monolis_std_debug_log_header("monolis_solver v0.0.0")
+    call monolis_std_debug_log_header("monolis_solver")
 
 !    if(monoPRM%show_summary .and. monoCOM%my_rank == 0) write(*,"(a)")" ** monolis solver: "// &
 !    & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))

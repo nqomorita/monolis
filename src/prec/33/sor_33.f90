@@ -34,8 +34,8 @@ contains
 !$omp & private(P, T, i, j, k, jS, jE, in)
 !$omp do
     do i = 1, N
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jS, jE
         in = item(j)
         if(i == in)then
@@ -102,7 +102,7 @@ contains
     integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), ALU(:)
 
-    N =  monoPREC%N
+    N =  monoMAT%N
     A => monoMAT%R%A
     ALU => monoPREC%R%D
     index => monoMAT%CSR%index
@@ -122,8 +122,8 @@ contains
       S1 = Y(3*i-2)
       S2 = Y(3*i-1)
       S3 = Y(3*i  )
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jS, jE
         jn = item(j)
         if(jn < i)then
@@ -152,8 +152,8 @@ contains
       S1 = 0.0d0
       S2 = 0.0d0
       S3 = 0.0d0
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jE, jS, -1
         jn = item(j)
         if(i < jn)then

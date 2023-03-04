@@ -19,9 +19,7 @@ contains
     integer(kint) :: Y(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_copy_I")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
@@ -49,9 +47,7 @@ contains
     real(kdouble) :: Y(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_copy_R")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
@@ -79,9 +75,7 @@ contains
     complex(kdouble) :: Y(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_copy_C")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y) &
@@ -115,9 +109,7 @@ contains
     integer(kint) :: Z(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_AXPBY_I")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
@@ -151,9 +143,7 @@ contains
     real(kdouble) :: Z(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_AXPBY_R")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
@@ -187,9 +177,7 @@ contains
     complex(kdouble) :: Z(:)
     integer(kint) :: i
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_vec_AXPBY_C")
-#endif
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &

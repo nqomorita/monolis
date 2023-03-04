@@ -11,7 +11,7 @@ module mod_monolis_precond_sor
 contains
 
   !> 前処理生成：SOR 前処理
-  subroutine monolis_precond_sor_setup(monoPRM, monoCOM, monoMAT, monoPREC)
+  subroutine monolis_precond_sor_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -22,15 +22,17 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
+    call monolis_std_debug_log_header("monolis_precond_sor_setup_R")
+
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_sor_33_setup(monoMAT, monoPREC)
+      call monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
     else
-      call monolis_precond_sor_nn_setup(monoMAT, monoPREC)
+      call monolis_precond_sor_nn_setup_R(monoMAT, monoPREC)
     endif
-  end subroutine monolis_precond_sor_setup
+  end subroutine monolis_precond_sor_setup_R
 
   !> 前処理適用：SOR 前処理
-  subroutine monolis_precond_sor_apply(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
+  subroutine monolis_precond_sor_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -42,15 +44,17 @@ contains
     type(monolis_mat) :: monoPREC
     real(kdouble) :: X(:), Y(:)
 
+    call monolis_std_debug_log_header("monolis_precond_sor_apply_R")
+
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_sor_33_apply(monoMAT, monoPREC, X, Y)
+      call monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
     else
-      call monolis_precond_sor_nn_apply(monoMAT, monoPREC, X, Y)
+      call monolis_precond_sor_nn_apply_R(monoMAT, monoPREC, X, Y)
     endif
-  end subroutine monolis_precond_sor_apply
+  end subroutine monolis_precond_sor_apply_R
 
   !> 前処理初期化：SOR 前処理
-  subroutine monolis_precond_sor_clear(monoPRM, monoCOM, monoMAT, monoPREC)
+  subroutine monolis_precond_sor_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -61,10 +65,12 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
+    call monolis_std_debug_log_header("monolis_precond_sor_clear_R")
+
     if(monoMAT%NDOF == 3)then
-      call monolis_precond_sor_33_clear(monoPREC)
+      call monolis_precond_sor_33_clear_R(monoPREC)
     else
-      call monolis_precond_sor_nn_clear(monoPREC)
+      call monolis_precond_sor_nn_clear_R(monoPREC)
     endif
-  end subroutine monolis_precond_sor_clear
+  end subroutine monolis_precond_sor_clear_R
 end module mod_monolis_precond_sor

@@ -256,6 +256,8 @@ contains
     real(kdouble) :: B(:)
     integer(kint) :: i
 
+    call monolis_std_debug_log_header("monolis_set_RHS")
+
     do i = 1, monoMAT%NP*monoMAT%NDOF
       monoMAT%R%B(i) = B(i)
     enddo
@@ -270,6 +272,8 @@ contains
     real(kdouble) :: X(:)
     integer(kint) :: i
 
+    call monolis_std_debug_log_header("monolis_set_initial_solution")
+
     do i = 1, monoMAT%NP*monoMAT%NDOF
       monoMAT%R%X(i) = X(i)
     enddo
@@ -283,6 +287,8 @@ contains
     !> 解ベクトル
     real(kdouble) :: X(:)
     integer(kint) :: i
+
+    call monolis_std_debug_log_header("monolis_get_solution")
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       X(i) = monoMAT%R%X(i)

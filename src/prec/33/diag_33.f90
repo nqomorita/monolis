@@ -34,8 +34,8 @@ contains
 !$omp & private(T, P, i, j, k, jS, jE, in)
 !$omp do
     do i = 1, N
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do j = jS, jE
         in = item(j)
         if(i == in)then
@@ -93,7 +93,7 @@ contains
   subroutine monolis_precond_diag_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
     !> 行列構造体
-    type(monolis_mat), target :: monoMAT
+    type(monolis_mat) :: monoMAT
     !> 前処理構造体
     type(monolis_mat), target :: monoPREC
     integer(kint) :: i, N
@@ -101,7 +101,7 @@ contains
     real(kdouble) :: X(:), Y(:)
     real(kdouble), pointer :: ALU(:)
 
-    N =  monoPREC%N
+    N =  monoMAT%N
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &

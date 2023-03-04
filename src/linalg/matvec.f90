@@ -19,6 +19,8 @@ contains
     real(kdouble) :: Y(:)
     real(kdouble) :: tspmv, tcomm
 
+    call monolis_std_debug_log_header("monolis_matvec_product_R")
+
     call monolis_matvec_product_main_R(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_R
 
@@ -33,6 +35,8 @@ contains
     !> 結果ベクトル
     complex(kdouble) :: Y(:)
     real(kdouble) :: tspmv, tcomm
+
+    call monolis_std_debug_log_header("monolis_matvec_product_C")
 
     call monolis_matvec_product_main_C(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_C
@@ -52,9 +56,8 @@ contains
     real(kdouble) :: t1, t2
     real(kdouble) :: tspmv, tcomm
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_matvec_product_main_R")
-#endif
+
     t1 = monolis_get_time()
 
     call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
@@ -86,9 +89,8 @@ contains
     real(kdouble) :: t1, t2
     real(kdouble) :: tspmv, tcomm
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_matvec_product_main_C")
-#endif
+
     t1 = monolis_get_time()
 
     call monolis_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
@@ -413,6 +415,8 @@ contains
     real(kdouble) :: tcomm
     integer(kint) :: i
 
+    call monolis_std_debug_log_header("monolis_residual_main_R")
+
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
 !$omp parallel default(none) &
@@ -445,6 +449,8 @@ contains
     !> 通信時間
     real(kdouble) :: tcomm
     integer(kint) :: i
+
+    call monolis_std_debug_log_header("monolis_residual_main_C")
 
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, R, tspmv, tcomm)
 

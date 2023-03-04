@@ -9,7 +9,7 @@ module mod_monolis_precond_sor_nn
 contains
 
   !> 前処理生成：SOR 前処理（nxn ブロック）
-  subroutine monolis_precond_sor_nn_setup(monoMAT, monoPREC)
+  subroutine monolis_precond_sor_nn_setup_R(monoMAT, monoPREC)
     implicit none
     !> 行列構造体
     type(monolis_mat), target :: monoMAT
@@ -76,10 +76,10 @@ contains
 
     deallocate(T)
     deallocate(LU)
-  end subroutine monolis_precond_sor_nn_setup
+  end subroutine monolis_precond_sor_nn_setup_R
 
   !> 前処理適用：SOR 前処理（3x3 ブロック）
-  subroutine monolis_precond_sor_nn_apply(monoMAT, monoPREC, X, Y)
+  subroutine monolis_precond_sor_nn_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
     !> 行列構造体
     type(monolis_mat), target :: monoMAT
@@ -92,7 +92,7 @@ contains
     real(kdouble), pointer :: A(:), ALU(:)
     real(kdouble), allocatable :: XT(:), YT(:), ST(:)
 
-    N =  monoPREC%N
+    N =  monoMAT%N
     NP = monoMAT%NP
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
@@ -196,15 +196,15 @@ contains
     deallocate(XT)
     deallocate(YT)
     deallocate(ST)
-  end subroutine monolis_precond_sor_nn_apply
+  end subroutine monolis_precond_sor_nn_apply_R
 
   !> 前処理初期化：SOR 前処理（nxn ブロック）
-  subroutine monolis_precond_sor_nn_clear(monoPREC)
+  subroutine monolis_precond_sor_nn_clear_R(monoPREC)
     implicit none
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
     call monolis_dealloc_R_1d(monoPREC%R%D)
-  end subroutine monolis_precond_sor_nn_clear
+  end subroutine monolis_precond_sor_nn_clear_R
 
 end module mod_monolis_precond_sor_nn

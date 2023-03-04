@@ -9,7 +9,7 @@ module mod_monolis_precond_diag_nn
 contains
 
   !> 前処理生成：対角スケーリング前処理（nxn ブロック）
-  subroutine monolis_precond_diag_nn_setup(monoMAT, monoPREC)
+  subroutine monolis_precond_diag_nn_setup_R(monoMAT, monoPREC)
     implicit none
     !> 行列構造体
     type(monolis_mat), target :: monoMAT
@@ -31,6 +31,7 @@ contains
     call monolis_alloc_R_2d(LU, NDOF, NDOF)
     call monolis_alloc_R_1d(monoPREC%R%D, NDOF2*N)
     ALU => monoPREC%R%D
+    monoPREC%N = monoMAT%N
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &
@@ -38,8 +39,8 @@ contains
 !$omp & private(T, LU, i, j, k, jS, jE, in)
 !$omp do
     do i = 1, N
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do ii = jS, jE
         in = item(ii)
         if(i == in)then
@@ -75,10 +76,10 @@ contains
 
     deallocate(T)
     deallocate(LU)
-  end subroutine monolis_precond_diag_nn_setup
+  end subroutine monolis_precond_diag_nn_setup_R
 
   !> 前処理適用：対角スケーリング前処理（nxn ブロック）
-  subroutine monolis_precond_diag_nn_apply(monoMAT, monoPREC, X, Y)
+  subroutine monolis_precond_diag_nn_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
     !> 行列構造体
     type(monolis_mat), target :: monoMAT
@@ -89,7 +90,7 @@ contains
     real(kdouble), pointer :: ALU(:)
     real(kdouble), allocatable :: T(:)
 
-    N =  monoPREC%N
+    N =  monoMAT%N
     NDOF  = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     ALU => monoPREC%R%D
@@ -124,15 +125,15 @@ contains
 !$omp end parallel
 
     deallocate(T)
-  end subroutine monolis_precond_diag_nn_apply
+  end subroutine monolis_precond_diag_nn_apply_R
 
   !> 前処理初期化：対角スケーリング前処理（nxn ブロック）
-  subroutine monolis_precond_diag_nn_clear(monoPREC)
+  subroutine monolis_precond_diag_nn_clear_R(monoPREC)
     implicit none
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
     call monolis_dealloc_R_1d(monoPREC%R%D)
-  end subroutine monolis_precond_diag_nn_clear
+  end subroutine monolis_precond_diag_nn_clear_R
 
 end module mod_monolis_precond_diag_nn

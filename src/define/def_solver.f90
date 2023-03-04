@@ -180,7 +180,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
 
-    monoPRM%Rarray(monolis_prm_R_tol) = 0.0d0
+    monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
     monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
     monoPRM%Rarray(monolis_R_time_prep) = 0.0d0

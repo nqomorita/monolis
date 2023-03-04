@@ -6,6 +6,7 @@ module mod_monolis_solver_CG
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
+  use mod_monolis_vec_util
   use mod_monolis_converge
 
   implicit none
@@ -31,9 +32,7 @@ contains
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
     real(kdouble), pointer :: B(:), X(:)
 
-#ifdef DEBUG
     call monolis_std_debug_log_header("monolis_solver_CG")
-#endif
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -81,7 +80,7 @@ contains
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
       else
-        call monolis_vec_AXPBY(N, NDOF, -alpha, Q, 1.0d0, R, R)
+        call monolis_vec_AXPBY_R(N, NDOF, -alpha, Q, 1.0d0, R, R)
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
