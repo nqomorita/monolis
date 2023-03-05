@@ -247,8 +247,8 @@ contains
     call monolis_dealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_finalize_CSC
 
-  !> 右辺ベクトルの設定
-  subroutine monolis_set_RHS(monoMAT, B)
+  !> 右辺ベクトルの設定（実数型）
+  subroutine monolis_set_RHS_R(monoMAT, B)
     implicit none
     !> 疎行列構造体
     type(monolis_mat) :: monoMAT
@@ -256,15 +256,31 @@ contains
     real(kdouble) :: B(:)
     integer(kint) :: i
 
-    call monolis_std_debug_log_header("monolis_set_RHS")
+    call monolis_std_debug_log_header("monolis_set_RHS_R")
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       monoMAT%R%B(i) = B(i)
     enddo
-  end subroutine monolis_set_RHS
+  end subroutine monolis_set_RHS_R
 
-  !> 解ベクトルの初期値設定
-  subroutine monolis_set_initial_solution(monoMAT, X)
+  !> 右辺ベクトルの設定（複素数型）
+  subroutine monolis_set_RHS_C(monoMAT, B)
+    implicit none
+    !> 疎行列構造体
+    type(monolis_mat) :: monoMAT
+    !> 右辺ベクトル
+    complex(kdouble) :: B(:)
+    integer(kint) :: i
+
+    call monolis_std_debug_log_header("monolis_set_RHS_C")
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      monoMAT%C%B(i) = B(i)
+    enddo
+  end subroutine monolis_set_RHS_C
+
+  !> 解ベクトルの初期値設定（実数型）
+  subroutine monolis_set_initial_solution_R(monoMAT, X)
     implicit none
     !> 疎行列構造体
     type(monolis_mat) :: monoMAT
@@ -272,15 +288,31 @@ contains
     real(kdouble) :: X(:)
     integer(kint) :: i
 
-    call monolis_std_debug_log_header("monolis_set_initial_solution")
+    call monolis_std_debug_log_header("monolis_set_initial_solution_R")
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       monoMAT%R%X(i) = X(i)
     enddo
-  end subroutine monolis_set_initial_solution
+  end subroutine monolis_set_initial_solution_R
 
-  !> 解ベクトルの設定
-  subroutine monolis_get_solution(monoMAT, X)
+  !> 解ベクトルの初期値設定（複素数型）
+  subroutine monolis_set_initial_solution_C(monoMAT, X)
+    implicit none
+    !> 疎行列構造体
+    type(monolis_mat) :: monoMAT
+    !> 解ベクトル
+    complex(kdouble) :: X(:)
+    integer(kint) :: i
+
+    call monolis_std_debug_log_header("monolis_set_initial_solution_C")
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      monoMAT%C%X(i) = X(i)
+    enddo
+  end subroutine monolis_set_initial_solution_C
+
+  !> 解ベクトルの設定（実数型）
+  subroutine monolis_get_solution_R(monoMAT, X)
     implicit none
     !> 疎行列構造体
     type(monolis_mat) :: monoMAT
@@ -288,11 +320,26 @@ contains
     real(kdouble) :: X(:)
     integer(kint) :: i
 
-    call monolis_std_debug_log_header("monolis_get_solution")
+    call monolis_std_debug_log_header("monolis_get_solution_R")
 
     do i = 1, monoMAT%NP*monoMAT%NDOF
       X(i) = monoMAT%R%X(i)
     enddo
-  end subroutine monolis_get_solution
+  end subroutine monolis_get_solution_R
 
+  !> 解ベクトルの設定（複素数型）
+  subroutine monolis_get_solution_C(monoMAT, X)
+    implicit none
+    !> 疎行列構造体
+    type(monolis_mat) :: monoMAT
+    !> 解ベクトル
+    complex(kdouble) :: X(:)
+    integer(kint) :: i
+
+    call monolis_std_debug_log_header("monolis_get_solution_C")
+
+    do i = 1, monoMAT%NP*monoMAT%NDOF
+      X(i) = monoMAT%C%X(i)
+    enddo
+  end subroutine monolis_get_solution_C
 end module mod_monolis_def_mat

@@ -51,7 +51,7 @@ contains
     do i1 = 1, 10
       do i2 = 1, n_dof
         call random_number(val)
-        val = val + 1.0d0
+        val = val + 2.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
     enddo
@@ -70,10 +70,11 @@ contains
 
     call monolis_matvec_product_R(mat, a, b)
 
+    call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-10)
 
-    call monolis_solve(mat, b, a)
+    call monolis_solve_R(mat, b, a)
 
     b = 1.0d0
 

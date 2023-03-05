@@ -12,8 +12,8 @@ module mod_monolis_solve
 
 contains
 
-  !> 線形ソルバ関数
-  subroutine monolis_solve(monolis, B, X)
+  !> 線形ソルバ関数（実数型）
+  subroutine monolis_solve_R(monolis, B, X)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -22,18 +22,37 @@ contains
     !> 解ベクトル
     real(kdouble) :: X(:)
 
-    !call monolis_std_debug_log_flag(.true.)
+    call monolis_set_RHS_R(monolis%MAT, B)
 
-    call monolis_set_RHS(monolis%MAT, B)
-
-    call monolis_set_initial_solution(monolis%MAT, X)
+    call monolis_set_initial_solution_R(monolis%MAT, X)
 
     !call monolis_set_initial_comm(monolis%COM, monolis%MAT)
 
     call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
-    call monolis_get_solution(monolis%MAT, X)
-  end subroutine monolis_solve
+    call monolis_get_solution_R(monolis%MAT, X)
+  end subroutine monolis_solve_R
+
+  !> 線形ソルバ関数（複素数型）
+  subroutine monolis_solve_C(monolis, B, X)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 右辺ベクトル
+    complex(kdouble) :: B(:)
+    !> 解ベクトル
+    complex(kdouble) :: X(:)
+
+    call monolis_set_RHS_C(monolis%MAT, B)
+
+    call monolis_set_initial_solution_C(monolis%MAT, X)
+
+    !call monolis_set_initial_comm(monolis%COM, monolis%MAT)
+
+    call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+
+    call monolis_get_solution_C(monolis%MAT, X)
+  end subroutine monolis_solve_C
 
   !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main(monoPRM, monoCOM, monoMAT, monoPREC)
@@ -50,9 +69,8 @@ contains
     call monolis_std_debug_log_header("monolis_solve_main")
 
     !call monolis_timer_initialize(monoPRM, monoCOM)
+
     !call monolis_check_diagonal(monoPRM, monoMAT)
-    !call monolis_reorder_matrix_fw(monoPRM, monoCOM, monoCOM_reorder, monoMAT, monoMAT_reorder)
-    !call monolis_scaling_fw(monoPRM, monoCOM_reorder, monoMAT_reorder)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
@@ -60,8 +78,6 @@ contains
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
 
-    !call monolis_scaling_bk(monoPRM, monoCOM_reorder, monoMAT_reorder)
-    !call monolis_reorder_matrix_bk(monoPRM, monoCOM_reorder, monoMAT_reorder, monoMAT)
     !call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve_main
 
