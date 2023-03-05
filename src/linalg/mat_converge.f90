@@ -158,10 +158,10 @@ contains
     monoPRM%Rarray(monolis_prm_R_cur_resid) = resid
 
     if(monoCOM%my_rank == 0 .and. monoPRM%Iarray(monolis_prm_I_show_iterlog) == monolis_I_true)then
-      write (*,"(i7, 1pe16.6)") iter, real(resid)
+      write (*,"(i7, 1pe16.6)") iter, abs(resid)
     endif
 
-    if(real(resid) < monoPRM%Rarray(monolis_prm_R_tol))then
+    if(abs(resid) < monoPRM%Rarray(monolis_prm_R_tol))then
       is_converge = .true.
     endif
 
