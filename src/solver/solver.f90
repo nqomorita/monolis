@@ -5,6 +5,8 @@ module mod_monolis_solve
   use mod_monolis_def_struc
   use mod_monolis_solver_CG
   use mod_monolis_solver_BiCGSTAB
+  use mod_monolis_solver_BiCGSTAB_noprec
+  use mod_monolis_solver_GropCG
   use mod_monolis_solver_COCG
   use mod_monolis_precond
 
@@ -105,11 +107,11 @@ contains
       case (monolis_iter_BiCGSTAB)
         call monolis_solver_BiCGSTAB(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      !case (monolis_iter_BiCGSTAB_noprec)
-      !  call monolis_solver_BiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_BiCGSTAB_noprec)
+        call monolis_solver_BiCGSTAB_noprec(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      !case (monolis_iter_GropCG)
-      !  call monolis_solver_GropCG(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_GropCG)
+        call monolis_solver_GropCG(monoPRM, monoCOM, monoMAT, monoPREC)
 
       !case (monolis_iter_PipeCG)
       !  call monolis_solver_PipeCG(monoPRM, monoCOM, monoMAT)

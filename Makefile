@@ -101,18 +101,16 @@ precond.f90
 SRC_ITER = \
 CG.f90 \
 BiCGSTAB.f90 \
-COCG.f90 \
+BiCGSTAB_noprec.f90 \
+GropCG.f90 \
+COCG.f90
 
-#BiCGSTAB_noprec.f90 \
 #CABiCGSTAB_noprec.f90 \
 #GMRES.f90 \
-#GropCG.f90 \
-#IR.f90 \
 #PipeBiCGSTAB.f90 \
 #PipeBiCGSTAB_noprec.f90 \
 #PipeCG.f90 \
 #PipeCR.f90 \
-#SOR.f90
 
 SRC_SOLV = \
 solver.f90

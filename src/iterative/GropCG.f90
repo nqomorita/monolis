@@ -1,95 +1,121 @@
+!> GropCG 法モジュール
 module mod_monolis_solver_GropCG
-  use mod_monolis_prm
-  use mod_monolis_mat
+  use mod_monolis_utils
+  use mod_monolis_def_mat
+  use mod_monolis_def_struc
   use mod_monolis_precond
   use mod_monolis_matvec
   use mod_monolis_linalg
+  use mod_monolis_vec_util
   use mod_monolis_converge
 
   implicit none
 
 contains
 
-  subroutine monolis_solver_GropCG(monoPRM, monoCOM, monoMAT)
+  !> GropCG 法
+  subroutine monolis_solver_GropCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
+    !> パラメータ構造体
     type(monolis_prm) :: monoPRM
+    !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kind=kint) :: N, NP, NDOF, NNDOF
-    integer(kind=kint) :: i, iter, iter_RR
-    !integer(kind=kint) :: reqs1(1), reqs2(1)
-    !integer(kind=kint) :: statuses(monolis_status_size,1)
-    real(kind=kdouble) :: R2, B2
-    real(kind=kdouble) :: alpha, beta, delta, gamma, gamma1
-    !real(kind=kdouble) :: buf1(1), buf2(2)
-    real(kind=kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), S(:)
-    real(kind=kdouble), pointer :: B(:), X(:)
+    !> 行列構造体
+    type(monolis_mat), target :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
+    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: i, iter, iter_RR
+    real(kdouble) :: R2, B2
+    real(kdouble) :: alpha, beta, delta, gamma, gamma1, rho, rho1
+    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
+    real(kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), S(:)
+    real(kdouble), pointer :: B(:), X(:)
     logical :: is_converge
+
+    call monolis_std_debug_log_header("monolis_solver_GropCG")
 
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
     NNDOF = N*NDOF
-    X => monoMAT%X
-    B => monoMAT%B
+    X => monoMAT%R%X
+    B => monoMAT%R%B
     iter_RR = 50
 
-    if(monoPRM%is_init_x) X = 0.0d0
+    tspmv = monoPRM%Rarray(monolis_R_time_spmv)
+    tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
+    tdotp = monoPRM%Rarray(monolis_R_time_dotp)
+    tcomm_dotp = monoPRM%Rarray(monolis_R_time_comm_dotp)
 
-    allocate(R(NDOF*NP)); R = 0.0d0
-    allocate(U(NDOF*NP)); U = 0.0d0
-    allocate(V(NDOF*NP)); V = 0.0d0
-    allocate(Q(NDOF*NP)); Q = 0.0d0
-    allocate(P(NDOF*NP)); P = 0.0d0
-    allocate(S(NDOF*NP)); S = 0.0d0
+    if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
+      X = 0.0d0
+    endif
 
-    call monolis_residual(monoCOM, monoMAT, X, B, R, monoPRM%tspmv, monoPRM%tcomm_spmv)
-    call monolis_set_converge(monoPRM, monoCOM, monoMAT, R, B2, is_converge, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_alloc_R_1d(R, NDOF*NP)
+    call monolis_alloc_R_1d(U, NDOF*NP)
+    call monolis_alloc_R_1d(V, NDOF*NP)
+    call monolis_alloc_R_1d(Q, NDOF*NP)
+    call monolis_alloc_R_1d(P, NDOF*NP)
+    call monolis_alloc_R_1d(S, NDOF*NP)
+
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
-    call monolis_precond_apply(monoPRM, monoCOM, monoMAT, R, U)
+
+    call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U)
 
     call monolis_vec_copy_R(N, NDOF, U, P)
 
-    call monolis_matvec(monoCOM, monoMAT, P, S, monoPRM%tspmv, monoPRM%tcomm_spmv)
-    call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma, monoPRM%tdotp, monoPRM%tcomm_dotp)
+    call monolis_matvec_product_main_R(monoCOM, monoMAT, P, S, tspmv, tcomm_spmv)
 
-    do iter = 1, monoPRM%maxiter
-      call monolis_inner_product_R(monoCOM, N, NDOF, P, S, delta, monoPRM%tdotp, monoPRM%tcomm_dotp)
-      call monolis_precond_apply(monoPRM, monoCOM, monoMAT, S, Q)
+    call monolis_inner_product_main_R(monoCOM, N, NDOF, R, U, gamma, tdotp, tcomm_dotp)
+
+    do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, P, S, delta, tdotp, tcomm_dotp)
+
+      call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, S, Q)
 
       alpha = gamma/delta
 
-      do i = 1, NNDOF
-        X(i) = X(i) + alpha*P(i)
-        R(i) = R(i) - alpha*S(i)
-        U(i) = U(i) - alpha*Q(i)
-      enddo
+      call monolis_vec_AXPBY_R(N, NDOF, alpha, P, 1.0d0, X, X)
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, U, gamma1, monoPRM%tdotp, monoPRM%tcomm_dotp)
-      call monolis_inner_product_R(monoCOM, N, NDOF, R, R, R2, monoPRM%tdotp, monoPRM%tcomm_dotp)
+      call monolis_vec_AXPBY_R(N, NDOF,-alpha, S, 1.0d0, R, R)
 
-      call monolis_matvec(monoCOM, monoMAT, U, V, monoPRM%tspmv, monoPRM%tcomm_spmv)
+      call monolis_vec_AXPBY_R(N, NDOF,-alpha, Q, 1.0d0, U, U)
+
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, R, U, gamma1, tdotp, tcomm_dotp)
+
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, R2, tdotp, tcomm_dotp)
+
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, U, V, tspmv, tcomm_spmv)
 
       beta  = gamma1/gamma
       gamma = gamma1
 
-      do i = 1, NNDOF
-        P(i) = U(i) + beta * P(i)
-        S(i) = V(i) + beta * S(i)
-      enddo
+      call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, U, P)
 
-      call monolis_check_converge_2(monoPRM, monoCOM, monoMAT, R2, B2, iter, is_converge)
+      call monolis_vec_AXPBY_R(N, NDOF, beta, S, 1.0d0, V, S)
+
+      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
+
+      rho1 = rho
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
+    call monolis_update_R(monoCOM, NDOF, X, tcomm_spmv)
 
-    deallocate(R)
-    deallocate(U)
-    deallocate(V)
-    deallocate(Q)
-    deallocate(P)
-    deallocate(S)
+    monoPRM%Rarray(monolis_R_time_spmv) = tspmv
+    monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
+    monoPRM%Rarray(monolis_R_time_dotp) = tdotp
+    monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
+
+    call monolis_dealloc_R_1d(R)
+    call monolis_dealloc_R_1d(U)
+    call monolis_dealloc_R_1d(V)
+    call monolis_dealloc_R_1d(Q)
+    call monolis_dealloc_R_1d(P)
+    call monolis_dealloc_R_1d(S)
   end subroutine monolis_solver_GropCG
 
 end module mod_monolis_solver_GropCG
