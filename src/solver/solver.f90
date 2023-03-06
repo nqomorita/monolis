@@ -68,9 +68,7 @@ contains
 
     call monolis_timer_initialize(monoPRM, monoCOM)
 
-    !call monolis_check_diagonal(monoPRM, monoMAT)
-
-    !call monolis_check_input_param(monoPRM, monoCOM, monoMAT)
+    call monolis_check_input_param(monoPRM, monoCOM, monoMAT)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
