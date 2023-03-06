@@ -26,8 +26,6 @@ contains
 
     call monolis_set_initial_solution_R(monolis%MAT, X)
 
-    !call monolis_set_initial_comm(monolis%COM, monolis%MAT)
-
     call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_R(monolis%MAT, X)
@@ -46,8 +44,6 @@ contains
     call monolis_set_RHS_C(monolis%MAT, B)
 
     call monolis_set_initial_solution_C(monolis%MAT, X)
-
-    !call monolis_set_initial_comm(monolis%COM, monolis%MAT)
 
     call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
@@ -68,9 +64,11 @@ contains
 
     call monolis_std_debug_log_header("monolis_solve_main")
 
-    !call monolis_timer_initialize(monoPRM, monoCOM)
+    call monolis_timer_initialize(monoPRM, monoCOM)
 
     !call monolis_check_diagonal(monoPRM, monoMAT)
+
+    !call monolis_check_input_param(monoPRM, monoCOM, monoMAT)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
@@ -78,7 +76,7 @@ contains
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
 
-    !call monolis_timer_finalize(monoPRM, monoCOM)
+    call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve_main
 
   subroutine monolis_solver(monoPRM, monoCOM, monoMAT, monoPREC)

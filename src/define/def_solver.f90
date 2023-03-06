@@ -200,4 +200,161 @@ contains
     monoPRM%Iarray = 0
     monoPRM%Rarray = 0.0d0
   end subroutine monolis_prm_finalize
+
+  !> 時間計測機能の初期化処理
+  subroutine monolis_timer_initialize(monoPRM, monoCOM)
+    implicit none
+    !> パラメータ構造体
+    type(monolis_prm) :: monoPRM
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
+
+    monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_prep) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_spmv) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_dotp) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_prec) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_comm_dotp) = 0.0d0
+    monoPRM%Rarray(monolis_R_time_comm_spmv) = 0.0d0
+
+    monoPRM%Rarray(monolis_R_time_sol) = monolis_get_time()
+  end subroutine monolis_timer_initialize
+
+  !> 時間計測機能の終了処理
+  subroutine monolis_timer_finalize(monoPRM, monoCOM)
+    implicit none
+    !> パラメータ構造体
+    type(monolis_prm) :: monoPRM
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
+    real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
+    logical :: is_output
+
+    call monolis_std_debug_log_header("monolis_timer_finalize")
+
+    call monolis_mpi_local_barrier(monoCOM%comm)
+
+    t1 = monolis_get_time()
+
+    monoPRM%Rarray(monolis_R_time_sol) = t1 - monoPRM%Rarray(monolis_R_time_sol)
+
+    if(monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .and. monoCOM%my_rank == 0)then
+      write(*,"(a,i10)")" ** monolis converge iter:", monoPRM%Iarray(monolis_prm_I_cur_iter)
+      write(*,"(a,1p4e10.3)")" ** monolis rel. residual:", monoPRM%Rarray(monolis_prm_R_cur_resid)
+    endif
+
+    if((monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .or. &
+      & monoPRM%Iarray(monolis_prm_I_show_time)    == monolis_I_true) .and. monoCOM%my_rank == 0)then
+      write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%Rarray(monolis_R_time_sol)
+    endif
+
+    if(monoPRM%Iarray(monolis_prm_I_show_time) == monolis_I_true)then
+      time(1) = monoPRM%Rarray(monolis_R_time_prep)
+      time(2) = monoPRM%Rarray(monolis_R_time_spmv)
+      time(3) = monoPRM%Rarray(monolis_R_time_dotp)
+      time(4) = monoPRM%Rarray(monolis_R_time_prec)
+      time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
+      time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
+
+      call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
+
+      time = time/dble(monolis_mpi_global_comm_size())
+
+      if(monoCOM%my_rank == 0)then
+        write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
+        write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
+        write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
+        write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
+        write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
+        write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
+      endif
+    endif
+
+    if(monoPRM%Iarray(monolis_prm_I_show_time_statistics) == monolis_I_true)then
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" ** monolis solution time statistics"
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"                           max       min       average   std"
+
+      time(1) = monoPRM%Rarray(monolis_R_time_prep)
+      call monolis_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/prepost time:", t_max, t_min, t_avg, t_sd
+
+      time(2) = monoPRM%Rarray(monolis_R_time_spmv)
+      call monolis_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
+
+      time(3) = monoPRM%Rarray(monolis_R_time_dotp)
+      call monolis_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/inner p time:", t_max, t_min, t_avg, t_sd
+
+      time(4) = monoPRM%Rarray(monolis_R_time_prec)
+      call monolis_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/precond time:", t_max, t_min, t_avg, t_sd
+
+      time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
+      call monolis_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
+
+      time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
+      call monolis_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
+    endif
+
+    time(1) = monoPRM%Rarray(monolis_R_time_prep)
+    time(2) = monoPRM%Rarray(monolis_R_time_spmv)
+    time(3) = monoPRM%Rarray(monolis_R_time_dotp)
+    time(4) = monoPRM%Rarray(monolis_R_time_prec)
+    time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
+    time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
+
+    call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
+    time = time/dble(monolis_mpi_global_comm_size())
+
+    monoPRM%Rarray(monolis_R_time_prep) = time(1)
+    monoPRM%Rarray(monolis_R_time_spmv) = time(2)
+    monoPRM%Rarray(monolis_R_time_dotp) = time(3)
+    monoPRM%Rarray(monolis_R_time_prec) = time(4)
+    monoPRM%Rarray(monolis_R_time_comm_dotp) = time(5)
+    monoPRM%Rarray(monolis_R_time_comm_spmv) = time(6)
+  end subroutine monolis_timer_finalize
+
+  !> 時間計測機能の統計処理
+  subroutine monolis_time_statistics(monoCOM, time, t_max, t_min, t_avg, t_sd)
+    implicit none
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
+    !> 時間
+    real(kdouble), intent(in) :: time
+    !> 最大値
+    real(kdouble), intent(out) :: t_max
+    !> 最小値
+    real(kdouble), intent(out) :: t_min
+    !> 平均値
+    real(kdouble), intent(out) :: t_avg
+    !> 標準偏差
+    real(kdouble), intent(out) :: t_sd
+    real(kdouble) :: tmp
+    integer(kint) :: np
+
+    np = monolis_mpi_global_comm_size()
+
+    t_max = time
+    call monolis_allreduce_R1(t_max, monolis_mpi_max, monoCOM%comm)
+
+    t_min = time
+    call monolis_allreduce_R1(t_min, monolis_mpi_min, monoCOM%comm)
+
+    t_avg = time
+    call monolis_allreduce_R1(t_avg, monolis_mpi_sum, monoCOM%comm)
+    t_avg = t_avg / np
+
+    tmp = time*time
+    call monolis_allreduce_R1(tmp, monolis_mpi_sum, monoCOM%comm)
+    tmp = tmp / np
+
+    if(np == 1)then
+      t_sd = 0.0d0
+    else
+      t_sd = dsqrt(tmp - t_avg*t_avg)
+    endif
+  end subroutine monolis_time_statistics
 end module mod_monolis_def_solver
