@@ -57,7 +57,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 12
 
-  character*24, dimension(12) :: monolis_str_iter = (/&
+  character*24, dimension(13) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -69,7 +69,8 @@ module mod_monolis_def_solver
   & "PipeBiCGSTAB_noprec", &
   & "SOR                ", &
   & "IR                 ", &
-  & "GMRES              "/)
+  & "GMRES              ", &
+  & "COCG               "/)
 
   character*24, dimension(0:12)  :: monolis_str_prec = (/&
   & "None  ", &
@@ -239,13 +240,13 @@ contains
     monoPRM%Rarray(monolis_R_time_sol) = t1 - monoPRM%Rarray(monolis_R_time_sol)
 
     if(monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .and. monoCOM%my_rank == 0)then
-      write(*,"(a,i10)")" ** monolis converge iter:", monoPRM%Iarray(monolis_prm_I_cur_iter)
-      write(*,"(a,1p4e10.3)")" ** monolis rel. residual:", monoPRM%Rarray(monolis_prm_R_cur_resid)
+      write(*,"(a,i10)")"** MONOLIS converge iter:", monoPRM%Iarray(monolis_prm_I_cur_iter)
+      write(*,"(a,1p4e10.3)")"** MONOLIS rel. residual:", monoPRM%Rarray(monolis_prm_R_cur_resid)
     endif
 
     if((monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .or. &
       & monoPRM%Iarray(monolis_prm_I_show_time)    == monolis_I_true) .and. monoCOM%my_rank == 0)then
-      write(*,"(a,1p4e10.3)")" ** monolis solution time:", monoPRM%Rarray(monolis_R_time_sol)
+      write(*,"(a,1p4e10.3)")"** MONOLIS solution time:", monoPRM%Rarray(monolis_R_time_sol)
     endif
 
     if(monoPRM%Iarray(monolis_prm_I_show_time) == monolis_I_true)then
@@ -261,42 +262,42 @@ contains
       time = time/dble(monolis_mpi_global_comm_size())
 
       if(monoCOM%my_rank == 0)then
-        write(*,"(a,1p4e10.3)")"  - solution/prepost time:", time(1)
-        write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", time(2)
-        write(*,"(a,1p4e10.3)")"  - solution/inner p time:", time(3)
-        write(*,"(a,1p4e10.3)")"  - solution/precond time:", time(4)
-        write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", time(5)
-        write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", time(6)
+        write(*,"(a,1p4e10.3)")" - solution/prepost time:", time(1)
+        write(*,"(a,1p4e10.3)")" - solution/SpMV    time:", time(2)
+        write(*,"(a,1p4e10.3)")" - solution/inner p time:", time(3)
+        write(*,"(a,1p4e10.3)")" - solution/precond time:", time(4)
+        write(*,"(a,1p4e10.3)")" - (comm time/inner p)  :", time(5)
+        write(*,"(a,1p4e10.3)")" - (comm time/spmv)     :", time(6)
       endif
     endif
 
     if(monoPRM%Iarray(monolis_prm_I_show_time_statistics) == monolis_I_true)then
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" ** monolis solution time statistics"
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"                           max       min       average   std"
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"** MONOLIS solution time statistics"
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"                          max       min       average   std"
 
       time(1) = monoPRM%Rarray(monolis_R_time_prep)
       call monolis_time_statistics (monoCOM, time(1), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/prepost time:", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - solution/prepost time:", t_max, t_min, t_avg, t_sd
 
       time(2) = monoPRM%Rarray(monolis_R_time_spmv)
       call monolis_time_statistics (monoCOM, time(2), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - solution/SpMV    time:", t_max, t_min, t_avg, t_sd
 
       time(3) = monoPRM%Rarray(monolis_R_time_dotp)
       call monolis_time_statistics (monoCOM, time(3), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/inner p time:", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - solution/inner p time:", t_max, t_min, t_avg, t_sd
 
       time(4) = monoPRM%Rarray(monolis_R_time_prec)
       call monolis_time_statistics (monoCOM, time(4), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - solution/precond time:", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - solution/precond time:", t_max, t_min, t_avg, t_sd
 
       time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
       call monolis_time_statistics (monoCOM, time(5), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - (comm time/inner p)  :", t_max, t_min, t_avg, t_sd
 
       time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
       call monolis_time_statistics (monoCOM, time(6), t_max, t_min, t_avg, t_sd)
-      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")"  - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
+      if(monoCOM%my_rank == 0) write(*,"(a,1p4e10.3)")" - (comm time/spmv)     :", t_max, t_min, t_avg, t_sd
     endif
 
     time(1) = monoPRM%Rarray(monolis_R_time_prep)

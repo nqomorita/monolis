@@ -73,6 +73,7 @@ contains
     call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-10)
+    call monolis_show_timelog_statistics(mat, .true.)
 
     call monolis_solve_R(mat, b, a)
 

@@ -92,8 +92,11 @@ contains
 
     call monolis_std_debug_log_header("monolis_solver")
 
-!    if(monoPRM%show_summary .and. monoCOM%my_rank == 0) write(*,"(a)")" ** monolis solver: "// &
-!    & trim(monolis_str_iter(monoPRM%method))//", prec: "//trim(monolis_str_prec(monoPRM%precond))
+    if(monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .and. monoCOM%my_rank == 0)then
+      write(*,"(a)") &
+      & "** MONOLIS solver: "//trim(monolis_str_iter(monoPRM%Iarray(monolis_prm_I_method)))//&
+      & ", prec: "//trim(monolis_str_prec(monoPRM%Iarray(monolis_prm_I_precond)))
+    endif
 
     select case(monoPRM%Iarray(monolis_prm_I_method))
       case (monolis_iter_CG)
