@@ -14,13 +14,13 @@ module mod_monolis_def_solver
   !> パラメータ：BiCGSTAB 法
   integer(kint), parameter :: monolis_iter_BiCGSTAB = 5
   !> パラメータ：Pipelined BiCGSTAB 法
-  !integer(kint), parameter :: monolis_iter_PipeBiCGSTAB = 6
+  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB = 6
   !> パラメータ：BiCGSTAB 法（前処理なし）
   integer(kint), parameter :: monolis_iter_BiCGSTAB_noprec = 7
   !> パラメータ：Communication Avoiding BiCGSTAB 法（前処理なし）
   !integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
-  !integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
+  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：COCG 法

@@ -105,12 +105,12 @@ BiCGSTAB_noprec.f90 \
 GropCG.f90 \
 PipeCG.f90 \
 PipeCR.f90 \
+PipeBiCGSTAB.f90 \
+PipeBiCGSTAB_noprec.f90 \
 COCG.f90
 
 #CABiCGSTAB_noprec.f90 \
 #GMRES.f90 \
-#PipeBiCGSTAB.f90 \
-#PipeBiCGSTAB_noprec.f90 \
 
 SRC_SOLV = \
 solver.f90

@@ -53,6 +53,8 @@ contains
       X = 0.0d0
     endif
 
+    tol = monoPRM%Rarray(monolis_prm_R_tol)
+
     call monolis_alloc_R_1d(R, NDOF*NP)
     call monolis_alloc_R_1d(U, NDOF*NP)
     call monolis_alloc_R_1d(V, NDOF*NP)

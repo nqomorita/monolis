@@ -9,6 +9,8 @@ module mod_monolis_solve
   use mod_monolis_solver_GropCG
   use mod_monolis_solver_PipeCG
   use mod_monolis_solver_PipeCR
+  use mod_monolis_solver_PipeBiCGSTAB
+  use mod_monolis_solver_PipeBiCGSTAB_noprec
   use mod_monolis_solver_COCG
   use mod_monolis_precond
 
@@ -122,11 +124,11 @@ contains
       !case (monolis_iter_CABiCGSTAB_noprec)
       !  call monolis_solver_CABiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
 
-      !case (monolis_iter_PipeBiCGSTAB)
-      !  call monolis_solver_PipeBiCGSTAB(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_PipeBiCGSTAB)
+        call monolis_solver_PipeBiCGSTAB(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      !case (monolis_iter_PipeBiCGSTAB_noprec)
-      !  call monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_PipeBiCGSTAB_noprec)
+        call monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT, monoPREC)
 
       !case (monolis_iter_GMRES)
       !  call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)
