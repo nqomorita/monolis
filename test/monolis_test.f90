@@ -14,6 +14,8 @@ program monolis_test
   use mod_monolis_matvec_test
   use mod_monolis_solver_CG_test
   use mod_monolis_solver_GropCG_test
+  use mod_monolis_solver_PipeCG_test
+  use mod_monolis_solver_PipeCR_test
   use mod_monolis_solver_BiCGSTAB_test
   use mod_monolis_solver_BiCGSTAB_noprec_test
   use mod_monolis_solver_COCG_test
@@ -38,6 +40,8 @@ program monolis_test
 
   call monolis_solver_CG_test()
   call monolis_solver_GropCG_test()
+  call monolis_solver_PipeCG_test()
+  call monolis_solver_PipeCR_test()
   call monolis_solver_BiCGSTAB_test()
   call monolis_solver_BiCGSTAB_noprec_test()
   call monolis_solver_COCG_test()

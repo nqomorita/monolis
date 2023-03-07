@@ -1,23 +1,23 @@
-!> GropCG 法テストモジュール
-module mod_monolis_solver_GropCG_test
+!> PipeCR 法テストモジュール
+module mod_monolis_solver_PipeCR_test
   use mod_monolis
 
   implicit none
 
 contains
 
-  subroutine monolis_solver_GropCG_test()
+  subroutine monolis_solver_PipeCR_test()
     implicit none
     integer(kint) :: n_dof
 
     do n_dof = 1, 3
-      call monolis_solver_GropCG_test_main(n_dof, monolis_prec_NONE)
-      call monolis_solver_GropCG_test_main(n_dof, monolis_prec_DIAG)
-      call monolis_solver_GropCG_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_PipeCR_test_main(n_dof, monolis_prec_NONE)
+      call monolis_solver_PipeCR_test_main(n_dof, monolis_prec_DIAG)
+      call monolis_solver_PipeCR_test_main(n_dof, monolis_prec_SOR)
     enddo
-  end subroutine monolis_solver_GropCG_test
+  end subroutine monolis_solver_PipeCR_test
 
-  subroutine monolis_solver_GropCG_test_main(n_dof, prec)
+  subroutine monolis_solver_PipeCR_test_main(n_dof, prec)
     implicit none
     type(monolis_structure) :: mat
     integer(kint) :: nnode, nelem, elem(2,9)
@@ -26,7 +26,7 @@ contains
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
-    call monolis_std_log_string("monolis_solver_GropCG_test_main")
+    call monolis_std_log_string("monolis_solver_PipeCR_test_main")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 
@@ -70,7 +70,7 @@ contains
 
     call monolis_matvec_product_R(mat, a, b)
 
-    call monolis_set_method(mat, monolis_iter_GropCG)
+    call monolis_set_method(mat, monolis_iter_PipeCR)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog_statistics(mat, .true.)
@@ -81,9 +81,9 @@ contains
 
     b = 1.0d0
 
-    call monolis_test_check_eq_R("monolis_solver_GropCG_test_main", a, b)
+    call monolis_test_check_eq_R("monolis_solver_PipeCR_test_main", a, b)
 
     call monolis_finalize(mat)
-  end subroutine monolis_solver_GropCG_test_main
+  end subroutine monolis_solver_PipeCR_test_main
 
-end module mod_monolis_solver_GropCG_test
+end module mod_monolis_solver_PipeCR_test

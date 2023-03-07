@@ -7,6 +7,8 @@ module mod_monolis_solve
   use mod_monolis_solver_BiCGSTAB
   use mod_monolis_solver_BiCGSTAB_noprec
   use mod_monolis_solver_GropCG
+  use mod_monolis_solver_PipeCG
+  use mod_monolis_solver_PipeCR
   use mod_monolis_solver_COCG
   use mod_monolis_precond
 
@@ -68,7 +70,7 @@ contains
 
     call monolis_timer_initialize(monoPRM, monoCOM)
 
-    call monolis_check_input_param(monoPRM, monoCOM, monoMAT)
+    call monolis_check_input_param(monoCOM, monoMAT)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
@@ -111,11 +113,11 @@ contains
       case (monolis_iter_GropCG)
         call monolis_solver_GropCG(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      !case (monolis_iter_PipeCG)
-      !  call monolis_solver_PipeCG(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_PipeCG)
+        call monolis_solver_PipeCG(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      !case (monolis_iter_PipeCR)
-      !  call monolis_solver_PipeCR(monoPRM, monoCOM, monoMAT)
+      case (monolis_iter_PipeCR)
+        call monolis_solver_PipeCR(monoPRM, monoCOM, monoMAT, monoPREC)
 
       !case (monolis_iter_CABiCGSTAB_noprec)
       !  call monolis_solver_CABiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
@@ -125,12 +127,6 @@ contains
 
       !case (monolis_iter_PipeBiCGSTAB_noprec)
       !  call monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT)
-
-      !case (monolis_iter_SOR)
-      !  call monolis_solver_SOR(monoPRM, monoCOM, monoMAT)
-
-      !case (monolis_iter_IR)
-      !  call monolis_solver_IR(monoPRM, monoCOM, monoMAT)
 
       !case (monolis_iter_GMRES)
       !  call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)

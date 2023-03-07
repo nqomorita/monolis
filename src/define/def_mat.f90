@@ -344,10 +344,8 @@ contains
   end subroutine monolis_get_solution_C
 
   !> 入力パラメータのチェック
-  subroutine monolis_check_input_param(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_check_input_param(monoCOM, monoMAT)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
     !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
     !> 行列構造体

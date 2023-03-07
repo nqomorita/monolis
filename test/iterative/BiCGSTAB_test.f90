@@ -76,6 +76,8 @@ contains
     call monolis_set_tolerance(mat, 1.0d-12)
     call monolis_show_timelog_statistics(mat, .true.)
 
+    a = 0.0d0
+
     call monolis_solve_R(mat, b, a)
 
     b = 1.0d0

@@ -8,9 +8,9 @@ module mod_monolis_def_solver
   !> パラメータ：GropCG 法
   integer(kint), parameter :: monolis_iter_GropCG   = 2
   !> パラメータ：Pipelined CG 法
-  !integer(kint), parameter :: monolis_iter_PipeCG   = 3
+  integer(kint), parameter :: monolis_iter_PipeCG   = 3
   !> パラメータ：Pipelined CR 法
-  !integer(kint), parameter :: monolis_iter_PipeCR   = 4
+  integer(kint), parameter :: monolis_iter_PipeCR   = 4
   !> パラメータ：BiCGSTAB 法
   integer(kint), parameter :: monolis_iter_BiCGSTAB = 5
   !> パラメータ：Pipelined BiCGSTAB 法
