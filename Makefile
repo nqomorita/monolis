@@ -10,7 +10,6 @@ CFLAGS = -fPIC -O2
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 USE_LIB = -L./lib -lmonolis -L./submodule/gedatsu/lib -lgedatsu -L./submodule/monolis_utils/lib -lmonolis_utils -L./lib -lmetis
-#ARC_LIB = ./submodule/gedatsu/lib/libgedatsu.a ./submodule/monolis_utils/lib/libmonolis_utils.a
 BIN_DIR = ./bin
 SRC_DIR = ./src
 OBJ_DIR = ./obj
@@ -115,9 +114,10 @@ COCG.f90
 SRC_SOLV = \
 solver.f90
 
-#SRC_EIGEN = \
-#Lanczos_util.f90 \
-Lanczos.f90
+SRC_EIGEN = \
+Lanczos_util.f90 \
+Lanczos.f90 \
+eigen_solver.f90
 
 SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \
