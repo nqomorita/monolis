@@ -1,5 +1,5 @@
 !> ベクトル内積関数群
-module mod_monolis_linalg
+module mod_monolis_inner_product
   use mod_monolis_utils
   use mod_monolis_def_struc
   implicit none
@@ -8,7 +8,26 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（整数型）
-  subroutine monolis_inner_product_I(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_product_I(monolis, ndof, X, Y, sum)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> ブロックサイズ
+    integer(kint) :: ndof
+    !> ベクトル 1
+    integer(kint) :: X(:)
+    !> ベクトル 2
+    integer(kint) :: Y(:)
+    !> 内積結果
+    integer(kint) :: sum
+    real(kdouble) :: tdotp, tcomm
+
+    call monolis_inner_product_main_I(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+  end subroutine monolis_inner_product_I
+
+  !> @ingroup linalg
+  !> ベクトル内積（整数型、任意のベクトルサイズ）
+  subroutine monolis_inner_productV_I(monolis, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -25,7 +44,7 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_I(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
-  end subroutine monolis_inner_product_I
+  end subroutine monolis_inner_productV_I
 
   !> @ingroup dev_linalg
   !> ベクトル内積（整数型、メイン関数）
@@ -75,7 +94,26 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（実数型）
-  subroutine monolis_inner_product_R(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_product_R(monolis, ndof, X, Y, sum)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> ブロックサイズ
+    integer(kint) :: ndof
+    !> ベクトル 1
+    real(kdouble) :: X(:)
+    !> ベクトル 2
+    real(kdouble) :: Y(:)
+    !> 内積結果
+    real(kdouble) :: sum
+    real(kdouble) :: tdotp, tcomm
+
+    call monolis_inner_product_main_R(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+  end subroutine monolis_inner_product_R
+
+  !> @ingroup linalg
+  !> ベクトル内積（実数型、任意のベクトルサイズ）
+  subroutine monolis_inner_productV_R(monolis, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -92,7 +130,7 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_R(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
-  end subroutine monolis_inner_product_R
+  end subroutine monolis_inner_productV_R
 
   !> @ingroup dev_linalg
   !> ベクトル内積（実数型、メイン関数）
@@ -142,7 +180,26 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（複素数型）
-  subroutine monolis_inner_product_C(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_product_C(monolis, ndof, X, Y, sum)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> ブロックサイズ
+    integer(kint) :: ndof
+    !> ベクトル 1
+    complex(kdouble) :: X(:)
+    !> ベクトル 2
+    complex(kdouble) :: Y(:)
+    !> 内積結果
+    complex(kdouble) :: sum
+    real(kdouble) :: tdotp, tcomm
+
+    call monolis_inner_product_main_C(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+  end subroutine monolis_inner_product_C
+
+  !> @ingroup linalg
+  !> ベクトル内積（複素数型、任意のベクトルサイズ）
+  subroutine monolis_inner_productV_C(monolis, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -159,7 +216,7 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_C(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
-  end subroutine monolis_inner_product_C
+  end subroutine monolis_inner_productV_C
 
   !> @ingroup dev_linalg
   !> ベクトル内積（複素数型、メイン関数）
@@ -228,4 +285,4 @@ contains
 !$omp end do
 !$omp end parallel
   end subroutine monolis_inner_product_main_R_no_comm
-end module mod_monolis_linalg
+end module mod_monolis_inner_product

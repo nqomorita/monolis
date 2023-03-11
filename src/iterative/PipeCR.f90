@@ -5,7 +5,7 @@ module mod_monolis_solver_PipeCR
   use mod_monolis_def_struc
   use mod_monolis_precond
   use mod_monolis_matvec
-  use mod_monolis_linalg
+  use mod_monolis_inner_product
   use mod_monolis_vec_util
   use mod_monolis_converge
 

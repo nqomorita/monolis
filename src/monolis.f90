@@ -11,7 +11,7 @@ module mod_monolis
   use mod_monolis_spmat_handler
   use mod_monolis_spmat_nonzero_pattern_util
   use mod_monolis_spmat_nonzero_pattern
-  use mod_monolis_linalg
+  use mod_monolis_inner_product
   use mod_monolis_converge
   use mod_monolis_matvec
   use mod_monolis_vec_util

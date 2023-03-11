@@ -3,7 +3,7 @@ module mod_monolis_converge
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
-  use mod_monolis_linalg
+  use mod_monolis_inner_product
   implicit none
 
 contains

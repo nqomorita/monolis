@@ -3,7 +3,7 @@ module mod_monolis_solver_CABiCGSTAB_noprec
   use mod_monolis_mat
   use mod_monolis_precond
   use mod_monolis_matvec
-  use mod_monolis_linalg
+  use mod_monolis_inner_product
   use mod_monolis_converge
 
   implicit none

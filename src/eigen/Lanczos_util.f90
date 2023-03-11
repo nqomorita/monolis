@@ -8,14 +8,27 @@ module mod_monolis_eigen_lanczos_util
 
 contains
 
+  !> Lanczos 法の初期ベクトル生成
   subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc, beta)
     implicit none
+    !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
-    integer(kint) :: i, N, NDOF
-    real(kdouble) :: q(:), norm, t1, t2, beta
+    !> 計算点数
+    integer(kint) :: N
+    !> 計算点上の自由度
+    integer(kint) :: NDOF
+    !> 入力ベクトル
+    real(kdouble) :: q(:)
+    !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
+    !> パラメータ beta
+    real(kdouble) :: beta
+    integer(kint) :: i, comm_size
+    real(kdouble) :: norm, t1, t2
 
-    call get_rundom_number(N*NDOF, q, monolis_mpi_global_comm_size())
+    comm_size = monolis_mpi_local_comm_size(monoCOM%comm)
+
+    call get_rundom_number(N*NDOF, q, comm_size)
 
     do i = 1, N*NDOF
       if(is_bc(i)) q(i) = 0.0d0
@@ -31,46 +44,6 @@ contains
       q(i) = q(i)*norm
     enddo
   end subroutine lanczos_initialze
-
-  subroutine get_rundom_number(N, X, SHIFT)
-    implicit none
-    real(kdouble) :: X(N), INVM
-    integer(kint), parameter :: MM = 1664501
-    integer(kint), parameter :: LAMBDA = 1229
-    integer(kint), parameter :: MU = 351750
-    integer(kint) :: i, N, IR, SHIFT
-
-    IR = 0
-    INVM = 1.0D0 / MM
-    do I = 1, SHIFT
-      IR = mod( LAMBDA * IR + MU, MM)
-    enddo
-    do I = SHIFT+1, SHIFT+N
-      IR = mod( LAMBDA * IR + MU, MM)
-      X(I-SHIFT) = INVM * IR
-    enddo
-  end subroutine get_rundom_number
-
-  subroutine monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
-    implicit none
-    type(monolis_prm) :: monoPRM
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, iter, N, NDOF
-    real(kdouble) :: q(:,0:), p(:), norm
-    real(kdouble) :: tdotp, tcomm_dotp
-    real(kdouble), allocatable :: t(:)
-
-    N    = monoMAT%N
-    NDOF = monoMAT%NDOF
-
-    do i = 1, iter
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,i), norm, tdotp, tcomm_dotp)
-      do j = 1, N*NDOF
-        p(j) = p(j) - norm*q(j,i)
-      enddo
-    enddo
-  end subroutine monolis_gram_schmidt
 
   subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
     & alpha_t, beta_t, q, e_value, e_mode, norm)
