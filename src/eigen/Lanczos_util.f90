@@ -3,6 +3,7 @@ module mod_monolis_eigen_lanczos_util
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_inner_product
 
   implicit none
 
@@ -28,7 +29,7 @@ contains
 
     comm_size = monolis_mpi_local_comm_size(monoCOM%comm)
 
-    call get_rundom_number(N*NDOF, q, comm_size)
+    call monolis_get_rundom_number_R(N*NDOF, q, comm_size)
 
     do i = 1, N*NDOF
       if(is_bc(i)) q(i) = 0.0d0
@@ -36,7 +37,7 @@ contains
 
     call monolis_update_R(monoCOM, NDOF, q, t1)
 
-    call monolis_inner_product_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
+    call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
 
     beta = dsqrt(norm)
     norm = 1.0d0/dsqrt(norm)

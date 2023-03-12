@@ -9,7 +9,12 @@ CFLAGS = -fPIC -O2
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = -L./lib -lmonolis -L./submodule/gedatsu/lib -lgedatsu -L./submodule/monolis_utils/lib -lmonolis_utils -L./lib -lmetis
+USE_LIB = \
+-L./lib -lmonolis \
+-L./submodule/gedatsu/lib -lgedatsu \
+-L./submodule/monolis_utils/lib -lmonolis_utils \
+-L./lib -lmetis \
+-llapack
 BIN_DIR = ./bin
 SRC_DIR = ./src
 OBJ_DIR = ./obj

@@ -52,7 +52,7 @@ contains
     logical :: is_bc(:)
 
     call monolis_eigen_inverted_standard_lanczos_R_main( &
-      & monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
+      & monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_inverted_standard_lanczos_R
 
 end module mod_monolis_eigen_solver

@@ -4,6 +4,10 @@ module mod_monolis_eigen_lanczos
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   use mod_monolis_eigen_lanczos_util
+  use mod_monolis_inner_product
+  use mod_monolis_matvec
+  use mod_monolis_vec_util
+  use mod_monolis_solve
 
   implicit none
 
@@ -11,7 +15,7 @@ contains
 
   !> Lanczos 法（逆反復、最小固有値、実数型、メイン関数）
   subroutine monolis_eigen_inverted_standard_lanczos_R_main &
-    & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    & (monoPRM, monoCOM, monoMAT, monoPREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -19,6 +23,8 @@ contains
     type(monolis_com) :: monoCOM
     !> 行列構造体
     type(monolis_mat) :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
     !> 取得固有値数
     integer(kint) :: n_get_eigen
     !> 収束判定閾値
@@ -39,7 +45,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_eigen_inverted_standard_lanczos_R_main")
 
-    call monolis_set_initial_comm(monoCOM, monoMAT)
+    !call monolis_set_initial_comm(monoCOM, monoMAT)
 
     N     = monoMAT%N
     NP    = monoMAT%NP
@@ -71,24 +77,24 @@ contains
     call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc, beta(1))
 
     do iter = 2, maxiter
-      call monolis_set_RHS(monoMAT, q(:,iter))
+      call monolis_set_RHS_R(monoMAT, q(:,iter))
 
-      !monoPRM%is_prec_stored = .true.
-      call monolis_solve_(monoPRM, monoCOM, monoMAT)
+      monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
+      call monolis_solve_main(monoPRM, monoCOM, monoMAT, monoPREC)
 
       do i = 1, N*NDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
-      call monolis_vec_AXPY(N, NDOF, -beta(iter), q(:,iter-1), monoMAT%R%X, p)
+      call monolis_vec_AXPBY_R(N, NDOF, -beta(iter), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
 
-      call monolis_vec_AXPY(N, NDOF, -alpha(iter), q(:,iter), p, p)
+      call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
+      call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
 
-      call monolis_inner_product_R(monoCOM, N, NDOF, p, p, beta_t)
+      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
 
       beta(iter+1) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter+1)
@@ -101,9 +107,9 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-if(monolis_mpi_global_comm_size() == 0)then
-  write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
-endif
+      if(monolis_mpi_global_comm_size() == 0)then
+        write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
+      endif
 
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
         do i = 1, n_get_eigen
@@ -146,7 +152,7 @@ endif
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
     logical :: is_converge
 
-    call monolis_set_initial_comm(monoCOM, monoMAT)
+    !call monolis_set_initial_comm(monoCOM, monoMAT)
 
     call monolis_std_debug_log_header("monolis_eigen_standard_lanczos_R_main")
 
@@ -192,7 +198,7 @@ endif
 
       call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt(monoPRM, monoCOM, monoMAT, iter, q, p)
+      call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
 
@@ -211,9 +217,9 @@ endif
 
       if(norm < ths) is_converge = .true.
 
-if(monolis_mpi_global_comm_size() == 0)then
-  write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
-endif
+      if(monolis_mpi_global_comm_size() == 0)then
+        write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
+      endif
 
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
         do i = 1, n_get_eigen

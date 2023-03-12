@@ -16,6 +16,7 @@ module mod_monolis
   use mod_monolis_matvec
   use mod_monolis_vec_util
   use mod_monolis_solve
+  use mod_monolis_eigen_solver
 
   !> @defgroup def_init 初期化・終了処理関数群
   !> 初期化・終了処理に関連する関数グループ
