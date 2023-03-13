@@ -14,7 +14,7 @@ contains
     !> 行列の対角成分
     real(kdouble) :: D(5)
     !> 行列の副対角成分
-    real(kdouble) :: S(4)
+    real(kdouble) :: S(5)
     !> 固有値
     real(kdouble) :: eig_val(5)
     !> 固有ベクトル
@@ -35,6 +35,7 @@ contains
     S(2) = 1.0d0
     S(3) = 1.0d0
     S(4) = 1.0d0
+    S(5) = 0.0d0
 
     call monolis_lapack_dstev(n, D, S, eig_val, eig_mode)
 

@@ -67,16 +67,16 @@ contains
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
 
     call monolis_alloc_R_1d(alpha, maxiter)
-    call monolis_alloc_R_1d(beta, maxiter + 1)
+    call monolis_alloc_R_1d(beta, maxiter)
     call monolis_alloc_R_1d(eigen_value, maxiter)
     call monolis_alloc_R_1d(prev, maxiter)
     call monolis_alloc_R_1d(p, NP*NDOF)
-    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 2)
+    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
     call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
 
-    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc, beta(1))
+    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc)
 
-    do iter = 2, maxiter
+    do iter = 1, maxiter
       call monolis_set_RHS_R(monoMAT, q(:,iter))
 
       monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
@@ -86,7 +86,11 @@ contains
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
-      call monolis_vec_AXPBY_R(N, NDOF, -beta(iter), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+      if(iter > 1)then
+        call monolis_vec_AXPBY_R(N, NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+      else
+        p = monoMAT%R%X
+      endif
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
 
@@ -96,8 +100,8 @@ contains
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
 
-      beta(iter+1) = dsqrt(beta_t)
-      beta_t = 1.0d0/beta(iter+1)
+      beta(iter) = dsqrt(beta_t)
+      beta_t = 1.0d0/beta(iter)
       do i = 1, NP*NDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
@@ -176,14 +180,14 @@ contains
     if(n_get_eigen > total_dof) n_get_eigen = total_dof
 
     call monolis_alloc_R_1d(alpha, maxiter)
-    call monolis_alloc_R_1d(beta, maxiter + 1)
+    call monolis_alloc_R_1d(beta, maxiter)
     call monolis_alloc_R_1d(eigen_value, maxiter)
     call monolis_alloc_R_1d(prev, maxiter)
     call monolis_alloc_R_1d(p, NP*NDOF)
-    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 2)
+    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
     call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
 
-    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc, beta(1))
+    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc)
 
     do iter = 1, maxiter
       call monolis_matvec_product_main_R(monoCOM, monoMAT, q(:,iter), monoMAT%R%X, tspmv, tcomm_spmv)
@@ -192,7 +196,11 @@ contains
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
-      call monolis_vec_AXPBY_R(N, NDOF, -beta(iter), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+      if(iter > 1)then
+        call monolis_vec_AXPBY_R(N, NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+      else
+        p = monoMAT%R%X
+      endif
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
 
@@ -202,8 +210,8 @@ contains
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
 
-      beta(iter+1) = dsqrt(beta_t)
-      beta_t = 1.0d0/beta(iter+1)
+      beta(iter) = dsqrt(beta_t)
+      beta_t = 1.0d0/beta(iter)
       do i = 1, NP*NDOF
         q(i,iter+1) = p(i)*beta_t
       enddo

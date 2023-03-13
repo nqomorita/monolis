@@ -40,7 +40,7 @@ contains
     beta(2) = 1.0d0
     beta(3) = 1.0d0
     beta(4) = 1.0d0
-    beta(5) = 1.0d0
+    beta(5) = 0.0d0
 
     q = 0.0d0
     q(1,1) = 1.0d0

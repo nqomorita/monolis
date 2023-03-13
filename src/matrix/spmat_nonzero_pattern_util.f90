@@ -222,6 +222,7 @@ contains
       enddo
     enddo
 
+    indexR = 0
     do i = 1, NR
       indexR(i + 1) = indexR(i) + temp(i)
     enddo

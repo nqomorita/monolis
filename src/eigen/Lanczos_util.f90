@@ -11,7 +11,7 @@ module mod_monolis_eigen_lanczos_util
 contains
 
   !> Lanczos 法の初期ベクトル生成
-  subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc, beta)
+  subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc)
     implicit none
     !> 通信テーブル構造体
     type(monolis_com) :: monoCOM
@@ -23,8 +23,6 @@ contains
     real(kdouble) :: q(:)
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
-    !> パラメータ beta
-    real(kdouble) :: beta
     integer(kint) :: i, comm_size
     real(kdouble) :: norm, t1, t2
 
@@ -40,7 +38,6 @@ contains
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
 
-    beta = dsqrt(norm)
     norm = 1.0d0/dsqrt(norm)
     do i = 1, N*NDOF
       q(i) = q(i)*norm

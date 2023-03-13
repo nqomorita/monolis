@@ -28,7 +28,7 @@ contains
     call monolis_alloc_R_1d(r1, n - 1)
     call monolis_alloc_R_1d(r2, 2*n)
 
-    eig_val = D
+    eig_val(1:n) = D(1:n)
     r1 = S(1:n - 1)
 
     call dstev("V", n, eig_val, r1, eig_mode, ldz, r2, info)
