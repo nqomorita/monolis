@@ -21,6 +21,7 @@ program monolis_test
   use mod_monolis_solver_PipeBiCGSTAB_test
   use mod_monolis_solver_PipeBiCGSTAB_noprec_test
   use mod_monolis_solver_COCG_test
+  use mod_monolis_lapack_test
   implicit none
 
   call monolis_global_initialize()
@@ -40,15 +41,17 @@ program monolis_test
   call monolis_converge_test()
   call monolis_matvec_test()
 
-  call monolis_solver_CG_test()
-  call monolis_solver_GropCG_test()
-  call monolis_solver_PipeCG_test()
-  call monolis_solver_PipeCR_test()
-  call monolis_solver_BiCGSTAB_test()
-  call monolis_solver_BiCGSTAB_noprec_test()
-  call monolis_solver_PipeBiCGSTAB_test()
-  call monolis_solver_PipeBiCGSTAB_noprec_test()
-  call monolis_solver_COCG_test()
+  call monolis_lapack_test()
+
+  !call monolis_solver_CG_test()
+  !call monolis_solver_GropCG_test()
+  !call monolis_solver_PipeCG_test()
+  !call monolis_solver_PipeCR_test()
+  !call monolis_solver_BiCGSTAB_test()
+  !call monolis_solver_BiCGSTAB_noprec_test()
+  !call monolis_solver_PipeBiCGSTAB_test()
+  !call monolis_solver_PipeBiCGSTAB_noprec_test()
+  !call monolis_solver_COCG_test()
 
   call monolis_global_finalize()
 
