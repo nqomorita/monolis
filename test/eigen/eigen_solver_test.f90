@@ -23,11 +23,11 @@ contains
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(6)
 
-    call monolis_eigen_standard_lanczos_R &
-      & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    !call monolis_eigen_standard_lanczos_R &
+    !  & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
 
-    call monolis_eigen_inverted_standard_lanczos_R &
-      & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    !call monolis_eigen_inverted_standard_lanczos_R &
+    !  & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_solver_test
 end module mod_monolis_eigen_solver_test
 

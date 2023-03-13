@@ -48,7 +48,7 @@ contains
   end subroutine lanczos_initialze
 
   !> Lanczos 法における三重対角行列の固有値分解
-  subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+  subroutine monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
     & alpha, beta, q, eig_val, eig_mode, norm)
     implicit none
     !> 反復回数
@@ -81,11 +81,12 @@ contains
     do i = 1, min(iter, n_get_eigen)
       eig_val(i) = 1.0d0/eig_val_tri(iter - i +1)
       eig_mode(:,i) = matmul(q(:,1:iter), eig_mode_tri(1:iter,iter - i + 1))
-      r = sqrt(eig_mode_tri(iter,iter - i + 1)**2)*beta(iter+1)
+
+      r = sqrt(eig_mode_tri(iter,iter - i + 1)**2)*beta(iter)
       if(norm < r)then
          norm = r
       endif
     enddo
-  end subroutine monolis_get_eigen_pair_from_tridiag
+  end subroutine monolis_get_inverted_eigen_pair_from_tridiag
 
 end module mod_monolis_eigen_lanczos_util

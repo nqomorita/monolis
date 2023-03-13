@@ -102,7 +102,7 @@ contains
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+      call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
         & alpha, beta, q, eigen_value, eigen_mode, norm)
 
       if(norm < ths) is_converge = .true.
@@ -208,7 +208,7 @@ contains
         q(i,iter+1) = p(i)*beta_t
       enddo
 
-      call monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
+      call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
         & alpha, beta, q, eigen_value, eigen_mode, norm)
 
       do i = 1, min(iter, n_get_eigen)
