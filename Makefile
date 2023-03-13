@@ -14,7 +14,7 @@ USE_LIB = \
 -L./submodule/gedatsu/lib -lgedatsu \
 -L./submodule/monolis_utils/lib -lmonolis_utils \
 -L./lib -lmetis \
--llapack
+-llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 OBJ_DIR = ./obj
