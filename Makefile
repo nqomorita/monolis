@@ -78,6 +78,9 @@ inner_product.f90 \
 mat_converge.f90 \
 vec_util.f90
 
+SRC_WRAP = \
+wrapper_lapack.f90
+
 #matmat.f90 \
 
 #SRC_FACT = \
@@ -128,6 +131,7 @@ SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \
 $(addprefix matrix/, $(SRC_MAT)) \
 $(addprefix linalg/, $(SRC_LINALG)) \
+$(addprefix wrapper/, $(SRC_WRAP)) \
 $(addprefix fact/, $(SRC_FACT)) \
 $(addprefix prec/, $(SRC_PREC)) \
 $(addprefix iterative/, $(SRC_ITER)) \

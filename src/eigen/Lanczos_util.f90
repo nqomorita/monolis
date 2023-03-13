@@ -4,6 +4,7 @@ module mod_monolis_eigen_lanczos_util
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   use mod_monolis_inner_product
+  use mod_monolis_lapack
 
   implicit none
 
@@ -46,45 +47,45 @@ contains
     enddo
   end subroutine lanczos_initialze
 
+  !> Lanczos 法における三重対角行列の固有値分解
   subroutine monolis_get_eigen_pair_from_tridiag(iter, n_get_eigen, &
-    & alpha_t, beta_t, q, e_value, e_mode, norm)
+    & alpha, beta, q, eig_val, eig_mode, norm)
     implicit none
+    !> 反復回数
     integer(kint), intent(in) :: iter
-    integer(kint) :: i, n, ldz, info, n_get_eigen
-    real(kdouble) :: alpha_t(:), beta_t(:), q(:,0:), e_value(:), e_mode(:,:), norm
-    integer(kint), allocatable :: isuppz(:), idum(:)
-    real(kdouble), allocatable :: alpha(:), beta(:), rdum(:), e_mode_t(:,:)
+    !> 取得したい固有値数
+    integer(kint), intent(in) :: n_get_eigen
+    !> 対角成分
+    real(kdouble) :: alpha(:)
+    !> 副対角成分
+    real(kdouble) :: beta(:)
+    !> Lanczos 法から得られるユニタリ行列
+    real(kdouble) :: q(:,:)
+    !> 固有値
+    real(kdouble) :: eig_val(:)
+    !> 固有ベクトル
+    real(kdouble) :: eig_mode(:,:)
+    !> 固有方程式の残差
+    real(kdouble) :: norm
+    integer(kint) :: i
+    real(kdouble) :: r
+    real(kdouble), allocatable :: eig_val_tri(:)
+    real(kdouble), allocatable :: eig_mode_tri(:,:)
 
-    !> DSTEVR
-    allocate(alpha(iter), source = 0.0d0)
-    allocate(beta (max(1,iter-1)), source = 0.0d0)
-    allocate(rdum(20*iter), source = 0.0d0)
-    allocate(e_mode_t(iter,iter), source = 0.0d0)
+    call monolis_alloc_R_1d(eig_val_tri, iter)
+    call monolis_alloc_R_2d(eig_mode_tri, iter, iter)
 
-    alpha = alpha_t(1:iter)
-    beta = beta_t(2:max(1,iter-1)+1)
-    if(iter == 1) beta = 0.0d0
-
-    n = iter
-    ldz = iter
-
-    call dstev("V", n, alpha, beta, e_mode_t, ldz, rdum, info)
+    call monolis_lapack_dstev(iter, alpha, beta, eig_val_tri, eig_mode_tri)
 
     norm = 0.0d0
     do i = 1, min(iter, n_get_eigen)
-      e_value(i) = 1.0d0/alpha(iter - i +1)
-      e_mode(:,i) = matmul(q(:,1:iter), e_mode_t(1:iter,iter - i + 1))
-      if(norm < sqrt(e_mode_t(iter,iter - i + 1)**2)*beta_t(iter+1))then
-        norm = sqrt(e_mode_t(iter,iter - i + 1)**2)*beta_t(iter+1)
+      eig_val(i) = 1.0d0/eig_val_tri(iter - i +1)
+      eig_mode(:,i) = matmul(q(:,1:iter), eig_mode_tri(1:iter,iter - i + 1))
+      r = sqrt(eig_mode_tri(iter,iter - i + 1)**2)*beta(iter+1)
+      if(norm < r)then
+         norm = r
       endif
     enddo
-
-    if(info /= 0) stop "monolis_get_eigen_pair_from_tridiag"
-
-    deallocate(alpha)
-    deallocate(beta)
-    deallocate(e_mode_t)
-    deallocate(rdum)
   end subroutine monolis_get_eigen_pair_from_tridiag
 
 end module mod_monolis_eigen_lanczos_util
