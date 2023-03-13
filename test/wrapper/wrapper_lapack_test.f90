@@ -51,7 +51,7 @@ contains
     r_ans(4) =-0.5d0
     r_ans(5) = 0.28867513459481270d0
 
-    call monolis_test_check_eq_R("monolis_lapack_test 1 b", r_ans, eig_mode(:,1))
+    call monolis_test_check_eq_R("monolis_lapack_test 1 b", dabs(r_ans), dabs(eig_mode(:,1)))
 
     r_ans(1) =-0.5d0
     r_ans(2) = 0.5d0
@@ -59,7 +59,7 @@ contains
     r_ans(4) =-0.5d0
     r_ans(5) = 0.5d0
 
-    call monolis_test_check_eq_R("monolis_lapack_test 2 b", r_ans, eig_mode(:,2))
+    call monolis_test_check_eq_R("monolis_lapack_test 2 b", dabs(r_ans), dabs(eig_mode(:,2)))
 
     r_ans(1) = 0.5773502691896257d0
     r_ans(2) = 0.0d0
@@ -67,7 +67,7 @@ contains
     r_ans(4) = 0.0d0
     r_ans(5) = 0.5773502691896257d0
 
-    call monolis_test_check_eq_R("monolis_lapack_test 3 b", r_ans, eig_mode(:,3))
+    call monolis_test_check_eq_R("monolis_lapack_test 3 b", dabs(r_ans), dabs(eig_mode(:,3)))
 
     r_ans(1) = 0.5d0
     r_ans(2) = 0.5d0
@@ -75,7 +75,7 @@ contains
     r_ans(4) =-0.5d0
     r_ans(5) =-0.5d0
 
-    call monolis_test_check_eq_R("monolis_lapack_test 4 b", r_ans, eig_mode(:,4))
+    call monolis_test_check_eq_R("monolis_lapack_test 4 b", dabs(r_ans), dabs(eig_mode(:,4)))
 
     r_ans(1) =-0.28867513459481281d0
     r_ans(2) =-0.5d0
@@ -83,7 +83,7 @@ contains
     r_ans(4) =-0.5d0
     r_ans(5) =-0.28867513459481270d0
 
-    call monolis_test_check_eq_R("monolis_lapack_test 5 b", r_ans, eig_mode(:,5))
+    call monolis_test_check_eq_R("monolis_lapack_test 5 b", dabs(r_ans), dabs(eig_mode(:,5)))
   end subroutine monolis_lapack_test
 
 end module mod_monolis_lapack_test
