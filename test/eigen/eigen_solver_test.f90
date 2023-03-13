@@ -69,11 +69,11 @@ contains
     call monolis_eigen_standard_lanczos_R &
       & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
 
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1", eig_val(5), 0.267949192431122d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2", eig_val(4), 1.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3", eig_val(3), 2.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4", eig_val(2), 3.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5", eig_val(1), 3.732050807568877d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 a", eig_val(5), 0.267949192431122d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 a", eig_val(4), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 a", eig_val(3), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 a", eig_val(2), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 a", eig_val(1), 3.732050807568877d0)
 
     r_ans(1) =-0.28867513459481281d0
     r_ans(2) = 0.5d0
@@ -127,11 +127,56 @@ contains
     call monolis_eigen_inverted_standard_lanczos_R &
       & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
 
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1", eig_val(1), 0.267949192431122d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2", eig_val(2), 1.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3", eig_val(3), 2.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4", eig_val(4), 3.0d0)
-    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5", eig_val(5), 3.732050807568877d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 c", eig_val(1), 0.267949192431122d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 c", eig_val(2), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 c", eig_val(3), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 c", eig_val(4), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 c", eig_val(5), 3.732050807568877d0)
+
+    r_ans(1) = 0.28867513459481281d0
+    r_ans(2) =-0.5d0
+    r_ans(3) = 0.57735026918962640d0
+    r_ans(4) =-0.5d0
+    r_ans(5) = 0.28867513459481270d0
+    r_ans(6) = 0.0d0
+
+    call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 1 d", r_ans, eig_mode(:,1))
+
+    r_ans(1) = 0.5d0
+    r_ans(2) =-0.5d0
+    r_ans(3) = 0.0d0
+    r_ans(4) = 0.5d0
+    r_ans(5) =-0.5d0
+    r_ans(6) = 0.0d0
+
+    call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 2 d", r_ans, eig_mode(:,2))
+
+    r_ans(1) = 0.5773502691896257d0
+    r_ans(2) = 0.0d0
+    r_ans(3) =-0.5773502691896257d0
+    r_ans(4) = 0.0d0
+    r_ans(5) = 0.5773502691896257d0
+    r_ans(6) = 0.0d0
+
+    call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 3 d", r_ans, eig_mode(:,3))
+
+    r_ans(1) = 0.5d0
+    r_ans(2) = 0.5d0
+    r_ans(3) = 0.0d0
+    r_ans(4) =-0.5d0
+    r_ans(5) =-0.5d0
+    r_ans(6) = 0.0d0
+
+    call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 4 d", r_ans, eig_mode(:,4))
+
+    r_ans(1) =-0.28867513459481281d0
+    r_ans(2) =-0.5d0
+    r_ans(3) =-0.57735026918962640d0
+    r_ans(4) =-0.5d0
+    r_ans(5) =-0.28867513459481270d0
+    r_ans(6) = 0.0d0
+
+    call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 5 d", r_ans, eig_mode(:,5))
 
   end subroutine monolis_eigen_solver_test
 end module mod_monolis_eigen_solver_test
