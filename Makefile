@@ -19,6 +19,7 @@ BIN_DIR = ./bin
 SRC_DIR = ./src
 OBJ_DIR = ./obj
 LIB_DIR = ./lib
+WRAP_DIR= ./wrapper
 TST_DIR = ./test
 DRV_DIR = ./driver
 LIBRARY = libmonolis.a
@@ -127,6 +128,14 @@ Lanczos_util.f90 \
 Lanczos.f90 \
 eigen_solver.f90
 
+##> C wrapper section
+SRC_DEFINE_C = \
+monolis_def_solver_c.c \
+monolis_def_mat_c.c \
+monolis_def_struc_c.c \
+monolis_def_solver_util_c.c
+
+##> all targes
 SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \
 $(addprefix matrix/, $(SRC_MAT)) \
@@ -137,19 +146,21 @@ $(addprefix prec/, $(SRC_PREC)) \
 $(addprefix iterative/, $(SRC_ITER)) \
 $(addprefix solver/, $(SRC_SOLV)) \
 $(addprefix eigen/, $(SRC_EIGEN)) \
-monolis.f90
 
 ##> lib objs
-LIB_SOURCES = $(addprefix $(SRC_DIR)/, $(SRC_ALL))
+LIB_SOURCES = \
+$(addprefix $(SRC_DIR)/,  $(SRC_ALL)) \
+$(addprefix $(WRAP_DIR)/, $(SRC_ALL_C)) \
+./src/monolis.f90
 LIB_OBJSt   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
-LIB_OBJS    = $(LIB_OBJSt:.c=.o)
+LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJSt:.c=.o))
 
 ##> **********
-##> test target (3)
+##> test target (2)
 TEST_TARGET = $(TST_DIR)/monolis_test
 
 ##> lib objs
-TST_SRC_ALL = $(SRC_ALL)
+TST_SRC_ALL = $(SRC_ALL) monolis.f90
 TST_SOURCES = $(addprefix $(TST_DIR)/, $(TST_SRC_ALL))
 TST_OBJSt   = $(subst $(TST_DIR), $(OBJ_DIR), $(TST_SOURCES:.f90=_test.o))
 TST_OBJS    = $(TST_OBJSt:.c=_test.o)
@@ -171,14 +182,14 @@ $(TEST_TARGET): $(TST_OBJS)
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) $(CPP) $(INCLUDE) -o $@ -c $<
-
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
-$(OBJ_DIR)/%.o: $(TST_DIR)/%.c
-	$(CC) $(CFLAGS) $(CPP) $(INCLUDE) -o $@ -c $<
+$(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
+	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+
+$(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 clean:
 	$(RM) \
