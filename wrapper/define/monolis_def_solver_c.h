@@ -6,6 +6,10 @@
 extern "C" {
 #endif
 
+const int monolis_prm_Iarray_size = 100
+
+const int monolis_prm_Rarray_size = 100
+
 const int monolis_iter_CG       = 1;
 
 const int monolis_iter_GropCG   = 2;
@@ -49,10 +53,6 @@ const int monolis_prec_ROM    = 8;
 const int monolis_prec_MF     = 9;
 
 const int monolis_prec_MUMPS_LOCAL = 10;
-
-const int monolis_prm_Iarray_size = 100
-
-const int monolis_prm_Rarray_size = 100
 
 const int monolis_prm_I_method = 1
 
