@@ -145,7 +145,9 @@ monolis_inner_product_c.c
 SRC_MAT_C = \
 monolis_spmat_nzpattern_util_c.c\
 monolis_spmat_nzpattern_c.c \
-spmat_nzpattern_util_wrap.f90
+monolis_spmat_handler_c.c \
+spmat_nzpattern_util_wrap.f90 \
+spmat_handler_util_wrap.f90
 
 SRC_ALL_C = \
 $(addprefix define/, $(SRC_DEFINE_C)) \

@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#include "monolis_def_mat_c.h"
+
 void monolis_get_nonzero_pattern_by_nodal_graph_main(
   MONOLIS_MAT* mat,
   int          n_node,
