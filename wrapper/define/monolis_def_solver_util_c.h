@@ -1,10 +1,13 @@
-/* monolis_def_struc.h */
-#ifndef MONOLIS_DEF_SOLVER_H
-#define MONOLIS_DEF_SOLVER_H
+/* monolis_def_solver_util.h */
+#ifndef MONOLIS_DEF_SOLVER_UTIL_H
+#define MONOLIS_DEF_SOLVER_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdbool.h>
+#include "monolis_def_struc_c.h"
 
 void monolis_set_method(
   MONOLIS* mat,

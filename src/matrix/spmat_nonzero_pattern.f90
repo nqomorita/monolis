@@ -30,7 +30,7 @@ contains
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
-    call gedatsu_convert_simple_elem_to_connectivity_graph &
+    call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
@@ -62,7 +62,7 @@ contains
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
-    call gedatsu_convert_simple_elem_to_connectivity_graph &
+    call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
@@ -95,7 +95,7 @@ contains
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
-    call gedatsu_convert_simple_elem_to_connectivity_graph &
+    call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
@@ -128,7 +128,7 @@ contains
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
-    call gedatsu_convert_simple_elem_to_connectivity_graph &
+    call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &

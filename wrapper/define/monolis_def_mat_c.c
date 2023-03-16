@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <complex.h>
+#include "monolis_utils.h"
 #include "monolis_def_mat_c.h"
 
 void monolis_mat_initialize_val_R(
@@ -55,11 +57,11 @@ void monolis_mat_initialize(
   mat->N = 0;
   mat->NP = 0;
   mat->NDOF = 0;
-  monolis_mat_initialize_val_R(mat->R);
-  monolis_mat_initialize_val_C(mat->C);
-  monolis_mat_initialize_SCSR(mat->SCSR);
-  monolis_mat_initialize_CSR(mat->CSR);
-  monolis_mat_initialize_CSC(mat->CSC);
+  monolis_mat_initialize_val_R(&mat->R);
+  monolis_mat_initialize_val_C(&mat->C);
+  monolis_mat_initialize_SCSR(&mat->SCSR);
+  monolis_mat_initialize_CSR(&mat->CSR);
+  monolis_mat_initialize_CSC(&mat->CSC);
 }
 
 void monolis_mat_finalize_val_R(
@@ -114,9 +116,9 @@ void monolis_mat_finalize(
   mat->N = 0;
   mat->NP = 0;
   mat->NDOF = 0;
-  monolis_mat_finalize_val_R(mat->R);
-  monolis_mat_finalize_val_C(mat->C);
-  monolis_mat_finalize_SCSR(mat->SCSR);
-  monolis_mat_finalize_CSR(mat->CSR);
-  monolis_mat_finalize_CSC(mat->CSC);
+  monolis_mat_finalize_val_R(&mat->R);
+  monolis_mat_finalize_val_C(&mat->C);
+  monolis_mat_finalize_SCSR(&mat->SCSR);
+  monolis_mat_finalize_CSR(&mat->CSR);
+  monolis_mat_finalize_CSC(&mat->CSC);
 }

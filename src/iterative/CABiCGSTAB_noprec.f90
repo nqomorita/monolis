@@ -99,7 +99,7 @@ contains
       rho = CG(1)
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
+    call monolis_mpi_update_R(monoCOM, NDOF, X, monoPRM%tcomm_spmv)
 
     deallocate(R0)
     deallocate(R )

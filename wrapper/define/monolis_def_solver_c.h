@@ -6,9 +6,9 @@
 extern "C" {
 #endif
 
-const int monolis_prm_Iarray_size = 100
+const int monolis_prm_Iarray_size = 100;
 
-const int monolis_prm_Rarray_size = 100
+const int monolis_prm_Rarray_size = 100;
 
 const int monolis_iter_CG       = 1;
 
@@ -54,57 +54,57 @@ const int monolis_prec_MF     = 9;
 
 const int monolis_prec_MUMPS_LOCAL = 10;
 
-const int monolis_prm_I_method = 1
+const int monolis_prm_I_method = 1;
 
-const int monolis_prm_I_precond = 2
+const int monolis_prm_I_precond = 2;
 
-const int monolis_prm_I_max_iter = 3
+const int monolis_prm_I_max_iter = 3;
 
-const int monolis_prm_I_cur_iter = 4
+const int monolis_prm_I_cur_iter = 4;
 
-const int monolis_prm_I_ierr = 5
+const int monolis_prm_I_ierr = 5;
 
-//const int monolis_prm_I_is_scaling = 6
+//const int monolis_prm_I_is_scaling = 6;
 
-//const int monolis_prm_I_is_reordering = 7
+//const int monolis_prm_I_is_reordering = 7;
 
-const int monolis_prm_I_is_init_x = 8
+const int monolis_prm_I_is_init_x = 8;
 
-const int monolis_prm_I_is_sym_matrix = 9
+const int monolis_prm_I_is_sym_matrix = 9;
 
-const int monolis_prm_I_is_debug = 10
+const int monolis_prm_I_is_debug = 10;
 
-const int monolis_prm_I_is_measurement = 11
+const int monolis_prm_I_is_measurement = 11;
 
-const int monolis_prm_I_is_check_diag = 12
+const int monolis_prm_I_is_check_diag = 12;
 
-const int monolis_prm_I_is_prec_stored = 13
+const int monolis_prm_I_is_prec_stored = 13;
 
-const int monolis_prm_I_show_iterlog = 14
+const int monolis_prm_I_show_iterlog = 14;
 
-const int monolis_prm_I_show_time = 15
+const int monolis_prm_I_show_time = 15;
 
-const int monolis_prm_I_show_summary = 16
+const int monolis_prm_I_show_summary = 16;
 
-const int monolis_prm_I_show_time_statistics = 17
+const int monolis_prm_I_show_time_statistics = 17;
 
-const int monolis_prm_R_tol = 1
+const int monolis_prm_R_tol = 1;
 
-const int monolis_prm_R_cur_resid = 2
+const int monolis_prm_R_cur_resid = 2;
 
-const int monolis_R_time_sol = 3
+const int monolis_R_time_sol = 3;
 
-const int monolis_R_time_prep = 4
+const int monolis_R_time_prep = 4;
 
-const int monolis_R_time_spmv = 5
+const int monolis_R_time_spmv = 5;
 
-const int monolis_R_time_dotp = 6
+const int monolis_R_time_dotp = 6;
 
-const int monolis_R_time_prec = 7
+const int monolis_R_time_prec = 7;
 
-const int monolis_R_time_comm_dotp = 8
+const int monolis_R_time_comm_dotp = 8;
 
-const int monolis_R_time_comm_spmv = 9
+const int monolis_R_time_comm_spmv = 9;
 
 typedef struct {
 
@@ -113,6 +113,11 @@ typedef struct {
   double Rarray[100];
 } MONOLIS_PRM;
 
+void monolis_prm_initialize(
+  MONOLIS_PRM* prm);
+
+void monolis_prm_finalize(
+  MONOLIS_PRM* prm);
 
 #ifdef __cplusplus
 }

@@ -34,7 +34,7 @@ contains
       if(is_bc(i)) q(i) = 0.0d0
     enddo
 
-    call monolis_update_R(monoCOM, NDOF, q, t1)
+    call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
 

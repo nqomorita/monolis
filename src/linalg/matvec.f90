@@ -60,7 +60,7 @@ contains
 
     t1 = monolis_get_time()
 
-    call monolis_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoCOM, monoMAT, X, Y)
@@ -93,7 +93,7 @@ contains
 
     t1 = monolis_get_time()
 
-    call monolis_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
+    call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_C(monoCOM, monoMAT, X, Y)

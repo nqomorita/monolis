@@ -1,6 +1,6 @@
-/* monolis_def_struc.h */
-#ifndef MONOLIS_DEF_SOLVER_H
-#define MONOLIS_DEF_SOLVER_H
+/* monolis_def_mat.h */
+#ifndef MONOLIS_DEF_MAT_H
+#define MONOLIS_DEF_MAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,7 +69,7 @@ void monolis_mat_initialize_CSC(
   MONOLIS_MAT_CSC* mat);
 
 void monolis_mat_initialize(
-  MONOLIS* mat);
+  MONOLIS_MAT* mat);
 
 void monolis_mat_finalize_val_R(
   MONOLIS_MAT_VAL_R* mat);
@@ -87,7 +87,7 @@ void monolis_mat_finalize_CSC(
   MONOLIS_MAT_CSC* mat);
 
 void monolis_mat_finalize(
-  MONOLIS* mat);
+  MONOLIS_MAT* mat);
 
 #ifdef __cplusplus
 }

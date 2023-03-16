@@ -135,6 +135,9 @@ monolis_def_mat_c.c \
 monolis_def_struc_c.c \
 monolis_def_solver_util_c.c
 
+SRC_ALL_C = \
+$(addprefix define/, $(SRC_DEFINE_C))
+
 ##> all targes
 SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \

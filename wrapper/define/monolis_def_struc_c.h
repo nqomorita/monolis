@@ -6,6 +6,10 @@
 extern "C" {
 #endif
 
+#include "monolis_utils.h"
+#include "monolis_def_solver_c.h"
+#include "monolis_def_mat_c.h"
+
 typedef struct {
   MONOLIS_PRM prm;
   MONOLIS_COM com;

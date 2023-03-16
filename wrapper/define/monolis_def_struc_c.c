@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "monolis_mpi_util_c.h"
+#include "monolis_utils.h"
+#include "monolis_def_solver_c.h"
+#include "monolis_def_struc_c.h"
 
 void monolis_global_initialize()
 {
@@ -14,19 +16,20 @@ void monolis_global_finalize()
 }
 
 void monolis_initialize(
-  MONOLIS* mat)
+  MONOLIS* mat,
+  const char* input_file_dir)
 {
-  monolis_prm_initialize(mat->PRM);
-  monolis_com_initialize(mat->COM);
-  monolis_mat_initialize(mat->MAT);
-  monolis_mat_initialize(mat->PREC);
+  monolis_prm_initialize(&mat->prm);
+  monolis_com_initialize(&mat->com);
+  monolis_mat_initialize(&mat->mat);
+  monolis_mat_initialize(&mat->prec);
 }
 
 void monolis_finalize(
   MONOLIS* mat)
 {
-  monolis_prm_finalize(mat->PRM);
-  monolis_com_finalize(mat->COM);
-  monolis_mat_finalize(mat->MAT);
-  monolis_mat_finalize(mat->PREC);
+  monolis_prm_initialize(&mat->prm);
+  monolis_com_initialize(&mat->com);
+  monolis_mat_initialize(&mat->mat);
+  monolis_mat_initialize(&mat->prec);
 }
