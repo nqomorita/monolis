@@ -45,7 +45,7 @@ contains
     item(5) = 4
     item(6) = 3
 
-    call monolis_get_nonzero_pattern_by_nodal_graph_main(monolis, n_node, ndof, index, item)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main(monolis%MAT, n_node, ndof, index, item)
 
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_nodal_graph_main_test 1", monolis%MAT%N, 4)
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_nodal_graph_main_test 2", monolis%MAT%NP, 4)
@@ -128,7 +128,7 @@ contains
     item(6) = 3
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis, n_node, n_dof_list, index, item)
+      & (monolis%MAT, n_node, n_dof_list, index, item)
 
     call monolis_test_check_eq_I1("monolis_get_nzp_by_nodal_graph_with_arbit_main_test 1", monolis%MAT%N, 6)
     call monolis_test_check_eq_I1("monolis_get_nzp_by_nodal_graph_with_arbit_main_test 2", monolis%MAT%NP, 6)
@@ -259,7 +259,7 @@ contains
 
     monolis%MAT%CSR%index(6) = 10
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
 
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 1", size(monolis%MAT%R%A), 40)
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 2", size(monolis%MAT%R%B), 20)
@@ -280,7 +280,7 @@ contains
 
     monolis%MAT%CSR%index(6) = 10
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
 
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 1", size(monolis%MAT%C%A), 40)
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_C_test 2", size(monolis%MAT%C%B), 20)

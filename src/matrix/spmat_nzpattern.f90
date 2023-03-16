@@ -37,9 +37,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_R
 
   !> 単一メッシュデータから疎行列パターンを決定（複素数型）
@@ -69,9 +69,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_C
 
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、実数型）
@@ -102,9 +102,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis, n_node, n_dof_list, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, n_dof_list, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R
 
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、複素数型）
@@ -135,9 +135,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis, n_node, n_dof_list, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, n_dof_list, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C
 
   !> コネクティビティグラフから疎行列パターンを決定（実数型）
@@ -165,9 +165,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_R
 
   !> コネクティビティグラフから疎行列パターンを決定（複素数型）
@@ -195,9 +195,9 @@ contains
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, nodal_index, nodal_item)
+      & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_C
 
   !> 節点グラフから疎行列パターンを決定（実数型）
@@ -215,9 +215,9 @@ contains
     integer(kint) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, index, item)
+      & (monolis%MAT, n_node, ndof, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_R
 
   !> 節点グラフから疎行列パターンを決定（複素数型）
@@ -235,9 +235,9 @@ contains
     integer(kint) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
-      & (monolis, n_node, ndof, index, item)
+      & (monolis%MAT, n_node, ndof, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_C
 
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、実数型）
@@ -256,9 +256,9 @@ contains
     integer(kint) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis, n_node, n_dof_list, index, item)
+      & (monolis%MAT, n_node, n_dof_list, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R
 
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、複素数型）
@@ -277,8 +277,8 @@ contains
     integer(kint) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis, n_node, n_dof_list, index, item)
+      & (monolis%MAT, n_node, n_dof_list, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis)
+    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C
 end module mod_monolis_spmat_nonzero_pattern
