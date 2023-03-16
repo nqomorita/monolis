@@ -104,6 +104,7 @@ void monolis_add_matrix_to_sparse_matrix_R(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  double* val_t;
 
   monolis_add_matrix_to_sparse_matrix_main_R_c_main(
     n_node,
@@ -116,7 +117,7 @@ void monolis_add_matrix_to_sparse_matrix_R(
     n_base,
     connectivity,
     connectivity,
-    val);
+    val_t);
 }
 
 void monolis_add_matrix_to_sparse_matrix_offdiag_R(
@@ -130,6 +131,7 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  double* val_t;
 
   monolis_add_matrix_to_sparse_matrix_main_R_c_main(
     n_node,
@@ -142,7 +144,7 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
     n_base2,
     connectivity1,
     connectivity2,
-    val);
+    val_t);
 }
 
 void monolis_set_matrix_BCSR_R(

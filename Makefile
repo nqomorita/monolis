@@ -149,10 +149,15 @@ monolis_spmat_handler_c.c \
 spmat_nzpattern_util_wrap.f90 \
 spmat_handler_util_wrap.f90
 
+SRC_SOLV_C = \
+monolis_solver_c.c \
+solver_wrapper.f90
+
 SRC_ALL_C = \
 $(addprefix define/, $(SRC_DEFINE_C)) \
 $(addprefix linalg/, $(SRC_LINALG_C)) \
-$(addprefix matrix/, $(SRC_MAT_C))
+$(addprefix matrix/, $(SRC_MAT_C)) \
+$(addprefix solver/, $(SRC_SOLV_C))
 
 ##> all targes
 SRC_ALL = \
@@ -221,6 +226,7 @@ cp_header:
 	$(CP) ./wrapper/define/monolis_def_solver_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
+	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/
 
 clean:
