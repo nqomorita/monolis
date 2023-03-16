@@ -59,7 +59,7 @@ void monolis_add_matrix_to_sparse_matrix_main_R_c_main(
   int*     connectivity2,
   double** val);
 
-void monolis_set_Dirichlet_bc_main_R_c(
+void monolis_set_Dirichlet_bc_R_c_main(
   int      n_node,
   int      nz,
   int      n_dof,

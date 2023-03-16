@@ -157,11 +157,13 @@ void monolis_set_matrix_BCSR_R(
   mat->mat.N = n;
   mat->mat.NP = np;
   mat->mat.NDOF = n_dof;
-  //mat->mat.A = (double*)calloc(n_dof*n_dof*nz, sizeof(double));
-  //mat->mat.X = (double*)calloc(n_dof*np, sizeof(double));
-  //mat->mat.B = (double*)calloc(n_dof*np, sizeof(double));
-  //mat->mat.index = (int* )calloc(np+1, sizeof(int));
-  //mat->mat.item = (int*)calloc(nz, sizeof(int));
+
+  monolis_alloc_I_1d(mat->CSR.index, np + 1);
+  monolis_alloc_I_1d(mat->CSR.item, nz);
+
+  monolis_alloc_R_1d(mat->R.A, n_dof*n_dof*nz);
+  monolis_alloc_R_1d(mat->R.X, n_dof*np);
+  monolis_alloc_R_1d(mat->R.B, n_dof*np);
 
   int i;
   for(i = 0; i < np + 1; i++) {
@@ -176,9 +178,9 @@ void monolis_set_matrix_BCSR_R(
     mat->mat.R.A[i] = A[i];
   }
 
-  //mat->mat.indexR = (int*)calloc(np+1, sizeof(int));
-  //mat->mat.itemR = (int*)calloc(nz, sizeof(int));
-  //mat->mat.permR = (int*)calloc(nz, sizeof(int));
+  monolis_alloc_I_1d(mat->CSC.index, np + 1);
+  monolis_alloc_I_1d(mat->CSC.item, nz);
+  monolis_alloc_I_1d(mat->CSC.perm, nz);
 
   monolis_get_CSC_format(
     n,
@@ -214,7 +216,7 @@ void monolis_set_Dirichlet_bc_R(
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
 
-  monolis_set_Dirichlet_bc_main_R_c(
+  monolis_set_Dirichlet_bc_R_c_main(
     n_node,
     nz,
     n_dof,
