@@ -37,10 +37,10 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
     for(j = jS + 1; j < jE; j++){
       mat->CSR.item[j] = item[j-i-1] + 1;
     }
-    //monolis_qsort_int(
-    //  &(mat->CSR.item[jS]),
-    //  1,
-    //  jE - jS);
+    monolis_qsort_I_1d(
+      &(mat->CSR.item[jS]),
+      1,
+      jE - jS);
   }
 
   monolis_alloc_I_1d(mat->CSC.index, n_node + 1);

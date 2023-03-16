@@ -48,6 +48,7 @@ endif
 ##> other commands
 MAKE = make
 CD   = cd
+CP   = cp
 RM   = rm -rf
 AR   = - ar ruv
 
@@ -183,10 +184,12 @@ TST_OBJS    = $(TST_OBJSt:.c=_test.o)
 
 ##> target
 all: \
+	cp_header \
 	$(LIB_TARGET) \
 	$(TEST_TARGET)
 
 lib: \
+	cp_header \
 	$(LIB_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)
@@ -206,6 +209,17 @@ $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+
+cp_header:
+	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
+	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_struc_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_mat_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_solver_util_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_solver_c.h ./include/
+	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_c.h ./include/
+	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
+	$(CP) ./wrapper/monolis.h ./include/
 
 clean:
 	$(RM) \
