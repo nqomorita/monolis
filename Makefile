@@ -135,8 +135,15 @@ monolis_def_mat_c.c \
 monolis_def_struc_c.c \
 monolis_def_solver_util_c.c
 
+SRC_LINALG_C = \
+matvec_wrap.f90 \
+inner_product_wrap.f90 \
+monolis_matvec_c.c \
+monolis_inner_product_c.c
+
 SRC_ALL_C = \
-$(addprefix define/, $(SRC_DEFINE_C))
+$(addprefix define/, $(SRC_DEFINE_C)) \
+$(addprefix linalg/, $(SRC_LINALG_C))
 
 ##> all targes
 SRC_ALL = \
