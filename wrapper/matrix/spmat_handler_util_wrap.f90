@@ -70,15 +70,16 @@ contains
     integer(c_int), intent(in), value :: N, NZ, NDOF, n_base1, n_base2
     integer(c_int), intent(in), target :: index(0:N)
     integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: conn1(NBF)
-    integer(c_int), intent(in), target :: conn2(NBF)
+    integer(c_int), intent(in), target :: conn1(n_base1)
+    integer(c_int), intent(in), target :: conn2(n_base2)
     real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: mat(NDOF*NDOF*NBF*NBF)
-    integer(kint) :: conn1t(NBF), conn2t(NBF)
+    real(c_double), target :: mat(NDOF*NDOF*n_base1*n_base2)
+    integer(kint) :: conn1t(n_base1), conn2t(n_base2)
+    real(kdouble) mat_t(NDOF*n_base1,NDOF*n_base2)
 
     conn1t = conn1 + 1
     conn2t = conn2 + 1
-    call monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n_base1, n_base2, NDOF, conn1t, conn2t, mat)
+    call monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n_base1, n_base2, NDOF, conn1t, conn2t, mat_t)
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R_c
 
   subroutine monolis_set_Dirichlet_bc_R_c(N, NZ, NDOF, index, item, indexR, itemR, permR, &

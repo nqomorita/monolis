@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#include <complex.h>
+
 void monolis_set_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
@@ -67,6 +69,68 @@ void monolis_set_Dirichlet_bc_R(
   int      node_id,
   int      n_dof_bc,
   double   val);
+
+void monolis_set_scalar_to_sparse_matrix_C(
+  MONOLIS*       mat,
+  int            i,
+  int            j,
+  int            submat_i,
+  int            submat_j,
+  double complex val);
+
+void monolis_add_scalar_to_sparse_matrix_C(
+  MONOLIS*       mat,
+  int            i,
+  int            j,
+  int            submat_i,
+  int            submat_j,
+  double complex val);
+
+void monolis_get_scalar_from_sparse_matrix_C(
+  MONOLIS*        mat,
+  int             i,
+  int             j,
+  int             submat_i,
+  int             submat_j,
+  double complex* val,
+  bool*           is_find);
+
+void monolis_add_matrix_to_sparse_matrix_C(
+  MONOLIS*         mat,
+  int              n_base,
+  int*             connectivity,
+  double complex** val);
+
+void monolis_add_matrix_to_sparse_matrix_offdiag_C(
+  MONOLIS*         mat,
+  int              n_base1,
+  int              n_base2,
+  int*             connectivity1,
+  int*             connectivity2,
+  double complex** val);
+
+void monolis_set_matrix_BCSR_C(
+  MONOLIS*        mat,
+  int             n,
+  int             np,
+  int             n_dof,
+  int             nz,
+  double complex* A,
+  int*            index,
+  int*            item);
+
+void monolis_set_matrix_BCSR_mat_val_C(
+  MONOLIS*        mat,
+  int             n_dof,
+  int             nz,
+  double complex* A);
+
+void monolis_set_Dirichlet_bc_C(
+  MONOLIS*        mat,
+  double complex* b,
+  int             node_id,
+  int             n_dof_bc,
+  double complex  val);
 
 #ifdef __cplusplus
 }
