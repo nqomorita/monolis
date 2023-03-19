@@ -111,7 +111,7 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-      if(monolis_mpi_global_comm_size() == 0)then
+      if(monolis_mpi_get_global_comm_size() == 0)then
         write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
       endif
 
@@ -225,7 +225,7 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-      if(monolis_mpi_global_comm_size() == 0)then
+      if(monolis_mpi_get_global_comm_size() == 0)then
         write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
       endif
 

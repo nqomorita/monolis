@@ -20,8 +20,8 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
   int* index;
   int* item;
 
-  monolis_alloc_I_1d(conn_index, n_elem + 1);
-  monolis_alloc_I_1d(conn_item,  n_elem*n_base);
+  conn_index = monolis_alloc_I_1d(conn_index, n_elem + 1);
+  conn_item = monolis_alloc_I_1d(conn_item,  n_elem*n_base);
 
   gedatsu_convert_simple_mesh_to_connectivity_graph(
     n_elem,
@@ -48,10 +48,10 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
   monolis_alloc_nonzero_pattern_mat_val_R(
     &mat->mat);
 
-  monolis_dealloc_I_1d(conn_index);
-  monolis_dealloc_I_1d(conn_item);
-  monolis_dealloc_I_1d(index);
-  monolis_dealloc_I_1d(item);
+  monolis_dealloc_I_1d(&conn_index);
+  monolis_dealloc_I_1d(&conn_item);
+  monolis_dealloc_I_1d(&index);
+  monolis_dealloc_I_1d(&item);
 }
 
 void monolis_get_nonzero_pattern_by_connectivity_R(
@@ -84,10 +84,10 @@ void monolis_get_nonzero_pattern_by_connectivity_R(
   monolis_alloc_nonzero_pattern_mat_val_R(
     &mat->mat);
 
-  monolis_dealloc_I_1d(conn_index);
-  monolis_dealloc_I_1d(conn_item);
-  monolis_dealloc_I_1d(index);
-  monolis_dealloc_I_1d(item);
+  monolis_dealloc_I_1d(&conn_index);
+  monolis_dealloc_I_1d(&conn_item);
+  monolis_dealloc_I_1d(&index);
+  monolis_dealloc_I_1d(&item);
 }
 
 void monolis_get_nonzero_pattern_by_nodal_graph_R(
@@ -121,8 +121,8 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
   int* index;
   int* item;
 
-  monolis_alloc_I_1d(conn_index, n_elem + 1);
-  monolis_alloc_I_1d(conn_item,  n_elem*n_base);
+  conn_index = monolis_alloc_I_1d(conn_index, n_elem + 1);
+  conn_item = monolis_alloc_I_1d(conn_item,  n_elem*n_base);
 
   gedatsu_convert_simple_mesh_to_connectivity_graph(
     n_elem,
@@ -149,10 +149,10 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
   monolis_alloc_nonzero_pattern_mat_val_C(
     &mat->mat);
 
-  monolis_dealloc_I_1d(conn_index);
-  monolis_dealloc_I_1d(conn_item);
-  monolis_dealloc_I_1d(index);
-  monolis_dealloc_I_1d(item);
+  monolis_dealloc_I_1d(&conn_index);
+  monolis_dealloc_I_1d(&conn_item);
+  monolis_dealloc_I_1d(&index);
+  monolis_dealloc_I_1d(&item);
 }
 
 void monolis_get_nonzero_pattern_by_connectivity_C(
@@ -185,10 +185,10 @@ void monolis_get_nonzero_pattern_by_connectivity_C(
   monolis_alloc_nonzero_pattern_mat_val_C(
     &mat->mat);
 
-  monolis_dealloc_I_1d(conn_index);
-  monolis_dealloc_I_1d(conn_item);
-  monolis_dealloc_I_1d(index);
-  monolis_dealloc_I_1d(item);
+  monolis_dealloc_I_1d(&conn_index);
+  monolis_dealloc_I_1d(&conn_item);
+  monolis_dealloc_I_1d(&index);
+  monolis_dealloc_I_1d(&item);
 }
 
 void monolis_get_nonzero_pattern_by_nodal_graph_C(

@@ -6,105 +6,105 @@
 extern "C" {
 #endif
 
-const int monolis_prm_Iarray_size = 100;
+static const int MONOLIS_PRM_IARRAY_SIZE = 100;
 
-const int monolis_prm_Rarray_size = 100;
+static const int MONOLIS_PRM_RARRAY_SIZE = 100;
 
-const int monolis_iter_CG       = 1;
+static const int MONOLIS_ITER_CG       = 1;
 
-const int monolis_iter_GropCG   = 2;
+static const int MONOLIS_ITER_GROPCG   = 2;
 
-const int monolis_iter_PipeCG   = 3;
+static const int MONOLIS_ITER_PIPECG   = 3;
 
-const int monolis_iter_PipeCR   = 4;
+static const int MONOLIS_ITER_PIPECR   = 4;
 
-const int monolis_iter_BiCGSTAB = 5;
+static const int MONOLIS_ITER_BICGSTAB = 5;
 
-const int monolis_iter_PipeBiCGSTAB = 6;
+static const int MONOLIS_ITER_PIPEBICGSTAB = 6;
 
-const int monolis_iter_BiCGSTAB_noprec = 7;
+static const int MONOLIS_ITER_BICGSTAB_NOPREC = 7;
 
-//const int monolis_iter_CABiCGSTAB_noprec = 8;
+//static const int MONOLIS_ITER_CABICGSTAB_NOPREC = 8;
 
-const int monolis_iter_PipeBiCGSTAB_noprec = 9;
+static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 9;
 
-//const int monolis_iter_GMRES = 10;
+//static const int MONOLIS_ITER_GMRES = 10;
 
-const int monolis_iter_COCG = 11;
+static const int MONOLIS_ITER_COCG = 11;
 
-const int monolis_prec_NONE   = 0;
+static const int MONOLIS_PREC_NONE   = 0;
 
-const int monolis_prec_DIAG   = 1;
+static const int MONOLIS_PREC_DIAG   = 1;
 
-const int monolis_prec_ILU    = 2;
+static const int MONOLIS_PREC_ILU    = 2;
 
-const int monolis_prec_JACOBI = 3;
+static const int MONOLIS_PREC_JACOBI = 3;
 
-const int monolis_prec_SOR    = 4;
+static const int MONOLIS_PREC_SOR    = 4;
 
-const int monolis_prec_SPIKE  = 5;
+static const int MONOLIS_PREC_SPIKE  = 5;
 
-const int monolis_prec_LU     = 6;
+static const int MONOLIS_PREC_LU     = 6;
 
-const int monolis_prec_MUMPS  = 7;
+static const int MONOLIS_PREC_MUMPS  = 7;
 
-const int monolis_prec_ROM    = 8;
+static const int MONOLIS_PREC_ROM    = 8;
 
-const int monolis_prec_MF     = 9;
+static const int MONOLIS_PREC_MF     = 9;
 
-const int monolis_prec_MUMPS_LOCAL = 10;
+static const int MONOLIS_PREC_MUMPS_LOCAL = 10;
 
-const int monolis_prm_I_method = 1;
+static const int MONOLIS_PRM_I_METHOD = 1;
 
-const int monolis_prm_I_precond = 2;
+static const int MONOLIS_PRM_I_PRECOND = 2;
 
-const int monolis_prm_I_max_iter = 3;
+static const int MONOLIS_PRM_I_MAX_ITER = 3;
 
-const int monolis_prm_I_cur_iter = 4;
+static const int MONOLIS_PRM_I_CUR_ITER = 4;
 
-const int monolis_prm_I_ierr = 5;
+static const int MONOLIS_PRM_I_IERR = 5;
 
-//const int monolis_prm_I_is_scaling = 6;
+//static const int MONOLIS_PRM_I_IS_SCALING = 6;
 
-//const int monolis_prm_I_is_reordering = 7;
+//static const int MONOLIS_PRM_I_IS_REORDERING = 7;
 
-const int monolis_prm_I_is_init_x = 8;
+static const int MONOLIS_PRM_I_IS_INIT_X = 8;
 
-const int monolis_prm_I_is_sym_matrix = 9;
+static const int MONOLIS_PRM_I_IS_SYM_MATRIX = 9;
 
-const int monolis_prm_I_is_debug = 10;
+static const int MONOLIS_PRM_I_IS_DEBUG = 10;
 
-const int monolis_prm_I_is_measurement = 11;
+static const int MONOLIS_PRM_I_IS_MEASUREMENT = 11;
 
-const int monolis_prm_I_is_check_diag = 12;
+static const int MONOLIS_PRM_I_IS_CHECK_DIAG = 12;
 
-const int monolis_prm_I_is_prec_stored = 13;
+static const int MONOLIS_PRM_I_IS_PREC_STORED = 13;
 
-const int monolis_prm_I_show_iterlog = 14;
+static const int MONOLIS_PRM_I_SHOW_ITERLOG = 14;
 
-const int monolis_prm_I_show_time = 15;
+static const int MONOLIS_PRM_I_SHOW_TIME = 15;
 
-const int monolis_prm_I_show_summary = 16;
+static const int MONOLIS_PRM_I_SHOW_SUMMARY = 16;
 
-const int monolis_prm_I_show_time_statistics = 17;
+static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 17;
 
-const int monolis_prm_R_tol = 1;
+static const int MONOLIS_PRM_R_TOL = 1;
 
-const int monolis_prm_R_cur_resid = 2;
+static const int MONOLIS_PRM_R_CUR_RESID = 2;
 
-const int monolis_R_time_sol = 3;
+static const int MONOLIS_R_TIME_SOL = 3;
 
-const int monolis_R_time_prep = 4;
+static const int MONOLIS_R_TIME_PREP = 4;
 
-const int monolis_R_time_spmv = 5;
+static const int MONOLIS_R_TIME_SPMV = 5;
 
-const int monolis_R_time_dotp = 6;
+static const int MONOLIS_R_TIME_DOTP = 6;
 
-const int monolis_R_time_prec = 7;
+static const int MONOLIS_R_TIME_PREC = 7;
 
-const int monolis_R_time_comm_dotp = 8;
+static const int MONOLIS_R_TIME_COMM_DOTP = 8;
 
-const int monolis_R_time_comm_spmv = 9;
+static const int MONOLIS_R_TIME_COMM_SPMV = 9;
 
 typedef struct {
 

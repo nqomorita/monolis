@@ -9,31 +9,31 @@ void monolis_prm_initialize(
 {
   int i;
 
-  for (int i = 0; i < monolis_prm_Iarray_size; ++i) {
+  for (int i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
     prm->Iarray[i] = 0;
   }
 
-  for (int i = 0; i < monolis_prm_Rarray_size; ++i) {
+  for (int i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
     prm->Rarray[i] = 0.0;
   }
 
-  prm->Iarray[monolis_prm_I_method] = 1;
-  prm->Iarray[monolis_prm_I_precond] = 1;
-  prm->Iarray[monolis_prm_I_max_iter] = 1000;
-  prm->Iarray[monolis_prm_I_cur_iter] = 0;
-  prm->Iarray[monolis_prm_I_ierr] = -1;
-  prm->Iarray[monolis_prm_I_is_init_x] = monolis_I_true;
-  prm->Iarray[monolis_prm_I_is_sym_matrix] = monolis_I_false;
-  prm->Iarray[monolis_prm_I_is_debug] = monolis_I_false;
-  prm->Iarray[monolis_prm_I_is_measurement] = monolis_I_false;
-  prm->Iarray[monolis_prm_I_is_check_diag] = monolis_I_false;
-  prm->Iarray[monolis_prm_I_is_prec_stored] = monolis_I_false;
-  prm->Iarray[monolis_prm_I_show_iterlog] = monolis_I_true;
-  prm->Iarray[monolis_prm_I_show_time] = monolis_I_true;
-  prm->Iarray[monolis_prm_I_show_summary] = monolis_I_true;
-  prm->Iarray[monolis_prm_I_show_time_statistics] = monolis_I_false;
+  prm->Iarray[MONOLIS_PRM_I_METHOD] = 1;
+  prm->Iarray[MONOLIS_PRM_I_PRECOND] = 1;
+  prm->Iarray[MONOLIS_PRM_I_MAX_ITER] = 1000;
+  prm->Iarray[MONOLIS_PRM_I_CUR_ITER] = 0;
+  prm->Iarray[MONOLIS_PRM_I_IERR] = -1;
+  prm->Iarray[MONOLIS_PRM_I_IS_INIT_X] = MONOLIS_I_TRUE;
+  prm->Iarray[MONOLIS_PRM_I_IS_SYM_MATRIX] = MONOLIS_I_FALSE;
+  prm->Iarray[MONOLIS_PRM_I_IS_DEBUG] = MONOLIS_I_FALSE;
+  prm->Iarray[MONOLIS_PRM_I_IS_MEASUREMENT] = MONOLIS_I_FALSE;
+  prm->Iarray[MONOLIS_PRM_I_IS_CHECK_DIAG] = MONOLIS_I_FALSE;
+  prm->Iarray[MONOLIS_PRM_I_IS_PREC_STORED] = MONOLIS_I_FALSE;
+  prm->Iarray[MONOLIS_PRM_I_SHOW_ITERLOG] = MONOLIS_I_TRUE;
+  prm->Iarray[MONOLIS_PRM_I_SHOW_TIME] = MONOLIS_I_TRUE;
+  prm->Iarray[MONOLIS_PRM_I_SHOW_SUMMARY] = MONOLIS_I_TRUE;
+  prm->Iarray[MONOLIS_PRM_I_SHOW_TIME_STATISTICS] = MONOLIS_I_FALSE;
 
-  prm->Rarray[monolis_prm_R_tol] = 1.0e-8;
+  prm->Rarray[MONOLIS_PRM_R_TOL] = 1.0e-8;
 }
 
 void monolis_prm_finalize(
@@ -41,11 +41,11 @@ void monolis_prm_finalize(
 {
   int i;
 
-  for (int i = 0; i < monolis_prm_Iarray_size; ++i) {
+  for (int i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
     prm->Iarray[i] = 0;
   }
 
-  for (int i = 0; i < monolis_prm_Rarray_size; ++i) {
+  for (int i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
     prm->Rarray[i] = 0.0;
   }
 }

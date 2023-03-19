@@ -26,7 +26,7 @@ contains
     integer(kint) :: i, comm_size
     real(kdouble) :: norm, t1, t2
 
-    comm_size = monolis_mpi_local_comm_size(monoCOM%comm)
+    comm_size = monolis_mpi_get_local_comm_size(monoCOM%comm)
 
     call monolis_get_rundom_number_R(N*NDOF, q, comm_size)
 

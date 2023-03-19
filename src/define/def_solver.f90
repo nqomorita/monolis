@@ -247,7 +247,7 @@ contains
 
       call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
 
-      time = time/dble(monolis_mpi_global_comm_size())
+      time = time/dble(monolis_mpi_get_global_comm_size())
 
       if(monoCOM%my_rank == 0)then
         write(*,"(a,1p4e10.3)")" - solution/prepost time:", time(1)
@@ -296,7 +296,7 @@ contains
     time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
     call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-    time = time/dble(monolis_mpi_global_comm_size())
+    time = time/dble(monolis_mpi_get_global_comm_size())
 
     monoPRM%Rarray(monolis_R_time_prep) = time(1)
     monoPRM%Rarray(monolis_R_time_spmv) = time(2)
@@ -324,7 +324,7 @@ contains
     real(kdouble) :: tmp
     integer(kint) :: np
 
-    np = monolis_mpi_global_comm_size()
+    np = monolis_mpi_get_global_comm_size()
 
     t_max = time
     call monolis_allreduce_R1(t_max, monolis_mpi_max, monoCOM%comm)
