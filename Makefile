@@ -21,6 +21,7 @@ OBJ_DIR = ./obj
 LIB_DIR = ./lib
 WRAP_DIR= ./wrapper
 TST_DIR = ./test
+TST_WRAP_DIR = ./wrapper_test
 DRV_DIR = ./driver
 LIBRARY = libmonolis.a
 CPP     = -cpp $(FLAG_DEBUG)
@@ -34,6 +35,7 @@ ifdef FLAGS
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
 		FFLAGS  = -fPIC -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow -Wno-missing-include-dirs
+		CFLAGS  = -fPIC -O2 -g -ggdb
 	endif
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
@@ -189,11 +191,27 @@ TST_SOURCES = $(addprefix $(TST_DIR)/, $(TST_SRC_ALL))
 TST_OBJSt   = $(subst $(TST_DIR), $(OBJ_DIR), $(TST_SOURCES:.f90=_test.o))
 TST_OBJS    = $(TST_OBJSt:.c=_test.o)
 
+##> **********
+##> test target (3)
+TEST_C_TARGET = $(TST_WRAP_DIR)/monolis_c_test
+
+##> lib objs
+SRC_DEFINE_C_TEST = \
+monolis_def_solver_util_c_test.c
+
+SRC_ALL_C_TEST = \
+$(addprefix define/, $(SRC_DEFINE_C_TEST))
+
+TST_SRC_C_ALL = $(SRC_ALL_C_TEST) monolis_c_test.c
+TST_C_SOURCES = $(addprefix $(TST_WRAP_DIR)/, $(TST_SRC_C_ALL))
+TST_C_OBJS    = $(subst $(TST_WRAP_DIR), $(OBJ_DIR), $(TST_C_SOURCES:.c=.o))
+
 ##> target
 all: \
 	cp_header \
 	$(LIB_TARGET) \
-	$(TEST_TARGET)
+	$(TEST_TARGET) \
+	$(TEST_C_TARGET)
 
 lib: \
 	cp_header \
@@ -204,6 +222,9 @@ $(LIB_TARGET): $(LIB_OBJS)
 
 $(TEST_TARGET): $(TST_OBJS)
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+
+$(TEST_C_TARGET): $(TST_C_OBJS)
+	$(FC) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
@@ -217,6 +238,9 @@ $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
+$(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+
 cp_header:
 	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
 	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
@@ -226,6 +250,8 @@ cp_header:
 	$(CP) ./wrapper/define/monolis_def_solver_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
+	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/
+	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/
 
@@ -233,8 +259,10 @@ clean:
 	$(RM) \
 	$(LIB_OBJS) \
 	$(TST_OBJS) \
+	$(TST_C_OBJS) \
 	$(LIB_TARGET) \
 	$(TEST_TARGET) \
+	$(TEST_C_TARGET) \
 	./include/*.mod \
 	./bin/*
 
