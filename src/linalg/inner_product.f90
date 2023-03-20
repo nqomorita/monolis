@@ -20,9 +20,13 @@ contains
     integer(kint) :: Y(:)
     !> 内積結果
     integer(kint) :: sum
+    integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_I(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+    N = monolis%MAT%N
+    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+
+    call monolis_inner_product_main_I(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_I
 
   !> @ingroup linalg
@@ -106,9 +110,13 @@ contains
     real(kdouble) :: Y(:)
     !> 内積結果
     real(kdouble) :: sum
+    integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_R(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+    N = monolis%MAT%N
+    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+
+    call monolis_inner_product_main_R(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_R
 
   !> @ingroup linalg
@@ -192,9 +200,13 @@ contains
     complex(kdouble) :: Y(:)
     !> 内積結果
     complex(kdouble) :: sum
+    integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_C(monolis%COM, monolis%COM%n_internal_vertex, ndof, X, Y, sum, tdotp, tcomm)
+    N = monolis%MAT%N
+    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+
+    call monolis_inner_product_main_C(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_C
 
   !> @ingroup linalg

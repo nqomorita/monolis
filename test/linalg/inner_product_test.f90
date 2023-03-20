@@ -17,6 +17,8 @@ contains
 
     call monolis_std_log_string("monolis_linalg_test")
 
+    monolis%MAT%N = 2
+
     monolis%COM%n_internal_vertex = 2
 
     ndof = 2

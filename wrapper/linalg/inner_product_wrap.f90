@@ -2,6 +2,7 @@
 module mod_monolis_inner_product_wrap
   use mod_monolis_utils
   use mod_monolis_def_struc
+  use mod_monolis_inner_product
   use iso_c_binding
   implicit none
 
@@ -45,7 +46,7 @@ contains
     !> ベクトル 2
     real(c_double), intent(in) :: y(n)
     !> 内積結果
-    integer(c_int) :: sum
+    real(c_double) :: sum
     !> [in] MPI コミュニケータ
     integer(c_int), intent(in), value :: comm
     type(monolis_com) :: monoCOM
@@ -69,7 +70,7 @@ contains
     !> ベクトル 2
     complex(c_double), intent(in) :: y(n)
     !> 内積結果
-    integer(c_int) :: sum
+    complex(c_double) :: sum
     !> [in] MPI コミュニケータ
     integer(c_int), intent(in), value :: comm
     type(monolis_com) :: monoCOM

@@ -11,28 +11,28 @@ extern "C" {
 
 void monolis_inner_product_I(
   MONOLIS* mat,
-  int      ndof,
+  int      n_dof,
   int*     x,
   int*     y,
   int*     sum);
 
 void monolis_inner_product_R(
   MONOLIS* mat,
-  int      ndof,
+  int      n_dof,
   double*  x,
   double*  y,
   double*  sum);
 
 void monolis_inner_product_C(
   MONOLIS*        mat,
-  int             ndof,
+  int             n_dof,
   double complex* x,
   double complex* y,
   double complex* sum);
 
 void monolis_inner_product_I_c_main(
   int  n,
-  int  ndof,
+  int  n_dof,
   int* x,
   int* y,
   int* sum,
@@ -40,7 +40,7 @@ void monolis_inner_product_I_c_main(
 
 void monolis_inner_product_R_c_main(
   int     n,
-  int     ndof,
+  int     n_dof,
   double* x,
   double* y,
   double* sum,
@@ -48,7 +48,7 @@ void monolis_inner_product_R_c_main(
 
 void monolis_inner_product_C_c_main(
   int             n,
-  int             ndof,
+  int             n_dof,
   double complex* x,
   double complex* y,
   double complex* sum,
