@@ -8,6 +8,10 @@
 #include "./define/monolis_def_solver_util_c_test.h"
 #include "./linalg/monolis_inner_product_c_test.h"
 #include "./linalg/monolis_matvec_c_test.h"
+#include "./matrix/monolis_spmat_handler_c_test.h"
+#include "./matrix/monolis_spmat_handler_util_c_test.h"
+#include "./matrix/monolis_spmat_nzpattern_c_test.h"
+#include "./matrix/monolis_spmat_nzpattern_util_c_test.h"
 
 int main()
 {
@@ -22,6 +26,14 @@ int main()
   monolis_inner_product_c_test();
 
   monolis_matvec_c_test();
+
+  monolis_spmat_handler_c_test();
+
+  monolis_spmat_handler_util_c_test();
+
+  monolis_spmat_nzpattern_c_test();
+
+  monolis_spmat_nzpattern_util_c_test();
 
   monolis_mpi_finalize();
 }

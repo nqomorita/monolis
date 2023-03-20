@@ -204,9 +204,16 @@ SRC_LINALG_C_TEST = \
 monolis_inner_product_c_test.c \
 monolis_matvec_c_test.c
 
+SRC_MAT_C_TEST = \
+monolis_spmat_nzpattern_util_c_test.c\
+monolis_spmat_nzpattern_c_test.c \
+monolis_spmat_handler_c_test.c \
+monolis_spmat_handler_util_c_test.c
+
 SRC_ALL_C_TEST = \
 $(addprefix define/, $(SRC_DEFINE_C_TEST)) \
-$(addprefix linalg/, $(SRC_LINALG_C_TEST))
+$(addprefix linalg/, $(SRC_LINALG_C_TEST)) \
+$(addprefix matrix/, $(SRC_MAT_C_TEST))
 
 TST_SRC_C_ALL = $(SRC_ALL_C_TEST) monolis_c_test.c
 TST_C_SOURCES = $(addprefix $(TST_WRAP_DIR)/, $(TST_SRC_C_ALL))
