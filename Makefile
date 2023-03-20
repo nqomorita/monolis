@@ -200,8 +200,13 @@ SRC_DEFINE_C_TEST = \
 monolis_def_solver_c_test.c \
 monolis_def_solver_util_c_test.c
 
+SRC_LINALG_C_TEST = \
+monolis_inner_product_c_test.c \
+monolis_matvec_c_test.c
+
 SRC_ALL_C_TEST = \
-$(addprefix define/, $(SRC_DEFINE_C_TEST))
+$(addprefix define/, $(SRC_DEFINE_C_TEST)) \
+$(addprefix linalg/, $(SRC_LINALG_C_TEST))
 
 TST_SRC_C_ALL = $(SRC_ALL_C_TEST) monolis_c_test.c
 TST_C_SOURCES = $(addprefix $(TST_WRAP_DIR)/, $(TST_SRC_C_ALL))
