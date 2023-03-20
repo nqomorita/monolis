@@ -22,23 +22,23 @@ contains
   subroutine monolis_matvec_11_R_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,4)
+    integer(kint) :: n_node, n_elem, elem(2,4)
     real(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
     call monolis_std_log_string("monolis_matvec_11_R_test")
 
     call monolis_initialize(mat, "./")
 
-    nnode = 5
+    n_node = 5
 
-    nelem = 4
+    n_elem = 4
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
     elem(1,4) = 4; elem(2,4) = 5;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, 1, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
 
     call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 1, 1, 2.0d0)
     call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 1, 1.0d0)
@@ -86,23 +86,23 @@ contains
   subroutine monolis_matvec_11_C_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,4)
+    integer(kint) :: n_node, n_elem, elem(2,4)
     complex(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
     call monolis_std_log_string("monolis_matvec_11_C_test")
 
     call monolis_initialize(mat, "./")
 
-    nnode = 5
+    n_node = 5
 
-    nelem = 4
+    n_elem = 4
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
     elem(1,4) = 4; elem(2,4) = 5;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, nnode, 2, 1, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 1, n_elem, elem)
 
     call monolis_add_scalar_to_sparse_matrix_C(mat, 1, 1, 1, 1, (2.0d0, 2.0d0))
     call monolis_add_scalar_to_sparse_matrix_C(mat, 1, 2, 1, 1, (1.0d0, 1.0d0))
@@ -151,7 +151,7 @@ contains
   subroutine monolis_matvec_33_R_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: val
     real(kdouble) :: a(12), b(12), b_th(12), mat_dense(12,12)
@@ -161,15 +161,15 @@ contains
 
     call monolis_initialize(mat, "./")
 
-    nnode = 4
+    n_node = 4
 
-    nelem = 3
+    n_elem = 3
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, 3, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 3, n_elem, elem)
 
     do i1 = 1, 3
       do i2 = 1, 3
@@ -209,7 +209,7 @@ contains
   subroutine monolis_matvec_33_C_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: v1, v2
     complex(kdouble) :: val
@@ -220,15 +220,15 @@ contains
 
     call monolis_initialize(mat, "./")
 
-    nnode = 4
+    n_node = 4
 
-    nelem = 3
+    n_elem = 3
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, nnode, 2, 3, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 3, n_elem, elem)
 
     do i1 = 1, 3
       do i2 = 1, 3
@@ -269,7 +269,7 @@ contains
   subroutine monolis_matvec_nn_R_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: val
     real(kdouble) :: a(8), b(8), b_th(8), mat_dense(8,8)
@@ -279,15 +279,15 @@ contains
 
     call monolis_initialize(mat, "./")
 
-    nnode = 4
+    n_node = 4
 
-    nelem = 3
+    n_elem = 3
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, 2, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 2, n_elem, elem)
 
     do i1 = 1, 3
       do i2 = 1, 2
@@ -327,7 +327,7 @@ contains
   subroutine monolis_matvec_nn_C_test()
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,3)
+    integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: v1, v2
     complex(kdouble) :: val
@@ -338,15 +338,15 @@ contains
 
     call monolis_initialize(mat, "./")
 
-    nnode = 4
+    n_node = 4
 
-    nelem = 3
+    n_elem = 3
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
     elem(1,3) = 3; elem(2,3) = 4;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, nnode, 2, 2, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 2, n_elem, elem)
 
     do i1 = 1, 3
       do i2 = 1, 2

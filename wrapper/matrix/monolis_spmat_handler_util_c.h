@@ -1,6 +1,6 @@
 /* monolis_spmat_handler.h */
-#ifndef MONOLIS_SPMAT_HANDLER_H
-#define MONOLIS_SPMAT_HANDLER_H
+#ifndef MONOLIS_SPMAT_HANDLER_UTIL_H
+#define MONOLIS_SPMAT_HANDLER_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -140,7 +140,7 @@ void monolis_set_Dirichlet_bc_C_c_main(
   double complex* b,
   int             node_id,
   int             n_dof_bc,
-  double          val);
+  double complex  val);
 
 #ifdef __cplusplus
 }
