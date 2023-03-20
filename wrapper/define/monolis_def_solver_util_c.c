@@ -29,14 +29,14 @@ void monolis_get_converge_iter(
   MONOLIS* mat,
   int*     param)
 {
-  param = &mat->prm.Iarray[MONOLIS_PRM_I_CUR_ITER];
+  *param = mat->prm.Iarray[MONOLIS_PRM_I_CUR_ITER];
 }
 
 void monolis_get_error_tag(
   MONOLIS* mat,
   int*     param)
 {
-  param = &mat->prm.Iarray[MONOLIS_PRM_I_IERR];
+  *param = mat->prm.Iarray[MONOLIS_PRM_I_IERR];
 }
 
 void monolis_set_init_x(
@@ -120,54 +120,54 @@ void monolis_get_converge_residual(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_PRM_R_CUR_RESID];
+  *val = mat->prm.Rarray[MONOLIS_PRM_R_CUR_RESID];
 }
 
 void monolis_get_time_solver(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_SOL];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_SOL];
 }
 
 void monolis_get_time_preparing(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_PREP];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_PREP];
 }
 
 void monolis_get_time_spmv(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_SPMV];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_SPMV];
 }
 
 void monolis_get_time_inner_product(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_DOTP];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_DOTP];
 }
 
 void monolis_get_time_precondition(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_PREC];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_PREC];
 }
 
 void monolis_get_time_comm_inner_product(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_COMM_DOTP];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_COMM_DOTP];
 }
 
 void monolis_get_time_comm_spmv(
   MONOLIS* mat,
   double*  val)
 {
-  val = &mat->prm.Rarray[MONOLIS_R_TIME_COMM_SPMV];
+  *val = mat->prm.Rarray[MONOLIS_R_TIME_COMM_SPMV];
 }
