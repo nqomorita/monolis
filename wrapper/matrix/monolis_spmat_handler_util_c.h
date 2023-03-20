@@ -125,7 +125,7 @@ void monolis_add_matrix_to_sparse_matrix_main_C_c_main(
   int              n_base2,
   int*             connectivity1,
   int*             connectivity2,
-  double complex** val);
+  double complex*  val);
 
 void monolis_set_Dirichlet_bc_C_c_main(
   int             n_node,

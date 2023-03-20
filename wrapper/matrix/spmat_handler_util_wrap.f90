@@ -13,10 +13,10 @@ contains
     & bind(c, name = "monolis_set_scalar_to_sparse_matrix_R_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    real(c_double) :: A(NDOF*NDOF*NZ)
+    real(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
 
     i_t = i + 1
@@ -30,10 +30,10 @@ contains
     & bind(c, name = "monolis_add_scalar_to_sparse_matrix_R_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    real(c_double) :: A(NDOF*NDOF*NZ)
+    real(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
 
     i_t = i + 1
@@ -47,11 +47,11 @@ contains
     & bind(c, name = "monolis_get_scalar_from_sparse_matrix_R_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), target :: is_find
-    real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int) :: is_find
+    real(c_double) :: A(NDOF*NDOF*NZ)
+    real(c_double) :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
     logical :: is_find_t
 
@@ -69,17 +69,24 @@ contains
     & bind(c, name = "monolis_add_matrix_to_sparse_matrix_main_R_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, n_base1, n_base2
-    integer(c_int), intent(in), target :: index(0:N)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: conn1(n_base1)
-    integer(c_int), intent(in), target :: conn2(n_base2)
-    real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: mat(NDOF*NDOF*n_base1*n_base2)
-    integer(kint) :: conn1t(n_base1), conn2t(n_base2)
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int), intent(in) :: conn1(n_base1)
+    integer(c_int), intent(in) :: conn2(n_base2)
+    real(c_double) :: A(NDOF*NDOF*NZ)
+    real(c_double) :: mat(NDOF*NDOF*n_base1*n_base2)
+    integer(kint) :: conn1t(n_base1), conn2t(n_base2), i, j
     real(kdouble) mat_t(NDOF*n_base1,NDOF*n_base2)
 
     conn1t = conn1 + 1
     conn2t = conn2 + 1
+
+    do i = 1, NDOF*n_base1
+      do j = 1, NDOF*n_base2
+        mat_t(i,j) = mat(NDOF*n_base2*(i - 1) + j)
+      enddo
+    enddo
+
     call monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n_base1, n_base2, NDOF, conn1t, conn2t, mat_t)
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R_c
 
@@ -88,14 +95,14 @@ contains
     & bind(c, name = "monolis_set_Dirichlet_bc_R_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, node_id, ndof_bc
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: indexR(N + 1)
-    integer(c_int), intent(in), target :: itemR(NZ)
-    integer(c_int), intent(in), target :: permR(NZ)
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int), intent(in) :: indexR(N + 1)
+    integer(c_int), intent(in) :: itemR(NZ)
+    integer(c_int), intent(in) :: permR(NZ)
     real(c_double), intent(in), value :: val
-    real(c_double), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: B(NDOF*N)
+    real(c_double) :: A(NDOF*NDOF*NZ)
+    real(c_double) :: B(NDOF*N)
     integer(kint) :: nid_t, ndof_bc_t
 
     nid_t = node_id + 1
@@ -108,10 +115,10 @@ contains
     & bind(c, name = "monolis_set_scalar_to_sparse_matrix_C_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    complex(c_double), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    complex(c_double) :: A(NDOF*NDOF*NZ)
+    complex(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
 
     i_t = i + 1
@@ -125,10 +132,10 @@ contains
     & bind(c, name = "monolis_add_scalar_to_sparse_matrix_C_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    complex(c_double), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    complex(c_double) :: A(NDOF*NDOF*NZ)
+    complex(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
 
     i_t = i + 1
@@ -142,11 +149,11 @@ contains
     & bind(c, name = "monolis_get_scalar_from_sparse_matrix_C_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, i, j, sub_i, sub_j
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), target :: is_find
-    complex(c_double), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: val
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int) :: is_find
+    complex(c_double) :: A(NDOF*NDOF*NZ)
+    complex(c_double) :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
     logical :: is_find_t
 
@@ -164,17 +171,24 @@ contains
     & bind(c, name = "monolis_add_matrix_to_sparse_matrix_main_C_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, n_base1, n_base2
-    integer(c_int), intent(in), target :: index(0:N)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: conn1(n_base1)
-    integer(c_int), intent(in), target :: conn2(n_base2)
-    complex(c_double), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: mat(NDOF*NDOF*n_base1*n_base2)
-    integer(kint) :: conn1t(n_base1), conn2t(n_base2)
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int), intent(in) :: conn1(n_base1)
+    integer(c_int), intent(in) :: conn2(n_base2)
+    complex(c_double) :: A(NDOF*NDOF*NZ)
+    complex(c_double) :: mat(NDOF*NDOF*n_base1*n_base2)
+    integer(kint) :: conn1t(n_base1), conn2t(n_base2), i, j
     complex(kdouble) mat_t(NDOF*n_base1,NDOF*n_base2)
 
     conn1t = conn1 + 1
     conn2t = conn2 + 1
+
+    do i = 1, NDOF*n_base1
+      do j = 1, NDOF*n_base2
+        mat_t(i,j) = mat(NDOF*n_base2*(i - 1) + j)
+      enddo
+    enddo
+
     call monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n_base1, n_base2, NDOF, conn1t, conn2t, mat_t)
   end subroutine monolis_add_matrix_to_sparse_matrix_main_C_c
 
@@ -183,14 +197,14 @@ contains
     & bind(c, name = "monolis_set_Dirichlet_bc_C_c_main")
     implicit none
     integer(c_int), intent(in), value :: N, NZ, NDOF, node_id, ndof_bc
-    integer(c_int), intent(in), target :: index(N + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: indexR(N + 1)
-    integer(c_int), intent(in), target :: itemR(NZ)
-    integer(c_int), intent(in), target :: permR(NZ)
+    integer(c_int), intent(in) :: index(N + 1)
+    integer(c_int), intent(in) :: item(NZ)
+    integer(c_int), intent(in) :: indexR(N + 1)
+    integer(c_int), intent(in) :: itemR(NZ)
+    integer(c_int), intent(in) :: permR(NZ)
     complex(c_double), intent(in), value :: val
-    complex(c_double), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: B(NDOF*N)
+    complex(c_double) :: A(NDOF*NDOF*NZ)
+    complex(c_double) :: B(NDOF*N)
     integer(kint) :: nid_t, ndof_bc_t
 
     nid_t = node_id + 1
