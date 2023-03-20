@@ -20,7 +20,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
   mat->NP = n_node;
   mat->NDOF = n_dof;
 
-  monolis_alloc_I_1d(mat->CSR.index, n_node + 1);
+  mat->CSR.index = monolis_alloc_I_1d(mat->CSR.index, n_node + 1);
 
   for(i = 1; i < n_node + 1; i++) {
     mat->CSR.index[i] = index[i] + i;
@@ -28,7 +28,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
 
   nz = mat->CSR.index[n_node];
 
-  monolis_alloc_I_1d(mat->CSR.item, nz);
+  mat->CSR.item = monolis_alloc_I_1d(mat->CSR.item, nz);
 
   for(i = 0; i < n_node; i++) {
     jS = mat->CSR.index[i];
@@ -43,9 +43,9 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
       jE - jS);
   }
 
-  monolis_alloc_I_1d(mat->CSC.index, n_node + 1);
-  monolis_alloc_I_1d(mat->CSC.item, nz);
-  monolis_alloc_I_1d(mat->CSC.perm, nz);
+  mat->CSC.index = monolis_alloc_I_1d(mat->CSC.index, n_node + 1);
+  mat->CSC.item = monolis_alloc_I_1d(mat->CSC.item, nz);
+  mat->CSC.perm = monolis_alloc_I_1d(mat->CSC.perm, nz);
 
   monolis_get_CSC_format(
     n_node,
@@ -67,9 +67,9 @@ void monolis_alloc_nonzero_pattern_mat_val_R(
   n_dof = mat->NDOF;
   nz = mat->CSR.index[n_node];
 
-  monolis_alloc_R_1d(mat->R.A, n_dof*n_dof*nz);
-  monolis_alloc_R_1d(mat->R.X, n_dof*n_node);
-  monolis_alloc_R_1d(mat->R.B, n_dof*n_node);
+  mat->R.A = monolis_alloc_R_1d(mat->R.A, n_dof*n_dof*nz);
+  mat->R.X = monolis_alloc_R_1d(mat->R.X, n_dof*n_node);
+  mat->R.B = monolis_alloc_R_1d(mat->R.B, n_dof*n_node);
 }
 
 void monolis_alloc_nonzero_pattern_mat_val_C(
@@ -81,7 +81,7 @@ void monolis_alloc_nonzero_pattern_mat_val_C(
   n_dof = mat->NDOF;
   nz = mat->CSR.index[n_node];
 
-  monolis_alloc_C_1d(mat->C.A, n_dof*n_dof*nz);
-  monolis_alloc_C_1d(mat->C.X, n_dof*n_node);
-  monolis_alloc_C_1d(mat->C.B, n_dof*n_node);
+  mat->C.A = monolis_alloc_C_1d(mat->C.A, n_dof*n_dof*nz);
+  mat->C.X = monolis_alloc_C_1d(mat->C.X, n_dof*n_node);
+  mat->C.B = monolis_alloc_C_1d(mat->C.B, n_dof*n_node);
 }

@@ -27,13 +27,13 @@ int main()
 
   monolis_matvec_c_test();
 
-  monolis_spmat_handler_c_test();
-
-  monolis_spmat_handler_util_c_test();
-
   monolis_spmat_nzpattern_c_test();
 
   monolis_spmat_nzpattern_util_c_test();
+
+  monolis_spmat_handler_c_test();
+
+  monolis_spmat_handler_util_c_test();
 
   monolis_mpi_finalize();
 }

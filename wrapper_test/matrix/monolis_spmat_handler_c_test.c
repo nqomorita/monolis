@@ -7,4 +7,6 @@
 
 void monolis_spmat_handler_c_test(){
 
+  monolis_std_log_string("monolis_spmat_handler_c_test");
+
 }
