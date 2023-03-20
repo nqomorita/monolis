@@ -18,9 +18,9 @@ contains
     !> 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
     !> ベクトル 1
-    integer(c_int), intent(in) :: x(n)
+    integer(c_int), intent(in) :: x(n*n_dof)
     !> ベクトル 2
-    integer(c_int), intent(in) :: y(n)
+    integer(c_int), intent(in) :: y(n*n_dof)
     !> 内積結果
     integer(c_int) :: sum
     !> [in] MPI コミュニケータ
@@ -42,9 +42,9 @@ contains
     !> 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
     !> ベクトル 1
-    real(c_double), intent(in) :: x(n)
+    real(c_double), intent(in) :: x(n*n_dof)
     !> ベクトル 2
-    real(c_double), intent(in) :: y(n)
+    real(c_double), intent(in) :: y(n*n_dof)
     !> 内積結果
     real(c_double) :: sum
     !> [in] MPI コミュニケータ
@@ -66,9 +66,9 @@ contains
     !> 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
     !> ベクトル 1
-    complex(c_double), intent(in) :: x(n)
+    complex(c_double), intent(in) :: x(n*n_dof)
     !> ベクトル 2
-    complex(c_double), intent(in) :: y(n)
+    complex(c_double), intent(in) :: y(n*n_dof)
     !> 内積結果
     complex(c_double) :: sum
     !> [in] MPI コミュニケータ
