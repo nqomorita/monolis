@@ -197,6 +197,7 @@ TEST_C_TARGET = $(TST_WRAP_DIR)/monolis_c_test
 
 ##> lib objs
 SRC_DEFINE_C_TEST = \
+monolis_def_solver_c_test.c \
 monolis_def_solver_util_c_test.c
 
 SRC_ALL_C_TEST = \
