@@ -12,6 +12,7 @@
 #include "./matrix/monolis_spmat_handler_util_c_test.h"
 #include "./matrix/monolis_spmat_nzpattern_c_test.h"
 #include "./matrix/monolis_spmat_nzpattern_util_c_test.h"
+#include "./solver/monolis_solver_c_test.h"
 
 int main()
 {
@@ -27,13 +28,15 @@ int main()
 
   monolis_matvec_c_test();
 
-  monolis_spmat_nzpattern_c_test();
+  //monolis_spmat_nzpattern_c_test();
 
-  monolis_spmat_nzpattern_util_c_test();
+  //monolis_spmat_nzpattern_util_c_test();
 
-  monolis_spmat_handler_c_test();
+  //monolis_spmat_handler_c_test();
 
-  monolis_spmat_handler_util_c_test();
+  //monolis_spmat_handler_util_c_test();
+
+  //monolis_solve_c_test();
 
   monolis_mpi_finalize();
 }

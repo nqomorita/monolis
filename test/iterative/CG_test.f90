@@ -20,7 +20,7 @@ contains
   subroutine monolis_solver_CG_test_main(n_dof, prec)
     implicit none
     type(monolis_structure) :: mat
-    integer(kint) :: nnode, nelem, elem(2,9)
+    integer(kint) :: n_node, nelem, elem(2,9)
     integer(kint) :: i1, i2, j1, j2
     integer(kint) :: n_dof, prec
     real(kdouble) :: val
@@ -32,7 +32,7 @@ contains
 
     call monolis_initialize(mat, "./")
 
-    nnode = 10
+    n_node = 10
 
     nelem = 9
 
@@ -46,7 +46,7 @@ contains
     elem(1,8) = 8; elem(2,8) = 9;
     elem(1,9) = 9; elem(2,9) =10;
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, n_dof, nelem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, n_dof, nelem, elem)
 
     do i1 = 1, 10
       do i2 = 1, n_dof
