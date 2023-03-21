@@ -6,63 +6,63 @@ module mod_monolis_def_mat
   !> 行列構造体（実数型）
   type monolis_mat_val_R
     !> 全行列値
-    real(kdouble), allocatable :: A(:)
+    real(kdouble), pointer :: A(:) => null()
     !> 行列値（狭義上三角）
-    real(kdouble), allocatable :: U(:)
+    real(kdouble), pointer :: U(:) => null()
     !> 行列値（対角成分）
-    real(kdouble), allocatable :: D(:)
+    real(kdouble), pointer :: D(:) => null()
     !> 行列値（狭義下三角）
-    real(kdouble), allocatable :: L(:)
+    real(kdouble), pointer :: L(:) => null()
     !> 解ベクトル
-    real(kdouble), allocatable :: X(:)
+    real(kdouble), pointer :: X(:) => null()
     !> 右辺ベクトル
-    real(kdouble), allocatable :: B(:)
+    real(kdouble), pointer :: B(:) => null()
   end type monolis_mat_val_R
 
   !> 行列構造体（複素数型）
   type monolis_mat_val_C
     !> 全行列値
-    complex(kdouble), allocatable :: A(:)
+    complex(kdouble), pointer :: A(:) => null()
     !> 行列値（狭義上三角）
-    complex(kdouble), allocatable :: U(:)
+    complex(kdouble), pointer :: U(:) => null()
     !> 行列値（対角成分）
-    complex(kdouble), allocatable :: D(:)
+    complex(kdouble), pointer :: D(:) => null()
     !> 行列値（狭義下三角）
-    complex(kdouble), allocatable :: L(:)
+    complex(kdouble), pointer :: L(:) => null()
     !> 解ベクトル
-    complex(kdouble), allocatable :: X(:)
+    complex(kdouble), pointer :: X(:) => null()
     !> 右辺ベクトル
-    complex(kdouble), allocatable :: B(:)
+    complex(kdouble), pointer :: B(:) => null()
   end type monolis_mat_val_C
 
   !> 行列構造体（セパレート CSR 構造）
   type monolis_mat_separated_CSR
     !> index 配列（狭義上三角）
-    integer(kint), allocatable :: indexU(:)
+    integer(kint), pointer :: indexU(:) => null()
     !> item 配列（狭義上三角）
-    integer(kint), allocatable :: itemU(:)
+    integer(kint), pointer :: itemU(:) => null()
     !> index 配列（狭義下三角）
-    integer(kint), allocatable :: indexL(:)
+    integer(kint), pointer :: indexL(:) => null()
     !> item 配列（狭義下三角）
-    integer(kint), allocatable :: itemL(:)
+    integer(kint), pointer :: itemL(:) => null()
   end type monolis_mat_separated_CSR
 
   !> 行列構造体（CSR 構造）
   type monolis_mat_CSR
     !> index 配列
-    integer(kint), allocatable :: index(:)
+    integer(kint), pointer :: index(:) => null()
     !> item 配列
-    integer(kint), allocatable :: item(:)
+    integer(kint), pointer :: item(:) => null()
   end type monolis_mat_CSR
 
   !> 行列構造体（CSC 構造）
   type monolis_mat_CSC
     !> index 配列
-    integer(kint), allocatable :: index(:)
+    integer(kint), pointer :: index(:) => null()
     !> item 配列
-    integer(kint), allocatable :: item(:)
+    integer(kint), pointer :: item(:) => null()
     !> CSR 形式に対する行列値の置換ベクトル
-    integer(kint), allocatable :: perm(:)
+    integer(kint), pointer :: perm(:) => null()
   end type monolis_mat_CSC
 
   !> 行列構造体（セパレート CSR 構造）
@@ -114,12 +114,12 @@ contains
     !> 行列構造体
     type(monolis_mat_val_R) :: R
 
-    call monolis_dealloc_R_1d(R%A)
-    call monolis_dealloc_R_1d(R%U)
-    call monolis_dealloc_R_1d(R%D)
-    call monolis_dealloc_R_1d(R%L)
-    call monolis_dealloc_R_1d(R%X)
-    call monolis_dealloc_R_1d(R%B)
+    call monolis_pdealloc_R_1d(R%A)
+    call monolis_pdealloc_R_1d(R%U)
+    call monolis_pdealloc_R_1d(R%D)
+    call monolis_pdealloc_R_1d(R%L)
+    call monolis_pdealloc_R_1d(R%X)
+    call monolis_pdealloc_R_1d(R%B)
   end subroutine monolis_mat_initialize_val_R
 
   !> 行列構造体の初期化処理関数（複素数型）
@@ -128,12 +128,12 @@ contains
     !> 行列構造体
     type(monolis_mat_val_C) :: C
 
-    call monolis_dealloc_C_1d(C%A)
-    call monolis_dealloc_C_1d(C%U)
-    call monolis_dealloc_C_1d(C%D)
-    call monolis_dealloc_C_1d(C%L)
-    call monolis_dealloc_C_1d(C%X)
-    call monolis_dealloc_C_1d(C%B)
+    call monolis_pdealloc_C_1d(C%A)
+    call monolis_pdealloc_C_1d(C%U)
+    call monolis_pdealloc_C_1d(C%D)
+    call monolis_pdealloc_C_1d(C%L)
+    call monolis_pdealloc_C_1d(C%X)
+    call monolis_pdealloc_C_1d(C%B)
   end subroutine monolis_mat_initialize_val_C
 
   !> 行列構造体の初期化処理関数（セパレート CSR 構造）
@@ -142,10 +142,10 @@ contains
     !> 行列構造体
     type(monolis_mat_separated_CSR) :: SCSR
 
-    call monolis_dealloc_I_1d(SCSR%indexU)
-    call monolis_dealloc_I_1d(SCSR%itemU)
-    call monolis_dealloc_I_1d(SCSR%indexL)
-    call monolis_dealloc_I_1d(SCSR%itemL)
+    call monolis_pdealloc_I_1d(SCSR%indexU)
+    call monolis_pdealloc_I_1d(SCSR%itemU)
+    call monolis_pdealloc_I_1d(SCSR%indexL)
+    call monolis_pdealloc_I_1d(SCSR%itemL)
   end subroutine monolis_mat_initialize_SCSR
 
   !> 行列構造体の初期化処理関数（CSR 構造）
@@ -154,8 +154,8 @@ contains
     !> 行列構造体
     type(monolis_mat_CSR) :: CSR
 
-    call monolis_dealloc_I_1d(CSR%index)
-    call monolis_dealloc_I_1d(CSR%item)
+    call monolis_pdealloc_I_1d(CSR%index)
+    call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_initialize_CSR
 
   !> 行列構造体の初期化処理関数（CSC 構造）
@@ -164,9 +164,9 @@ contains
     !> 行列構造体
     type(monolis_mat_CSC) :: CSC
 
-    call monolis_dealloc_I_1d(CSC%index)
-    call monolis_dealloc_I_1d(CSC%item)
-    call monolis_dealloc_I_1d(CSC%perm)
+    call monolis_pdealloc_I_1d(CSC%index)
+    call monolis_pdealloc_I_1d(CSC%item)
+    call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_initialize_CSC
 
   !> 行列構造体の終了処理関数
@@ -192,12 +192,12 @@ contains
     !> 行列構造体
     type(monolis_mat_val_R) :: R
 
-    call monolis_dealloc_R_1d(R%A)
-    call monolis_dealloc_R_1d(R%U)
-    call monolis_dealloc_R_1d(R%D)
-    call monolis_dealloc_R_1d(R%L)
-    call monolis_dealloc_R_1d(R%X)
-    call monolis_dealloc_R_1d(R%B)
+    call monolis_pdealloc_R_1d(R%A)
+    call monolis_pdealloc_R_1d(R%U)
+    call monolis_pdealloc_R_1d(R%D)
+    call monolis_pdealloc_R_1d(R%L)
+    call monolis_pdealloc_R_1d(R%X)
+    call monolis_pdealloc_R_1d(R%B)
   end subroutine monolis_mat_finalize_val_R
 
   !> 行列構造体の終了処理関数（複素数型）
@@ -206,12 +206,12 @@ contains
     !> 行列構造体
     type(monolis_mat_val_C) :: C
 
-    call monolis_dealloc_C_1d(C%A)
-    call monolis_dealloc_C_1d(C%U)
-    call monolis_dealloc_C_1d(C%D)
-    call monolis_dealloc_C_1d(C%L)
-    call monolis_dealloc_C_1d(C%X)
-    call monolis_dealloc_C_1d(C%B)
+    call monolis_pdealloc_C_1d(C%A)
+    call monolis_pdealloc_C_1d(C%U)
+    call monolis_pdealloc_C_1d(C%D)
+    call monolis_pdealloc_C_1d(C%L)
+    call monolis_pdealloc_C_1d(C%X)
+    call monolis_pdealloc_C_1d(C%B)
   end subroutine monolis_mat_finalize_val_C
 
   !> 行列構造体の終了処理関数（セパレート CSR 構造）
@@ -220,10 +220,10 @@ contains
     !> 行列構造体
     type(monolis_mat_separated_CSR) :: SCSR
 
-    call monolis_dealloc_I_1d(SCSR%indexU)
-    call monolis_dealloc_I_1d(SCSR%itemU)
-    call monolis_dealloc_I_1d(SCSR%indexL)
-    call monolis_dealloc_I_1d(SCSR%itemL)
+    call monolis_pdealloc_I_1d(SCSR%indexU)
+    call monolis_pdealloc_I_1d(SCSR%itemU)
+    call monolis_pdealloc_I_1d(SCSR%indexL)
+    call monolis_pdealloc_I_1d(SCSR%itemL)
   end subroutine monolis_mat_finalize_SCSR
 
   !> 行列構造体の終了処理関数（CSR 構造）
@@ -232,8 +232,8 @@ contains
     !> 行列構造体
     type(monolis_mat_CSR) :: CSR
 
-    call monolis_dealloc_I_1d(CSR%index)
-    call monolis_dealloc_I_1d(CSR%item)
+    call monolis_pdealloc_I_1d(CSR%index)
+    call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_finalize_CSR
 
   !> 行列構造体の終了処理関数（CSC 構造）
@@ -242,9 +242,9 @@ contains
     !> 行列構造体
     type(monolis_mat_CSC) :: CSC
 
-    call monolis_dealloc_I_1d(CSC%index)
-    call monolis_dealloc_I_1d(CSC%item)
-    call monolis_dealloc_I_1d(CSC%perm)
+    call monolis_pdealloc_I_1d(CSC%index)
+    call monolis_pdealloc_I_1d(CSC%item)
+    call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_finalize_CSC
 
   !> 右辺ベクトルの設定（実数型）

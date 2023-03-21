@@ -255,7 +255,7 @@ contains
 
     monolis%MAT%NP = 5
 
-    call monolis_alloc_I_1d(monolis%MAT%CSR%index, 6)
+    call monolis_palloc_I_1d(monolis%MAT%CSR%index, 6)
 
     monolis%MAT%CSR%index(6) = 10
 
@@ -276,7 +276,7 @@ contains
 
     monolis%MAT%NP = 5
 
-    call monolis_alloc_I_1d(monolis%MAT%CSR%index, 6)
+    call monolis_palloc_I_1d(monolis%MAT%CSR%index, 6)
 
     monolis%MAT%CSR%index(6) = 10
 

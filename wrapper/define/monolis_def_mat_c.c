@@ -8,47 +8,47 @@
 void monolis_mat_initialize_val_R(
   MONOLIS_MAT_VAL_R* mat)
 {
-  monolis_dealloc_R_1d(&mat->A);
-  monolis_dealloc_R_1d(&mat->U);
-  monolis_dealloc_R_1d(&mat->D);
-  monolis_dealloc_R_1d(&mat->L);
-  monolis_dealloc_R_1d(&mat->X);
-  monolis_dealloc_R_1d(&mat->B);
+  mat->A = NULL;
+  mat->U = NULL;
+  mat->D = NULL;
+  mat->L = NULL;
+  mat->X = NULL;
+  mat->B = NULL;
 }
 
 void monolis_mat_initialize_val_C(
   MONOLIS_MAT_VAL_C* mat)
 {
-  monolis_dealloc_C_1d(&mat->A);
-  monolis_dealloc_C_1d(&mat->U);
-  monolis_dealloc_C_1d(&mat->D);
-  monolis_dealloc_C_1d(&mat->L);
-  monolis_dealloc_C_1d(&mat->X);
-  monolis_dealloc_C_1d(&mat->B);
+  mat->A = NULL;
+  mat->U = NULL;
+  mat->D = NULL;
+  mat->L = NULL;
+  mat->X = NULL;
+  mat->B = NULL;
 }
 
 void monolis_mat_initialize_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat)
 {
-  monolis_dealloc_I_1d(&mat->indexU);
-  monolis_dealloc_I_1d(&mat->indexL);
-  monolis_dealloc_I_1d(&mat->itemU);
-  monolis_dealloc_I_1d(&mat->itemL);
+  mat->indexU = NULL;
+  mat->indexL = NULL;
+  mat->itemU = NULL;
+  mat->itemL = NULL;
 }
 
 void monolis_mat_initialize_CSR(
   MONOLIS_MAT_CSR* mat)
 {
-  monolis_dealloc_I_1d(&mat->index);
-  monolis_dealloc_I_1d(&mat->item);
+  mat->index = NULL;
+  mat->item = NULL;
 }
 
 void monolis_mat_initialize_CSC(
   MONOLIS_MAT_CSC* mat)
 {
-  monolis_dealloc_I_1d(&mat->index);
-  monolis_dealloc_I_1d(&mat->item);
-  monolis_dealloc_I_1d(&mat->perm);
+  mat->index = NULL;
+  mat->item = NULL;
+  mat->perm = NULL;
 }
 
 void monolis_mat_initialize(

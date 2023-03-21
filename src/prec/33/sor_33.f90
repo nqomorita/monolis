@@ -26,7 +26,7 @@ contains
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    call monolis_alloc_R_1d(monoPREC%R%D, 9*N)
+    call monolis_palloc_R_1d(monoPREC%R%D, 9*N)
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
@@ -185,7 +185,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    call monolis_dealloc_R_1d(monoPREC%R%D)
+    call monolis_pdealloc_R_1d(monoPREC%R%D)
   end subroutine monolis_precond_sor_33_clear_R
 
 end module mod_monolis_precond_sor_33

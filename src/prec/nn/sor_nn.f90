@@ -31,7 +31,7 @@ contains
 
     call monolis_alloc_R_1d(T, NDOF)
     call monolis_alloc_R_2d(LU, NDOF, NDOF)
-    call monolis_alloc_R_1d(monoPREC%R%D, NDOF2*N)
+    call monolis_palloc_R_1d(monoPREC%R%D, NDOF2*N)
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
@@ -101,7 +101,7 @@ contains
 
     call monolis_alloc_C_1d(T, NDOF)
     call monolis_alloc_C_2d(LU, NDOF, NDOF)
-    call monolis_alloc_C_1d(monoPREC%C%D, NDOF2*N)
+    call monolis_palloc_C_1d(monoPREC%C%D, NDOF2*N)
     ALU => monoPREC%C%D
 
 !$omp parallel default(none) &
@@ -394,7 +394,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    call monolis_dealloc_R_1d(monoPREC%R%D)
+    call monolis_pdealloc_R_1d(monoPREC%R%D)
   end subroutine monolis_precond_sor_nn_clear_R
 
   !> 前処理初期化：SOR 前処理（nxn ブロック、複素数型）
@@ -403,6 +403,6 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    call monolis_dealloc_C_1d(monoPREC%C%D)
+    call monolis_pdealloc_C_1d(monoPREC%C%D)
   end subroutine monolis_precond_sor_nn_clear_C
 end module mod_monolis_precond_sor_nn

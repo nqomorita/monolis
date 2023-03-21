@@ -27,7 +27,7 @@ contains
     MAT%NP = n_node
     MAT%NDOF = ndof
 
-    call monolis_alloc_I_1d(MAT%CSR%index, n_node + 1)
+    call monolis_palloc_I_1d(MAT%CSR%index, n_node + 1)
 
     do i = 1, n_node
       MAT%CSR%index(i + 1) = index(i + 1) + i
@@ -35,7 +35,7 @@ contains
 
     nz = MAT%CSR%index(n_node + 1)
 
-    call monolis_alloc_I_1d(MAT%CSR%item, nz)
+    call monolis_palloc_I_1d(MAT%CSR%item, nz)
 
     do i = 1, n_node
       jS = MAT%CSR%index(i) + 1
@@ -47,9 +47,9 @@ contains
       call monolis_qsort_I_1d(MAT%CSR%item(jS:jE), 1, jE - jS + 1)
     enddo
 
-    call monolis_alloc_I_1d(MAT%CSC%index, n_node + 1)
-    call monolis_alloc_I_1d(MAT%CSC%item, nz)
-    call monolis_alloc_I_1d(MAT%CSC%perm, nz)
+    call monolis_palloc_I_1d(MAT%CSC%index, n_node + 1)
+    call monolis_palloc_I_1d(MAT%CSC%item, nz)
+    call monolis_palloc_I_1d(MAT%CSC%perm, nz)
 
     call monolis_get_CSC_format(MAT%N, MAT%N, nz, &
       & MAT%CSR%index, MAT%CSR%item, &
@@ -87,7 +87,7 @@ contains
     MAT%NP = total_dof
     MAT%NDOF = 1
 
-    call monolis_alloc_I_1d(MAT%CSR%index, total_dof + 1)
+    call monolis_palloc_I_1d(MAT%CSR%index, total_dof + 1)
 
     !# count nz
     nz = 0
@@ -101,7 +101,7 @@ contains
       enddo
     enddo
 
-    call monolis_alloc_I_1d(MAT%CSR%item, nz)
+    call monolis_palloc_I_1d(MAT%CSR%item, nz)
 
     !# construct index and item
     in = 0
@@ -132,9 +132,9 @@ contains
       enddo
     enddo
 
-    call monolis_alloc_I_1d(MAT%CSC%index, total_dof + 1)
-    call monolis_alloc_I_1d(MAT%CSC%item, nz)
-    call monolis_alloc_I_1d(MAT%CSC%perm, nz)
+    call monolis_palloc_I_1d(MAT%CSC%index, total_dof + 1)
+    call monolis_palloc_I_1d(MAT%CSC%item, nz)
+    call monolis_palloc_I_1d(MAT%CSC%perm, nz)
 
     call monolis_get_CSC_format(MAT%N, MAT%N, nz, &
       & MAT%CSR%index, MAT%CSR%item, &
@@ -168,9 +168,9 @@ contains
     NP = MAT%NP
     NZ = MAT%CSR%index(NP + 1)
 
-    call monolis_alloc_R_1d(MAT%R%A, NZ*NDOF*NDOF)
-    call monolis_alloc_R_1d(MAT%R%B, NZ*NDOF)
-    call monolis_alloc_R_1d(MAT%R%X, NZ*NDOF)
+    call monolis_palloc_R_1d(MAT%R%A, NZ*NDOF*NDOF)
+    call monolis_palloc_R_1d(MAT%R%B, NZ*NDOF)
+    call monolis_palloc_R_1d(MAT%R%X, NZ*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
   !> 疎行列の行列成分のメモリ確保（複素数型）
@@ -184,9 +184,9 @@ contains
     NP = MAT%NP
     NZ = MAT%CSR%index(NP + 1)
 
-    call monolis_alloc_C_1d(MAT%C%A, NZ*NDOF*NDOF)
-    call monolis_alloc_C_1d(MAT%C%B, NZ*NDOF)
-    call monolis_alloc_C_1d(MAT%C%X, NZ*NDOF)
+    call monolis_palloc_C_1d(MAT%C%A, NZ*NDOF*NDOF)
+    call monolis_palloc_C_1d(MAT%C%B, NZ*NDOF)
+    call monolis_palloc_C_1d(MAT%C%X, NZ*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C
 
   !> CSR 形式から CSC 形式のデータを生成

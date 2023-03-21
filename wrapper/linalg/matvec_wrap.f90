@@ -68,26 +68,26 @@ contains
     monoMAT%N = N
     monoMAT%NP = NP
     monoMAT%NDOF = NDOF
-    !monoMAT%R%A => A
-    !monoMAT%R%X => X
-    !monoMAT%R%B => Y
-    !monoMAT%CSR%index => index
-    !monoMAT%CSR%item => item
+    monoMAT%R%A => A
+    monoMAT%R%X => X
+    monoMAT%R%B => Y
+    monoMAT%CSR%index => index
+    monoMAT%CSR%item => item
 
     !> for monoCOM
     monoCOM%my_rank = my_rank
     monoCOM%comm = comm
     monoCOM%comm_size = comm_size
     monoCOM%recv_n_neib = recv_n_neib
-    !monoCOM%recv_neib_pe => recv_neib_pe
-    !monoCOM%recv_index => recv_index
-    !monoCOM%recv_item => recv_item
+    monoCOM%recv_neib_pe => recv_neib_pe
+    monoCOM%recv_index => recv_index
+    monoCOM%recv_item => recv_item
     monoCOM%send_n_neib = send_n_neib
-    !monoCOM%send_neib_pe => send_neib_pe
-    !monoCOM%send_index => send_index
-    !monoCOM%send_item => send_item
+    monoCOM%send_neib_pe => send_neib_pe
+    monoCOM%send_index => send_index
+    monoCOM%send_item => send_item
 
-    !call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
+    call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_R_c
 
   !> @ingroup dev_linalg
@@ -150,24 +150,24 @@ contains
     monoMAT%N = N
     monoMAT%NP = NP
     monoMAT%NDOF = NDOF
-    !monoMAT%R%A => A
-    !monoMAT%R%X => X
-    !monoMAT%R%B => Y
-    !monoMAT%CSR%index => index
-    !monoMAT%CSR%item => item
+    monoMAT%C%A => A
+    monoMAT%C%X => X
+    monoMAT%C%B => Y
+    monoMAT%CSR%index => index
+    monoMAT%CSR%item => item
 
     !> for monoCOM
     monoCOM%my_rank = my_rank
     monoCOM%comm = comm
     monoCOM%comm_size = comm_size
     monoCOM%recv_n_neib = recv_n_neib
-    !monoCOM%recv_neib_pe => recv_neib_pe
-    !monoCOM%recv_index => recv_index
-    !monoCOM%recv_item => recv_item
+    monoCOM%recv_neib_pe => recv_neib_pe
+    monoCOM%recv_index => recv_index
+    monoCOM%recv_item => recv_item
     monoCOM%send_n_neib = send_n_neib
-    !monoCOM%send_neib_pe => send_neib_pe
-    !monoCOM%send_index => send_index
-    !monoCOM%send_item => send_item
+    monoCOM%send_neib_pe => send_neib_pe
+    monoCOM%send_index => send_index
+    monoCOM%send_item => send_item
 
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_C_c

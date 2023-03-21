@@ -3,7 +3,7 @@
 ##> compiler setting
 FC     = mpif90
 FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
-CC     = mpicc
+CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
 
 ##> directory setting
@@ -60,10 +60,10 @@ LIB_TARGET = $(LIB_DIR)/$(LIBRARY)
 
 ##> source file define
 SRC_DEFINE = \
-def_solver.f90 \
+def_solver_prm.f90 \
 def_mat.f90 \
 def_struc.f90 \
-def_solver_util.f90
+def_solver_prm_util.f90
 
 SRC_MAT = \
 spmat_handler_util.f90 \
@@ -133,10 +133,10 @@ eigen_solver.f90
 
 ##> C wrapper section
 SRC_DEFINE_C = \
-monolis_def_solver_c.c \
+monolis_def_solver_prm_c.c \
 monolis_def_mat_c.c \
 monolis_def_struc_c.c \
-monolis_def_solver_util_c.c
+monolis_def_solver_prm_util_c.c
 
 SRC_LINALG_C = \
 matvec_wrap.f90 \
@@ -197,8 +197,8 @@ TEST_C_TARGET = $(TST_WRAP_DIR)/monolis_c_test
 
 ##> lib objs
 SRC_DEFINE_C_TEST = \
-monolis_def_solver_c_test.c \
-monolis_def_solver_util_c_test.c
+monolis_def_solver_prm_c_test.c \
+monolis_def_solver_prm_util_c_test.c
 
 SRC_LINALG_C_TEST = \
 monolis_inner_product_c_test.c \
@@ -263,8 +263,8 @@ cp_header:
 	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_struc_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_mat_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_solver_util_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_solver_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_solver_prm_util_c.h ./include/
+	$(CP) ./wrapper/define/monolis_def_solver_prm_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/

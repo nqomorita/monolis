@@ -63,11 +63,11 @@ contains
     call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
-      call monolis_matvec_33_R(monoCOM, monoMAT, X, Y)
+      call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     elseif(monoMAT%NDOF == 1)then
-      call monolis_matvec_11_R(monoCOM, monoMAT, X, Y)
+      call monolis_matvec_11_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     else
-      call monolis_matvec_nn_R(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
+      call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
     endif
 
     t2 = monolis_get_time()
@@ -96,11 +96,11 @@ contains
     call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
-      call monolis_matvec_33_C(monoCOM, monoMAT, X, Y)
+      call monolis_matvec_33_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     elseif(monoMAT%NDOF == 1)then
-      call monolis_matvec_11_C(monoCOM, monoMAT, X, Y)
+      call monolis_matvec_11_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     else
-      call monolis_matvec_nn_C(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
+      call monolis_matvec_nn_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y, monoMAT%NDOF)
     endif
 
     t2 = monolis_get_time()
@@ -109,28 +109,26 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、nxn ブロック）
-  subroutine monolis_matvec_nn_R(monoCOM, monoMAT, X, Y, NDOF)
+  subroutine monolis_matvec_nn_R(N, index, item, A, X, Y, NDOF)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
+    !> 行列サイズ
+    integer(kint) :: N
+    !> ブロックサイズ
+    integer(kint) :: NDOF
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    real(kdouble) :: A(:)
     !> 右辺ベクトル
     real(kdouble) :: X(:)
     !> 結果ベクトル
     real(kdouble) :: Y(:)
-    !> ブロックサイズ
-    integer(kint) :: NDOF
-    integer(kint) :: i, j, k, l, in, N, NDOF2, jS, jE
+    integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
     real(kdouble) :: XT(NDOF), YT(NDOF)
-    integer(kint), pointer :: index(:), item(:)
-    real(kdouble), pointer :: A(:)
 
-    N = monoMAT%N
     NDOF2 = NDOF*NDOF
-    A => monoMAT%R%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
@@ -162,28 +160,28 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数、nxn ブロック）
-  subroutine monolis_matvec_nn_C(monoCOM, monoMAT, X, Y, NDOF)
+  subroutine monolis_matvec_nn_C(N, index, item, A, X, Y, NDOF)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
+    !> 行列サイズ
+    integer(kint) :: N
+    !> ブロックサイズ
+    integer(kint) :: NDOF
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    complex(kdouble) :: A(:)
     !> monolis 構造体
     type(monolis_mat), target :: monoMAT
     !> 右辺ベクトル
     complex(kdouble) :: X(:)
     !> 結果ベクトル
     complex(kdouble) :: Y(:)
-    !> ブロックサイズ
-    integer(kint) :: NDOF
-    integer(kint) :: i, j, k, l, in, N, NDOF2, jS, jE
+    integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
     complex(kdouble) :: XT(NDOF), YT(NDOF)
-    integer(kint), pointer :: index(:), item(:)
-    complex(kdouble), pointer :: A(:)
 
-    N = monoMAT%N
     NDOF2 = NDOF*NDOF
-    A => monoMAT%C%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
@@ -215,25 +213,24 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、1x1 ブロック）
-  subroutine monolis_matvec_11_R(monoCOM, monoMAT, X, Y)
+  subroutine monolis_matvec_11_R(N, index, item, A, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
+    !> 行列サイズ
+    integer(kint) :: N
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    real(kdouble) :: A(:)
     !> monolis 構造体
     type(monolis_mat), target :: monoMAT
     !> 右辺ベクトル
     real(kdouble) :: X(:)
     !> 結果ベクトル
     real(kdouble) :: Y(:)
-    integer(kint) :: i, j, in, N, jS, jE
-    integer(kint), pointer :: index(:), item(:)
+    integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: Y1
-    real(kdouble), pointer :: A(:)
-
-    N = monoMAT%N
-    A => monoMAT%R%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
@@ -256,25 +253,24 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数型、1x1 ブロック）
-  subroutine monolis_matvec_11_C(monoCOM, monoMAT, X, Y)
+  subroutine monolis_matvec_11_C(N, index, item, A, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
+    !> 行列サイズ
+    integer(kint) :: N
+    !> ブロックサイズ
+    integer(kint) :: NDOF
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    complex(kdouble) :: A(:)
     !> 右辺ベクトル
     complex(kdouble) :: X(:)
     !> 結果ベクトル
     complex(kdouble) :: Y(:)
-    integer(kint) :: i, j, in, N, jS, jE
-    integer(kint), pointer :: index(:), item(:)
+    integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: Y1
-    complex(kdouble), pointer :: A(:)
-
-    N = monoMAT%N
-    A => monoMAT%C%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
@@ -297,25 +293,22 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、3x3 ブロック）
-  subroutine monolis_matvec_33_R(monoCOM, monoMAT, X, Y)
+  subroutine monolis_matvec_33_R(N, index, item, A, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
+    !> 行列サイズ
+    integer(kint) :: N
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    real(kdouble) :: A(:)
     !> 右辺ベクトル
     real(kdouble) :: X(:)
     !> 結果ベクトル
     real(kdouble) :: Y(:)
-    integer(kint) :: i, j, in, N, jS, jE
-    integer(kint), pointer :: index(:), item(:)
+    integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
-    real(kdouble), pointer :: A(:)
-
-    N = monoMAT%N
-    A => monoMAT%R%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
@@ -347,25 +340,22 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数型、3x3 ブロック）
-  subroutine monolis_matvec_33_C(monoCOM, monoMAT, X, Y)
+  subroutine monolis_matvec_33_C(N, index, item, A, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
+    !> 行列サイズ
+    integer(kint) :: N
+    !> index 配列
+    integer(kint) :: index(:)
+    !> item 配列
+    integer(kint) :: item(:)
+    !> 行列成分
+    complex(kdouble) :: A(:)
     !> 右辺ベクトル
     complex(kdouble) :: X(:)
     !> 結果ベクトル
     complex(kdouble) :: Y(:)
-    integer(kint) :: i, j, in, N, jS, jE
-    integer(kint), pointer :: index(:), item(:)
+    integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: X1, X2, X3, Y1, Y2, Y3
-    complex(kdouble), pointer :: A(:)
-
-    N = monoMAT%N
-    A => monoMAT%C%A
-    index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &

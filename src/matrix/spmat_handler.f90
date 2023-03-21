@@ -265,24 +265,24 @@ contains
     real(kdouble), intent(in) :: A(:)
     integer(kint) :: i
 
-    call monolis_dealloc_I_1d(monolis%MAT%CSR%index)
-    call monolis_dealloc_I_1d(monolis%MAT%CSR%item)
-    call monolis_dealloc_I_1d(monolis%MAT%CSC%index)
-    call monolis_dealloc_I_1d(monolis%MAT%CSC%item)
-    call monolis_dealloc_I_1d(monolis%MAT%CSC%perm)
-    call monolis_dealloc_R_1d(monolis%MAT%R%A)
-    call monolis_dealloc_R_1d(monolis%MAT%R%B)
-    call monolis_dealloc_R_1d(monolis%MAT%R%X)
+    call monolis_pdealloc_I_1d(monolis%MAT%CSR%index)
+    call monolis_pdealloc_I_1d(monolis%MAT%CSR%item)
+    call monolis_pdealloc_I_1d(monolis%MAT%CSC%index)
+    call monolis_pdealloc_I_1d(monolis%MAT%CSC%item)
+    call monolis_pdealloc_I_1d(monolis%MAT%CSC%perm)
+    call monolis_pdealloc_R_1d(monolis%MAT%R%A)
+    call monolis_pdealloc_R_1d(monolis%MAT%R%B)
+    call monolis_pdealloc_R_1d(monolis%MAT%R%X)
 
     monolis%MAT%N = N
     monolis%MAT%NP = NP
     monolis%MAT%NDOF = NDOF
 
-    call monolis_alloc_I_1d(monolis%MAT%CSR%index, NP + 1)
-    call monolis_alloc_I_1d(monolis%MAT%CSR%item, NZ)
-    call monolis_alloc_R_1d(monolis%MAT%R%A, NDOF*NDOF*NZ)
-    call monolis_alloc_R_1d(monolis%MAT%R%B, NDOF*NP)
-    call monolis_alloc_R_1d(monolis%MAT%R%X, NDOF*NP)
+    call monolis_palloc_I_1d(monolis%MAT%CSR%index, NP + 1)
+    call monolis_palloc_I_1d(monolis%MAT%CSR%item, NZ)
+    call monolis_palloc_R_1d(monolis%MAT%R%A, NDOF*NDOF*NZ)
+    call monolis_palloc_R_1d(monolis%MAT%R%B, NDOF*NP)
+    call monolis_palloc_R_1d(monolis%MAT%R%X, NDOF*NP)
 
     do i = 1, NP
       monolis%MAT%CSR%index(i) = index(i)
@@ -296,9 +296,9 @@ contains
       monolis%MAT%R%A(i) = A(i)
     enddo
 
-    call monolis_alloc_I_1d(monolis%MAT%CSC%index, NP + 1)
-    call monolis_alloc_I_1d(monolis%MAT%CSC%item, NZ)
-    call monolis_alloc_I_1d(monolis%MAT%CSC%perm, NZ)
+    call monolis_palloc_I_1d(monolis%MAT%CSC%index, NP + 1)
+    call monolis_palloc_I_1d(monolis%MAT%CSC%item, NZ)
+    call monolis_palloc_I_1d(monolis%MAT%CSC%perm, NZ)
 
     call monolis_get_CSC_format(N, NP, NZ, &
       & monolis%MAT%CSR%index, monolis%MAT%CSR%item, &

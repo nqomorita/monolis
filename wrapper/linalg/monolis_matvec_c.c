@@ -15,7 +15,7 @@ void monolis_matvec_product_R(
   if(mat->com.comm_size > 1 ) n = mat->com.n_internal_vertex;
   int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.NP + 1];
+  int nz = mat->mat.CSR.index[mat->mat.NP];
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
@@ -55,7 +55,7 @@ void monolis_matvec_product_C(
   if(mat->com.comm_size > 1 ) n = mat->com.n_internal_vertex;
   int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.NP + 1];
+  int nz = mat->mat.CSR.index[mat->mat.NP];
   int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
   int send_nitem = mat->com.send_index[mat->com.send_n_neib];
 
