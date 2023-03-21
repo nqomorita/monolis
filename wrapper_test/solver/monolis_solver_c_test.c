@@ -67,10 +67,11 @@ void monolis_solve_c_test(){
     a[i] = 0.0;
   }
 
+  monolis_set_tolerance(&mat, 1.0e-10);
+
   monolis_solve_R(&mat, b, a);
 
   for(int i = 0; i < 20; ++i){
-    printf("%d %lf\n", i, a[i]);
     monolis_test_check_eq_R1("monolis_solve_c_test R", a[i], 1.0);
   }
 
