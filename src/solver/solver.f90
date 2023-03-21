@@ -32,7 +32,7 @@ contains
 
     call monolis_set_initial_solution_R(monolis%MAT, X)
 
-    call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_R(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_R(monolis%MAT, X)
   end subroutine monolis_solve_R
@@ -51,13 +51,13 @@ contains
 
     call monolis_set_initial_solution_C(monolis%MAT, X)
 
-    call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_C(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_C(monolis%MAT, X)
   end subroutine monolis_solve_C
 
   !> 線形ソルバ関数（メイン関数）
-  subroutine monolis_solve_main(monoPRM, monoCOM, monoMAT, monoPREC)
+  subroutine monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -68,7 +68,7 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    call monolis_std_debug_log_header("monolis_solve_main")
+    call monolis_std_debug_log_header("monolis_solve_main_R")
 
     call monolis_timer_initialize(monoPRM, monoCOM)
 
@@ -76,14 +76,15 @@ contains
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
-    call monolis_solver(monoPRM, monoCOM, monoMAT, monoPREC)
+    call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
 
     call monolis_timer_finalize(monoPRM, monoCOM)
-  end subroutine monolis_solve_main
+  end subroutine monolis_solve_main_R
 
-  subroutine monolis_solver(monoPRM, monoCOM, monoMAT, monoPREC)
+  !> 線形ソルバ関数（メイン関数）
+  subroutine monolis_solve_main_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -94,7 +95,33 @@ contains
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
 
-    call monolis_std_debug_log_header("monolis_solver")
+    call monolis_std_debug_log_header("monolis_solve_main_C")
+
+    call monolis_timer_initialize(monoPRM, monoCOM)
+
+    call monolis_check_input_param(monoCOM, monoMAT)
+
+    call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
+
+    call monolis_solver_select_C(monoPRM, monoCOM, monoMAT, monoPREC)
+
+    call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
+
+    call monolis_timer_finalize(monoPRM, monoCOM)
+  end subroutine monolis_solve_main_C
+
+  subroutine monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
+    implicit none
+    !> パラメータ構造体
+    type(monolis_prm) :: monoPRM
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
+    !> 行列構造体
+    type(monolis_mat) :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
+
+    call monolis_std_debug_log_header("monolis_solver_select_R")
 
     if(monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .and. monoCOM%my_rank == 0)then
       write(*,"(a)") &
@@ -133,12 +160,40 @@ contains
       !case (monolis_iter_GMRES)
       !  call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)
 
+      case default
+        call monolis_std_error_string("monolis_solver_select_R")
+        call monolis_std_error_string("please select a linear solver for real numbers")
+        call monolis_std_error_stop()
+    end select
+  end subroutine monolis_solver_select_R
+
+  subroutine monolis_solver_select_C(monoPRM, monoCOM, monoMAT, monoPREC)
+    implicit none
+    !> パラメータ構造体
+    type(monolis_prm) :: monoPRM
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
+    !> 行列構造体
+    type(monolis_mat) :: monoMAT
+    !> 前処理構造体
+    type(monolis_mat) :: monoPREC
+
+    call monolis_std_debug_log_header("monolis_solver_select_R")
+
+    if(monoPRM%Iarray(monolis_prm_I_show_summary) == monolis_I_true .and. monoCOM%my_rank == 0)then
+      write(*,"(a)") &
+      & "** MONOLIS solver: "//trim(monolis_str_iter(monoPRM%Iarray(monolis_prm_I_method)))//&
+      & ", prec: "//trim(monolis_str_prec(monoPRM%Iarray(monolis_prm_I_precond)))
+    endif
+
+    select case(monoPRM%Iarray(monolis_prm_I_method))
       case (monolis_iter_COCG)
         call monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
 
       case default
-        stop "monolis_solver"
+        call monolis_std_error_string("monolis_solver_select_C")
+        call monolis_std_error_string("please select a linear solver for complex numbers")
+        call monolis_std_error_stop()
     end select
-  end subroutine monolis_solver
-
+  end subroutine monolis_solver_select_C
 end module mod_monolis_solve
