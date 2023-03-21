@@ -21,6 +21,8 @@ void monolis_inner_product_c_test(){
 
   monolis_std_log_string("monolis_inner_product_c_test");
 
+  monolis_initialize(&mat, "./");
+
   mat.mat.N = 2;
 
   mat.com.n_internal_vertex = 2;
@@ -53,4 +55,6 @@ void monolis_inner_product_c_test(){
   monolis_inner_product_C(&mat, n_dof, cx, cy, &csum);
 
   monolis_test_check_eq_R1("monolis_linalg_test 3", csum, 10.0 + 10.0*I);
+
+  monolis_finalize(&mat);
 }
