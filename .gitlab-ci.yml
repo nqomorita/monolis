@@ -19,7 +19,9 @@ build_monolis:
 test_monolis:
   stage: test
   script:
-    - cd test
+    - cd src_test
+    - ./run.CI.sh
+    - cd ../wrapper_test
     - ./run.CI.sh
   dependencies:
     - build_monolis

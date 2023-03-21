@@ -17,10 +17,10 @@ USE_LIB = \
 -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
+TST_DIR = ./src_test
 OBJ_DIR = ./obj
 LIB_DIR = ./lib
 WRAP_DIR= ./wrapper
-TST_DIR = ./test
 TST_WRAP_DIR = ./wrapper_test
 DRV_DIR = ./driver
 LIBRARY = libmonolis.a
