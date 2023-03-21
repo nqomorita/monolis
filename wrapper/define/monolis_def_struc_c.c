@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "monolis_utils.h"
-#include "monolis_def_solver_c.h"
 #include "monolis_def_struc_c.h"
 
 void monolis_com_input_comm_table(

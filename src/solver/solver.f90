@@ -135,6 +135,9 @@ contains
 
       case (monolis_iter_COCG)
         call monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
+
+      case default
+        stop "monolis_solver"
     end select
   end subroutine monolis_solver
 

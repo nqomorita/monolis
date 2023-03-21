@@ -36,12 +36,13 @@ void monolis_solve_c_test(){
   elem[7][0] = 7; elem[7][1] = 8;
   elem[8][0] = 8; elem[8][1] = 9;
 
+  monolis_initialize(&mat, "./");
+
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 
   for(int i = 0; i < n_node; ++i){
     for(int j = 0; j < n_dof; ++j){
-      val = rand()%1001;
-      val = val + 2.0;
+      val = rand()%1001 + 5000.0;
       monolis_set_scalar_to_sparse_matrix_R(&mat, i, i, j, j, val);
     }
   }
@@ -60,13 +61,20 @@ void monolis_solve_c_test(){
     a[i] = 1.0;
   }
 
-  //monolis_matvec_product_R(&mat, a, b);
+  monolis_matvec_product_R(&mat, a, b);
 
   for(int i = 0; i < 20; ++i){
     a[i] = 0.0;
   }
 
-  //monolis_solve_R(&mat, b, a);
+  monolis_solve_R(&mat, b, a);
+
+  for(int i = 0; i < 20; ++i){
+    printf("%d %lf\n", i, a[i]);
+    monolis_test_check_eq_R1("monolis_solve_c_test R", a[i], 1.0);
+  }
+
+  monolis_finalize(&mat);
 
   monolis_test_check_eq_R1("monolis_solve_c_test", a[0], 1.0);
 }

@@ -39,6 +39,37 @@ void monolis_solve_R_c_main(
   int*    Iarray,
   double* Rarray);
 
+void monolis_solve_C(
+  MONOLIS* mat,
+  double complex*  b,
+  double complex*  x);
+
+void monolis_solve_C_c_main(
+  int     n,
+  int     np,
+  int     nz,
+  int     n_dof,
+  double complex* A,
+  double complex* x,
+  double complex* b,
+  int*    index,
+  int*    item,
+  int     my_rank,
+  int     comm,
+  int     comm_size,
+  int     recv_n_neib,
+  int     recv_nitem,
+  int*    recv_neib_pe,
+  int*    recv_index,
+  int*    recv_item,
+  int     send_n_neib,
+  int     send_nitem,
+  int*    send_neib_pe,
+  int*    send_index,
+  int*    send_item,
+  int*    Iarray,
+  double* Rarray);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "monolis_def_solver_c.h"
+#include "monolis_def_solver_prm_c.h"
 #include "monolis_utils.h"
 
 void monolis_prm_initialize(

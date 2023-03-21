@@ -281,6 +281,7 @@ clean:
 	$(TEST_TARGET) \
 	$(TEST_C_TARGET) \
 	./include/*.mod \
+	./include/*.h \
 	./bin/*
 
 .PHONY: clean

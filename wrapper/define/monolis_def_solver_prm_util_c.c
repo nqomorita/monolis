@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "monolis_def_solver_util_c.h"
-#include "monolis_def_solver_c.h"
+#include "monolis_def_solver_prm_util_c.h"
+#include "monolis_def_solver_prm_c.h"
 
 void monolis_set_method(
   MONOLIS* mat,
