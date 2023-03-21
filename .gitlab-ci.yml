@@ -14,7 +14,8 @@ build_monolis:
   artifacts:
     paths:
       - bin
-      - test
+      - src_test
+      - wrapper_test
 
 test_monolis:
   stage: test
