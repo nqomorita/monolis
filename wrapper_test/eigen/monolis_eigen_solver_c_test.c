@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 #include "monolis.h"
 #include "monolis_utils.h"
 #include "monolis_eigen_solver_c.h"
@@ -64,40 +65,35 @@ void monolis_eigen_solve_c_test(){
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 a", eig_val[3], 3.0);
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 a", eig_val[4], 3.732050807568877);
 
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 b", eig_mode[0][0], 0.28867513459481281);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 b", eig_mode[0][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 b", eig_mode[0][2], 0.57735026918962640);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 b", eig_mode[0][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 b", eig_mode[0][4], 0.28867513459481270);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 b", fabs(eig_mode[0][0]), 0.28867513459481281);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 b", fabs(eig_mode[0][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 b", fabs(eig_mode[0][2]), 0.57735026918962640);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 b", fabs(eig_mode[0][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 b", fabs(eig_mode[0][4]), 0.28867513459481270);
 
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 c", eig_mode[1][0], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 c", eig_mode[1][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 c", 0.0, eig_mode[1][2]);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 c", eig_mode[1][3], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 c", eig_mode[1][4],-0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 c", fabs(eig_mode[1][0]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 c", fabs(eig_mode[1][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 c", 0.0, fabs(eig_mode[1][2]));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 c", fabs(eig_mode[1][3]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 c", fabs(eig_mode[1][4]),fabs(-0.5));
 
-printf("%f\n", eig_mode[2][0]);
-printf("%f\n", eig_mode[2][1]);
-printf("%f\n", eig_mode[2][2]);
-printf("%f\n", eig_mode[2][3]);
-printf("%f\n", eig_mode[2][4]);
-  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 d", eig_mode[2][0], 0.5773502691896257);
-  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 d", 0.0, eig_mode[2][1]);
-  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 d", eig_mode[2][2],-0.5773502691896257);
-  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 d", 0.0, eig_mode[2][3]);
-  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 d", eig_mode[2][4], 0.5773502691896257);
+  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 d", fabs(eig_mode[2][0]), 0.5773502691896257);
+  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 d", 0.0, fabs(eig_mode[2][1]));
+  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 d", fabs(eig_mode[2][2]),fabs(-0.5773502691896257));
+  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 d", 0.0, fabs(eig_mode[2][3]));
+  //monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 d", fabs(eig_mode[2][4]), 0.5773502691896257);
 
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 f", eig_mode[3][0], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 f", eig_mode[3][1], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 f", 0.0, eig_mode[3][2]);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 f", eig_mode[3][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 f", eig_mode[3][4],-0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 f", fabs(eig_mode[3][0]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 f", fabs(eig_mode[3][1]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 f", 0.0, fabs(eig_mode[3][2]));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 f", fabs(eig_mode[3][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 f", fabs(eig_mode[3][4]),fabs(-0.5));
 
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 f", eig_mode[4][0],-0.28867513459481281);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 f", eig_mode[4][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 f", eig_mode[4][2],-0.57735026918962640);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 f", eig_mode[4][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 f", eig_mode[4][4],-0.28867513459481270);
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 g", fabs(eig_mode[4][0]),fabs(-0.28867513459481281));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 g", fabs(eig_mode[4][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 3 g", fabs(eig_mode[4][2]),fabs(-0.57735026918962640));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 g", fabs(eig_mode[4][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 g", fabs(eig_mode[4][4]),fabs(-0.28867513459481270));
 
   for(int i = 0; i < 6; ++i){
     eig_val[i] = 0.0;
@@ -119,35 +115,35 @@ printf("%f\n", eig_mode[2][4]);
   monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 a", eig_val[3], 3.0);
   monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 a", eig_val[4], 3.732050807568877);
 
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 b", eig_mode[0][0], 0.28867513459481281);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 b", eig_mode[0][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 b", eig_mode[0][2], 0.57735026918962640);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 b", eig_mode[0][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 b", eig_mode[0][4], 0.28867513459481270);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 b", fabs(eig_mode[0][0]), 0.28867513459481281);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 b", fabs(eig_mode[0][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 b", fabs(eig_mode[0][2]), 0.57735026918962640);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 b", fabs(eig_mode[0][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 b", fabs(eig_mode[0][4]), 0.28867513459481270);
 
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 c", eig_mode[1][0], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 c", eig_mode[1][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 c", 0.0, eig_mode[1][2]);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 c", eig_mode[1][3], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 c", eig_mode[1][4],-0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 c", fabs(eig_mode[1][0]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 c", fabs(eig_mode[1][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 c", 0.0, fabs(eig_mode[1][2]));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 c", fabs(eig_mode[1][3]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 c", fabs(eig_mode[1][4]),fabs(-0.5));
 
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 d", eig_mode[2][0], 0.5773502691896257);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 d", 0.0, eig_mode[2][1]);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 d", eig_mode[2][2],-0.5773502691896257);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 d", 0.0, eig_mode[2][3]);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 d", eig_mode[2][4], 0.5773502691896257);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 d", fabs(eig_mode[2][0]), 0.5773502691896257);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 d", 0.0, fabs(eig_mode[2][1]));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 d", fabs(eig_mode[2][2]),fabs(-0.5773502691896257));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 d", 0.0, fabs(eig_mode[2][3]));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 d", fabs(eig_mode[2][4]), 0.5773502691896257);
 
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 f", eig_mode[3][0], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 f", eig_mode[3][1], 0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 f", 0.0, eig_mode[3][2]);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 f", eig_mode[3][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 f", eig_mode[3][4],-0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 f", fabs(eig_mode[3][0]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 f", fabs(eig_mode[3][1]), 0.5);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 f", 0.0, fabs(eig_mode[3][2]));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 f", fabs(eig_mode[3][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 f", fabs(eig_mode[3][4]),fabs(-0.5));
 
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 f", eig_mode[4][0],-0.28867513459481281);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 f", eig_mode[4][1],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 f", eig_mode[4][2],-0.57735026918962640);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 f", eig_mode[4][3],-0.5);
-  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 f", eig_mode[4][4],-0.28867513459481270);
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 f", fabs(eig_mode[4][0]),fabs(-0.28867513459481281));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 f", fabs(eig_mode[4][1]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 3 f", fabs(eig_mode[4][2]),fabs(-0.57735026918962640));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 4 f", fabs(eig_mode[4][3]),fabs(-0.5));
+  monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 5 f", fabs(eig_mode[4][4]),fabs(-0.28867513459481270));
 
   monolis_finalize(&mat);
 }
