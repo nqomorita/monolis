@@ -155,11 +155,16 @@ SRC_SOLV_C = \
 monolis_solver_c.c \
 solver_wrapper.f90
 
+SRC_EIGEN_SOLV_C = \
+monolis_eigen_solver_c.c \
+eigen_solver_wrapper.f90
+
 SRC_ALL_C = \
 $(addprefix define/, $(SRC_DEFINE_C)) \
 $(addprefix linalg/, $(SRC_LINALG_C)) \
 $(addprefix matrix/, $(SRC_MAT_C)) \
-$(addprefix solver/, $(SRC_SOLV_C))
+$(addprefix solver/, $(SRC_SOLV_C)) \
+$(addprefix eigen/, $(SRC_EIGEN_SOLV_C))
 
 ##> all targes
 SRC_ALL = \
@@ -213,11 +218,15 @@ monolis_spmat_handler_util_c_test.c
 SRC_SOLVER_C_TEST = \
 monolis_solver_c_test.c
 
+SRC_EIGEN_SOLVER_C_TEST = \
+monolis_eigen_solver_c_test.c
+
 SRC_ALL_C_TEST = \
 $(addprefix define/, $(SRC_DEFINE_C_TEST)) \
 $(addprefix linalg/, $(SRC_LINALG_C_TEST)) \
 $(addprefix matrix/, $(SRC_MAT_C_TEST)) \
-$(addprefix solver/, $(SRC_SOLVER_C_TEST))
+$(addprefix solver/, $(SRC_SOLVER_C_TEST)) \
+$(addprefix eigen/, $(SRC_EIGEN_SOLVER_C_TEST))
 
 TST_SRC_C_ALL = $(SRC_ALL_C_TEST) monolis_c_test.c
 TST_C_SOURCES = $(addprefix $(TST_WRAP_DIR)/, $(TST_SRC_C_ALL))
@@ -270,6 +279,7 @@ cp_header:
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
+	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/
 
 clean:

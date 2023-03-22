@@ -80,7 +80,7 @@ contains
       call monolis_set_RHS_R(monoMAT, q(:,iter))
 
       monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
-      call monolis_solve_main(monoPRM, monoCOM, monoMAT, monoPREC)
+      call monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
       do i = 1, N*NDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
