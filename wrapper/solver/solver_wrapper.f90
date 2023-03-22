@@ -63,7 +63,7 @@ contains
       monoliS%PRM%Rarray(i) = Rarray(i + 1)
     enddo
 
-    call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_R(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
   end subroutine monolis_solve_R_c
 
   subroutine monolis_solve_C_c(N, NP, NZ, NDOF, A, X, B, index, item, &
@@ -121,6 +121,6 @@ contains
       monoliS%PRM%Rarray(i) = Rarray(i + 1)
     enddo
 
-    call monolis_solve_main(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_C(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
   end subroutine monolis_solve_C_c
 end module mod_monolis_solve_wrapper
