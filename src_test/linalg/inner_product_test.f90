@@ -30,7 +30,11 @@ contains
 
     call monolis_inner_product_I(monolis, ndof, iX, iY, isum)
 
-    call monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 10)
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 20)
+    else
+      call monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 10)
+    endif
 
     rX(1) = 1.0d0; rY(1) = 1.0d0
     rX(2) = 1.0d0; rY(2) = 2.0d0
@@ -39,7 +43,11 @@ contains
 
     call monolis_inner_product_R(monolis, ndof, rX, rY, rsum)
 
-    call monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 10.0d0)
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 20.0d0)
+    else
+      call monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 10.0d0)
+    endif
 
     cX(1) = (1.0d0, 0.0d0); cY(1) = (1.0d0, 1.0d0)
     cX(2) = (1.0d0, 0.0d0); cY(2) = (2.0d0, 2.0d0)
@@ -48,7 +56,11 @@ contains
 
     call monolis_inner_product_C(monolis, ndof, cX, cY, csum)
 
-    call monolis_test_check_eq_C1("monolis_linalg_test 3", csum, (10.0d0, 10.0d0))
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_C1("monolis_linalg_test 3", csum, (20.0d0, 20.0d0))
+    else
+      call monolis_test_check_eq_C1("monolis_linalg_test 3", csum, (10.0d0, 10.0d0))
+    endif
 
     n = 2
 
@@ -61,7 +73,11 @@ contains
 
     call monolis_inner_productV_I(monolis, n, ndof, iX, iY, isum)
 
-    call monolis_test_check_eq_I1("monolis_linalg_test 4", isum, 10)
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_I1("monolis_linalg_test 4", isum, 20)
+    else
+      call monolis_test_check_eq_I1("monolis_linalg_test 4", isum, 10)
+    endif
 
     rX(1) = 1.0d0; rY(1) = 1.0d0
     rX(2) = 1.0d0; rY(2) = 2.0d0
@@ -70,7 +86,11 @@ contains
 
     call monolis_inner_productV_R(monolis, n, ndof, rX, rY, rsum)
 
-    call monolis_test_check_eq_R1("monolis_linalg_test 5", rsum, 10.0d0)
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_R1("monolis_linalg_test 5", rsum, 20.0d0)
+    else
+      call monolis_test_check_eq_R1("monolis_linalg_test 5", rsum, 10.0d0)
+    endif
 
     cX(1) = (1.0d0, 0.0d0); cY(1) = (1.0d0, 1.0d0)
     cX(2) = (1.0d0, 0.0d0); cY(2) = (2.0d0, 2.0d0)
@@ -79,7 +99,11 @@ contains
 
     call monolis_inner_productV_C(monolis, n, ndof, cX, cY, csum)
 
-    call monolis_test_check_eq_C1("monolis_linalg_test 6", csum, (10.0d0, 10.0d0))
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_C1("monolis_linalg_test 6", csum, (20.0d0, 20.0d0))
+    else
+      call monolis_test_check_eq_C1("monolis_linalg_test 6", csum, (10.0d0, 10.0d0))
+    endif
 
     rX(1) = 1.0d0; rY(1) = 1.0d0
     rX(2) = 1.0d0; rY(2) = 2.0d0

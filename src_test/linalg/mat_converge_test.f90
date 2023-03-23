@@ -35,9 +35,15 @@ contains
 
     call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
 
-    call monolis_test_check_eq_I1("monolis_converge_test 1", monoPRM%Iarray(monolis_prm_I_cur_iter), 10)
-    call monolis_test_check_eq_R1("monolis_converge_test 2", monoPRM%Rarray(monolis_prm_R_cur_resid), 2.0d0)
-    call monolis_test_check_eq_L1("monolis_converge_test 3", is_converge, .false.)
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_I1("monolis_converge_test 1", monoPRM%Iarray(monolis_prm_I_cur_iter), 10)
+      call monolis_test_check_eq_R1("monolis_converge_test 2", monoPRM%Rarray(monolis_prm_R_cur_resid), dsqrt(8.0d0))
+      call monolis_test_check_eq_L1("monolis_converge_test 3", is_converge, .false.)
+    else
+      call monolis_test_check_eq_I1("monolis_converge_test 1", monoPRM%Iarray(monolis_prm_I_cur_iter), 10)
+      call monolis_test_check_eq_R1("monolis_converge_test 2", monoPRM%Rarray(monolis_prm_R_cur_resid), 2.0d0)
+      call monolis_test_check_eq_L1("monolis_converge_test 3", is_converge, .false.)
+      endif
   end subroutine monolis_converge_test
 
 end module mod_monolis_converge_test

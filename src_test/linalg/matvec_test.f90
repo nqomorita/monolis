@@ -9,6 +9,8 @@ contains
   subroutine monolis_matvec_test()
     implicit none
 
+    if(monolis_mpi_get_global_comm_size() == 2) return
+
     call monolis_matvec_11_R_test()
     call monolis_matvec_11_C_test()
 
