@@ -36,7 +36,11 @@ void monolis_inner_product_c_test(){
 
   monolis_inner_product_I(&mat, n_dof, ix, iy, &isum);
 
-  monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 10);
+  if(monolis_mpi_get_global_comm_size() == 2){
+    monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 20);
+  } else {
+    monolis_test_check_eq_I1("monolis_linalg_test 1", isum, 10);
+  }
 
   rx[0] = 1.0; ry[0] = 1.0;
   rx[1] = 1.0; ry[1] = 2.0;
@@ -45,7 +49,11 @@ void monolis_inner_product_c_test(){
 
   monolis_inner_product_R(&mat, n_dof, rx, ry, &rsum);
 
-  monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 10.0);
+  if(monolis_mpi_get_global_comm_size() == 2){
+    monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 20.0);
+  } else {
+    monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 10.0);
+  }
 
   cx[0] = 1.0 + 0.0*I; cy[0] = 1.0 + 1.0*I;
   cx[1] = 1.0 + 0.0*I; cy[1] = 2.0 + 2.0*I;
@@ -54,7 +62,11 @@ void monolis_inner_product_c_test(){
 
   monolis_inner_product_C(&mat, n_dof, cx, cy, &csum);
 
-  monolis_test_check_eq_R1("monolis_linalg_test 3", csum, 10.0 + 10.0*I);
+  if(monolis_mpi_get_global_comm_size() == 2){
+    monolis_test_check_eq_R1("monolis_linalg_test 3", csum, 20.0 + 20.0*I);
+  } else {
+    monolis_test_check_eq_R1("monolis_linalg_test 3", csum, 10.0 + 10.0*I);
+  }
 
   monolis_finalize(&mat);
 }

@@ -486,6 +486,8 @@ void monolis_matvec_c_test_C33(){
 }
 
 void monolis_matvec_c_test(){
+  if(monolis_mpi_get_global_comm_size() == 1) return
+
   monolis_matvec_c_test_R11();
   monolis_matvec_c_test_R22();
   monolis_matvec_c_test_R33();

@@ -37,9 +37,10 @@ int main()
 
   monolis_spmat_handler_util_c_test();
 
-  monolis_solve_c_test();
-
-  monolis_eigen_solve_c_test();
+  if(monolis_mpi_get_global_comm_size() == 1){
+    monolis_solve_c_test();
+    monolis_eigen_solve_c_test();
+  }
 
   monolis_mpi_finalize();
 }
