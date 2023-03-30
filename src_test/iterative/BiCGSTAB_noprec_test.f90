@@ -30,7 +30,7 @@ contains
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 
-    call monolis_initialize(mat, "./")
+    call monolis_initialize(mat)
 
     nnode = 10
 

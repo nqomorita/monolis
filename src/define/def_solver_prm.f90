@@ -141,6 +141,12 @@ module mod_monolis_def_solver
     integer(kint) :: Iarray(monolis_prm_Iarray_size) = 0
     !> 実数パラメータ
     real(kdouble) :: Rarray(monolis_prm_Rarray_size) = 0.0d0
+    !> 実数パラメータ
+    character(monolis_charlen) :: com_top_dir_name
+    !> 実数パラメータ
+    character(monolis_charlen) :: com_part_dir_name
+    !> 実数パラメータ
+    character(monolis_charlen) :: com_file_name
   end type monolis_prm
 
 contains
@@ -150,6 +156,10 @@ contains
     implicit none
     !> パラメータ 構造体
     type(monolis_prm) :: monoPRM
+
+    monoPRM%com_top_dir_name = "./"
+    monoPRM%com_part_dir_name = "./parted.0"
+    monoPRM%com_file_name = "./node.dat"
 
     monoPRM%Iarray(monolis_prm_I_method) = 1
     monoPRM%Iarray(monolis_prm_I_precond) = 1

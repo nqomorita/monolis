@@ -28,7 +28,7 @@ contains
 
     call monolis_std_log_string("monolis_eigen_solver_test")
 
-    call monolis_initialize(mat, "./")
+    call monolis_initialize(mat)
 
     nnode = 6
 

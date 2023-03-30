@@ -46,6 +46,8 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
+    call monolis_initialize(monolis)
+
     call monolis_get_nonzero_pattern_by_simple_mesh_R(monolis, n_node, n_base, ndof, n_elem, elem)
 
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 1", monolis%MAT%N, 4)
@@ -124,6 +126,8 @@ contains
     elem(1,1) = 1; elem(2,1) = 2
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
+
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(monolis, n_node, n_base, ndof, n_elem, elem)
 
@@ -206,6 +210,8 @@ contains
     n_dof_list(2) = 2
     n_dof_list(3) = 1
     n_dof_list(4) = 2
+
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)
@@ -325,6 +331,8 @@ contains
     n_dof_list(2) = 2
     n_dof_list(3) = 1
     n_dof_list(4) = 2
+
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)

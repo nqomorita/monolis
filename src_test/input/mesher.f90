@@ -10,6 +10,8 @@ program main
 
   call monolis_global_initialize()
 
+  call monolis_std_log_string("monolis matrix to mesh")
+
   call monolis_get_arg_input_i_tag(filename, is_get)
 
   call monolis_input_mtx_R(filename, n_node, n_elem, elem, coef)

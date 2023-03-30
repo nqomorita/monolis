@@ -44,6 +44,8 @@ contains
     item(4) = 2
     item(5) = 4
     item(6) = 3
+write(*,*)"monolis_initialize"
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main(monolis%MAT, n_node, ndof, index, item)
 
@@ -126,6 +128,8 @@ contains
     item(4) = 2
     item(5) = 4
     item(6) = 3
+
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
       & (monolis%MAT, n_node, n_dof_list, index, item)
@@ -259,6 +263,8 @@ contains
 
     monolis%MAT%CSR%index(6) = 10
 
+    call monolis_initialize(monolis)
+
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
 
     call monolis_test_check_eq_I1("monolis_alloc_nonzero_pattern_mat_val_R_test 1", size(monolis%MAT%R%A), 40)
@@ -279,6 +285,8 @@ contains
     call monolis_palloc_I_1d(monolis%MAT%CSR%index, 6)
 
     monolis%MAT%CSR%index(6) = 10
+
+    call monolis_initialize(monolis)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
 
