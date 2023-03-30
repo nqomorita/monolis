@@ -255,6 +255,8 @@ write(*,*)"monolis_initialize"
 
     call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_R_test")
 
+    call monolis_initialize(monolis)
+
     monolis%MAT%NDOF = 2
 
     monolis%MAT%NP = 5
@@ -262,8 +264,6 @@ write(*,*)"monolis_initialize"
     call monolis_palloc_I_1d(monolis%MAT%CSR%index, 6)
 
     monolis%MAT%CSR%index(6) = 10
-
-    call monolis_initialize(monolis)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
 
@@ -278,6 +278,8 @@ write(*,*)"monolis_initialize"
 
     call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_C_test")
 
+    call monolis_initialize(monolis)
+
     monolis%MAT%NDOF = 2
 
     monolis%MAT%NP = 5
@@ -285,8 +287,6 @@ write(*,*)"monolis_initialize"
     call monolis_palloc_I_1d(monolis%MAT%CSR%index, 6)
 
     monolis%MAT%CSR%index(6) = 10
-
-    call monolis_initialize(monolis)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
 

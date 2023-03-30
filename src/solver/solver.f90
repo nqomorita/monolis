@@ -32,6 +32,8 @@ contains
 
     call monolis_set_initial_solution_R(monolis%MAT, X)
 
+    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+
     call monolis_solve_main_R(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_R(monolis%MAT, X)
@@ -50,6 +52,8 @@ contains
     call monolis_set_RHS_C(monolis%MAT, B)
 
     call monolis_set_initial_solution_C(monolis%MAT, X)
+
+    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
 
     call monolis_solve_main_C(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
 

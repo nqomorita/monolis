@@ -37,20 +37,15 @@ contains
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
-write(*,*)"monolis_prm_initialize"
-call flush()
+
     call monolis_prm_initialize(monolis%PRM)
-write(*,*)"monolis_com_initialize"
-call flush()
+
     call monolis_com_initialize(monolis%COM)
-write(*,*)"monolis_mat_initialize"
-call flush()
+
     call monolis_mat_initialize(monolis%MAT)
-write(*,*)"monolis_mat_initialize"
-call flush()
+
     call monolis_mat_initialize(monolis%PREC)
-write(*,*)"monolis_com_input_comm_table"
-call flush()
+
     call monolis_com_input_comm_table(monolis%COM, &
       & monolis%PRM%com_top_dir_name, monolis%PRM%com_part_dir_name, monolis%PRM%com_file_name)
   end subroutine monolis_initialize

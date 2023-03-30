@@ -57,7 +57,7 @@ AR   = - ar ruv
 
 ##> **********
 ##> target (1)
-LIB_TARGET = $(LIB_DIR)/$(LIBRARY_SOLVER)
+LIB_TARGET = $(LIB_DIR)/$(LIBRARY)
 
 ##> source file define
 SRC_DEFINE = \

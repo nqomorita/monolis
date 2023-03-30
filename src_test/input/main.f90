@@ -77,7 +77,7 @@ program main
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-8)
     call monolis_show_timelog(mat, .true.)
-    call monolis_show_iterlog(mat, .false.)
+    call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
     a = 0.0d0
