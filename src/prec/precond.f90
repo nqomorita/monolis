@@ -253,7 +253,7 @@ contains
     !  call monolis_precond_ilu_clear(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_JACOBI)then
     !  call monolis_precond_Jacobi_clear(monoPRM, monoCOM, monoMAT)
-    !elseif(precond == monolis_prec_SOR)then
+    elseif(precond == monolis_prec_SOR)then
       call monolis_precond_SOR_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     !elseif(precond == monolis_prec_MUMPS)then
     !  call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
@@ -293,7 +293,7 @@ contains
     !  call monolis_precond_ilu_clear(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_JACOBI)then
     !  call monolis_precond_Jacobi_clear(monoPRM, monoCOM, monoMAT)
-    !elseif(precond == monolis_prec_SOR)then
+    elseif(precond == monolis_prec_SOR)then
       call monolis_precond_SOR_clear_C(monoPRM, monoCOM, monoMAT, monoPREC)
     !elseif(precond == monolis_prec_MUMPS)then
     !  call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)

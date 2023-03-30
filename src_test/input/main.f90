@@ -2,7 +2,7 @@ program main
   use mod_monolis
   use mod_gedatsu
   implicit none
-  integer(kint) :: iter
+  integer(kint) :: iter, prec
 
   call monolis_global_initialize()
 
@@ -24,7 +24,7 @@ program main
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:)
     real(kdouble), allocatable :: coef(:), node(:,:)
-    real(kdouble), allocatable :: a(:), b(:)
+    real(kdouble), allocatable :: a(:), b(:), c(:)
 
     fname = monolis_get_global_input_file_name("parted.0", "node.dat")
     call monolis_input_node(fname, n_node, node)
@@ -67,26 +67,33 @@ program main
 
     call monolis_alloc_R_1d(a, n_node)
     call monolis_alloc_R_1d(b, n_node)
+    call monolis_alloc_R_1d(c, n_node)
 
     a = 1.0d0
 
-    call monolis_matvec_product_R(mat, a, b)
+    call monolis_matvec_product_R(mat, a, c)
 
-    call monolis_set_method(mat, monolis_iter_CG)
-    call monolis_set_precond(mat, monolis_prec_NONE)
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-8)
     call monolis_show_timelog(mat, .true.)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    a = 0.0d0
+    do iter = 1, 8
+    do prec = 0, 2
+      a = 0.0d0
+      b = c
 
-    call monolis_solve_R(mat, b, a)
+      call monolis_set_method(mat, iter)
+      call monolis_set_precond(mat, prec)
 
-    b = 1.0d0
+      call monolis_solve_R(mat, b, a)
 
-    call monolis_test_check_eq_R("monolis_solver_parallel_test", a, b)
+      b = 1.0d0
+
+      call monolis_test_check_eq_R("monolis_solver_parallel_test", a, b)
+    enddo
+    enddo
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_parallel_test

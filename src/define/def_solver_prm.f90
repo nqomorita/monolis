@@ -20,11 +20,11 @@ module mod_monolis_def_solver
   !> パラメータ：Communication Avoiding BiCGSTAB 法（前処理なし）
   !integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
-  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 9
+  integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 8
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG       = 11
+  integer(kint), parameter :: monolis_iter_COCG       = 9
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -35,21 +35,21 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック Jacobi 前処理
   !integer(kint), parameter :: monolis_prec_JACOBI = 3
   !> パラメータ：ブロック SOR 前処理
-  integer(kint), parameter :: monolis_prec_SOR    = 4
+  integer(kint), parameter :: monolis_prec_SOR    = 2
   !> パラメータ：SPIKE 前処理
   !integer(kint), parameter :: monolis_prec_SPIKE  = 5
   !> パラメータ：LU 分解
   !integer(kint), parameter :: monolis_prec_LU     = 6
   !> パラメータ：LU 分解（MUMPS）
-  integer(kint), parameter :: monolis_prec_MUMPS  = 7
+  integer(kint), parameter :: monolis_prec_MUMPS  = 3
   !> パラメータ：ROM 前処理
   !integer(kint), parameter :: monolis_prec_ROM    = 8
   !> パラメータ：LU 分解（MF 法）
   !integer(kint), parameter :: monolis_prec_MF     = 9
   !> パラメータ：ブロック LU 分解（MUMPS）
-  integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 10
+  integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(11) :: monolis_str_iter = (/&
+  character*24, dimension(9) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -57,22 +57,22 @@ module mod_monolis_def_solver
   & "BiCGSTAB           ", &
   & "PipeBiCGSTAB       ", &
   & "BiCGSTAB_noprec    ", &
-  & "CABiCGSTAB_noprec  ", &
+  !& "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
-  & "GMRES              ", &
+  !& "GMRES              ", &
   & "COCG               "/)
 
-  character*24, dimension(0:10)  :: monolis_str_prec = (/&
+  character*24, dimension(0:4)  :: monolis_str_prec = (/&
   & "None  ", &
   & "Diag  ", &
-  & "ILU   ", &
-  & "Jacobi", &
+!  & "ILU   ", &
+!  & "Jacobi", &
   & "SOR   ", &
-  & "SPIKE ", &
-  & "LU    ", &
+!  & "SPIKE ", &
+!  & "LU    ", &
   & "MUMPS ", &
-  & "ROM   ", &
-  & "MF    ", &
+!  & "ROM   ", &
+!  & "MF    ", &
   & "MUMPSL"/)
 
   !> 整数パラメータのサイズ
