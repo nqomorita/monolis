@@ -24,6 +24,7 @@ WRAP_DIR= ./wrapper
 TST_WRAP_DIR = ./wrapper_test
 DRV_DIR = ./driver
 LIBRARY = libmonolis.a
+LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp $(FLAG_DEBUG)
 
 ##> option setting
@@ -56,7 +57,7 @@ AR   = - ar ruv
 
 ##> **********
 ##> target (1)
-LIB_TARGET = $(LIB_DIR)/$(LIBRARY)
+LIB_TARGET = $(LIB_DIR)/$(LIBRARY_SOLVER)
 
 ##> source file define
 SRC_DEFINE = \
@@ -236,12 +237,16 @@ TST_C_OBJS    = $(subst $(TST_WRAP_DIR), $(OBJ_DIR), $(TST_C_SOURCES:.c=.o))
 all: \
 	cp_header \
 	$(LIB_TARGET) \
+	cp_header_lib \
+	ar_all_lib \
 	$(TEST_TARGET) \
 	$(TEST_C_TARGET)
 
 lib: \
 	cp_header \
-	$(LIB_TARGET)
+	$(LIB_TARGET) \
+	cp_header_lib \
+	ar_all_lib
 
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
@@ -281,6 +286,10 @@ cp_header:
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/
+
+cp_header_lib:
+
+ar_all_lib:
 
 clean:
 	$(RM) \
