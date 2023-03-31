@@ -21,14 +21,15 @@ program main
     type(monolis_structure) :: mat !> 疎行列変数
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
-    integer(kint) :: i
+    integer(kint) :: i, j
     integer(kint) :: n_get_eigen
     real(kdouble) :: val
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:)
     real(kdouble), allocatable :: coef(:), node(:,:)
     real(kdouble), allocatable :: a(:), b(:), c(:)
-    real(kdouble), allocatable :: eig_val(:), eig_mode(:,:)
+    real(kdouble), allocatable :: eig_val1(:), eig_mode1(:,:)
+    real(kdouble), allocatable :: eig_val2(:), eig_mode2(:,:)
     logical, allocatable :: is_bc(:)
 
     call monolis_std_log_string("monolis_solver_parallel_test linear")
@@ -81,7 +82,7 @@ program main
     call monolis_matvec_product_R(mat, a, c)
 
     call monolis_set_maxiter(mat, 1000)
-    call monolis_set_tolerance(mat, 1.0d-8)
+    call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog(mat, .true.)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
@@ -100,6 +101,7 @@ program main
 
       b = 1.0d0
 
+      write(*,*)"iter", iter, ", prec", prec
       call monolis_test_check_eq_R("monolis_solver_parallel_R_test", a, b)
 
       call monolis_mpi_global_barrier();
@@ -108,19 +110,36 @@ program main
 
     call monolis_std_log_string("monolis_solver_parallel_test eigen")
 
-    n_get_eigen = 5
-    call monolis_alloc_R_1d(eig_val, n_get_eigen)
-    call monolis_alloc_R_2d(eig_mode, n_node, n_get_eigen)
+    n_get_eigen = 12
+
+    call monolis_alloc_R_1d(eig_val1, n_get_eigen)
+    call monolis_alloc_R_1d(eig_val2, n_get_eigen)
+    call monolis_alloc_R_2d(eig_mode1, n_node, n_get_eigen)
+    call monolis_alloc_R_2d(eig_mode2, n_node, n_get_eigen)
     call monolis_alloc_L_1d(is_bc, n_node)
 
+    call monolis_set_method(mat, monolis_iter_CG)
+    call monolis_set_precond(mat, monolis_prec_SOR)
+    call monolis_show_timelog(mat, .false.)
+    call monolis_show_iterlog(mat, .false.)
+    call monolis_show_summary(mat, .false.)
+
     call monolis_eigen_standard_lanczos_R &
-      & (mat, n_get_eigen, 1.0d-6, 100, eig_val, eig_mode, is_bc)
+      & (mat, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
 
-    write(*,*)eig_val
-    write(*,*)eig_mode
+    call monolis_eigen_inverted_standard_lanczos_R &
+      & (mat, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
 
-    !call monolis_eigen_inverted_standard_lanczos_R &
-    !  & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
+    do i = 1, n_get_eigen
+      j = n_get_eigen - i + 1
+      call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
+
+write(*,*)eig_val1(i)
+write(*,*)eig_val2(j)
+write(*,*)dabs(eig_mode1(:,i))
+write(*,*)dabs(eig_mode2(:,j))
+      call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
+    enddo
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_parallel_R_test
@@ -187,7 +206,7 @@ program main
     call monolis_matvec_product_C(mat, a, c)
 
     call monolis_set_maxiter(mat, 1000)
-    call monolis_set_tolerance(mat, 1.0d-8)
+    call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog(mat, .true.)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)

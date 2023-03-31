@@ -5,7 +5,7 @@ echo "mesher"
 mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o mesher mesher.f90 \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 
 ./mesher -i mtx.dat
 
@@ -18,6 +18,8 @@ mpicc -I../../include \
 
 mpif90 -I../../include \
 -o solver main.o \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
+
+./solver
 
 mpirun -np 2 solver

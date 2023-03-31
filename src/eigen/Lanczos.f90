@@ -45,8 +45,6 @@ contains
 
     call monolis_std_debug_log_header("monolis_eigen_inverted_standard_lanczos_R_main")
 
-    !call monolis_set_initial_comm(monoCOM, monoMAT)
-
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
@@ -111,7 +109,7 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-      if(monolis_mpi_get_global_comm_size() == 0)then
+      if(monolis_mpi_get_local_my_rank(monoCOM%comm) == 0)then
         write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
       endif
 
@@ -156,8 +154,6 @@ contains
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
     logical :: is_converge
 
-    !call monolis_set_initial_comm(monoCOM, monoMAT)
-
     call monolis_std_debug_log_header("monolis_eigen_standard_lanczos_R_main")
 
     N     = monoMAT%N
@@ -192,6 +188,8 @@ contains
     do iter = 1, maxiter
       call monolis_matvec_product_main_R(monoCOM, monoMAT, q(:,iter), monoMAT%R%X, tspmv, tcomm_spmv)
 
+      call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, monoMAT%R%X, tcomm_spmv)
+
       do i = 1, N*NDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
@@ -225,7 +223,7 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-      if(monolis_mpi_get_global_comm_size() == 0)then
+      if(monolis_mpi_get_local_my_rank(monoCOM%comm) == 0)then
         write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
       endif
 
