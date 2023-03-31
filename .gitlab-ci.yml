@@ -15,6 +15,7 @@ build_monolis:
     paths:
       - bin
       - include
+      - lib
       - src_test
       - wrapper_test
 

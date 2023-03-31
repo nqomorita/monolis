@@ -9,6 +9,7 @@ CFLAGS = -fPIC -O2
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+#USE_LIB = -L./lib -lmonolis -lmetis -llapack -lblas
 USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
@@ -292,7 +293,7 @@ cp_header_lib:
 	$(CP) ./submodule/gedatsu/lib/libgedatsu.a ./lib/
 
 $(LIBALL_TARGET):
-	$(AR) -rcT $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
+	ar -rc $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
 
 clean:
 	$(RM) \
