@@ -109,9 +109,9 @@ static const int MONOLIS_R_TIME_COMM_DOTP = 8;
 static const int MONOLIS_R_TIME_COMM_SPMV = 9;
 
 typedef struct {
-  char   com_top_dir_name[MONOLIS_CHARLEN];
-  char   com_part_dir_name[MONOLIS_CHARLEN];
-  char   com_file_name[MONOLIS_CHARLEN];
+  char   com_top_dir_name[1024];
+  char   com_part_dir_name[1024];
+  char   com_file_name[1024];
   int    Iarray[100];
   double Rarray[100];
 } MONOLIS_PRM;

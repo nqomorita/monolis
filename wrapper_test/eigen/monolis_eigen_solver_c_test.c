@@ -26,7 +26,7 @@ void monolis_eigen_solve_c_test(){
   n_node = 5;
   n_base = 2;
   n_dof  = 1;
-  n_elem = 5;
+  n_elem = 4;
 
   n_get_eigen = 5;
 
@@ -36,9 +36,8 @@ void monolis_eigen_solve_c_test(){
   elem[1][0] = 1; elem[1][1] = 2;
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
-  elem[4][0] = 4; elem[4][1] = 5;
 
-  monolis_initialize(&mat);
+  monolis_initialize_entire(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 
