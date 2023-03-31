@@ -72,6 +72,82 @@ contains
     monolis%PRM%com_file_name = trim(param)
   end subroutine monolis_set_input_file_name
 
+  !> @ingroup mpi
+  !> MPI のグローバルコミュニケータを取得する関数
+  function monolis_get_global_comm()
+    implicit none
+    integer(kint) :: monolis_get_global_comm
+    monolis_get_global_comm = monolis_mpi_get_global_comm()
+  end function monolis_get_global_comm
+
+  !> @ingroup mpi
+  !> MPI のグローバルランクサイズを取得する関数
+  function monolis_get_global_comm_size()
+    implicit none
+    integer(kint) :: monolis_get_global_comm_size
+    monolis_get_global_comm_size = monolis_mpi_get_global_comm_size()
+  end function monolis_get_global_comm_size
+
+  !> @ingroup mpi
+  !> MPI のグローバルランクを取得する関数
+  function monolis_get_global_my_rank()
+    implicit none
+    integer(kint) :: monolis_get_global_my_rank
+    monolis_get_global_my_rank = monolis_mpi_get_global_my_rank()
+  end function monolis_get_global_my_rank
+
+  !> @ingroup mpi
+  !> MPI のローカルコミュニケータのランクサイズを取得する関数
+  function monolis_get_local_comm_size(monolis)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [out] コミュニケータサイズ
+    integer(kint) :: monolis_get_local_comm_size
+    integer(kint) :: ierr
+    monolis_get_local_comm_size = monolis_mpi_get_local_comm_size(monolis%COM%comm)
+  end function monolis_get_local_comm_size
+
+  !> @ingroup mpi
+  !> MPI のローカルコミュニケータのランクサイズを取得する関数
+  function monolis_get_local_my_rank(monolis)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [out] MPI ランク番号
+    integer(kint) :: monolis_get_local_my_rank
+    monolis_get_local_my_rank = monolis_mpi_get_local_my_rank(monolis%COM%comm)
+  end function monolis_get_local_my_rank
+
+  !> @ingroup mpi
+  !> MPI バリア関数（グローバルコミュニケータ）
+  subroutine monolis_global_barrier()
+    implicit none
+    call monolis_mpi_global_barrier()
+  end subroutine monolis_global_barrier
+
+  !> @ingroup mpi
+  !> MPI バリア関数（ローカルコミュニケータ）
+  subroutine monolis_local_barrier(monolis)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    call monolis_mpi_local_barrier(monolis%COM%comm)
+  end subroutine monolis_local_barrier
+
+  !> @ingroup mpi
+  !> MPI コミュニケータの分割
+  subroutine monolis_split_communicator(monolis, group_id, comm_split)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [in] コミュニケータのグループ id
+    integer(kint) :: group_id
+    !> [out] 分割後の MPI コミュニケータ
+    integer(kint) :: comm_split
+    call monolis_mpi_split_comm(monolis%COM%comm, group_id, comm_split)
+  end subroutine monolis_split_communicator
+
   !> @ingroup com
   !> monolis 構造体に MPI コミュニケータを設定
   subroutine monolis_set_communicator(monolis, comm)
@@ -400,3 +476,5 @@ contains
     param = monolis%PRM%Rarray(monolis_R_time_comm_spmv)
   end subroutine monolis_get_time_comm_spmv
 end module mod_monolis_def_solver_util
+
+
