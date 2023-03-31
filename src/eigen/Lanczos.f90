@@ -234,9 +234,7 @@ contains
           do j = 1, NP*NDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
-          write(*,*)"iter", i
           call monolis_mpi_update_R(monoCOM, NDOF, vec(:,i), tmp)
-          write(*,*)"iter end", i
         enddo
         exit
       endif
