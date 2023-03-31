@@ -10,7 +10,10 @@ mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule
 ../../submodule/gedatsu/bin/gedatsu_simple_mesh_partitioner -n 2
 
 mpicc -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
--o solver main.c \
+-c -o main.o main.c
+
+mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
+-o solver main.o \
 -L../../lib -lmonolis -L../../submodule/gedatsu/lib -lgedatsu -L../../submodule/monolis_utils/lib -lmonolis_utils -lmetis
 
 mpirun -np 2 solver
