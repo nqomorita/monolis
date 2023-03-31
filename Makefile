@@ -9,12 +9,7 @@ CFLAGS = -fPIC -O2
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = \
--L./lib -lmonolis \
--L./submodule/gedatsu/lib -lgedatsu \
--L./submodule/monolis_utils/lib -lmonolis_utils \
--L./lib -lmetis \
--llapack -lblas
+USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -57,7 +52,8 @@ AR   = - ar ruv
 
 ##> **********
 ##> target (1)
-LIB_TARGET = $(LIB_DIR)/$(LIBRARY)
+LIB_TARGET = $(LIB_DIR)/$(LIBRARY_SOLVER)
+LIBALL_TARGET = $(LIB_DIR)/$(LIBRARY)
 
 ##> source file define
 SRC_DEFINE = \
@@ -236,17 +232,17 @@ TST_C_OBJS    = $(subst $(TST_WRAP_DIR), $(OBJ_DIR), $(TST_C_SOURCES:.c=.o))
 ##> target
 all: \
 	cp_header \
-	$(LIB_TARGET) \
 	cp_header_lib \
-	ar_all_lib \
+	$(LIB_TARGET) \
+	$(LIBALL_TARGET) \
 	$(TEST_TARGET) \
 	$(TEST_C_TARGET)
 
 lib: \
 	cp_header \
-	$(LIB_TARGET) \
 	cp_header_lib \
-	ar_all_lib
+	$(LIB_TARGET) \
+	$(LIBALL_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
@@ -288,8 +284,15 @@ cp_header:
 	$(CP) ./wrapper/monolis.h ./include/
 
 cp_header_lib:
+	$(CP) ./submodule/monolis_utils/bin/* ./bin/
+	$(CP) ./submodule/monolis_utils/include/* ./include/
+	$(CP) ./submodule/monolis_utils/lib/libmonolis_utils.a ./lib/
+	$(CP) ./submodule/gedatsu/bin/* ./bin/
+	$(CP) ./submodule/gedatsu/include/* ./include/
+	$(CP) ./submodule/gedatsu/lib/libgedatsu.a ./lib/
 
-ar_all_lib:
+$(LIBALL_TARGET):
+	$(AR) -rcT $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
 
 clean:
 	$(RM) \
@@ -297,6 +300,7 @@ clean:
 	$(TST_OBJS) \
 	$(TST_C_OBJS) \
 	$(LIB_TARGET) \
+	$(LIBALL_TARGET) \
 	$(TEST_TARGET) \
 	$(TEST_C_TARGET) \
 	./include/*.mod \

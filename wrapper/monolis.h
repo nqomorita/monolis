@@ -6,6 +6,9 @@
 extern "C" {
 #endif
 
+#include "monolis_utils.h"
+#include "gedatsu.h"
+
 #include "monolis_matvec_c.h"
 #include "monolis_inner_product_c.h"
 #include "monolis_def_struc_c.h"
@@ -17,7 +20,6 @@ extern "C" {
 #include "monolis_spmat_nzpattern_util_c.h"
 #include "monolis_spmat_handler_util_c.h"
 #include "monolis_spmat_handler_c.h"
-#include "monolis.h"
 
 #ifdef __cplusplus
 }

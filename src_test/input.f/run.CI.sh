@@ -3,7 +3,7 @@
 mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o mesher mesher.f90 \
--L../../lib -lmonolis -L../../submodule/gedatsu/lib -lgedatsu -L../../submodule/monolis_utils/lib -lmonolis_utils -lmetis
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
 
 ./mesher -i mtx.dat
 
@@ -12,6 +12,6 @@ mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule
 mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o solver main.f90 \
--L../../lib -lmonolis -L../../submodule/gedatsu/lib -lgedatsu -L../../submodule/monolis_utils/lib -lmonolis_utils -lmetis
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
 
 mpirun --oversubscribe --allow-run-as-root -np 2 solver
