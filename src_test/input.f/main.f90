@@ -91,9 +91,13 @@ program main
 
       call monolis_solve_R(mat, b, a)
 
+      call monolis_mpi_global_barrier();
+
       b = 1.0d0
 
       call monolis_test_check_eq_R("monolis_solver_parallel_R_test", a, b)
+
+      call monolis_mpi_global_barrier();
     enddo
     enddo
 
@@ -177,9 +181,13 @@ program main
 
       call monolis_solve_C(mat, b, a)
 
+      call monolis_mpi_global_barrier();
+
       b = (1.0d0, 1.0d0)
 
       call monolis_test_check_eq_C("monolis_solver_parallel_C_test", a, b)
+
+      call monolis_mpi_global_barrier();
     enddo
     enddo
 

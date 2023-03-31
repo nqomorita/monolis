@@ -49,8 +49,6 @@ void monolis_input_mesh_elem_c(
 
   for(i = 0; i < *nelem; i++){
     fscanf(fp, "%d %d", &(*elem)[i][0], &(*elem)[i][1]);
-    //(*elem)[i][0] -= 1;
-    //(*elem)[i][1] -= 1;
   }
   fclose(fp);
   return;
@@ -77,7 +75,6 @@ void monolis_input_id_c(
 
   for(i = 0; i < nid; i++){
     fscanf(fp, "%d", &(*global_eid)[i]);
-    //(*global_eid)[i] -= 1;
   }
   fclose(fp);
   return;
@@ -138,6 +135,7 @@ void monolis_solver_parallel_R_test(){
       global_eid[i] = i;
     }
   }
+
   monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, 1, n_elem, elem);
@@ -189,9 +187,107 @@ void monolis_solver_parallel_R_test(){
 
       monolis_solve_R(&mat, b, a);
 
+      monolis_mpi_global_barrier();
+
       for(i = 0; i < n_node; i++){
         monolis_test_check_eq_R1("monolis_solver_parallel_R_test Clang", 1.0, a[i]);
       }
+
+      monolis_mpi_global_barrier();
+    }
+  }
+
+  monolis_finalize(&mat);
+}
+
+void monolis_solver_parallel_C_test(){
+  MONOLIS mat;
+  const char* fname;
+  int n_node, n_elem, n_base, n_id, n_coef;
+  int eid[2], iter, prec, i, j;
+  int* global_eid;
+  int** elem;
+  double complex val;
+  double* coef;
+  double complex* a;
+  double complex* b;
+  double complex* c;
+  double** node;
+
+  fname = monolis_get_global_input_file_name("parted.0", "node.dat");
+  monolis_input_mesh_node_c(fname, &n_node, &node);
+
+  fname = monolis_get_global_input_file_name("parted.0", "elem.dat");
+  monolis_input_mesh_elem_c(fname, &n_elem, &n_base, &elem);
+
+  if(monolis_mpi_get_global_comm_size() > 1){
+    fname = monolis_get_global_input_file_name("parted.0", "elem.dat.id");
+    monolis_input_id_c(fname, &global_eid);
+  } else {
+    global_eid = monolis_alloc_I_1d(global_eid, n_elem);
+    for(i = 0; i < n_elem; i++){
+      global_eid[i] = i;
+    }
+  }
+
+  monolis_initialize(&mat);
+
+  monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, 1, n_elem, elem);
+
+  fname = "coef.dat";
+  input_coef(fname, &n_coef, &coef);
+
+  for(i = 0; i < n_elem; i++){
+    for(j = 0; j < 2; j++){
+      eid[j] = elem[i][j];
+    }
+
+    val = coef[global_eid[i]] + coef[global_eid[i]]*I;
+
+    if(eid[0] == eid[1]){
+      monolis_add_scalar_to_sparse_matrix_C(&mat, eid[0], eid[1], 0, 0, val);
+    } else{
+      monolis_add_scalar_to_sparse_matrix_C(&mat, eid[0], eid[1], 0, 0, val);
+      monolis_add_scalar_to_sparse_matrix_C(&mat, eid[1], eid[0], 0, 0, val);
+    }
+  }
+
+  a = monolis_alloc_C_1d(a, n_node);
+  b = monolis_alloc_C_1d(b, n_node);
+  c = monolis_alloc_C_1d(c, n_node);
+
+  for(i = 0; i < n_node; i++){
+    a[i] = 1.0 + 1.0*I;
+  }
+
+  monolis_matvec_product_C(&mat, a, c);
+
+  monolis_set_maxiter(&mat, 1000);
+  monolis_set_tolerance(&mat, 1.0e-8);
+  monolis_show_timelog(&mat, true);
+  monolis_show_iterlog(&mat, true);
+  monolis_show_summary(&mat, true);
+
+  for (iter = 9; iter < 10; ++iter) {
+    for (prec = 0; prec < 3; ++prec) {
+
+      for(i = 0; i < n_node; i++){
+        a[i] = 0.0 + 0.0*I;
+        b[i] = c[i];
+      }
+
+      monolis_set_method(&mat, iter);
+      monolis_set_precond(&mat, prec);
+
+      monolis_solve_C(&mat, b, a);
+
+      monolis_mpi_global_barrier();
+
+      for(i = 0; i < n_node; i++){
+        monolis_test_check_eq_C1("monolis_solver_parallel_R_test Clang", 1.0 + 1.0*I, a[i]);
+      }
+
+      monolis_mpi_global_barrier();
     }
   }
 
@@ -204,7 +300,7 @@ int main()
 
   monolis_solver_parallel_R_test();
 
-  //monolis_solver_parallel_C_test()
+  monolis_solver_parallel_C_test();
 
   monolis_global_finalize();
 

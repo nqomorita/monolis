@@ -4,6 +4,56 @@
 #include "monolis_def_solver_prm_util_c.h"
 #include "monolis_def_solver_prm_c.h"
 
+
+void monolis_set_input_top_directory_name(
+  MONOLIS*    mat,
+  const char* param)
+{
+  strcpy(mat->prm.com_top_dir_name, param);
+}
+
+void monolis_set_input_part_directory_name(
+  MONOLIS*    mat,
+  const char* param)
+{
+  strcpy(mat->prm.com_part_dir_name, param);
+}
+
+void monolis_set_input_file_name(
+  MONOLIS*    mat,
+  const char* param)
+{
+  strcpy(mat->prm.com_file_name, param);
+}
+
+void monolis_set_communicator(
+  MONOLIS* mat,
+  int      param)
+{
+  monolis_com_set_communicator(&mat->com, param);
+}
+
+void monolis_set_my_rank(
+  MONOLIS* mat,
+  int      param)
+{
+  monolis_com_set_my_rank(&mat->com, param);
+}
+
+void monolis_set_comm_size(
+  MONOLIS* mat,
+  int      param)
+{
+  monolis_com_set_comm_size(&mat->com, param);
+}
+
+void monolis_set_n_internal_vertex(
+  MONOLIS* mat,
+  int      param)
+{
+  monolis_com_set_n_internal_vertex(&mat->com, param);
+}
+
 void monolis_set_method(
   MONOLIS* mat,
   int      param)

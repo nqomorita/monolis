@@ -22,6 +22,26 @@ void monolis_com_input_comm_table(
     mat->com.recv_item = monolis_alloc_I_1d(mat->com.recv_item, 1);
     return;
   }
+
+  const char* input_file_name;
+  char* header;
+  char* body;
+
+  header = (char*)malloc(sizeof(char)*MONOLIS_CHARLEN);
+  snprintf(header, MONOLIS_CHARLEN, "%s/%s", top_dir_name, part_dir_name);
+
+  body = (char*)malloc(sizeof(char)*MONOLIS_CHARLEN);
+  snprintf(body, MONOLIS_CHARLEN, "%s.recv", file_name);
+  input_file_name = monolis_get_output_file_name_by_domain_id(header, body, mat->com.my_rank);
+  monolis_input_recv_com_table(input_file_name, &mat->com);
+
+  snprintf(body, MONOLIS_CHARLEN, "%s.send", file_name);
+  input_file_name = monolis_get_output_file_name_by_domain_id(header, body, mat->com.my_rank);
+  monolis_input_send_com_table(input_file_name, &mat->com);
+
+  snprintf(body, MONOLIS_CHARLEN, "%s.n_internal", file_name);
+  input_file_name = monolis_get_output_file_name_by_domain_id(header, body, mat->com.my_rank);
+  monolis_input_internal_vertex_number(input_file_name, &mat->com.n_internal_vertex);
 }
 
 void monolis_global_initialize()

@@ -9,6 +9,34 @@ extern "C" {
 #include <stdbool.h>
 #include "monolis_def_struc_c.h"
 
+void monolis_set_input_top_directory_name(
+  MONOLIS*    mat,
+  const char* param);
+
+void monolis_set_input_part_directory_name(
+  MONOLIS*    mat,
+  const char* param);
+
+void monolis_set_input_file_name(
+  MONOLIS*    mat,
+  const char* param);
+
+void monolis_set_communicator(
+  MONOLIS* mat,
+  int      param);
+
+void monolis_set_my_rank(
+  MONOLIS* mat,
+  int      param);
+
+void monolis_set_comm_size(
+  MONOLIS* mat,
+  int      param);
+
+void monolis_set_n_internal_vertex(
+  MONOLIS* mat,
+  int      param);
+
 void monolis_set_method(
   MONOLIS* mat,
   int      param);

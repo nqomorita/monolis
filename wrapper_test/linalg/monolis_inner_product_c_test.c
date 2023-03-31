@@ -21,11 +21,14 @@ void monolis_inner_product_c_test(){
 
   monolis_std_log_string("monolis_inner_product_c_test");
 
-  monolis_initialize(&mat);
+  monolis_initialize_entire(&mat);
+
+  monolis_set_communicator(&mat, monolis_mpi_get_global_comm());
+  monolis_set_my_rank(&mat, monolis_mpi_get_global_my_rank());
+  monolis_set_comm_size(&mat, monolis_mpi_get_global_comm_size());
+  monolis_set_n_internal_vertex(&mat, 2);
 
   mat.mat.N = 2;
-
-  mat.com.n_internal_vertex = 2;
 
   n_dof = 2;
 
