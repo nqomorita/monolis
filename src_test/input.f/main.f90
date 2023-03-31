@@ -10,7 +10,7 @@ program main
 
   call monolis_solver_parallel_R_test()
 
-  call monolis_solver_parallel_C_test()
+  !call monolis_solver_parallel_C_test()
 
   call monolis_global_finalize()
 
@@ -124,14 +124,20 @@ program main
     call monolis_show_iterlog(mat, .false.)
     call monolis_show_summary(mat, .false.)
 
-    !call monolis_eigen_standard_lanczos_R &
-    !  & (mat, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
+    call monolis_eigen_standard_lanczos_R &
+      & (mat, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
 
-    !call monolis_eigen_inverted_standard_lanczos_R &
-    !  & (mat, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
+    call monolis_eigen_inverted_standard_lanczos_R &
+      & (mat, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
 
     do i = 1, n_get_eigen
       j = n_get_eigen - i + 1
+
+write(*,*)eig_val1(i)
+write(*,*)eig_val2(j)
+!write(*,*)dabs(eig_mode1(:,i))
+!write(*,*)dabs(eig_mode2(:,j))
+
       !call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
 
       !call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))

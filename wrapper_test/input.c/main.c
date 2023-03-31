@@ -169,7 +169,7 @@ void monolis_solver_parallel_R_test(){
   monolis_matvec_product_R(&mat, a, c);
 
   monolis_set_maxiter(&mat, 1000);
-  monolis_set_tolerance(&mat, 1.0e-8);
+  monolis_set_tolerance(&mat, 1.0e-10);
   monolis_show_timelog(&mat, true);
   monolis_show_iterlog(&mat, true);
   monolis_show_summary(&mat, true);
@@ -263,7 +263,7 @@ void monolis_solver_parallel_C_test(){
   monolis_matvec_product_C(&mat, a, c);
 
   monolis_set_maxiter(&mat, 1000);
-  monolis_set_tolerance(&mat, 1.0e-8);
+  monolis_set_tolerance(&mat, 1.0e-10);
   monolis_show_timelog(&mat, true);
   monolis_show_iterlog(&mat, true);
   monolis_show_summary(&mat, true);

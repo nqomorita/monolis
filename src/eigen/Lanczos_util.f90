@@ -37,7 +37,7 @@ contains
     call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
-
+write(*,*)"norm", norm
     norm = 1.0d0/dsqrt(norm)
     do i = 1, N*NDOF
       q(i) = q(i)*norm

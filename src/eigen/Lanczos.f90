@@ -91,7 +91,7 @@ contains
       endif
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
-
+write(*,*)"alpha", alpha(iter)
       call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
       call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
