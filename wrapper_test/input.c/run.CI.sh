@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "mesher"
+
 mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o mesher mesher.f90 \
@@ -9,9 +11,13 @@ mpif90 -I../../include \
 
 ../../bin/gedatsu_simple_mesh_partitioner -n 2
 
+echo "solver"
+
+mpicc -I../../include \
+-c -o main.o main.c
+
 mpif90 -I../../include \
--std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
--o solver main.f90 \
+-o solver main.o \
 -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 
 ./solver
