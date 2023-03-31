@@ -33,14 +33,14 @@ void monolis_global_finalize()
 }
 
 void monolis_initialize(
-  MONOLIS* mat,
-  const char* input_file_dir)
+  MONOLIS* mat)
 {
+  char* input_file_dir;
   monolis_prm_initialize(&mat->prm);
   monolis_com_initialize(&mat->com);
   monolis_mat_initialize(&mat->mat);
   monolis_mat_initialize(&mat->prec);
-  monolis_com_input_comm_table(mat,input_file_dir);
+  monolis_com_input_comm_table(mat, input_file_dir);
 }
 
 void monolis_finalize(

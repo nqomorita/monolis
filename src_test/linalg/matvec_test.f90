@@ -29,7 +29,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_11_R_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 5
 
@@ -93,7 +93,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_11_C_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 5
 
@@ -161,7 +161,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_33_R_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 4
 
@@ -220,7 +220,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_33_C_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 4
 
@@ -279,7 +279,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_nn_R_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 4
 
@@ -338,7 +338,7 @@ contains
 
     call monolis_std_log_string("monolis_matvec_nn_C_test")
 
-    call monolis_initialize(mat)
+    call monolis_initialize_entire(mat)
 
     n_node = 4
 

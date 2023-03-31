@@ -4,6 +4,6 @@
 
 mpirun -np 2 ./monolis_test
 
-cd input
+cd input.f
 
 ./run.sh

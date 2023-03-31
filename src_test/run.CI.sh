@@ -4,6 +4,6 @@
 
 mpirun --oversubscribe --allow-run-as-root -np 2 ./monolis_test
 
-cd input
+cd input.f
 
 ./run.CI.sh

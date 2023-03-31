@@ -157,9 +157,9 @@ contains
     !> パラメータ 構造体
     type(monolis_prm) :: monoPRM
 
-    monoPRM%com_top_dir_name = "./"
-    monoPRM%com_part_dir_name = "./parted.0"
-    monoPRM%com_file_name = "./node.dat"
+    monoPRM%com_top_dir_name = "."
+    monoPRM%com_part_dir_name = "parted.0"
+    monoPRM%com_file_name = "node.dat"
 
     monoPRM%Iarray(monolis_prm_I_method) = 1
     monoPRM%Iarray(monolis_prm_I_precond) = 1

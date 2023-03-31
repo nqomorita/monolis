@@ -12,15 +12,9 @@ contains
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R_test()
     call monolis_get_nonzero_pattern_by_simple_mesh_C_test()
-    !call monolis_get_nonzero_pattern_by_connectivity_R &
-    !call monolis_get_nonzero_pattern_by_connectivity_C &
-    !call monolis_get_nonzero_pattern_by_nodal_graph_R(monolis, n_node, ndof, index, item)
-    !call monolis_get_nonzero_pattern_by_nodal_graph_C(monolis, n_node, ndof, index, item)
 
     call monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test()
     call monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test()
-    !call monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R &
-    !call monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C &
   end subroutine monolis_spmat_nonzero_pattern_test
 
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_R_test()
@@ -46,7 +40,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(monolis, n_node, n_base, ndof, n_elem, elem)
 
@@ -127,7 +121,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(monolis, n_node, n_base, ndof, n_elem, elem)
 
@@ -211,7 +205,7 @@ contains
     n_dof_list(3) = 1
     n_dof_list(4) = 2
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)
@@ -332,7 +326,7 @@ contains
     n_dof_list(3) = 1
     n_dof_list(4) = 2
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)

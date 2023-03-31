@@ -21,7 +21,7 @@ void monolis_inner_product_c_test(){
 
   monolis_std_log_string("monolis_inner_product_c_test");
 
-  monolis_initialize(&mat, "./");
+  monolis_initialize(&mat);
 
   mat.mat.N = 2;
 

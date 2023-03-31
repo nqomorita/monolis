@@ -50,6 +50,25 @@ contains
       & monolis%PRM%com_top_dir_name, monolis%PRM%com_part_dir_name, monolis%PRM%com_file_name)
   end subroutine monolis_initialize
 
+  !> monolis 構造体の初期化処理
+  subroutine monolis_initialize_entire(monolis)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+
+    call monolis_prm_initialize(monolis%PRM)
+
+    call monolis_com_initialize(monolis%COM)
+
+    call monolis_mat_initialize(monolis%MAT)
+
+    call monolis_mat_initialize(monolis%PREC)
+
+    monolis%COM%comm = 0
+    monolis%COM%my_rank = 0
+    monolis%COM%comm_size = 1
+  end subroutine monolis_initialize_entire
+
   !> monoils 構造体の終了処理
   subroutine monolis_finalize(monolis)
     implicit none

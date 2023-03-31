@@ -13,9 +13,6 @@ contains
 
     call monolis_set_scalar_to_sparse_matrix_R_test()
     call monolis_set_scalar_to_sparse_matrix_C_test()
-
-    !call monolis_set_matrix_BCSR_R(monolis, N, NP, NDOF, NZ, A, index, item)
-    !call monolis_set_matrix_BCSR_mat_val_R(monolis, NDOF, NZ, A)
   end subroutine monolis_spmat_handler_test
 
   subroutine monolis_set_scalar_to_sparse_matrix_R_test()
@@ -50,7 +47,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(monolis, n_node, n_base, ndof, n_elem, elem)
 
@@ -161,7 +158,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize(monolis)
+    call monolis_initialize_entire(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(monolis, n_node, n_base, ndof, n_elem, elem)
 

@@ -22,8 +22,7 @@ void monolis_global_initialize();
 void monolis_global_finalize();
 
 void monolis_initialize(
-  MONOLIS*    mat,
-  const char* input_file_dir);
+  MONOLIS*    mat);
 
 void monolis_finalize(
   MONOLIS* mat);

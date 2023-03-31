@@ -38,7 +38,7 @@ void monolis_eigen_solve_c_test(){
   elem[3][0] = 3; elem[3][1] = 4;
   elem[4][0] = 4; elem[4][1] = 5;
 
-  monolis_initialize(&mat, "./");
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 

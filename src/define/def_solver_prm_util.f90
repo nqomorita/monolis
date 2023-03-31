@@ -1,4 +1,13 @@
 !> ソルバパラメータの設定関数群
+!> comm
+!# subroutine monolis_set_input_top_directory_name(monolis, param)
+!# subroutine monolis_set_input_part_directory_name(monolis, param)
+!# subroutine monolis_set_input_file_name(monolis, param)
+!# subroutine monolis_set_communicator(monolis, comm)
+!# subroutine monolis_set_my_rank(monolis, my_rank)
+!# subroutine monolis_set_comm_size(monolis, comm_size)
+!# subroutine monolis_set_n_internal_vertex(monolis, n_internal_vertex)
+!> solver
 !# subroutine monolis_set_method(monolis, param)
 !# subroutine monolis_set_precond(monolis, param)
 !# subroutine monolis_set_maxiter(monolis, param)
@@ -32,6 +41,80 @@ module mod_monolis_def_solver_util
   implicit none
 
 contains
+
+  !> 読込ファイルのトップディレクトリの設定
+  subroutine monolis_set_input_top_directory_name(monolis, param)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> パラメータ
+    character(*) :: param
+    monolis%PRM%com_top_dir_name = trim(param)
+  end subroutine monolis_set_input_top_directory_name
+
+  !> 読込ファイルの分割データディレクトリの設定
+  subroutine monolis_set_input_part_directory_name(monolis, param)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> パラメータ
+    character(*) :: param
+    monolis%PRM%com_part_dir_name = trim(param)
+  end subroutine monolis_set_input_part_directory_name
+
+  !> 読込ファイル名の設定
+  subroutine monolis_set_input_file_name(monolis, param)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> パラメータ
+    character(*) :: param
+    monolis%PRM%com_file_name = trim(param)
+  end subroutine monolis_set_input_file_name
+
+  !> @ingroup com
+  !> monolis 構造体に MPI コミュニケータを設定
+  subroutine monolis_set_communicator(monolis, comm)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> MPI コミュニケータ
+    integer(kint) :: comm
+    call monolis_com_set_communicator(monolis%COM, comm)
+  end subroutine monolis_set_communicator
+
+  !> @ingroup com
+  !> monolis 構造体に MPI ランク番号を設定
+  subroutine monolis_set_my_rank(monolis, my_rank)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> MPI ランク番号
+    integer(kint) :: my_rank
+    call monolis_com_set_my_rank(monolis%COM, my_rank)
+  end subroutine monolis_set_my_rank
+
+  !> @ingroup com
+  !> monolis 構造体に MPI コミュニケータサイズを設定
+  subroutine monolis_set_comm_size(monolis, comm_size)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> MPI コミュニケータサイズ
+    integer(kint) :: comm_size
+    call monolis_com_set_comm_size(monolis%COM, comm_size)
+  end subroutine monolis_set_comm_size
+
+  !> @ingroup com
+  !> monolis 構造体に内部領域に属する自由度数を設定
+  subroutine monolis_set_n_internal_vertex(monolis, n_internal_vertex)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 内部領域に属する自由度数
+    integer(kint) :: n_internal_vertex
+    call monolis_com_set_n_internal_vertex(monolis%COM, n_internal_vertex)
+  end subroutine monolis_set_n_internal_vertex
 
   !> ソルバの設定
   subroutine monolis_set_method(monolis, param)
