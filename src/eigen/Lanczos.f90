@@ -80,7 +80,7 @@ contains
       monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
       call monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      do i = 1, N*NDOF
+      do i = 1, NP*NDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
@@ -91,7 +91,7 @@ contains
       endif
 
       call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
-write(*,*)"alpha", alpha(iter)
+
       call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
       call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
@@ -119,6 +119,7 @@ write(*,*)"alpha", alpha(iter)
           do j = 1, NP*NDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
+          call monolis_mpi_update_R(monoCOM, NDOF, vec(:,i), tmp)
         enddo
         exit
       endif
@@ -233,6 +234,9 @@ write(*,*)"alpha", alpha(iter)
           do j = 1, NP*NDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
+          write(*,*)"iter", i
+          call monolis_mpi_update_R(monoCOM, NDOF, vec(:,i), tmp)
+          write(*,*)"iter end", i
         enddo
         exit
       endif

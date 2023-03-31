@@ -23,12 +23,13 @@ contains
     real(kdouble) :: q(:)
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
-    integer(kint) :: i, comm_size
+    integer(kint) :: i
     real(kdouble) :: norm, t1, t2
+    integer(kint), allocatable :: vtxdist(:)
 
-    comm_size = monolis_mpi_get_local_comm_size(monoCOM%comm)
+    call monolis_com_n_vertex_list(N*NDOF, monoCOM%comm, vtxdist)
 
-    call monolis_get_rundom_number_R(N*NDOF, q, comm_size)
+    call monolis_get_rundom_number_R(N*NDOF, q, vtxdist(monoCOM%my_rank + 1))
 
     do i = 1, N*NDOF
       if(is_bc(i)) q(i) = 0.0d0
@@ -37,11 +38,13 @@ contains
     call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
-write(*,*)"norm", norm
+
     norm = 1.0d0/dsqrt(norm)
     do i = 1, N*NDOF
       q(i) = q(i)*norm
     enddo
+
+    call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
   end subroutine lanczos_initialze
 
   !> Lanczos 法における三重対角行列の固有値分解

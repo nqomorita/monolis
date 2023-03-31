@@ -3,6 +3,7 @@
 #include <string.h>
 #include <complex.h>
 #include <stdbool.h>
+#include <math.h>
 #include "monolis.h"
 
 void monolis_input_mesh_node_c(
@@ -110,7 +111,7 @@ void monolis_solver_parallel_R_test(){
   MONOLIS mat;
   const char* fname;
   int n_node, n_elem, n_base, n_id, n_coef;
-  int eid[2], iter, prec, i, j;
+  int eid[2], iter, prec, i, j, k;
   int* global_eid;
   int** elem;
   double val;
@@ -194,6 +195,39 @@ void monolis_solver_parallel_R_test(){
       }
 
       monolis_mpi_global_barrier();
+    }
+  }
+
+  monolis_std_log_string("monolis_solver_parallel_test eigen");
+
+  int n_get_eigen = 10;
+  double* eig_val1;
+  double* eig_val2;
+  double** eig_mode1;
+  double** eig_mode2;
+  bool* is_bc;
+
+  eig_val1 = monolis_alloc_R_1d(eig_val1, n_get_eigen);
+  eig_val2 = monolis_alloc_R_1d(eig_val2, n_get_eigen);
+  eig_mode1 = monolis_alloc_R_2d(eig_mode1, n_get_eigen, n_node);
+  eig_mode2 = monolis_alloc_R_2d(eig_mode2, n_get_eigen, n_node);
+  is_bc = (bool*)calloc(n_node, sizeof(bool));;
+
+  monolis_set_method(&mat, MONOLIS_ITER_CG);
+  monolis_set_precond(&mat, MONOLIS_PREC_SOR);
+  monolis_show_timelog(&mat, false);
+  monolis_show_iterlog(&mat, false);
+  monolis_show_summary(&mat, false);
+
+  monolis_eigen_standard_lanczos_R(&mat, n_get_eigen, 1.0e-6, 100, eig_val1, eig_mode1, is_bc);
+
+  monolis_eigen_inverted_standard_lanczos_R(&mat, n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
+
+  for (int i = 0; i < n_get_eigen; ++i) {
+    j = n_get_eigen - i - 1;
+    monolis_test_check_eq_R1("monolis_solver_parallel_R_test eig value", eig_val1[i], eig_val2[j]);
+    for (int k = 0; k < n_node; ++k) {
+      monolis_test_check_eq_R1("monolis_solver_parallel_R_test eig mode", fabs(eig_mode1[i][k]), fabs(eig_mode2[j][k]));
     }
   }
 

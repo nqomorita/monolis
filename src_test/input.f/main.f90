@@ -10,7 +10,7 @@ program main
 
   call monolis_solver_parallel_R_test()
 
-  !call monolis_solver_parallel_C_test()
+  call monolis_solver_parallel_C_test()
 
   call monolis_global_finalize()
 
@@ -110,7 +110,7 @@ program main
 
     call monolis_std_log_string("monolis_solver_parallel_test eigen")
 
-    n_get_eigen = 12
+    n_get_eigen = 10
 
     call monolis_alloc_R_1d(eig_val1, n_get_eigen)
     call monolis_alloc_R_1d(eig_val2, n_get_eigen)
@@ -133,14 +133,9 @@ program main
     do i = 1, n_get_eigen
       j = n_get_eigen - i + 1
 
-write(*,*)eig_val1(i)
-write(*,*)eig_val2(j)
-!write(*,*)dabs(eig_mode1(:,i))
-!write(*,*)dabs(eig_mode2(:,j))
+      call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
 
-      !call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
-
-      !call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
+      call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
     enddo
 
     call monolis_finalize(mat)
