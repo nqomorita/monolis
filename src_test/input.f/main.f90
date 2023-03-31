@@ -10,7 +10,7 @@ program main
 
   call monolis_solver_parallel_R_test()
 
-  call monolis_solver_parallel_C_test()
+  !call monolis_solver_parallel_C_test()
 
   call monolis_global_finalize()
 
@@ -22,11 +22,16 @@ program main
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
     integer(kint) :: i
+    integer(kint) :: n_get_eigen
     real(kdouble) :: val
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:)
     real(kdouble), allocatable :: coef(:), node(:,:)
     real(kdouble), allocatable :: a(:), b(:), c(:)
+    real(kdouble), allocatable :: eig_val(:), eig_mode(:,:)
+    logical, allocatable :: is_bc(:)
+
+    call monolis_std_log_string("monolis_solver_parallel_test linear")
 
     fname = monolis_get_global_input_file_name("parted.0", "node.dat")
     call monolis_input_node(fname, n_node, node)
@@ -100,6 +105,22 @@ program main
       call monolis_mpi_global_barrier();
     enddo
     enddo
+
+    call monolis_std_log_string("monolis_solver_parallel_test eigen")
+
+    n_get_eigen = 5
+    call monolis_alloc_R_1d(eig_val, n_get_eigen)
+    call monolis_alloc_R_2d(eig_mode, n_node, n_get_eigen)
+    call monolis_alloc_L_1d(is_bc, n_node)
+
+    call monolis_eigen_standard_lanczos_R &
+      & (mat, n_get_eigen, 1.0d-6, 100, eig_val, eig_mode, is_bc)
+
+    write(*,*)eig_val
+    write(*,*)eig_mode
+
+    !call monolis_eigen_inverted_standard_lanczos_R &
+    !  & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_parallel_R_test

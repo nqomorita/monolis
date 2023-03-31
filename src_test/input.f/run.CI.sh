@@ -1,17 +1,17 @@
 #!/bin/bash
 
-mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
+mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o mesher mesher.f90 \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack
 
 ./mesher -i mtx.dat
 
-../../submodule/gedatsu/bin/gedatsu_simple_mesh_partitioner -n 2
+../../bin/gedatsu_simple_mesh_partitioner -n 2
 
-mpif90 -I../../include -I../../submodule/monolis_utils/include -I../../submodule/gedatsu/include \
+mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o solver main.f90 \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack
 
 mpirun --oversubscribe --allow-run-as-root -np 2 solver

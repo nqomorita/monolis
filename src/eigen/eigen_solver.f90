@@ -28,6 +28,8 @@ contains
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
 
+    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+
     call monolis_eigen_standard_lanczos_R_main( &
       & monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_standard_lanczos_R
@@ -50,6 +52,8 @@ contains
     real(kdouble) :: vec(:,:)
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
+
+    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
 
     call monolis_eigen_inverted_standard_lanczos_R_main( &
       & monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
