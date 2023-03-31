@@ -9,6 +9,10 @@ void monolis_prm_initialize(
 {
   int i;
 
+  //prm->com_top_dir_name = ".";
+  //prm->com_part_dir_name = "parted.0";
+  //prm->com_file_name = "node.dat";
+
   for (int i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
     prm->Iarray[i] = 0;
   }

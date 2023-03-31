@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#include "monolis_utils.h"
+
 static const int MONOLIS_PRM_IARRAY_SIZE = 100;
 
 static const int MONOLIS_PRM_RARRAY_SIZE = 100;
@@ -26,33 +28,33 @@ static const int MONOLIS_ITER_BICGSTAB_NOPREC = 7;
 
 //static const int MONOLIS_ITER_CABICGSTAB_NOPREC = 8;
 
-static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 9;
+static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 //static const int MONOLIS_ITER_GMRES = 10;
 
-static const int MONOLIS_ITER_COCG = 11;
+static const int MONOLIS_ITER_COCG = 9;
 
 static const int MONOLIS_PREC_NONE   = 0;
 
 static const int MONOLIS_PREC_DIAG   = 1;
 
-static const int MONOLIS_PREC_ILU    = 2;
+//static const int MONOLIS_PREC_ILU    = 2;
 
-static const int MONOLIS_PREC_JACOBI = 3;
+//static const int MONOLIS_PREC_JACOBI = 3;
 
-static const int MONOLIS_PREC_SOR    = 4;
+static const int MONOLIS_PREC_SOR    = 2;
 
-static const int MONOLIS_PREC_SPIKE  = 5;
+//static const int MONOLIS_PREC_SPIKE  = 5;
 
-static const int MONOLIS_PREC_LU     = 6;
+//static const int MONOLIS_PREC_LU     = 6;
 
-static const int MONOLIS_PREC_MUMPS  = 7;
+//static const int MONOLIS_PREC_MUMPS  = 7;
 
-static const int MONOLIS_PREC_ROM    = 8;
+//static const int MONOLIS_PREC_ROM    = 8;
 
-static const int MONOLIS_PREC_MF     = 9;
+//static const int MONOLIS_PREC_MF     = 9;
 
-static const int MONOLIS_PREC_MUMPS_LOCAL = 10;
+//static const int MONOLIS_PREC_MUMPS_LOCAL = 10;
 
 static const int MONOLIS_PRM_I_METHOD = 1;
 
@@ -107,9 +109,10 @@ static const int MONOLIS_R_TIME_COMM_DOTP = 8;
 static const int MONOLIS_R_TIME_COMM_SPMV = 9;
 
 typedef struct {
-
+  char   com_top_dir_name[MONOLIS_CHARLEN];
+  char   com_part_dir_name[MONOLIS_CHARLEN];
+  char   com_file_name[MONOLIS_CHARLEN];
   int    Iarray[100];
-
   double Rarray[100];
 } MONOLIS_PRM;
 
