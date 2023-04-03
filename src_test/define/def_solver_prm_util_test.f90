@@ -118,6 +118,27 @@ contains
 
     call monolis_get_time_comm_spmv(monolis, r_param)
     call monolis_test_check_eq_R1("monolis_def_solver_util_test 26", r_param, 8.0d0)
+
+    call monolis_set_input_top_directory_name(monolis, "test_a")
+    if(trim(monolis%PRM%com_top_dir_name) == "test_a")then
+      call monolis_test_assert_pass("monolis_def_solver_util_test 27")
+    else
+      call monolis_test_assert_fail("monolis_def_solver_util_test 27", "")
+    endif
+
+    call monolis_set_input_part_directory_name(monolis, "test_b")
+    if(trim(monolis%PRM%com_part_dir_name) == "test_b")then
+      call monolis_test_assert_pass("monolis_def_solver_util_test 28")
+    else
+      call monolis_test_assert_fail("monolis_def_solver_util_test 28", "")
+    endif
+
+    call monolis_set_input_file_name(monolis, "test_c")
+    if(trim(monolis%PRM%com_file_name) == "test_c")then
+      call monolis_test_assert_pass("monolis_def_solver_util_test 29")
+    else
+      call monolis_test_assert_fail("monolis_def_solver_util_test 29", "")
+    endif
   end subroutine monolis_def_solver_util_test
 
 end module mod_monolis_def_solver_util_test
