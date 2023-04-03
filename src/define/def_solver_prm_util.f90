@@ -7,6 +7,7 @@
 !# subroutine monolis_set_my_rank(monolis, my_rank)
 !# subroutine monolis_set_comm_size(monolis, comm_size)
 !# subroutine monolis_set_n_internal_vertex(monolis, n_internal_vertex)
+!# subroutine monolis_get_n_internal_vertex(monolis, n_internal_vertex)
 !> solver
 !# subroutine monolis_set_method(monolis, param)
 !# subroutine monolis_set_precond(monolis, param)
@@ -191,6 +192,53 @@ contains
     integer(kint) :: n_internal_vertex
     call monolis_com_set_n_internal_vertex(monolis%COM, n_internal_vertex)
   end subroutine monolis_set_n_internal_vertex
+
+  !> @ingroup com
+  !> monolis 構造体に内部領域に属する自由度数を取得
+  subroutine monolis_get_n_internal_vertex(monolis, n_internal_vertex)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 内部領域に属する自由度数
+    integer(kint) :: n_internal_vertex
+    call monolis_com_get_n_internal_vertex(monolis%COM, n_internal_vertex)
+  end subroutine monolis_get_n_internal_vertex
+
+  !> @ingroup com
+  !> monolis 構造体に内部領域に属するコネクティビティのリストを取得
+  subroutine monolis_get_internal_simple_mesh_list(monolis, n_elem, n_base, elem, list)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 要素数
+    integer(kint) :: n_elem
+    !> 要素の基底数
+    integer(kint) :: n_base
+    !> 要素コネクティビティ
+    integer(kint) :: elem(:,:)
+    !> 内部領域に属する自由度数
+    integer(kint) :: list(:)
+    integer(kint) :: i, j, n_internal_vertex, my_rank
+    integer(kint), allocatable :: domain_id(:)
+
+    call monolis_get_n_internal_vertex(monolis, n_internal_vertex)
+
+    my_rank = monolis_get_local_my_rank(monolis)
+
+    call monolis_alloc_I_1d(domain_id, monolis%MAT%NP)
+
+    do i = 1, n_internal_vertex
+      domain_id(i) = my_rank
+    enddo
+
+    call monolis_mpi_update_I(monolis%COM, 1, domain_id)
+
+    do i = 1, n_elem
+      do j = 1, n_base
+
+      enddo
+    enddo
+  end subroutine monolis_get_internal_simple_mesh_list
 
   !> ソルバの設定
   subroutine monolis_set_method(monolis, param)

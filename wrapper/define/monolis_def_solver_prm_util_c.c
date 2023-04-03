@@ -54,6 +54,13 @@ void monolis_set_n_internal_vertex(
   monolis_com_set_n_internal_vertex(&mat->com, param);
 }
 
+void monolis_get_n_internal_vertex(
+  MONOLIS* mat,
+  int*     param)
+{
+  monolis_com_get_n_internal_vertex(&mat->com, param);
+}
+
 void monolis_set_method(
   MONOLIS* mat,
   int      param)

@@ -6,6 +6,51 @@ module mod_monolis_vec_util
 
 contains
 
+  !> @ingroup mpi
+  !> ベクトルのアップデート関数（実数型）
+  subroutine monolis_update_R(monolis, ndof, X)
+    implicit none
+    !> [in] monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [in] 節点あたりの自由度
+    integer(kint) :: ndof
+    !> [in,out] 入出力ベクトル
+    real(kdouble) :: X(:)
+    real(kdouble) :: tcomm
+
+    call monolis_mpi_update_R(monolis%COM, ndof, X, tcomm)
+  end subroutine monolis_update_R
+
+  !> @ingroup mpi
+  !> ベクトルのアップデート関数（整数型）
+  subroutine monolis_update_I(monolis, ndof, X)
+    implicit none
+    !> [in] monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [in] 節点あたりの自由度
+    integer(kint) :: ndof
+    !> [in,out] 入出力ベクトル
+    integer(kint) :: X(:)
+    real(kdouble) :: tcomm
+
+    call monolis_mpi_update_I(monolis%COM, ndof, X, tcomm)
+  end subroutine monolis_update_I
+
+  !> @ingroup mpi
+  !> ベクトルのアップデート関数（複素数型）
+  subroutine monolis_update_C(monolis, ndof, X)
+    implicit none
+    !> [in] monolis 構造体
+    type(monolis_structure) :: monolis
+    !> [in] 節点あたりの自由度
+    integer(kint) :: ndof
+    !> [in,out] 入出力ベクトル
+    complex(kdouble) :: X(:)
+    real(kdouble) :: tcomm
+
+    call monolis_mpi_update_C(monolis%COM, ndof, X, tcomm)
+  end subroutine monolis_update_C
+
   !> @ingroup dev_linalg
   !> ベクトル配列コピー（整数型）
   subroutine monolis_vec_copy_I(n, n_dof, X, Y)
