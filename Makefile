@@ -64,13 +64,13 @@ def_struc.f90 \
 def_solver_prm_util.f90
 
 SRC_MAT = \
+spmat_copy.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90
 
 #spmat_fillin.f90 \
-#spmat_copy.f90 \
 #spmat_reorder.f90 \
 #spmat_scaling.f90 \
 
@@ -143,7 +143,8 @@ monolis_matvec_c.c \
 monolis_inner_product_c.c
 
 SRC_MAT_C = \
-monolis_spmat_nzpattern_util_c.c\
+monolis_spmat_copy_c.c \
+monolis_spmat_nzpattern_util_c.c \
 monolis_spmat_nzpattern_c.c \
 monolis_spmat_handler_c.c \
 spmat_nzpattern_util_wrap.f90 \

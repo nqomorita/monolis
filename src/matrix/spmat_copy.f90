@@ -1,4 +1,4 @@
-module mod_monolis_matrix_copy
+module mod_monolis_spmat_copy
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
@@ -7,105 +7,183 @@ module mod_monolis_matrix_copy
 
 contains
 
-  subroutine monolis_copy_mat_by_pointer(min, mout)
+!  subroutine monolis_copy_mat_R(mat_in, mat_out)
+!    implicit none
+!    type(monolis_structure) :: min
+!    type(monolis_structure) :: mout
+!
+!    call monolis_finalize(mout)
+!
+!    call monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+!    call monolis_copy_mat_value_R(mat_in, mat_out)
+!  end subroutine monolis_copy_mat_R
+
+!  subroutine monolis_copy_mat_C(mat_in, mat_out)
+!    implicit none
+!    type(monolis_structure) :: min
+!    type(monolis_structure) :: mout
+!
+!    call monolis_finalize(mout)
+!
+!    call monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+!    call monolis_copy_mat_value_C(mat_in, mat_out)
+!  end subroutine monolis_copy_mat_C
+
+!  subroutine monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+!    implicit none
+!    type(monolis_structure) :: min
+!    type(monolis_structure) :: mout
+!  end subroutine monolis_copy_mat_nonzero_pattern
+
+  !> 行列値のコピー（実数型）
+  subroutine monolis_copy_mat_value_R(mat_in, mat_out)
     implicit none
-    type(monolis_mat) :: min
-    type(monolis_mat) :: mout
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    call monolis_copy_mat_value_A_R(mat_in, mat_out)
+    call monolis_copy_mat_value_B_R(mat_in, mat_out)
+    call monolis_copy_mat_value_X_R(mat_in, mat_out)
+  end subroutine monolis_copy_mat_value_R
 
-!    mout%N = min%N
-!    mout%NP = min%NP
-!    mout%NZ = min%NZ
-!    mout%NDOF = min%NDOF
-!    mout%index => min%index
-!    mout%item => min%item
-!    mout%indexR => min%indexR
-!    mout%itemR => min%itemR
-!    mout%permR => min%permR
-!    mout%A => min%A
-!    mout%X => min%X
-!    mout%B => min%B
-  end subroutine monolis_copy_mat_by_pointer
-
-  subroutine monolis_copy_mat_profile(min, mout)
+  !> 行列値のコピー（行列、実数型）
+  subroutine monolis_copy_mat_value_A_R(mat_in, mat_out)
     implicit none
-    type(monolis_structure) :: min
-    type(monolis_structure) :: mout
-    integer(kint) :: ndof2
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%R%A = mat_in%MAT%R%A
+  end subroutine monolis_copy_mat_value_A_R
 
-!    call monolis_com_copy(min%COM, mout%COM)
-!
-!    mout%MAT%index => min%MAT%index
-!    mout%MAT%item => min%MAT%item
-!    mout%MAT%indexR => min%MAT%indexR
-!    mout%MAT%itemR => min%MAT%itemR
-!    mout%MAT%permR => min%MAT%permR
-!
-!    mout%MAT%n = min%MAT%n
-!    mout%MAT%np = min%MAT%np
-!    mout%MAT%ndof = min%MAT%ndof
-!
-!    ndof2 = min%MAT%ndof*min%MAT%ndof
-!    allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%n)), source = 0.0d0)
-!    allocate(mout%MAT%X(min%MAT%np*min%MAT%ndof), source = 0.0d0)
-!    allocate(mout%MAT%B(min%MAT%np*min%MAT%ndof), source = 0.0d0)
-  end subroutine monolis_copy_mat_profile
-
-!  subroutine monolis_clear_mat_value(mat)
-!    implicit none
-!    type(monolis_structure) :: mat
-!
-!    call monolis_clear_A_value(mat)
-!    call monolis_clear_X_value(mat)
-!    call monolis_clear_B_value(mat)
-!  end subroutine monolis_clear_mat_value
-!
-!  subroutine monolis_clear_A_value(mat)
-!    implicit none
-!    type(monolis_structure) :: mat
-!    mat%MAT%A = 0.0d0
-!  end subroutine monolis_clear_A_value
-!
-!  subroutine monolis_clear_X_value(mat)
-!    implicit none
-!    type(monolis_structure) :: mat
-!    mat%MAT%X = 0.0d0
-!  end subroutine monolis_clear_X_value
-!
-!  subroutine monolis_clear_B_value(mat)
-!    implicit none
-!    type(monolis_structure) :: mat
-!    mat%MAT%B = 0.0d0
-!  end subroutine monolis_clear_B_value
-
-  subroutine monolis_copy_mat_all(min, mout)
+  !> 行列値のコピー（右辺ベクトル、実数型）
+  subroutine monolis_copy_mat_value_B_R(mat_in, mat_out)
     implicit none
-    type(monolis_mat) :: min
-    type(monolis_mat) :: mout
-    integer(kint) :: i, NZ
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%R%B = mat_in%MAT%R%B
+  end subroutine monolis_copy_mat_value_B_R
 
-!    mout%N = min%N
-!    mout%NP = min%NP
-!    mout%NZ = min%NZ
-!    mout%NDOF = min%NDOF
-!
-!    NZ = min%index(min%NP)
-!    allocate(mout%index(0:min%NP))
-!    allocate(mout%item(NZ))
-!    allocate(mout%indexR(0:min%NP))
-!    allocate(mout%itemR(NZ))
-!    allocate(mout%permR(NZ))
-!    allocate(mout%A(min%NDOF*min%NDOF*NZ))
-!    allocate(mout%X(min%NDOF*min%NP))
-!    allocate(mout%B(min%NDOF*min%NP))
-!
-!    mout%index(0:min%NP) = min%index(0:min%NP)
-!    mout%item = min%item
-!    mout%indexR(0:min%NP) = min%indexR(0:min%NP)
-!    mout%itemR = min%itemR
-!    mout%permR = min%permR
-!    mout%A = min%A
-!    mout%X = min%X
-!    mout%B = min%B
-  end subroutine monolis_copy_mat_all
+  !> 行列値のコピー（解ベクトル、実数型）
+  subroutine monolis_copy_mat_value_X_R(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%R%X = mat_in%MAT%R%X
+  end subroutine monolis_copy_mat_value_X_R
 
-end module mod_monolis_matrix_copy
+  !> 行列値のコピー（複素数型）
+  subroutine monolis_copy_mat_value_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    call monolis_copy_mat_value_A_C(mat_in, mat_out)
+    call monolis_copy_mat_value_B_C(mat_in, mat_out)
+    call monolis_copy_mat_value_X_C(mat_in, mat_out)
+  end subroutine monolis_copy_mat_value_C
+
+  !> 行列値のコピー（行列、複素数型）
+  subroutine monolis_copy_mat_value_A_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%C%A = mat_in%MAT%C%A
+  end subroutine monolis_copy_mat_value_A_C
+
+  !> 行列値のコピー（右辺ベクトル、複素数型）
+  subroutine monolis_copy_mat_value_B_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%C%B = mat_in%MAT%C%B
+  end subroutine monolis_copy_mat_value_B_C
+
+  !> 行列値のコピー（解ベクトル、複素数型）
+  subroutine monolis_copy_mat_value_X_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+    mat_out%MAT%C%X = mat_in%MAT%C%X
+  end subroutine monolis_copy_mat_value_X_C
+
+  !> 行列値のゼロ初期化（実数型）
+  subroutine monolis_clear_mat_value_R(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    call monolis_clear_mat_value_A_R(mat)
+    call monolis_clear_mat_value_B_R(mat)
+    call monolis_clear_mat_value_X_R(mat)
+  end subroutine monolis_clear_mat_value_R
+
+  !> 行列値のゼロ初期化（行列、実数型）
+  subroutine monolis_clear_mat_value_A_R(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%R%A = 0.0d0
+  end subroutine monolis_clear_mat_value_A_R
+
+  !> 行列値のゼロ初期化（右辺ベクトル、実数型）
+  subroutine monolis_clear_mat_value_B_R(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%R%B = 0.0d0
+  end subroutine monolis_clear_mat_value_B_R
+
+  !> 行列値のゼロ初期化（解ベクトル、実数型）
+  subroutine monolis_clear_mat_value_X_R(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%R%X = 0.0d0
+  end subroutine monolis_clear_mat_value_X_R
+
+  !> 行列値のゼロ初期化（複素数型）
+  subroutine monolis_clear_mat_value_C(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    call monolis_clear_mat_value_A_C(mat)
+    call monolis_clear_mat_value_B_C(mat)
+    call monolis_clear_mat_value_X_C(mat)
+  end subroutine monolis_clear_mat_value_C
+
+  !> 行列値のゼロ初期化（行列、複素数型）
+  subroutine monolis_clear_mat_value_A_C(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%C%A = 0.0d0
+  end subroutine monolis_clear_mat_value_A_C
+
+  !> 行列値のゼロ初期化（右辺ベクトル、複素数型）
+  subroutine monolis_clear_mat_value_B_C(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%C%B = 0.0d0
+  end subroutine monolis_clear_mat_value_B_C
+
+  !> 行列値のゼロ初期化（解ベクトル、複素数型）
+  subroutine monolis_clear_mat_value_X_C(mat)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat
+    mat%MAT%C%X = 0.0d0
+  end subroutine monolis_clear_mat_value_X_C
+end module mod_monolis_spmat_copy
