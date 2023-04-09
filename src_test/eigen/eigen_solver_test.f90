@@ -26,8 +26,12 @@ contains
     integer(kint) :: i
     real(kdouble) :: r_ans(6)
 
+    call monolis_std_global_log_string("lanczos_initialze")
+    call monolis_std_global_log_string("monolis_gram_schmidt_R")
     call monolis_std_global_log_string("monolis_eigen_standard_lanczos_R")
+    call monolis_std_global_log_string("monolis_eigen_standard_lanczos_R_main")
     call monolis_std_global_log_string("monolis_eigen_inverted_standard_lanczos_R")
+    call monolis_std_global_log_string("monolis_eigen_inverted_standard_lanczos_R_main")
 
     call monolis_initialize(mat)
 

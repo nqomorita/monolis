@@ -10,8 +10,8 @@ module mod_monolis_eigen_solver
 contains
 
   !> Lanczos 法（順反復、最大固有値、実数型）
-  subroutine monolis_eigen_standard_lanczos_R &
-    & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+  subroutine monolis_eigen_standard_lanczos_R( &
+    & monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -35,8 +35,8 @@ contains
   end subroutine monolis_eigen_standard_lanczos_R
 
   !> Lanczos 法（逆反復、最小固有値、実数型）
-  subroutine monolis_eigen_inverted_standard_lanczos_R &
-    & (monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+  subroutine monolis_eigen_inverted_standard_lanczos_R( &
+    & monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis

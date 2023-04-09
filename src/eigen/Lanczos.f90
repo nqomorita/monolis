@@ -14,8 +14,8 @@ module mod_monolis_eigen_lanczos
 contains
 
   !> Lanczos 法（逆反復、最小固有値、実数型、メイン関数）
-  subroutine monolis_eigen_inverted_standard_lanczos_R_main &
-    & (monoPRM, monoCOM, monoMAT, monoPREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
+  subroutine monolis_eigen_inverted_standard_lanczos_R_main( &
+    & monoPRM, monoCOM, monoMAT, monoPREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM
@@ -127,8 +127,8 @@ contains
   end subroutine monolis_eigen_inverted_standard_lanczos_R_main
 
   !> Lanczos 法（順反復、最大固有値、実数型、メイン関数）
-  subroutine monolis_eigen_standard_lanczos_R_main &
-    & (monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
+  subroutine monolis_eigen_standard_lanczos_R_main( &
+    & monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> パラメータ構造体
     type(monolis_prm) :: monoPRM

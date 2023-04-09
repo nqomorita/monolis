@@ -24,6 +24,8 @@ program monolis_test
   use mod_monolis_lapack_test
   use mod_monolis_eigen_lanczos_util_test
   use mod_monolis_eigen_solver_test
+  use mod_monolis_precond_test
+  use mod_monolis_solve_test
   implicit none
 
   call monolis_global_initialize()
@@ -42,6 +44,9 @@ program monolis_test
   call monolis_linalg_test()
   call monolis_converge_test()
   call monolis_matvec_test()
+
+  call monolis_precond_test()
+  call monolis_solve_test()
 
   call monolis_lapack_test()
 

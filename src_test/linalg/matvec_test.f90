@@ -19,6 +19,11 @@ contains
 
     call monolis_matvec_nn_R_test()
     call monolis_matvec_nn_C_test()
+
+    call monolis_std_global_log_string("monolis_matvec_product_R")
+    call monolis_std_global_log_string("monolis_matvec_product_C")
+    call monolis_std_global_log_string("monolis_matvec_product_main_R")
+    call monolis_std_global_log_string("monolis_matvec_product_main_C")
   end subroutine monolis_matvec_test
 
   subroutine monolis_matvec_11_R_test()

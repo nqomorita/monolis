@@ -15,6 +15,11 @@ contains
     real(kdouble) :: rX(4), rY(4), rsum
     complex(kdouble) :: cX(4), cY(4), csum
 
+    call monolis_std_global_log_string("monolis_inner_product_main_C")
+    call monolis_std_global_log_string("monolis_inner_product_main_I")
+    call monolis_std_global_log_string("monolis_inner_product_main_R")
+    call monolis_std_global_log_string("monolis_inner_product_main_R_no_comm")
+
     call monolis_std_global_log_string("monolis_inner_product_I")
     call monolis_std_global_log_string("monolis_inner_product_R")
     call monolis_std_global_log_string("monolis_inner_product_C")

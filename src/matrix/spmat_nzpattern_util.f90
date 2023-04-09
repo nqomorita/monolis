@@ -57,8 +57,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_main
 
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、メイン関数）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-    (MAT, n_node, n_dof_list, index, item)
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main( &
+    MAT, n_node, n_dof_list, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_mat) :: MAT

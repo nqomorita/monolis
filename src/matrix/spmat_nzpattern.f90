@@ -75,8 +75,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_C
 
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、実数型）
-  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
-    (monolis, n_node, n_base, n_dof_list, n_elem, elem)
+  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R( &
+    monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -108,8 +108,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R
 
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、複素数型）
-  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C &
-    (monolis, n_node, n_base, n_dof_list, n_elem, elem)
+  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C( &
+    monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -141,8 +141,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C
 
   !> コネクティビティグラフから疎行列パターンを決定（実数型）
-  subroutine monolis_get_nonzero_pattern_by_connectivity_R &
-      & (monolis, n_node, n_base, ndof, n_elem, index, item)
+  subroutine monolis_get_nonzero_pattern_by_connectivity_R( &
+      & monolis, n_node, n_base, ndof, n_elem, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -171,8 +171,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_connectivity_R
 
   !> コネクティビティグラフから疎行列パターンを決定（複素数型）
-  subroutine monolis_get_nonzero_pattern_by_connectivity_C &
-      & (monolis, n_node, n_base, ndof, n_elem, index, item)
+  subroutine monolis_get_nonzero_pattern_by_connectivity_C( &
+      & monolis, n_node, n_base, ndof, n_elem, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -241,8 +241,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_C
 
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、実数型）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R &
-    (monolis, n_node, n_dof_list, index, item)
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R( &
+    monolis, n_node, n_dof_list, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
@@ -262,8 +262,8 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R
 
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、複素数型）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C &
-    (monolis, n_node, n_dof_list, index, item)
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C( &
+    monolis, n_node, n_dof_list, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis

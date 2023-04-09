@@ -9,9 +9,9 @@ contains
   subroutine monolis_precond_sor_33_test
     implicit none
 
-    !call monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
-    !call monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
-    !call monolis_precond_sor_33_clear_R(monoPREC)
+    call monolis_std_log_string("monolis_precond_sor_33_setup_R")
+    call monolis_std_log_string("monolis_precond_sor_33_apply_R")
+    call monolis_std_log_string("monolis_precond_sor_33_clear_R")
   end subroutine monolis_precond_sor_33_test
 
 end module mod_monolis_precond_sor_33_test
