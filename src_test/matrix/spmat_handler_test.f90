@@ -34,6 +34,13 @@ contains
     logical :: is_find
 
     call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_main_R")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_offdiag_R")
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_R")
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_main_R")
 
     n_node = 4
 
@@ -145,6 +152,13 @@ contains
     logical :: is_find
 
     call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_C")
+    call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_C")
+    call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_C")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_C")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_main_C")
+    call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_offdiag_C")
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_C")
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_main_C")
 
     n_node = 4
 

@@ -16,6 +16,11 @@ contains
     call monolis_alloc_nonzero_pattern_mat_val_R_test()
     call monolis_alloc_nonzero_pattern_mat_val_C_test()
     call monolis_get_CSC_format_test()
+
+    call monolis_std_global_log_string("monolis_stop_by_matrix_assemble")
+    call monolis_std_global_log_string("monolis_stop_by_set_DBC")
+    call monolis_std_global_log_string("monolis_stop_by_set_zero_diag_component")
+    call monolis_std_global_log_string("monolis_stop_by_submatrix_access")
   end subroutine monolis_spmat_nonzero_pattern_util_test
 
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_main_test()

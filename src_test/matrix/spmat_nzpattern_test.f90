@@ -27,6 +27,9 @@ contains
     integer(kint) :: elem(2,3)
 
     call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_R")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_connectivity_R")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_R")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R")
 
     n_node = 4
 
@@ -108,6 +111,9 @@ contains
     integer(kint) :: elem(2,3)
 
     call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_C")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_connectivity_C")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_C")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C")
 
     n_node = 4
 
