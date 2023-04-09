@@ -21,7 +21,7 @@ contains
     real(kdouble) :: eig_mode(5,5)
     real(kdouble) :: r_ans(5)
 
-    call monolis_std_log_string("monolis_lapack_test")
+    call monolis_std_global_log_string("monolis_lapack_dstev")
 
     n = 5
 

@@ -29,7 +29,9 @@ contains
     real(kdouble) :: val
     logical :: is_find
 
-    call monolis_std_log_string("monolis_set_scalar_to_sparse_matrix_main_R_test")
+    call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_main_R")
+    call monolis_std_global_log_string("monolis_get_scalar_from_sparse_matrix_main_R")
+    call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_main_R")
 
     ndof = 2
 
@@ -84,7 +86,9 @@ contains
     complex(kdouble) :: val
     logical :: is_find
 
-    call monolis_std_log_string("monolis_set_scalar_to_sparse_matrix_main_C_test")
+    call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_main_C")
+    call monolis_std_global_log_string("monolis_get_scalar_from_sparse_matrix_main_C")
+    call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_main_C")
 
     ndof = 2
 
@@ -138,7 +142,7 @@ contains
     real(kdouble) :: B(5)
     integer(kint) :: e(1)
 
-    call monolis_std_log_string("monolis_set_block_to_sparse_matrix_main_R_test")
+    call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_main_R")
 
     ndof = 2
 
@@ -199,7 +203,7 @@ contains
     complex(kdouble) :: val(2,2)
     integer(kint) :: e(1)
 
-    call monolis_std_log_string("monolis_set_block_to_sparse_matrix_main_C_test")
+    call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_main_C")
 
     ndof = 2
 

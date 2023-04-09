@@ -12,7 +12,33 @@ contains
     integer(kint) :: i_param
     real(kdouble) :: r_param
 
-    call monolis_std_log_string("monolis_def_solver_util_test")
+    call monolis_std_global_log_string("monolis_set_method")
+    call monolis_std_global_log_string("monolis_set_precond")
+    call monolis_std_global_log_string("monolis_set_maxiter")
+    call monolis_std_global_log_string("monolis_set_init_x")
+    call monolis_std_global_log_string("monolis_set_sym_matrix")
+    call monolis_std_global_log_string("monolis_set_debug")
+    call monolis_std_global_log_string("monolis_set_performance_measurement")
+    call monolis_std_global_log_string("monolis_set_check_diag")
+    call monolis_std_global_log_string("monolis_set_prec_stored")
+    call monolis_std_global_log_string("monolis_show_iterlog")
+    call monolis_std_global_log_string("monolis_show_timelog")
+    call monolis_std_global_log_string("monolis_show_summary")
+    call monolis_std_global_log_string("monolis_show_timelog_statistics")
+    call monolis_std_global_log_string("monolis_get_converge_iter")
+    call monolis_std_global_log_string("monolis_get_error_tag")
+    call monolis_std_global_log_string("monolis_set_tolerance")
+    call monolis_std_global_log_string("monolis_get_converge_residual")
+    call monolis_std_global_log_string("monolis_get_time_solver")
+    call monolis_std_global_log_string("monolis_get_time_preparing")
+    call monolis_std_global_log_string("monolis_get_time_spmv")
+    call monolis_std_global_log_string("monolis_get_time_inner_product")
+    call monolis_std_global_log_string("monolis_get_time_precondition")
+    call monolis_std_global_log_string("monolis_get_time_comm_inner_product")
+    call monolis_std_global_log_string("monolis_get_time_comm_spmv")
+    call monolis_std_global_log_string("monolis_set_input_top_directory_name")
+    call monolis_std_global_log_string("monolis_set_input_part_directory_name")
+    call monolis_std_global_log_string("monolis_set_input_file_name")
 
     monolis%PRM%Iarray = 0
 

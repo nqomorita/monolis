@@ -24,7 +24,7 @@ contains
     real(kdouble) :: eig_mode(5,5)
     real(kdouble) :: norm, r_ans(5)
 
-    call monolis_std_log_string("monolis_get_eigen_pair_from_tridiag_test")
+    call monolis_std_global_log_string("monolis_get_inverted_eigen_pair_from_tridiag")
 
     iter = 5
 

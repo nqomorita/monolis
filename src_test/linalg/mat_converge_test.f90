@@ -17,7 +17,7 @@ contains
     real(kdouble) :: tdotp
     real(kdouble) :: tcomm
 
-    call monolis_std_log_string("monolis_converge_test")
+    call monolis_std_global_log_string("monolis_check_converge_R")
 
     call monolis_initialize_entire(monolis)
 

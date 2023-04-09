@@ -26,7 +26,7 @@ contains
     integer(kint) :: n_elem
     integer(kint) :: elem(2,3)
 
-    call monolis_std_log_string("monolis_get_nonzero_pattern_by_simple_mesh_R_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_R")
 
     n_node = 4
 
@@ -107,7 +107,7 @@ contains
     integer(kint) :: n_elem
     integer(kint) :: elem(2,3)
 
-    call monolis_std_log_string("monolis_get_nonzero_pattern_by_simple_mesh_C_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_C")
 
     n_node = 4
 
@@ -188,7 +188,7 @@ contains
     integer(kint) :: n_elem
     integer(kint) :: elem(2,3)
 
-    call monolis_std_log_string("monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R")
 
     n_node = 4
 
@@ -309,7 +309,7 @@ contains
     integer(kint) :: n_elem
     integer(kint) :: elem(2,3)
 
-    call monolis_std_log_string("monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C")
 
     n_node = 4
 
@@ -328,7 +328,7 @@ contains
 
     call monolis_initialize_entire(monolis)
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
+    call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)
 
     call monolis_test_check_eq_I1("monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test 1", monolis%MAT%N, 6)

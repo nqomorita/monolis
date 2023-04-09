@@ -26,7 +26,7 @@ contains
     integer(kint) :: index(5)
     integer(kint) :: item(6)
 
-    call monolis_std_log_string("monolis_get_nonzero_pattern_by_nodal_graph_main_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_main")
 
     n_node = 4
 
@@ -107,7 +107,7 @@ contains
     integer(kint) :: index(5)
     integer(kint) :: item(6)
 
-    call monolis_std_log_string("monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main")
 
     n_node = 4
 
@@ -230,7 +230,7 @@ contains
     integer(kint) :: n_dof_list(3)
     integer(kint) :: n_dof_index(3)
 
-    call monolis_std_log_string("monolis_get_n_dof_index_test")
+    call monolis_std_global_log_string("monolis_get_n_dof_index")
 
     n_node = 3
 
@@ -253,7 +253,7 @@ contains
     implicit none
     type(monolis_structure) :: monolis
 
-    call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_R_test")
+    call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_R")
 
     call monolis_initialize_entire(monolis)
 
@@ -276,7 +276,7 @@ contains
     implicit none
     type(monolis_structure) :: monolis
 
-    call monolis_std_log_string("monolis_alloc_nonzero_pattern_mat_val_C_test")
+    call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_C")
 
     call monolis_initialize_entire(monolis)
 
@@ -306,7 +306,7 @@ contains
     integer(kint) :: itemR(10)
     integer(kint) :: permR(10)
 
-    call monolis_std_log_string("monolis_get_CSC_format_test")
+    call monolis_std_global_log_string("monolis_get_CSC_format")
 
     NC = 4
 

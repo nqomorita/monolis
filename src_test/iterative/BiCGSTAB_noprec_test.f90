@@ -26,7 +26,7 @@ contains
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
-    call monolis_std_log_string("monolis_solver_BiCGSTAB_noprec_test_main")
+    call monolis_std_global_log_string("monolis_solver_BiCGSTAB_noprec")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 

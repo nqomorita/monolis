@@ -22,7 +22,9 @@ contains
     real(kdouble) :: rX(4), rY(4)
     complex(kdouble) :: cX(4), cY(4)
 
-    call monolis_std_log_string("monolis_vec_copy_test")
+    call monolis_std_global_log_string("monolis_vec_copy_I")
+    call monolis_std_global_log_string("monolis_vec_copy_R")
+    call monolis_std_global_log_string("monolis_vec_copy_C")
 
     n = 2
 
@@ -73,7 +75,9 @@ contains
     real(kdouble) :: rX(4), rY(4), rZ(4), ra, rb
     complex(kdouble) :: cX(4), cY(4), cZ(4), ca, cb
 
-    call monolis_std_log_string("monolis_vec_AXPBY_test")
+    call monolis_std_global_log_string("monolis_vec_AXPBY_I")
+    call monolis_std_global_log_string("monolis_vec_AXPBY_R")
+    call monolis_std_global_log_string("monolis_vec_AXPBY_C")
 
     n = 2
 

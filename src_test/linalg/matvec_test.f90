@@ -27,7 +27,7 @@ contains
     integer(kint) :: n_node, n_elem, elem(2,4)
     real(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
-    call monolis_std_log_string("monolis_matvec_11_R_test")
+    call monolis_std_global_log_string("monolis_matvec_11_R")
 
     call monolis_initialize_entire(mat)
 
@@ -91,7 +91,7 @@ contains
     integer(kint) :: n_node, n_elem, elem(2,4)
     complex(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
-    call monolis_std_log_string("monolis_matvec_11_C_test")
+    call monolis_std_global_log_string("monolis_matvec_11_C")
 
     call monolis_initialize_entire(mat)
 
@@ -159,7 +159,7 @@ contains
     real(kdouble) :: a(12), b(12), b_th(12), mat_dense(12,12)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_matvec_33_R_test")
+    call monolis_std_global_log_string("monolis_matvec_33_R")
 
     call monolis_initialize_entire(mat)
 
@@ -218,7 +218,7 @@ contains
     complex(kdouble) :: a(12), b(12), b_th(12), mat_dense(12,12)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_matvec_33_C_test")
+    call monolis_std_global_log_string("monolis_matvec_33_C")
 
     call monolis_initialize_entire(mat)
 
@@ -277,7 +277,7 @@ contains
     real(kdouble) :: a(8), b(8), b_th(8), mat_dense(8,8)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_matvec_nn_R_test")
+    call monolis_std_global_log_string("monolis_matvec_nn_R")
 
     call monolis_initialize_entire(mat)
 
@@ -336,7 +336,7 @@ contains
     complex(kdouble) :: a(8), b(8), b_th(8), mat_dense(8,8)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_matvec_nn_C_test")
+    call monolis_std_global_log_string("monolis_matvec_nn_C")
 
     call monolis_initialize_entire(mat)
 

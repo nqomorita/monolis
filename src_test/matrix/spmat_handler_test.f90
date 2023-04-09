@@ -33,7 +33,7 @@ contains
     integer(kint) :: elem(2,3)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_set_scalar_to_sparse_matrix_R_test")
+    call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_R")
 
     n_node = 4
 
@@ -144,7 +144,7 @@ contains
     integer(kint) :: elem(2,3)
     logical :: is_find
 
-    call monolis_std_log_string("monolis_set_scalar_to_sparse_matrix_C_test")
+    call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_C")
 
     n_node = 4
 
