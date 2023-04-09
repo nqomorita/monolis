@@ -20,6 +20,7 @@ extern "C" {
 #include "monolis_spmat_nzpattern_util_c.h"
 #include "monolis_spmat_handler_util_c.h"
 #include "monolis_spmat_handler_c.h"
+#include "monolis_spmat_copy_c.h"
 #include "monolis_eigen_solver_c.h"
 
 #ifdef __cplusplus

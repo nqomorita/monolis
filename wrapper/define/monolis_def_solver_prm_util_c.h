@@ -41,6 +41,20 @@ void monolis_get_n_internal_vertex(
   MONOLIS* mat,
   int*     param);
 
+void monolis_get_internal_simple_mesh_list(
+  MONOLIS* mat,
+  int      n_elem,
+  int      n_base,
+  int**    elem,
+  int*     list);
+
+void monolis_get_internal_connectivity_list(
+  MONOLIS* mat,
+  int      n_elem,
+  int*     index,
+  int*     item,
+  int*     list);
+
 void monolis_set_method(
   MONOLIS* mat,
   int      param);

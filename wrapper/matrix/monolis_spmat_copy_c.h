@@ -12,15 +12,15 @@ void monolis_copy_mat_value_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_A_R(
+void monolis_copy_mat_value_matrix_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_X_R(
+void monolis_copy_mat_value_solution_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_B_R(
+void monolis_copy_mat_value_rhs_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
@@ -28,40 +28,40 @@ void monolis_copy_mat_value_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_A_C(
+void monolis_copy_mat_value_matrix_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_X_C(
+void monolis_copy_mat_value_solution_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
-void monolis_copy_mat_value_B_C(
+void monolis_copy_mat_value_rhs_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
 void monolis_clear_mat_value_R(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_A_R(
+void monolis_clear_mat_value_matrix_R(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_X_R(
+void monolis_clear_mat_value_solution_R(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_B_R(
+void monolis_clear_mat_value_rhs_R(
   MONOLIS* mat);
 
 void monolis_clear_mat_value_C(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_A_C(
+void monolis_clear_mat_value_matrix_C(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_X_C(
+void monolis_clear_mat_value_solution_C(
   MONOLIS* mat);
 
-void monolis_clear_mat_value_B_C(
+void monolis_clear_mat_value_rhs_C(
   MONOLIS* mat);
 
 #ifdef __cplusplus

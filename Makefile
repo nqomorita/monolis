@@ -282,6 +282,7 @@ cp_header:
 	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
+	$(CP) ./wrapper/matrix/monolis_spmat_copy_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/

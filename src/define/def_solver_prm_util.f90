@@ -205,7 +205,7 @@ contains
   end subroutine monolis_get_n_internal_vertex
 
   !> @ingroup com
-  !> monolis 構造体に内部領域に属するコネクティビティのリストを取得
+  !> monolis 構造体に内部領域に属する単一メッシュのリストを取得
   subroutine monolis_get_internal_simple_mesh_list(monolis, n_elem, n_base, elem, list)
     implicit none
     !> monolis 構造体
@@ -218,7 +218,7 @@ contains
     integer(kint) :: elem(:,:)
     !> 内部領域に属する自由度数
     integer(kint) :: list(:)
-    integer(kint) :: i, j, n_internal_vertex, my_rank
+    integer(kint) :: i, in, j, id(n_base), n_internal_vertex, my_rank
     integer(kint), allocatable :: domain_id(:)
 
     call monolis_get_n_internal_vertex(monolis, n_internal_vertex)
@@ -233,12 +233,59 @@ contains
 
     call monolis_mpi_update_I(monolis%COM, 1, domain_id)
 
+    list = 0
     do i = 1, n_elem
       do j = 1, n_base
-
+        id(j) = domain_id(elem(j,i))
       enddo
+      in = minval(id)
+      if(in == my_rank) list(i) = 1
     enddo
   end subroutine monolis_get_internal_simple_mesh_list
+
+  !> @ingroup com
+  !> monolis 構造体に内部領域に属するコネクティビティのリストを取得
+  subroutine monolis_get_internal_connectivity_list(monolis, n_elem, index, item, list)
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: monolis
+    !> 要素数
+    integer(kint) :: n_elem
+    !> 要素コネクティビティの index 配列
+    integer(kint) :: index(:)
+    !> 要素コネクティビティの item 配列
+    integer(kint) :: item(:)
+    !> 内部領域に属する自由度数
+    integer(kint) :: list(:)
+    integer(kint) :: i, in, j, jS, jE, n_internal_vertex, my_rank
+    integer(kint), allocatable :: id(:)
+    integer(kint), allocatable :: domain_id(:)
+
+    call monolis_get_n_internal_vertex(monolis, n_internal_vertex)
+
+    my_rank = monolis_get_local_my_rank(monolis)
+
+    call monolis_alloc_I_1d(domain_id, monolis%MAT%NP)
+
+    do i = 1, n_internal_vertex
+      domain_id(i) = my_rank
+    enddo
+
+    call monolis_mpi_update_I(monolis%COM, 1, domain_id)
+
+    list = 0
+    do i = 1, n_elem
+      jS = index(i) + 1
+      jE = index(i + 1)
+      call monolis_alloc_I_1d(id, jE - jS + 1)
+      do j = jS, jE
+        id(j - jS + 1) = domain_id(item(j))
+      enddo
+      call monolis_dealloc_I_1d(id)
+      in = minval(id)
+      if(in == my_rank) list(i) = 1
+    enddo
+  end subroutine monolis_get_internal_connectivity_list
 
   !> ソルバの設定
   subroutine monolis_set_method(monolis, param)
@@ -524,5 +571,3 @@ contains
     param = monolis%PRM%Rarray(monolis_R_time_comm_spmv)
   end subroutine monolis_get_time_comm_spmv
 end module mod_monolis_def_solver_util
-
-

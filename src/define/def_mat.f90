@@ -65,7 +65,7 @@ module mod_monolis_def_mat
     integer(kint), pointer :: perm(:) => null()
   end type monolis_mat_CSC
 
-  !> 行列構造体（セパレート CSR 構造）
+  !> 行列構造体（格子構造）
   !type monolis_mat_lattice
   !end type monolis_mat_lattice
 
