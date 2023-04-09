@@ -49,8 +49,8 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat_LDU) :: monoMAT
 
-    call FORM_ILU0_nn &
-      & (monoMAT%N, monoMAT%NDOF, monoMAT%N, monoMAT%NPL, monoMAT%NPU, &
+    call FORM_ILU0_nn( &
+      &  monoMAT%N, monoMAT%NDOF, monoMAT%N, monoMAT%NPL, monoMAT%NPU, &
       &  monoMAT%D, monoMAT%L, monoMAT%indexL, monoMAT%itemL, &
       &  monoMAT%U, monoMAT%indexU, monoMAT%itemU, 1.0d0, 1.0d0)
   end subroutine monolis_fact_LU_inner_nn

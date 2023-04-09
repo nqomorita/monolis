@@ -8,7 +8,7 @@ module mod_monolis_precond_Jacobi
 
 contains
 
-  subroutine  monolis_precond_Jacobi_setup(monoPRM, monoCOM, monoMAT)
+  subroutine monolis_precond_Jacobi_setup(monoPRM, monoCOM, monoMAT)
     implicit none
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
