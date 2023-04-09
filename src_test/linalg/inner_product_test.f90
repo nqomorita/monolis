@@ -29,10 +29,10 @@ contains
 
     call monolis_initialize_entire(monolis)
 
-    call monolis_set_communicator(monolis, monolis_mpi_get_global_comm())
-    call monolis_set_my_rank(monolis, monolis_mpi_get_global_my_rank())
-    call monolis_set_comm_size(monolis, monolis_mpi_get_global_comm_size())
-    call monolis_set_n_internal_vertex(monolis, 2)
+    call monolis_com_set_communicator(monolis%COM, monolis_mpi_get_global_comm())
+    call monolis_com_set_my_rank(monolis%COM, monolis_mpi_get_global_my_rank())
+    call monolis_com_set_comm_size(monolis%COM, monolis_mpi_get_global_comm_size())
+    call monolis_com_set_n_internal_vertex(monolis%COM, 2)
 
     monolis%MAT%N = 2
 

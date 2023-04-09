@@ -135,25 +135,4 @@ void monolis_def_solver_util_c_test(){
   mat.prm.Rarray[MONOLIS_R_TIME_COMM_SPMV] = 9.0;
   monolis_get_time_comm_spmv(&mat, &r_param);
   monolis_test_check_eq_R1("monolis_def_solver_util_c_test 24", r_param, 9.0);
-
-  monolis_set_input_top_directory_name(&mat, "test_a");
-  if(strcmp(mat.prm.com_top_dir_name, "test_a") == 0){
-    monolis_test_assert_pass("monolis_def_solver_util_c_test 25");
-  } else {
-    monolis_test_assert_fail("monolis_def_solver_util_c_test 25", "");
-  }
-
-  monolis_set_input_part_directory_name(&mat, "test_b");
-  if(strcmp(mat.prm.com_part_dir_name, "test_b") == 0){
-    monolis_test_assert_pass("monolis_def_solver_util_c_test 26");
-  } else {
-    monolis_test_assert_fail("monolis_def_solver_util_c_test 26", "");
-  }
-
-  monolis_set_input_file_name(&mat, "test_c");
-  if(strcmp(mat.prm.com_file_name, "test_c") == 0){
-    monolis_test_assert_pass("monolis_def_solver_util_c_test 27");
-  } else {
-    monolis_test_assert_fail("monolis_def_solver_util_c_test 27", "");
-  }
 }

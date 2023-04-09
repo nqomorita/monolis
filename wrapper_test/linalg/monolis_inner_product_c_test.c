@@ -23,10 +23,10 @@ void monolis_inner_product_c_test(){
 
   monolis_initialize_entire(&mat);
 
-  monolis_set_communicator(&mat, monolis_mpi_get_global_comm());
-  monolis_set_my_rank(&mat, monolis_mpi_get_global_my_rank());
-  monolis_set_comm_size(&mat, monolis_mpi_get_global_comm_size());
-  monolis_set_n_internal_vertex(&mat, 2);
+  monolis_com_set_communicator(&mat.com, monolis_mpi_get_global_comm());
+  monolis_com_set_my_rank(&mat.com, monolis_mpi_get_global_my_rank());
+  monolis_com_set_comm_size(&mat.com, monolis_mpi_get_global_comm_size());
+  monolis_com_set_n_internal_vertex(&mat.com, 2);
 
   mat.mat.N = 2;
 

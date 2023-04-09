@@ -140,8 +140,7 @@ SRC_LINALG_C = \
 matvec_wrap.f90 \
 inner_product_wrap.f90 \
 monolis_matvec_c.c \
-monolis_inner_product_c.c \
-monolis_vec_util_c.c
+monolis_inner_product_c.c
 
 SRC_MAT_C = \
 monolis_spmat_copy_c.c \
