@@ -666,7 +666,7 @@ contains
     shift = 0
     nmin = 1
     do i = 1, n_domain
-      in = minval(mesh(i)%eid)
+      in = minval(mesh(i)%nid)
       if(in < nmin) nmin = in
     enddo
     if(nmin == 0) shift = 1
@@ -679,7 +679,7 @@ contains
         write(20,"(a)") trim(label)
         write(20,"(i0,x,i0)") mesh(i)%nnode, ndof
         do j = 1, mesh(i)%nnode
-          in = mesh(i)%eid(j) + shift
+          in = mesh(i)%nid(j) + shift
           write(20,"(20(i0,x))") (val(k,in), k = 1, ndof)
         enddo
       close(20)
