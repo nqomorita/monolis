@@ -45,7 +45,7 @@ contains
     mout%MAT%ndof = min%MAT%ndof
 
     ndof2 = min%MAT%ndof*min%MAT%ndof
-    allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%n)), source = 0.0d0)
+    allocate(mout%MAT%A(ndof2*min%MAT%index(min%MAT%np)), source = 0.0d0)
     allocate(mout%MAT%X(min%MAT%np*min%MAT%ndof), source = 0.0d0)
     allocate(mout%MAT%B(min%MAT%np*min%MAT%ndof), source = 0.0d0)
   end subroutine monolis_copy_mat_profile

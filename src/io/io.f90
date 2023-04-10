@@ -485,12 +485,12 @@ contains
       write(20,"(i0,x,i0)")nnode
       do i = 1, nnode
         in = nid(i)
-        write(20,"(1p3e22.14)") node(1,in), node(2,in), node(3,in)
+        write(20,"(1p3e25.14)") node(1,in), node(2,in), node(3,in)
       enddo
     else
       write(20,"(i0)")nnode
       do i = 1, nnode
-        write(20,"(1p3e22.14)") node(1,i), node(2,i), node(3,i)
+        write(20,"(1p3e25.14)") node(1,i), node(2,i), node(3,i)
       enddo
     endif
     close(20)
@@ -842,7 +842,7 @@ contains
     open(20, file = trim(output_dir)//"mesh.parted.inp", status = "replace")
       write(20,"(5i12)") nnode, nelem, 1, 1, 0
       do i = 1, nnode
-        write(20,"(i0,1p3e12.5)") i, node(1,i), node(2,i), node(3,i)
+        write(20,"(i0,1p3e13.5)") i, node(1,i), node(2,i), node(3,i)
       enddo
 
       if(nbase == 3) etype = " tri  "
