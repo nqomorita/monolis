@@ -11,12 +11,17 @@ module mod_monolis
   use mod_monolis_spmat_handler
   use mod_monolis_spmat_nonzero_pattern_util
   use mod_monolis_spmat_nonzero_pattern
+  use mod_monolis_spmat_copy
   use mod_monolis_inner_product
   use mod_monolis_converge
   use mod_monolis_matvec
   use mod_monolis_vec_util
   use mod_monolis_solve
+  use mod_monolis_precond
+  use mod_monolis_lapack
   use mod_monolis_eigen_solver
+  use mod_monolis_eigen_lanczos
+  use mod_monolis_eigen_lanczos_util
 
   !> @defgroup def_init 初期化・終了処理関数群
   !> 初期化・終了処理に関連する関数グループ
