@@ -184,7 +184,7 @@ contains
           jn = node_list(i)%eid(j)
           kS = graph%index(jn) + 1
           kE = graph%index(jn+1)
-          write(20,"(i0,x,i0,$)")j, kE-kS+1
+          write(20,"(i0,x,i0,$)")j + shift, kE-kS+1
           do k = kS, kE
             kn = graph%item(k) + shift
             call monolis_bsearch_int(mesh(i)%nid, 1, nnode, kn, idx)
@@ -201,7 +201,7 @@ contains
         in = node_list(i)%nelem_in + node_list(i)%nelem_out
         write(20,"(i0)")in
         do j = 1, in
-          write(20,"(i0,x,i0,x,i0)") j, 1, node_list(i)%eid(j) + shift
+          write(20,"(i0,x,i0,x,i0)") j + shift, 1, node_list(i)%eid(j) + shift
         enddo
       close(20)
 
