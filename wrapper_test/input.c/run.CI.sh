@@ -9,7 +9,7 @@ mpif90 -I../../include \
 
 ./mesher -i mtx.dat
 
-../../bin/gedatsu_simple_mesh_partitioner -n 2
+../../bin/gedatsu_simple_mesh_partitioner -n 3
 
 echo "solver"
 
@@ -22,4 +22,4 @@ mpif90 -I../../include \
 
 ./solver
 
-mpirun --oversubscribe --allow-run-as-root -np 2 solver
+mpirun --oversubscribe --allow-run-as-root -np 3 solver

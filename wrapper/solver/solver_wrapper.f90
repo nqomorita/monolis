@@ -25,10 +25,10 @@ contains
     integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
-    integer(c_int), intent(in), target :: Iarray(100)
-    real(c_double), intent(in), target :: Rarray(100)
+    integer(c_int), target :: Iarray(100)
+    real(c_double), target :: Rarray(100)
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), intent(in), target :: X(NDOF*NP)
+    real(c_double), target :: X(NDOF*NP)
     real(c_double), intent(in), target :: B(NDOF*NP)
     integer(kint) :: i
 
@@ -64,6 +64,14 @@ contains
     enddo
 
     call monolis_solve_main_R(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+
+    do i = 1, monolis_prm_Iarray_size - 1
+      Iarray(i + 1) = monoliS%PRM%Iarray(i)
+    enddo
+
+    do i = 1, monolis_prm_Rarray_size - 1
+      Rarray(i + 1) = monoliS%PRM%Rarray(i)
+    enddo
   end subroutine monolis_solve_R_c
 
   subroutine monolis_solve_C_c(N, NP, NZ, NDOF, A, X, B, index, item, &
@@ -83,10 +91,10 @@ contains
     integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
     integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
     integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
-    integer(c_int), intent(in), target :: Iarray(100)
-    real(c_double), intent(in), target :: Rarray(100)
+    integer(c_int), target :: Iarray(100)
+    real(c_double), target :: Rarray(100)
     complex(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), intent(in), target :: X(NDOF*NP)
+    complex(c_double), target :: X(NDOF*NP)
     complex(c_double), intent(in), target :: B(NDOF*NP)
     integer(kint) :: i
 
@@ -122,5 +130,13 @@ contains
     enddo
 
     call monolis_solve_main_C(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+
+    do i = 1, monolis_prm_Iarray_size - 1
+      Iarray(i + 1) = monoliS%PRM%Iarray(i)
+    enddo
+
+    do i = 1, monolis_prm_Rarray_size - 1
+      Rarray(i + 1) = monoliS%PRM%Rarray(i)
+    enddo
   end subroutine monolis_solve_C_c
 end module mod_monolis_solve_wrapper

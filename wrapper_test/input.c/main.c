@@ -111,7 +111,7 @@ void monolis_solver_parallel_R_test(){
   MONOLIS mat;
   const char* fname;
   int n_node, n_elem, n_base, n_id, n_coef;
-  int eid[2], iter, prec, i, j, k;
+  int eid[2], iter, prec, i, j, k, iter_conv;
   int* global_eid;
   int** elem;
   double val;
@@ -194,10 +194,18 @@ void monolis_solver_parallel_R_test(){
         monolis_test_check_eq_R1("monolis_solver_parallel_R_test Clang", 1.0, a[i]);
       }
 
+      monolis_get_converge_iter(&mat, &iter_conv);
+
+      if(iter_conv <= 1){
+        monolis_test_assert_fail("monolis_solver_parallel_R_test Clang", "conv iter is less than 1");
+      }
+
       monolis_mpi_global_barrier();
     }
   }
 
+
+  /* eigen solver */
   monolis_std_log_string("monolis_solver_parallel_test eigen");
 
   int n_get_eigen = 10;

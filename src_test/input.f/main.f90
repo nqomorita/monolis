@@ -21,7 +21,7 @@ program main
     type(monolis_structure) :: mat !> 疎行列変数
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
-    integer(kint) :: i, j
+    integer(kint) :: i, j, iter_conv
     integer(kint) :: n_get_eigen
     real(kdouble) :: val
     character(monolis_charlen) :: fname
@@ -101,13 +101,22 @@ program main
 
       b = 1.0d0
 
-      write(*,*)"iter", iter, ", prec", prec
+      if(monolis_mpi_get_global_my_rank() == 0)then
+        write(*,*)"iter", iter, ", prec", prec
+      endif
       call monolis_test_check_eq_R("monolis_solver_parallel_R_test", a, b)
+
+      call monolis_get_converge_iter(mat, iter_conv)
+      if(iter_conv <= 1)then
+        call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
+      endif
 
       call monolis_mpi_global_barrier();
     enddo
     enddo
 
+
+    !> eigen test
     call monolis_std_log_string("monolis_solver_parallel_test eigen")
 
     n_get_eigen = 10
