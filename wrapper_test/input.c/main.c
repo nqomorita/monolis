@@ -115,6 +115,7 @@ void monolis_solver_parallel_R_test(){
   int* global_eid;
   int** elem;
   double val;
+  double res_conv;
   double* coef;
   double* a;
   double* b;
@@ -195,9 +196,13 @@ void monolis_solver_parallel_R_test(){
       }
 
       monolis_get_converge_iter(&mat, &iter_conv);
-
       if(iter_conv <= 1){
         monolis_test_assert_fail("monolis_solver_parallel_R_test Clang", "conv iter is less than 1");
+      }
+
+      monolis_get_converge_residual(&mat, &res_conv);
+      if(res_conv > 1.0e-10){
+        monolis_test_assert_fail("monolis_solver_parallel_R_test", "residual is greater than ths");
       }
 
       monolis_mpi_global_barrier();
@@ -246,9 +251,10 @@ void monolis_solver_parallel_C_test(){
   MONOLIS mat;
   const char* fname;
   int n_node, n_elem, n_base, n_id, n_coef;
-  int eid[2], iter, prec, i, j;
+  int eid[2], iter, prec, i, j, iter_conv;
   int* global_eid;
   int** elem;
+  double res_conv;
   double complex val;
   double* coef;
   double complex* a;
@@ -327,6 +333,16 @@ void monolis_solver_parallel_C_test(){
 
       for(i = 0; i < n_node; i++){
         monolis_test_check_eq_C1("monolis_solver_parallel_R_test Clang", 1.0 + 1.0*I, a[i]);
+      }
+
+      monolis_get_converge_iter(&mat, &iter_conv);
+      if(iter_conv <= 1){
+        monolis_test_assert_fail("monolis_solver_parallel_R_test Clang", "conv iter is less than 1");
+      }
+
+      monolis_get_converge_residual(&mat, &res_conv);
+      if(res_conv > 1.0e-10){
+        monolis_test_assert_fail("monolis_solver_parallel_R_test", "residual is greater than ths");
       }
 
       monolis_mpi_global_barrier();

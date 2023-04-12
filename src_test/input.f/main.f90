@@ -23,7 +23,7 @@ program main
     integer(kint) :: n_coef, eid(2)
     integer(kint) :: i, j, iter_conv
     integer(kint) :: n_get_eigen
-    real(kdouble) :: val
+    real(kdouble) :: val, res_conv
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:)
     real(kdouble), allocatable :: coef(:), node(:,:)
@@ -111,6 +111,12 @@ program main
         call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
       endif
 
+      call monolis_get_converge_residual(mat, res_conv)
+
+      if(res_conv > 1.0d-10)then
+        call monolis_test_assert_fail("monolis_solver_parallel_R_test", "residual is greater than ths")
+      endif
+
       call monolis_mpi_global_barrier();
     enddo
     enddo
@@ -155,8 +161,8 @@ program main
     type(monolis_structure) :: mat !> 疎行列変数
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
-    integer(kint) :: i
-    real(kdouble) :: r
+    integer(kint) :: i, iter_conv
+    real(kdouble) :: r, res_conv
     complex(kdouble) :: val
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:)
@@ -232,6 +238,17 @@ program main
       b = (1.0d0, 1.0d0)
 
       call monolis_test_check_eq_C("monolis_solver_parallel_C_test", a, b)
+
+      call monolis_get_converge_iter(mat, iter_conv)
+      if(iter_conv <= 1)then
+        call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
+      endif
+
+      call monolis_get_converge_residual(mat, res_conv)
+
+      if(res_conv > 1.0d-10)then
+        call monolis_test_assert_fail("monolis_solver_parallel_R_test", "residual is greater than ths")
+      endif
 
       call monolis_mpi_global_barrier();
     enddo
