@@ -73,11 +73,11 @@ contains
         graph%ebase_func, graph%connectivity, node_list(i), shift)
 
       fname = trim(output_dir)//"node.id."//trim(cnum)
-      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid)
+      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, mesh%nid, node_list(i)%nid, shift)
 
       fname = trim(output_dir)//"connectivity.id."//trim(cnum)
       call monolis_output_mesh_global_eid(fname, mesh%nelem, node_list(i)%nelem, node_list(i)%nelem_in, &
-      &  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func)
+      &  mesh%eid, node_list(i)%eid, mesh%nbase_func, graph%ebase_func, shift)
 
       fname = trim(output_dir)//"monolis.send."//trim(cnum)
       call monolis_output_mesh_comm(fname, comm(i)%send_n_neib, comm(i)%send_neib_pe, &
@@ -120,7 +120,7 @@ contains
         node_list(i)%index, node_list(i)%item, shift)
 
       fname = trim(output_dir)//"node.id."//trim(cnum)
-      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, graph_format%point_id, node_list(i)%nid)
+      call monolis_output_mesh_global_nid(fname, node_list(i)%nnode, graph_format%point_id, node_list(i)%nid, shift)
 
       fname = trim(output_dir)//"connectivity.id."//trim(cnum)
       call monolis_output_mesh_global_eid_null(fname)
@@ -543,24 +543,24 @@ contains
     close(20)
   end subroutine monolis_output_mesh_elem_ref
 
-  subroutine monolis_output_mesh_global_nid(fname, nnode, global_nid, nid)
+  subroutine monolis_output_mesh_global_nid(fname, nnode, global_nid, nid, shift)
     implicit none
-    integer(kint) :: i, in, nnode, global_nid(:), nid(:)
+    integer(kint) :: i, in, nnode, shift, global_nid(:), nid(:)
     character :: fname*100
 
     open(20, file = fname, status = "replace")
       write(20,"(i0)")nnode
       do i = 1, nnode
         in = nid(i)
-        write(20,"(i0,x,i0,x,i0)") i, 1, global_nid(in)
+        write(20,"(i0,x,i0,x,i0)") i + shift, 1, global_nid(in)
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_nid
 
   subroutine monolis_output_mesh_global_eid(fname, nelem_all, nelem, nelem_in, global_eid, eid, &
-  &  nbase, ebase_func)
+  &  nbase, ebase_func, shift)
     implicit none
-    integer(kint) :: i, in, jn, kn, nelem, nelem_in, global_eid(:), eid(:), nelem_all, jE, jS
+    integer(kint) :: i, in, jn, kn, nelem, nelem_in, global_eid(:), eid(:), nelem_all, jE, jS, shift
     integer(kint) :: ebase_func(:), nbase
     character :: fname*100
 
@@ -580,7 +580,7 @@ contains
       do i = 1, nelem
         in = eid(i)
         if(in > nelem_all) cycle
-        write(20,"(i0,x,i0,x,i0)") i, 1, global_eid(in)
+        write(20,"(i0,x,i0,x,i0)") i - shift, 1, global_eid(in)
       enddo
     close(20)
   end subroutine monolis_output_mesh_global_eid
