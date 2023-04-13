@@ -9,10 +9,12 @@ contains
 
   !> @ingroup linalg
   !> 疎行列ベクトル積（実数型）
-  subroutine monolis_matvec_product_R(monolis, X, Y)
+  subroutine monolis_matvec_product_R(monolis, monoCOM, X, Y)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> 右辺ベクトル
     real(kdouble) :: X(:)
     !> 結果ベクトル
@@ -21,15 +23,17 @@ contains
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
-    call monolis_matvec_product_main_R(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
+    call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_R
 
   !> @ingroup linalg
   !> 疎行列ベクトル積（複素数型）
-  subroutine monolis_matvec_product_C(monolis, X, Y)
+  subroutine monolis_matvec_product_C(monolis, monoCOM, X, Y)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> 右辺ベクトル
     complex(kdouble) :: X(:)
     !> 結果ベクトル
@@ -38,7 +42,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_matvec_product_C")
 
-    call monolis_matvec_product_main_C(monolis%COM, monolis%MAT, X, Y, tspmv, tcomm)
+    call monolis_matvec_product_main_C(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
   end subroutine monolis_matvec_product_C
 
   !> @ingroup dev_linalg

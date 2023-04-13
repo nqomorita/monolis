@@ -8,21 +8,22 @@
 #include "monolis_eigen_solver_c.h"
 
 void monolis_eigen_standard_lanczos_R(
-  MONOLIS* mat,
-  int      n_get_eigen,
-  double   ths,
-  int      maxiter,
-  double*  eigen_value,
-  double** eigen_mode,
-  bool*    is_Dirichlet_bc)
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_get_eigen,
+  double       ths,
+  int          maxiter,
+  double*      eigen_value,
+  double**     eigen_mode,
+  bool*        is_Dirichlet_bc)
 {
   int n = mat->mat.N;
-  if(mat->com.comm_size > 1) n = mat->com.n_internal_vertex;
+  if(com->comm_size > 1) n = com->n_internal_vertex;
   int np = mat->mat.NP;
   int nz = mat->mat.CSR.index[np];
   int n_dof = mat->mat.NDOF;
-  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
-  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int recv_nitem = com->recv_index[com->recv_n_neib];
+  int send_nitem = com->send_index[com->send_n_neib];
   int i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
@@ -48,19 +49,19 @@ void monolis_eigen_standard_lanczos_R(
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     /* comm */
-    mat->com.my_rank,
-    mat->com.comm,
-    mat->com.comm_size,
-    mat->com.recv_n_neib,
+    com->my_rank,
+    com->comm,
+    com->comm_size,
+    com->recv_n_neib,
     recv_nitem,
-    mat->com.recv_neib_pe,
-    mat->com.recv_index,
-    mat->com.recv_item,
-    mat->com.send_n_neib,
+    com->recv_neib_pe,
+    com->recv_index,
+    com->recv_item,
+    com->send_n_neib,
     send_nitem,
-    mat->com.send_neib_pe,
-    mat->com.send_index,
-    mat->com.send_item,
+    com->send_neib_pe,
+    com->send_index,
+    com->send_item,
     /* parameter */
     mat->prm.Iarray,
     mat->prm.Rarray,
@@ -82,21 +83,22 @@ void monolis_eigen_standard_lanczos_R(
 }
 
 void monolis_eigen_inverted_standard_lanczos_R(
-  MONOLIS* mat,
-  int      n_get_eigen,
-  double   ths,
-  int      maxiter,
-  double*  eigen_value,
-  double** eigen_mode,
-  bool*    is_Dirichlet_bc)
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_get_eigen,
+  double       ths,
+  int          maxiter,
+  double*      eigen_value,
+  double**     eigen_mode,
+  bool*        is_Dirichlet_bc)
 {
   int n = mat->mat.N;
-  if(mat->com.comm_size > 1) n = mat->com.n_internal_vertex;
+  if(com->comm_size > 1) n = com->n_internal_vertex;
   int np = mat->mat.NP;
   int nz = mat->mat.CSR.index[np];
   int n_dof = mat->mat.NDOF;
-  int recv_nitem = mat->com.recv_index[mat->com.recv_n_neib];
-  int send_nitem = mat->com.send_index[mat->com.send_n_neib];
+  int recv_nitem = com->recv_index[com->recv_n_neib];
+  int send_nitem = com->send_index[com->send_n_neib];
   int i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
@@ -122,19 +124,19 @@ void monolis_eigen_inverted_standard_lanczos_R(
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     /* comm */
-    mat->com.my_rank,
-    mat->com.comm,
-    mat->com.comm_size,
-    mat->com.recv_n_neib,
+    com->my_rank,
+    com->comm,
+    com->comm_size,
+    com->recv_n_neib,
     recv_nitem,
-    mat->com.recv_neib_pe,
-    mat->com.recv_index,
-    mat->com.recv_item,
-    mat->com.send_n_neib,
+    com->recv_neib_pe,
+    com->recv_index,
+    com->recv_item,
+    com->send_n_neib,
     send_nitem,
-    mat->com.send_neib_pe,
-    mat->com.send_index,
-    mat->com.send_item,
+    com->send_neib_pe,
+    com->send_index,
+    com->send_item,
     /* parameter */
     mat->prm.Iarray,
     mat->prm.Rarray,

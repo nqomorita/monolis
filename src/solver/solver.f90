@@ -19,10 +19,12 @@ module mod_monolis_solve
 contains
 
   !> 線形ソルバ関数（実数型）
-  subroutine monolis_solve_R(monolis, B, X)
+  subroutine monolis_solve_R(monolis, monoCOM, B, X)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
     !> 右辺ベクトル
     real(kdouble) :: B(:)
     !> 解ベクトル
@@ -32,18 +34,20 @@ contains
 
     call monolis_set_initial_solution_R(monolis%MAT, X)
 
-    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
-    call monolis_solve_main_R(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_R(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_R(monolis%MAT, X)
   end subroutine monolis_solve_R
 
   !> 線形ソルバ関数（複素数型）
-  subroutine monolis_solve_C(monolis, B, X)
+  subroutine monolis_solve_C(monolis, monoCOM, B, X)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
     !> 右辺ベクトル
     complex(kdouble) :: B(:)
     !> 解ベクトル
@@ -53,9 +57,9 @@ contains
 
     call monolis_set_initial_solution_C(monolis%MAT, X)
 
-    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
-    call monolis_solve_main_C(monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC)
+    call monolis_solve_main_C(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
 
     call monolis_get_solution_C(monolis%MAT, X)
   end subroutine monolis_solve_C
@@ -74,7 +78,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
 
-    call monolis_timer_initialize(monoPRM, monoCOM)
+    call monolis_timer_initialize(monoPRM)
 
     call monolis_check_input_param(monoCOM, monoMAT)
 
@@ -101,7 +105,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_solve_main_C")
 
-    call monolis_timer_initialize(monoPRM, monoCOM)
+    call monolis_timer_initialize(monoPRM)
 
     call monolis_check_input_param(monoCOM, monoMAT)
 

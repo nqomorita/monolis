@@ -86,8 +86,8 @@ contains
 
       call monolis_matvec_product_main_R(monoCOM, monoMAT, S, T, tspmv, tcomm_spmv)
 
-      call monolis_inner_product_main_R_no_comm(monoCOM, N, NDOF, T, S, CG(1))
-      call monolis_inner_product_main_R_no_comm(monoCOM, N, NDOF, T, T, CG(2))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, T, S, CG(1))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, T, T, CG(2))
       call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
 
       omega = CG(1) / CG(2)

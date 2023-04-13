@@ -11,10 +11,12 @@ contains
 
   !> Lanczos 法（順反復、最大固有値、実数型）
   subroutine monolis_eigen_standard_lanczos_R( &
-    & monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    & monolis, monoCOM, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
     !> 取得固有値数
     integer(kint) :: n_get_eigen
     !> 収束判定閾値
@@ -28,18 +30,20 @@ contains
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
 
-    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
     call monolis_eigen_standard_lanczos_R_main( &
-      & monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
+      & monolis%PRM, monoCOM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_standard_lanczos_R
 
   !> Lanczos 法（逆反復、最小固有値、実数型）
   subroutine monolis_eigen_inverted_standard_lanczos_R( &
-    & monolis, n_get_eigen, ths, maxiter, val, vec, is_bc)
+    & monolis, monoCOM, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> 通信テーブル構造体
+    type(monolis_com) :: monoCOM
     !> 取得固有値数
     integer(kint) :: n_get_eigen
     !> 収束判定閾値
@@ -53,10 +57,10 @@ contains
     !> Dirhchlet 境界条件判定フラグ
     logical :: is_bc(:)
 
-    if(monolis%COM%comm_size > 1) monolis%MAT%N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
     call monolis_eigen_inverted_standard_lanczos_R_main( &
-      & monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
+      & monolis%PRM, monoCOM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
   end subroutine monolis_eigen_inverted_standard_lanczos_R
 
 end module mod_monolis_eigen_solver

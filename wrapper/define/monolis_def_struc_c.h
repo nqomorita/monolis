@@ -12,7 +12,6 @@ extern "C" {
 
 typedef struct {
   MONOLIS_PRM prm;
-  MONOLIS_COM com;
   MONOLIS_MAT mat;
   MONOLIS_MAT prec;
 } MONOLIS;
@@ -22,9 +21,6 @@ void monolis_global_initialize();
 void monolis_global_finalize();
 
 void monolis_initialize(
-  MONOLIS*    mat);
-
-void monolis_initialize_entire(
   MONOLIS*    mat);
 
 void monolis_finalize(

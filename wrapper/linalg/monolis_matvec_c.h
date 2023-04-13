@@ -10,12 +10,14 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 void monolis_matvec_product_R(
-  MONOLIS* mat,
-  double*  x,
-  double*  y);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  double*      x,
+  double*      y);
 
 void monolis_matvec_product_C(
   MONOLIS*        mat,
+  MONOLIS_COM*    com,
   double complex* x,
   double complex* y);
 

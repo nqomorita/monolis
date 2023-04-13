@@ -17,6 +17,7 @@ contains
     & bind(c, name = "monolis_eigen_standard_lanczos_R_c_main")
     implicit none
     type(monolis_structure) :: monolis
+    type(monolis_com) :: monoCOM
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
@@ -48,17 +49,17 @@ contains
     call monolis_palloc_R_1d(monolis%MAT%R%B, NP*NDOF)
 
     !> for monoCOM
-    monoliS%COM%my_rank = my_rank
-    monoliS%COM%comm = comm
-    monoliS%COM%comm_size = comm_size
-    monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
-    monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    monoCOM%my_rank = my_rank
+    monoCOM%comm = comm
+    monoCOM%comm_size = comm_size
+    monoCOM%recv_n_neib = recv_n_neib
+    monoCOM%recv_neib_pe => recv_neib_pe
+    monoCOM%recv_index => recv_index
+    monoCOM%recv_item => recv_item
+    monoCOM%send_n_neib = send_n_neib
+    monoCOM%send_neib_pe => send_neib_pe
+    monoCOM%send_index => send_index
+    monoCOM%send_item => send_item
 
     do i = 1, monolis_prm_Iarray_size - 1
       monoliS%PRM%Iarray(i) = Iarray(i + 1)
@@ -75,7 +76,7 @@ contains
     enddo
 
     call monolis_eigen_standard_lanczos_R_main( &
-      & monolis%PRM, monolis%COM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
+      & monolis%PRM, monoCOM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
   end subroutine monolis_eigen_standard_lanczos_R_c
 
   subroutine monolis_eigen_inverted_standard_lanczos_R_c(N, NP, NZ, NDOF, A, index, item, &
@@ -87,6 +88,7 @@ contains
     & bind(c, name = "monolis_eigen_inverted_standard_lanczos_R_c_main")
     implicit none
     type(monolis_structure) :: monolis
+    type(monolis_com) :: monoCOM
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
@@ -118,17 +120,17 @@ contains
     call monolis_palloc_R_1d(monolis%MAT%R%B, NP*NDOF)
 
     !> for monoCOM
-    monoliS%COM%my_rank = my_rank
-    monoliS%COM%comm = comm
-    monoliS%COM%comm_size = comm_size
-    monoliS%COM%recv_n_neib = recv_n_neib
-    monoliS%COM%recv_neib_pe => recv_neib_pe
-    monoliS%COM%recv_index => recv_index
-    monoliS%COM%recv_item => recv_item
-    monoliS%COM%send_n_neib = send_n_neib
-    monoliS%COM%send_neib_pe => send_neib_pe
-    monoliS%COM%send_index => send_index
-    monoliS%COM%send_item => send_item
+    monoCOM%my_rank = my_rank
+    monoCOM%comm = comm
+    monoCOM%comm_size = comm_size
+    monoCOM%recv_n_neib = recv_n_neib
+    monoCOM%recv_neib_pe => recv_neib_pe
+    monoCOM%recv_index => recv_index
+    monoCOM%recv_item => recv_item
+    monoCOM%send_n_neib = send_n_neib
+    monoCOM%send_neib_pe => send_neib_pe
+    monoCOM%send_index => send_index
+    monoCOM%send_item => send_item
 
     do i = 1, monolis_prm_Iarray_size - 1
       monoliS%PRM%Iarray(i) = Iarray(i + 1)
@@ -145,6 +147,6 @@ contains
     enddo
 
     call monolis_eigen_inverted_standard_lanczos_R_main( &
-      & monolis%PRM, monolis%COM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
+      & monolis%PRM, monoCOM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
   end subroutine monolis_eigen_inverted_standard_lanczos_R_c
 end module mod_monolis_eigen_solver_wrapper

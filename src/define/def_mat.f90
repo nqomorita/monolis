@@ -342,23 +342,4 @@ contains
       X(i) = monoMAT%C%X(i)
     enddo
   end subroutine monolis_get_solution_C
-
-  !> 入力パラメータのチェック
-  subroutine monolis_check_input_param(monoCOM, monoMAT)
-    implicit none
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-
-    call monolis_std_debug_log_header("monolis_check_input_param")
-
-    !if(monolis_mpi_local_comm_size(monoCOM%comm) > 1)then
-    !endif
-
-    if(monoMAT%N == 0)then
-      call monolis_std_warning_string("the number of internal vertex is 0")
-    endif
-  end subroutine monolis_check_input_param
-
 end module mod_monolis_def_mat

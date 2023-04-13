@@ -10,13 +10,14 @@ extern "C" {
 
 /* eigen solver (inverted Lnaczos) */
 void monolis_eigen_inverted_standard_lanczos_R(
-  MONOLIS* mat,
-  int      n_get_eigen,
-  double   ths,
-  int      maxiter,
-  double*  eigen_value,
-  double** eigen_mode,
-  bool*    is_Dirichlet_bc);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_get_eigen,
+  double       ths,
+  int          maxiter,
+  double*      eigen_value,
+  double**     eigen_mode,
+  bool*        is_Dirichlet_bc);
 
 void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int     n,
@@ -50,13 +51,14 @@ void monolis_eigen_inverted_standard_lanczos_R_c_main(
 
 /* eigen solver (forwared Lnaczos) */
 void monolis_eigen_standard_lanczos_R(
-  MONOLIS* mat,
-  int      n_get_eigen,
-  double   ths,
-  int      maxiter,
-  double*  eigen_value,
-  double** eigen_mode,
-  bool*    is_Dirichlet_bc);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_get_eigen,
+  double       ths,
+  int          maxiter,
+  double*      eigen_value,
+  double**     eigen_mode,
+  bool*        is_Dirichlet_bc);
 
 void monolis_eigen_standard_lanczos_R_c_main(
   int     n,

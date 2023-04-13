@@ -74,9 +74,9 @@ contains
     alpha = 1.0d0
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
-      call monolis_inner_product_main_R_no_comm(monoCOM, N, NDOF, R, U, CG(1))
-      call monolis_inner_product_main_R_no_comm(monoCOM, N, NDOF, V, U, CG(2))
-      call monolis_inner_product_main_R_no_comm(monoCOM, N, NDOF, R, R, CG(3))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, R, U, CG(1))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, V, U, CG(2))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, R, R, CG(3))
       call monolis_allreduce_R(3, CG, monolis_mpi_sum, monoCOM%comm)
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, V, M)

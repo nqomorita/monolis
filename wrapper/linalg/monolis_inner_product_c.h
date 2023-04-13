@@ -10,21 +10,24 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 void monolis_inner_product_I(
-  MONOLIS* mat,
-  int      n_dof,
-  int*     x,
-  int*     y,
-  int*     sum);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_dof,
+  int*         x,
+  int*         y,
+  int*         sum);
 
 void monolis_inner_product_R(
-  MONOLIS* mat,
-  int      n_dof,
-  double*  x,
-  double*  y,
-  double*  sum);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  int          n_dof,
+  double*      x,
+  double*      y,
+  double*      sum);
 
 void monolis_inner_product_C(
   MONOLIS*        mat,
+  MONOLIS_COM*    com,
   int             n_dof,
   double complex* x,
   double complex* y,

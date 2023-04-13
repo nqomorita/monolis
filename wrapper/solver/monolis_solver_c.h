@@ -9,9 +9,10 @@ extern "C" {
 #include <complex.h>
 
 void monolis_solve_R(
-  MONOLIS* mat,
-  double*  b,
-  double*  x);
+  MONOLIS*     mat,
+  MONOLIS_COM* com,
+  double*      b,
+  double*      x);
 
 void monolis_solve_R_c_main(
   int     n,
@@ -40,9 +41,10 @@ void monolis_solve_R_c_main(
   double* Rarray);
 
 void monolis_solve_C(
-  MONOLIS* mat,
-  double complex*  b,
-  double complex*  x);
+  MONOLIS*        mat,
+  MONOLIS_COM*    com,
+  double complex* b,
+  double complex* x);
 
 void monolis_solve_C_c_main(
   int     n,

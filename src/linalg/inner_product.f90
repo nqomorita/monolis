@@ -8,10 +8,12 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（整数型）
-  subroutine monolis_inner_product_I(monolis, ndof, X, Y, sum)
+  subroutine monolis_inner_product_I(monolis, monoCOM, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> ブロックサイズ
     integer(kint) :: ndof
     !> ベクトル 1
@@ -24,17 +26,19 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     N = monolis%MAT%N
-    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_I(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_I(monoCOM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_I
 
   !> @ingroup linalg
   !> ベクトル内積（整数型、任意のベクトルサイズ）
-  subroutine monolis_inner_productV_I(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_productV_I(monolis, monoCOM, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
@@ -47,7 +51,7 @@ contains
     integer(kint) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_I(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_I(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_productV_I
 
   !> @ingroup dev_linalg
@@ -98,10 +102,12 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（実数型）
-  subroutine monolis_inner_product_R(monolis, ndof, X, Y, sum)
+  subroutine monolis_inner_product_R(monolis, monoCOM, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> ブロックサイズ
     integer(kint) :: ndof
     !> ベクトル 1
@@ -114,17 +120,19 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     N = monolis%MAT%N
-    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_R(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_R
 
   !> @ingroup linalg
   !> ベクトル内積（実数型、任意のベクトルサイズ）
-  subroutine monolis_inner_productV_R(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_productV_R(monolis, monoCOM, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
@@ -137,7 +145,7 @@ contains
     real(kdouble) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_R(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_productV_R
 
   !> @ingroup dev_linalg
@@ -188,10 +196,12 @@ contains
 
   !> @ingroup linalg
   !> ベクトル内積（複素数型）
-  subroutine monolis_inner_product_C(monolis, ndof, X, Y, sum)
+  subroutine monolis_inner_product_C(monolis, monoCOM, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> ブロックサイズ
     integer(kint) :: ndof
     !> ベクトル 1
@@ -204,17 +214,19 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     N = monolis%MAT%N
-    if(monolis%COM%comm_size > 1) N = monolis%COM%n_internal_vertex
+    if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_C(monolis%COM, N, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, N, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_C
 
   !> @ingroup linalg
   !> ベクトル内積（複素数型、任意のベクトルサイズ）
-  subroutine monolis_inner_productV_C(monolis, n, ndof, X, Y, sum)
+  subroutine monolis_inner_productV_C(monolis, monoCOM, n, ndof, X, Y, sum)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
+    !> [in] COM 構造体
+    type(monolis_COM) :: monoCOM
     !> 自由度数
     integer(kint) :: n
     !> ブロックサイズ
@@ -227,7 +239,7 @@ contains
     complex(kdouble) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_C(monolis%COM, n, ndof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, n, ndof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_productV_C
 
   !> @ingroup dev_linalg
@@ -278,9 +290,8 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル内積（実数型、メイン関数、通信なし）
-  subroutine monolis_inner_product_main_R_no_comm(monoCOM, n, ndof, X, Y, sum)
+  subroutine monolis_inner_product_main_R_no_comm(n, ndof, X, Y, sum)
     implicit none
-    type(monolis_com) :: monoCOM
     integer(kint) :: i, n, ndof
     real(kdouble) :: X(:), Y(:)
     real(kdouble) :: sum
