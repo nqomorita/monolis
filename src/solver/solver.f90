@@ -80,7 +80,7 @@ contains
 
     call monolis_timer_initialize(monoPRM)
 
-    call monolis_check_input_param(monoCOM, monoMAT)
+    !call monolis_check_input_param(monoCOM, monoMAT)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
@@ -107,7 +107,7 @@ contains
 
     call monolis_timer_initialize(monoPRM)
 
-    call monolis_check_input_param(monoCOM, monoMAT)
+    !call monolis_check_input_param(monoCOM, monoMAT)
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 

@@ -16,12 +16,12 @@ typedef struct {
 } MONOLIS_MAT_VAL_R;
 
 typedef struct {
-  double complex* A;
-  double complex* U;
-  double complex* D;
-  double complex* L;
-  double complex* X;
-  double complex* B;
+  double _Complex* A;
+  double _Complex* U;
+  double _Complex* D;
+  double _Complex* L;
+  double _Complex* X;
+  double _Complex* B;
 } MONOLIS_MAT_VAL_C;
 
 typedef struct {

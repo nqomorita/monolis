@@ -18,8 +18,8 @@ void monolis_matvec_product_R(
 void monolis_matvec_product_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
-  double complex* x,
-  double complex* y);
+  double _Complex* x,
+  double _Complex* y);
 
 void monolis_matvec_product_R_c_main(
   int     n,
@@ -50,9 +50,9 @@ void monolis_matvec_product_C_c_main(
   int             np,
   int             nz,
   int             ndof,
-  double complex* A,
-  double complex* x,
-  double complex* y,
+  double _Complex* A,
+  double _Complex* x,
+  double _Complex* y,
   int*            index,
   int*            item,
   int             my_rank,

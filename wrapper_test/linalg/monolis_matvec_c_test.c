@@ -7,6 +7,7 @@
 
 void monolis_matvec_c_test_R11(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
@@ -30,6 +31,7 @@ void monolis_matvec_c_test_R11(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -55,7 +57,7 @@ void monolis_matvec_c_test_R11(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_R(&mat, rx, ry);
+  monolis_matvec_product_R(&mat, &com, rx, ry);
 
   monolis_test_check_eq_R1("monolis_matvec_c_test_R11", ry[0], 3.0);
   monolis_test_check_eq_R1("monolis_matvec_c_test_R11", ry[1], 6.0);
@@ -68,6 +70,7 @@ void monolis_matvec_c_test_R11(){
 
 void monolis_matvec_c_test_R22(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
@@ -91,6 +94,7 @@ void monolis_matvec_c_test_R22(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -130,7 +134,7 @@ void monolis_matvec_c_test_R22(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_R(&mat, rx, ry);
+  monolis_matvec_product_R(&mat, &com, rx, ry);
 
   monolis_test_check_eq_R1("monolis_matvec_c_test_R22", ry[0], 3.0);
   monolis_test_check_eq_R1("monolis_matvec_c_test_R22", ry[1], 6.0);
@@ -148,6 +152,7 @@ void monolis_matvec_c_test_R22(){
 
 void monolis_matvec_c_test_R33(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
@@ -171,6 +176,7 @@ void monolis_matvec_c_test_R33(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -224,7 +230,7 @@ void monolis_matvec_c_test_R33(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_R(&mat, rx, ry);
+  monolis_matvec_product_R(&mat, &com, rx, ry);
 
   monolis_test_check_eq_R1("monolis_matvec_c_test_R33", ry[0], 3.0);
   monolis_test_check_eq_R1("monolis_matvec_c_test_R33", ry[1], 6.0);
@@ -247,12 +253,13 @@ void monolis_matvec_c_test_R33(){
 
 void monolis_matvec_c_test_C11(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
   int** elem;
-  double complex rx[5];
-  double complex ry[5];
+  double _Complex rx[5];
+  double _Complex ry[5];
 
   monolis_std_log_string("monolis_matvec_c_test_C11");
 
@@ -270,6 +277,7 @@ void monolis_matvec_c_test_C11(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -295,7 +303,7 @@ void monolis_matvec_c_test_C11(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_C(&mat, rx, ry);
+  monolis_matvec_product_C(&mat, &com, rx, ry);
 
   monolis_test_check_eq_C1("monolis_matvec_c_test_C11", ry[0], 3.0);
   monolis_test_check_eq_C1("monolis_matvec_c_test_C11", ry[1], 6.0);
@@ -308,12 +316,13 @@ void monolis_matvec_c_test_C11(){
 
 void monolis_matvec_c_test_C22(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
   int** elem;
-  double complex rx[10];
-  double complex ry[10];
+  double _Complex rx[10];
+  double _Complex ry[10];
 
   monolis_std_log_string("monolis_matvec_c_test_C22");
 
@@ -331,6 +340,7 @@ void monolis_matvec_c_test_C22(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -370,7 +380,7 @@ void monolis_matvec_c_test_C22(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_C(&mat, rx, ry);
+  monolis_matvec_product_C(&mat, &com, rx, ry);
 
   monolis_test_check_eq_C1("monolis_matvec_c_test_C22", ry[0], 3.0);
   monolis_test_check_eq_C1("monolis_matvec_c_test_C22", ry[1], 6.0);
@@ -388,12 +398,13 @@ void monolis_matvec_c_test_C22(){
 
 void monolis_matvec_c_test_C33(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_dof;
   int n_node;
   int n_elem;
   int** elem;
-  double complex rx[15];
-  double complex ry[15];
+  double _Complex rx[15];
+  double _Complex ry[15];
 
   monolis_std_log_string("monolis_matvec_c_test_C33");
 
@@ -411,6 +422,7 @@ void monolis_matvec_c_test_C33(){
   elem[3][0] = 3; elem[3][1] = 4;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -464,7 +476,7 @@ void monolis_matvec_c_test_C33(){
     ry[i] = 0.0;
   }
 
-  monolis_matvec_product_C(&mat, rx, ry);
+  monolis_matvec_product_C(&mat, &com, rx, ry);
 
   monolis_test_check_eq_C1("monolis_matvec_c_test_C33", ry[0], 3.0);
   monolis_test_check_eq_C1("monolis_matvec_c_test_C33", ry[1], 6.0);

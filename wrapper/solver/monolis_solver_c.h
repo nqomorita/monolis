@@ -43,17 +43,17 @@ void monolis_solve_R_c_main(
 void monolis_solve_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
-  double complex* b,
-  double complex* x);
+  double _Complex* b,
+  double _Complex* x);
 
 void monolis_solve_C_c_main(
   int     n,
   int     np,
   int     nz,
   int     n_dof,
-  double complex* A,
-  double complex* x,
-  double complex* b,
+  double _Complex* A,
+  double _Complex* x,
+  double _Complex* b,
   int*    index,
   int*    item,
   int     my_rank,

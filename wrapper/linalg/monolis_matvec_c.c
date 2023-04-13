@@ -50,8 +50,8 @@ void monolis_matvec_product_R(
 void monolis_matvec_product_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
-  double complex* x,
-  double complex* y)
+  double _Complex* x,
+  double _Complex* y)
 {
   int n = mat->mat.N;
   if(com->comm_size > 1 ) n = com->n_internal_vertex;

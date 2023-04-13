@@ -107,9 +107,9 @@ void monolis_spmat_handler_c_test_C(){
   int e[1];
   int f[1];
   int** elem;
-  double complex val;
-  double complex b[8];
-  double complex** bval;
+  double _Complex val;
+  double _Complex b[8];
+  double _Complex** bval;
   bool is_find;
 
   monolis_std_log_string("monolis_spmat_handler_c_test_C");

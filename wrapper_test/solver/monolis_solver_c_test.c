@@ -7,6 +7,7 @@
 
 void monolis_solve_c_test_R(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_node;
   int n_base;
   int n_dof;
@@ -37,6 +38,7 @@ void monolis_solve_c_test_R(){
   elem[8][0] = 8; elem[8][1] = 9;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 
@@ -61,7 +63,7 @@ void monolis_solve_c_test_R(){
     a[i] = 1.0;
   }
 
-  monolis_matvec_product_R(&mat, a, b);
+  monolis_matvec_product_R(&mat, &com, a, b);
 
   for(int i = 0; i < 20; ++i){
     a[i] = 0.0;
@@ -69,7 +71,7 @@ void monolis_solve_c_test_R(){
 
   monolis_set_tolerance(&mat, 1.0e-10);
 
-  monolis_solve_R(&mat, b, a);
+  monolis_solve_R(&mat, &com, b, a);
 
   for(int i = 0; i < 20; ++i){
     monolis_test_check_eq_R1("monolis_solve_c_test R", a[i], 1.0);
@@ -80,15 +82,16 @@ void monolis_solve_c_test_R(){
 
 void monolis_solve_c_test_C(){
   MONOLIS mat;
+  MONOLIS_COM com;
   int n_node;
   int n_base;
   int n_dof;
   int n_elem;
   int i, j, k;
   int** elem;
-  double complex val;
-  double complex a[20];
-  double complex b[20];
+  double _Complex val;
+  double _Complex a[20];
+  double _Complex b[20];
 
   monolis_std_log_string("monolis_solve_c_test_C");
 
@@ -110,6 +113,7 @@ void monolis_solve_c_test_C(){
   elem[8][0] = 8; elem[8][1] = 9;
 
   monolis_initialize(&mat);
+  monolis_com_initialize_by_self(&com);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, n_base, n_dof, n_elem, elem);
 
@@ -134,7 +138,7 @@ void monolis_solve_c_test_C(){
     a[i] = 1.0 + 1.0*I;
   }
 
-  monolis_matvec_product_C(&mat, a, b);
+  monolis_matvec_product_C(&mat, &com, a, b);
 
   for(int i = 0; i < 20; ++i){
     a[i] = 0.0 + 0.0*I;
@@ -144,7 +148,7 @@ void monolis_solve_c_test_C(){
 
   monolis_set_tolerance(&mat, 1.0e-10);
 
-  monolis_solve_C(&mat, b, a);
+  monolis_solve_C(&mat, &com, b, a);
 
   for(int i = 0; i < 20; ++i){
     monolis_test_check_eq_C1("monolis_solve_c_test C", a[i], 1.0 + 1.0*I);

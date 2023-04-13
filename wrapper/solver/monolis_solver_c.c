@@ -51,10 +51,10 @@ void monolis_solve_R(
 }
 
 void monolis_solve_C(
-  MONOLIS*        mat,
-  MONOLIS_COM*    com,
-  double complex* b,
-  double complex* x)
+  MONOLIS*         mat,
+  MONOLIS_COM*     com,
+  double _Complex* b,
+  double _Complex* x)
 {
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;

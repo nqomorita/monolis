@@ -29,9 +29,9 @@ void monolis_inner_product_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
   int             n_dof,
-  double complex* x,
-  double complex* y,
-  double complex* sum);
+  double _Complex* x,
+  double _Complex* y,
+  double _Complex* sum);
 
 void monolis_inner_product_I_c_main(
   int  n,
@@ -52,9 +52,9 @@ void monolis_inner_product_R_c_main(
 void monolis_inner_product_C_c_main(
   int             n,
   int             n_dof,
-  double complex* x,
-  double complex* y,
-  double complex* sum,
+  double _Complex* x,
+  double _Complex* y,
+  double _Complex* sum,
   int             comm);
 
 #ifdef __cplusplus

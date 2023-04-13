@@ -38,9 +38,9 @@ void monolis_inner_product_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
   int             ndof,
-  double complex* x,
-  double complex* y,
-  double complex* sum)
+  double _Complex* x,
+  double _Complex* y,
+  double _Complex* sum)
 {
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;

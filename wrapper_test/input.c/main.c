@@ -255,11 +255,11 @@ void monolis_solver_parallel_C_test(){
   int* global_eid;
   int** elem;
   double res_conv;
-  double complex val;
+  double _Complex val;
   double* coef;
-  double complex* a;
-  double complex* b;
-  double complex* c;
+  double _Complex* a;
+  double _Complex* b;
+  double _Complex* c;
   double** node;
 
   fname = monolis_get_global_input_file_name("parted.0", "node.dat");
