@@ -13,7 +13,6 @@ contains
     call monolis_std_global_log_string("monolis_global_finalize")
 
     call monolis_std_global_log_string("monolis_initialize")
-    call monolis_std_global_log_string("monolis_initialize_entire")
 
     call monolis_std_global_log_string("monolis_finalize")
 

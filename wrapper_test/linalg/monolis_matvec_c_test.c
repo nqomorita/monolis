@@ -29,7 +29,7 @@ void monolis_matvec_c_test_R11(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -90,7 +90,7 @@ void monolis_matvec_c_test_R22(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -170,7 +170,7 @@ void monolis_matvec_c_test_R33(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -269,7 +269,7 @@ void monolis_matvec_c_test_C11(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -330,7 +330,7 @@ void monolis_matvec_c_test_C22(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 
@@ -410,7 +410,7 @@ void monolis_matvec_c_test_C33(){
   elem[2][0] = 2; elem[2][1] = 3;
   elem[3][0] = 3; elem[3][1] = 4;
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, n_dof, n_elem, elem);
 

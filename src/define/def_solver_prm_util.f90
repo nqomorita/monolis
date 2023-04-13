@@ -316,4 +316,5 @@ contains
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_comm_spmv)
   end subroutine monolis_get_time_comm_spmv
+
 end module mod_monolis_def_solver_util

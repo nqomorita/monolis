@@ -21,7 +21,7 @@ void monolis_inner_product_c_test(){
 
   monolis_std_log_string("monolis_inner_product_c_test");
 
-  monolis_initialize_entire(&mat);
+  monolis_initialize(&mat);
 
   monolis_com_set_communicator(&mat.com, monolis_mpi_get_global_comm());
   monolis_com_set_my_rank(&mat.com, monolis_mpi_get_global_my_rank());

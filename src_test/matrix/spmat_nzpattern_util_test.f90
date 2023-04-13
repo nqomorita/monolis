@@ -50,7 +50,7 @@ contains
     item(5) = 4
     item(6) = 3
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main(monolis%MAT, n_node, ndof, index, item)
 
@@ -134,7 +134,7 @@ contains
     item(5) = 4
     item(6) = 3
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
       & (monolis%MAT, n_node, n_dof_list, index, item)
@@ -260,7 +260,7 @@ contains
 
     call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_R")
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     monolis%MAT%NDOF = 2
 
@@ -283,7 +283,7 @@ contains
 
     call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_C")
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     monolis%MAT%NDOF = 2
 

@@ -54,7 +54,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(monolis, n_node, n_base, ndof, n_elem, elem)
 
@@ -172,7 +172,7 @@ contains
     elem(1,2) = 2; elem(2,2) = 3
     elem(1,3) = 3; elem(2,3) = 4
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(monolis, n_node, n_base, ndof, n_elem, elem)
 

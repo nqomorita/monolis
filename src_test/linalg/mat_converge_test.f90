@@ -10,6 +10,7 @@ contains
   subroutine monolis_converge_test()
     implicit none
     type(monolis_structure) :: monolis
+    type(monolis_com) :: com
     real(kdouble) :: R(4)
     real(kdouble) :: B2
     integer(kint) :: iter
@@ -19,11 +20,12 @@ contains
 
     call monolis_std_global_log_string("monolis_check_converge_R")
 
-    call monolis_initialize_entire(monolis)
+    call monolis_initialize(monolis)
+    call monolis_com_initialize_by_self(com)
 
-    call monolis_com_set_communicator(monolis%COM, monolis_mpi_get_global_comm())
-    call monolis_com_set_my_rank(monolis%COM, monolis_mpi_get_global_my_rank())
-    call monolis_com_set_comm_size(monolis%COM, monolis_mpi_get_global_comm_size())
+    call monolis_com_set_communicator(com, monolis_mpi_get_global_comm())
+    call monolis_com_set_my_rank(com, monolis_mpi_get_global_my_rank())
+    call monolis_com_set_comm_size(com, monolis_mpi_get_global_comm_size())
 
     monolis%MAT%N = 2
     monolis%MAT%NDOF = 2
@@ -37,7 +39,7 @@ contains
 
     iter = 10
 
-    call monolis_check_converge_R(monolis%PRM, monolis%COM, monolis%MAT, R, B2, iter, is_converge, tdotp, tcomm)
+    call monolis_check_converge_R(monolis%PRM, com, monolis%MAT, R, B2, iter, is_converge, tdotp, tcomm)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
       call monolis_test_check_eq_I1("monolis_converge_test 1", monolis%PRM%Iarray(monolis_prm_I_cur_iter), 10)

@@ -29,12 +29,14 @@ contains
   subroutine monolis_matvec_11_R_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,4)
     real(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
     call monolis_std_global_log_string("monolis_matvec_11_R")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 5
 
@@ -81,7 +83,7 @@ contains
     a(4) = 1.0d0
     a(5) = 1.0d0
 
-    call monolis_matvec_product_R(mat, a, b)
+    call monolis_matvec_product_R(mat, com, a, b)
 
     b_th = matmul(mat_dense, a)
 
@@ -93,12 +95,14 @@ contains
   subroutine monolis_matvec_11_C_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,4)
     complex(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
 
     call monolis_std_global_log_string("monolis_matvec_11_C")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 5
 
@@ -146,7 +150,7 @@ contains
     a(4) = (1.0d0, 1.0d0)
     a(5) = (1.0d0, 1.0d0)
 
-    call monolis_matvec_product_C(mat, a, b)
+    call monolis_matvec_product_C(mat, com, a, b)
 
     b_th = matmul(mat_dense, a)
 
@@ -158,6 +162,7 @@ contains
   subroutine monolis_matvec_33_R_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: val
@@ -166,7 +171,8 @@ contains
 
     call monolis_std_global_log_string("monolis_matvec_33_R")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 4
 
@@ -191,7 +197,7 @@ contains
 
     a = 1.0d0
 
-    call monolis_matvec_product_R(mat, a, b)
+    call monolis_matvec_product_R(mat, com, a, b)
 
     mat_dense = 0.0d0
 
@@ -216,6 +222,7 @@ contains
   subroutine monolis_matvec_33_C_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: v1, v2
@@ -225,7 +232,8 @@ contains
 
     call monolis_std_global_log_string("monolis_matvec_33_C")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 4
 
@@ -251,7 +259,7 @@ contains
 
     a = (1.0d0, 1.0d0)
 
-    call monolis_matvec_product_C(mat, a, b)
+    call monolis_matvec_product_C(mat, com, a, b)
 
     mat_dense = (0.0d0, 0.0d0)
 
@@ -276,6 +284,7 @@ contains
   subroutine monolis_matvec_nn_R_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: val
@@ -284,7 +293,8 @@ contains
 
     call monolis_std_global_log_string("monolis_matvec_nn_R")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 4
 
@@ -309,7 +319,7 @@ contains
 
     a = 1.0d0
 
-    call monolis_matvec_product_R(mat, a, b)
+    call monolis_matvec_product_R(mat, com, a, b)
 
     mat_dense = 0.0d0
 
@@ -334,6 +344,7 @@ contains
   subroutine monolis_matvec_nn_C_test()
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,3)
     integer(kint) :: i1, i2, j1, j2
     real(kdouble) :: v1, v2
@@ -343,7 +354,8 @@ contains
 
     call monolis_std_global_log_string("monolis_matvec_nn_C")
 
-    call monolis_initialize_entire(mat)
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     n_node = 4
 
@@ -369,7 +381,7 @@ contains
 
     a = (1.0d0, 1.0d0)
 
-    call monolis_matvec_product_C(mat, a, b)
+    call monolis_matvec_product_C(mat, com, a, b)
 
     mat_dense = (0.0d0, 0.0d0)
 

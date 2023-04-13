@@ -20,6 +20,7 @@ contains
   subroutine monolis_solver_COCG_test_main(n_dof, prec)
     implicit none
     type(monolis_structure) :: mat
+    type(monolis_com) :: com
     integer(kint) :: nnode, nelem, elem(2,9)
     integer(kint) :: i1, i2, j1, j2
     integer(kint) :: n_dof, prec
@@ -32,6 +33,7 @@ contains
     call monolis_std_log_I1("PRECOND", prec)
 
     call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     nnode = 10
 
@@ -72,7 +74,7 @@ contains
 
     a = (1.0d0, 1.0d0)
 
-    call monolis_matvec_product_C(mat, a, b)
+    call monolis_matvec_product_C(mat, com, a, b)
 
     call monolis_set_method(mat, monolis_iter_COCG)
     call monolis_set_precond(mat, prec)
@@ -81,7 +83,7 @@ contains
 
     a = 0.0d0
 
-    call monolis_solve_C(mat, b, a)
+    call monolis_solve_C(mat, com, b, a)
 
     b = (1.0d0, 1.0d0)
 

@@ -10,6 +10,8 @@ contains
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: mat
+    !> monolis 通信構造体
+    type(monolis_com) :: com
     !> 取得固有値数
     integer(kint) :: n_get_eigen
     !> 収束判定閾値
@@ -34,6 +36,7 @@ contains
     call monolis_std_global_log_string("monolis_eigen_inverted_standard_lanczos_R_main")
 
     call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
 
     nnode = 6
 
@@ -72,7 +75,7 @@ contains
     eig_mode = 0.0d0
 
     call monolis_eigen_standard_lanczos_R &
-      & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
+      & (mat, com, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
 
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 a", eig_val(5), 0.267949192431122d0)
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 a", eig_val(4), 1.0d0)
@@ -130,7 +133,7 @@ contains
     eig_mode = 0.0d0
 
     call monolis_eigen_inverted_standard_lanczos_R &
-      & (mat, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
+      & (mat, com, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
 
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 c", eig_val(1), 0.267949192431122d0)
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 c", eig_val(2), 1.0d0)
