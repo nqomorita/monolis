@@ -19,6 +19,7 @@ program main
   subroutine monolis_solver_parallel_R_test()
     implicit none
     type(monolis_structure) :: mat !> 疎行列変数
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
     integer(kint) :: i, j, iter_conv
@@ -52,6 +53,9 @@ program main
 
     call monolis_initialize(mat)
 
+    call monolis_com_set_input_file_name(com, "node.dat")
+    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm())
+
     call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
 
     open(20, file = "coef.dat", status = "old")
@@ -79,7 +83,7 @@ program main
 
     a = 1.0d0
 
-    call monolis_matvec_product_R(mat, a, c)
+    call monolis_matvec_product_R(mat, com, a, c)
 
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-10)
@@ -95,7 +99,7 @@ program main
       call monolis_set_method(mat, iter)
       call monolis_set_precond(mat, prec)
 
-      call monolis_solve_R(mat, b, a)
+      call monolis_solve_R(mat, com, b, a)
 
       call monolis_mpi_global_barrier();
 
@@ -140,10 +144,10 @@ program main
     call monolis_show_summary(mat, .false.)
 
     call monolis_eigen_standard_lanczos_R &
-      & (mat, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
+      & (mat, com, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
 
     call monolis_eigen_inverted_standard_lanczos_R &
-      & (mat, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
+      & (mat, com, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
 
     do i = 1, n_get_eigen
       j = n_get_eigen - i + 1
@@ -159,6 +163,7 @@ program main
   subroutine monolis_solver_parallel_C_test()
     implicit none
     type(monolis_structure) :: mat !> 疎行列変数
+    type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2)
     integer(kint) :: i, iter_conv
@@ -186,6 +191,9 @@ program main
     endif
 
     call monolis_initialize(mat)
+
+    call monolis_com_set_input_file_name(com, "node.dat")
+    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm())
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 1, n_elem, elem)
 
@@ -215,7 +223,7 @@ program main
 
     a = (1.0d0, 1.0d0)
 
-    call monolis_matvec_product_C(mat, a, c)
+    call monolis_matvec_product_C(mat, com, a, c)
 
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-10)
@@ -231,7 +239,7 @@ program main
       call monolis_set_method(mat, iter)
       call monolis_set_precond(mat, prec)
 
-      call monolis_solve_C(mat, b, a)
+      call monolis_solve_C(mat, com, b, a)
 
       call monolis_mpi_global_barrier();
 

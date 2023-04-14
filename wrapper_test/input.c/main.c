@@ -109,6 +109,7 @@ void input_coef(
 
 void monolis_solver_parallel_R_test(){
   MONOLIS mat;
+  MONOLIS_COM com;
   const char* fname;
   int n_node, n_elem, n_base, n_id, n_coef;
   int eid[2], iter, prec, i, j, k, iter_conv;
@@ -140,6 +141,11 @@ void monolis_solver_parallel_R_test(){
 
   monolis_initialize(&mat);
 
+  monolis_com_set_input_top_directory_name(&com, "./");
+  monolis_com_set_input_part_directory_name(&com, "./parted.0");
+  monolis_com_set_input_file_name(&com, "node.dat");
+  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm());
+
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, 1, n_elem, elem);
 
   fname = "coef.dat";
@@ -168,7 +174,7 @@ void monolis_solver_parallel_R_test(){
     a[i] = 1.0;
   }
 
-  monolis_matvec_product_R(&mat, a, c);
+  monolis_matvec_product_R(&mat, &com, a, c);
 
   monolis_set_maxiter(&mat, 1000);
   monolis_set_tolerance(&mat, 1.0e-10);
@@ -187,7 +193,7 @@ void monolis_solver_parallel_R_test(){
       monolis_set_method(&mat, iter);
       monolis_set_precond(&mat, prec);
 
-      monolis_solve_R(&mat, b, a);
+      monolis_solve_R(&mat, &com, b, a);
 
       monolis_mpi_global_barrier();
 
@@ -232,9 +238,9 @@ void monolis_solver_parallel_R_test(){
   monolis_show_iterlog(&mat, false);
   monolis_show_summary(&mat, false);
 
-  monolis_eigen_standard_lanczos_R(&mat, n_get_eigen, 1.0e-6, 100, eig_val1, eig_mode1, is_bc);
+  monolis_eigen_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val1, eig_mode1, is_bc);
 
-  monolis_eigen_inverted_standard_lanczos_R(&mat, n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
+  monolis_eigen_inverted_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
 
   for (int i = 0; i < n_get_eigen; ++i) {
     j = n_get_eigen - i - 1;
@@ -249,6 +255,7 @@ void monolis_solver_parallel_R_test(){
 
 void monolis_solver_parallel_C_test(){
   MONOLIS mat;
+  MONOLIS_COM com;
   const char* fname;
   int n_node, n_elem, n_base, n_id, n_coef;
   int eid[2], iter, prec, i, j, iter_conv;
@@ -280,6 +287,11 @@ void monolis_solver_parallel_C_test(){
 
   monolis_initialize(&mat);
 
+  monolis_com_set_input_top_directory_name(&com, "./");
+  monolis_com_set_input_part_directory_name(&com, "./parted.0");
+  monolis_com_set_input_file_name(&com, "node.dat");
+  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm());
+
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, 1, n_elem, elem);
 
   fname = "coef.dat";
@@ -308,7 +320,7 @@ void monolis_solver_parallel_C_test(){
     a[i] = 1.0 + 1.0*I;
   }
 
-  monolis_matvec_product_C(&mat, a, c);
+  monolis_matvec_product_C(&mat, &com, a, c);
 
   monolis_set_maxiter(&mat, 1000);
   monolis_set_tolerance(&mat, 1.0e-10);
@@ -327,7 +339,7 @@ void monolis_solver_parallel_C_test(){
       monolis_set_method(&mat, iter);
       monolis_set_precond(&mat, prec);
 
-      monolis_solve_C(&mat, b, a);
+      monolis_solve_C(&mat, &com, b, a);
 
       monolis_mpi_global_barrier();
 
