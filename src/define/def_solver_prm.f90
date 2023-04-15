@@ -154,8 +154,8 @@ contains
   !> パラメータ 構造体の初期化処理
   subroutine monolis_prm_initialize(monoPRM)
     implicit none
-    !> パラメータ 構造体
-    type(monolis_prm) :: monoPRM
+    !> [out] パラメータ 構造体
+    type(monolis_prm), intent(out) :: monoPRM
 
     monoPRM%com_top_dir_name = "."
     monoPRM%com_part_dir_name = "parted.0"
@@ -193,8 +193,8 @@ contains
   !> パラメータ 構造体の終了処理
   subroutine monolis_prm_finalize(monoPRM)
     implicit none
-    !> パラメータ 構造体
-    type(monolis_prm) :: monoPRM
+    !> [out] パラメータ 構造体
+    type(monolis_prm), intent(out) :: monoPRM
 
     monoPRM%Iarray = 0
     monoPRM%Rarray = 0.0d0
@@ -203,8 +203,8 @@ contains
   !> 時間計測機能の初期化処理
   subroutine monolis_timer_initialize(monoPRM)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
+    !> [out] パラメータ構造体
+    type(monolis_prm), intent(out) :: monoPRM
 
     monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
     monoPRM%Rarray(monolis_R_time_prep) = 0.0d0
@@ -220,10 +220,10 @@ contains
   !> 時間計測機能の終了処理
   subroutine monolis_timer_finalize(monoPRM, monoCOM)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
+    !> [in,out] パラメータ 構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
     logical :: is_output
 
@@ -317,18 +317,18 @@ contains
   !> 時間計測機能の統計処理
   subroutine monolis_time_statistics(time, t_max, t_min, t_avg, t_sd, comm)
     implicit none
-    !> 時間
+    !> [in] 時間
     real(kdouble), intent(in) :: time
-    !> 最大値
+    !> [out] 最大値
     real(kdouble), intent(out) :: t_max
-    !> 最小値
+    !> [out] 最小値
     real(kdouble), intent(out) :: t_min
-    !> 平均値
+    !> [out] 平均値
     real(kdouble), intent(out) :: t_avg
-    !> 標準偏差
+    !> [out] 標準偏差
     real(kdouble), intent(out) :: t_sd
-    !> MPI コミュニケータ
-    integer(kint) :: comm
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
     real(kdouble) :: tmp
     integer(kint) :: np
 
