@@ -193,8 +193,8 @@ contains
   !> パラメータ 構造体の終了処理
   subroutine monolis_prm_finalize(monoPRM)
     implicit none
-    !> [out] パラメータ 構造体
-    type(monolis_prm), intent(out) :: monoPRM
+    !> [in,out] パラメータ 構造体
+    type(monolis_prm), intent(inout) :: monoPRM
 
     monoPRM%Iarray = 0
     monoPRM%Rarray = 0.0d0
@@ -203,8 +203,8 @@ contains
   !> 時間計測機能の初期化処理
   subroutine monolis_timer_initialize(monoPRM)
     implicit none
-    !> [out] パラメータ構造体
-    type(monolis_prm), intent(out) :: monoPRM
+    !> [inout] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
 
     monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
     monoPRM%Rarray(monolis_R_time_prep) = 0.0d0
