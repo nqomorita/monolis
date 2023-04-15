@@ -21,7 +21,7 @@ contains
     type(monolis_prm), intent(inout) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [inout] 行列構造体
+    !> [in,out] 行列構造体
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
@@ -130,24 +130,24 @@ contains
   subroutine monolis_eigen_standard_lanczos_R_main( &
     & monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 取得固有値数
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 取得固有値数
     integer(kint) :: n_get_eigen
-    !> 収束判定閾値
-    real(kdouble) :: ths
-    !> 最大反復回数
-    integer(kint) :: maxiter
-    !> 固有値
-    real(kdouble) :: val(:)
-    !> 固有ベクトル
-    real(kdouble) :: vec(:,:)
-    !> Dirhchlet 境界条件判定フラグ
-    logical :: is_bc(:)
+    !> [in] 収束判定閾値
+    real(kdouble), intent(in) :: ths
+    !> [in] 最大反復回数
+    integer(kint), intent(in) :: maxiter
+    !> [in,out] 固有値
+    real(kdouble), intent(inout) :: val(:)
+    !> [in,out] 固有ベクトル
+    real(kdouble), intent(inout) :: vec(:,:)
+    !> [in] Dirhchlet 境界条件判定フラグ
+    logical, intent(in) :: is_bc(:)
     integer(kint) :: N, NP, NDOF, total_dof, n_bc, j, k
     integer(kint) :: i, iter
     real(kdouble) :: beta_t, norm, tmp
