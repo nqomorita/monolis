@@ -13,16 +13,16 @@ contains
   !> Lanczos 法の初期ベクトル生成
   subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc)
     implicit none
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 計算点数
-    integer(kint) :: N
-    !> 計算点上の自由度
-    integer(kint) :: NDOF
-    !> 入力ベクトル
-    real(kdouble) :: q(:)
-    !> Dirhchlet 境界条件判定フラグ
-    logical :: is_bc(:)
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 計算点数
+    integer(kint), intent(in) :: N
+    !> [in] 計算点上の自由度
+    integer(kint), intent(in) :: NDOF
+    !> [out] 入力ベクトル
+    real(kdouble), intent(out) :: q(:)
+    !> [in] Dirhchlet 境界条件判定フラグ
+    logical, intent(in) :: is_bc(:)
     integer(kint) :: i
     real(kdouble) :: norm, t1, t2
     integer(kint), allocatable :: vtxdist(:)
@@ -51,22 +51,22 @@ contains
   subroutine monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
     & alpha, beta, q, eig_val, eig_mode, norm)
     implicit none
-    !> 反復回数
+    !> [in] 反復回数
     integer(kint), intent(in) :: iter
-    !> 取得したい固有値数
+    !> [in] 取得したい固有値数
     integer(kint), intent(in) :: n_get_eigen
-    !> 対角成分
-    real(kdouble) :: alpha(:)
-    !> 副対角成分
-    real(kdouble) :: beta(:)
-    !> Lanczos 法から得られるユニタリ行列
-    real(kdouble) :: q(:,:)
-    !> 固有値
-    real(kdouble) :: eig_val(:)
-    !> 固有ベクトル
-    real(kdouble) :: eig_mode(:,:)
-    !> 固有方程式の残差
-    real(kdouble) :: norm
+    !> [in] 対角成分
+    real(kdouble), intent(in) :: alpha(:)
+    !> [in] 副対角成分
+    real(kdouble), intent(in) :: beta(:)
+    !> [in] Lanczos 法から得られるユニタリ行列
+    real(kdouble), intent(in) :: q(:,:)
+    !> [out] 固有値
+    real(kdouble), intent(out) :: eig_val(:)
+    !> [out] 固有ベクトル
+    real(kdouble), intent(out) :: eig_mode(:,:)
+    !> [out] 固有方程式の残差
+    real(kdouble), intent(out) :: norm
     integer(kint) :: i
     real(kdouble) :: r
     real(kdouble), allocatable :: eig_val_tri(:)
@@ -84,9 +84,8 @@ contains
 
       r = sqrt(eig_mode_tri(iter,iter - i + 1)**2)*beta(iter)
       if(norm < r)then
-         norm = r
+        norm = r
       endif
     enddo
   end subroutine monolis_get_inverted_eigen_pair_from_tridiag
-
 end module mod_monolis_eigen_lanczos_util
