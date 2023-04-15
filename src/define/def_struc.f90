@@ -33,8 +33,8 @@ contains
   !> monolis 構造体の初期化処理
   subroutine monolis_initialize(monolis)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
+    !> [out] monolis 構造体
+    type(monolis_structure), intent(out) :: monolis
 
     call monolis_prm_initialize(monolis%PRM)
     call monolis_mat_initialize(monolis%MAT)
@@ -44,8 +44,8 @@ contains
   !> monoils 構造体の終了処理
   subroutine monolis_finalize(monolis)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
 
     call monolis_prm_finalize(monolis%PRM)
     call monolis_mat_finalize(monolis%MAT)
