@@ -94,8 +94,8 @@ contains
   !> 行列構造体の初期化処理関数
   subroutine monolis_mat_initialize(monoMAT)
     implicit none
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
 
     monoMAT%N = 0
     monoMAT%NP = 0
@@ -111,8 +111,8 @@ contains
   !> 行列構造体の初期化処理関数（実数型）
   subroutine monolis_mat_initialize_val_R(R)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_val_R) :: R
+    !> [in,out] 行列構造体
+    type(monolis_mat_val_R), intent(inout) :: R
 
     call monolis_pdealloc_R_1d(R%A)
     call monolis_pdealloc_R_1d(R%U)
@@ -125,8 +125,8 @@ contains
   !> 行列構造体の初期化処理関数（複素数型）
   subroutine monolis_mat_initialize_val_C(C)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_val_C) :: C
+    !> [in,out] 行列構造体
+    type(monolis_mat_val_C), intent(inout) :: C
 
     call monolis_pdealloc_C_1d(C%A)
     call monolis_pdealloc_C_1d(C%U)
@@ -139,8 +139,8 @@ contains
   !> 行列構造体の初期化処理関数（セパレート CSR 構造）
   subroutine monolis_mat_initialize_SCSR(SCSR)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_separated_CSR) :: SCSR
+    !> [in,out] 行列構造体
+    type(monolis_mat_separated_CSR), intent(inout) :: SCSR
 
     call monolis_pdealloc_I_1d(SCSR%indexU)
     call monolis_pdealloc_I_1d(SCSR%itemU)
@@ -151,8 +151,8 @@ contains
   !> 行列構造体の初期化処理関数（CSR 構造）
   subroutine monolis_mat_initialize_CSR(CSR)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_CSR) :: CSR
+    !> [in,out] 行列構造体
+    type(monolis_mat_CSR), intent(inout) :: CSR
 
     call monolis_pdealloc_I_1d(CSR%index)
     call monolis_pdealloc_I_1d(CSR%item)
@@ -161,8 +161,8 @@ contains
   !> 行列構造体の初期化処理関数（CSC 構造）
   subroutine monolis_mat_initialize_CSC(CSC)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_CSC) :: CSC
+    !> [in,out] 行列構造体
+    type(monolis_mat_CSC), intent(inout) :: CSC
 
     call monolis_pdealloc_I_1d(CSC%index)
     call monolis_pdealloc_I_1d(CSC%item)
@@ -172,8 +172,8 @@ contains
   !> 行列構造体の終了処理関数
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
 
     monoMAT%N = 0
     monoMAT%NP = 0
@@ -189,8 +189,8 @@ contains
   !> 行列構造体の終了処理関数（実数型）
   subroutine monolis_mat_finalize_val_R(R)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_val_R) :: R
+    !> [in,out] 行列構造体
+    type(monolis_mat_val_R), intent(inout) :: R
 
     call monolis_pdealloc_R_1d(R%A)
     call monolis_pdealloc_R_1d(R%U)
@@ -203,8 +203,8 @@ contains
   !> 行列構造体の終了処理関数（複素数型）
   subroutine monolis_mat_finalize_val_C(C)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_val_C) :: C
+    !> [in,out] 行列構造体
+    type(monolis_mat_val_C), intent(inout) :: C
 
     call monolis_pdealloc_C_1d(C%A)
     call monolis_pdealloc_C_1d(C%U)
@@ -217,8 +217,8 @@ contains
   !> 行列構造体の終了処理関数（セパレート CSR 構造）
   subroutine monolis_mat_finalize_SCSR(SCSR)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_separated_CSR) :: SCSR
+    !> [in,out] 行列構造体
+    type(monolis_mat_separated_CSR), intent(inout) :: SCSR
 
     call monolis_pdealloc_I_1d(SCSR%indexU)
     call monolis_pdealloc_I_1d(SCSR%itemU)
@@ -229,8 +229,8 @@ contains
   !> 行列構造体の終了処理関数（CSR 構造）
   subroutine monolis_mat_finalize_CSR(CSR)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_CSR) :: CSR
+    !> [in,out] 行列構造体
+    type(monolis_mat_CSR), intent(inout) :: CSR
 
     call monolis_pdealloc_I_1d(CSR%index)
     call monolis_pdealloc_I_1d(CSR%item)
@@ -239,8 +239,8 @@ contains
   !> 行列構造体の終了処理関数（CSC 構造）
   subroutine monolis_mat_finalize_CSC(CSC)
     implicit none
-    !> 行列構造体
-    type(monolis_mat_CSC) :: CSC
+    !> [in,out] 行列構造体
+    type(monolis_mat_CSC), intent(inout) :: CSC
 
     call monolis_pdealloc_I_1d(CSC%index)
     call monolis_pdealloc_I_1d(CSC%item)
@@ -250,10 +250,10 @@ contains
   !> 右辺ベクトルの設定（実数型）
   subroutine monolis_set_RHS_R(monoMAT, B)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    real(kdouble) :: B(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: B(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_set_RHS_R")
@@ -266,10 +266,10 @@ contains
   !> 右辺ベクトルの設定（複素数型）
   subroutine monolis_set_RHS_C(monoMAT, B)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    complex(kdouble) :: B(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: B(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_set_RHS_C")
@@ -282,10 +282,10 @@ contains
   !> 解ベクトルの初期値設定（実数型）
   subroutine monolis_set_initial_solution_R(monoMAT, X)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    real(kdouble) :: X(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 解ベクトル
+    real(kdouble), intent(in) :: X(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_set_initial_solution_R")
@@ -298,10 +298,10 @@ contains
   !> 解ベクトルの初期値設定（複素数型）
   subroutine monolis_set_initial_solution_C(monoMAT, X)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    complex(kdouble) :: X(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 解ベクトル
+    complex(kdouble), intent(in) :: X(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_set_initial_solution_C")
@@ -314,10 +314,10 @@ contains
   !> 解ベクトルの設定（実数型）
   subroutine monolis_get_solution_R(monoMAT, X)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    real(kdouble) :: X(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [out] 解ベクトル
+    real(kdouble), intent(out) :: X(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_get_solution_R")
@@ -330,10 +330,10 @@ contains
   !> 解ベクトルの設定（複素数型）
   subroutine monolis_get_solution_C(monoMAT, X)
     implicit none
-    !> 疎行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    complex(kdouble) :: X(:)
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [out] 解ベクトル
+    complex(kdouble), intent(out) :: X(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_get_solution_C")
