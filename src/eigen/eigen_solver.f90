@@ -13,22 +13,22 @@ contains
   subroutine monolis_eigen_standard_lanczos_R( &
     & monolis, monoCOM, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 取得固有値数
-    integer(kint) :: n_get_eigen
-    !> 収束判定閾値
-    real(kdouble) :: ths
-    !> 最大反復回数
-    integer(kint) :: maxiter
-    !> 固有値
-    real(kdouble) :: val(:)
-    !> 固有ベクトル
-    real(kdouble) :: vec(:,:)
-    !> Dirhchlet 境界条件判定フラグ
-    logical :: is_bc(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 取得固有値数
+    integer(kint), intent(inout) :: n_get_eigen
+    !> [in] 収束判定閾値
+    real(kdouble), intent(in) :: ths
+    !> [in] 最大反復回数
+    integer(kint), intent(in) :: maxiter
+    !> [inout] 固有値
+    real(kdouble), intent(inout) :: val(:)
+    !> [inout] 固有ベクトル
+    real(kdouble), intent(inout) :: vec(:,:)
+    !> [in] Dirhchlet 境界条件判定フラグ
+    logical, intent(in) :: is_bc(:)
 
     if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
@@ -40,22 +40,22 @@ contains
   subroutine monolis_eigen_inverted_standard_lanczos_R( &
     & monolis, monoCOM, n_get_eigen, ths, maxiter, val, vec, is_bc)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 取得固有値数
-    integer(kint) :: n_get_eigen
-    !> 収束判定閾値
-    real(kdouble) :: ths
-    !> 最大反復回数
-    integer(kint) :: maxiter
-    !> 固有値
-    real(kdouble) :: val(:)
-    !> 固有ベクトル
-    real(kdouble) :: vec(:,:)
-    !> Dirhchlet 境界条件判定フラグ
-    logical :: is_bc(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 取得固有値数
+    integer(kint), intent(inout) :: n_get_eigen
+    !> [in] 収束判定閾値
+    real(kdouble), intent(in) :: ths
+    !> [in] 最大反復回数
+    integer(kint), intent(in) :: maxiter
+    !> [in,out] 固有値
+    real(kdouble), intent(inout) :: val(:)
+    !> [in,out] 固有ベクトル
+    real(kdouble), intent(inout) :: vec(:,:)
+    !> [in] Dirhchlet 境界条件判定フラグ
+    logical, intent(in) :: is_bc(:)
 
     if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
