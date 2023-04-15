@@ -135,7 +135,7 @@ module mod_monolis_def_solver
   !> パラメータ：疎行列ベクトル積の通信時間
   integer(kint), parameter :: monolis_R_time_comm_spmv = 9
 
-  !> パラメータ 構造体
+  !> パラメータ構造体
   type monolis_prm
     !> 整数パラメータ
     integer(kint) :: Iarray(monolis_prm_Iarray_size) = 0
@@ -154,7 +154,7 @@ contains
   !> パラメータ 構造体の初期化処理
   subroutine monolis_prm_initialize(monoPRM)
     implicit none
-    !> [out] パラメータ 構造体
+    !> [out] パラメータ構造体
     type(monolis_prm), intent(out) :: monoPRM
 
     monoPRM%com_top_dir_name = "."
@@ -190,10 +190,10 @@ contains
     monoPRM%Rarray(monolis_R_time_comm_spmv) = 0.0d0
   end subroutine monolis_prm_initialize
 
-  !> パラメータ 構造体の終了処理
+  !> パラメータ構造体の終了処理
   subroutine monolis_prm_finalize(monoPRM)
     implicit none
-    !> [in,out] パラメータ 構造体
+    !> [in,out] パラメータ構造体
     type(monolis_prm), intent(inout) :: monoPRM
 
     monoPRM%Iarray = 0
@@ -220,7 +220,7 @@ contains
   !> 時間計測機能の終了処理
   subroutine monolis_timer_finalize(monoPRM, monoCOM)
     implicit none
-    !> [in,out] パラメータ 構造体
+    !> [in,out] パラメータ構造体
     type(monolis_prm), intent(inout) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
@@ -354,5 +354,4 @@ contains
       t_sd = dsqrt(tmp - t_avg*t_avg)
     endif
   end subroutine monolis_time_statistics
-
 end module mod_monolis_def_solver
