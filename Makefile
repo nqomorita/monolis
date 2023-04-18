@@ -37,7 +37,7 @@ ifdef FLAGS
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
 		FC      = mpiifort
-		FFLAGS  = -fPIC -O2 -align array64byte
+		FFLAGS  = -fPIC -O2 -align array64byte -nofor-main
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include

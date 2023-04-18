@@ -29,11 +29,11 @@ void monolis_def_solver_c_test(){
 
   monolis_prm_finalize(&mat.prm);
 
-  for (int i = 0; i < 100; ++i){
+  for (i = 0; i < 100; ++i){
     monolis_test_check_eq_I1("monolis_def_solver_c_test I", mat.prm.Iarray[i], 0);
   }
 
-  for (int i = 0; i < 100; ++i){
+  for (i = 0; i < 100; ++i){
     monolis_test_check_eq_R1("monolis_def_solver_c_test R", mat.prm.Rarray[i], 0.0);
   }
 }
