@@ -8,7 +8,7 @@
 void clear_Iarray(
   MONOLIS *mat){
   int i;
-  for (int i = 0; i < 100; ++i){
+  for (i = 0; i < 100; ++i){
     mat->prm.Iarray[i] = 0;
   }
 }

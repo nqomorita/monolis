@@ -9,7 +9,6 @@ CFLAGS = -fPIC -O2
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-#USE_LIB = -L./lib -lmonolis -lmetis -llapack -lblas
 USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
@@ -36,11 +35,12 @@ ifdef FLAGS
 	endif
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
-		FC      = mpiifort
+		FC      = mpiifort -mkl=cluster
 		FFLAGS  = -fPIC -O2 -align array64byte -nofor-main
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
+		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
 	endif
 endif
 
