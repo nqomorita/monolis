@@ -42,30 +42,30 @@ void monolis_solve_c_test_R(){
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 
-  for(int i = 0; i < n_node; ++i){
-    for(int j = 0; j < n_dof; ++j){
+  for(i = 0; i < n_node; ++i){
+    for(j = 0; j < n_dof; ++j){
       val = rand()%1001 + 5000.0;
       monolis_set_scalar_to_sparse_matrix_R(&mat, i, i, j, j, val);
     }
   }
 
-  for(int i = 0; i < n_elem; ++i){
-    for(int j = 0; j < n_dof; ++j){
-    for(int k = 0; k < n_dof; ++k){
-      val = rand()%1001;
-      monolis_set_scalar_to_sparse_matrix_R(&mat, elem[i][0], elem[i][1], j, k, val);
-      monolis_set_scalar_to_sparse_matrix_R(&mat, elem[i][1], elem[i][0], j, k, val);
-    }
+  for(i = 0; i < n_elem; ++i){
+    for(j = 0; j < n_dof; ++j){
+      for(k = 0; k < n_dof; ++k){
+        val = rand()%1001;
+        monolis_set_scalar_to_sparse_matrix_R(&mat, elem[i][0], elem[i][1], j, k, val);
+        monolis_set_scalar_to_sparse_matrix_R(&mat, elem[i][1], elem[i][0], j, k, val);
+      }
     }
   }
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     a[i] = 1.0;
   }
 
   monolis_matvec_product_R(&mat, &com, a, b);
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     a[i] = 0.0;
   }
 
@@ -73,7 +73,7 @@ void monolis_solve_c_test_R(){
 
   monolis_solve_R(&mat, &com, b, a);
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     monolis_test_check_eq_R1("monolis_solve_c_test R", a[i], 1.0);
   }
 
@@ -117,30 +117,30 @@ void monolis_solve_c_test_C(){
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, n_base, n_dof, n_elem, elem);
 
-  for(int i = 0; i < n_node; ++i){
-    for(int j = 0; j < n_dof; ++j){
+  for(i = 0; i < n_node; ++i){
+    for(j = 0; j < n_dof; ++j){
       val = rand()%1001 + 5000.0;
       monolis_set_scalar_to_sparse_matrix_C(&mat, i, i, j, j, val + 0.1*val*I);
     }
   }
 
-  for(int i = 0; i < n_elem; ++i){
-    for(int j = 0; j < n_dof; ++j){
-    for(int k = 0; k < n_dof; ++k){
-      val = rand()%1001;
-      monolis_set_scalar_to_sparse_matrix_C(&mat, elem[i][0], elem[i][1], j, k, val + 0.1*val*I);
-      monolis_set_scalar_to_sparse_matrix_C(&mat, elem[i][1], elem[i][0], j, k, val + 0.1*val*I);
-    }
+  for(i = 0; i < n_elem; ++i){
+    for(j = 0; j < n_dof; ++j){
+      for(k = 0; k < n_dof; ++k){
+        val = rand()%1001;
+        monolis_set_scalar_to_sparse_matrix_C(&mat, elem[i][0], elem[i][1], j, k, val + 0.1*val*I);
+        monolis_set_scalar_to_sparse_matrix_C(&mat, elem[i][1], elem[i][0], j, k, val + 0.1*val*I);
+      }
     }
   }
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     a[i] = 1.0 + 1.0*I;
   }
 
   monolis_matvec_product_C(&mat, &com, a, b);
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     a[i] = 0.0 + 0.0*I;
   }
 
@@ -150,7 +150,7 @@ void monolis_solve_c_test_C(){
 
   monolis_solve_C(&mat, &com, b, a);
 
-  for(int i = 0; i < 20; ++i){
+  for(i = 0; i < 20; ++i){
     monolis_test_check_eq_C1("monolis_solve_c_test C", a[i], 1.0 + 1.0*I);
   }
 
