@@ -35,7 +35,7 @@ ifdef FLAGS
 	endif
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
-		FC      = mpiifort -mkl=cluster
+		FC      = mpiifort -qmkl=cluster
 		FFLAGS  = -fPIC -O2 -align array64byte -nofor-main
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
