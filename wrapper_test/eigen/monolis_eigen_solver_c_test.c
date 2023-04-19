@@ -43,16 +43,16 @@ void monolis_eigen_solve_c_test(){
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
 
-  for(int i = 0; i < n_node; ++i){
+  for(i = 0; i < n_node; ++i){
     monolis_set_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, 2.0);
   }
 
-  for(int i = 0; i < 4; ++i){
+  for(i = 0; i < 4; ++i){
     monolis_set_scalar_to_sparse_matrix_R(&mat, i, i + 1, 0, 0, 1.0);
     monolis_set_scalar_to_sparse_matrix_R(&mat, i + 1, i, 0, 0, 1.0);
   }
 
-  for(int i = 0; i < n_node; ++i){
+  for(i = 0; i < n_node; ++i){
     is_bc[i] = false;
   }
 
@@ -96,12 +96,12 @@ void monolis_eigen_solve_c_test(){
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 4 g", fabs(eig_mode[4][3]),fabs(-0.5));
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 5 g", fabs(eig_mode[4][4]),fabs(-0.28867513459481270));
 
-  for(int i = 0; i < n_get_eigen; ++i){
+  for(i = 0; i < n_get_eigen; ++i){
     eig_val[i] = 0.0;
   }
 
-  for(int i = 0; i < n_get_eigen; ++i){
-    for(int j = 0; j < n_node; ++j){
+  for(i = 0; i < n_get_eigen; ++i){
+    for(j = 0; j < n_node; ++j){
       eig_mode[i][j] = 0.0;
     }
   }

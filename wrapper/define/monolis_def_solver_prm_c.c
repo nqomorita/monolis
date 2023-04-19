@@ -13,11 +13,11 @@ void monolis_prm_initialize(
   strcpy(prm->com_part_dir_name, "parted.0");
   strcpy(prm->com_file_name, "node.dat");
 
-  for (int i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
+  for (i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
     prm->Iarray[i] = 0;
   }
 
-  for (int i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
+  for (i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
     prm->Rarray[i] = 0.0;
   }
 
@@ -45,11 +45,11 @@ void monolis_prm_finalize(
 {
   int i;
 
-  for (int i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
+  for (i = 0; i < MONOLIS_PRM_IARRAY_SIZE; ++i) {
     prm->Iarray[i] = 0;
   }
 
-  for (int i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
+  for (i = 0; i < MONOLIS_PRM_RARRAY_SIZE; ++i) {
     prm->Rarray[i] = 0.0;
   }
 }

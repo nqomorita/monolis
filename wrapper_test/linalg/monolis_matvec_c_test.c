@@ -8,6 +8,7 @@
 void monolis_matvec_c_test_R11(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -49,11 +50,11 @@ void monolis_matvec_c_test_R11(){
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 3, 0, 0, 1.0);
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 4, 0, 0, 2.0);
 
-  for(int i = 0; i < 5; ++i){
+  for(i = 0; i < 5; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 5; ++i){
+  for(i = 0; i < 5; ++i){
     ry[i] = 0.0;
   }
 
@@ -71,6 +72,7 @@ void monolis_matvec_c_test_R11(){
 void monolis_matvec_c_test_R22(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -126,11 +128,11 @@ void monolis_matvec_c_test_R22(){
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 3, 1, 1, 2.0);
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 4, 1, 1, 4.0);
 
-  for(int i = 0; i < 10; ++i){
+  for(i = 0; i < 10; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 10; ++i){
+  for(i = 0; i < 10; ++i){
     ry[i] = 0.0;
   }
 
@@ -153,6 +155,7 @@ void monolis_matvec_c_test_R22(){
 void monolis_matvec_c_test_R33(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -222,11 +225,11 @@ void monolis_matvec_c_test_R33(){
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 3, 2, 2, 4.0);
   monolis_add_scalar_to_sparse_matrix_R(&mat, 4, 4, 2, 2, 8.0);
 
-  for(int i = 0; i < 15; ++i){
+  for(i = 0; i < 15; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 15; ++i){
+  for(i = 0; i < 15; ++i){
     ry[i] = 0.0;
   }
 
@@ -254,6 +257,7 @@ void monolis_matvec_c_test_R33(){
 void monolis_matvec_c_test_C11(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -295,11 +299,11 @@ void monolis_matvec_c_test_C11(){
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 3, 0, 0, 1.0);
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 4, 0, 0, 2.0);
 
-  for(int i = 0; i < 5; ++i){
+  for(i = 0; i < 5; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 5; ++i){
+  for(i = 0; i < 5; ++i){
     ry[i] = 0.0;
   }
 
@@ -317,6 +321,7 @@ void monolis_matvec_c_test_C11(){
 void monolis_matvec_c_test_C22(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -372,11 +377,11 @@ void monolis_matvec_c_test_C22(){
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 3, 1, 1, 2.0);
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 4, 1, 1, 4.0);
 
-  for(int i = 0; i < 10; ++i){
+  for(i = 0; i < 10; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 10; ++i){
+  for(i = 0; i < 10; ++i){
     ry[i] = 0.0;
   }
 
@@ -399,6 +404,7 @@ void monolis_matvec_c_test_C22(){
 void monolis_matvec_c_test_C33(){
   MONOLIS mat;
   MONOLIS_COM com;
+  int i;
   int n_dof;
   int n_node;
   int n_elem;
@@ -468,11 +474,11 @@ void monolis_matvec_c_test_C33(){
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 3, 2, 2, 4.0);
   monolis_add_scalar_to_sparse_matrix_C(&mat, 4, 4, 2, 2, 8.0);
 
-  for(int i = 0; i < 15; ++i){
+  for(i = 0; i < 15; ++i){
     rx[i] = 1.0;
   }
 
-  for(int i = 0; i < 15; ++i){
+  for(i = 0; i < 15; ++i){
     ry[i] = 0.0;
   }
 

@@ -77,11 +77,11 @@ void monolis_spmat_handler_c_test_R(){
   monolis_test_check_eq_R1("monolis_spmat_handler_c_test_R 5", mat.mat.R.A[18], 3.0);
   monolis_test_check_eq_R1("monolis_spmat_handler_c_test_R 5", mat.mat.R.A[19], 4.0);
 
-  for(int i = 0; i < 8; ++i){
+  for(i = 0; i < 8; ++i){
     b[i] = 0.0;
   }
 
-  for(int i = 0; i < 40; ++i){
+  for(i = 0; i < 40; ++i){
     mat.mat.R.A[i] = 2.0;
   }
 
@@ -169,11 +169,11 @@ void monolis_spmat_handler_c_test_C(){
   monolis_test_check_eq_C1("monolis_spmat_handler_c_test_C 5", mat.mat.C.A[18], 3.0);
   monolis_test_check_eq_C1("monolis_spmat_handler_c_test_C 5", mat.mat.C.A[19], 4.0);
 
-  for(int i = 0; i < 8; ++i){
+  for(i = 0; i < 8; ++i){
     b[i] = 0.0;
   }
 
-  for(int i = 0; i < 40; ++i){
+  for(i = 0; i < 40; ++i){
     mat.mat.C.A[i] = 2.0;
   }
 

@@ -111,8 +111,8 @@ void monolis_add_matrix_to_sparse_matrix_R(
 
   val_t = monolis_alloc_R_1d(val_t, n*n);
 
-  for(int i = 0; i < n; ++i){
-    for(int j = 0; j < n; ++j){
+  for(i = 0; i < n; ++i){
+    for(j = 0; j < n; ++j){
       val_t[n*i + j] = val[i][j];
     }
   }
@@ -152,8 +152,8 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
 
   val_t = monolis_alloc_R_1d(val_t, n1*n2);
 
-  for(int i = 0; i < n1; ++i){
-    for(int j = 0; j < n2; ++j){
+  for(i = 0; i < n1; ++i){
+    for(j = 0; j < n2; ++j){
       val_t[n2*i + j] = val[i][j];
     }
   }
@@ -365,8 +365,8 @@ void monolis_add_matrix_to_sparse_matrix_C(
 
   val_t = monolis_alloc_C_1d(val_t, n*n);
 
-  for(int i = 0; i < n; ++i){
-    for(int j = 0; j < n; ++j){
+  for(i = 0; i < n; ++i){
+    for(j = 0; j < n; ++j){
       val_t[n*i + j] = val[i][j];
     }
   }
@@ -406,8 +406,8 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_C(
 
   val_t = monolis_alloc_C_1d(val_t, n1*n2);
 
-  for(int i = 0; i < n1; ++i){
-    for(int j = 0; j < n2; ++j){
+  for(i = 0; i < n1; ++i){
+    for(j = 0; j < n2; ++j){
       val_t[n2*i + j] = val[i][j];
     }
   }
