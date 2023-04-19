@@ -238,9 +238,9 @@ void monolis_solver_parallel_R_test(){
   monolis_show_iterlog(&mat, false);
   monolis_show_summary(&mat, false);
 
-  monolis_eigen_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val1, eig_mode1, is_bc);
+  monolis_eigen_standard_lanczos_R(&mat, &com, &n_get_eigen, 1.0e-6, 100, eig_val1, eig_mode1, is_bc);
 
-  monolis_eigen_inverted_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
+  monolis_eigen_inverted_standard_lanczos_R(&mat, &com, &n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
 
   for (int i = 0; i < n_get_eigen; ++i) {
     j = n_get_eigen - i - 1;
