@@ -21,7 +21,8 @@ contains
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
-    integer(c_int), intent(in), value :: n_get_eigen, maxiter
+    integer(c_int), intent(in), value :: maxiter
+    integer(c_int), intent(inout), target :: n_get_eigen
     integer(c_int), intent(in), target :: index(NP + 1)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -33,8 +34,8 @@ contains
     real(c_double), intent(in), target :: Rarray(100)
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(in), value :: ths
-    real(c_double), intent(in), target :: val(n_get_eigen)
-    real(c_double), intent(in), target :: vec(NDOF*NP, n_get_eigen)
+    real(c_double), intent(out), target :: val(n_get_eigen)
+    real(c_double), intent(out), target :: vec(NDOF*NP, n_get_eigen)
     integer(kint) :: i
     logical, allocatable :: is_bc_t(:)
 
@@ -92,7 +93,8 @@ contains
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
-    integer(c_int), intent(in), value :: n_get_eigen, maxiter
+    integer(c_int), intent(in), value :: maxiter
+    integer(c_int), intent(inout), target :: n_get_eigen
     integer(c_int), intent(in), target :: index(NP + 1)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -104,8 +106,8 @@ contains
     real(c_double), intent(in), target :: Rarray(100)
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
     real(c_double), intent(in), value :: ths
-    real(c_double), intent(in), target :: val(n_get_eigen)
-    real(c_double), intent(in), target :: vec(NDOF*NP, n_get_eigen)
+    real(c_double), intent(out), target :: val(n_get_eigen)
+    real(c_double), intent(out), target :: vec(NDOF*NP, n_get_eigen)
     integer(kint) :: i
     logical, allocatable :: is_bc_t(:)
 

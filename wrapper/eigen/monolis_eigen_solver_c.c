@@ -10,7 +10,7 @@
 void monolis_eigen_standard_lanczos_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
-  int          n_get_eigen,
+  int*         n_get_eigen,
   double       ths,
   int          maxiter,
   double*      eigen_value,
@@ -28,7 +28,7 @@ void monolis_eigen_standard_lanczos_R(
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
 
-  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*n_get_eigen);
+  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*(*n_get_eigen));
   is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, np*n_dof);
 
   for(i = 0; i < np*n_dof; i++){
@@ -72,7 +72,7 @@ void monolis_eigen_standard_lanczos_R(
     eigen_mode_tmp,
     is_Dirichlet_bc_int);
 
-  for(i = 0; i < n_get_eigen; i++){
+  for(i = 0; i < *n_get_eigen; i++){
     for(j = 0; j < np*n_dof; j++){
       eigen_mode[i][j] = eigen_mode_tmp[np*n_dof*i + j];
     }
@@ -85,7 +85,7 @@ void monolis_eigen_standard_lanczos_R(
 void monolis_eigen_inverted_standard_lanczos_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
-  int          n_get_eigen,
+  int*         n_get_eigen,
   double       ths,
   int          maxiter,
   double*      eigen_value,
@@ -103,7 +103,7 @@ void monolis_eigen_inverted_standard_lanczos_R(
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
 
-  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*n_get_eigen);
+  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*(*n_get_eigen));
   is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, np*n_dof);
 
   for(i = 0; i < np*n_dof; i++){
@@ -147,7 +147,7 @@ void monolis_eigen_inverted_standard_lanczos_R(
     eigen_mode_tmp,
     is_Dirichlet_bc_int);
 
-  for(i = 0; i < n_get_eigen; i++){
+  for(i = 0; i < *n_get_eigen; i++){
     for(j = 0; j < np*n_dof; j++){
       eigen_mode[i][j] = eigen_mode_tmp[np*n_dof*i + j];
     }

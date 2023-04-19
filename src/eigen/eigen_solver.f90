@@ -24,9 +24,9 @@ contains
     !> [in] 最大反復回数
     integer(kint), intent(in) :: maxiter
     !> [inout] 固有値
-    real(kdouble), intent(inout) :: val(:)
+    real(kdouble), intent(out) :: val(:)
     !> [inout] 固有ベクトル
-    real(kdouble), intent(inout) :: vec(:,:)
+    real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
 
@@ -51,9 +51,9 @@ contains
     !> [in] 最大反復回数
     integer(kint), intent(in) :: maxiter
     !> [in,out] 固有値
-    real(kdouble), intent(inout) :: val(:)
+    real(kdouble), intent(out) :: val(:)
     !> [in,out] 固有ベクトル
-    real(kdouble), intent(inout) :: vec(:,:)
+    real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
 

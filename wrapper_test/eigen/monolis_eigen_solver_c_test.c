@@ -58,7 +58,7 @@ void monolis_eigen_solve_c_test(){
 
   eig_mode = monolis_alloc_R_2d(eig_mode, n_get_eigen, n_node);
 
-  monolis_eigen_inverted_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val, eig_mode, is_bc);
+  monolis_eigen_inverted_standard_lanczos_R(&mat, &com, &n_get_eigen, 1.0e-6, 100, eig_val, eig_mode, is_bc);
 
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 1 a", eig_val[0], 0.267949192431122);
   monolis_test_check_eq_R1("monolis_eigen_inverted_standard_lanczos_R 2 a", eig_val[1], 1.0);
@@ -108,7 +108,7 @@ void monolis_eigen_solve_c_test(){
 
   monolis_std_log_string("monolis_eigen_standard_lanczos_R");
 
-  monolis_eigen_standard_lanczos_R(&mat, &com, n_get_eigen, 1.0e-6, 100, eig_val, eig_mode, is_bc);
+  monolis_eigen_standard_lanczos_R(&mat, &com, &n_get_eigen, 1.0e-6, 100, eig_val, eig_mode, is_bc);
 
   monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 a", eig_val[4], 0.267949192431122);
   monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 a", eig_val[3], 1.0);
