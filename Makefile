@@ -181,6 +181,7 @@ $(addprefix eigen/, $(SRC_EIGEN)) \
 LIB_SOURCES = \
 $(addprefix $(SRC_DIR)/,  $(SRC_ALL)) \
 $(addprefix $(WRAP_DIR)/, $(SRC_ALL_C)) \
+./src/monolis_solver.f90 \
 ./src/monolis.f90
 LIB_OBJSt   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
 LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJSt:.c=.o))
@@ -284,6 +285,7 @@ cp_header:
 	$(CP) ./wrapper/matrix/monolis_spmat_copy_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
+	$(CP) ./wrapper/monolis_solver.h ./include/
 	$(CP) ./wrapper/monolis.h ./include/
 
 cp_header_lib:

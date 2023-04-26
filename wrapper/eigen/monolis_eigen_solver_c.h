@@ -6,8 +6,6 @@
 extern "C" {
 #endif
 
-#include <complex.h>
-
 /* eigen solver (inverted Lnaczos) */
 void monolis_eigen_inverted_standard_lanczos_R(
   MONOLIS*     mat,

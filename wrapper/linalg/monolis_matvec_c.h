@@ -6,7 +6,6 @@
 extern "C" {
 #endif
 
-#include <complex.h>
 #include "monolis_def_struc_c.h"
 
 void monolis_matvec_product_R(

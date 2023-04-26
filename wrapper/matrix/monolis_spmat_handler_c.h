@@ -6,8 +6,6 @@
 extern "C" {
 #endif
 
-#include <complex.h>
-
 void monolis_set_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
