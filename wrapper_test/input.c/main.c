@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <complex.h>
 #include <math.h>
 #include "monolis.h"
 
@@ -140,10 +141,8 @@ void monolis_solver_parallel_R_test(){
 
   monolis_initialize(&mat);
 
-  monolis_com_set_input_top_directory_name(&com, "./");
-  monolis_com_set_input_part_directory_name(&com, "./parted.0");
-  monolis_com_set_input_file_name(&com, "node.dat");
-  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm());
+  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm(),
+      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat");
 
   monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, 2, 1, n_elem, elem);
 
@@ -286,10 +285,8 @@ void monolis_solver_parallel_C_test(){
 
   monolis_initialize(&mat);
 
-  monolis_com_set_input_top_directory_name(&com, "./");
-  monolis_com_set_input_part_directory_name(&com, "./parted.0");
-  monolis_com_set_input_file_name(&com, "node.dat");
-  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm());
+  monolis_com_initialize_by_parted_files(&com, monolis_mpi_get_global_comm(),
+      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat");
 
   monolis_get_nonzero_pattern_by_simple_mesh_C(&mat, n_node, 2, 1, n_elem, elem);
 

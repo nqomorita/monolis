@@ -53,8 +53,9 @@ program main
 
     call monolis_initialize(mat)
 
-    call monolis_com_set_input_file_name(com, "node.dat")
-    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm())
+    call monolis_com_initialize_by_parted_files(com, &
+      monolis_mpi_get_global_comm(), &
+      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
 
@@ -192,8 +193,9 @@ program main
 
     call monolis_initialize(mat)
 
-    call monolis_com_set_input_file_name(com, "node.dat")
-    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm())
+    call monolis_com_initialize_by_parted_files(com, &
+      monolis_mpi_get_global_comm(), &
+      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
 
     call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 1, n_elem, elem)
 
