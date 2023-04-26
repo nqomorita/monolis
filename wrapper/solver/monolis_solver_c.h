@@ -1,12 +1,10 @@
 /* monolis_spmat_handler.h */
-#ifndef MONOLIS_SOLVER_H
-#define MONOLIS_SOLVER_H
+#ifndef MONOLIS_SOLVE_H
+#define MONOLIS_SOLVE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <complex.h>
 
 void monolis_solve_R(
   MONOLIS*     mat,

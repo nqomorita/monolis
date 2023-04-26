@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <complex.h>
 #include "monolis.h"
-#include "monolis_utils.h"
 
 void monolis_solve_c_test_R(){
   MONOLIS mat;

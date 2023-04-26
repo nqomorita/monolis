@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <complex.h>
 #include "monolis_utils.h"
 #include "monolis_spmat_handler_util_c.h"
 #include "monolis_spmat_nzpattern_util_c.h"

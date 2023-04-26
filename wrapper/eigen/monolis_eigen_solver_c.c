@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <complex.h>
 #include "monolis_utils.h"
 #include "monolis_def_struc_c.h"
 #include "monolis_eigen_solver_c.h"

@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "monolis.h"
-#include "monolis_utils.h"
 
 void monolis_def_solver_c_test(){
   MONOLIS mat;

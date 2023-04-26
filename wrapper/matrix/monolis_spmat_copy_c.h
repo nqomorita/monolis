@@ -6,8 +6,6 @@
 extern "C" {
 #endif
 
-#include <complex.h>
-
 void monolis_copy_mat_value_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
