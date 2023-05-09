@@ -35,14 +35,14 @@ program main
 
     call monolis_std_log_string("monolis_solver_parallel_test linear")
 
-    fname = monolis_get_global_input_file_name("parted.0", "node.dat")
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
     call monolis_input_node(fname, n_node, node)
 
-    fname = monolis_get_global_input_file_name("parted.0", "elem.dat")
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
     call monolis_input_elem(fname, n_elem, n_base, elem)
 
     if(monolis_mpi_get_global_comm_size() > 1)then
-      fname = monolis_get_global_input_file_name("parted.0", "elem.dat.id")
+      fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id")
       call monolis_input_global_id(fname, n_id, global_eid)
     else
       call monolis_alloc_I_1d(global_eid, n_elem)
@@ -175,14 +175,14 @@ program main
     real(kdouble), allocatable :: coef(:), node(:,:)
     complex(kdouble), allocatable :: a(:), b(:), c(:)
 
-    fname = monolis_get_global_input_file_name("parted.0", "node.dat")
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
     call monolis_input_node(fname, n_node, node)
 
-    fname = monolis_get_global_input_file_name("parted.0", "elem.dat")
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
     call monolis_input_elem(fname, n_elem, n_base, elem)
 
     if(monolis_mpi_get_global_comm_size() > 1)then
-      fname = monolis_get_global_input_file_name("parted.0", "elem.dat.id")
+      fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id")
       call monolis_input_global_id(fname, n_id, global_eid)
     else
       call monolis_alloc_I_1d(global_eid, n_elem)

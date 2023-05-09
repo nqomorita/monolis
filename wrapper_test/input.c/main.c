@@ -123,14 +123,14 @@ void monolis_solver_parallel_R_test(){
   double* c;
   double** node;
 
-  fname = monolis_get_global_input_file_name("parted.0", "node.dat");
+  fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat");
   monolis_input_mesh_node_c(fname, &n_node, &node);
 
-  fname = monolis_get_global_input_file_name("parted.0", "elem.dat");
+  fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat");
   monolis_input_mesh_elem_c(fname, &n_elem, &n_base, &elem);
 
   if(monolis_mpi_get_global_comm_size() > 1){
-    fname = monolis_get_global_input_file_name("parted.0", "elem.dat.id");
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id");
     monolis_input_id_c(fname, &global_eid);
   } else {
     global_eid = monolis_alloc_I_1d(global_eid, n_elem);
@@ -267,14 +267,14 @@ void monolis_solver_parallel_C_test(){
   double _Complex* c;
   double** node;
 
-  fname = monolis_get_global_input_file_name("parted.0", "node.dat");
+  fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat");
   monolis_input_mesh_node_c(fname, &n_node, &node);
 
-  fname = monolis_get_global_input_file_name("parted.0", "elem.dat");
+  fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat");
   monolis_input_mesh_elem_c(fname, &n_elem, &n_base, &elem);
 
   if(monolis_mpi_get_global_comm_size() > 1){
-    fname = monolis_get_global_input_file_name("parted.0", "elem.dat.id");
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id");
     monolis_input_id_c(fname, &global_eid);
   } else {
     global_eid = monolis_alloc_I_1d(global_eid, n_elem);
