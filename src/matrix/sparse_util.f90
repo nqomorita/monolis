@@ -353,7 +353,7 @@ contains
               A(im) = A(im) + temp(ndof*(j-1)+i2, ndof*(i-1)+i1)
             enddo
             enddo
-            jS = k + 1
+            jS = k
             cycle aa
           endif
         enddo
