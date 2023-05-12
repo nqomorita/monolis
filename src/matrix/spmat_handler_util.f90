@@ -426,7 +426,7 @@ contains
               A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
             enddo
             enddo
-            jS = k + 1
+            jS = k
             cycle aa
           endif
         enddo
@@ -498,7 +498,7 @@ contains
               A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
             enddo
             enddo
-            jS = k + 1
+            jS = k
             cycle aa
           endif
         enddo
