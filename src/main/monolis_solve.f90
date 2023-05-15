@@ -66,7 +66,7 @@ contains
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
 
-    if(monolis_global_commsize() > 1)then
+    if(monolis_local_commsize(monoCOM%comm) > 1)then
       monoMAT%N = monoCOM%internal_nnode
     endif
   end subroutine monolis_set_initial_comm

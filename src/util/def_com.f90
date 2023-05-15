@@ -250,6 +250,17 @@ contains
 #endif
   end function monolis_global_commsize
 
+  function monolis_local_commsize(comm)
+    implicit none
+    integer(kint) :: monolis_local_commsize, comm, ierr
+
+#ifdef WITH_MPI
+    call MPI_comm_size(comm, monolis_local_commsize, ierr)
+#else
+    monolis_local_commsize = 1
+#endif
+  end function monolis_local_commsize
+
   function monolis_global_myrank()
     implicit none
     integer(kint) :: monolis_global_myrank, ierr
