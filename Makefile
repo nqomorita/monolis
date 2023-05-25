@@ -81,7 +81,8 @@ mat_converge.f90 \
 vec_util.f90
 
 SRC_WRAP = \
-wrapper_lapack.f90
+wrapper_lapack.f90 \
+wrapper_scalapack.f90
 
 #matmat.f90 \
 
