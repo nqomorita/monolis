@@ -1,28 +1,29 @@
 !> ScaLAPACK ラッパーモジュール
 module mod_monolis_scalapack
   use mod_monolis_utils
+  use mod_monolis_vec_util
 
   implicit none
 
 contains
 
   !> PDGESVD 関数（実数型）
-  subroutine monolis_scalapack_gesvd_R(M_loc, N, A, S, V, D, comm)
+  subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
     implicit none
     !> 行列の大きさ（行数 N）
-    integer(kint), intent(in) :: M_loc
+    integer(kint), intent(in) :: N_loc
     !> 行列の大きさ（列数 M）
-    integer(kint), intent(in) :: N
-    !> 入力行列（M_loc x N）
+    integer(kint), intent(in) :: M
+    !> 入力行列（N_loc x M）
     real(kdouble) :: A(:,:)
-    !> 左特異行列（M_loc x P）
+    !> 左特異行列（N_loc x P）
     real(kdouble) :: S(:,:)
     !> 特異値（P）
     real(kdouble) :: V(:)
-    !> 右特異行列（P x N）
+    !> 右特異行列（P x M）
     real(kdouble) :: D(:,:)
     !> コミュニケータ
-    integer(kint) :: M, comm
+    integer(kint) :: N, comm
     integer(kint) :: scalapack_comm
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
@@ -48,23 +49,23 @@ contains
 
     NB = 1
 
-    !# M の取得
-    M = M_loc
-    call monolis_allreduce_I1(M, monolis_mpi_sum, comm)
-    P = min(M, N)
+    !# N の取得
+    N = N_loc
+    call monolis_allreduce_I1(N, monolis_mpi_sum, comm)
+    P = min(N, M)
 
-    lld_A = numroc(M, NB, my_row, 0, n_row)
-    lld_S = numroc(M, NB, my_row, 0, n_row)
-    lld_D = numroc(N, NB, my_row, 0, n_row)
+    lld_A = numroc(N, NB, my_row, 0, n_row)
+    lld_S = numroc(N, NB, my_row, 0, n_row)
+    lld_D = numroc(M, NB, my_row, 0, n_row)
 
-    call descinit(desc_A, M, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
-    call descinit(desc_S, M, P, NB, NB, 0, 0, scalapack_comm, lld_S, info)
-    call descinit(desc_D, P, N, NB, NB, 0, 0, scalapack_comm, lld_D, info)
+    call descinit(desc_A, N, M, NB, NB, 0, 0, scalapack_comm, lld_A, info)
+    call descinit(desc_S, N, P, NB, NB, 0, 0, scalapack_comm, lld_S, info)
+    call descinit(desc_D, P, M, NB, NB, 0, 0, scalapack_comm, lld_D, info)
 
     !# 一次ベクトルの大きさ取得
     call monolis_alloc_R_1d(W, 1)
 
-    call pdgesvd("V", "V", M, N, &
+    call pdgesvd("V", "V", N, M, &
       & A, 1, 1, desc_A, &
       & V, &
       & S, 1, 1, desc_S, &
@@ -76,7 +77,7 @@ contains
     call monolis_alloc_R_1d(W, NW)
 
     !# 特異値分解
-    call pdgesvd("V", "V", M, N, &
+    call pdgesvd("V", "V", N, M, &
       & A, 1, 1, desc_A, &
       & V, &
       & S, 1, 1, desc_S, &
