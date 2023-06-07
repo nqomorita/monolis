@@ -15,23 +15,22 @@ contains
     !> 行列の大きさ（列数 M）
     integer(kint), intent(in) :: M
     !> 入力行列（N_loc x M）
-    real(kdouble) :: A(:,:)
+    real(kdouble), intent(in) :: A(:,:)
     !> 左特異行列（N_loc x P）
-    real(kdouble) :: S(:,:)
+    real(kdouble), intent(out) :: S(:,:)
     !> 特異値（P）
-    real(kdouble) :: V(:)
+    real(kdouble), intent(out) :: V(:)
     !> 右特異行列（P x M）
-    real(kdouble) :: D(:,:)
+    real(kdouble), intent(out) :: D(:,:)
     !> コミュニケータ
-    integer(kint) :: N, comm
-    integer(kint) :: scalapack_comm
+    integer(kint) :: comm
+    integer(kint) :: N, scalapack_comm
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
-    integer(kint) :: NW, info, i
+    integer(kint) :: NW, info
     integer(kint) :: my_col, my_row, n_col, n_row
-    integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: W(:)
-    real(kdouble), allocatable :: D_full(:)
+    real(kdouble), allocatable :: A_temp(:,:)
 
     integer :: numroc
     external :: numroc
@@ -66,9 +65,11 @@ contains
 
     !# 一時ベクトルの大きさ取得
     call monolis_alloc_R_1d(W, 1)
+    call monolis_alloc_R_2d(A_temp, N_loc, M)
+    A_temp = A
 
     call pdgesvd("V", "V", N, M, &
-      & A, 1, 1, desc_A, &
+      & A_temp, 1, 1, desc_A, &
       & V, &
       & S, 1, 1, desc_S, &
       & D, 1, 1, desc_D, &
@@ -80,28 +81,46 @@ contains
 
     !# 特異値分解
     call pdgesvd("V", "V", N, M, &
-      & A, 1, 1, desc_A, &
+      & A_temp, 1, 1, desc_A, &
       & V, &
       & S, 1, 1, desc_S, &
       & D, 1, 1, desc_D, &
       & W, NW, info)
 
     !# 計算結果 D 行列の通信
-    call monolis_alloc_R_1d(D_full, P*M)
-    call monolis_alloc_I_1d(counts, n_row)
-    call monolis_alloc_I_1d(displs, n_row)
-
-    counts = M
-
-    do i = 2, n_row
-      displs(i) = M*(i-1)
-    enddo
-
-    call monolis_allgatherv_R(M, D(:,1), D_full, counts, displs, comm)
-    call monolis_vec_to_mat_R(P, M, D_full, D)
+    call gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
 
     !# scalapack コミュニケータの終了処理
     call blacs_gridexit(scalapack_comm)
   end subroutine monolis_scalapack_gesvd_R
+
+  subroutine gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
+    implicit none
+    integer(kint) :: P
+    integer(kint) :: M
+    integer(kint) :: n_row
+    integer(kint) :: lld_D
+    real(kdouble) :: D(:,:)
+    integer(kint) :: comm
+    integer(kint) :: i
+    integer(kint), allocatable :: counts(:), displs(:)
+    real(kdouble), allocatable :: D_temp(:)
+    real(kdouble), allocatable :: D_full(:)
+
+    call monolis_alloc_R_1d(D_temp, P*M)
+    call monolis_alloc_R_1d(D_full, P*M)
+    call monolis_alloc_I_1d(counts, n_row)
+    call monolis_alloc_I_1d(displs, n_row)
+
+    counts = lld_D*M
+
+    do i = 2, n_row
+      displs(i) = lld_D*M*(i-1)
+    enddo
+
+    call monolis_mat_to_vec_R(P, M, D, D_temp)
+    call monolis_allgatherv_R(lld_D*M, D_temp, D_full, counts, displs, comm)
+    call monolis_vec_to_mat_R(P, M, D_full, D)
+  end subroutine gesvd_R_update_D
 
 end module mod_monolis_scalapack
