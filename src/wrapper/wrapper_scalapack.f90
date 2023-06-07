@@ -27,9 +27,11 @@ contains
     integer(kint) :: scalapack_comm
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
-    integer(kint) :: NW, info
+    integer(kint) :: NW, info, i
     integer(kint) :: my_col, my_row, n_col, n_row
+    integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: W(:)
+    real(kdouble), allocatable :: D_full(:)
 
     integer :: numroc
     external :: numroc
@@ -62,7 +64,7 @@ contains
     call descinit(desc_S, N, P, NB, NB, 0, 0, scalapack_comm, lld_S, info)
     call descinit(desc_D, P, M, NB, NB, 0, 0, scalapack_comm, lld_D, info)
 
-    !# 一次ベクトルの大きさ取得
+    !# 一時ベクトルの大きさ取得
     call monolis_alloc_R_1d(W, 1)
 
     call pdgesvd("V", "V", N, M, &
@@ -83,6 +85,20 @@ contains
       & S, 1, 1, desc_S, &
       & D, 1, 1, desc_D, &
       & W, NW, info)
+
+    !# 計算結果 D 行列の通信
+    call monolis_alloc_R_1d(D_full, P*M)
+    call monolis_alloc_I_1d(counts, n_row)
+    call monolis_alloc_I_1d(displs, n_row)
+
+    counts = M
+
+    do i = 2, n_row
+      displs(i) = M*(i-1)
+    enddo
+
+    call monolis_allgatherv_R(M, D(:,1), D_full, counts, displs, comm)
+    call monolis_vec_to_mat_R(P, M, D_full, D)
 
     !# scalapack コミュニケータの終了処理
     call blacs_gridexit(scalapack_comm)
