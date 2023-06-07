@@ -46,11 +46,6 @@ contains
       A(2,2) = 12.0d0
       A(3,2) = 13.0d0
       A(4,2) = 14.0d0
-
-      !A(1,3) = 21.0d0
-      !A(2,3) = 22.0d0
-      !A(3,3) = 23.0d0
-      !A(4,3) = 24.0d0
     else
       A(1,1) = 5.0d0
       A(2,1) = 6.0d0
@@ -61,11 +56,6 @@ contains
       A(2,2) = 16.0d0
       A(3,2) = 17.0d0
       A(4,2) = 18.0d0
-
-      !A(1,3) = 25.0d0
-      !A(2,3) = 26.0d0
-      !A(3,3) = 27.0d0
-      !A(4,3) = 28.0d0
     endif
 
     call monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
@@ -73,19 +63,9 @@ contains
     Vt = 0.0d0
     Vt(1,1) = V(1)
     Vt(2,2) = V(2)
-    !Vt(3,3) = V(3)
-
-    write(*,*)"S"
-    write(*,"(1pe12.4)")S
-    write(*,*)"V"
-    write(*,"(1pe12.4)")V
-    write(*,*)"D"
-    write(*,"(1pe12.4)")D
 
     VD = matmul(Vt, D)
     A_res = matmul(S,VD)
-    !write(*,"(1pe12.4)")A_res
-    !write(*,"(1pe12.4)")A
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       call monolis_test_check_eq_R("monolis_scalapack_gesvd_R 1", A(:,1), A_res(:,1))
@@ -95,5 +75,4 @@ contains
       call monolis_test_check_eq_R("monolis_scalapack_gesvd_R 2", A(:,2), A_res(:,2))
     endif
   end subroutine monolis_scalapack_test
-
 end module mod_monolis_scalapack_test
