@@ -7,8 +7,78 @@ module mod_monolis_scalapack
 
 contains
 
+
   !> PDGESVD 関数（実数型）
   subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
+    implicit none
+    !> 行列の大きさ（行数 N）
+    integer(kint), intent(in) :: N_loc
+    !> 行列の大きさ（列数 M）
+    integer(kint), intent(in) :: M
+    !> 入力行列（N_loc x M）
+    real(kdouble), intent(in) :: A(:,:)
+    !> 左特異行列（N_loc x P）
+    real(kdouble), intent(out) :: S(:,:)
+    !> 特異値（P）
+    real(kdouble), intent(out) :: V(:)
+    !> 右特異行列（P x M）
+    real(kdouble), intent(out) :: D(:,:)
+    !> コミュニケータ
+    integer(kint) :: comm
+    integer(kint) :: N_loc_max, M_fix
+    integer(kint) :: comm_size, P
+    integer(kint) :: i, j, fio
+    real(kdouble), allocatable :: A_temp(:,:)
+    real(kdouble), allocatable :: S_temp(:,:)
+    real(kdouble), allocatable :: V_temp(:)
+    real(kdouble), allocatable :: D_temp(:,:)
+
+    comm_size = monolis_mpi_get_local_comm_size(comm)
+    N_loc_max = N_loc
+    call monolis_allreduce_I1(N_loc_max, monolis_mpi_max, comm)
+
+    !# M の取得
+    if(mod(M, comm_size) == 0)then
+      M_fix = M
+    else
+      M_fix = (M/comm_size + 1)*comm_size
+    endif
+
+    P = min(N_loc_max, M_fix)
+
+    call monolis_alloc_R_2d(A_temp, N_loc_max, M_fix)
+    call monolis_alloc_R_2d(S_temp, N_loc_max, P)
+    call monolis_alloc_R_1d(V_temp, P)
+    call monolis_alloc_R_2d(D_temp, P, M_fix)
+
+    do i = 1, M
+    do j = 1, N_loc
+      A_temp(j,i) = A(j,i)
+    enddo
+    enddo
+
+    call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm)
+
+    !# 出力行列サイズの修正
+    do i = 1, P
+    do j = 1, N_loc
+      S(j,i) = S_temp(j,i)
+    enddo
+    enddo
+
+    do i = 1, P
+      V(i) = V_temp(i)
+    enddo
+
+    do i = 1, M
+    do j = 1, P
+      D(j,i) = D_temp(j,i)
+    enddo
+    enddo
+  end subroutine monolis_scalapack_gesvd_R
+
+  !> PDGESVD 関数（実数型、メイン関数）
+  subroutine monolis_scalapack_gesvd_R_main(N_loc, M, A, S, V, D, comm)
     implicit none
     !> 行列の大きさ（行数 N）
     integer(kint), intent(in) :: N_loc
@@ -92,7 +162,7 @@ contains
 
     !# scalapack コミュニケータの終了処理
     call blacs_gridexit(scalapack_comm)
-  end subroutine monolis_scalapack_gesvd_R
+  end subroutine monolis_scalapack_gesvd_R_main
 
   subroutine gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
     implicit none
@@ -102,13 +172,15 @@ contains
     integer(kint) :: lld_D
     real(kdouble) :: D(:,:)
     integer(kint) :: comm
-    integer(kint) :: i
+    integer(kint) :: i, j
     integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: D_temp(:)
     real(kdouble), allocatable :: D_full(:)
+    real(kdouble), allocatable :: D_perm(:)
 
-    call monolis_alloc_R_1d(D_temp, P*M)
+    call monolis_alloc_R_1d(D_temp, lld_D*M)
     call monolis_alloc_R_1d(D_full, P*M)
+    call monolis_alloc_R_1d(D_perm, P*M)
     call monolis_alloc_I_1d(counts, n_row)
     call monolis_alloc_I_1d(displs, n_row)
 
@@ -118,9 +190,15 @@ contains
       displs(i) = lld_D*M*(i-1)
     enddo
 
-    call monolis_mat_to_vec_R(P, M, D, D_temp)
+    call monolis_mat_to_vec_R(lld_D, M, D, D_temp)
     call monolis_allgatherv_R(lld_D*M, D_temp, D_full, counts, displs, comm)
-    call monolis_vec_to_mat_R(P, M, D_full, D)
-  end subroutine gesvd_R_update_D
 
+    do i = 1, lld_D*M
+    do j = 1, n_row
+      D_perm(n_row*(i-1) + j) = D_full(i + lld_D*M*(j - 1))
+    enddo
+    enddo
+
+    call monolis_vec_to_mat_R(P, M, D_perm, D)
+  end subroutine gesvd_R_update_D
 end module mod_monolis_scalapack
