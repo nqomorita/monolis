@@ -52,7 +52,7 @@ contains
 
     do i = 1, M
       do j = 1, P
-         D(N_loc*(i-1) + j) = D_temp(j,i)
+         D(P*(i-1) + j) = D_temp(j,i)
       enddo
     enddo
   end subroutine monolis_scalapack_gesvd_R_c

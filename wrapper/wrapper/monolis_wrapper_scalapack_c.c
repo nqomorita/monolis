@@ -53,7 +53,7 @@ void monolis_scalapack_gesvd_R(
 
   for (i = 0; i < M; ++i) {
     for (j = 0; j < P; ++j) {
-      D[j][i] = D_tmp[i*N_loc + j];
+      D[j][i] = D_tmp[i*P + j];
     }
   }
 }

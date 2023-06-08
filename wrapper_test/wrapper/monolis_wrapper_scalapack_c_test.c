@@ -58,7 +58,7 @@ void monolis_scalapack_test()
 
   for (i = 0; i < 3; ++i) {
     for (j = 0; j < 3; ++j) {
-      VD[i][j] = V[j]*D[i][j];
+      VD[i][j] = V[i]*D[i][j];
     }
   }
 
@@ -73,7 +73,6 @@ void monolis_scalapack_test()
 
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 3; ++j) {
-      printf("%f %f \n", A[i][j], SVD[i][j]);
       monolis_test_check_eq_R1("monolis_scalapack_test R", A[i][j], SVD[i][j]);
     }
   }
