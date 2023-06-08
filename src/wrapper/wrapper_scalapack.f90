@@ -33,6 +33,7 @@ contains
     real(kdouble), allocatable :: V_temp(:)
     real(kdouble), allocatable :: D_temp(:,:)
 
+    !# N の取得
     comm_size = monolis_mpi_get_local_comm_size(comm)
     N_loc_max = N_loc
     call monolis_allreduce_I1(N_loc_max, monolis_mpi_max, comm)
@@ -46,6 +47,7 @@ contains
 
     P = min(N_loc_max, M_fix)
 
+    !# 係数行列のパディング
     call monolis_alloc_R_2d(A_temp, N_loc_max, M_fix)
     call monolis_alloc_R_2d(S_temp, N_loc_max, P)
     call monolis_alloc_R_1d(V_temp, P)
@@ -57,6 +59,7 @@ contains
     enddo
     enddo
 
+    !# 特異値分解
     call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm)
 
     !# 出力行列サイズの修正
