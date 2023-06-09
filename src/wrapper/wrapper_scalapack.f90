@@ -25,7 +25,7 @@ contains
     real(kdouble), intent(out) :: D(:,:)
     !> コミュニケータ
     integer(kint) :: comm
-    integer(kint) :: N_loc_max, M_fix
+    integer(kint) :: N_loc_max, M_fix, N
     integer(kint) :: comm_size, P
     integer(kint) :: i, j, fio
     real(kdouble), allocatable :: A_temp(:,:)
@@ -33,19 +33,19 @@ contains
     real(kdouble), allocatable :: V_temp(:)
     real(kdouble), allocatable :: D_temp(:,:)
 
-    !# N の取得
+    !# N の取得（各領域の行数を統一）
     comm_size = monolis_mpi_get_local_comm_size(comm)
     N_loc_max = N_loc
     call monolis_allreduce_I1(N_loc_max, monolis_mpi_max, comm)
 
-    !# M の取得
+    !# M の取得（各領域の列数を統一）
     if(mod(M, comm_size) == 0)then
       M_fix = M
     else
       M_fix = (M/comm_size + 1)*comm_size
     endif
 
-    P = min(N_loc_max, M_fix)
+    P = min(N_loc_max*comm_size, M_fix)
 
     !# 係数行列のパディング
     call monolis_alloc_R_2d(A_temp, N_loc_max, M_fix)
@@ -63,6 +63,10 @@ contains
     call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm)
 
     !# 出力行列サイズの修正
+    N = N_loc
+    call monolis_allreduce_I1(N, monolis_mpi_sum, comm)
+    P = min(N, M)
+
     do i = 1, P
     do j = 1, N_loc
       S(j,i) = S_temp(j,i)
@@ -130,7 +134,7 @@ contains
 
     lld_A = numroc(N, NB, my_row, 0, n_row)
     lld_S = numroc(N, NB, my_row, 0, n_row)
-    lld_D = numroc(M, NB, my_row, 0, n_row)
+    lld_D = numroc(P, NB, my_row, 0, n_row)
 
     call descinit(desc_A, N, M, NB, NB, 0, 0, scalapack_comm, lld_A, info)
     call descinit(desc_S, N, P, NB, NB, 0, 0, scalapack_comm, lld_S, info)
@@ -175,30 +179,32 @@ contains
     integer(kint) :: lld_D
     real(kdouble) :: D(:,:)
     integer(kint) :: comm
-    integer(kint) :: i, j
+    integer(kint) :: i, j, size
     integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: D_temp(:)
     real(kdouble), allocatable :: D_full(:)
     real(kdouble), allocatable :: D_perm(:)
 
-    call monolis_alloc_R_1d(D_temp, lld_D*M)
+    size = lld_D*M
+
+    call monolis_alloc_R_1d(D_temp, size)
     call monolis_alloc_R_1d(D_full, P*M)
     call monolis_alloc_R_1d(D_perm, P*M)
     call monolis_alloc_I_1d(counts, n_row)
     call monolis_alloc_I_1d(displs, n_row)
 
-    counts = lld_D*M
+    counts = size
 
     do i = 2, n_row
-      displs(i) = lld_D*M*(i-1)
+      displs(i) = size*(i-1)
     enddo
 
     call monolis_mat_to_vec_R(lld_D, M, D, D_temp)
-    call monolis_allgatherv_R(lld_D*M, D_temp, D_full, counts, displs, comm)
+    call monolis_allgatherv_R(size, D_temp, D_full, counts, displs, comm)
 
-    do i = 1, lld_D*M
+    do i = 1, size
     do j = 1, n_row
-      D_perm(n_row*(i-1) + j) = D_full(i + lld_D*M*(j - 1))
+      D_perm(n_row*(i-1) + j) = D_full(i + size*(j - 1))
     enddo
     enddo
 
