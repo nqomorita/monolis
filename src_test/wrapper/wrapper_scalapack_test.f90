@@ -164,14 +164,23 @@ contains
 
     call monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
 
-    Vt = 0.0d0
-    Vt(1,1) = V(1)
-    Vt(2,2) = V(2)
-    Vt(3,3) = V(3)
-    Vt(4,4) = V(4)
+    if(monolis_mpi_get_global_comm_size() == 1)then
+      Vt = 0.0d0
+      Vt(1,1) = V(1)
+      Vt(2,2) = V(2)
 
-    VD = matmul(Vt, D)
-    A_res = matmul(S,VD)
+      VD(1:2,1:6) = matmul(Vt(1:2,1:2), D(1:2,1:6))
+      A_res = matmul(S(1:2,1:2),VD(1:2,1:6))
+    else
+      Vt = 0.0d0
+      Vt(1,1) = V(1)
+      Vt(2,2) = V(2)
+      Vt(3,3) = V(3)
+      Vt(4,4) = V(4)
+
+      VD = matmul(Vt, D)
+      A_res = matmul(S,VD)
+    endif
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       call monolis_test_check_eq_R("monolis_scalapack_gesvd_R 1", A(:,1), A_res(:,1))

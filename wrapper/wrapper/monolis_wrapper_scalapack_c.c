@@ -15,12 +15,16 @@ void monolis_scalapack_gesvd_R(
 {
   int     P;
   int     i, j;
+  int     N;
   double* A_tmp;
   double* S_tmp;
   double* D_tmp;
 
-  if(N_loc < M){
-    P = N_loc;
+  N = N_loc;
+  monolis_allreduce_I(1, &N, MONOLIS_MPI_SUM, comm);
+
+  if(N < M){
+    P = N;
   } else {
     P = M;
   }
