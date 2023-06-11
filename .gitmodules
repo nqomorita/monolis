@@ -10,3 +10,9 @@
 	path = submodule/scalapack
 	url = https://github.com/Reference-ScaLAPACK/scalapack.git
         ignore = dirty
+[submodule "submodule/gedatsu"]
+	path = submodule/gedatsu
+	url = https://gitlab.com/morita/gedatsu.git
+[submodule "submodule/monolis_utils"]
+	path = submodule/monolis_utils
+	url = https://gitlab.com/morita/monolis_utils.git

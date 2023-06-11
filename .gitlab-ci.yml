@@ -1,34 +1,49 @@
-image: debian:stable
+image: nqoki709/monolis_build:latest
 
 stages:
-  - build
+  - lib_build
+  - test
+  - doxy_build
   - deploy
 
-build_book:
-  stage: build
-  before_script:
-    - apt-get update
-    - apt-get install -y curl
-    - curl -LO https://github.com/rust-lang-nursery/mdBook/releases/download/v${VERSION}/mdbook-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz
-    - tar xf mdbook-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz
+build_monolis:
+  stage: lib_build
   script:
-    - ./mdbook build
-  variables:
-    VERSION: "0.2.1"
+    - ./install_lib.sh
+    - make FLAGS=DEBUG
   artifacts:
     paths:
-      - book
-  only:
-    - master
+      - bin
+      - include
+      - lib
+      - src_test
+      - wrapper_test
+
+test_monolis:
+  stage: test
+  script:
+    - cd src_test
+    - ./run.CI.sh
+    - cd ../wrapper_test
+    - ./run.CI.sh
+  dependencies:
+    - build_monolis
+
+doxygen_monolis:
+  stage: doxy_build
+  script:
+    - cd manual
+    - doxygen
+  artifacts:
+    paths:
+      - manual
 
 pages:
   stage: deploy
   dependencies:
-    - build_book
+    - doxygen_monolis
   script:
-    - mv book public
+    - mv manual/html public
   artifacts:
     paths:
       - public
-  only:
-    - master
