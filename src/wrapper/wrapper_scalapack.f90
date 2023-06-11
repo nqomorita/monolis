@@ -101,11 +101,12 @@ contains
     real(kdouble), intent(out) :: D(:,:)
     !> コミュニケータ
     integer(kint) :: comm
-    integer(kint) :: N, scalapack_comm
+    integer(kint) :: N, scalapack_comm, i, comm_temp
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
     integer(kint) :: NW, info
     integer(kint) :: my_col, my_row, n_col, n_row
+    integer(kint), allocatable :: user_map(:,:)
     real(kdouble), allocatable :: W(:)
     real(kdouble), allocatable :: A_temp(:,:)
 
@@ -117,7 +118,12 @@ contains
     n_col = 1
 
     call blacs_get(0, 0, scalapack_comm)
-    call blacs_gridinit(scalapack_comm, "r", n_row, n_col)
+
+    call monolis_alloc_I_2d(user_map, n_row, 1)
+    user_map(monolis_mpi_get_local_my_rank(comm) + 1,1) = monolis_mpi_get_global_my_rank()
+    call monolis_allreduce_I(n_row, user_map(:,1), monolis_mpi_max, comm)
+
+    call blacs_gridmap(scalapack_comm, user_map, n_row, n_row, n_col)
     call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
 
     !# Scalapack 用パラメータの取得

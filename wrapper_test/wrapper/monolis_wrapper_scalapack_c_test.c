@@ -170,8 +170,83 @@ void monolis_scalapack_test_2()
   }
 }
 
+void monolis_scalapack_test_3()
+{
+  int    N_loc = 2;
+  int    M = 6;
+  double** A;
+  double** S;
+  double*  V;
+  double** D;
+  double VD[2][6];
+  double SVD[2][6];
+  int    comm;
+  int    i, j, k;
+
+  monolis_std_log_string("monolis_scalapack_test");
+
+  comm = monolis_mpi_get_self_comm();
+
+  A = monolis_alloc_R_2d(A, 2, 6);
+  S = monolis_alloc_R_2d(S, 2, 2);
+  V = monolis_alloc_R_1d(V, 2);
+  D = monolis_alloc_R_2d(D, 2, 6);
+
+  if(monolis_mpi_get_global_my_rank() == 0){
+    A[0][0] = 1.0;
+    A[1][0] = 2.0;
+    A[0][1] = 13.0;
+    A[1][1] = 14.0;
+    A[0][2] = 25.0;
+    A[1][2] = 26.0;
+    A[0][3] = 37.0;
+    A[1][3] = 38.0;
+    A[0][4] = 49.0;
+    A[1][4] = 50.0;
+    A[0][5] = 51.0;
+    A[1][5] = 52.0;
+  } else {
+    A[0][0] = 3.0;
+    A[1][0] = 4.0;
+    A[0][1] = 15.0;
+    A[1][1] = 16.0;
+    A[0][2] = 27.0;
+    A[1][2] = 28.0;
+    A[0][3] = 39.0;
+    A[1][3] = 40.0;
+    A[0][4] = 41.0;
+    A[1][4] = 42.0;
+    A[0][5] = 53.0;
+    A[1][5] = 54.0;
+  }
+
+  monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm);
+
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 6; ++j) {
+      VD[i][j] = V[i]*D[i][j];
+    }
+  }
+
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 6; ++j) {
+      SVD[i][j] = 0.0;
+      for (k = 0; k < 2; ++k) {
+        SVD[i][j] = SVD[i][j] + S[i][k]*VD[k][j];
+      }
+    }
+  }
+
+  for (i = 0; i < 2; ++i) {
+    for (j = 0; j < 6; ++j) {
+      monolis_test_check_eq_R1("monolis_scalapack_test R", A[i][j], SVD[i][j]);
+    }
+  }
+}
+
 void monolis_scalapack_test()
 {
   monolis_scalapack_test_1();
   monolis_scalapack_test_2();
+  monolis_scalapack_test_3();
 }
