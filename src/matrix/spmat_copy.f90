@@ -7,33 +7,119 @@ module mod_monolis_spmat_copy
 
 contains
 
+  !> 行列構造体のコピー（実数型）
   subroutine monolis_copy_mat_R(mat_in, mat_out)
     implicit none
+    !> monolis 構造体（入力）
     type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
     type(monolis_structure) :: mat_out
 
     call monolis_finalize(mat_out)
 
-    call monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+    call monolis_copy_mat_nonzero_pattern_R(mat_in, mat_out)
     call monolis_copy_mat_value_R(mat_in, mat_out)
   end subroutine monolis_copy_mat_R
 
+  !> 行列構造体のコピー（複素数型）
   subroutine monolis_copy_mat_C(mat_in, mat_out)
     implicit none
+    !> monolis 構造体（入力）
     type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
     type(monolis_structure) :: mat_out
 
     call monolis_finalize(mat_out)
 
-    call monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+    call monolis_copy_mat_nonzero_pattern_C(mat_in, mat_out)
     call monolis_copy_mat_value_C(mat_in, mat_out)
   end subroutine monolis_copy_mat_C
 
-  subroutine monolis_copy_mat_nonzero_pattern(mat_in, mat_out)
+  !> 行列の非零パターンのコピー（実数型）
+  subroutine monolis_copy_mat_nonzero_pattern_R(mat_in, mat_out)
     implicit none
+    !> monolis 構造体（入力）
     type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
     type(monolis_structure) :: mat_out
-  end subroutine monolis_copy_mat_nonzero_pattern
+
+    mat_out%MAT%N = mat_in%MAT%N
+    mat_out%MAT%NP = mat_in%MAT%NP
+    mat_out%MAT%NDOF = mat_in%MAT%NDOF
+
+    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%CSR,  mat_out%MAT%CSR)
+    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%CSC,  mat_out%MAT%CSC)
+    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%SCSR, mat_out%MAT%SCSR)
+    call monolis_copy_mat_nonzero_pattern_val_R(mat_in%MAT%R, mat_out%MAT%R)
+  end subroutine monolis_copy_mat_nonzero_pattern_R
+
+  !> 行列の非零パターンのコピー（複素数型）
+  subroutine monolis_copy_mat_nonzero_pattern_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_structure) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_structure) :: mat_out
+
+    mat_out%MAT%N = mat_in%MAT%N
+    mat_out%MAT%NP = mat_in%MAT%NP
+    mat_out%MAT%NDOF = mat_in%MAT%NDOF
+
+    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%CSR,  mat_out%MAT%CSR)
+    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%CSC,  mat_out%MAT%CSC)
+    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%SCSR, mat_out%MAT%SCSR)
+    call monolis_copy_mat_nonzero_pattern_val_C(mat_in%MAT%C, mat_out%MAT%C)
+  end subroutine monolis_copy_mat_nonzero_pattern_C
+
+  !> 行列の非零パターンのコピー（実数型）
+  subroutine monolis_copy_mat_nonzero_pattern_val_R(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_mat_val_R) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_mat_val_R) :: mat_out
+
+  end subroutine monolis_copy_mat_nonzero_pattern_val_R
+
+  !> 行列の非零パターンのコピー（複素数型）
+  subroutine monolis_copy_mat_nonzero_pattern_val_C(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_mat_val_C) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_mat_val_C) :: mat_out
+
+  end subroutine monolis_copy_mat_nonzero_pattern_val_C
+
+  !> 行列の非零パターンのコピー（CSR）
+  subroutine monolis_copy_mat_nonzero_pattern_CSR(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_mat_CSR) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_mat_CSR) :: mat_out
+
+  end subroutine monolis_copy_mat_nonzero_pattern_CSR
+
+  !> 行列の非零パターンのコピー（CSC）
+  subroutine monolis_copy_mat_nonzero_pattern_CSC(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_mat_CSC) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_mat_CSC) :: mat_out
+
+  end subroutine monolis_copy_mat_nonzero_pattern_CSC
+
+  !> 行列の非零パターンのコピー（SCSR）
+  subroutine monolis_copy_mat_nonzero_pattern_SCSR(mat_in, mat_out)
+    implicit none
+    !> monolis 構造体（入力）
+    type(monolis_mat_separated_CSR) :: mat_in
+    !> monolis 構造体（出力）
+    type(monolis_mat_separated_CSR) :: mat_out
+
+  end subroutine monolis_copy_mat_nonzero_pattern_SCSR
 
   !> 行列値のコピー（実数型）
   subroutine monolis_copy_mat_value_R(mat_in, mat_out)
