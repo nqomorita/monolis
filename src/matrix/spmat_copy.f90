@@ -42,15 +42,31 @@ contains
     type(monolis_structure) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_structure) :: mat_out
+    integer(kint) :: NP, NZ, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
     mat_out%MAT%NP = mat_in%MAT%NP
     mat_out%MAT%NDOF = mat_in%MAT%NDOF
 
-    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%CSR,  mat_out%MAT%CSR)
-    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%CSC,  mat_out%MAT%CSC)
-    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%SCSR, mat_out%MAT%SCSR)
-    call monolis_copy_mat_nonzero_pattern_val_R(mat_in%MAT%R, mat_out%MAT%R)
+    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%NP, mat_in%MAT%CSR,  mat_out%MAT%CSR)
+    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%NP, mat_in%MAT%CSC,  mat_out%MAT%CSC)
+    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%NP, mat_in%MAT%SCSR, mat_out%MAT%SCSR)
+
+    NP = mat_in%MAT%NP
+    NZ = mat_in%MAT%CSR%index(NP + 1)
+
+    NZU = 0
+    if(associated(mat_in%MAT%SCSR%indexU))then
+      NZU = mat_in%MAT%SCSR%indexU(NP + 1)
+    endif
+
+    NZL = 0
+    if(associated(mat_in%MAT%SCSR%indexL))then
+      NZL = mat_in%MAT%SCSR%indexL(NP + 1)
+    endif
+
+    call monolis_copy_mat_nonzero_pattern_val_R(mat_in%MAT%NP, mat_in%MAT%NDOF, NZ, NZU, NZL, &
+      & mat_in%MAT%R, mat_out%MAT%R)
   end subroutine monolis_copy_mat_nonzero_pattern_R
 
   !> 行列の非零パターンのコピー（複素数型）
@@ -60,65 +76,217 @@ contains
     type(monolis_structure) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_structure) :: mat_out
+    integer(kint) :: NP, NZ, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
     mat_out%MAT%NP = mat_in%MAT%NP
     mat_out%MAT%NDOF = mat_in%MAT%NDOF
 
-    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%CSR,  mat_out%MAT%CSR)
-    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%CSC,  mat_out%MAT%CSC)
-    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%SCSR, mat_out%MAT%SCSR)
-    call monolis_copy_mat_nonzero_pattern_val_C(mat_in%MAT%C, mat_out%MAT%C)
+    call monolis_copy_mat_nonzero_pattern_CSR (mat_in%MAT%NP, mat_in%MAT%CSR,  mat_out%MAT%CSR)
+    call monolis_copy_mat_nonzero_pattern_CSC (mat_in%MAT%NP, mat_in%MAT%CSC,  mat_out%MAT%CSC)
+    call monolis_copy_mat_nonzero_pattern_SCSR(mat_in%MAT%NP, mat_in%MAT%SCSR, mat_out%MAT%SCSR)
+
+    NP = mat_in%MAT%NP
+    NZ = mat_in%MAT%CSR%index(NP + 1)
+
+    NZU = 0
+    if(associated(mat_in%MAT%SCSR%indexU))then
+      NZU = mat_in%MAT%SCSR%indexU(NP + 1)
+    endif
+
+    NZL = 0
+    if(associated(mat_in%MAT%SCSR%indexL))then
+      NZL = mat_in%MAT%SCSR%indexL(NP + 1)
+    endif
+
+    call monolis_copy_mat_nonzero_pattern_val_C(mat_in%MAT%NP, mat_in%MAT%NDOF, NZ, NZU, NZL, &
+      & mat_in%MAT%C, mat_out%MAT%C)
   end subroutine monolis_copy_mat_nonzero_pattern_C
 
   !> 行列の非零パターンのコピー（実数型）
-  subroutine monolis_copy_mat_nonzero_pattern_val_R(mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
+    !> 全計算点数
+    integer(kint) :: NP
+    !> 1 計算点あたりの自由度
+    integer(kint) :: NDOF
+    !> 非零要素数
+    integer(kint) :: NZ
+    !> 非零要素数（上三角）
+    integer(kint) :: NZU
+    !> 非零要素数（下三角）
+    integer(kint) :: NZL
     !> monolis 構造体（入力）
     type(monolis_mat_val_R) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_mat_val_R) :: mat_out
 
+    call monolis_pdealloc_R_1d(mat_out%X)
+    call monolis_palloc_R_1d(mat_out%X, NP*NDOF)
+    mat_out%X = mat_in%X
+
+    call monolis_pdealloc_R_1d(mat_out%B)
+    call monolis_palloc_R_1d(mat_out%B, NP*NDOF)
+    mat_out%B = mat_in%B
+
+    call monolis_pdealloc_R_1d(mat_out%A)
+    call monolis_palloc_R_1d(mat_out%A, NZ*NDOF*NDOF)
+    mat_out%A = mat_in%A
+
+    if(associated(mat_in%U))then
+      call monolis_pdealloc_R_1d(mat_out%U)
+      call monolis_palloc_R_1d(mat_out%U, NZ*NDOF*NDOF)
+      mat_out%U = mat_in%U
+    endif
+
+    if(associated(mat_in%L))then
+      call monolis_pdealloc_R_1d(mat_out%L)
+      call monolis_palloc_R_1d(mat_out%L, NZ*NDOF*NDOF)
+      mat_out%L = mat_in%L
+    endif
+
+    if(associated(mat_in%D))then
+      call monolis_pdealloc_R_1d(mat_out%D)
+      call monolis_palloc_R_1d(mat_out%D, NP*NDOF*NDOF)
+      mat_out%D = mat_in%D
+    endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_R
 
   !> 行列の非零パターンのコピー（複素数型）
-  subroutine monolis_copy_mat_nonzero_pattern_val_C(mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_val_C(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
+    !> 全計算点数
+    integer(kint) :: NP
+    !> 1 計算点あたりの自由度
+    integer(kint) :: NDOF
+    !> 非零要素数
+    integer(kint) :: NZ
+    !> 非零要素数（上三角）
+    integer(kint) :: NZU
+    !> 非零要素数（下三角）
+    integer(kint) :: NZL
     !> monolis 構造体（入力）
     type(monolis_mat_val_C) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_mat_val_C) :: mat_out
 
+    call monolis_pdealloc_C_1d(mat_out%X)
+    call monolis_palloc_C_1d(mat_out%X, NP*NDOF)
+    mat_out%X = mat_in%X
+
+    call monolis_pdealloc_C_1d(mat_out%B)
+    call monolis_palloc_C_1d(mat_out%B, NP*NDOF)
+    mat_out%B = mat_in%B
+
+    call monolis_pdealloc_C_1d(mat_out%A)
+    call monolis_palloc_C_1d(mat_out%A, NZ*NDOF*NDOF)
+    mat_out%A = mat_in%A
+
+    if(associated(mat_in%U))then
+      call monolis_pdealloc_C_1d(mat_out%U)
+      call monolis_palloc_C_1d(mat_out%U, NZ*NDOF*NDOF)
+      mat_out%U = mat_in%U
+    endif
+
+    if(associated(mat_in%L))then
+      call monolis_pdealloc_C_1d(mat_out%L)
+      call monolis_palloc_C_1d(mat_out%L, NZ*NDOF*NDOF)
+      mat_out%L = mat_in%L
+    endif
+
+    if(associated(mat_in%D))then
+      call monolis_pdealloc_C_1d(mat_out%D)
+      call monolis_palloc_C_1d(mat_out%D, NP*NDOF*NDOF)
+      mat_out%D = mat_in%D
+    endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_C
 
   !> 行列の非零パターンのコピー（CSR）
-  subroutine monolis_copy_mat_nonzero_pattern_CSR(mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_CSR(NP, mat_in, mat_out)
     implicit none
+    !> 全計算点数
+    integer(kint) :: NP
     !> monolis 構造体（入力）
     type(monolis_mat_CSR) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_mat_CSR) :: mat_out
+    integer(kint) :: NZ
 
+    NZ = mat_in%index(NP + 1)
+
+    call monolis_pdealloc_I_1d(mat_out%index)
+    call monolis_palloc_I_1d(mat_out%index, NP + 1)
+    mat_out%index = mat_in%index
+
+    call monolis_pdealloc_I_1d(mat_out%item)
+    call monolis_palloc_I_1d(mat_out%item, NZ)
+    mat_out%item = mat_in%item
   end subroutine monolis_copy_mat_nonzero_pattern_CSR
 
   !> 行列の非零パターンのコピー（CSC）
-  subroutine monolis_copy_mat_nonzero_pattern_CSC(mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_CSC(NP, mat_in, mat_out)
     implicit none
+    !> 全計算点数
+    integer(kint) :: NP
     !> monolis 構造体（入力）
     type(monolis_mat_CSC) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_mat_CSC) :: mat_out
+    integer(kint) :: NZ
 
+    NZ = mat_in%index(NP + 1)
+
+    call monolis_pdealloc_I_1d(mat_out%index)
+    call monolis_palloc_I_1d(mat_out%index, NP + 1)
+    mat_out%index = mat_in%index
+
+    call monolis_pdealloc_I_1d(mat_out%item)
+    call monolis_palloc_I_1d(mat_out%item, NZ)
+    mat_out%item = mat_in%item
+
+    call monolis_pdealloc_I_1d(mat_out%perm)
+    call monolis_palloc_I_1d(mat_out%perm, NP)
+    mat_out%perm = mat_in%perm
   end subroutine monolis_copy_mat_nonzero_pattern_CSC
 
   !> 行列の非零パターンのコピー（SCSR）
-  subroutine monolis_copy_mat_nonzero_pattern_SCSR(mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_SCSR(NP, mat_in, mat_out)
     implicit none
+    !> 全計算点数
+    integer(kint) :: NP
     !> monolis 構造体（入力）
     type(monolis_mat_separated_CSR) :: mat_in
     !> monolis 構造体（出力）
     type(monolis_mat_separated_CSR) :: mat_out
+    integer(kint) :: NZ
 
+    NZ = mat_in%indexU(NP + 1)
+
+    if(associated(mat_in%indexU))then
+      call monolis_pdealloc_I_1d(mat_out%indexU)
+      call monolis_palloc_I_1d(mat_out%indexU, NP + 1)
+      mat_out%indexU = mat_in%indexU
+    endif
+
+    if(associated(mat_in%itemU))then
+      call monolis_pdealloc_I_1d(mat_out%itemU)
+      call monolis_palloc_I_1d(mat_out%itemU, NZ)
+      mat_out%itemU = mat_in%itemU
+    endif
+
+    NZ = mat_in%indexL(NP + 1)
+
+    if(associated(mat_in%indexL))then
+      call monolis_pdealloc_I_1d(mat_out%indexL)
+      call monolis_palloc_I_1d(mat_out%indexL, NP)
+      mat_out%indexL = mat_in%indexL
+    endif
+
+    if(associated(mat_in%itemL))then
+      call monolis_pdealloc_I_1d(mat_out%itemL)
+      call monolis_palloc_I_1d(mat_out%itemL, NZ)
+      mat_out%itemL = mat_in%itemL
+    endif
   end subroutine monolis_copy_mat_nonzero_pattern_SCSR
 
   !> 行列値のコピー（実数型）
