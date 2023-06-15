@@ -9,6 +9,7 @@
 #include "./linalg/monolis_inner_product_c_test.h"
 #include "./linalg/monolis_matvec_c_test.h"
 #include "./linalg/monolis_vec_util_c_test.h"
+#include "./matrix/monolis_spmat_copy_c_test.h"
 #include "./matrix/monolis_spmat_handler_c_test.h"
 #include "./matrix/monolis_spmat_handler_util_c_test.h"
 #include "./matrix/monolis_spmat_nzpattern_c_test.h"
@@ -32,6 +33,8 @@ int main()
   monolis_vec_util_c_test();
 
   monolis_matvec_c_test();
+
+  monolis_spmat_copy_c_test();
 
   monolis_spmat_nzpattern_c_test();
 

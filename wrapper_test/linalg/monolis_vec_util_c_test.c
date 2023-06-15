@@ -5,7 +5,6 @@
 #include <complex.h>
 #include "monolis.h"
 #include "monolis_utils.h"
-#include "monolis_vec_util_c.h"
 
 void monolis_vec_util_c_test(){
   int ix[4];

@@ -218,6 +218,7 @@ monolis_vec_util_c_test.c \
 monolis_matvec_c_test.c
 
 SRC_MAT_C_TEST = \
+monolis_spmat_copy_c_test.c\
 monolis_spmat_nzpattern_util_c_test.c\
 monolis_spmat_nzpattern_c_test.c \
 monolis_spmat_handler_c_test.c \

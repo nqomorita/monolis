@@ -245,7 +245,7 @@ contains
     mat_out%item = mat_in%item
 
     call monolis_pdealloc_I_1d(mat_out%perm)
-    call monolis_palloc_I_1d(mat_out%perm, NP)
+    call monolis_palloc_I_1d(mat_out%perm, NZ)
     mat_out%perm = mat_in%perm
   end subroutine monolis_copy_mat_nonzero_pattern_CSC
 
@@ -260,8 +260,6 @@ contains
     type(monolis_mat_separated_CSR) :: mat_out
     integer(kint) :: NZ
 
-    NZ = mat_in%indexU(NP + 1)
-
     if(associated(mat_in%indexU))then
       call monolis_pdealloc_I_1d(mat_out%indexU)
       call monolis_palloc_I_1d(mat_out%indexU, NP + 1)
@@ -269,12 +267,11 @@ contains
     endif
 
     if(associated(mat_in%itemU))then
+      NZ = mat_in%indexU(NP + 1)
       call monolis_pdealloc_I_1d(mat_out%itemU)
       call monolis_palloc_I_1d(mat_out%itemU, NZ)
       mat_out%itemU = mat_in%itemU
     endif
-
-    NZ = mat_in%indexL(NP + 1)
 
     if(associated(mat_in%indexL))then
       call monolis_pdealloc_I_1d(mat_out%indexL)
@@ -283,6 +280,7 @@ contains
     endif
 
     if(associated(mat_in%itemL))then
+      NZ = mat_in%indexL(NP + 1)
       call monolis_pdealloc_I_1d(mat_out%itemL)
       call monolis_palloc_I_1d(mat_out%itemL, NZ)
       mat_out%itemL = mat_in%itemL
