@@ -1,6 +1,6 @@
 /* monolis_vec_util.h */
-#ifndef MONOLISVEC_UTIL_H
-#define MONOLISVEC_UTIL_H
+#ifndef MONOLIS_VEC_UTIL_H
+#define MONOLIS_VEC_UTIL_H
 
 #ifdef __cplusplus
 extern "C" {

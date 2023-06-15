@@ -141,6 +141,7 @@ SRC_LINALG_C = \
 matvec_wrap.f90 \
 inner_product_wrap.f90 \
 monolis_matvec_c.c \
+monolis_vec_util_c.c \
 monolis_inner_product_c.c
 
 SRC_MAT_C = \
@@ -213,6 +214,7 @@ monolis_def_solver_prm_util_c_test.c
 
 SRC_LINALG_C_TEST = \
 monolis_inner_product_c_test.c \
+monolis_vec_util_c_test.c \
 monolis_matvec_c_test.c
 
 SRC_MAT_C_TEST = \
