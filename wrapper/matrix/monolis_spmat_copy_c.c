@@ -13,7 +13,7 @@ void monolis_copy_mat_R(
   monolis_finalize(mat_out);
 
   monolis_copy_mat_nonzero_pattern_R(mat_in, mat_out);
-  monolis_copy_mat_value_R(mat_in, mat_out);
+  //monolis_copy_mat_value_R(mat_in, mat_out);
 }
 
 void monolis_copy_mat_C(
@@ -40,25 +40,25 @@ void monolis_copy_mat_nonzero_pattern_R(
   monolis_copy_mat_nonzero_pattern_CSC (mat_in->mat.NP, &mat_in->mat.CSC,  &mat_out->mat.CSC);
   monolis_copy_mat_nonzero_pattern_SCSR(mat_in->mat.NP, &mat_in->mat.SCSR, &mat_out->mat.SCSR);
 
-  NP = mat_in->mat.NP;
-  NZ = mat_in->mat.CSR.index[NP];
-
-  NZU = 0;
-  if(mat_in->mat.SCSR.indexU != NULL){
-    NZU = mat_in->mat.SCSR.indexU[NP];
-  }
-
-  NZL = 0;
-  if(mat_in->mat.SCSR.indexL != NULL){
-    NZL = mat_in->mat.SCSR.indexL[NP];
-  }
-
-  monolis_copy_mat_nonzero_pattern_val_R(
-    mat_in->mat.NP,
-    mat_in->mat.NDOF,
-    NZ, NZU, NZL,
-    &mat_in->mat.R,
-    &mat_out->mat.R);
+//  NP = mat_in->mat.NP;
+//  NZ = mat_in->mat.CSR.index[NP];
+//
+//  NZU = 0;
+//  if(mat_in->mat.SCSR.indexU != NULL){
+//    NZU = mat_in->mat.SCSR.indexU[NP];
+//  }
+//
+//  NZL = 0;
+//  if(mat_in->mat.SCSR.indexL != NULL){
+//    NZL = mat_in->mat.SCSR.indexL[NP];
+//  }
+//
+//  monolis_copy_mat_nonzero_pattern_val_R(
+//    mat_in->mat.NP,
+//    mat_in->mat.NDOF,
+//    NZ, NZU, NZL,
+//    &mat_in->mat.R,
+//    &mat_out->mat.R);
 }
 
 void monolis_copy_mat_nonzero_pattern_C(
@@ -220,7 +220,6 @@ void monolis_copy_mat_nonzero_pattern_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat_out)
 {
   int NZ;
-  NZ = mat_in->indexU[NP];
 
   if(mat_in->indexU != NULL){
     monolis_dealloc_I_1d(&mat_out->indexU);
@@ -229,12 +228,11 @@ void monolis_copy_mat_nonzero_pattern_SCSR(
   }
 
   if(mat_in->itemU != NULL){
+    NZ = mat_in->indexU[NP];
     monolis_dealloc_I_1d(&mat_out->itemU);
     mat_out->itemU = monolis_alloc_I_1d(mat_out->itemU, NZ);
-    monolis_vec_copy_I(NP, 1, mat_in->itemU, mat_out->itemU);
+    monolis_vec_copy_I(NZ, 1, mat_in->itemU, mat_out->itemU);
   }
-
-  NZ = mat_in->indexL[NP];
 
   if(mat_in->indexL != NULL){
     monolis_dealloc_I_1d(&mat_out->indexL);
@@ -243,9 +241,10 @@ void monolis_copy_mat_nonzero_pattern_SCSR(
   }
 
   if(mat_in->itemL != NULL){
+    NZ = mat_in->indexL[NP];
     monolis_dealloc_I_1d(&mat_out->itemL);
     mat_out->itemL = monolis_alloc_I_1d(mat_out->itemL, NZ);
-    monolis_vec_copy_I(NP, 1, mat_in->itemL, mat_out->itemL);
+    monolis_vec_copy_I(NZ, 1, mat_in->itemL, mat_out->itemL);
   }
 }
 
