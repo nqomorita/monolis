@@ -11,7 +11,7 @@ void monolis_vec_copy_I(
 {
   int i;
   for (i = 0; i < n*n_dof; ++i) {
-    x[i] = y[i];
+    y[i] = x[i];
   }
 }
 
@@ -23,7 +23,7 @@ void monolis_vec_copy_R(
 {
   int i;
   for (i = 0; i < n*n_dof; ++i) {
-    x[i] = y[i];
+    y[i] = x[i];
   }
 }
 
@@ -35,6 +35,6 @@ void monolis_vec_copy_C(
 {
   int i;
   for (i = 0; i < n*n_dof; ++i) {
-    x[i] = y[i];
+    y[i] = x[i];
   }
 }

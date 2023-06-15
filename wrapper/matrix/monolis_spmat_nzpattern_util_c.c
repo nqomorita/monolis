@@ -60,7 +60,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
   mat->SCSR.indexU = NULL;
   mat->SCSR.itemU = NULL;
   mat->SCSR.indexL = NULL;
-  mat->SCSR.itemU = NULL;
+  mat->SCSR.itemL = NULL;
 }
 
 void monolis_alloc_nonzero_pattern_mat_val_R(
