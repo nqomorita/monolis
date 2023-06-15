@@ -284,6 +284,7 @@ $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 cp_header:
 	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
 	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
+	$(CP) ./wrapper/linalg/monolis_vec_util_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_struc_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_mat_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_solver_prm_util_c.h ./include/

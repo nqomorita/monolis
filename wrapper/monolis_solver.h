@@ -8,6 +8,7 @@ extern "C" {
 
 #include "monolis_matvec_c.h"
 #include "monolis_inner_product_c.h"
+#include "monolis_vec_util_c.h"
 #include "monolis_def_struc_c.h"
 #include "monolis_def_mat_c.h"
 #include "monolis_def_solver_prm_util_c.h"
