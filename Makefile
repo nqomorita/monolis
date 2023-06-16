@@ -9,7 +9,7 @@ CFLAGS = -fPIC -O2
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
+USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -81,7 +81,8 @@ mat_converge.f90 \
 vec_util.f90
 
 SRC_WRAP = \
-wrapper_lapack.f90
+wrapper_lapack.f90 \
+wrapper_scalapack.f90
 
 #matmat.f90 \
 
@@ -140,6 +141,7 @@ SRC_LINALG_C = \
 matvec_wrap.f90 \
 inner_product_wrap.f90 \
 monolis_matvec_c.c \
+monolis_vec_util_c.c \
 monolis_inner_product_c.c
 
 SRC_MAT_C = \
@@ -149,6 +151,10 @@ monolis_spmat_nzpattern_c.c \
 monolis_spmat_handler_c.c \
 spmat_nzpattern_util_wrap.f90 \
 spmat_handler_util_wrap.f90
+
+SRC_WRAP_C = \
+scalapack_wrapper.f90 \
+monolis_wrapper_scalapack_c.c
 
 SRC_SOLV_C = \
 monolis_solver_c.c \
@@ -162,6 +168,7 @@ SRC_ALL_C = \
 $(addprefix define/, $(SRC_DEFINE_C)) \
 $(addprefix linalg/, $(SRC_LINALG_C)) \
 $(addprefix matrix/, $(SRC_MAT_C)) \
+$(addprefix wrapper/, $(SRC_WRAP_C)) \
 $(addprefix solver/, $(SRC_SOLV_C)) \
 $(addprefix eigen/, $(SRC_EIGEN_SOLV_C))
 
@@ -207,13 +214,18 @@ monolis_def_solver_prm_util_c_test.c
 
 SRC_LINALG_C_TEST = \
 monolis_inner_product_c_test.c \
+monolis_vec_util_c_test.c \
 monolis_matvec_c_test.c
 
 SRC_MAT_C_TEST = \
+monolis_spmat_copy_c_test.c\
 monolis_spmat_nzpattern_util_c_test.c\
 monolis_spmat_nzpattern_c_test.c \
 monolis_spmat_handler_c_test.c \
 monolis_spmat_handler_util_c_test.c
+
+SRC_WRAP_C_TEST = \
+monolis_wrapper_scalapack_c_test.c
 
 SRC_SOLVER_C_TEST = \
 monolis_solver_c_test.c
@@ -225,6 +237,7 @@ SRC_ALL_C_TEST = \
 $(addprefix define/, $(SRC_DEFINE_C_TEST)) \
 $(addprefix linalg/, $(SRC_LINALG_C_TEST)) \
 $(addprefix matrix/, $(SRC_MAT_C_TEST)) \
+$(addprefix wrapper/, $(SRC_WRAP_C_TEST)) \
 $(addprefix solver/, $(SRC_SOLVER_C_TEST)) \
 $(addprefix eigen/, $(SRC_EIGEN_SOLVER_C_TEST))
 
@@ -274,6 +287,7 @@ $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 cp_header:
 	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
 	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
+	$(CP) ./wrapper/linalg/monolis_vec_util_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_struc_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_mat_c.h ./include/
 	$(CP) ./wrapper/define/monolis_def_solver_prm_util_c.h ./include/
@@ -283,6 +297,7 @@ cp_header:
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_copy_c.h ./include/
+	$(CP) ./wrapper/wrapper/monolis_wrapper_scalapack_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
 	$(CP) ./wrapper/monolis_solver.h ./include/

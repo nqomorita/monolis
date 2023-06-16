@@ -4,6 +4,7 @@ program monolis_test
   use mod_monolis_def_solver_test
   use mod_monolis_def_solver_util_test
   use mod_monolis_def_struc_test
+  use mod_monolis_spmat_copy_test
   use mod_monolis_spmat_nonzero_pattern_util_test
   use mod_monolis_spmat_nonzero_pattern_test
   use mod_monolis_spmat_handler_util_test
@@ -22,6 +23,7 @@ program monolis_test
   use mod_monolis_solver_PipeBiCGSTAB_noprec_test
   use mod_monolis_solver_COCG_test
   use mod_monolis_lapack_test
+  use mod_monolis_scalapack_test
   use mod_monolis_eigen_lanczos_util_test
   use mod_monolis_eigen_solver_test
   use mod_monolis_precond_test
@@ -35,6 +37,7 @@ program monolis_test
   call monolis_def_solver_util_test()
   call monolis_def_struc_test()
 
+  call monolis_spmat_copy_test()
   call monolis_spmat_nonzero_pattern_util_test()
   call monolis_spmat_nonzero_pattern_test()
   call monolis_spmat_handler_util_test()
@@ -49,6 +52,7 @@ program monolis_test
   call monolis_solve_test()
 
   call monolis_lapack_test()
+  call monolis_scalapack_test()
 
   if(monolis_mpi_get_global_comm_size() == 1)then
     call monolis_solver_CG_test()

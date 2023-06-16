@@ -17,6 +17,7 @@ module mod_monolis_solver
   use mod_monolis_solve
   use mod_monolis_precond
   use mod_monolis_lapack
+  use mod_monolis_scalapack
   use mod_monolis_eigen_solver
   use mod_monolis_eigen_lanczos
   use mod_monolis_eigen_lanczos_util

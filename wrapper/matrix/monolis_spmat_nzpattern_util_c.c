@@ -56,6 +56,11 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
     mat->CSC.index,
     mat->CSC.item,
     mat->CSC.perm);
+
+  mat->SCSR.indexU = NULL;
+  mat->SCSR.itemU = NULL;
+  mat->SCSR.indexL = NULL;
+  mat->SCSR.itemL = NULL;
 }
 
 void monolis_alloc_nonzero_pattern_mat_val_R(
@@ -70,6 +75,10 @@ void monolis_alloc_nonzero_pattern_mat_val_R(
   mat->R.A = monolis_alloc_R_1d(mat->R.A, n_dof*n_dof*nz);
   mat->R.X = monolis_alloc_R_1d(mat->R.X, n_dof*n_node);
   mat->R.B = monolis_alloc_R_1d(mat->R.B, n_dof*n_node);
+
+  mat->R.L = NULL;
+  mat->R.U = NULL;
+  mat->R.D = NULL;
 }
 
 void monolis_alloc_nonzero_pattern_mat_val_C(
@@ -84,4 +93,8 @@ void monolis_alloc_nonzero_pattern_mat_val_C(
   mat->C.A = monolis_alloc_C_1d(mat->C.A, n_dof*n_dof*nz);
   mat->C.X = monolis_alloc_C_1d(mat->C.X, n_dof*n_node);
   mat->C.B = monolis_alloc_C_1d(mat->C.B, n_dof*n_node);
+
+  mat->C.L = NULL;
+  mat->C.U = NULL;
+  mat->C.D = NULL;
 }

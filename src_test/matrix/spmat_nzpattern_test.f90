@@ -97,8 +97,8 @@ contains
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 43", monolis%MAT%CSC%perm(10), 10)
 
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 44", size(monolis%MAT%R%A), 40)
-    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 45", size(monolis%MAT%R%B), 20)
-    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 46", size(monolis%MAT%R%X), 20)
+    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 45", size(monolis%MAT%R%B), 8)
+    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 46", size(monolis%MAT%R%X), 8)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_R_test
 
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_C_test()
@@ -181,8 +181,8 @@ contains
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_C_test 43", monolis%MAT%CSC%perm(10), 10)
 
     call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_C_test 44", size(monolis%MAT%C%A), 40)
-    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_C_test 45", size(monolis%MAT%C%B), 20)
-    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 46", size(monolis%MAT%C%X), 20)
+    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_C_test 45", size(monolis%MAT%C%B), 8)
+    call monolis_test_check_eq_I1("monolis_get_nonzero_pattern_by_simple_mesh_R_test 46", size(monolis%MAT%C%X), 8)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_C_test
 
   subroutine monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test()
