@@ -7,7 +7,7 @@ module mod_monolis_scalapack
 
 contains
 
-
+  !> @ingroup wrapper
   !> PDGESVD 関数（実数型）
   subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
     implicit none
@@ -84,6 +84,7 @@ contains
     enddo
   end subroutine monolis_scalapack_gesvd_R
 
+  !> @ingroup wrapper
   !> PDGESVD 関数（実数型、メイン関数）
   subroutine monolis_scalapack_gesvd_R_main(N_loc, M, A, S, V, D, comm)
     implicit none
@@ -177,6 +178,8 @@ contains
     call blacs_gridexit(scalapack_comm)
   end subroutine monolis_scalapack_gesvd_R_main
 
+  !> @ingroup wrapper
+  !> PDGESVD 関数（実数型、行列情報の更新）
   subroutine gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
     implicit none
     integer(kint) :: P

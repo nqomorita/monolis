@@ -8,6 +8,7 @@ module mod_monolis_precond_sor_33
 
 contains
 
+  !> @ingroup prec
   !> 前処理生成：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
     implicit none
@@ -89,6 +90,7 @@ contains
 !$omp end parallel
   end subroutine monolis_precond_sor_33_setup_R
 
+  !> @ingroup prec
   !> 前処理適用：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
@@ -179,6 +181,7 @@ contains
     enddo
   end subroutine monolis_precond_sor_33_apply_R
 
+  !> @ingroup prec
   !> 前処理初期化：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_clear_R(monoPREC)
     implicit none

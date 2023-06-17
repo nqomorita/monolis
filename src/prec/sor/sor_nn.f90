@@ -8,6 +8,7 @@ module mod_monolis_precond_sor_nn
 
 contains
 
+  !> @ingroup prec
   !> 前処理生成：SOR 前処理（nxn ブロック、実数型）
   subroutine monolis_precond_sor_nn_setup_R(monoMAT, monoPREC)
     implicit none
@@ -78,6 +79,7 @@ contains
     deallocate(LU)
   end subroutine monolis_precond_sor_nn_setup_R
 
+  !> @ingroup prec
   !> 前処理生成：SOR 前処理（nxn ブロック、複素数型）
   subroutine monolis_precond_sor_nn_setup_C(monoMAT, monoPREC)
     implicit none
@@ -148,6 +150,7 @@ contains
     deallocate(LU)
   end subroutine monolis_precond_sor_nn_setup_C
 
+  !> @ingroup prec
   !> 前処理適用：SOR 前処理（3x3 ブロック、実数型）
   subroutine monolis_precond_sor_nn_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
@@ -388,6 +391,7 @@ contains
     deallocate(ST)
   end subroutine monolis_precond_sor_nn_apply_C
 
+  !> @ingroup prec
   !> 前処理初期化：SOR 前処理（nxn ブロック、実数型）
   subroutine monolis_precond_sor_nn_clear_R(monoPREC)
     implicit none
@@ -397,6 +401,7 @@ contains
     call monolis_pdealloc_R_1d(monoPREC%R%D)
   end subroutine monolis_precond_sor_nn_clear_R
 
+  !> @ingroup prec
   !> 前処理初期化：SOR 前処理（nxn ブロック、複素数型）
   subroutine monolis_precond_sor_nn_clear_C(monoPREC)
     implicit none

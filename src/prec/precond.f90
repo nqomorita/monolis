@@ -10,6 +10,7 @@ module mod_monolis_precond
 
 contains
 
+  !> @ingroup prec
   !> 前処理生成関数
   subroutine monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -30,6 +31,8 @@ contains
     end select
   end subroutine monolis_precond_setup
 
+  !> @ingroup prec
+  !> 前処理初期化関数
   subroutine monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
@@ -49,6 +52,7 @@ contains
     end select
   end subroutine monolis_precond_clear
 
+  !> @ingroup prec
   !> 前処理生成関数（実数型）
   subroutine monolis_precond_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -90,6 +94,7 @@ contains
     !monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_precond_setup_R
 
+  !> @ingroup prec
   !> 前処理生成関数（複素数型）
   subroutine monolis_precond_setup_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -131,6 +136,7 @@ contains
     !monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_precond_setup_C
 
+  !> @ingroup prec
   !> 前処理適用関数（実数型）
   subroutine monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
@@ -179,6 +185,7 @@ contains
     !monoPRM%tprec = monoPRM%tprec + t2 - t1
   end subroutine monolis_precond_apply_R
 
+  !> @ingroup prec
   !> 前処理適用関数（複素数型）
   subroutine monolis_precond_apply_C(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
@@ -227,6 +234,7 @@ contains
     !monoPRM%tprec = monoPRM%tprec + t2 - t1
   end subroutine monolis_precond_apply_C
 
+  !> @ingroup prec
   !> 前処理初期化関数（実数型）
   subroutine monolis_precond_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -267,6 +275,7 @@ contains
     !monoPRM%tprep = monoPRM%tprep + t2 - t1
   end subroutine monolis_precond_clear_R
 
+  !> @ingroup prec
   !> 前処理初期化関数（複素数型）
   subroutine monolis_precond_clear_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

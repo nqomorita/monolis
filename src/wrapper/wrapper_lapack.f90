@@ -6,6 +6,7 @@ module mod_monolis_lapack
 
 contains
 
+  !> @ingroup wrapper
   !> DSTEV 関数（実数型）
   subroutine monolis_lapack_dstev(n, D, S, eig_val, eig_mode)
     implicit none

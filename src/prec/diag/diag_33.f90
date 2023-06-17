@@ -8,6 +8,7 @@ module mod_monolis_precond_diag_33
 
 contains
 
+  !> @ingroup prec
   !> 前処理生成：対角スケーリング前処理（3x3 ブロック）
   subroutine monolis_precond_diag_33_setup_R(monoMAT, monoPREC)
     implicit none
@@ -89,6 +90,7 @@ contains
 !$omp end parallel
   end subroutine monolis_precond_diag_33_setup_R
 
+  !> @ingroup prec
   !> 前処理適用：対角スケーリング前処理（3x3 ブロック）
   subroutine monolis_precond_diag_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
@@ -125,6 +127,7 @@ contains
 !$omp end parallel
   end subroutine monolis_precond_diag_33_apply_R
 
+  !> @ingroup prec
   !> 前処理初期化：対角スケーリング前処理（3x3 ブロック）
   subroutine monolis_precond_diag_33_clear_R(monoPREC)
     implicit none
