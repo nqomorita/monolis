@@ -6,18 +6,33 @@
 extern "C" {
 #endif
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup linalg
+ */
 void monolis_vec_copy_I(
   int  n,
   int  n_dof,
   int* x,
   int* y);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup linalg
+ */
 void monolis_vec_copy_R(
   int     n,
   int     n_dof,
   double* x,
   double* y);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup linalg
+ */
 void monolis_vec_copy_C(
   int              n,
   int              n_dof,

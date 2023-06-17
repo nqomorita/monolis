@@ -116,9 +116,19 @@ typedef struct {
   double Rarray[100];
 } MONOLIS_PRM;
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_init
+ */
 void monolis_prm_initialize(
   MONOLIS_PRM* prm);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_init
+ */
 void monolis_prm_finalize(
   MONOLIS_PRM* prm);
 

@@ -6,7 +6,11 @@
 extern "C" {
 #endif
 
-/* eigen solver (inverted Lnaczos) */
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup eigen
+ */
 void monolis_eigen_inverted_standard_lanczos_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
@@ -17,6 +21,11 @@ void monolis_eigen_inverted_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_solver
+ */
 void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int     n,
   int     np,
@@ -47,7 +56,11 @@ void monolis_eigen_inverted_standard_lanczos_R_c_main(
   double* eigen_mode_tmp,
   int*    is_Dirichlet_bc_int);
 
-/* eigen solver (forwared Lnaczos) */
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup eigen
+ */
 void monolis_eigen_standard_lanczos_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
@@ -58,6 +71,11 @@ void monolis_eigen_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_solver
+ */
 void monolis_eigen_standard_lanczos_R_c_main(
   int     n,
   int     np,

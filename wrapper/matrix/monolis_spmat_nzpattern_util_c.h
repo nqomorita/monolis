@@ -8,6 +8,11 @@ extern "C" {
 
 #include "monolis_def_mat_c.h"
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_matrix
+ */
 void monolis_get_nonzero_pattern_by_nodal_graph_main(
   MONOLIS_MAT* mat,
   int          n_node,
@@ -15,12 +20,27 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
   int*         index,
   int*         item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_matrix
+ */
 void monolis_alloc_nonzero_pattern_mat_val_R(
   MONOLIS_MAT* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_matrix
+ */
 void monolis_alloc_nonzero_pattern_mat_val_C(
   MONOLIS_MAT* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_matrix
+ */
 void monolis_get_CSC_format(
   int  ncol,
   int  nrow,

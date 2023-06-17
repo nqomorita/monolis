@@ -8,6 +8,11 @@ extern "C" {
 
 #include "monolis_def_struc_c.h"
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_simple_mesh_R(
   MONOLIS* mat,
   int      n_node,
@@ -16,6 +21,11 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
   int      n_elem,
   int**    elem);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_connectivity_R(
   MONOLIS* mat,
   int      n_node,
@@ -25,6 +35,11 @@ void monolis_get_nonzero_pattern_by_connectivity_R(
   int*     conn_index,
   int*     conn_item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_nodal_graph_R(
   MONOLIS* mat,
   int      n_node,
@@ -32,6 +47,11 @@ void monolis_get_nonzero_pattern_by_nodal_graph_R(
   int*     index,
   int*     item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_simple_mesh_C(
   MONOLIS* mat,
   int      n_node,
@@ -40,6 +60,11 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
   int      n_elem,
   int**    elem);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_connectivity_C(
   MONOLIS* mat,
   int      n_node,
@@ -49,6 +74,11 @@ void monolis_get_nonzero_pattern_by_connectivity_C(
   int*     conn_index,
   int*     conn_item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup nzpattern
+ */
 void monolis_get_nonzero_pattern_by_nodal_graph_C(
   MONOLIS* mat,
   int      n_node,

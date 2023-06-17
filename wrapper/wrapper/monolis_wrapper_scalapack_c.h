@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup wrapper
+ */
 void monolis_scalapack_gesvd_R(
   int      N_loc,
   int      M,
@@ -15,6 +20,11 @@ void monolis_scalapack_gesvd_R(
   double** D,
   int      comm);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup wrapper
+ */
 void monolis_scalapack_gesvd_R_c_main(
   int      N_loc,
   int      M,

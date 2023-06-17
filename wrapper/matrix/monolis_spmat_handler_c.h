@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
@@ -14,6 +19,11 @@ void monolis_set_scalar_to_sparse_matrix_R(
   int      submat_j,
   double   val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
@@ -22,6 +32,11 @@ void monolis_add_scalar_to_sparse_matrix_R(
   int      submat_j,
   double   val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_get_scalar_from_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
@@ -31,12 +46,22 @@ void monolis_get_scalar_from_sparse_matrix_R(
   double*  val,
   bool*    is_find);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_matrix_to_sparse_matrix_R(
   MONOLIS* mat,
   int      n_base,
   int*     connectivity,
   double** val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_matrix_to_sparse_matrix_offdiag_R(
   MONOLIS* mat,
   int      n_base1,
@@ -45,6 +70,11 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
   int*     connectivity2,
   double** val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_matrix_BCSR_R(
   MONOLIS* mat,
   int      n,
@@ -55,12 +85,22 @@ void monolis_set_matrix_BCSR_R(
   int*     index,
   int*     item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_matrix_BCSR_mat_val_R(
   MONOLIS* mat,
   int      n_dof,
   int      nz,
   double*  A);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_Dirichlet_bc_R(
   MONOLIS* mat,
   double*  b,
@@ -68,6 +108,11 @@ void monolis_set_Dirichlet_bc_R(
   int      n_dof_bc,
   double   val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_scalar_to_sparse_matrix_C(
   MONOLIS*       mat,
   int            i,
@@ -76,6 +121,11 @@ void monolis_set_scalar_to_sparse_matrix_C(
   int            submat_j,
   double _Complex val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_scalar_to_sparse_matrix_C(
   MONOLIS*       mat,
   int            i,
@@ -84,6 +134,11 @@ void monolis_add_scalar_to_sparse_matrix_C(
   int            submat_j,
   double _Complex val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_get_scalar_from_sparse_matrix_C(
   MONOLIS*        mat,
   int             i,
@@ -93,12 +148,22 @@ void monolis_get_scalar_from_sparse_matrix_C(
   double _Complex* val,
   bool*           is_find);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_matrix_to_sparse_matrix_C(
   MONOLIS*         mat,
   int              n_base,
   int*             connectivity,
   double _Complex** val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_add_matrix_to_sparse_matrix_offdiag_C(
   MONOLIS*         mat,
   int              n_base1,
@@ -107,6 +172,11 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_C(
   int*             connectivity2,
   double _Complex** val);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_matrix_BCSR_C(
   MONOLIS*        mat,
   int             n,
@@ -117,12 +187,22 @@ void monolis_set_matrix_BCSR_C(
   int*            index,
   int*            item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_matrix_BCSR_mat_val_C(
   MONOLIS*        mat,
   int             n_dof,
   int             nz,
   double _Complex* A);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix
+ */
 void monolis_set_Dirichlet_bc_C(
   MONOLIS*        mat,
   double _Complex* b,

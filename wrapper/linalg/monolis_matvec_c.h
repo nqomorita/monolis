@@ -8,18 +8,33 @@ extern "C" {
 
 #include "monolis_def_struc_c.h"
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup linalg
+ */
 void monolis_matvec_product_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
   double*      x,
   double*      y);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup linalg
+ */
 void monolis_matvec_product_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
   double _Complex* x,
   double _Complex* y);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_linalg
+ */
 void monolis_matvec_product_R_c_main(
   int     n,
   int     np,
@@ -44,6 +59,11 @@ void monolis_matvec_product_R_c_main(
   int*    send_index,
   int*    send_item);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_linalg
+ */
 void monolis_matvec_product_C_c_main(
   int             n,
   int             np,

@@ -6,22 +6,47 @@
 extern "C" {
 #endif
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_val_R(
   int      NP,
   int      NDOF,
@@ -31,6 +56,11 @@ void monolis_copy_mat_nonzero_pattern_val_R(
   MONOLIS_MAT_VAL_R* mat_in,
   MONOLIS_MAT_VAL_R* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_val_C(
   int      NP,
   int      NDOF,
@@ -40,74 +70,169 @@ void monolis_copy_mat_nonzero_pattern_val_C(
   MONOLIS_MAT_VAL_C* mat_in,
   MONOLIS_MAT_VAL_C* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_CSR(
   int      NP,
   MONOLIS_MAT_CSR* mat_in,
   MONOLIS_MAT_CSR* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_CSC(
   int      NP,
   MONOLIS_MAT_CSC* mat_in,
   MONOLIS_MAT_CSC* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_nonzero_pattern_SCSR(
   int      NP,
   MONOLIS_MAT_SEPARATED_CSR* mat_in,
   MONOLIS_MAT_SEPARATED_CSR* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_matrix_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_solution_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_rhs_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_matrix_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_solution_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_copy_mat_value_rhs_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_R(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_matrix_R(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_solution_R(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_rhs_R(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_C(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_matrix_C(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_solution_C(
   MONOLIS* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup matrix_copy
+ */
 void monolis_clear_mat_value_rhs_C(
   MONOLIS* mat);
 

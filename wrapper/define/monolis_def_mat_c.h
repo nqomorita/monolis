@@ -53,39 +53,99 @@ typedef struct {
   MONOLIS_MAT_CSC CSC;
 } MONOLIS_MAT;
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize_val_R(
   MONOLIS_MAT_VAL_R* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize_val_C(
   MONOLIS_MAT_VAL_C* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize_CSR(
   MONOLIS_MAT_CSR* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize_CSC(
   MONOLIS_MAT_CSC* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_initialize(
   MONOLIS_MAT* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize_val_R(
   MONOLIS_MAT_VAL_R* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize_val_C(
   MONOLIS_MAT_VAL_C* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize_CSR(
   MONOLIS_MAT_CSR* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize_CSC(
   MONOLIS_MAT_CSC* mat);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup def_mat_init
+ */
 void monolis_mat_finalize(
   MONOLIS_MAT* mat);
 

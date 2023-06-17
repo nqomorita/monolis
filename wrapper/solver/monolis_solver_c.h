@@ -6,12 +6,22 @@
 extern "C" {
 #endif
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup solver
+ */
 void monolis_solve_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
   double*      b,
   double*      x);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_solver
+ */
 void monolis_solve_R_c_main(
   int     n,
   int     np,
@@ -38,12 +48,22 @@ void monolis_solve_R_c_main(
   int*    Iarray,
   double* Rarray);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup solver
+ */
 void monolis_solve_C(
   MONOLIS*        mat,
   MONOLIS_COM*    com,
   double _Complex* b,
   double _Complex* x);
 
+/**
+ * @brief 1 次元整数配列のメモリ確保
+ * @param[inout] var メモリ確保する配列
+ * @ingroup dev_solver
+ */
 void monolis_solve_C_c_main(
   int     n,
   int     np,
