@@ -10,6 +10,7 @@ module mod_monolis_eigen_lanczos_util
 
 contains
 
+  !> @ingroup eigen
   !> Lanczos 法の初期ベクトル生成
   subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc)
     implicit none
@@ -47,6 +48,7 @@ contains
     call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
   end subroutine lanczos_initialze
 
+  !> @ingroup eigen
   !> Lanczos 法における三重対角行列の固有値分解
   subroutine monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
     & alpha, beta, q, eig_val, eig_mode, norm)

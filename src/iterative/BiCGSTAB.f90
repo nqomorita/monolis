@@ -13,6 +13,7 @@ module mod_monolis_solver_BiCGSTAB
 
 contains
 
+  !> @ingroup solver
   !> BiCGStab 法
   subroutine monolis_solver_BiCGSTAB(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

@@ -6,7 +6,7 @@ module mod_monolis_vec_util
 
 contains
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル配列コピー（整数型）
   subroutine monolis_vec_copy_I(n, n_dof, X, Y)
     implicit none
@@ -34,7 +34,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_copy_I
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル配列コピー（実数型）
   subroutine monolis_vec_copy_R(n, n_dof, X, Y)
     implicit none
@@ -62,7 +62,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_copy_R
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル配列コピー（複素数型）
   subroutine monolis_vec_copy_C(n, n_dof, X, Y)
     implicit none
@@ -90,7 +90,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_copy_C
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル和 $z = \alpha * x + y$ （整数型）
   subroutine monolis_vec_AXPBY_I(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
@@ -124,7 +124,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_I
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル和 $z = \alpha * x + y$ （実数型）
   subroutine monolis_vec_AXPBY_R(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
@@ -158,7 +158,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_R
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> ベクトル和 $z = \alpha * x + y$ （複素数型）
   subroutine monolis_vec_AXPBY_C(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
@@ -192,7 +192,7 @@ contains
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_C
 
-  !> @ingroup dev_linalg
+  !> @ingroup linalg
   !> Gram Schmidt 法（実数型）
   subroutine monolis_gram_schmidt_R(monoCOM, n_vec, N, NDOF, p, q)
     implicit none

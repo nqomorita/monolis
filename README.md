@@ -4,7 +4,8 @@
 
 ## manual
 
-- [doxygen manual](https://morita.gitlab.io/monolis/)
+- [doxygen manual (fortran)](https://morita.gitlab.io/monolis/fortran/)
+- [doxygen manual (C lang)](https://morita.gitlab.io/monolis/c/)
 
 ## license
 

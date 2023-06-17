@@ -11,6 +11,7 @@ module mod_monolis_spmat_handler
 contains
 
   !# setter
+  !> @ingroup matrix
   !> スカラ値を疎行列に設定（実数型）
   subroutine monolis_set_scalar_to_sparse_matrix_R(monolis, i, j, sub_i, sub_j, val)
     implicit none
@@ -31,6 +32,7 @@ contains
       & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_set_scalar_to_sparse_matrix_R
 
+  !> @ingroup matrix
   !> スカラ値を疎行列に設定（複素数型）
   subroutine monolis_set_scalar_to_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val)
     implicit none
@@ -51,6 +53,7 @@ contains
       & monolis%MAT%C%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_set_scalar_to_sparse_matrix_C
 
+  !> @ingroup matrix
   !> ブロック行列を疎行列に設定（実数型）
   subroutine monolis_set_block_to_sparse_matrix_R(monolis, i, j, val)
     implicit none
@@ -67,6 +70,7 @@ contains
       & monolis%MAT%R%A, monolis%MAT%ndof, i, j, val)
   end subroutine monolis_set_block_to_sparse_matrix_R
 
+  !> @ingroup matrix
   !> ブロック行列を疎行列に設定（複素数型）
   subroutine monolis_set_block_to_sparse_matrix_C(monolis, i, j, val)
     implicit none
@@ -84,6 +88,7 @@ contains
   end subroutine monolis_set_block_to_sparse_matrix_C
 
   !# getter
+  !> @ingroup matrix
   !> スカラ値を疎行列から取得（実数型）
   subroutine monolis_get_scalar_from_sparse_matrix_R(monolis, i, j, sub_i, sub_j, val, is_find)
     implicit none
@@ -106,6 +111,7 @@ contains
       & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val, is_find)
   end subroutine monolis_get_scalar_from_sparse_matrix_R
 
+  !> @ingroup matrix
   !> スカラ値を疎行列から取得（複素数型）
   subroutine monolis_get_scalar_from_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val, is_find)
     implicit none
@@ -129,6 +135,7 @@ contains
   end subroutine monolis_get_scalar_from_sparse_matrix_C
 
   !# adder
+  !> @ingroup matrix
   !> スカラ値を疎行列に足込（実数型）
   subroutine monolis_add_scalar_to_sparse_matrix_R(monolis, i, j, sub_i, sub_j, val)
     implicit none
@@ -149,6 +156,7 @@ contains
       & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_add_scalar_to_sparse_matrix_R
 
+  !> @ingroup matrix
   !> スカラ値を疎行列に足込（複素数型）
   subroutine monolis_add_scalar_to_sparse_matrix_C(monolis, i, j, sub_i, sub_j, val)
     implicit none
@@ -169,6 +177,7 @@ contains
       & monolis%MAT%C%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
   end subroutine monolis_add_scalar_to_sparse_matrix_C
 
+  !> @ingroup matrix
   !> 行列を疎行列に足込（実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_R(monolis, n_base, connectivity, mat)
     implicit none
@@ -185,6 +194,7 @@ contains
       & monolis%MAT%R%A, n_base, n_base, monolis%MAT%ndof, connectivity, connectivity, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_R
 
+  !> @ingroup matrix
   !> 行列を疎行列に足込（複素数型）
   subroutine monolis_add_matrix_to_sparse_matrix_C(monolis, n_base, connectivity, mat)
     implicit none
@@ -201,6 +211,7 @@ contains
       & monolis%MAT%C%A, n_base, n_base, monolis%MAT%ndof, connectivity, connectivity, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_C
 
+  !> @ingroup matrix
   !> 行列を疎行列の非対角部分に足込（実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R(monolis, n_base_i, n_base_j, &
     & connectivity_i, connectivity_j, mat)
@@ -222,6 +233,7 @@ contains
       & monolis%MAT%R%A, n_base_i, n_base_j, monolis%MAT%ndof, connectivity_i, connectivity_j, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R
 
+  !> @ingroup matrix
   !> 行列を疎行列の非対角部分に足込（複素数型）
   subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C(monolis, n_base_i, n_base_j, &
     & connectivity_i, connectivity_j, mat)
@@ -244,6 +256,7 @@ contains
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C
 
   !# CSR data setter
+  !> @ingroup matrix
   !> BCSR 形式の疎行列を直接設定（実数型）
   subroutine monolis_set_matrix_BCSR_R(monolis, N, NP, NDOF, NZ, A, index, item)
     implicit none
@@ -305,6 +318,7 @@ contains
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
   end subroutine monolis_set_matrix_BCSR_R
 
+  !> @ingroup matrix
   !> BCSR 形式の疎行列の行列値を直接設定（実数型）
   subroutine monolis_set_matrix_BCSR_mat_val_R(monolis, NDOF, NZ, A)
     implicit none
@@ -324,6 +338,7 @@ contains
   end subroutine monolis_set_matrix_BCSR_mat_val_R
 
   !# boundary condition
+  !> @ingroup matrix
   !> 境界条件処理（実数型）
   subroutine monolis_set_Dirichlet_bc_R(monolis, B, node_id, ndof_bc, val)
     implicit none
@@ -343,6 +358,7 @@ contains
       & monolis%MAT%ndof, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_R
 
+  !> @ingroup matrix
   !> 境界条件処理（実数型）
   subroutine monolis_set_Dirichlet_bc_C(monolis, B, node_id, ndof_bc, val)
     implicit none

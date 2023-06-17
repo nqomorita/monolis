@@ -18,6 +18,7 @@ module mod_monolis_solve
 
 contains
 
+  !> @ingroup solver
   !> 線形ソルバ関数（実数型）
   subroutine monolis_solve_R(monolis, monoCOM, B, X)
     implicit none
@@ -41,6 +42,7 @@ contains
     call monolis_get_solution_R(monolis%MAT, X)
   end subroutine monolis_solve_R
 
+  !> @ingroup solver
   !> 線形ソルバ関数（複素数型）
   subroutine monolis_solve_C(monolis, monoCOM, B, X)
     implicit none
@@ -64,6 +66,7 @@ contains
     call monolis_get_solution_C(monolis%MAT, X)
   end subroutine monolis_solve_C
 
+  !> @ingroup dev_solver
   !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -91,6 +94,7 @@ contains
     call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve_main_R
 
+  !> @ingroup dev_solver
   !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
@@ -118,6 +122,8 @@ contains
     call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve_main_C
 
+  !> @ingroup dev_solver
+  !> 線形ソルバの選択関数
   subroutine monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体
@@ -175,6 +181,8 @@ contains
     end select
   end subroutine monolis_solver_select_R
 
+  !> @ingroup dev_solver
+  !> 線形ソルバの選択関数
   subroutine monolis_solver_select_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> パラメータ構造体

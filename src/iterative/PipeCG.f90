@@ -13,6 +13,7 @@ module mod_monolis_solver_PipeCG
 
 contains
 
+  !> @ingroup solver
   !> PipeCG 法
   subroutine monolis_solver_PipeCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

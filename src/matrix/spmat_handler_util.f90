@@ -27,6 +27,7 @@ module mod_monolis_spmat_handler_util
 contains
 
   !# setter
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列に設定（メイン関数、実数型）
   subroutine monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
@@ -69,6 +70,7 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_R
 
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列に設定（メイン関数、複素数型）
   subroutine monolis_set_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
@@ -111,6 +113,7 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_C
 
+  !> @ingroup dev_matrix
   !> 小行列を疎行列に設定（メイン関数、実数型）
   subroutine monolis_set_block_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, val)
     implicit none
@@ -149,6 +152,7 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_block_to_sparse_matrix_main_R
 
+  !> @ingroup dev_matrix
   !> 小行列を疎行列に設定（メイン関数、複素数型）
   subroutine monolis_set_block_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, val)
     implicit none
@@ -188,6 +192,7 @@ contains
   end subroutine monolis_set_block_to_sparse_matrix_main_C
 
   !# getter
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列から取得（メイン関数、実数型）
   subroutine monolis_get_scalar_from_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
     implicit none
@@ -233,6 +238,7 @@ contains
     enddo
   end subroutine monolis_get_scalar_from_sparse_matrix_main_R
 
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列から取得（メイン関数、複素数型）
   subroutine monolis_get_scalar_from_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
     implicit none
@@ -279,6 +285,7 @@ contains
   end subroutine monolis_get_scalar_from_sparse_matrix_main_C
 
   !# adder
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列に足込（メイン関数、実数型）
   subroutine monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
@@ -321,6 +328,7 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_R
 
+  !> @ingroup dev_matrix
   !> スカラ値を疎行列に足込（メイン関数、複素数型）
   subroutine monolis_add_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
@@ -363,6 +371,7 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_C
 
+  !> @ingroup dev_matrix
   !> 行列値を疎行列に足込（メイン関数、実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, ndof, e1, e2, val)
     implicit none
@@ -435,6 +444,7 @@ contains
     enddo
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R
 
+  !> @ingroup dev_matrix
   !> 行列値を疎行列に足込（メイン関数、複素数型）
   subroutine monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n1, n2, ndof, e1, e2, val)
     implicit none
@@ -507,6 +517,7 @@ contains
     enddo
   end subroutine monolis_add_matrix_to_sparse_matrix_main_C
 
+  !> @ingroup dev_matrix
   !> 境界条件処理（実数型、メイン関数）
   subroutine monolis_set_Dirichlet_bc_main_R(index, item, A, B, indexR, itemR, permA, &
     & ndof, node_id, ndof_bc, val)
@@ -573,6 +584,7 @@ contains
     B(ndof*node_id - ndof + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_R
 
+  !> @ingroup dev_matrix
   !> 境界条件処理（複素数型、メイン関数）
   subroutine monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
     & ndof, node_id, ndof_bc, val)
@@ -639,6 +651,7 @@ contains
     B(ndof*node_id - ndof + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_C
 
+  !> @ingroup dev_matrix
   !> 非零要素がメモリ確保されていない場合にエラーストップ
   subroutine monolis_stop_by_matrix_assemble(ci, cj)
     !> 行番号
@@ -652,6 +665,7 @@ contains
     call monolis_std_error_stop()
   end subroutine monolis_stop_by_matrix_assemble
 
+  !> @ingroup dev_matrix
   !> ブロックサイズより大きい部分へのアクサス時にエラーストップ
   subroutine monolis_stop_by_submatrix_access(ndof, sub_dof)
     !> 行番号
@@ -666,6 +680,7 @@ contains
     call monolis_std_error_stop()
   end subroutine monolis_stop_by_submatrix_access
 
+  !> @ingroup dev_matrix
   !> 対角成分が見つからない場合にエラーストップ
   subroutine monolis_stop_by_set_DBC(node_id)
     !> 行番号
@@ -677,6 +692,7 @@ contains
     call monolis_std_error_stop()
   end subroutine monolis_stop_by_set_DBC
 
+  !> @ingroup dev_matrix
   !> 対角成分が零の場合にエラーストップ
   subroutine monolis_stop_by_set_zero_diag_component(node_id, ndof)
     !> 行番号
@@ -691,6 +707,7 @@ contains
     call monolis_std_error_stop()
   end subroutine monolis_stop_by_set_zero_diag_component
 
+  !> @ingroup dev_matrix
   !> 行列の最大値の取得（実数型、メイン関数）
   subroutine monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
     implicit none
@@ -705,6 +722,7 @@ contains
     call monolis_allreduce_R1(max_val, monolis_mpi_max, monoCOM%comm)
   end subroutine monolis_get_max_matrix_component_main_R
 
+  !> @ingroup dev_matrix
   !> 行列の対角成分の 0 チェック（実数型、メイン関数）
   subroutine monolis_check_diagonal_zero_component_main_R(monoPRM, monoMAT)
     implicit none

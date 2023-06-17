@@ -5,6 +5,8 @@ module mod_monolis_matmat
 
 contains
 
+  !> @ingroup linalg
+  !> ベクトル内積
   subroutine monolis_matmat(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
@@ -28,6 +30,8 @@ contains
     tspmv = tspmv + t2 - t1
   end subroutine monolis_matmat
 
+  !> @ingroup linalg
+  !> ベクトル内積
   subroutine monolis_matmat_nn(monoCOM, monoMAT, X, Y, NDOF)
     implicit none
     type(monolis_com) :: monoCOM

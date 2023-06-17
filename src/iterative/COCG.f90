@@ -13,6 +13,7 @@ module mod_monolis_solver_COCG
 
 contains
 
+  !> @ingroup solver
   !> COCG 法
   subroutine monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

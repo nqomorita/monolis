@@ -13,6 +13,7 @@ module mod_monolis_solver_PipeBiCGSTAB_noprec
 
 contains
 
+  !> @ingroup solver
   !> PipeBiCGSTAB 法（前処理なし）
   subroutine monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

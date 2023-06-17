@@ -13,6 +13,7 @@ module mod_monolis_solver_CG
 
 contains
 
+  !> @ingroup solver
   !> CG 法
   subroutine monolis_solver_CG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

@@ -8,6 +8,7 @@ module mod_monolis_spmat_nonzero_pattern_util
 
 contains
 
+  !> @ingroup dev_matrix
   !> 節点グラフから疎行列パターンを決定（メイン関数）
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_main(MAT, n_node, ndof, index, item)
     implicit none
@@ -56,6 +57,7 @@ contains
       & MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_main
 
+  !> @ingroup dev_matrix
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、メイン関数）
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main( &
     MAT, n_node, n_dof_list, index, item)
@@ -141,6 +143,7 @@ contains
       & MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main
 
+  !> @ingroup dev_matrix
   !> 節点数 index の作成
   subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
     implicit none
@@ -157,6 +160,7 @@ contains
     enddo
   end subroutine monolis_get_n_dof_index
 
+  !> @ingroup dev_matrix
   !> 疎行列の行列成分のメモリ確保（実数型）
   subroutine monolis_alloc_nonzero_pattern_mat_val_R(MAT)
     implicit none
@@ -173,6 +177,7 @@ contains
     call monolis_palloc_R_1d(MAT%R%X, NP*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
+  !> @ingroup dev_matrix
   !> 疎行列の行列成分のメモリ確保（複素数型）
   subroutine monolis_alloc_nonzero_pattern_mat_val_C(MAT)
     implicit none
@@ -189,6 +194,7 @@ contains
     call monolis_palloc_C_1d(MAT%C%X, NP*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C
 
+  !> @ingroup dev_matrix
   !> CSR 形式から CSC 形式のデータを生成
   subroutine monolis_get_CSC_format(NC, NR, NZ, index, item, indexR, itemR, permR)
     implicit none

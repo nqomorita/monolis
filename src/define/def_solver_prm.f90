@@ -151,6 +151,7 @@ module mod_monolis_def_solver
 
 contains
 
+  !> @ingroup def_init
   !> パラメータ 構造体の初期化処理
   subroutine monolis_prm_initialize(monoPRM)
     implicit none
@@ -190,6 +191,7 @@ contains
     monoPRM%Rarray(monolis_R_time_comm_spmv) = 0.0d0
   end subroutine monolis_prm_initialize
 
+  !> @ingroup def_init
   !> パラメータ構造体の終了処理
   subroutine monolis_prm_finalize(monoPRM)
     implicit none
@@ -200,6 +202,7 @@ contains
     monoPRM%Rarray = 0.0d0
   end subroutine monolis_prm_finalize
 
+  !> @ingroup def_init
   !> 時間計測機能の初期化処理
   subroutine monolis_timer_initialize(monoPRM)
     implicit none
@@ -217,6 +220,7 @@ contains
     monoPRM%Rarray(monolis_R_time_sol) = monolis_get_time()
   end subroutine monolis_timer_initialize
 
+  !> @ingroup def_init
   !> 時間計測機能の終了処理
   subroutine monolis_timer_finalize(monoPRM, monoCOM)
     implicit none
@@ -314,6 +318,7 @@ contains
     monoPRM%Rarray(monolis_R_time_comm_spmv) = time(6)
   end subroutine monolis_timer_finalize
 
+  !> @ingroup def_init
   !> 時間計測機能の統計処理
   subroutine monolis_time_statistics(time, t_max, t_min, t_avg, t_sd, comm)
     implicit none

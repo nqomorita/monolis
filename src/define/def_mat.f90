@@ -91,6 +91,7 @@ module mod_monolis_def_mat
 
 contains
 
+  !> @ingroup def_init
   !> 行列構造体の初期化処理関数
   subroutine monolis_mat_initialize(monoMAT)
     implicit none
@@ -108,6 +109,7 @@ contains
     call monolis_mat_initialize_CSC(monoMAT%CSC)
   end subroutine monolis_mat_initialize
 
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（実数型）
   subroutine monolis_mat_initialize_val_R(R)
     implicit none
@@ -122,6 +124,7 @@ contains
     call monolis_pdealloc_R_1d(R%B)
   end subroutine monolis_mat_initialize_val_R
 
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（複素数型）
   subroutine monolis_mat_initialize_val_C(C)
     implicit none
@@ -136,6 +139,7 @@ contains
     call monolis_pdealloc_C_1d(C%B)
   end subroutine monolis_mat_initialize_val_C
 
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（セパレート CSR 構造）
   subroutine monolis_mat_initialize_SCSR(SCSR)
     implicit none
@@ -148,6 +152,7 @@ contains
     call monolis_pdealloc_I_1d(SCSR%itemL)
   end subroutine monolis_mat_initialize_SCSR
 
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（CSR 構造）
   subroutine monolis_mat_initialize_CSR(CSR)
     implicit none
@@ -158,6 +163,7 @@ contains
     call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_initialize_CSR
 
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（CSC 構造）
   subroutine monolis_mat_initialize_CSC(CSC)
     implicit none
@@ -169,6 +175,7 @@ contains
     call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_initialize_CSC
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
@@ -186,6 +193,7 @@ contains
     call monolis_mat_finalize_CSC(monoMAT%CSC)
   end subroutine monolis_mat_finalize
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数（実数型）
   subroutine monolis_mat_finalize_val_R(R)
     implicit none
@@ -200,6 +208,7 @@ contains
     call monolis_pdealloc_R_1d(R%B)
   end subroutine monolis_mat_finalize_val_R
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数（複素数型）
   subroutine monolis_mat_finalize_val_C(C)
     implicit none
@@ -214,6 +223,7 @@ contains
     call monolis_pdealloc_C_1d(C%B)
   end subroutine monolis_mat_finalize_val_C
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数（セパレート CSR 構造）
   subroutine monolis_mat_finalize_SCSR(SCSR)
     implicit none
@@ -226,6 +236,7 @@ contains
     call monolis_pdealloc_I_1d(SCSR%itemL)
   end subroutine monolis_mat_finalize_SCSR
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数（CSR 構造）
   subroutine monolis_mat_finalize_CSR(CSR)
     implicit none
@@ -236,6 +247,7 @@ contains
     call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_finalize_CSR
 
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数（CSC 構造）
   subroutine monolis_mat_finalize_CSC(CSC)
     implicit none
@@ -247,6 +259,7 @@ contains
     call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_finalize_CSC
 
+  !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（実数型）
   subroutine monolis_set_RHS_R(monoMAT, B)
     implicit none
@@ -263,6 +276,7 @@ contains
     enddo
   end subroutine monolis_set_RHS_R
 
+  !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（複素数型）
   subroutine monolis_set_RHS_C(monoMAT, B)
     implicit none
@@ -279,6 +293,7 @@ contains
     enddo
   end subroutine monolis_set_RHS_C
 
+  !> @ingroup def_mat_init
   !> 解ベクトルの初期値設定（実数型）
   subroutine monolis_set_initial_solution_R(monoMAT, X)
     implicit none
@@ -295,6 +310,7 @@ contains
     enddo
   end subroutine monolis_set_initial_solution_R
 
+  !> @ingroup def_mat_init
   !> 解ベクトルの初期値設定（複素数型）
   subroutine monolis_set_initial_solution_C(monoMAT, X)
     implicit none
@@ -311,6 +327,7 @@ contains
     enddo
   end subroutine monolis_set_initial_solution_C
 
+  !> @ingroup def_mat_init
   !> 解ベクトルの設定（実数型）
   subroutine monolis_get_solution_R(monoMAT, X)
     implicit none
@@ -327,6 +344,7 @@ contains
     enddo
   end subroutine monolis_get_solution_R
 
+  !> @ingroup def_mat_init
   !> 解ベクトルの設定（複素数型）
   subroutine monolis_get_solution_C(monoMAT, X)
     implicit none

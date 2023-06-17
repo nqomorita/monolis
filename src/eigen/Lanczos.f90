@@ -13,6 +13,7 @@ module mod_monolis_eigen_lanczos
 
 contains
 
+  !> @ingroup eigen
   !> Lanczos 法（逆反復、最小固有値、実数型、メイン関数）
   subroutine monolis_eigen_inverted_standard_lanczos_R_main( &
     & monoPRM, monoCOM, monoMAT, monoPREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
@@ -126,6 +127,7 @@ contains
     enddo
   end subroutine monolis_eigen_inverted_standard_lanczos_R_main
 
+  !> @ingroup eigen
   !> Lanczos 法（順反復、最大固有値、実数型、メイン関数）
   subroutine monolis_eigen_standard_lanczos_R_main( &
     & monoPRM, monoCOM, monoMAT, n_get_eigen, ths, maxiter, val, vec, is_bc)

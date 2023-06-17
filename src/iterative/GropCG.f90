@@ -13,6 +13,7 @@ module mod_monolis_solver_GropCG
 
 contains
 
+  !> @ingroup solver
   !> GropCG 法
   subroutine monolis_solver_GropCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none

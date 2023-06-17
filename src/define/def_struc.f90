@@ -18,18 +18,21 @@ module mod_monolis_def_struc
 
 contains
 
+  !> @ingroup def_init
   !> monolis ライブラリの初期化処理処理
   subroutine monolis_global_initialize()
     implicit none
     call monolis_mpi_initialize()
   end subroutine monolis_global_initialize
 
+  !> @ingroup def_init
   !> monolis ライブラリの終了処理処理
   subroutine monolis_global_finalize()
     implicit none
     call monolis_mpi_finalize()
   end subroutine monolis_global_finalize
 
+  !> @ingroup def_init
   !> monolis 構造体の初期化処理
   subroutine monolis_initialize(monolis)
     implicit none
@@ -41,6 +44,7 @@ contains
     call monolis_mat_initialize(monolis%PREC)
   end subroutine monolis_initialize
 
+  !> @ingroup def_init
   !> monoils 構造体の終了処理
   subroutine monolis_finalize(monolis)
     implicit none

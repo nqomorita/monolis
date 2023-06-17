@@ -7,6 +7,7 @@ module mod_monolis_spmat_copy
 
 contains
 
+  !> @ingroup matrix_copy
   !> 行列構造体のコピー（実数型）
   subroutine monolis_copy_mat_R(mat_in, mat_out)
     implicit none
@@ -21,6 +22,7 @@ contains
     call monolis_copy_mat_value_R(mat_in, mat_out)
   end subroutine monolis_copy_mat_R
 
+  !> @ingroup matrix_copy
   !> 行列構造体のコピー（複素数型）
   subroutine monolis_copy_mat_C(mat_in, mat_out)
     implicit none
@@ -35,6 +37,7 @@ contains
     call monolis_copy_mat_value_C(mat_in, mat_out)
   end subroutine monolis_copy_mat_C
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（実数型）
   subroutine monolis_copy_mat_nonzero_pattern_R(mat_in, mat_out)
     implicit none
@@ -69,6 +72,7 @@ contains
       & mat_in%MAT%R, mat_out%MAT%R)
   end subroutine monolis_copy_mat_nonzero_pattern_R
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（複素数型）
   subroutine monolis_copy_mat_nonzero_pattern_C(mat_in, mat_out)
     implicit none
@@ -103,6 +107,7 @@ contains
       & mat_in%MAT%C, mat_out%MAT%C)
   end subroutine monolis_copy_mat_nonzero_pattern_C
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（実数型）
   subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
@@ -152,6 +157,7 @@ contains
     endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_R
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（複素数型）
   subroutine monolis_copy_mat_nonzero_pattern_val_C(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
@@ -201,6 +207,7 @@ contains
     endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_C
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（CSR）
   subroutine monolis_copy_mat_nonzero_pattern_CSR(NP, mat_in, mat_out)
     implicit none
@@ -223,6 +230,7 @@ contains
     mat_out%item = mat_in%item
   end subroutine monolis_copy_mat_nonzero_pattern_CSR
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（CSC）
   subroutine monolis_copy_mat_nonzero_pattern_CSC(NP, mat_in, mat_out)
     implicit none
@@ -249,6 +257,7 @@ contains
     mat_out%perm = mat_in%perm
   end subroutine monolis_copy_mat_nonzero_pattern_CSC
 
+  !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（SCSR）
   subroutine monolis_copy_mat_nonzero_pattern_SCSR(NP, mat_in, mat_out)
     implicit none
@@ -287,6 +296,7 @@ contains
     endif
   end subroutine monolis_copy_mat_nonzero_pattern_SCSR
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（実数型）
   subroutine monolis_copy_mat_value_R(mat_in, mat_out)
     implicit none
@@ -299,6 +309,7 @@ contains
     call monolis_copy_mat_value_solution_R(mat_in, mat_out)
   end subroutine monolis_copy_mat_value_R
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（行列、実数型）
   subroutine monolis_copy_mat_value_matrix_R(mat_in, mat_out)
     implicit none
@@ -309,6 +320,7 @@ contains
     mat_out%MAT%R%A = mat_in%MAT%R%A
   end subroutine monolis_copy_mat_value_matrix_R
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（右辺ベクトル、実数型）
   subroutine monolis_copy_mat_value_rhs_R(mat_in, mat_out)
     implicit none
@@ -319,6 +331,7 @@ contains
     mat_out%MAT%R%B = mat_in%MAT%R%B
   end subroutine monolis_copy_mat_value_rhs_R
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（解ベクトル、実数型）
   subroutine monolis_copy_mat_value_solution_R(mat_in, mat_out)
     implicit none
@@ -329,6 +342,7 @@ contains
     mat_out%MAT%R%X = mat_in%MAT%R%X
   end subroutine monolis_copy_mat_value_solution_R
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（複素数型）
   subroutine monolis_copy_mat_value_C(mat_in, mat_out)
     implicit none
@@ -341,6 +355,7 @@ contains
     call monolis_copy_mat_value_solution_C(mat_in, mat_out)
   end subroutine monolis_copy_mat_value_C
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（行列、複素数型）
   subroutine monolis_copy_mat_value_matrix_C(mat_in, mat_out)
     implicit none
@@ -351,6 +366,7 @@ contains
     mat_out%MAT%C%A = mat_in%MAT%C%A
   end subroutine monolis_copy_mat_value_matrix_C
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（右辺ベクトル、複素数型）
   subroutine monolis_copy_mat_value_rhs_C(mat_in, mat_out)
     implicit none
@@ -361,6 +377,7 @@ contains
     mat_out%MAT%C%B = mat_in%MAT%C%B
   end subroutine monolis_copy_mat_value_rhs_C
 
+  !> @ingroup matrix_copy
   !> 行列値のコピー（解ベクトル、複素数型）
   subroutine monolis_copy_mat_value_solution_C(mat_in, mat_out)
     implicit none
@@ -371,6 +388,7 @@ contains
     mat_out%MAT%C%X = mat_in%MAT%C%X
   end subroutine monolis_copy_mat_value_solution_C
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（実数型）
   subroutine monolis_clear_mat_value_R(mat)
     implicit none
@@ -381,6 +399,7 @@ contains
     call monolis_clear_mat_value_solution_R(mat)
   end subroutine monolis_clear_mat_value_R
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（行列、実数型）
   subroutine monolis_clear_mat_value_matrix_R(mat)
     implicit none
@@ -389,6 +408,7 @@ contains
     mat%MAT%R%A = 0.0d0
   end subroutine monolis_clear_mat_value_matrix_R
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（右辺ベクトル、実数型）
   subroutine monolis_clear_mat_value_rhs_R(mat)
     implicit none
@@ -397,6 +417,7 @@ contains
     mat%MAT%R%B = 0.0d0
   end subroutine monolis_clear_mat_value_rhs_R
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（解ベクトル、実数型）
   subroutine monolis_clear_mat_value_solution_R(mat)
     implicit none
@@ -405,6 +426,7 @@ contains
     mat%MAT%R%X = 0.0d0
   end subroutine monolis_clear_mat_value_solution_R
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（複素数型）
   subroutine monolis_clear_mat_value_C(mat)
     implicit none
@@ -415,6 +437,7 @@ contains
     call monolis_clear_mat_value_solution_C(mat)
   end subroutine monolis_clear_mat_value_C
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（行列、複素数型）
   subroutine monolis_clear_mat_value_matrix_C(mat)
     implicit none
@@ -423,6 +446,7 @@ contains
     mat%MAT%C%A = 0.0d0
   end subroutine monolis_clear_mat_value_matrix_C
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（右辺ベクトル、複素数型）
   subroutine monolis_clear_mat_value_rhs_C(mat)
     implicit none
@@ -431,6 +455,7 @@ contains
     mat%MAT%C%B = 0.0d0
   end subroutine monolis_clear_mat_value_rhs_C
 
+  !> @ingroup matrix_copy
   !> 行列値のゼロ初期化（解ベクトル、複素数型）
   subroutine monolis_clear_mat_value_solution_C(mat)
     implicit none
