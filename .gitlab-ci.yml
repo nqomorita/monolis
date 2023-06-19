@@ -32,6 +32,7 @@ test_monolis:
 doxygen_monolis:
   stage: doxy_build
   script:
+    - doxygen -v
     - cd manual/fortran
     - doxygen
     - cd ../c

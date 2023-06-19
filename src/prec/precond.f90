@@ -148,8 +148,11 @@ contains
     type(monolis_mat) :: monoMAT
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
+    !> 入力ベクトル
+    real(kdouble) :: X(:)
+    !> 出力ベクトル
+    real(kdouble) :: Y(:)
     integer(kint) :: i, precond
-    real(kdouble) :: X(:), Y(:)
     real(kdouble) :: t1, t2
 
     call monolis_std_debug_log_header("monolis_precond_apply_R")
@@ -197,8 +200,11 @@ contains
     type(monolis_mat) :: monoMAT
     !> 前処理構造体
     type(monolis_mat) :: monoPREC
+    !> 入力ベクトル
+    complex(kdouble) :: X(:)
+    !> 出力ベクトル
+    complex(kdouble) :: Y(:)
     integer(kint) :: i, precond
-    complex(kdouble) :: X(:), Y(:)
     real(kdouble) :: t1, t2
 
     call monolis_std_debug_log_header("monolis_precond_apply_C")

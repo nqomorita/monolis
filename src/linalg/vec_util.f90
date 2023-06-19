@@ -91,7 +91,7 @@ contains
   end subroutine monolis_vec_copy_C
 
   !> @ingroup linalg
-  !> ベクトル和 $z = \alpha * x + y$ （整数型）
+  !> ベクトル和 $z = alpha * x + y$ （整数型）
   subroutine monolis_vec_AXPBY_I(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
@@ -125,7 +125,7 @@ contains
   end subroutine monolis_vec_AXPBY_I
 
   !> @ingroup linalg
-  !> ベクトル和 $z = \alpha * x + y$ （実数型）
+  !> ベクトル和 $z = alpha * x + y$ （実数型）
   subroutine monolis_vec_AXPBY_R(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数
@@ -159,7 +159,7 @@ contains
   end subroutine monolis_vec_AXPBY_R
 
   !> @ingroup linalg
-  !> ベクトル和 $z = \alpha * x + y$ （複素数型）
+  !> ベクトル和 $z = alpha * x + y$ （複素数型）
   subroutine monolis_vec_AXPBY_C(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
     !> 自由度数

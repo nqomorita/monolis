@@ -32,9 +32,9 @@ contains
     real(kdouble), intent(in) :: ths
     !> [in] 最大反復回数
     integer(kint), intent(in) :: maxiter
-    !> [in,out] 固有値
+    !> [out] 固有値
     real(kdouble), intent(out) :: val(:)
-    !> [in,out] 固有ベクトル
+    !> [out] 固有ベクトル
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
@@ -136,7 +136,7 @@ contains
     type(monolis_prm), intent(in) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in,out] 行列構造体
+    !> [in] 行列構造体
     type(monolis_mat), intent(in) :: monoMAT
     !> [in,out] 取得固有値数
     integer(kint), intent(inout) :: n_get_eigen
@@ -144,9 +144,9 @@ contains
     real(kdouble), intent(in) :: ths
     !> [in] 最大反復回数
     integer(kint), intent(in) :: maxiter
-    !> [in,out] 固有値
+    !> [out] 固有値
     real(kdouble), intent(out) :: val(:)
-    !> [in,out] 固有ベクトル
+    !> [out] 固有ベクトル
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
