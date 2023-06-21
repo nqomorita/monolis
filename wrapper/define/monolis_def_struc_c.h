@@ -17,30 +17,28 @@ typedef struct {
 } MONOLIS;
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief monolis ライブラリの初期化処理処理
  * @ingroup def_init
  */
 void monolis_global_initialize();
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief monolis ライブラリの終了処理処理
  * @ingroup def_init
  */
 void monolis_global_finalize();
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief monolis 構造体の初期化処理
+ * @param[out] mat monolis 構造体
  * @ingroup def_init
  */
 void monolis_initialize(
   MONOLIS*    mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief monoils 構造体の終了処理
+ * @param[inout] mat monolis 構造体
  * @ingroup def_init
  */
 void monolis_finalize(
