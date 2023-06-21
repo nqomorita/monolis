@@ -10,8 +10,9 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ソルバの設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_method(
@@ -19,8 +20,9 @@ void monolis_set_method(
   int      param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 前処理の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_precond(
@@ -28,8 +30,9 @@ void monolis_set_precond(
   int      param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 最大反復回数の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_maxiter(
@@ -37,8 +40,9 @@ void monolis_set_maxiter(
   int      param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 現在の反復回数の取得
+ * @param[in] mat monolis 構造体
+ * @param[out] prm パラメータ
  * @ingroup param
  */
 void monolis_get_converge_iter(
@@ -46,8 +50,9 @@ void monolis_get_converge_iter(
   int*     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief エラー番号の取得
+ * @param[in] mat monolis 構造体
+ * @param[out] prm パラメータ
  * @ingroup param
  */
 void monolis_get_error_tag(
@@ -55,8 +60,9 @@ void monolis_get_error_tag(
   int*     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 解ベクトル初期化の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_init_x(
@@ -64,8 +70,9 @@ void monolis_set_init_x(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 対称行列向け処理の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_sym_matrix(
@@ -73,8 +80,9 @@ void monolis_set_sym_matrix(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief デバッグ出力の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_debug(
@@ -82,8 +90,9 @@ void monolis_set_debug(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 詳細な計算時間測定の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_performance_measurement(
@@ -91,8 +100,9 @@ void monolis_set_performance_measurement(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列対角成分確認の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_check_diag(
@@ -100,8 +110,9 @@ void monolis_set_check_diag(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 前処理情報保存の有無の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_prec_stored(
@@ -109,8 +120,9 @@ void monolis_set_prec_stored(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 反復回数と残差履歴の表示の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_show_iterlog(
@@ -118,8 +130,9 @@ void monolis_show_iterlog(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 詳細な計算時間の表示の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_show_timelog(
@@ -127,8 +140,9 @@ void monolis_show_timelog(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ソルバ収束後のサマリの表示の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_show_summary(
@@ -136,8 +150,9 @@ void monolis_show_summary(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 計算時間の統計的処理結果の表示の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_show_timelog_statistics(
@@ -145,8 +160,9 @@ void monolis_show_timelog_statistics(
   bool     param);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 収束判定閾値の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
  * @ingroup param
  */
 void monolis_set_tolerance(
@@ -154,8 +170,9 @@ void monolis_set_tolerance(
   double   val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 現在の残差の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_converge_residual(
@@ -163,8 +180,9 @@ void monolis_get_converge_residual(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ソルバの全計算時間の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_solver(
@@ -172,8 +190,9 @@ void monolis_get_time_solver(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 前処理時間（生成時間）の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_preparing(
@@ -181,8 +200,9 @@ void monolis_get_time_preparing(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積時間の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_spmv(
@@ -190,8 +210,9 @@ void monolis_get_time_spmv(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積時間の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_inner_product(
@@ -199,8 +220,9 @@ void monolis_get_time_inner_product(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 前処理時間（適用時間）の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_precondition(
@@ -208,8 +230,9 @@ void monolis_get_time_precondition(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積の通信時間の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_comm_inner_product(
@@ -217,8 +240,9 @@ void monolis_get_time_comm_inner_product(
   double*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積の通信時間の取得
+ * @param[in] mat monolis 構造体
+ * @param[inout] prm パラメータ
  * @ingroup param
  */
 void monolis_get_time_comm_spmv(
