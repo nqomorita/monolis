@@ -7,8 +7,15 @@ extern "C" {
 #endif
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief Lanczos 法（逆反復、最小固有値、実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[inout] n_get_eigen 取得固有値数
+ * @param[in] ths 収束判定閾値
+ * @param[in] maxiter 最大反復回数
+ * @param[inout] eigen_value 固有値
+ * @param[inout] eigen_mode 固有ベクトル
+ * @param[in] is_Dirichlet_bc Dirhchlet 境界条件判定フラグ
  * @ingroup eigen
  */
 void monolis_eigen_inverted_standard_lanczos_R(
@@ -22,8 +29,35 @@ void monolis_eigen_inverted_standard_lanczos_R(
   bool*        is_Dirichlet_bc);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief !
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] n_dof
+ * @param[in] A
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm
+ * @param[in] comm_size
+ * @param[in] recv_n_neib
+ * @param[in] recv_nitem
+ * @param[in] revc_neib_pe
+ * @param[in] recv_index
+ * @param[in] recv_item
+ * @param[in] send_n_neib
+ * @param[in] send_nitem
+ * @param[in] send_neib_pe
+ * @param[in] send_index
+ * @param[in] send_item
+ * @param[in] Iarray
+ * @param[in] Rarray
+ * @param[in] n_get_eigen
+ * @param[in] ths
+ * @param[in] eigen_maxiter
+ * @param[in] eigen_value
+ * @param[in] eigen_mode_tmp
+ * @param[in] is_Dirichlet_bc_int
  * @ingroup dev_solver
  */
 void monolis_eigen_inverted_standard_lanczos_R_c_main(
@@ -57,8 +91,15 @@ void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int*    is_Dirichlet_bc_int);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief Lanczos 法（順反復、最大固有値、実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[inout] n_get_eigen 取得固有値数
+ * @param[in] ths 収束判定閾値
+ * @param[in] maxiter 最大反復回数
+ * @param[inout] eigen_value 固有値
+ * @param[inout] eigen_mode 固有ベクトル
+ * @param[in] is_Dirichlet_bc Dirhchlet 境界条件判定フラグ
  * @ingroup eigen
  */
 void monolis_eigen_standard_lanczos_R(
@@ -72,8 +113,35 @@ void monolis_eigen_standard_lanczos_R(
   bool*        is_Dirichlet_bc);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief !
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] n_dof
+ * @param[in] A
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm
+ * @param[in] comm_size
+ * @param[in] recv_n_neib
+ * @param[in] recv_nitem
+ * @param[in] revc_neib_pe
+ * @param[in] recv_index
+ * @param[in] recv_item
+ * @param[in] send_n_neib
+ * @param[in] send_nitem
+ * @param[in] send_neib_pe
+ * @param[in] send_index
+ * @param[in] send_item
+ * @param[in] Iarray
+ * @param[in] Rarray
+ * @param[in] n_get_eigen
+ * @param[in] ths
+ * @param[in] eigen_maxiter
+ * @param[in] eigen_value
+ * @param[in] eigen_mode_tmp
+ * @param[in] is_Dirichlet_bc_int
  * @ingroup dev_solver
  */
 void monolis_eigen_standard_lanczos_R_c_main(
