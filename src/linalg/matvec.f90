@@ -15,7 +15,7 @@ contains
     type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    !> [inout] 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     real(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
@@ -34,7 +34,7 @@ contains
     type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    !> [inout] 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     complex(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     complex(kdouble), intent(out) :: Y(:)
@@ -53,7 +53,7 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [in] monolis 構造体
     type(monolis_mat), intent(in) :: monoMAT
-    !> [inout] 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     real(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
@@ -86,7 +86,7 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [in] monolis 構造体
     type(monolis_mat), intent(in) :: monoMAT
-    !> [inout] 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     complex(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     complex(kdouble), intent(out) :: Y(:)
@@ -391,15 +391,15 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [in] monolis 構造体
     type(monolis_mat), intent(in) :: monoMAT
-    !> [inout] 解ベクトル
+    !> [in,out] 解ベクトル
     real(kdouble), intent(inout) :: X(:)
     !> [in] 右辺ベクトル
     real(kdouble), intent(in) :: B(:)
     !> [out] 残差ベクトル
     real(kdouble), intent(out) :: R(:)
-    !> [inout] 計算時間
+    !> [in,out] 計算時間
     real(kdouble), intent(inout) :: tspmv
-    !> [inout] 通信時間
+    !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
     integer(kint) :: i
 
@@ -426,15 +426,15 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [in] monolis 構造体
     type(monolis_mat), intent(in) :: monoMAT
-    !> [inout] 解ベクトル
+    !> [in,out] 解ベクトル
     complex(kdouble), intent(inout) :: X(:)
     !> [in] 右辺ベクトル
     complex(kdouble), intent(in) :: B(:)
     !> [out] 残差ベクトル
     complex(kdouble), intent(out) :: R(:)
-    !> [inout] 計算時間
+    !> [in,out] 計算時間
     real(kdouble), intent(inout) :: tspmv
-    !> [inout] 通信時間
+    !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
     integer(kint) :: i
 

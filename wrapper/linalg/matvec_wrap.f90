@@ -26,7 +26,7 @@ contains
     integer(c_int), intent(in), value :: NDOF
     !> [in] 自由度
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    !> [inout] 自由度
+    !> [in,out] 自由度
     real(c_double), intent(inout), target :: X(NDOF*NP)
     !> [out] 自由度
     real(c_double), intent(out), target :: Y(NDOF*NP)
@@ -108,7 +108,7 @@ contains
     integer(c_int), intent(in), value :: NDOF
     !> [in] 自由度
     complex(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    !> [inout] 自由度
+    !> [in,out] 自由度
     complex(c_double), intent(inout), target :: X(NDOF*NP)
     !> [out] 自由度
     complex(c_double), intent(out), target :: Y(NDOF*NP)

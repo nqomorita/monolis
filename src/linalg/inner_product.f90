@@ -11,17 +11,17 @@ contains
   subroutine monolis_inner_product_I(monolis, monoCOM, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    integer(kint) :: X(:)
+    integer(kint), intent(in) :: X(:)
     !> [in] ベクトル 2
-    integer(kint) :: Y(:)
+    integer(kint), intent(in) :: Y(:)
     !> [out] 内積結果
-    integer(kint) :: sum
+    integer(kint), intent(out) :: sum
     integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
@@ -36,19 +36,19 @@ contains
   subroutine monolis_inner_productV_I(monolis, monoCOM, n, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    integer(kint) :: X(:)
+    integer(kint), intent(in) :: X(:)
     !> [in] ベクトル 2
-    integer(kint) :: Y(:)
+    integer(kint), intent(in) :: Y(:)
     !> [out] 内積結果
-    integer(kint) :: sum
+    integer(kint), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_I(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
@@ -59,21 +59,21 @@ contains
   subroutine monolis_inner_product_main_I(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
-    type(monolis_com) :: monoCOM
+    type(monolis_com), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    integer(kint) :: X(:)
+    integer(kint), intent(in) :: X(:)
     !> [in] ベクトル 2
-    integer(kint) :: Y(:)
+    integer(kint), intent(in) :: Y(:)
     !> [out] 内積結果
-    integer(kint) :: sum
+    integer(kint), intent(out) :: sum
     !> [inout] 内積時間
-    real(kdouble), optional :: tdotp
+    real(kdouble), optional, intent(inout) :: tdotp
     !> [inout] 通信時間
-    real(kdouble), optional :: tcomm
+    real(kdouble), optional, intent(inout) :: tcomm
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
@@ -105,17 +105,17 @@ contains
   subroutine monolis_inner_product_R(monolis, monoCOM, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    real(kdouble) :: X(:)
+    real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    real(kdouble) :: Y(:)
+    real(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    real(kdouble) :: sum
+    real(kdouble), intent(out) :: sum
     integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
@@ -130,19 +130,19 @@ contains
   subroutine monolis_inner_productV_R(monolis, monoCOM, n, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    real(kdouble) :: X(:)
+    real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    real(kdouble) :: Y(:)
+    real(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    real(kdouble) :: sum
+    real(kdouble), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_R(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
@@ -153,21 +153,21 @@ contains
   subroutine monolis_inner_product_main_R(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
-    type(monolis_com) :: monoCOM
+    type(monolis_com), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    real(kdouble) :: X(:)
+    real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    real(kdouble) :: Y(:)
+    real(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    real(kdouble) :: sum
+    real(kdouble), intent(out) :: sum
     !> [inout] 内積時間
-    real(kdouble), optional :: tdotp
+    real(kdouble), optional, intent(inout) :: tdotp
     !> [inout] 通信時間
-    real(kdouble), optional :: tcomm
+    real(kdouble), optional, intent(inout) :: tcomm
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
@@ -199,17 +199,17 @@ contains
   subroutine monolis_inner_product_C(monolis, monoCOM, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    complex(kdouble) :: X(:)
+    complex(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    complex(kdouble) :: Y(:)
+    complex(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    complex(kdouble) :: sum
+    complex(kdouble), intent(out) :: sum
     integer(kint) :: N
     real(kdouble) :: tdotp, tcomm
 
@@ -224,19 +224,19 @@ contains
   subroutine monolis_inner_productV_C(monolis, monoCOM, n, n_dof, X, Y, sum)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
+    type(monolis_COM), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    complex(kdouble) :: X(:)
+    complex(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    complex(kdouble) :: Y(:)
+    complex(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    complex(kdouble) :: sum
+    complex(kdouble), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
     call monolis_inner_product_main_C(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
@@ -247,21 +247,21 @@ contains
   subroutine monolis_inner_product_main_C(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
-    type(monolis_com) :: monoCOM
+    type(monolis_com), intent(in) :: monoCOM
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    complex(kdouble) :: X(:)
+    complex(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    complex(kdouble) :: Y(:)
+    complex(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    complex(kdouble) :: sum
+    complex(kdouble), intent(out) :: sum
     !> [inout] 内積時間
-    real(kdouble), optional :: tdotp
+    real(kdouble), optional, intent(inout) :: tdotp
     !> [inout] 通信時間
-    real(kdouble), optional :: tcomm
+    real(kdouble), optional, intent(inout) :: tcomm
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
@@ -293,15 +293,15 @@ contains
   subroutine monolis_inner_product_main_R_no_comm(n, n_dof, X, Y, sum)
     implicit none
     !> [in] 内部計算点数
-    integer(kint) :: n
+    integer(kint), intent(in) :: n
     !> [in] 計算点が持つ自由度
-    integer(kint) :: n_dof
+    integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1
-    real(kdouble) :: X(:)
+    real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
-    real(kdouble) :: Y(:)
+    real(kdouble), intent(in) :: Y(:)
     !> [out] 内積結果
-    real(kdouble) :: sum
+    real(kdouble), intent(out) :: sum
     integer(kint) :: i
 
     sum = 0.0d0
