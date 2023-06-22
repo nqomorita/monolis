@@ -9,8 +9,13 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（整数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
  * @ingroup linalg
  */
 void monolis_inner_product_I(
@@ -22,8 +27,13 @@ void monolis_inner_product_I(
   int*         sum);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（実数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
  * @ingroup linalg
  */
 void monolis_inner_product_R(
@@ -35,8 +45,13 @@ void monolis_inner_product_R(
   double*      sum);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（複素数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
  * @ingroup linalg
  */
 void monolis_inner_product_C(
@@ -48,8 +63,13 @@ void monolis_inner_product_C(
   double _Complex* sum);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（整数型）
+ * @param[in] n 内部計算点数
+ * @param[in] n_dof 計算点あたりの自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
+ * @param[in] comm MPI コミュニケータ
  * @ingroup dev_linalg
  */
 void monolis_inner_product_I_c_main(
@@ -61,8 +81,13 @@ void monolis_inner_product_I_c_main(
   int  comm);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（実数型）
+ * @param[in] n 内部計算点数
+ * @param[in] n_dof 計算点あたりの自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
+ * @param[in] comm MPI コミュニケータ
  * @ingroup dev_linalg
  */
 void monolis_inner_product_R_c_main(
@@ -74,8 +99,13 @@ void monolis_inner_product_R_c_main(
   int     comm);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief ベクトル内積（複素数型）
+ * @param[in] n 内部計算点数
+ * @param[in] n_dof 計算点あたりの自由度
+ * @param[in] x ベクトル 1
+ * @param[in] y ベクトル 2
+ * @param[out] sum 内積結果
+ * @param[in] comm MPI コミュニケータ
  * @ingroup dev_linalg
  */
 void monolis_inner_product_C_c_main(
