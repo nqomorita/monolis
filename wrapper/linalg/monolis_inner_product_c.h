@@ -64,7 +64,7 @@ void monolis_inner_product_C(
 
 /**
  * @brief ベクトル内積（整数型）
- * @param[in] n 内部計算点数
+ * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1
  * @param[in] y ベクトル 2
@@ -82,7 +82,7 @@ void monolis_inner_product_I_c_main(
 
 /**
  * @brief ベクトル内積（実数型）
- * @param[in] n 内部計算点数
+ * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1
  * @param[in] y ベクトル 2
@@ -100,7 +100,7 @@ void monolis_inner_product_R_c_main(
 
 /**
  * @brief ベクトル内積（複素数型）
- * @param[in] n 内部計算点数
+ * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1
  * @param[in] y ベクトル 2

@@ -10,14 +10,14 @@ contains
   !> ベクトル配列コピー（整数型）
   subroutine monolis_vec_copy_I(n, n_dof, X, Y)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> ベクトル 1
-    integer(kint) :: X(:)
-    !> ベクトル 2
-    integer(kint) :: Y(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] ベクトル 1 (コピー元)
+    integer(kint), intent(in) :: X(:)
+    !> [out] ベクトル 2 (コピー先)
+    integer(kint), intent(out) :: Y(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_copy_I")
@@ -38,14 +38,14 @@ contains
   !> ベクトル配列コピー（実数型）
   subroutine monolis_vec_copy_R(n, n_dof, X, Y)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> ベクトル 1
-    real(kdouble) :: X(:)
-    !> ベクトル 2
-    real(kdouble) :: Y(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] ベクトル 1 (コピー元)
+    real(kdouble), intent(in) :: X(:)
+    !> [out] ベクトル 2 (コピー先)
+    real(kdouble), intent(out) :: Y(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_copy_R")
@@ -66,14 +66,14 @@ contains
   !> ベクトル配列コピー（複素数型）
   subroutine monolis_vec_copy_C(n, n_dof, X, Y)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> ベクトル 1
-    complex(kdouble) :: X(:)
-    !> ベクトル 2
-    complex(kdouble) :: Y(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] ベクトル 1 (コピー元)
+    complex(kdouble), intent(in) :: X(:)
+    !> [out] ベクトル 2 (コピー先)
+    complex(kdouble), intent(out) :: Y(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_copy_C")
@@ -94,20 +94,20 @@ contains
   !> ベクトル和 $z = \alpha * x + y$ （整数型）
   subroutine monolis_vec_AXPBY_I(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> 係数 1
-    integer(kint) :: alpha
-    !> ベクトル 1
-    integer(kint) :: X(:)
-    !> 係数 2
-    integer(kint) :: beta
-    !> ベクトル 2
-    integer(kint) :: Y(:)
-    !> 結果ベクトル
-    integer(kint) :: Z(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] 係数 1
+    integer(kint), intent(in) :: alpha
+    !> [in] ベクトル 1
+    integer(kint), intent(in) :: X(:)
+    !> [in] 係数 2
+    integer(kint), intent(in) :: beta
+    !> [in] ベクトル 2
+    integer(kint), intent(in) :: Y(:)
+    !> [out] 結果ベクトル
+    integer(kint), intent(out) :: Z(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_AXPBY_I")
@@ -128,20 +128,20 @@ contains
   !> ベクトル和 $z = \alpha * x + y$ （実数型）
   subroutine monolis_vec_AXPBY_R(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> 係数 1
-    real(kdouble) :: alpha
-    !> ベクトル 1
-    real(kdouble) :: X(:)
-    !> 係数 2
-    real(kdouble) :: beta
-    !> ベクトル 2
-    real(kdouble) :: Y(:)
-    !> 結果ベクトル
-    real(kdouble) :: Z(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] 係数 1
+    real(kdouble), intent(in) :: alpha
+    !> [in] ベクトル 1
+    real(kdouble), intent(in) :: X(:)
+    !> [in] 係数 2
+    real(kdouble), intent(in) :: beta
+    !> [in] ベクトル 2
+    real(kdouble), intent(in) :: Y(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Z(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_AXPBY_R")
@@ -162,20 +162,20 @@ contains
   !> ベクトル和 $z = \alpha * x + y$ （複素数型）
   subroutine monolis_vec_AXPBY_C(n, n_dof, alpha, X, beta, Y, Z)
     implicit none
-    !> 自由度数
-    integer(kint) :: n
-    !> ブロックサイズ
-    integer(kint) :: n_dof
-    !> 係数 1
-    complex(kdouble) :: alpha
-    !> ベクトル 1
-    complex(kdouble) :: X(:)
-    !> 係数 2
-    complex(kdouble) :: beta
-    !> ベクトル 2
-    complex(kdouble) :: Y(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Z(:)
+    !> [in] 計算点数
+    integer(kint), intent(in) :: n
+    !> [in] 計算点あたりの自由度
+    integer(kint), intent(in) :: n_dof
+    !> [in] 係数 1
+    complex(kdouble), intent(in) :: alpha
+    !> [in] ベクトル 1
+    complex(kdouble), intent(in) :: X(:)
+    !> [in] 係数 2
+    complex(kdouble), intent(in) :: beta
+    !> [in] ベクトル 2
+    complex(kdouble), intent(in) :: Y(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Z(:)
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_vec_AXPBY_C")
@@ -196,18 +196,18 @@ contains
   !> Gram Schmidt 法（実数型）
   subroutine monolis_gram_schmidt_R(monoCOM, n_vec, N, NDOF, p, q)
     implicit none
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> ベクトル本数
-    integer(kint) :: n_vec
-    !> 計算点数
-    integer(kint) :: N
-    !> 計算点上の自由度
-    integer(kint) :: NDOF
-    !> 入力ベクトル
-    real(kdouble) :: p(:)
-    !> 直交化されるベクトル
-    real(kdouble) :: q(:,:)
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] ベクトル本数
+    integer(kint), intent(in) :: n_vec
+    !> [in] 計算点数
+    integer(kint), intent(in) :: N
+    !> [in] 計算点上の自由度
+    integer(kint), intent(in) :: NDOF
+    !> [in,out] 入力ベクトル
+    real(kdouble), intent(inout) :: p(:)
+    !> [in] 直交化されるベクトル
+    real(kdouble), intent(in) :: q(:,:)
     integer(kint) :: i, j
     real(kdouble) :: norm, tdotp, tcomm_dotp
 

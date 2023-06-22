@@ -13,7 +13,7 @@ contains
   subroutine monolis_inner_product_I_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_I_c_main")
     implicit none
-    !> [in] 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
     !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
@@ -37,7 +37,7 @@ contains
   subroutine monolis_inner_product_R_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_R_c_main")
     implicit none
-    !> [in] 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
     !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
@@ -61,7 +61,7 @@ contains
   subroutine monolis_inner_product_C_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_C_c_main")
     implicit none
-    !> [in] 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
     !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
