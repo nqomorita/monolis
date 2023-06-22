@@ -11,14 +11,14 @@ contains
   !> 疎行列ベクトル積（実数型）
   subroutine monolis_matvec_product_R(monolis, monoCOM, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
+    !> [in] monolis 構造体
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
-    !> 右辺ベクトル
-    real(kdouble) :: X(:)
-    !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    type(monolis_COM), intent(in) :: monoCOM
+    !> [inout] 右辺ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
     real(kdouble) :: tspmv, tcomm
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
@@ -30,14 +30,14 @@ contains
   !> 疎行列ベクトル積（複素数型）
   subroutine monolis_matvec_product_C(monolis, monoCOM, X, Y)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
+    !> [in] monolis 構造体
+    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
-    type(monolis_COM) :: monoCOM
-    !> 右辺ベクトル
-    complex(kdouble) :: X(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Y(:)
+    type(monolis_COM), intent(in) :: monoCOM
+    !> [inout] 右辺ベクトル
+    complex(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
     real(kdouble) :: tspmv, tcomm
 
     call monolis_std_debug_log_header("monolis_matvec_product_C")
@@ -49,14 +49,14 @@ contains
   !> 疎行列ベクトル積（実数型、メイン関数）
   subroutine monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    real(kdouble) :: X(:)
-    !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    !> [in] monolis 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] monolis 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [inout] 右辺ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
     real(kdouble) :: t1, t2
     real(kdouble) :: tspmv, tcomm
 
@@ -82,14 +82,14 @@ contains
   !> 疎行列ベクトル積（複素数型、メイン関数）
   subroutine monolis_matvec_product_main_C(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    complex(kdouble) :: X(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Y(:)
+    !> [in] monolis 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] monolis 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [inout] 右辺ベクトル
+    complex(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
     real(kdouble) :: t1, t2
     real(kdouble) :: tspmv, tcomm
 
@@ -115,20 +115,20 @@ contains
   !> 疎行列ベクトル積（実数型、nxn ブロック）
   subroutine monolis_matvec_nn_R(N, index, item, A, X, Y, NDOF)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> ブロックサイズ
-    integer(kint) :: NDOF
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    real(kdouble) :: A(:)
-    !> 右辺ベクトル
-    real(kdouble) :: X(:)
-    !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    real(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
     integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
     real(kdouble) :: XT(NDOF), YT(NDOF)
 
@@ -166,22 +166,20 @@ contains
   !> 疎行列ベクトル積（複素数、nxn ブロック）
   subroutine monolis_matvec_nn_C(N, index, item, A, X, Y, NDOF)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> ブロックサイズ
-    integer(kint) :: NDOF
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    complex(kdouble) :: A(:)
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
-    !> 右辺ベクトル
-    complex(kdouble) :: X(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    complex(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
     integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
     complex(kdouble) :: XT(NDOF), YT(NDOF)
 
@@ -219,20 +217,18 @@ contains
   !> 疎行列ベクトル積（実数型、1x1 ブロック）
   subroutine monolis_matvec_11_R(N, index, item, A, X, Y)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    real(kdouble) :: A(:)
-    !> monolis 構造体
-    type(monolis_mat), target :: monoMAT
-    !> 右辺ベクトル
-    real(kdouble) :: X(:)
-    !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    real(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: Y1
 
@@ -259,20 +255,18 @@ contains
   !> 疎行列ベクトル積（複素数型、1x1 ブロック）
   subroutine monolis_matvec_11_C(N, index, item, A, X, Y)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> ブロックサイズ
-    integer(kint) :: NDOF
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    complex(kdouble) :: A(:)
-    !> 右辺ベクトル
-    complex(kdouble) :: X(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    complex(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: Y1
 
@@ -299,18 +293,18 @@ contains
   !> 疎行列ベクトル積（実数型、3x3 ブロック）
   subroutine monolis_matvec_33_R(N, index, item, A, X, Y)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    real(kdouble) :: A(:)
-    !> 右辺ベクトル
-    real(kdouble) :: X(:)
-    !> 結果ベクトル
-    real(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    real(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
@@ -346,18 +340,18 @@ contains
   !> 疎行列ベクトル積（複素数型、3x3 ブロック）
   subroutine monolis_matvec_33_C(N, index, item, A, X, Y)
     implicit none
-    !> 行列サイズ
-    integer(kint) :: N
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
-    !> 行列成分
-    complex(kdouble) :: A(:)
-    !> 右辺ベクトル
-    complex(kdouble) :: X(:)
-    !> 結果ベクトル
-    complex(kdouble) :: Y(:)
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    complex(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
@@ -393,20 +387,20 @@ contains
   !> 残差ベクトルの取得（実数型、メイン関数）
   subroutine monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    real(kdouble) :: X(:)
-    !> 右辺ベクトル
-    real(kdouble) :: B(:)
-    !> 残差ベクトル
-    real(kdouble) :: R(:)
-    !> 計算時間
-    real(kdouble) :: tspmv
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in] monolis 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] monolis 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [inout] 解ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: B(:)
+    !> [out] 残差ベクトル
+    real(kdouble), intent(out) :: R(:)
+    !> [inout] 計算時間
+    real(kdouble), intent(inout) :: tspmv
+    !> [inout] 通信時間
+    real(kdouble), intent(inout) :: tcomm
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_residual_main_R")
@@ -428,20 +422,20 @@ contains
   !> 残差ベクトルの取得（複素数型、メイン関数）
   subroutine monolis_residual_main_C(monoCOM, monoMAT, X, B, R, tspmv, tcomm)
     implicit none
-    !> monolis 構造体
-    type(monolis_com) :: monoCOM
-    !> monolis 構造体
-    type(monolis_mat) :: monoMAT
-    !> 解ベクトル
-    complex(kdouble) :: X(:)
-    !> 右辺ベクトル
-    complex(kdouble) :: B(:)
-    !> 残差ベクトル
-    complex(kdouble) :: R(:)
-    !> 計算時間
-    real(kdouble) :: tspmv
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in] monolis 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] monolis 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [inout] 解ベクトル
+    complex(kdouble), intent(inout) :: X(:)
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: B(:)
+    !> [out] 残差ベクトル
+    complex(kdouble), intent(out) :: R(:)
+    !> [inout] 計算時間
+    real(kdouble), intent(inout) :: tspmv
+    !> [inout] 通信時間
+    real(kdouble), intent(inout) :: tcomm
     integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_residual_main_C")

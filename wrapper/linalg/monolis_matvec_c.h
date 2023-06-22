@@ -9,8 +9,11 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（実数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[inout] x 右辺ベクトル
+ * @param[out] y 結果ベクトル
  * @ingroup linalg
  */
 void monolis_matvec_product_R(
@@ -20,8 +23,11 @@ void monolis_matvec_product_R(
   double*      y);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（複素数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[inout] x 右辺ベクトル
+ * @param[out] y 結果ベクトル
  * @ingroup linalg
  */
 void monolis_matvec_product_C(
@@ -31,8 +37,29 @@ void monolis_matvec_product_C(
   double _Complex* y);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（複素数型）
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] ndof
+ * @param[in] A
+ * @param[in] x
+ * @param[in] y
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm MPI コミュニケータ
+ * @param[in] comm_size
+ * @param[in] recv_n_neib recv する隣接領域数
+ * @param[in] recv_nitem recv の item 数
+ * @param[in] revc_neib_pe recv する隣接領域 id
+ * @param[in] recv_index recv の index 配列
+ * @param[in] recv_item recv の item 配列（受信する節点番号データ）
+ * @param[in] send_n_neib send する隣接領域数
+ * @param[in] send_nitem send の item 数
+ * @param[in] send_neib_pe send する隣接領域 id
+ * @param[in] send_index send の index 配列
+ * @param[in] send_item send の item 配列（送信する節点番号データ）
  * @ingroup dev_linalg
  */
 void monolis_matvec_product_R_c_main(
@@ -60,8 +87,29 @@ void monolis_matvec_product_R_c_main(
   int*    send_item);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（複素数型）
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] ndof
+ * @param[in] A
+ * @param[in] x
+ * @param[in] y
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm MPI コミュニケータ
+ * @param[in] comm_size
+ * @param[in] recv_n_neib recv する隣接領域数
+ * @param[in] recv_nitem recv の item 数
+ * @param[in] revc_neib_pe recv する隣接領域 id
+ * @param[in] recv_index recv の index 配列
+ * @param[in] recv_item recv の item 配列（受信する節点番号データ）
+ * @param[in] send_n_neib send する隣接領域数
+ * @param[in] send_nitem send の item 数
+ * @param[in] send_neib_pe send する隣接領域 id
+ * @param[in] send_index send の index 配列
+ * @param[in] send_item send の item 配列（送信する節点番号データ）
  * @ingroup dev_linalg
  */
 void monolis_matvec_product_C_c_main(
