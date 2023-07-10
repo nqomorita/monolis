@@ -11,7 +11,7 @@ extern "C" {
  * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1 (コピー元)
- * @param[in] y ベクトル 2 (コピー先)
+ * @param[out] y ベクトル 2 (コピー先)
  * @ingroup linalg
  */
 void monolis_vec_copy_I(
@@ -25,7 +25,7 @@ void monolis_vec_copy_I(
  * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1 (コピー元)
- * @param[in] y ベクトル 2 (コピー先)
+ * @param[out] y ベクトル 2 (コピー先)
  * @ingroup linalg
  */
 void monolis_vec_copy_R(
@@ -39,7 +39,7 @@ void monolis_vec_copy_R(
  * @param[in] n 計算点数
  * @param[in] n_dof 計算点あたりの自由度
  * @param[in] x ベクトル 1 (コピー元)
- * @param[in] y ベクトル 2 (コピー先)
+ * @param[out] y ベクトル 2 (コピー先)
  * @ingroup linalg
  */
 void monolis_vec_copy_C(
