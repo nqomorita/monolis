@@ -13,15 +13,15 @@ contains
   subroutine monolis_inner_product_I_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_I_c_main")
     implicit none
-    !> 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
-    !> 計算点あたりの自由度
+    !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
-    !> ベクトル 1
+    !> [in] ベクトル 1
     integer(c_int), intent(in) :: x(n*n_dof)
-    !> ベクトル 2
+    !> [in] ベクトル 2
     integer(c_int), intent(in) :: y(n*n_dof)
-    !> 内積結果
+    !> [out] 内積結果
     integer(c_int) :: sum
     !> [in] MPI コミュニケータ
     integer(c_int), intent(in), value :: comm
@@ -37,15 +37,15 @@ contains
   subroutine monolis_inner_product_R_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_R_c_main")
     implicit none
-    !> 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
-    !> 計算点あたりの自由度
+    !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
-    !> ベクトル 1
+    !> [in] ベクトル 1
     real(c_double), intent(in) :: x(n*n_dof)
-    !> ベクトル 2
+    !> [in] ベクトル 2
     real(c_double), intent(in) :: y(n*n_dof)
-    !> 内積結果
+    !> [out] 内積結果
     real(c_double) :: sum
     !> [in] MPI コミュニケータ
     integer(c_int), intent(in), value :: comm
@@ -61,15 +61,15 @@ contains
   subroutine monolis_inner_product_C_c(n, n_dof, x, y, sum, comm)&
     & bind(c, name = "monolis_inner_product_C_c_main")
     implicit none
-    !> 内部計算点数
+    !> [in] 計算点数
     integer(c_int), intent(in), value :: n
-    !> 計算点あたりの自由度
+    !> [in] 計算点あたりの自由度
     integer(c_int), intent(in), value :: n_dof
-    !> ベクトル 1
+    !> [in] ベクトル 1
     complex(c_double), intent(in) :: x(n*n_dof)
-    !> ベクトル 2
+    !> [in] ベクトル 2
     complex(c_double), intent(in) :: y(n*n_dof)
-    !> 内積結果
+    !> [out] 内積結果
     complex(c_double) :: sum
     !> [in] MPI コミュニケータ
     integer(c_int), intent(in), value :: comm

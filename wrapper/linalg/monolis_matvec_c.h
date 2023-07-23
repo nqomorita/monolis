@@ -9,8 +9,11 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（実数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[inout] x 右辺ベクトル
+ * @param[out] y 結果ベクトル
  * @ingroup linalg
  */
 void monolis_matvec_product_R(
@@ -20,8 +23,11 @@ void monolis_matvec_product_R(
   double*      y);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 疎行列ベクトル積（複素数型）
+ * @param[in] mat monolis 構造体
+ * @param[in] com COM 構造体
+ * @param[inout] x 右辺ベクトル
+ * @param[out] y 結果ベクトル
  * @ingroup linalg
  */
 void monolis_matvec_product_C(
@@ -30,11 +36,6 @@ void monolis_matvec_product_C(
   double _Complex* x,
   double _Complex* y);
 
-/**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
- * @ingroup dev_linalg
- */
 void monolis_matvec_product_R_c_main(
   int     n,
   int     np,
@@ -59,11 +60,6 @@ void monolis_matvec_product_R_c_main(
   int*    send_index,
   int*    send_item);
 
-/**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
- * @ingroup dev_linalg
- */
 void monolis_matvec_product_C_c_main(
   int             n,
   int             np,

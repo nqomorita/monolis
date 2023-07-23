@@ -7,8 +7,15 @@ extern "C" {
 #endif
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief Lanczos 法（逆反復、最小固有値、実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[inout] n_get_eigen 取得固有値数
+ * @param[in] ths 収束判定閾値
+ * @param[in] maxiter 最大反復回数
+ * @param[inout] eigen_value 固有値
+ * @param[inout] eigen_mode 固有ベクトル
+ * @param[in] is_Dirichlet_bc Dirhchlet 境界条件判定フラグ
  * @ingroup eigen
  */
 void monolis_eigen_inverted_standard_lanczos_R(
@@ -21,11 +28,6 @@ void monolis_eigen_inverted_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
-/**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
- * @ingroup dev_solver
- */
 void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int     n,
   int     np,
@@ -57,8 +59,15 @@ void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int*    is_Dirichlet_bc_int);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief Lanczos 法（順反復、最大固有値、実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[inout] n_get_eigen 取得固有値数
+ * @param[in] ths 収束判定閾値
+ * @param[in] maxiter 最大反復回数
+ * @param[inout] eigen_value 固有値
+ * @param[inout] eigen_mode 固有ベクトル
+ * @param[in] is_Dirichlet_bc Dirhchlet 境界条件判定フラグ
  * @ingroup eigen
  */
 void monolis_eigen_standard_lanczos_R(
@@ -71,11 +80,6 @@ void monolis_eigen_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
-/**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
- * @ingroup dev_solver
- */
 void monolis_eigen_standard_lanczos_R_c_main(
   int     n,
   int     np,

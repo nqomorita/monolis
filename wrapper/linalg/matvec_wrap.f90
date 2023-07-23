@@ -26,10 +26,10 @@ contains
     integer(c_int), intent(in), value :: NDOF
     !> [in] 自由度
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    !> [in] 自由度
-    real(c_double), intent(in), target :: X(NDOF*NP)
-    !> [in] 自由度
-    real(c_double), intent(in), target :: Y(NDOF*NP)
+    !> [in,out] 自由度
+    real(c_double), intent(inout), target :: X(NDOF*NP)
+    !> [out] 自由度
+    real(c_double), intent(out), target :: Y(NDOF*NP)
     !> [in] 自由度
     integer(c_int), intent(in), target :: index(NP + 1)
     !> [in] 自由度
@@ -97,7 +97,7 @@ contains
   end subroutine monolis_matvec_product_R_c
 
   !> @ingroup dev_linalg
-  !> 疎行列ベクトル積（実数型）
+  !> 疎行列ベクトル積（複素数型）
   subroutine monolis_matvec_product_C_c(N, NP, NZ, NDOF, A, X, Y, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
@@ -114,10 +114,10 @@ contains
     integer(c_int), intent(in), value :: NDOF
     !> [in] 自由度
     complex(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    !> [in] 自由度
-    complex(c_double), intent(in), target :: X(NDOF*NP)
-    !> [in] 自由度
-    complex(c_double), intent(in), target :: Y(NDOF*NP)
+    !> [in,out] 自由度
+    complex(c_double), intent(inout), target :: X(NDOF*NP)
+    !> [out] 自由度
+    complex(c_double), intent(out), target :: Y(NDOF*NP)
     !> [in] 自由度
     integer(c_int), intent(in), target :: index(NP + 1)
     !> [in] 自由度

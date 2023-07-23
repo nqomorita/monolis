@@ -11,10 +11,10 @@ contains
   !> 行列構造体のコピー（実数型）
   subroutine monolis_copy_mat_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
 
     call monolis_finalize(mat_out)
 
@@ -26,10 +26,10 @@ contains
   !> 行列構造体のコピー（複素数型）
   subroutine monolis_copy_mat_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
 
     call monolis_finalize(mat_out)
 
@@ -41,10 +41,10 @@ contains
   !> 行列の非零パターンのコピー（実数型）
   subroutine monolis_copy_mat_nonzero_pattern_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     integer(kint) :: NP, NZ, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
@@ -76,10 +76,10 @@ contains
   !> 行列の非零パターンのコピー（複素数型）
   subroutine monolis_copy_mat_nonzero_pattern_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     integer(kint) :: NP, NZ, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
@@ -108,23 +108,23 @@ contains
   end subroutine monolis_copy_mat_nonzero_pattern_C
 
   !> @ingroup matrix_copy
-  !> 行列の非零パターンのコピー（実数型）
+  !> 行列の非零値のコピー（実数型）
   subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
-    !> 全計算点数
-    integer(kint) :: NP
-    !> 1 計算点あたりの自由度
-    integer(kint) :: NDOF
-    !> 非零要素数
-    integer(kint) :: NZ
-    !> 非零要素数（上三角）
-    integer(kint) :: NZU
-    !> 非零要素数（下三角）
-    integer(kint) :: NZL
-    !> monolis 構造体（入力）
-    type(monolis_mat_val_R) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_mat_val_R) :: mat_out
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: NDOF
+    !> [in] 非零要素数
+    integer(kint), intent(in) :: NZ
+    !> [in] 非零要素数（上三角）
+    integer(kint), intent(in) :: NZU
+    !> [in] 非零要素数（下三角）
+    integer(kint), intent(in) :: NZL
+    !> [in] monolis 構造体（入力）
+    type(monolis_mat_val_R), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_mat_val_R), intent(inout) :: mat_out
 
     call monolis_pdealloc_R_1d(mat_out%X)
     call monolis_palloc_R_1d(mat_out%X, NP*NDOF)
@@ -140,13 +140,13 @@ contains
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_R_1d(mat_out%U)
-      call monolis_palloc_R_1d(mat_out%U, NZ*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%U, NZU*NDOF*NDOF)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_R_1d(mat_out%L)
-      call monolis_palloc_R_1d(mat_out%L, NZ*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%L, NZL*NDOF*NDOF)
       mat_out%L = mat_in%L
     endif
 
@@ -161,20 +161,20 @@ contains
   !> 行列の非零パターンのコピー（複素数型）
   subroutine monolis_copy_mat_nonzero_pattern_val_C(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
-    !> 全計算点数
-    integer(kint) :: NP
-    !> 1 計算点あたりの自由度
-    integer(kint) :: NDOF
-    !> 非零要素数
-    integer(kint) :: NZ
-    !> 非零要素数（上三角）
-    integer(kint) :: NZU
-    !> 非零要素数（下三角）
-    integer(kint) :: NZL
-    !> monolis 構造体（入力）
-    type(monolis_mat_val_C) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_mat_val_C) :: mat_out
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: NDOF
+    !> [in] 非零要素数
+    integer(kint), intent(in) :: NZ
+    !> [in] 非零要素数（上三角）
+    integer(kint), intent(in) :: NZU
+    !> [in] 非零要素数（下三角）
+    integer(kint), intent(in) :: NZL
+    !> [in] monolis 構造体（入力）
+    type(monolis_mat_val_C), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_mat_val_C), intent(inout) :: mat_out
 
     call monolis_pdealloc_C_1d(mat_out%X)
     call monolis_palloc_C_1d(mat_out%X, NP*NDOF)
@@ -190,13 +190,13 @@ contains
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_C_1d(mat_out%U)
-      call monolis_palloc_C_1d(mat_out%U, NZ*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%U, NZU*NDOF*NDOF)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_C_1d(mat_out%L)
-      call monolis_palloc_C_1d(mat_out%L, NZ*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%L, NZL*NDOF*NDOF)
       mat_out%L = mat_in%L
     endif
 
@@ -211,12 +211,12 @@ contains
   !> 行列の非零パターンのコピー（CSR）
   subroutine monolis_copy_mat_nonzero_pattern_CSR(NP, mat_in, mat_out)
     implicit none
-    !> 全計算点数
-    integer(kint) :: NP
-    !> monolis 構造体（入力）
-    type(monolis_mat_CSR) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_mat_CSR) :: mat_out
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] monolis 構造体（入力）
+    type(monolis_mat_CSR), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_mat_CSR), intent(inout) :: mat_out
     integer(kint) :: NZ
 
     NZ = mat_in%index(NP + 1)
@@ -234,12 +234,12 @@ contains
   !> 行列の非零パターンのコピー（CSC）
   subroutine monolis_copy_mat_nonzero_pattern_CSC(NP, mat_in, mat_out)
     implicit none
-    !> 全計算点数
-    integer(kint) :: NP
-    !> monolis 構造体（入力）
-    type(monolis_mat_CSC) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_mat_CSC) :: mat_out
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] monolis 構造体（入力）
+    type(monolis_mat_CSC), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_mat_CSC), intent(inout) :: mat_out
     integer(kint) :: NZ
 
     NZ = mat_in%index(NP + 1)
@@ -261,12 +261,12 @@ contains
   !> 行列の非零パターンのコピー（SCSR）
   subroutine monolis_copy_mat_nonzero_pattern_SCSR(NP, mat_in, mat_out)
     implicit none
-    !> 全計算点数
-    integer(kint) :: NP
-    !> monolis 構造体（入力）
-    type(monolis_mat_separated_CSR) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_mat_separated_CSR) :: mat_out
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] monolis 構造体（入力）
+    type(monolis_mat_separated_CSR), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_mat_separated_CSR), intent(inout) :: mat_out
     integer(kint) :: NZ
 
     if(associated(mat_in%indexU))then
@@ -300,10 +300,10 @@ contains
   !> 行列値のコピー（実数型）
   subroutine monolis_copy_mat_value_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     call monolis_copy_mat_value_matrix_R(mat_in, mat_out)
     call monolis_copy_mat_value_rhs_R(mat_in, mat_out)
     call monolis_copy_mat_value_solution_R(mat_in, mat_out)
@@ -313,10 +313,10 @@ contains
   !> 行列値のコピー（行列、実数型）
   subroutine monolis_copy_mat_value_matrix_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%R%A = mat_in%MAT%R%A
   end subroutine monolis_copy_mat_value_matrix_R
 
@@ -324,10 +324,10 @@ contains
   !> 行列値のコピー（右辺ベクトル、実数型）
   subroutine monolis_copy_mat_value_rhs_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%R%B = mat_in%MAT%R%B
   end subroutine monolis_copy_mat_value_rhs_R
 
@@ -335,10 +335,10 @@ contains
   !> 行列値のコピー（解ベクトル、実数型）
   subroutine monolis_copy_mat_value_solution_R(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%R%X = mat_in%MAT%R%X
   end subroutine monolis_copy_mat_value_solution_R
 
@@ -346,10 +346,10 @@ contains
   !> 行列値のコピー（複素数型）
   subroutine monolis_copy_mat_value_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     call monolis_copy_mat_value_matrix_C(mat_in, mat_out)
     call monolis_copy_mat_value_rhs_C(mat_in, mat_out)
     call monolis_copy_mat_value_solution_C(mat_in, mat_out)
@@ -359,10 +359,10 @@ contains
   !> 行列値のコピー（行列、複素数型）
   subroutine monolis_copy_mat_value_matrix_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%C%A = mat_in%MAT%C%A
   end subroutine monolis_copy_mat_value_matrix_C
 
@@ -370,10 +370,10 @@ contains
   !> 行列値のコピー（右辺ベクトル、複素数型）
   subroutine monolis_copy_mat_value_rhs_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%C%B = mat_in%MAT%C%B
   end subroutine monolis_copy_mat_value_rhs_C
 
@@ -381,10 +381,10 @@ contains
   !> 行列値のコピー（解ベクトル、複素数型）
   subroutine monolis_copy_mat_value_solution_C(mat_in, mat_out)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat_in
-    !> monolis 構造体（出力）
-    type(monolis_structure) :: mat_out
+    !> [in] monolis 構造体（入力）
+    type(monolis_structure), intent(in) :: mat_in
+    !> [in,out] monolis 構造体（出力）
+    type(monolis_structure), intent(inout) :: mat_out
     mat_out%MAT%C%X = mat_in%MAT%C%X
   end subroutine monolis_copy_mat_value_solution_C
 
@@ -392,8 +392,8 @@ contains
   !> 行列値のゼロ初期化（実数型）
   subroutine monolis_clear_mat_value_R(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     call monolis_clear_mat_value_matrix_R(mat)
     call monolis_clear_mat_value_rhs_R(mat)
     call monolis_clear_mat_value_solution_R(mat)
@@ -403,8 +403,8 @@ contains
   !> 行列値のゼロ初期化（行列、実数型）
   subroutine monolis_clear_mat_value_matrix_R(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%R%A = 0.0d0
   end subroutine monolis_clear_mat_value_matrix_R
 
@@ -412,8 +412,8 @@ contains
   !> 行列値のゼロ初期化（右辺ベクトル、実数型）
   subroutine monolis_clear_mat_value_rhs_R(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%R%B = 0.0d0
   end subroutine monolis_clear_mat_value_rhs_R
 
@@ -421,8 +421,8 @@ contains
   !> 行列値のゼロ初期化（解ベクトル、実数型）
   subroutine monolis_clear_mat_value_solution_R(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%R%X = 0.0d0
   end subroutine monolis_clear_mat_value_solution_R
 
@@ -430,8 +430,8 @@ contains
   !> 行列値のゼロ初期化（複素数型）
   subroutine monolis_clear_mat_value_C(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     call monolis_clear_mat_value_matrix_C(mat)
     call monolis_clear_mat_value_rhs_C(mat)
     call monolis_clear_mat_value_solution_C(mat)
@@ -441,8 +441,8 @@ contains
   !> 行列値のゼロ初期化（行列、複素数型）
   subroutine monolis_clear_mat_value_matrix_C(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%C%A = 0.0d0
   end subroutine monolis_clear_mat_value_matrix_C
 
@@ -450,8 +450,8 @@ contains
   !> 行列値のゼロ初期化（右辺ベクトル、複素数型）
   subroutine monolis_clear_mat_value_rhs_C(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%C%B = 0.0d0
   end subroutine monolis_clear_mat_value_rhs_C
 
@@ -459,8 +459,8 @@ contains
   !> 行列値のゼロ初期化（解ベクトル、複素数型）
   subroutine monolis_clear_mat_value_solution_C(mat)
     implicit none
-    !> monolis 構造体（入力）
-    type(monolis_structure) :: mat
+    !> [in,out] monolis 構造体（入力）
+    type(monolis_structure), intent(inout) :: mat
     mat%MAT%C%X = 0.0d0
   end subroutine monolis_clear_mat_value_solution_C
 end module mod_monolis_spmat_copy

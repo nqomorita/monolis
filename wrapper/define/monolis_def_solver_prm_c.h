@@ -117,16 +117,16 @@ typedef struct {
 } MONOLIS_PRM;
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief パラメータ 構造体の初期化処理
+ * @param[out] prm パラメータ構造体
  * @ingroup def_init
  */
 void monolis_prm_initialize(
   MONOLIS_PRM* prm);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief パラメータ構造体の終了処理
+ * @param[inout] prm パラメータ構造体
  * @ingroup def_init
  */
 void monolis_prm_finalize(

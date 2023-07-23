@@ -54,96 +54,96 @@ typedef struct {
 } MONOLIS_MAT;
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数（実数型）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize_val_R(
   MONOLIS_MAT_VAL_R* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数（複素数型）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize_val_C(
   MONOLIS_MAT_VAL_C* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数（セパレート CSR 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数（CSR 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize_CSR(
   MONOLIS_MAT_CSR* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数（CSC 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize_CSC(
   MONOLIS_MAT_CSC* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の初期化処理関数
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_initialize(
   MONOLIS_MAT* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数（実数型）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize_val_R(
   MONOLIS_MAT_VAL_R* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数（複素数型）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize_val_C(
   MONOLIS_MAT_VAL_C* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数（セパレート CSR 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数（CSR 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize_CSR(
   MONOLIS_MAT_CSR* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数（CSC 構造）
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize_CSC(
   MONOLIS_MAT_CSC* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体の終了処理関数
+ * @param[inout] mat 行列構造体
  * @ingroup def_mat_init
  */
 void monolis_mat_finalize(

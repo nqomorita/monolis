@@ -37,9 +37,9 @@ contains
   !> ソルバの設定
   subroutine monolis_set_method(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     integer(kint) :: param
     monolis%PRM%Iarray(monolis_prm_I_method) = param
   end subroutine monolis_set_method
@@ -48,9 +48,9 @@ contains
   !> 前処理の設定
   subroutine monolis_set_precond(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     integer(kint) :: param
     monolis%PRM%Iarray(monolis_prm_I_precond) = param
   end subroutine monolis_set_precond
@@ -59,9 +59,9 @@ contains
   !> 最大反復回数の設定
   subroutine monolis_set_maxiter(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     integer(kint) :: param
     monolis%PRM%Iarray(monolis_prm_I_max_iter) = param
   end subroutine monolis_set_maxiter
@@ -70,9 +70,9 @@ contains
   !> 現在の反復回数の取得
   subroutine monolis_get_converge_iter(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     integer(kint) :: param
     param = monolis%PRM%Iarray(monolis_prm_I_cur_iter)
   end subroutine monolis_get_converge_iter
@@ -81,9 +81,9 @@ contains
   !> エラー番号の取得
   subroutine monolis_get_error_tag(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     integer(kint) :: param
     param = monolis%PRM%Iarray(monolis_prm_I_ierr)
   end subroutine monolis_get_error_tag
@@ -91,9 +91,9 @@ contains
   !> スケーリングの有無の設定
   !subroutine monolis_set_scaling(monolis, param)
   !  implicit none
-  !  !> monolis 構造体
+    !> [in,out] monolis 構造体
   !  type(monolis_structure) :: monolis
-  !  !> パラメータ
+    !> [in] パラメータ
   !  logical :: param
   !  integer(kint) :: iparam
 
@@ -103,9 +103,9 @@ contains
   !> リオーダリングの有無の設定
   !subroutine monolis_set_reordering(monolis, param)
   !  implicit none
-  !  !> monolis 構造体
+    !> [in,out] monolis 構造体
   !  type(monolis_structure) :: monolis
-  !  !> パラメータ
+    !> [in] パラメータ
   !  logical :: param
   !  integer(kint) :: iparam
 
@@ -116,9 +116,9 @@ contains
   !> 解ベクトル初期化の有無の設定
   subroutine monolis_set_init_x(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -129,9 +129,9 @@ contains
   !> 対称行列向け処理の有無の設定
   subroutine monolis_set_sym_matrix(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -142,9 +142,9 @@ contains
   !> デバッグ出力の有無の設定
   subroutine monolis_set_debug(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -155,9 +155,9 @@ contains
   !> 詳細な計算時間測定の有無の設定
   subroutine monolis_set_performance_measurement(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -168,9 +168,9 @@ contains
   !> 行列対角成分確認の有無の設定
   subroutine monolis_set_check_diag(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -181,9 +181,9 @@ contains
   !> 前処理情報保存の有無の設定
   subroutine monolis_set_prec_stored(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -194,9 +194,9 @@ contains
   !> 反復回数と残差履歴の表示の設定
   subroutine monolis_show_iterlog(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -207,9 +207,9 @@ contains
   !> 詳細な計算時間の表示の設定
   subroutine monolis_show_timelog(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -220,9 +220,9 @@ contains
   !> ソルバ収束後のサマリの表示の設定
   subroutine monolis_show_summary(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -233,9 +233,9 @@ contains
   !> 計算時間の統計的処理結果の表示の設定
   subroutine monolis_show_timelog_statistics(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     logical :: param
     integer(kint) :: iparam
 
@@ -246,9 +246,9 @@ contains
   !> 収束判定閾値の設定
   subroutine monolis_set_tolerance(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in,out] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [in] パラメータ
     real(kdouble) :: param
     monolis%PRM%Rarray(monolis_prm_R_tol) = param
   end subroutine monolis_set_tolerance
@@ -257,9 +257,9 @@ contains
   !> 現在の残差の取得
   subroutine monolis_get_converge_residual(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_prm_R_cur_resid)
   end subroutine monolis_get_converge_residual
@@ -268,9 +268,9 @@ contains
   !> ソルバの全計算時間の取得
   subroutine monolis_get_time_solver(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_sol)
   end subroutine monolis_get_time_solver
@@ -279,9 +279,9 @@ contains
   !> 前処理時間（生成時間）の取得
   subroutine monolis_get_time_preparing(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_prep)
   end subroutine monolis_get_time_preparing
@@ -290,9 +290,9 @@ contains
   !> 疎行列ベクトル積時間の取得
   subroutine monolis_get_time_spmv(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_spmv)
   end subroutine monolis_get_time_spmv
@@ -301,9 +301,9 @@ contains
   !> ベクトル内積時間の取得
   subroutine monolis_get_time_inner_product(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_dotp)
   end subroutine monolis_get_time_inner_product
@@ -312,9 +312,9 @@ contains
   !> 前処理時間（適用時間）の取得
   subroutine monolis_get_time_precondition(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_prec)
   end subroutine monolis_get_time_precondition
@@ -323,9 +323,9 @@ contains
   !> ベクトル内積の通信時間の取得
   subroutine monolis_get_time_comm_inner_product(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_comm_dotp)
   end subroutine monolis_get_time_comm_inner_product
@@ -334,9 +334,9 @@ contains
   !> 疎行列ベクトル積の通信時間の取得
   subroutine monolis_get_time_comm_spmv(monolis, param)
     implicit none
-    !> monolis 構造体
+    !> [in] monolis 構造体
     type(monolis_structure) :: monolis
-    !> パラメータ
+    !> [out] パラメータ
     real(kdouble) :: param
     param = monolis%PRM%Rarray(monolis_R_time_comm_spmv)
   end subroutine monolis_get_time_comm_spmv

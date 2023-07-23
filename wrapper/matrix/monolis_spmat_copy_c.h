@@ -7,8 +7,9 @@ extern "C" {
 #endif
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体のコピー（実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_R(
@@ -16,8 +17,9 @@ void monolis_copy_mat_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列構造体のコピー（複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_C(
@@ -25,8 +27,9 @@ void monolis_copy_mat_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_R(
@@ -34,8 +37,9 @@ void monolis_copy_mat_nonzero_pattern_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_C(
@@ -43,8 +47,14 @@ void monolis_copy_mat_nonzero_pattern_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（実数型）
+ * @param[in] NP 全計算点数
+ * @param[in] NDOF 計算点が持つ自由度
+ * @param[in] NZ 非零要素数
+ * @param[in] NZU 非零要素数（上三角）
+ * @param[in] NZL 非零要素数（下三角）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_val_R(
@@ -57,8 +67,14 @@ void monolis_copy_mat_nonzero_pattern_val_R(
   MONOLIS_MAT_VAL_R* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（複素数型）
+ * @param[in] NP 全計算点数
+ * @param[in] NDOF 計算点が持つ自由度
+ * @param[in] NZ 非零要素数
+ * @param[in] NZU 非零要素数（上三角）
+ * @param[in] NZL 非零要素数（下三角）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_val_C(
@@ -71,8 +87,10 @@ void monolis_copy_mat_nonzero_pattern_val_C(
   MONOLIS_MAT_VAL_C* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（CSR）
+ * @param[in] NP 全計算点数
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_CSR(
@@ -81,8 +99,10 @@ void monolis_copy_mat_nonzero_pattern_CSR(
   MONOLIS_MAT_CSR* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（CSC）
+ * @param[in] NP 全計算点数
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_CSC(
@@ -91,8 +111,10 @@ void monolis_copy_mat_nonzero_pattern_CSC(
   MONOLIS_MAT_CSC* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列の非零パターンのコピー（SCSR）
+ * @param[in] NP 全計算点数
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_nonzero_pattern_SCSR(
@@ -101,8 +123,9 @@ void monolis_copy_mat_nonzero_pattern_SCSR(
   MONOLIS_MAT_SEPARATED_CSR* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_R(
@@ -110,8 +133,9 @@ void monolis_copy_mat_value_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（行列、実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_matrix_R(
@@ -119,8 +143,9 @@ void monolis_copy_mat_value_matrix_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（解ベクトル、実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_solution_R(
@@ -128,8 +153,9 @@ void monolis_copy_mat_value_solution_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（右辺ベクトル、実数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_rhs_R(
@@ -137,8 +163,9 @@ void monolis_copy_mat_value_rhs_R(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_C(
@@ -146,8 +173,9 @@ void monolis_copy_mat_value_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（行列、複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_matrix_C(
@@ -155,8 +183,9 @@ void monolis_copy_mat_value_matrix_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（解ベクトル、複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_solution_C(
@@ -164,8 +193,9 @@ void monolis_copy_mat_value_solution_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のコピー（右辺ベクトル、複素数型）
+ * @param[in] mat_in monolis 構造体（入力)
+ * @param[inout] mat_out monolis 構造体（出力）
  * @ingroup matrix_copy
  */
 void monolis_copy_mat_value_rhs_C(
@@ -173,64 +203,64 @@ void monolis_copy_mat_value_rhs_C(
   MONOLIS* mat_out);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（実数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_R(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（行列、実数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_matrix_R(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（解ベクトル、実数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_solution_R(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（右辺ベクトル、実数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_rhs_R(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（複素数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_C(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（行列、複素数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_matrix_C(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（解ベクトル、複素数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_solution_C(
   MONOLIS* mat);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値のゼロ初期化（右辺ベクトル、複素数型）
+ * @param[inout] mat monolis 構造体（入力)
  * @ingroup matrix_copy
  */
 void monolis_clear_mat_value_rhs_C(
