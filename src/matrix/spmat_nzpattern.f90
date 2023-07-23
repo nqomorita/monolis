@@ -147,14 +147,12 @@ contains
   !> @ingroup nzpattern
   !> コネクティビティグラフから疎行列パターンを決定（実数型）
   subroutine monolis_get_nonzero_pattern_by_connectivity_R( &
-      & monolis, n_node, n_base, ndof, n_elem, index, item)
+      & monolis, n_node, ndof, n_elem, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
     !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
     !> 自由度数
     integer(kint) :: ndof
     !> 要素数
@@ -178,14 +176,12 @@ contains
   !> @ingroup nzpattern
   !> コネクティビティグラフから疎行列パターンを決定（複素数型）
   subroutine monolis_get_nonzero_pattern_by_connectivity_C( &
-      & monolis, n_node, n_base, ndof, n_elem, index, item)
+      & monolis, n_node, ndof, n_elem, index, item)
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: monolis
     !> 節点数
     integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
     !> 自由度数
     integer(kint) :: ndof
     !> 要素数

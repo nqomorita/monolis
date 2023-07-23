@@ -57,7 +57,6 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
 void monolis_get_nonzero_pattern_by_connectivity_R(
   MONOLIS* mat,
   int      n_node,
-  int      n_base,
   int      n_dof,
   int      n_elem,
   int*     conn_index,
@@ -158,7 +157,6 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
 void monolis_get_nonzero_pattern_by_connectivity_C(
   MONOLIS* mat,
   int      n_node,
-  int      n_base,
   int      n_dof,
   int      n_elem,
   int*     conn_index,
