@@ -20,6 +20,10 @@ mpif90 -I../../include \
 -o solver main.o \
 -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 
+echo "serial"
+
 ./solver
+
+echo "parallel"
 
 mpirun -np 3 solver

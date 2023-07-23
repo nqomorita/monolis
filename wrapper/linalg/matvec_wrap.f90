@@ -87,7 +87,13 @@ contains
     monoCOM%send_index => send_index
     monoCOM%send_item => send_item
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
   end subroutine monolis_matvec_product_R_c
 
   !> @ingroup dev_linalg
@@ -169,6 +175,12 @@ contains
     monoCOM%send_index => send_index
     monoCOM%send_item => send_item
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, Y, tspmv, tcomm)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
   end subroutine monolis_matvec_product_C_c
 end module mod_monolis_matvec_wrap

@@ -64,7 +64,13 @@ contains
       monoliS%PRM%Rarray(i) = Rarray(i + 1)
     enddo
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_solve_main_R(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
 
     do i = 1, monolis_prm_Iarray_size - 1
       Iarray(i + 1) = monoliS%PRM%Iarray(i)
@@ -131,7 +137,13 @@ contains
       monoliS%PRM%Rarray(i) = Rarray(i + 1)
     enddo
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_solve_main_C(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
 
     do i = 1, monolis_prm_Iarray_size - 1
       Iarray(i + 1) = monoliS%PRM%Iarray(i)

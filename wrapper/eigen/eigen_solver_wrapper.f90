@@ -76,8 +76,14 @@ contains
       is_bc_t(i) = monolis_conv_I2L(is_bc(i))
     enddo
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_eigen_standard_lanczos_R_main( &
       & monolis%PRM, monoCOM, monolis%MAT, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
   end subroutine monolis_eigen_standard_lanczos_R_c
 
   subroutine monolis_eigen_inverted_standard_lanczos_R_c(N, NP, NZ, NDOF, A, index, item, &
@@ -148,7 +154,13 @@ contains
       is_bc_t(i) = monolis_conv_I2L(is_bc(i))
     enddo
 
+    monoCOM%recv_item = monoCOM%recv_item + 1
+    monoCOM%send_item = monoCOM%send_item + 1
+
     call monolis_eigen_inverted_standard_lanczos_R_main( &
       & monolis%PRM, monoCOM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc_t)
+
+    monoCOM%recv_item = monoCOM%recv_item - 1
+    monoCOM%send_item = monoCOM%send_item - 1
   end subroutine monolis_eigen_inverted_standard_lanczos_R_c
 end module mod_monolis_eigen_solver_wrapper
