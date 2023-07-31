@@ -24,6 +24,8 @@ contains
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
+
+    call monolis_mpi_update_R(monoCOM, monolis%MAT%NDOF, Y, tcomm)
   end subroutine monolis_matvec_product_R
 
   !> @ingroup linalg
@@ -43,6 +45,8 @@ contains
     call monolis_std_debug_log_header("monolis_matvec_product_C")
 
     call monolis_matvec_product_main_C(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
+
+    call monolis_mpi_update_C(monoCOM, monolis%MAT%NDOF, Y, tcomm)
   end subroutine monolis_matvec_product_C
 
   !> @ingroup dev_linalg

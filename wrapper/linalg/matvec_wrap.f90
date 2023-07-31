@@ -92,6 +92,8 @@ contains
 
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
 
+    call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, Y, tcomm)
+
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1
   end subroutine monolis_matvec_product_R_c
@@ -179,6 +181,8 @@ contains
     monoCOM%send_item = monoCOM%send_item + 1
 
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, Y, tspmv, tcomm)
+
+    call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, Y, tcomm)
 
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1
