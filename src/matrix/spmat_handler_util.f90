@@ -215,7 +215,7 @@ contains
     !> 設定値
     real(kdouble), intent(out) :: val
     !> 取得判定フラグ
-    logical :: is_find
+    logical, intent(out) :: is_find
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     val = 0.0d0
@@ -261,7 +261,7 @@ contains
     !> 設定値
     complex(kdouble), intent(out) :: val
     !> 取得判定フラグ
-    logical :: is_find
+    logical, intent(out) :: is_find
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     val = 0.0d0
