@@ -108,7 +108,7 @@ contains
   end subroutine monolis_copy_mat_nonzero_pattern_C
 
   !> @ingroup matrix_copy
-  !> 行列の非零パターンのコピー（実数型）
+  !> 行列の非零値のコピー（実数型）
   subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
     implicit none
     !> [in] 全計算点数
@@ -140,13 +140,13 @@ contains
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_R_1d(mat_out%U)
-      call monolis_palloc_R_1d(mat_out%U, NZ*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%U, NZU*NDOF*NDOF)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_R_1d(mat_out%L)
-      call monolis_palloc_R_1d(mat_out%L, NZ*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%L, NZL*NDOF*NDOF)
       mat_out%L = mat_in%L
     endif
 
@@ -190,13 +190,13 @@ contains
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_C_1d(mat_out%U)
-      call monolis_palloc_C_1d(mat_out%U, NZ*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%U, NZU*NDOF*NDOF)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_C_1d(mat_out%L)
-      call monolis_palloc_C_1d(mat_out%L, NZ*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%L, NZL*NDOF*NDOF)
       mat_out%L = mat_in%L
     endif
 

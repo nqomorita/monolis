@@ -28,38 +28,6 @@ void monolis_eigen_inverted_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
-/**
- * @brief !
- * @param[in] n
- * @param[in] np
- * @param[in] nz
- * @param[in] n_dof
- * @param[in] A
- * @param[in] index
- * @param[in] item
- * @param[in] my_rank
- * @param[in] comm
- * @param[in] comm_size
- * @param[in] recv_n_neib
- * @param[in] recv_nitem
- * @param[in] revc_neib_pe
- * @param[in] recv_index
- * @param[in] recv_item
- * @param[in] send_n_neib
- * @param[in] send_nitem
- * @param[in] send_neib_pe
- * @param[in] send_index
- * @param[in] send_item
- * @param[in] Iarray
- * @param[in] Rarray
- * @param[in] n_get_eigen
- * @param[in] ths
- * @param[in] eigen_maxiter
- * @param[in] eigen_value
- * @param[in] eigen_mode_tmp
- * @param[in] is_Dirichlet_bc_int
- * @ingroup dev_solver
- */
 void monolis_eigen_inverted_standard_lanczos_R_c_main(
   int     n,
   int     np,
@@ -112,38 +80,6 @@ void monolis_eigen_standard_lanczos_R(
   double**     eigen_mode,
   bool*        is_Dirichlet_bc);
 
-/**
- * @brief !
- * @param[in] n
- * @param[in] np
- * @param[in] nz
- * @param[in] n_dof
- * @param[in] A
- * @param[in] index
- * @param[in] item
- * @param[in] my_rank
- * @param[in] comm
- * @param[in] comm_size
- * @param[in] recv_n_neib
- * @param[in] recv_nitem
- * @param[in] revc_neib_pe
- * @param[in] recv_index
- * @param[in] recv_item
- * @param[in] send_n_neib
- * @param[in] send_nitem
- * @param[in] send_neib_pe
- * @param[in] send_index
- * @param[in] send_item
- * @param[in] Iarray
- * @param[in] Rarray
- * @param[in] n_get_eigen
- * @param[in] ths
- * @param[in] eigen_maxiter
- * @param[in] eigen_value
- * @param[in] eigen_mode_tmp
- * @param[in] is_Dirichlet_bc_int
- * @ingroup dev_solver
- */
 void monolis_eigen_standard_lanczos_R_c_main(
   int     n,
   int     np,
