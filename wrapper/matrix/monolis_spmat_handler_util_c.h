@@ -7,8 +7,18 @@ extern "C" {
 #endif
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列に設定（メイン関数、実数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_set_scalar_to_sparse_matrix_R_c_main(
@@ -25,8 +35,18 @@ void monolis_set_scalar_to_sparse_matrix_R_c_main(
   double   val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列に足込（メイン関数、実数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_add_scalar_to_sparse_matrix_R_c_main(
@@ -43,8 +63,19 @@ void monolis_add_scalar_to_sparse_matrix_R_c_main(
   double   val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列から取得（メイン関数、実数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[in] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[out] val 設定値
+ * @param[out] is_find 取得判定フラグ
  * @ingroup dev_matrix
  */
 void monolis_get_scalar_from_sparse_matrix_R_c_main(
@@ -62,8 +93,18 @@ void monolis_get_scalar_from_sparse_matrix_R_c_main(
   int*     is_find);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値を疎行列に足込（メイン関数、実数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] n_base1
+ * @param[in] n_base2
+ * @param[in] connectivity1
+ * @param[in] connectivity2
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_add_matrix_to_sparse_matrix_main_R_c_main(
@@ -80,8 +121,20 @@ void monolis_add_matrix_to_sparse_matrix_main_R_c_main(
   double* val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 境界条件処理（実数型、メイン関数）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[in] indexR index 配列（CSC 形式）
+ * @param[in] itemR item 配列（CSC 形式）
+ * @param[in] permR 行列成分の CSC 形式との置換ベクトル
+ * @param[inout] A 係数行列
+ * @param[inout] b 右辺ベクトル
+ * @param[in] node_id 自由度番号
+ * @param[in] n_dof_bc ブロック番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_set_Dirichlet_bc_R_c_main(
@@ -100,8 +153,18 @@ void monolis_set_Dirichlet_bc_R_c_main(
   double   val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列に設定（メイン関数、複素数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_set_scalar_to_sparse_matrix_C_c_main(
@@ -118,8 +181,18 @@ void monolis_set_scalar_to_sparse_matrix_C_c_main(
   double _Complex  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列に足込（メイン関数、複素数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_add_scalar_to_sparse_matrix_C_c_main(
@@ -136,8 +209,19 @@ void monolis_add_scalar_to_sparse_matrix_C_c_main(
   double _Complex  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief スカラ値を疎行列から取得（メイン関数、複素数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[in] A 係数行列
+ * @param[in] i 行番号
+ * @param[in] j 列番号
+ * @param[in] submat_i ブロック中の行番号
+ * @param[in] submat_j ブロック中の列番号
+ * @param[out] val 設定値
+ * @param[out] is_find 取得判定フラグ
  * @ingroup dev_matrix
  */
 void monolis_get_scalar_from_sparse_matrix_C_c_main(
@@ -155,8 +239,18 @@ void monolis_get_scalar_from_sparse_matrix_C_c_main(
   int*            is_find);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 行列値を疎行列に足込（メイン関数、複素数型）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[in] n_base1
+ * @param[in] n_base2
+ * @param[in] connectivity1
+ * @param[in] connectivity2
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_add_matrix_to_sparse_matrix_main_C_c_main(
@@ -173,8 +267,20 @@ void monolis_add_matrix_to_sparse_matrix_main_C_c_main(
   double _Complex*  val);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 境界条件処理（複素数型、メイン関数）
+ * @param[in] n_node 
+ * @param[in] nz
+ * @param[in] n_dof ブロック自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[in] indexR index 配列（CSC 形式）
+ * @param[in] itemR item 配列（CSC 形式）
+ * @param[in] permR 行列成分の CSC 形式との置換ベクトル
+ * @param[inout] A 係数行列
+ * @param[inout] b 右辺ベクトル
+ * @param[in] node_id 自由度番号
+ * @param[in] n_dof_bc ブロック番号
+ * @param[in] val 設定値
  * @ingroup dev_matrix
  */
 void monolis_set_Dirichlet_bc_C_c_main(
