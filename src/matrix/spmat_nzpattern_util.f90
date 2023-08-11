@@ -16,7 +16,7 @@ contains
     type(monolis_mat), intent(inout) :: MAT
     !> [in] 節点数
     integer(kint), intent(in) :: n_node
-    !> [in] 自由度数
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: ndof
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
