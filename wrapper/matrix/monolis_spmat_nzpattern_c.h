@@ -9,8 +9,13 @@ extern "C" {
 #include "monolis_def_struc_c.h"
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 単一メッシュデータから疎行列パターンを決定（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] n_elem 要素数
+ * @param[in] elem 要素コネクティビティ
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_simple_mesh_R(
@@ -22,8 +27,14 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
   int**    elem);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief コネクティビティグラフから疎行列パターンを決定（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] n_elem 要素数
+ * @param[in] conn_index コネクティビティ index 配列
+ * @param[in] conn_item コネクティビティ item 配列
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_connectivity_R(
@@ -36,8 +47,12 @@ void monolis_get_nonzero_pattern_by_connectivity_R(
   int*     conn_item);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 節点グラフから疎行列パターンを決定（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_nodal_graph_R(
@@ -48,8 +63,13 @@ void monolis_get_nonzero_pattern_by_nodal_graph_R(
   int*     item);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 単一メッシュデータから疎行列パターンを決定（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] n_elem 要素数
+ * @param[in] elem 要素コネクティビティ
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_simple_mesh_C(
@@ -61,8 +81,14 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
   int**    elem);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief コネクティビティグラフから疎行列パターンを決定（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] n_elem 要素数
+ * @param[in] conn_index コネクティビティ index 配列
+ * @param[in] conn_item コネクティビティ item 配列
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_connectivity_C(
@@ -75,8 +101,12 @@ void monolis_get_nonzero_pattern_by_connectivity_C(
   int*     conn_item);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 節点グラフから疎行列パターンを決定（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_dof 計算点が持つ自由度
+ * @param[in] index index 配列
+ * @param[in] item item 配列
  * @ingroup nzpattern
  */
 void monolis_get_nonzero_pattern_by_nodal_graph_C(
