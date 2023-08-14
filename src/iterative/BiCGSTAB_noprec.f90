@@ -21,10 +21,10 @@ contains
     type(monolis_prm), intent(inout) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 行列構造体
-    type(monolis_mat), target, intent(in) :: monoMAT
-    !> [in] 前処理構造体
-    type(monolis_mat), intent(in) :: monoPREC
+    !> [in,out] 行列構造体
+    type(monolis_mat), target, intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF, NNDOF
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, c2, omega

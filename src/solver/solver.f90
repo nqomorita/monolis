@@ -22,14 +22,14 @@ contains
   !> 線形ソルバ関数（実数型）
   subroutine monolis_solve_R(monolis, monoCOM, B, X)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 右辺ベクトル
-    real(kdouble) :: B(:)
-    !> 解ベクトル
-    real(kdouble) :: X(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: B(:)
+    !> [in,out] 解ベクトル
+    real(kdouble), intent(inout) :: X(:)
 
     call monolis_set_RHS_R(monolis%MAT, B)
 
@@ -46,14 +46,14 @@ contains
   !> 線形ソルバ関数（複素数型）
   subroutine monolis_solve_C(monolis, monoCOM, B, X)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 右辺ベクトル
-    complex(kdouble) :: B(:)
-    !> 解ベクトル
-    complex(kdouble) :: X(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: B(:)
+    !> [in,out] 解ベクトル
+    complex(kdouble), intent(inout) :: X(:)
 
     call monolis_set_RHS_C(monolis%MAT, B)
 
@@ -70,14 +70,14 @@ contains
   !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
 
@@ -98,14 +98,14 @@ contains
   !> 線形ソルバ関数（メイン関数）
   subroutine monolis_solve_main_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_solve_main_C")
 
@@ -126,14 +126,14 @@ contains
   !> 線形ソルバの選択関数
   subroutine monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_solver_select_R")
 
@@ -185,14 +185,14 @@ contains
   !> 線形ソルバの選択関数
   subroutine monolis_solver_select_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_solver_select_R")
 

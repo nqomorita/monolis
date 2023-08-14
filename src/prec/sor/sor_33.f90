@@ -12,10 +12,10 @@ contains
   !> 前処理生成：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: i, j, jS, jE, in, k, l, N
     real(kdouble) :: T(3,3), P(3), sigma
     integer(kint), pointer :: index(:), item(:)
@@ -94,10 +94,10 @@ contains
   !> 前処理適用：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in] 前処理構造体
+    type(monolis_mat), target, intent(in) :: monoPREC
     integer(kint) :: i, j, jS, jE, jn, N
     real(kdouble) :: X1, X2, X3, S1, S2, S3
     real(kdouble) :: X(:), Y(:)
@@ -185,8 +185,8 @@ contains
   !> 前処理初期化：SOR 前処理（3x3 ブロック）
   subroutine monolis_precond_sor_33_clear_R(monoPREC)
     implicit none
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_pdealloc_R_1d(monoPREC%R%D)
   end subroutine monolis_precond_sor_33_clear_R

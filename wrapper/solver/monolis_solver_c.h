@@ -7,8 +7,11 @@ extern "C" {
 #endif
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 線形ソルバ関数（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[in] b 右辺ベクトル
+ * @param[inout] x 解ベクトル
  * @ingroup solver
  */
 void monolis_solve_R(
@@ -18,8 +21,31 @@ void monolis_solve_R(
   double*      x);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 線形ソルバ関数（メイン関数）
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] n_dof
+ * @param[in] A
+ * @param[in] x
+ * @param[in] b
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm
+ * @param[in] comm_size
+ * @param[in] recv_n_neib
+ * @param[in] recv_nitem
+ * @param[in] recv_neib_pe
+ * @param[in] recv_index
+ * @param[in] recv_item
+ * @param[in] send_n_neib
+ * @param[in] send_nitem
+ * @param[in] send_neib_pe
+ * @param[in] send_index
+ * @param[in] send_item
+ * @param[in] Iarray
+ * @param[in] Rarray
  * @ingroup dev_solver
  */
 void monolis_solve_R_c_main(
@@ -49,8 +75,11 @@ void monolis_solve_R_c_main(
   double* Rarray);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 線形ソルバ関数（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] com 通信テーブル構造体
+ * @param[in] b 右辺ベクトル
+ * @param[inout] x 解ベクトル
  * @ingroup solver
  */
 void monolis_solve_C(
@@ -60,8 +89,31 @@ void monolis_solve_C(
   double _Complex* x);
 
 /**
- * @brief 1 次元整数配列のメモリ確保
- * @param[inout] var メモリ確保する配列
+ * @brief 線形ソルバ関数（メイン関数）
+ * @param[in] n
+ * @param[in] np
+ * @param[in] nz
+ * @param[in] n_dof
+ * @param[in] A
+ * @param[in] x
+ * @param[in] b
+ * @param[in] index
+ * @param[in] item
+ * @param[in] my_rank
+ * @param[in] comm
+ * @param[in] comm_size
+ * @param[in] recv_n_neib
+ * @param[in] recv_nitem
+ * @param[in] recv_neib_pe
+ * @param[in] recv_index
+ * @param[in] recv_item
+ * @param[in] send_n_neib
+ * @param[in] send_nitem
+ * @param[in] send_neib_pe
+ * @param[in] send_index
+ * @param[in] send_item
+ * @param[in] Iarray
+ * @param[in] Rarray
  * @ingroup dev_solver
  */
 void monolis_solve_C_c_main(
