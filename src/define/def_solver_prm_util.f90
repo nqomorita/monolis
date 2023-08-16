@@ -38,9 +38,9 @@ contains
   subroutine monolis_set_method(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    integer(kint) :: param
+    integer(kint), intent(in) :: param
     monolis%PRM%Iarray(monolis_prm_I_method) = param
   end subroutine monolis_set_method
 
@@ -49,9 +49,9 @@ contains
   subroutine monolis_set_precond(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    integer(kint) :: param
+    integer(kint), intent(in) :: param
     monolis%PRM%Iarray(monolis_prm_I_precond) = param
   end subroutine monolis_set_precond
 
@@ -60,9 +60,9 @@ contains
   subroutine monolis_set_maxiter(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    integer(kint) :: param
+    integer(kint), intent(in) :: param
     monolis%PRM%Iarray(monolis_prm_I_max_iter) = param
   end subroutine monolis_set_maxiter
 
@@ -71,9 +71,9 @@ contains
   subroutine monolis_get_converge_iter(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    integer(kint) :: param
+    integer(kint), intent(out) :: param
     param = monolis%PRM%Iarray(monolis_prm_I_cur_iter)
   end subroutine monolis_get_converge_iter
 
@@ -82,9 +82,9 @@ contains
   subroutine monolis_get_error_tag(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    integer(kint) :: param
+    integer(kint), intent(out) :: param
     param = monolis%PRM%Iarray(monolis_prm_I_ierr)
   end subroutine monolis_get_error_tag
 
@@ -92,9 +92,9 @@ contains
   !subroutine monolis_set_scaling(monolis, param)
   !  implicit none
     !> [in,out] monolis 構造体
-  !  type(monolis_structure) :: monolis
+  !  type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-  !  logical :: param
+  !  logical, intent(in) :: param
   !  integer(kint) :: iparam
 
   !  monolis%PRM%Iarray(monolis_prm_I_is_scaling) = monolis_conv_L2I(param)
@@ -104,9 +104,9 @@ contains
   !subroutine monolis_set_reordering(monolis, param)
   !  implicit none
     !> [in,out] monolis 構造体
-  !  type(monolis_structure) :: monolis
+  !  type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-  !  logical :: param
+  !  logical, intent(in) :: param
   !  integer(kint) :: iparam
 
   !  monolis%PRM%Iarray(monolis_prm_I_is_reordering) = monolis_conv_L2I(param)
@@ -117,9 +117,9 @@ contains
   subroutine monolis_set_init_x(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_init_x) = monolis_conv_L2I(param)
@@ -130,9 +130,9 @@ contains
   subroutine monolis_set_sym_matrix(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_sym_matrix) = monolis_conv_L2I(param)
@@ -143,9 +143,9 @@ contains
   subroutine monolis_set_debug(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_debug) = monolis_conv_L2I(param)
@@ -156,9 +156,9 @@ contains
   subroutine monolis_set_performance_measurement(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_measurement) = monolis_conv_L2I(param)
@@ -169,9 +169,9 @@ contains
   subroutine monolis_set_check_diag(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_check_diag) = monolis_conv_L2I(param)
@@ -182,9 +182,9 @@ contains
   subroutine monolis_set_prec_stored(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_conv_L2I(param)
@@ -195,9 +195,9 @@ contains
   subroutine monolis_show_iterlog(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_iterlog) = monolis_conv_L2I(param)
@@ -208,9 +208,9 @@ contains
   subroutine monolis_show_timelog(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_time) = monolis_conv_L2I(param)
@@ -221,9 +221,9 @@ contains
   subroutine monolis_show_summary(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_summary) = monolis_conv_L2I(param)
@@ -234,9 +234,9 @@ contains
   subroutine monolis_show_timelog_statistics(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    logical :: param
+    logical, intent(in) :: param
     integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_conv_L2I(param)
@@ -247,9 +247,9 @@ contains
   subroutine monolis_set_tolerance(monolis, param)
     implicit none
     !> [in,out] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(in) :: param
     monolis%PRM%Rarray(monolis_prm_R_tol) = param
   end subroutine monolis_set_tolerance
 
@@ -258,9 +258,9 @@ contains
   subroutine monolis_get_converge_residual(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_prm_R_cur_resid)
   end subroutine monolis_get_converge_residual
 
@@ -269,9 +269,9 @@ contains
   subroutine monolis_get_time_solver(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_sol)
   end subroutine monolis_get_time_solver
 
@@ -280,9 +280,9 @@ contains
   subroutine monolis_get_time_preparing(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_prep)
   end subroutine monolis_get_time_preparing
 
@@ -291,9 +291,9 @@ contains
   subroutine monolis_get_time_spmv(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_spmv)
   end subroutine monolis_get_time_spmv
 
@@ -302,9 +302,9 @@ contains
   subroutine monolis_get_time_inner_product(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_dotp)
   end subroutine monolis_get_time_inner_product
 
@@ -313,9 +313,9 @@ contains
   subroutine monolis_get_time_precondition(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_prec)
   end subroutine monolis_get_time_precondition
 
@@ -324,9 +324,9 @@ contains
   subroutine monolis_get_time_comm_inner_product(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_comm_dotp)
   end subroutine monolis_get_time_comm_inner_product
 
@@ -335,9 +335,9 @@ contains
   subroutine monolis_get_time_comm_spmv(monolis, param)
     implicit none
     !> [in] monolis 構造体
-    type(monolis_structure) :: monolis
+    type(monolis_structure), intent(in) :: monolis
     !> [out] パラメータ
-    real(kdouble) :: param
+    real(kdouble), intent(out) :: param
     param = monolis%PRM%Rarray(monolis_R_time_comm_spmv)
   end subroutine monolis_get_time_comm_spmv
 

@@ -57,8 +57,11 @@ contains
     real(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
+    !> [in,out] 計算時間
+    real(kdouble) :: tspmv
+    !> [in,out] 通信時間
+    real(kdouble) :: tcomm
     real(kdouble) :: t1, t2
-    real(kdouble) :: tspmv, tcomm
 
     call monolis_std_debug_log_header("monolis_matvec_product_main_R")
 
@@ -90,8 +93,11 @@ contains
     complex(kdouble), intent(inout) :: X(:)
     !> [out] 結果ベクトル
     complex(kdouble), intent(out) :: Y(:)
+    !> [in,out] 計算時間
+    real(kdouble) :: tspmv
+    !> [in,out] 通信時間
+    real(kdouble) :: tcomm
     real(kdouble) :: t1, t2
-    real(kdouble) :: tspmv, tcomm
 
     call monolis_std_debug_log_header("monolis_matvec_product_main_C")
 

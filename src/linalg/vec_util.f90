@@ -12,7 +12,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1 (コピー元)
     integer(kint), intent(in) :: X(:)
@@ -40,7 +40,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1 (コピー元)
     real(kdouble), intent(in) :: X(:)
@@ -68,7 +68,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] ベクトル 1 (コピー元)
     complex(kdouble), intent(in) :: X(:)
@@ -96,7 +96,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] 係数 1
     integer(kint), intent(in) :: alpha
@@ -130,7 +130,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] 係数 1
     real(kdouble), intent(in) :: alpha
@@ -164,7 +164,7 @@ contains
     implicit none
     !> [in] 計算点数
     integer(kint), intent(in) :: n
-    !> [in] 計算点あたりの自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: n_dof
     !> [in] 係数 1
     complex(kdouble), intent(in) :: alpha
@@ -202,7 +202,7 @@ contains
     integer(kint), intent(in) :: n_vec
     !> [in] 計算点数
     integer(kint), intent(in) :: N
-    !> [in] 計算点上の自由度
+    !> [in] 計算点が持つ自由度
     integer(kint), intent(in) :: NDOF
     !> [in,out] 入力ベクトル
     real(kdouble), intent(inout) :: p(:)
