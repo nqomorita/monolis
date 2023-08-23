@@ -1,4 +1,4 @@
-!> ¾€ÐÎ¥½¥ë¥Ð¥â¥¸¥å©`¥ë
+!> ï¿½ï¿½ï¿½Î¥ï¿½ï¿½ï¿½Ð¥â¥¸ï¿½ï¿½`ï¿½ï¿½
 module mod_monolis_scalapack_wrapper
   use mod_monolis_utils
   use mod_monolis_scalapack
@@ -11,21 +11,21 @@ contains
   subroutine monolis_scalapack_gesvd_R_c(N_loc, M, P, A, S, V, D, comm) &
     & bind(c, name = "monolis_scalapack_gesvd_R_c_main")
     implicit none
-    !> ÐÐÁÐ¤Î´ó¤­¤µ£¨ÐÐÊý N£©
+    !> ï¿½ï¿½ï¿½Ð¤Î´ó¤­¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Nï¿½ï¿½
     integer(c_int), value :: N_loc
-    !> ÐÐÁÐ¤Î´ó¤­¤µ£¨ÁÐÊý M£©
+    !> ï¿½ï¿½ï¿½Ð¤Î´ó¤­¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Mï¿½ï¿½
     integer(c_int), value :: M
-    !> ÐÐÁÐ¤Î´ó¤­¤µ¤Î×îÐ¡‚Ž
+    !> ï¿½ï¿½ï¿½Ð¤Î´ó¤­¤ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½
     integer(c_int), value :: P
-    !> ÈëÁ¦ÐÐÁÐ£¨N_loc x M£©
+    !> ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½N_loc x Mï¿½ï¿½
     real(c_double), target :: A(N_loc*M)
-    !> ×óÌØ®ÐÐÁÐ£¨N_loc x P£©
+    !> ï¿½ï¿½ï¿½Ø®ï¿½ï¿½ï¿½ï¿½Ð£ï¿½N_loc x Pï¿½ï¿½
     real(c_double), target :: S(N_loc*P)
-    !> ÌØ®‚Ž£¨P£©
+    !> ï¿½Ø®ï¿½ï¿½ï¿½ï¿½ï¿½Pï¿½ï¿½
     real(c_double), target :: V(P)
-    !> ÓÒÌØ®ÐÐÁÐ£¨P x M£©
+    !> ï¿½ï¿½ï¿½Ø®ï¿½ï¿½ï¿½ï¿½Ð£ï¿½P x Mï¿½ï¿½
     real(c_double), target :: D(P*M)
-    !> ¥³¥ß¥å¥Ë¥±©`¥¿
+    !> ï¿½ï¿½ï¿½ß¥ï¿½Ë¥ï¿½ï¿½`ï¿½ï¿½
     integer(c_int), value :: comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)

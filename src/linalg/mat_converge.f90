@@ -12,20 +12,20 @@ contains
   !> 収束判定閾値の設定
   subroutine monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
     implicit none
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    real(kdouble) :: B(:)
-    !> L2 相対誤差の分母値
-    real(kdouble) :: B2
-    !> 収束判定フラグ
-    logical :: is_converge
-    !> 内積時間
-    real(kdouble) :: tdotp
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: B(:)
+    !> [out] L2 相対誤差の分母値
+    real(kdouble), intent(out) :: B2
+    !> [in,out] 収束判定フラグ
+    logical, intent(inout) :: is_converge
+    !> [in,out] 内積時間
+    real(kdouble), intent(inout) :: tdotp
+    !> [in,out] 通信時間
+    real(kdouble), intent(inout) :: tcomm
 
     call monolis_std_debug_log_header("monolis_set_converge_R")
 
@@ -45,20 +45,20 @@ contains
   !> 収束判定閾値の設定
   subroutine monolis_set_converge_C(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm)
     implicit none
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 右辺ベクトル
-    complex(kdouble) :: B(:)
-    !> L2 相対誤差の分母値
-    complex(kdouble) :: B2
-    !> 収束判定フラグ
-    logical :: is_converge
-    !> 内積時間
-    real(kdouble) :: tdotp
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), intent(inout) :: monoMAT
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: B(:)
+    !> [out] L2 相対誤差の分母値
+    complex(kdouble), intent(out) :: B2
+    !> [in,out] 収束判定フラグ
+    logical, intent(inout) :: is_converge
+    !> [in,out] 内積時間
+    real(kdouble), intent(inout) :: tdotp
+    !> [in,out] 通信時間
+    real(kdouble), intent(inout) :: tcomm
 
     call monolis_std_debug_log_header("monolis_set_converge_C")
 
@@ -78,24 +78,24 @@ contains
   !> 収束の判定
   subroutine monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 残差ベクトル
-    real(kdouble) :: R(:)
-    !> L2 相対誤差の分母値
-    real(kdouble) :: B2
-    !> 反復回数
-    integer(kint) :: iter
-    !> 収束判定フラグ
-    logical :: is_converge
-    !> 内積時間
-    real(kdouble) :: tdotp
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in] 残差ベクトル
+    real(kdouble), intent(in) :: R(:)
+    !> [in] L2 相対誤差の分母値
+    real(kdouble), intent(in) :: B2
+    !> [in] 反復回数
+    integer(kint), intent(in) :: iter
+    !> [in,out] 収束判定フラグ
+    logical, intent(inout) :: is_converge
+    !> [in,out] 内積時間
+    real(kdouble), intent(inout) :: tdotp
+    !> [in,out] 通信時間
+    real(kdouble), intent(inout) :: tcomm
     real(kdouble) :: R2, resid
 
     call monolis_std_debug_log_header("monolis_check_converge_R")
@@ -128,24 +128,24 @@ contains
   !> 収束の判定
   subroutine monolis_check_converge_C(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 残差ベクトル
-    complex(kdouble) :: R(:)
-    !> L2 相対誤差の分母値
-    complex(kdouble) :: B2
-    !> 反復回数
-    integer(kint) :: iter
-    !> 収束判定フラグ
-    logical :: is_converge
-    !> 内積時間
-    real(kdouble) :: tdotp
-    !> 通信時間
-    real(kdouble) :: tcomm
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in] 残差ベクトル
+    complex(kdouble), intent(in) :: R(:)
+    !> [in] L2 相対誤差の分母値
+    complex(kdouble), intent(in) :: B2
+    !> [in] 反復回数
+    integer(kint), intent(in) :: iter
+    !> [in,out] 収束判定フラグ
+    logical, intent(inout) :: is_converge
+    !> [in,out] 内積時間
+    real(kdouble), intent(inout) :: tdotp
+    !> [in,out] 通信時間
+    real(kdouble), intent(inout) :: tcomm
     complex(kdouble) :: R2, resid
 
     call monolis_std_debug_log_header("monolis_check_converge_C")

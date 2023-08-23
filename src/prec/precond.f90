@@ -14,14 +14,14 @@ contains
   !> 前処理生成関数
   subroutine monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     select case(monoPRM%Iarray(monolis_prm_I_method))
       case (monolis_iter_COCG)
@@ -35,14 +35,14 @@ contains
   !> 前処理初期化関数
   subroutine monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     select case(monoPRM%Iarray(monolis_prm_I_method))
       case (monolis_iter_COCG)
@@ -56,14 +56,14 @@ contains
   !> 前処理生成関数（実数型）
   subroutine monolis_precond_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: precond
     real(kdouble) :: t1, t2
 
@@ -98,14 +98,14 @@ contains
   !> 前処理生成関数（複素数型）
   subroutine monolis_precond_setup_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: precond
     real(kdouble) :: t1, t2
 
@@ -140,14 +140,14 @@ contains
   !> 前処理適用関数（実数型）
   subroutine monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     !> 入力ベクトル
     real(kdouble) :: X(:)
     !> 出力ベクトル
@@ -192,14 +192,14 @@ contains
   !> 前処理適用関数（複素数型）
   subroutine monolis_precond_apply_C(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     !> 入力ベクトル
     complex(kdouble) :: X(:)
     !> 出力ベクトル
@@ -244,14 +244,14 @@ contains
   !> 前処理初期化関数（実数型）
   subroutine monolis_precond_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: precond
     real(kdouble) :: t1, t2
 
@@ -285,14 +285,14 @@ contains
   !> 前処理初期化関数（複素数型）
   subroutine monolis_precond_clear_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: precond
     real(kdouble) :: t1, t2
 

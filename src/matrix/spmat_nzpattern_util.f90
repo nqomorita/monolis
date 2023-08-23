@@ -12,16 +12,16 @@ contains
   !> 節点グラフから疎行列パターンを決定（メイン関数）
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_main(MAT, n_node, ndof, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_mat) :: MAT
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度数
-    integer(kint) :: ndof
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
     integer(kint) :: i, j, nz, jS, jE
 
     MAT%N = n_node
@@ -62,16 +62,16 @@ contains
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main( &
     MAT, n_node, n_dof_list, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_mat) :: MAT
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度リスト
-    integer(kint) :: n_dof_list(:)
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 自由度リスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
     integer(kint) :: i, in, j, jn, nz, jS, jE, k, kE, kS, l
     integer(kint) :: total_dof, ncol, nrow
     integer(kint), allocatable :: n_dof_index(:)
@@ -147,12 +147,12 @@ contains
   !> 節点数 index の作成
   subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
     implicit none
-    !> 節点数
+    !> [in] 節点数
     integer(kint), intent(in) :: n_node
-    !> 節点自由度リスト
+    !> [in] 節点自由度リスト
     integer(kint), intent(in) :: n_dof_list(:)
-    !> 節点自由度 index
-    integer(kint) :: n_dof_index(:)
+    !> [in,out] 節点自由度 index
+    integer(kint), intent(inout) :: n_dof_index(:)
     integer(kint) :: i
 
     do i = 1, n_node - 1
@@ -164,8 +164,8 @@ contains
   !> 疎行列の行列成分のメモリ確保（実数型）
   subroutine monolis_alloc_nonzero_pattern_mat_val_R(MAT)
     implicit none
-    !> monolis 構造体
-    type(monolis_mat) :: MAT
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
     integer(kint) :: NP, NDOF, NZ
 
     NDOF = MAT%NDOF
@@ -181,8 +181,8 @@ contains
   !> 疎行列の行列成分のメモリ確保（複素数型）
   subroutine monolis_alloc_nonzero_pattern_mat_val_C(MAT)
     implicit none
-    !> monolis 構造体
-    type(monolis_mat) :: MAT
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
     integer(kint) :: NDOF, NP, NZ
 
     NDOF = MAT%NDOF
@@ -198,22 +198,22 @@ contains
   !> CSR 形式から CSC 形式のデータを生成
   subroutine monolis_get_CSC_format(NC, NR, NZ, index, item, indexR, itemR, permR)
     implicit none
-    !> 行数
+    !> [in] 行数
     integer(kint), intent(in) :: NC
-    !> 列数
+    !> [in] 列数
     integer(kint), intent(in) :: NR
-    !> 非零要素数
+    !> [in] 非零要素数
     integer(kint), intent(in) :: NZ
-    !> index 配列（CSR 形式）
+    !> [in] index 配列（CSR 形式）
     integer(kint), intent(in) :: index(:)
-    !> item 配列（CSR 形式）
+    !> [in] item 配列（CSR 形式）
     integer(kint), intent(in) :: item(:)
-    !> index 配列（CSC 形式）
-    integer(kint) :: indexR(:)
-    !> index 配列（CSC 形式）
-    integer(kint) :: itemR(:)
-    !> index 配列（CSC 形式）
-    integer(kint) :: permR(:)
+    !> [out] index 配列（CSC 形式）
+    integer(kint), intent(out) :: indexR(:)
+    !> [in,out] index 配列（CSC 形式）
+    integer(kint), intent(inout) :: itemR(:)
+    !> [in,out] index 配列（CSC 形式）
+    integer(kint), intent(inout) :: permR(:)
     integer(kint), allocatable :: temp(:)
     integer(kint) :: i, j, in, jS, jE, m, p
 

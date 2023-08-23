@@ -11,20 +11,20 @@ contains
   !> PDGESVD 関数（実数型）
   subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
     implicit none
-    !> 行列の大きさ（行数 N）
+    !> [in] 行列の大きさ（行数 N）
     integer(kint), intent(in) :: N_loc
-    !> 行列の大きさ（列数 M）
+    !> [in] 行列の大きさ（列数 M）
     integer(kint), intent(in) :: M
-    !> 入力行列（N_loc x M）
+    !> [in] 入力行列（N_loc x M）
     real(kdouble), intent(in) :: A(:,:)
-    !> 左特異行列（N_loc x P）
+    !> [out] 左特異行列（N_loc x P）
     real(kdouble), intent(out) :: S(:,:)
-    !> 特異値（P）
+    !> [out] 特異値（P）
     real(kdouble), intent(out) :: V(:)
-    !> 右特異行列（P x M）
+    !> [out] 右特異行列（P x M）
     real(kdouble), intent(out) :: D(:,:)
-    !> コミュニケータ
-    integer(kint) :: comm
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: N_loc_max, M_fix, N
     integer(kint) :: comm_size, P
     integer(kint) :: i, j, fio
@@ -88,20 +88,20 @@ contains
   !> PDGESVD 関数（実数型、メイン関数）
   subroutine monolis_scalapack_gesvd_R_main(N_loc, M, A, S, V, D, comm)
     implicit none
-    !> 行列の大きさ（行数 N）
+    !> [in] 行列の大きさ（行数 N）
     integer(kint), intent(in) :: N_loc
-    !> 行列の大きさ（列数 M）
+    !> [in] 行列の大きさ（列数 M）
     integer(kint), intent(in) :: M
-    !> 入力行列（N_loc x M）
+    !> [in] 入力行列（N_loc x M）
     real(kdouble), intent(in) :: A(:,:)
-    !> 左特異行列（N_loc x P）
+    !> [out] 左特異行列（N_loc x P）
     real(kdouble), intent(out) :: S(:,:)
-    !> 特異値（P）
+    !> [out] 特異値（P）
     real(kdouble), intent(out) :: V(:)
-    !> 右特異行列（P x M）
+    !> [out] 右特異行列（P x M）
     real(kdouble), intent(out) :: D(:,:)
-    !> コミュニケータ
-    integer(kint) :: comm
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: N, scalapack_comm, i, comm_temp
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
@@ -182,12 +182,18 @@ contains
   !> PDGESVD 関数（実数型、行列情報の更新）
   subroutine gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
     implicit none
-    integer(kint) :: P
-    integer(kint) :: M
-    integer(kint) :: n_row
-    integer(kint) :: lld_D
-    real(kdouble) :: D(:,:)
-    integer(kint) :: comm
+    !> [in] 
+    integer(kint), intent(in) :: n_row
+    !> [in] 
+    integer(kint), intent(in) :: P
+    !> [in] 
+    integer(kint), intent(in) :: M
+    !> [in] 
+    integer(kint), intent(in) :: lld_D
+    !> [in,out] 
+    real(kdouble), intent(inout) :: D(:,:)
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: i, j, size
     integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: D_temp(:)

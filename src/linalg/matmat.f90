@@ -9,11 +9,19 @@ contains
   !> ベクトル内積
   subroutine monolis_matmat(monoCOM, monoMAT, X, Y, tspmv, tcomm)
     implicit none
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    real(kdouble) :: X(:), Y(:)
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 右辺ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in,out] 計算時間
+    real(kdouble), intent(inout) :: tspmv
+    !> [in,out] 通信時間
+    real(kdouble), intent(inout) :: tcomm
     real(kdouble) :: t1, t2
-    real(kdouble) :: tspmv, tcomm
 
 #ifdef DEBUG
     call monolis_std_debug_log_header("monolis_matmat")
@@ -34,11 +42,19 @@ contains
   !> ベクトル内積
   subroutine monolis_matmat_nn(monoCOM, monoMAT, X, Y, NDOF)
     implicit none
-    type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 右辺ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: NDOF
+    integer(kint) :: i, j, k, l, in, N, NDOF2, jS, jE
     integer(kint), pointer :: index(:), item(:)
-    real(kdouble) :: X(:), Y(:), XT(NDOF), YT(NDOF)
+    real(kdouble) :: XT(NDOF), YT(NDOF)
     real(kdouble), pointer :: A(:)
 
     N = monoMAT%N

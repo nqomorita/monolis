@@ -10,16 +10,16 @@ contains
   !> DSTEV 関数（実数型）
   subroutine monolis_lapack_dstev(n, D, S, eig_val, eig_mode)
     implicit none
-    !> 行列の大きさ
+    !> [in] 行列の大きさ
     integer(kint), intent(in) :: n
-    !> 行列の対角成分
-    real(kdouble) :: D(:)
-    !> 行列の副対角成分
-    real(kdouble) :: S(:)
-    !> 固有値
-    real(kdouble) :: eig_val(:)
-    !> 固有ベクトル
-    real(kdouble) :: eig_mode(:,:)
+    !> [in] 行列の対角成分
+    real(kdouble), intent(in) :: D(:)
+    !> [in] 行列の副対角成分
+    real(kdouble), intent(in) :: S(:)
+    !> [out] 固有値
+    real(kdouble), intent(out) :: eig_val(:)
+    !> [out] 固有ベクトル
+    real(kdouble), intent(out) :: eig_mode(:,:)
     real(kdouble), allocatable :: r1(:)
     real(kdouble), allocatable :: r2(:)
     integer(kint) :: ldz, info

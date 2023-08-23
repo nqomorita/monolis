@@ -12,10 +12,10 @@ contains
   !> 前処理生成：対角スケーリング前処理（nxn ブロック、実数型）
   subroutine monolis_precond_diag_nn_setup_R(monoMAT, monoPREC)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
     real(kdouble), allocatable :: T(:), LU(:,:)
     integer(kint), pointer :: index(:), item(:)
@@ -83,10 +83,10 @@ contains
   !> 前処理生成：対角スケーリング前処理（nxn ブロック、複素数型）
   subroutine monolis_precond_diag_nn_setup_C(monoMAT, monoPREC)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NDOF, NDOF2
     complex(kdouble), allocatable :: T(:), LU(:,:)
     integer(kint), pointer :: index(:), item(:)
@@ -154,10 +154,10 @@ contains
   !> 前処理適用：対角スケーリング前処理（nxn ブロック、実数型）
   subroutine monolis_precond_diag_nn_apply_R(monoMAT, monoPREC, X, Y)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in] 前処理構造体
+    type(monolis_mat), target, intent(in) :: monoPREC
     integer(kint) :: i, j, k, N, NDOF, NDOF2
     real(kdouble) :: X(:), Y(:)
     real(kdouble), pointer :: ALU(:)
@@ -204,10 +204,10 @@ contains
   !> 前処理適用：対角スケーリング前処理（nxn ブロック、複素数型）
   subroutine monolis_precond_diag_nn_apply_C(monoMAT, monoPREC, X, Y)
     implicit none
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat), target :: monoPREC
+    !> [in] 行列構造体
+    type(monolis_mat), target, intent(in) :: monoMAT
+    !> [in] 前処理構造体
+    type(monolis_mat), target, intent(in) :: monoPREC
     integer(kint) :: i, j, k, N, NDOF, NDOF2
     complex(kdouble) :: X(:), Y(:)
     complex(kdouble), pointer :: ALU(:)
@@ -254,8 +254,8 @@ contains
   !> 前処理初期化：対角スケーリング前処理（nxn ブロック、実数型）
   subroutine monolis_precond_diag_nn_clear_R(monoPREC)
     implicit none
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_pdealloc_R_1d(monoPREC%R%D)
   end subroutine monolis_precond_diag_nn_clear_R
@@ -264,8 +264,8 @@ contains
   !> 前処理初期化：対角スケーリング前処理（nxn ブロック、複素数型）
   subroutine monolis_precond_diag_nn_clear_C(monoPREC)
     implicit none
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_pdealloc_C_1d(monoPREC%C%D)
   end subroutine monolis_precond_diag_nn_clear_C

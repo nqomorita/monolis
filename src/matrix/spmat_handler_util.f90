@@ -31,23 +31,23 @@ contains
   !> スカラ値を疎行列に設定（メイン関数、実数型）
   subroutine monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [in] 設定値
     real(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
@@ -74,23 +74,23 @@ contains
   !> スカラ値を疎行列に設定（メイン関数、複素数型）
   subroutine monolis_set_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [in] 設定値
     complex(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
@@ -117,19 +117,19 @@ contains
   !> 小行列を疎行列に設定（メイン関数、実数型）
   subroutine monolis_set_block_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> 設定値
+    !> [in] 設定値
     real(kdouble), intent(in) :: val(ndof,ndof)
     integer(kint) :: k, jn, im, jS, jE, i1, i2, NDOF2
 
@@ -156,19 +156,19 @@ contains
   !> 小行列を疎行列に設定（メイン関数、複素数型）
   subroutine monolis_set_block_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> 設定値
+    !> [in] 設定値
     complex(kdouble), intent(in) :: val(ndof,ndof)
     integer(kint) :: k, jn, im, jS, jE, i1, i2, NDOF2
 
@@ -196,26 +196,26 @@ contains
   !> スカラ値を疎行列から取得（メイン関数、実数型）
   subroutine monolis_get_scalar_from_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in] 係数行列
     real(kdouble), intent(in) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [out] 設定値
     real(kdouble), intent(out) :: val
-    !> 取得判定フラグ
-    logical :: is_find
+    !> [out] 取得判定フラグ
+    logical, intent(out) :: is_find
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     val = 0.0d0
@@ -242,26 +242,26 @@ contains
   !> スカラ値を疎行列から取得（メイン関数、複素数型）
   subroutine monolis_get_scalar_from_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in] 係数行列
     complex(kdouble), intent(in) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [out] 設定値
     complex(kdouble), intent(out) :: val
-    !> 取得判定フラグ
-    logical :: is_find
+    !> [out] 取得判定フラグ
+    logical, intent(out) :: is_find
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
     val = 0.0d0
@@ -289,23 +289,23 @@ contains
   !> スカラ値を疎行列に足込（メイン関数、実数型）
   subroutine monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [in] 設定値
     real(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
@@ -332,23 +332,23 @@ contains
   !> スカラ値を疎行列に足込（メイン関数、複素数型）
   subroutine monolis_add_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
-    !> ブロック中の行番号
+    !> [in] ブロック中の行番号
     integer(kint), intent(in) :: csub_i
-    !> ブロック中の列番号
+    !> [in] ブロック中の列番号
     integer(kint), intent(in) :: csub_j
-    !> 設定値
+    !> [in] 設定値
     complex(kdouble), intent(in) :: val
     integer(kint) :: j, jn, im, jS, jE, NDOF2
 
@@ -375,23 +375,23 @@ contains
   !> 行列値を疎行列に足込（メイン関数、実数型）
   subroutine monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, ndof, e1, e2, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> 入力行列の行サイズ
+    !> [in] 入力行列の行サイズ
     integer(kint), intent(in) :: n1
-    !> 入力行列の列サイズ
+    !> [in] 入力行列の列サイズ
     integer(kint), intent(in) :: n2
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号リスト
+    !> [in] 行番号リスト
     integer(kint), intent(in) :: e1(n1)
-    !> 列番号リスト
+    !> [in] 列番号リスト
     integer(kint), intent(in) :: e2(n2)
-    !> 設定値
+    !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
     integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
@@ -448,23 +448,23 @@ contains
   !> 行列値を疎行列に足込（メイン関数、複素数型）
   subroutine monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n1, n2, ndof, e1, e2, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> 入力行列の行サイズ
+    !> [in] 入力行列の行サイズ
     integer(kint), intent(in) :: n1
-    !> 入力行列の列サイズ
+    !> [in] 入力行列の列サイズ
     integer(kint), intent(in) :: n2
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 行番号リスト
+    !> [in] 行番号リスト
     integer(kint), intent(in) :: e1(n1)
-    !> 列番号リスト
+    !> [in] 列番号リスト
     integer(kint), intent(in) :: e2(n2)
-    !> 設定値
+    !> [in] 設定値
     complex(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
     integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
@@ -522,27 +522,27 @@ contains
   subroutine monolis_set_Dirichlet_bc_main_R(index, item, A, B, indexR, itemR, permA, &
     & ndof, node_id, ndof_bc, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     real(kdouble), intent(inout) :: B(:)
-    !> index 配列（CSC 形式）
+    !> [in] index 配列（CSC 形式）
     integer(kint), intent(in) :: indexR(:)
-    !> item 配列（CSC 形式）
+    !> [in] item 配列（CSC 形式）
     integer(kint), intent(in) :: itemR(:)
-    !> 行列成分の CSC 形式との置換ベクトル
+    !> [in] 行列成分の CSC 形式との置換ベクトル
     integer(kint), intent(in) :: permA(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 自由度番号
+    !> [in] 自由度番号
     integer(kint), intent(in) :: node_id
-    !> ブロック番号
+    !> [in] ブロック番号
     integer(kint), intent(in) :: ndof_bc
-    !> 境界条件の設定値
+    !> [in] 境界条件の設定値
     real(kdouble), intent(in) :: val
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
@@ -589,27 +589,27 @@ contains
   subroutine monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
     & ndof, node_id, ndof_bc, val)
     implicit none
-    !> index 配列
+    !> [in] index 配列
     integer(kint), intent(in) :: index(:)
-    !> item 配列
+    !> [in] item 配列
     integer(kint), intent(in) :: item(:)
-    !> 係数行列
+    !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> 右辺ベクトル
+    !> [in,out] 右辺ベクトル
     complex(kdouble), intent(inout) :: B(:)
-    !> index 配列（CSC 形式）
+    !> [in] index 配列（CSC 形式）
     integer(kint), intent(in) :: indexR(:)
-    !> item 配列（CSC 形式）
+    !> [in] item 配列（CSC 形式）
     integer(kint), intent(in) :: itemR(:)
-    !> 行列成分の CSC 形式との置換ベクトル
+    !> [in] 行列成分の CSC 形式との置換ベクトル
     integer(kint), intent(in) :: permA(:)
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
-    !> 自由度番号
+    !> [in] 自由度番号
     integer(kint), intent(in) :: node_id
-    !> ブロック番号
+    !> [in] ブロック番号
     integer(kint), intent(in) :: ndof_bc
-    !> 境界条件の設定値
+    !> [in] 境界条件の設定値
     complex(kdouble), intent(in) :: val
     integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
     logical :: is_add
@@ -654,9 +654,9 @@ contains
   !> @ingroup dev_matrix
   !> 非零要素がメモリ確保されていない場合にエラーストップ
   subroutine monolis_stop_by_matrix_assemble(ci, cj)
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ci
-    !> 列番号
+    !> [in] 列番号
     integer(kint), intent(in) :: cj
 
     call monolis_std_error_string("")
@@ -668,9 +668,9 @@ contains
   !> @ingroup dev_matrix
   !> ブロックサイズより大きい部分へのアクサス時にエラーストップ
   subroutine monolis_stop_by_submatrix_access(ndof, sub_dof)
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: ndof
-    !> ブロック番号
+    !> [in] ブロック番号
     integer(kint), intent(in) :: sub_dof
 
     call monolis_std_error_string("")
@@ -683,7 +683,7 @@ contains
   !> @ingroup dev_matrix
   !> 対角成分が見つからない場合にエラーストップ
   subroutine monolis_stop_by_set_DBC(node_id)
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: node_id
 
     call monolis_std_error_string("")
@@ -695,9 +695,9 @@ contains
   !> @ingroup dev_matrix
   !> 対角成分が零の場合にエラーストップ
   subroutine monolis_stop_by_set_zero_diag_component(node_id, ndof)
-    !> 行番号
+    !> [in] 行番号
     integer(kint), intent(in) :: node_id
-    !> ブロック自由度
+    !> [in] ブロック自由度
     integer(kint), intent(in) :: ndof
 
     call monolis_std_error_string("")
@@ -711,12 +711,12 @@ contains
   !> 行列の最大値の取得（実数型、メイン関数）
   subroutine monolis_get_max_matrix_component_main_R(monoMAT, monoCOM, max_val)
     implicit none
-    !> monolis MAT 構造体
-    type(monolis_mat) :: monoMAT
-    !> monolis COM 構造体
-    type(monolis_com) :: monoCOM
-    !> 最大値
-    real(kdouble) :: max_val
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in] monolis COM 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [out] 最大値
+    real(kdouble), intent(out) :: max_val
 
     max_val = maxval(monoMAT%R%A)
     call monolis_allreduce_R1(max_val, monolis_mpi_max, monoCOM%comm)
@@ -726,10 +726,10 @@ contains
   !> 行列の対角成分の 0 チェック（実数型、メイン関数）
   subroutine monolis_check_diagonal_zero_component_main_R(monoPRM, monoMAT)
     implicit none
-    !> monolis PRM 構造体
-    type(monolis_prm) :: monoPRM
-    !> monolis MAT 構造体
-    type(monolis_mat) :: monoMAT
+    !> [in] monolis PRM 構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(in) :: monoMAT
     integer(kint) :: i, j, k, jS, jE, in, kn, N, NDOF, NDOF2
 
     if(monoPRM%Iarray(monolis_prm_I_is_check_diag) == monolis_I_false) return

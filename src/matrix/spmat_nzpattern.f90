@@ -14,18 +14,18 @@ contains
   !> 単一メッシュデータから疎行列パターンを決定（実数型）
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_R(monolis, n_node, n_base, ndof, n_elem, elem)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
-    !> 自由度数
-    integer(kint) :: ndof
-    !> 要素数
-    integer(kint) :: n_elem
-    !> 要素
-    integer(kint) :: elem(:,:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 要素を構成する形状関数の数
+    integer(kint), intent(in) :: n_base
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [in] 要素コネクティビティ
+    integer(kint), intent(in) :: elem(:,:)
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
@@ -47,18 +47,18 @@ contains
   !> 単一メッシュデータから疎行列パターンを決定（複素数型）
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_C(monolis, n_node, n_base, ndof, n_elem, elem)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
-    !> 自由度数
-    integer(kint) :: ndof
-    !> 要素数
-    integer(kint) :: n_elem
-    !> 要素
-    integer(kint) :: elem(:,:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 要素を構成する形状関数の数
+    integer(kint), intent(in) :: n_base
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [in] 要素コネクティビティ
+    integer(kint), intent(in) :: elem(:,:)
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
@@ -81,18 +81,18 @@ contains
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R( &
     monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
-    !> 自由度数リスト
-    integer(kint) :: n_dof_list(:)
-    !> 要素数
-    integer(kint) :: n_elem
-    !> 要素
-    integer(kint) :: elem(:,:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 要素を構成する形状関数の数
+    integer(kint), intent(in) :: n_base
+    !> [in] 自由度数リスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [in] 要素コネクティビティ
+    integer(kint), intent(in) :: elem(:,:)
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
@@ -115,18 +115,18 @@ contains
   subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C( &
     monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 要素を構成する節点数
-    integer(kint) :: n_base
-    !> 自由度数リスト
-    integer(kint) :: n_dof_list(:)
-    !> 要素数
-    integer(kint) :: n_elem
-    !> 要素
-    integer(kint) :: elem(:,:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 要素を構成する形状関数の数
+    integer(kint), intent(in) :: n_base
+    !> [in] 自由度数リスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [in] 要素コネクティビティ
+    integer(kint), intent(in) :: elem(:,:)
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
@@ -149,18 +149,18 @@ contains
   subroutine monolis_get_nonzero_pattern_by_connectivity_R( &
       & monolis, n_node, ndof, n_elem, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度数
-    integer(kint) :: ndof
-    !> 要素数
-    integer(kint) :: n_elem
-    !> コネクティビティ index 配列
-    integer(kint) :: index(:)
-    !> コネクティビティ item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [out] コネクティビティ index 配列
+    integer(kint), intent(out) :: index(:)
+    !> [out] コネクティビティ item 配列
+    integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
@@ -178,18 +178,18 @@ contains
   subroutine monolis_get_nonzero_pattern_by_connectivity_C( &
       & monolis, n_node, ndof, n_elem, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度数
-    integer(kint) :: ndof
-    !> 要素数
-    integer(kint) :: n_elem
-    !> コネクティビティ index 配列
-    integer(kint) :: index(:)
-    !> コネクティビティ item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] 要素数
+    integer(kint), intent(in) :: n_elem
+    !> [out] コネクティビティ index 配列
+    integer(kint), intent(out) :: index(:)
+    !> [out] コネクティビティ item 配列
+    integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
 
@@ -206,16 +206,16 @@ contains
   !> 節点グラフから疎行列パターンを決定（実数型）
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_R(monolis, n_node, ndof, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度数
-    integer(kint) :: ndof
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
@@ -227,16 +227,16 @@ contains
   !> 節点グラフから疎行列パターンを決定（複素数型）
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_C(monolis, n_node, ndof, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度数
-    integer(kint) :: ndof
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
@@ -249,16 +249,16 @@ contains
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R( &
     monolis, n_node, n_dof_list, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度リスト
-    integer(kint) :: n_dof_list(:)
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 自由度リスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
       & (monolis%MAT, n_node, n_dof_list, index, item)
@@ -271,16 +271,16 @@ contains
   subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C( &
     monolis, n_node, n_dof_list, index, item)
     implicit none
-    !> monolis 構造体
-    type(monolis_structure) :: monolis
-    !> 節点数
-    integer(kint) :: n_node
-    !> 自由度リスト
-    integer(kint) :: n_dof_list(:)
-    !> index 配列
-    integer(kint) :: index(:)
-    !> item 配列
-    integer(kint) :: item(:)
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 自由度リスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
       & (monolis%MAT, n_node, n_dof_list, index, item)

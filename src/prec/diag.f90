@@ -14,14 +14,14 @@ contains
   !> 前処理生成：対角スケーリング前処理（実数型）
   subroutine monolis_precond_diag_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_diag_setup_R")
 
@@ -36,14 +36,14 @@ contains
   !> 前処理生成：対角スケーリング前処理（複素数型）
   subroutine monolis_precond_diag_setup_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_diag_setup_C")
 
@@ -54,14 +54,14 @@ contains
   !> 前処理適用：対角スケーリング前処理（実数型）
   subroutine monolis_precond_diag_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     real(kdouble) :: X(:), Y(:)
 
     call monolis_std_debug_log_header("monolis_precond_diag_apply_R")
@@ -77,14 +77,14 @@ contains
   !> 前処理適用：対角スケーリング前処理（複素数型）
   subroutine monolis_precond_diag_apply_C(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     complex(kdouble) :: X(:), Y(:)
 
     call monolis_std_debug_log_header("monolis_precond_diag_apply_C")
@@ -96,14 +96,14 @@ contains
   !> 前処理初期化：対角スケーリング前処理（実数型）
   subroutine monolis_precond_diag_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_diag_clear_R")
 
@@ -118,14 +118,14 @@ contains
   !> 前処理初期化：対角スケーリング前処理（複素数型）
   subroutine monolis_precond_diag_clear_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat) :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in] パラメータ構造体
+    type(monolis_prm), intent(in) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_diag_clear_C")
 

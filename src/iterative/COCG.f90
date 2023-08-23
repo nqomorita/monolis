@@ -17,14 +17,14 @@ contains
   !> COCG 法
   subroutine monolis_solver_COCG(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
-    !> パラメータ構造体
-    type(monolis_prm) :: monoPRM
-    !> 通信テーブル構造体
-    type(monolis_com) :: monoCOM
-    !> 行列構造体
-    type(monolis_mat), target :: monoMAT
-    !> 前処理構造体
-    type(monolis_mat) :: monoPREC
+    !> [in,out] パラメータ構造体
+    type(monolis_prm), intent(inout) :: monoPRM
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in,out] 行列構造体
+    type(monolis_mat), target, intent(inout) :: monoMAT
+    !> [in,out] 前処理構造体
+    type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF, NNDOF
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
