@@ -1,4 +1,4 @@
-!> ���Υ���Х⥸��`��
+!> 線形ソルバモジュール
 module mod_monolis_scalapack_wrapper
   use mod_monolis_utils
   use mod_monolis_scalapack
@@ -11,21 +11,21 @@ contains
   subroutine monolis_scalapack_gesvd_R_c(N_loc, M, P, A, S, V, D, comm) &
     & bind(c, name = "monolis_scalapack_gesvd_R_c_main")
     implicit none
-    !> ���Фδ󤭤������� N��
+    !> 行列の大きさ（行数 N）
     integer(c_int), value :: N_loc
-    !> ���Фδ󤭤������� M��
+    !> 行列の大きさ（列数 M）
     integer(c_int), value :: M
-    !> ���Фδ󤭤�����С��
+    !> 行列の大きさの最小値
     integer(c_int), value :: P
-    !> �������У�N_loc x M��
+    !> 入力行列（N_loc x M）
     real(c_double), target :: A(N_loc*M)
-    !> ���خ����У�N_loc x P��
+    !> 左特異行列（N_loc x P）
     real(c_double), target :: S(N_loc*P)
-    !> �خ�����P��
+    !> 特異値（P）
     real(c_double), target :: V(P)
-    !> ���خ����У�P x M��
+    !> 右特異行列（P x M）
     real(c_double), target :: D(P*M)
-    !> ���ߥ�˥��`��
+    !> コミュニケータ
     integer(c_int), value :: comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)

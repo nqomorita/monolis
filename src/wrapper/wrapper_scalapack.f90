@@ -179,7 +179,7 @@ contains
   end subroutine monolis_scalapack_gesvd_R_main
 
   !> @ingroup wrapper
-  !> PDGESVD 関数（実数型、行列情報の更新）
+  !> 右特異ベクトルのアップデート（実数型、行列情報の更新）
   subroutine gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
     implicit none
     !> [in] 
@@ -190,7 +190,7 @@ contains
     integer(kint), intent(in) :: M
     !> [in] 
     integer(kint), intent(in) :: lld_D
-    !> [in,out] 
+    !> [in,out] 右特異ベクトル
     real(kdouble), intent(inout) :: D(:,:)
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
