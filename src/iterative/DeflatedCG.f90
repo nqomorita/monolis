@@ -46,7 +46,7 @@ contains
     NPNDOF= NP*NDOF
     X => monoMAT%R%X
     B => monoMAT%R%B
-    iter_RR = 200
+    iter_RR = 100
     M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
     M_neib = M*(monoCOM%recv_n_neib + 1)
 
@@ -59,14 +59,22 @@ contains
       X = 0.0d0
     endif
 
-    call monolis_alloc_R_1d(R, NDOF*NP)
-    call monolis_alloc_R_1d(Z, NDOF*NP)
-    call monolis_alloc_R_1d(Q, NDOF*NP)
-    call monolis_alloc_R_1d(P, NDOF*NP)
+    call monolis_alloc_R_1d(R, NPNDOF)
+    call monolis_alloc_R_1d(Z, NPNDOF)
+    call monolis_alloc_R_1d(Q, NPNDOF)
+    call monolis_alloc_R_1d(P, NPNDOF)
+    call monolis_alloc_R_1d(X0, NPNDOF)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
+
+    if(M > 0)then
+      !call deflatedCG_initialize()
+      !call deflatedCG_pre()
+    endif
+
+    !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
@@ -79,16 +87,21 @@ contains
         call monolis_vec_copy_R(N, NDOF, Z, P)
       endif
 
+      if(M > 0)then
+        !call deflatedCG_omit()
+      endif
+
       call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
       call monolis_inner_product_main_R(monoCOM, N, NDOF, P, Q, omega, tdotp, tcomm_dotp)
       alpha = rho/omega
 
       call monolis_vec_AXPBY_R(N, NDOF, alpha, P, 1.0d0, X, X)
+      call monolis_vec_AXPBY_R(N, NDOF,-alpha, Q, 1.0d0, R, R)
 
       if(mod(iter, iter_RR) == 0)then
-        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      else
-        call monolis_vec_AXPBY_R(N, NDOF, -alpha, Q, 1.0d0, R, R)
+        if(M > 0)then
+          !call deflatedCG_residual_replacement()
+        endif
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
@@ -96,6 +109,10 @@ contains
 
       rho1 = rho
     enddo
+
+    if(M > 0)then
+      !call deflatedCG_post()
+    endif
 
     call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
 
@@ -108,6 +125,11 @@ contains
     call monolis_dealloc_R_1d(Z)
     call monolis_dealloc_R_1d(Q)
     call monolis_dealloc_R_1d(P)
+    call monolis_dealloc_R_1d(X0)
+
+    if(M > 0)then
+      !call deflatedCG_finalize()
+    endif
   end subroutine monolis_solver_DeflatedCG
 
 end module mod_monolis_solver_DeflatedCG
