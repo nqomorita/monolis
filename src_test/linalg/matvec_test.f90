@@ -410,7 +410,7 @@ contains
     type(monolis_structure) :: mat
     type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,4)
-    real(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
+    real(kdouble) :: a(5,3), b(5,3), b_th(5,3), mat_dense(5,5), time
 
     call monolis_std_global_log_string("monolis_matmat_product_main_local_R")
 
@@ -456,17 +456,19 @@ contains
     mat_dense(5, 4) = 1.0d0
     mat_dense(5, 5) = 2.0d0
 
-    a(1) = 1.0d0
-    a(2) = 1.0d0
-    a(3) = 1.0d0
-    a(4) = 1.0d0
-    a(5) = 1.0d0
+    a(1,1) = 1.0d0; a(1,2) = 2.0d0; a(1,3) = 3.0d0
+    a(2,1) = 1.0d0; a(2,2) = 2.0d0; a(2,3) = 3.0d0
+    a(3,1) = 1.0d0; a(3,2) = 2.0d0; a(3,3) = 3.0d0
+    a(4,1) = 1.0d0; a(4,2) = 2.0d0; a(4,3) = 3.0d0
+    a(5,1) = 1.0d0; a(5,2) = 2.0d0; a(5,3) = 3.0d0
 
-    !call monolis_matmat_product_main_local_R(monoCOM, monoMAT, M, X, Y, tspmv, tcomm)
+    call monolis_matmat_product_main_local_R(com, mat%mat, 3, a, b, time, time)
 
-    !b_th = matmul(mat_dense, a)
+    b_th = matmul(mat_dense, a)
 
-    !call monolis_test_check_eq_R("monolis_matmat_product_main_local_R_test", b, b_th)
+    call monolis_test_check_eq_R("monolis_matmat_product_main_local_R_test 1", b(:,1), b_th(:,1))
+    call monolis_test_check_eq_R("monolis_matmat_product_main_local_R_test 2", b(:,2), b_th(:,2))
+    call monolis_test_check_eq_R("monolis_matmat_product_main_local_R_test 3", b(:,3), b_th(:,3))
 
     call monolis_finalize(mat)
   end subroutine monolis_matmat_product_main_local_R_test

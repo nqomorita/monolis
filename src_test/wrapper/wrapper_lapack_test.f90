@@ -17,12 +17,29 @@ contains
   subroutine monolis_lapack_LU_fact_R_test()
     implicit none
     !> 行列の大きさ
-    integer(kint) :: N = 4
-    !> 行列の対角成分
-    real(kdouble) :: A(4,4)
+    integer(kint) :: N = 3
+    integer(kint) :: IPV(3)
+    real(kdouble) :: a(3,3), c(3,3), B(3), X(3), X_th(3)
 
-    !call monolis_lapack_LU_fact_R(N, A, IPV)
-    !call monolis_lapack_LU_solve_R(N, A, B, IPV, X)
+    a(1,1) = 3.0d0; a(1,2) = 3.0d0; a(1,3) = 2.0d0
+    a(2,1) = 2.0d0; a(2,2) = 3.0d0; a(2,3) = 3.0d0
+    a(3,1) = 1.0d0; a(3,2) = 2.0d0; a(3,3) = 1.0d0
+
+    call monolis_lapack_LU_fact_R(N, A, IPV)
+
+    B(1) = 1.0d0
+    B(2) = 2.0d0
+    B(3) = 3.0d0
+
+    call monolis_lapack_LU_solve_R(N, A, B, IPV, X)
+
+    c(1,1) = 0.75d0; c(1,2) =-0.25d0; c(1,3) =-0.75d0
+    c(2,1) =-0.25d0; c(2,2) =-0.25d0; c(2,3) = 1.25d0
+    c(3,1) =-0.25d0; c(3,2) = 0.75d0; c(3,3) =-0.75d0
+
+    X_th = matmul(c, B)
+
+    call monolis_test_check_eq_R("monolis_lapack_LU_fact_R_test", X, X_th)
   end subroutine monolis_lapack_LU_fact_R_test
 
   subroutine monolis_lapack_stev_R_test()
