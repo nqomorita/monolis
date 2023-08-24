@@ -20,6 +20,8 @@ contains
     call monolis_matvec_nn_R_test()
     call monolis_matvec_nn_C_test()
 
+    call monolis_matmat_product_main_local_R_test()
+
     call monolis_std_global_log_string("monolis_matvec_product_R")
     call monolis_std_global_log_string("monolis_matvec_product_C")
     call monolis_std_global_log_string("monolis_matvec_product_main_R")
@@ -402,4 +404,70 @@ contains
 
     call monolis_finalize(mat)
   end subroutine monolis_matvec_nn_C_test
+
+  subroutine monolis_matmat_product_main_local_R_test()
+    implicit none
+    type(monolis_structure) :: mat
+    type(monolis_com) :: com
+    integer(kint) :: n_node, n_elem, elem(2,4)
+    real(kdouble) :: a(5), b(5), b_th(5), mat_dense(5,5)
+
+    call monolis_std_global_log_string("monolis_matmat_product_main_local_R")
+
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
+
+    n_node = 5
+
+    n_elem = 4
+
+    elem(1,1) = 1; elem(2,1) = 2;
+    elem(1,2) = 2; elem(2,2) = 3;
+    elem(1,3) = 3; elem(2,3) = 4;
+    elem(1,4) = 4; elem(2,4) = 5;
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 1, 1, 2.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 1, 1.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 1, 1, 1, 1.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 1, 1, 2.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 3, 1, 1, 3.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 2, 1, 1, 1.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 3, 1, 1, 2.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 4, 1, 1, 4.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 4, 3, 1, 1, 1.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 4, 4, 1, 1, 2.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 4, 5, 1, 1, 5.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 5, 4, 1, 1, 1.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 5, 5, 1, 1, 2.0d0)
+
+    mat_dense(1, 1) = 2.0d0
+    mat_dense(1, 2) = 1.0d0
+    mat_dense(2, 1) = 1.0d0
+    mat_dense(2, 2) = 2.0d0
+    mat_dense(2, 3) = 3.0d0
+    mat_dense(3, 2) = 1.0d0
+    mat_dense(3, 3) = 2.0d0
+    mat_dense(3, 4) = 4.0d0
+    mat_dense(4, 3) = 1.0d0
+    mat_dense(4, 4) = 2.0d0
+    mat_dense(4, 5) = 5.0d0
+    mat_dense(5, 4) = 1.0d0
+    mat_dense(5, 5) = 2.0d0
+
+    a(1) = 1.0d0
+    a(2) = 1.0d0
+    a(3) = 1.0d0
+    a(4) = 1.0d0
+    a(5) = 1.0d0
+
+    !call monolis_matmat_product_main_local_R(monoCOM, monoMAT, M, X, Y, tspmv, tcomm)
+
+    !b_th = matmul(mat_dense, a)
+
+    !call monolis_test_check_eq_R("monolis_matmat_product_main_local_R_test", b, b_th)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_matmat_product_main_local_R_test
 end module mod_monolis_matvec_test

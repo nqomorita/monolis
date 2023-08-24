@@ -77,7 +77,7 @@ contains
     call monolis_alloc_R_1d(eig_val_tri, iter)
     call monolis_alloc_R_2d(eig_mode_tri, iter, iter)
 
-    call monolis_lapack_dstev(iter, alpha, beta, eig_val_tri, eig_mode_tri)
+    call monolis_lapack_stev_R(iter, alpha, beta, eig_val_tri, eig_mode_tri)
 
     norm = 0.0d0
     do i = 1, min(iter, n_get_eigen)

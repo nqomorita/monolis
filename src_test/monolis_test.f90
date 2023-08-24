@@ -11,6 +11,7 @@ program monolis_test
   use mod_monolis_spmat_handler_test
   use mod_monolis_vec_util_test
   use mod_monolis_linalg_test
+  use mod_monolis_matalg_dense_test
   use mod_monolis_converge_test
   use mod_monolis_matvec_test
   use mod_monolis_solver_CG_test
@@ -47,6 +48,7 @@ program monolis_test
   call monolis_linalg_test()
   call monolis_converge_test()
   call monolis_matvec_test()
+  call monolis_matalg_dense_test()
 
   call monolis_precond_test()
   call monolis_solve_test()

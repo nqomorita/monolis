@@ -122,6 +122,45 @@ contains
   end subroutine monolis_matvec_product_main_C
 
   !> @ingroup dev_linalg
+  !> 疎行列密行列積（実数型、メイン関数、通信なし）
+  subroutine monolis_matmat_product_main_local_R(monoCOM, monoMAT, M, X, Y, tspmv, tcomm)
+    implicit none
+    !> [in] monolis 構造体
+    type(monolis_com), intent(inout) :: monoCOM
+    !> [in] monolis 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in] ベクトル本数
+    integer(kint) :: M
+    !> [in,out] 右辺ベクトル
+    real(kdouble), intent(inout) :: X(:,:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:,:)
+    !> [in,out] 計算時間
+    real(kdouble) :: tspmv
+    !> [in,out] 通信時間
+    real(kdouble) :: tcomm
+    integer(kint) :: i, comm, comm_size, my_rank
+
+    call monolis_std_debug_log_header("monolis_matmat_product_main_local_R")
+
+    comm = monoCOM%comm
+    comm_size = monoCOM%comm_size
+    my_rank = monoCOM%my_rank
+
+    monoCOM%comm = monolis_mpi_get_self_comm()
+    monoCOM%comm_size = 1
+    monoCOM%my_rank = 0
+
+    do i = 1, M
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, X(:,i), Y(:,i), tspmv, tcomm)
+    enddo
+
+    monoCOM%comm = comm
+    monoCOM%comm_size = comm_size
+    monoCOM%my_rank = my_rank
+  end subroutine monolis_matmat_product_main_local_R
+
+  !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、nxn ブロック）
   subroutine monolis_matvec_nn_R(N, index, item, A, X, Y, NDOF)
     implicit none

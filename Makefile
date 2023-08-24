@@ -77,6 +77,7 @@ spmat_handler.f90
 SRC_LINALG = \
 matvec.f90 \
 inner_product.f90 \
+matalg_dense.f90 \
 mat_converge.f90 \
 vec_util.f90
 
