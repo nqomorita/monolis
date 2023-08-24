@@ -118,6 +118,7 @@ PipeCG.f90 \
 PipeCR.f90 \
 PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
+DeflatedCG.f90 \
 COCG.f90
 
 #CABiCGSTAB_noprec.f90 \

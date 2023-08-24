@@ -21,10 +21,12 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_CABiCGSTAB_noprec = 8
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 8
+  !> パラメータ：Deflated CG 法
+  integer(kint), parameter :: monolis_iter_DeflatedCG    = 9
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG       = 9
+  integer(kint), parameter :: monolis_iter_COCG       = 10
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -49,7 +51,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(9) :: monolis_str_iter = (/&
+  character*24, dimension(10) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -59,6 +61,7 @@ module mod_monolis_def_solver
   & "BiCGSTAB_noprec    ", &
   !& "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
+  & "Deflated CG        ", &
   !& "GMRES              ", &
   & "COCG               "/)
 
@@ -115,6 +118,8 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_show_summary = 16
   !> パラメータ：計算時間の統計的処理結果の表示
   integer(kint), parameter :: monolis_prm_I_show_time_statistics = 17
+  !> パラメータ：Deflated CG 法のローカル入力基底本数
+  integer(kint), parameter :: monolis_prm_I_n_local_deflation_mode = 18
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
