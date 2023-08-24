@@ -47,8 +47,8 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
-!    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
-!    M_neib = M*(monoCOM%recv_n_neib + 1)
+    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
+    M_neib = M*(monoCOM%recv_n_neib + 1)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
