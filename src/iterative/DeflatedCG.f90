@@ -70,8 +70,8 @@ contains
     if(is_converge) return
 
     if(M > 0)then
-      !call deflatedCG_initialize()
-      !call deflatedCG_pre()
+      call deflatedCG_initialize()
+      call deflatedCG_pre()
     endif
 
     !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
@@ -88,7 +88,7 @@ contains
       endif
 
       if(M > 0)then
-        !call deflatedCG_omit()
+        call deflatedCG_omit()
       endif
 
       call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
@@ -100,7 +100,7 @@ contains
 
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          !call deflatedCG_residual_replacement()
+          call deflatedCG_residual_replacement()
         endif
       endif
 
@@ -111,7 +111,7 @@ contains
     enddo
 
     if(M > 0)then
-      !call deflatedCG_post()
+      call deflatedCG_post()
     endif
 
     call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
@@ -128,8 +128,160 @@ contains
     call monolis_dealloc_R_1d(X0)
 
     if(M > 0)then
-      !call deflatedCG_finalize()
+      call deflatedCG_finalize()
     endif
   end subroutine monolis_solver_DeflatedCG
 
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_initialize()
+    implicit none
+
+    call monolis_prm_initialize(monoPRM_deflated_eq)
+    call monolis_mat_initialize(monoMAT_deflated_eq)
+    call monolis_com_initialize(monoCOM_deflated_eq)
+
+    call monolis_alloc_R_2d(W, NPNDOF, M_neib)
+    call monolis_alloc_R_2d(WtA, M_neib, NNDOF)
+    call monolis_alloc_R_2d(WtA, M, M)
+    call monolis_alloc_R_1d(g, M_neib)
+    call monolis_alloc_R_1d(IPV_R, M)
+
+    !call deflatedCG_set_deflation_mode()
+    !call deflatedCG_set_defeq_initialize()
+    !call deflatedCG_set_defeq_mat_gen()
+  end subroutine deflatedCG_initialize
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_pre()
+    implicit none
+
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    NNDOF = N*NDOF
+
+    allocate(WTR(M_neib), source = 0.0d0)
+    allocate(Wg(NNDOF), source = 0.0d0)
+
+    monoMAT_deflated_eq%B = 0.0d0
+    call monolis_dense_matvec_local(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), monoMAT_deflated_eq%B(1:M), monoPRM%tdemv)
+
+    call interface_monolis_solve_(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq)
+    call monolis_DeflatedCG_timer_totalling(monoPRM, monoPRM_deflated_eq)
+
+    g = monoMAT_deflated_eq%X
+
+    call monolis_dense_matvec_local(NNDOF, M, W, g, Wg, monoPRM%tdemv)
+    call monolis_vec_AXPY(N, NDOF, 1.0d0, X, Wg, X)
+    call monolis_vec_copy_R(N, NDOF, X, X0)
+
+    call monolis_residual(monoCOM, monoMAT, X, B, R, time, time)
+
+    call monolis_dense_matvec_local(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), monoMAT_deflated_eq%B(1:M), monoPRM%tdemv)
+
+    call interface_monolis_solve_(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq)
+    call monolis_DeflatedCG_timer_totalling(monoPRM, monoPRM_deflated_eq)
+
+    g = monoMAT_deflated_eq%X
+
+    call monolis_dense_matmul_local(M, NNDOF, M, transpose(W(1:NNDOF,1:M)), W(1:NNDOF,1:M), WTW, monoPRM%tdemv)
+
+    call monolis_lapack_LU_fact(M, WTW, IPV_R)
+  end subroutine deflatedCG_pre
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_omit()
+    implicit none
+
+    N     = monoMAT%N
+    NDOF  = monoMAT%NDOF
+    NNDOF = N*NDOF
+
+    allocate(WTAZ(M_neib), source = 0.0d0)
+    allocate(WLinvWTAZ(NNDOF), source = 0.0d0)
+
+    call monolis_dense_matvec_local(M_neib, NNDOF, WTA(1:M_neib,1:NNDOF), Z(1:NNDOF), WTAZ, monoPRM%tdemv)
+
+    monoMAT_deflated_eq%B(1:M) = WTAZ(1:M)
+
+    call monolis_update_R_reverse(monoCOM_deflated_eq, M, WTAZ, monoPRM%tcomm_urev)
+
+    monoMAT_deflated_eq%B(1:M) = monoMAT_deflated_eq%B(1:M) + WTAZ(1:M)
+
+    call interface_monolis_solve_(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq)
+    call monolis_DeflatedCG_timer_totalling(monoPRM, monoPRM_deflated_eq)
+
+    call monolis_dense_matvec_local(NNDOF, M, W(1:NNDOF,1:M), monoMAT_deflated_eq%X(1:M), WLinvWTAZ, monoPRM%tdemv)
+    call monolis_vec_AXPY(N, NDOF, -1.0d0, WLinvWTAZ, P, P)
+  end subroutine deflatedCG_omit
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_residual_replacement()
+    implicit none
+
+    N     = monoMAT%N
+    NDOF  = monoMAT%NDOF
+    NNDOF = N*NDOF
+
+    allocate(WWTWinvWTR(NNDOF), source = 0.0d0)
+
+    call monolis_dense_matvec_local(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), WTR, monoPRM%tdemv)
+
+    call monolis_lapack_LU_solve(M, WTW, WTR, IPV_R, WTR)
+
+    call monolis_dense_matvec_local(NNDOF, M, W, WTR, WWTWinvWTR, monoPRM%tdemv)
+
+    call monolis_vec_AXPY(N, NDOF, -1.0d0, WWTWinvWTR, R, R)
+  end subroutine deflatedCG_residual_replacement
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_post()
+    implicit none
+
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    NNDOF = N*NDOF
+    NPNDOF= NP*NDOF
+
+    allocate(AX(NPNDOF), source = 0.0d0)
+    allocate(h(M_neib), source = 0.0d0)
+    allocate(WgMh(NNDOF), source = 0.0d0)
+
+    call monolis_matvec(monoCOM, monoMAT, X - X0, AX, time, time)
+
+    call monolis_dense_matvec_local(M, NNDOF, transpose(W(1:NNDOF,1:M)), AX(1:NNDOF), monoMAT_deflated_eq%B(1:M), monoPRM%tdemv)
+
+    call interface_monolis_solve_(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq)
+    call monolis_DeflatedCG_timer_totalling(monoPRM, monoPRM_deflated_eq)
+
+    h = monoMAT_deflated_eq%X
+
+    call monolis_dense_matvec_local(NNDOF, M_neib, W, g - h, WgMh, monoPRM%tdemv)
+
+    call monolis_vec_AXPY(N, NDOF, 1.0d0, WgMh, X, X)
+
+    call monolis_update_R(monoCOM, NDOF, X, time)
+  end subroutine deflatedCG_post
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
+  subroutine deflatedCG_finalize()
+    implicit none
+
+    deallocate(W)
+    deallocate(WTA)
+    deallocate(g)
+    deallocate(WTW)
+    deallocate(IPV_R)
+
+    call monolis_prm_finalize(monoPRM_deflated_eq)
+    call monolis_mat_finalize(monoMAT_deflated_eq)
+    call monolis_com_finalize(monoCOM_deflated_eq)
+  end subroutine deflatedCG_finalize
 end module mod_monolis_solver_DeflatedCG
