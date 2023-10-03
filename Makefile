@@ -81,8 +81,10 @@ matalg_dense.f90 \
 mat_converge.f90 \
 vec_util.f90
 
-SRC_WRAP = \
-wrapper_lapack.f90 \
+SRC_WRAP1 = \
+wrapper_lapack.f90
+
+SRC_WRAP2 = \
 wrapper_scalapack.f90
 
 #matmat.f90 \
@@ -120,9 +122,6 @@ PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
 DeflatedCG.f90 \
 COCG.f90
-
-#CABiCGSTAB_noprec.f90 \
-#GMRES.f90 \
 
 SRC_SOLV = \
 solver.f90
@@ -177,9 +176,10 @@ $(addprefix eigen/, $(SRC_EIGEN_SOLV_C))
 ##> all targes
 SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \
+$(addprefix wrapper/, $(SRC_WRAP1)) \
 $(addprefix matrix/, $(SRC_MAT)) \
 $(addprefix linalg/, $(SRC_LINALG)) \
-$(addprefix wrapper/, $(SRC_WRAP)) \
+$(addprefix wrapper/, $(SRC_WRAP2)) \
 $(addprefix fact/, $(SRC_FACT)) \
 $(addprefix prec/, $(SRC_PREC)) \
 $(addprefix iterative/, $(SRC_ITER)) \

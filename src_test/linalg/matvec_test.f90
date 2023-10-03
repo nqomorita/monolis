@@ -336,6 +336,7 @@ contains
     enddo
     enddo
 
+    a = 1.0d0
     b_th = matmul(mat_dense, a)
 
     call monolis_test_check_eq_R("monolis_matvec_nn_R_test", b, b_th)

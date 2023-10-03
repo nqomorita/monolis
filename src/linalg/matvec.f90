@@ -3,6 +3,7 @@ module mod_monolis_matvec
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_lapack
   implicit none
 
 contains
@@ -179,14 +180,14 @@ contains
     !> [in] ブロックサイズ
     integer(kint), intent(in) :: NDOF
     integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
-    real(kdouble) :: XT(NDOF), YT(NDOF)
+    real(kdouble) :: XT(NDOF), YT(NDOF), TMP(NDOF,NDOF), ZT(NDOF), time
 
     NDOF2 = NDOF*NDOF
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
-!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp & private(YT, XT, ZT, TMP, i, j, k, l, jS, jE, in)
 !$omp do
     do i = 1, N
       YT = 0.0d0
@@ -197,11 +198,17 @@ contains
         do k = 1, NDOF
           XT(k) = X(NDOF*(in-1)+k)
         enddo
+        call monolis_vec_to_mat_R(NDOF, NDOF, A(NDOF2*(j-1)+1:NDOF2*j), TMP)
+        call monolis_lapack_dense_matvec_trans_local_R(NDOF, NDOF, TMP, XT, ZT, time)
         do k = 1, NDOF
-          do l = 1, NDOF
-            YT(k) = YT(k) + A(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
-          enddo
+          YT(k) = YT(k) + ZT(k)
         enddo
+        !> original code
+        !do k = 1, NDOF
+        !  do l = 1, NDOF
+        !    YT(k) = YT(k) + A(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
+        !  enddo
+        !enddo
       enddo
       do k = 1, NDOF
         Y(NDOF*(i-1)+k) = YT(k)
@@ -230,7 +237,7 @@ contains
     !> [in] ブロックサイズ
     integer(kint), intent(in) :: NDOF
     integer(kint) :: i, j, k, l, in, NDOF2, jS, jE
-    complex(kdouble) :: XT(NDOF), YT(NDOF)
+    complex(kdouble) :: XT(NDOF), YT(NDOF), TMP(NDOF,NDOF), ZT(NDOF), time
 
     NDOF2 = NDOF*NDOF
 
@@ -248,6 +255,12 @@ contains
         do k = 1, NDOF
           XT(k) = X(NDOF*(in-1)+k)
         enddo
+        !call monolis_vec_to_mat_C(NDOF, NDOF, A(NDOF2*(j-1)+1:NDOF2*j), TMP)
+        !call monolis_lapack_dense_matvec_trans_local_C(NDOF, NDOF, A, XT, ZT, time)
+        !do k = 1, NDOF
+        !  YT(k) = YT(k) + ZT(k)
+        !enddo
+        !> original code
         do k = 1, NDOF
           do l = 1, NDOF
             YT(k) = YT(k) + A(NDOF2*(j-1)+NDOF*(k-1)+l) * XT(l)
