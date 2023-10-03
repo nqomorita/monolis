@@ -7,6 +7,34 @@ module mod_monolis_lapack
 contains
 
   !> @ingroup wrapper
+  !> 密行列ベクトル積（DGEMV 関数、実数型）
+  subroutine monolis_lapack_dense_matvec_local_R(N, M, MAT, X, Y, tdemv)
+    implicit none
+    !> [in] 行列サイズ N
+    integer(kint) :: N
+    !> [in] 行列サイズ M
+    integer(kint) :: M
+    !> [in] 入力行列（N x M）
+    real(kdouble) :: MAT(:,:)
+    !> [in] 入力ベクトル（M）
+    real(kdouble) :: X(:)
+    !> [out] 出力ベクトル（N）
+    real(kdouble) :: Y(:)
+    !> [in,out] 計算時間
+    real(kdouble), optional :: tdemv
+    real(kdouble) :: t1, t2
+
+    t1 = monolis_get_time()
+
+    Y = 0.0d0
+    call dgemv("N", N, M, 1.0d0, MAT, N, X, 1, 1.0d0, Y, 1)
+
+    t2 = monolis_get_time()
+
+    if(present(tdemv)) tdemv = tdemv + t2 - t1
+  end subroutine monolis_lapack_dense_matvec_local_R
+
+  !> @ingroup wrapper
   !> 三重対角行列の固有値問題求解（DSTEV 関数、実数型）
   subroutine monolis_lapack_stev_R(N, D, S, eig_val, eig_mode)
     implicit none
