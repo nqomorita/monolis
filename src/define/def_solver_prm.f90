@@ -146,12 +146,14 @@ module mod_monolis_def_solver
     integer(kint) :: Iarray(monolis_prm_Iarray_size) = 0
     !> 実数パラメータ
     real(kdouble) :: Rarray(monolis_prm_Rarray_size) = 0.0d0
-    !> 実数パラメータ
+    !> トップディレクトリ名
     character(monolis_charlen) :: com_top_dir_name
-    !> 実数パラメータ
+    !> 分割ファイルディレクトリ名
     character(monolis_charlen) :: com_part_dir_name
-    !> 実数パラメータ
+    !> 読込ファイルディレクトリ名
     character(monolis_charlen) :: com_file_name
+    !> deflation mode
+    real(kdouble), allocatable :: deflation_mode(:,:)
   end type monolis_prm
 
 contains
