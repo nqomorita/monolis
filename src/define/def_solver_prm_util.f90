@@ -33,6 +33,7 @@ module mod_monolis_def_solver_util
 
 contains
 
+  !# Iarray section
   !> @ingroup param
   !> ソルバの設定
   subroutine monolis_set_method(monolis, param)
@@ -242,6 +243,33 @@ contains
     monolis%PRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_conv_L2I(param)
   end subroutine monolis_show_timelog_statistics
 
+  !> @ingroup param
+  !> Deflated CG 法のローカル入力基底本数
+  subroutine monolis_set_deflation_mode(monolis, n_deflation_mode, deflation_mode)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 基底本数
+    integer(kint) :: n_deflation_mode
+    !> [in] 基底ベクトル
+    real(kdouble) :: deflation_mode(:,:)
+    integer(kint) :: n
+
+    call monolis_dealloc_R_2d(monolis%PRM%deflation_mode)
+
+    n = monolis%MAT%NP*monolis%MAT%NDOF
+    call monolis_alloc_R_2d(monolis%PRM%deflation_mode, n, n_deflation_mode)
+
+    if(size(deflation_mode,1) /= n)then
+      !stop "** monolis_param_set_global_deflation_mode: size of input array is different with DoF."
+      stop "monolis_set_deflation_mode"
+    endif
+
+    monolis%PRM%Iarray(monolis_prm_I_n_local_deflation_mode) = n_deflation_mode
+    monolis%PRM%deflation_mode = deflation_mode
+  end subroutine monolis_set_deflation_mode
+
+  !# Rarray section
   !> @ingroup param
   !> 収束判定閾値の設定
   subroutine monolis_set_tolerance(monolis, param)

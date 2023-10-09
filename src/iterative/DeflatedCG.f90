@@ -3,6 +3,7 @@ module mod_monolis_solver_DeflatedCG
   use mod_monolis_def_solver
   use mod_monolis_def_mat
   use mod_monolis_utils_define_com_init
+  use mod_monolis_def_solver_util
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
@@ -78,9 +79,9 @@ contains
     if(is_converge) return
 
     if(M > 0)then
-      call deflatedCG_initialize(monoCOM, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_set_deflation_mode(monoPRM, monoCOM, monoMAT, NPNDOF, M, M_neib, W)
+      call deflatedCG_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, NPNDOF, IPV_R, W, WtA, WtW, g)
-      call deflatedCG_set_deflation_mode(monoPRM, monoCOM, monoMAT, M, W)
       call deflatedCG_pre(monoPRM, monoCOM, monoMAT, &
         & monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, X, X0, g, B, R, WTW, IPV_R)
@@ -149,24 +150,28 @@ contains
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_initialize(monoCOM, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
     & M, M_neib, NNDOF, NPNDOF, IPV_R, W, WtA, WtW, g)
     implicit none
+    !> [in] 通信テーブル構造体
     type(monolis_com) :: monoCOM
+    !> [in] パラメータ構造体
+    type(monolis_prm) :: monoPRM
+    !> [in] 行列構造体
+    type(monolis_mat) :: monoMAT
     type(monolis_prm) :: monoPRM_deflated_eq
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_com) :: monoCOM_deflated_eq_self
     type(monolis_mat) :: monoMAT_deflated_eq
     integer(kint) :: NNDOF, NPNDOF, M, M_neib
-    integer(kint) :: i, n_neib
+    integer(kint) :: i, NP
     real(kdouble) :: tdemv, time
-    integer(kint), allocatable :: index(:), item(:), global_id(:)
+    integer(kint), allocatable :: global_id(:)
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: W(:,:), WtA(:,:), WtW(:,:), g(:)
     real(kdouble), allocatable :: AW(:,:), L(:,:)
 
     !# allocation
-    call monolis_alloc_R_2d(W, NPNDOF, M_neib)
     call monolis_alloc_R_2d(WtA, M_neib, NNDOF)
     call monolis_alloc_R_2d(WtW, M, M)
     call monolis_alloc_R_1d(g, M_neib)
@@ -180,58 +185,63 @@ contains
     call monolis_mat_initialize(monoMAT_deflated_eq)
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
-    call monolis_alloc_I_1d(global_id, M_neib)
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_show_iterlog) = .false.
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time_statistics) = .false.
+
+    NP = monoCOM%recv_n_neib + 1
+    call monolis_alloc_I_1d(global_id, NP)
 
     global_id(1) = monolis_mpi_get_local_my_rank(monoCOM%comm)
     call monolis_mpi_update_I(monoCOM, 1, global_id, time)
-    call monolis_com_initialize_by_global_id(monoCOM_deflated_eq, monoCOM%comm, 1, M_neib, global_id)
+    call monolis_com_initialize_by_global_id(monoCOM_deflated_eq, monoCOM%comm, 1, NP, global_id)
 
-    call monolis_alloc_I_1d(index, M_neib + 1)
-    call monolis_alloc_I_1d(item, 2*M_neib - 2)
+    monoMAT_deflated_eq%N = NP
+    monoMAT_deflated_eq%NP = NP
+    monoMAT_deflated_eq%NDOF = M
 
-    index(2) = M_neib - 1
-    do i = 2, M_neib
-      index(i + 1) = index(i) + 1
+    call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%index, 2)
+    call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%item, NP)
+
+    monoMAT_deflated_eq%CSR%index(1) = 0
+    monoMAT_deflated_eq%CSR%index(2) = NP
+
+    do i = 1, NP
+      monoMAT_deflated_eq%CSR%item(i) = i
     enddo
 
-    do i = 1, M_neib - 1
-      item(i) = i + 1
-    enddo
-
-    do i = M_neib, 2*M_neib - 2
-      item(i) = 1
-    enddo
-
-    call monolis_get_nonzero_pattern_by_nodal_graph_main(monoMAT_deflated_eq, M_neib, M, index, item)
     call monolis_alloc_nonzero_pattern_mat_val_R(monoMAT_deflated_eq)
 
     !# matrix value assign
-    call monolis_matmat_product_main_local_R(monoCOM_deflated_eq_self, monoMAT_deflated_eq, M_neib, W, AW, time, time)
-
+    call monolis_matmat_product_main_local_R(monoCOM_deflated_eq_self, monoMAT, M_neib, W, AW, time, time)
     call monolis_dense_matmul_local_R(M, NNDOF, M_neib, transpose(W), AW, L, tdemv)
     WtA = transpose(AW)
 
     call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
       & monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%ndof, 1, 1, L(1:M,1:M))
 
-    do i = 1, n_neib
+    do i = 1, monoCOM%recv_n_neib  - 1
       call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
         & monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%ndof, 1, i + 1, L(1:M, i*M + 1:i*M + M))
     enddo
   end subroutine deflatedCG_initialize
 
-  subroutine deflatedCG_set_deflation_mode(monoPRM, monoCOM, monoMAT, M, W)
+  subroutine deflatedCG_set_deflation_mode(monoPRM, monoCOM, monoMAT, NPNDOF, M, M_neib, W)
     implicit none
     !> monolis 構造体
     type(monolis_prm) :: monoPRM
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     !> 縮約次数 (local)
-    integer(kint) :: M
+    integer(kint) :: NPNDOF, M, M_neib
     !> 縮約基底ベクトル
-    real(kdouble) :: W(:,:)
+    real(kdouble), allocatable :: W(:,:)
     real(kdouble) :: tcomm
     integer(kint) :: iS, in, i, j, k, ierr, id, NDOF
+
+    call monolis_alloc_R_2d(W, NPNDOF, M_neib)
+    W = monoPRM%deflation_mode
 
     NDOF  = monoMAT%NDOF
     W(:,1:M) = monoPRM%deflation_mode(:,1:M)

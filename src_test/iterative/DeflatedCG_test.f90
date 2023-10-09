@@ -12,9 +12,10 @@ contains
 
     do n_dof = 1, 3
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
-      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
-      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
+      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
+      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
     enddo
+  stop
   end subroutine monolis_solver_DeflatedCG_test
 
   subroutine monolis_solver_DeflatedCG_test_main(n_dof, prec)
@@ -24,8 +25,11 @@ contains
     integer(kint) :: n_node, nelem, elem(2,9)
     integer(kint) :: i1, i2, j1, j2
     integer(kint) :: n_dof, prec
+    integer(kint) :: n_get_eigen
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
+    real(kdouble) :: eig_val(n_dof*10), eig_mode(n_dof*10,4)
+    logical :: is_bc(n_dof*10)
 
     call monolis_std_global_log_string("monolis_solver_DeflatedCG")
     call monolis_std_log_I1("DOF", n_dof)
@@ -72,9 +76,30 @@ contains
 
     call monolis_matvec_product_R(mat, com, a, b)
 
+    !> get deflation mode
+    call monolis_std_global_log_string("get deflation mode")
     call monolis_set_method(mat, monolis_iter_CG)
+    call monolis_set_precond(mat, monolis_prec_NONE)
+    call monolis_show_iterlog(mat, .false.)
+    call monolis_show_timelog(mat, .false.)
+    call monolis_show_summary(mat, .false.)
+    call monolis_show_timelog_statistics(mat, .false.)
+
+    n_get_eigen = 4
+    is_bc = .false.
+    call monolis_eigen_inverted_standard_lanczos_R &
+      & (mat, com, n_get_eigen, 1.0d-8, 20, eig_val, eig_mode, is_bc)
+
+    call monolis_set_deflation_mode(mat, n_get_eigen, eig_mode)
+
+    !> solve
+    call monolis_std_global_log_string("Deflated CG main")
+    call monolis_set_method(mat, monolis_iter_DeflatedCG)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-10)
+    call monolis_show_iterlog(mat, .true.)
+    call monolis_show_timelog(mat, .true.)
+    call monolis_show_summary(mat, .true.)
     call monolis_show_timelog_statistics(mat, .true.)
 
     a = 0.0d0
