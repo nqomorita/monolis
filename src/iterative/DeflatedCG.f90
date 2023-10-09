@@ -250,7 +250,6 @@ contains
     integer(kint) :: iS, in, i, j, k, ierr, id, NDOF
 
     call monolis_alloc_R_2d(W, NPNDOF, M_neib)
-    W = monoPRM%deflation_mode
 
     NDOF  = monoMAT%NDOF
     W(:,1:M) = monoPRM%deflation_mode(:,1:M)
@@ -261,8 +260,8 @@ contains
 
     id = M
     do i = 1, monoCOM%recv_n_neib
-      iS = monoCOM%recv_index(i-1)
-      in = monoCOM%recv_index(i  ) - iS
+      iS = monoCOM%recv_index(i)
+      in = monoCOM%recv_index(i + 1) - iS
       do j = 1, M
         id = id + 1
         do k = iS + 1, iS + in
