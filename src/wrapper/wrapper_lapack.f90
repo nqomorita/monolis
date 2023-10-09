@@ -36,7 +36,7 @@ contains
 
   !> @ingroup wrapper
   !> 密行列ベクトル積（DGEMV 関数、実数型、転置）
-  subroutine monolis_lapack_dense_matvec_trans_local_R(N, M, MAT, X, Y, tdemv)
+  subroutine monolis_lapack_dense_matvec_trans_local_R(M, N, MAT, X, Y, tdemv)
     implicit none
     !> [in] 行列サイズ N
     integer(kint) :: N

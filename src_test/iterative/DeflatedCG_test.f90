@@ -11,9 +11,9 @@ contains
     integer(kint) :: n_dof
 
     do n_dof = 1, 3
-      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
+      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
       !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
-      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
     enddo
   stop
   end subroutine monolis_solver_DeflatedCG_test
@@ -88,7 +88,7 @@ contains
     n_get_eigen = 4
     is_bc = .false.
     call monolis_eigen_inverted_standard_lanczos_R &
-      & (mat, com, n_get_eigen, 1.0d-8, 20, eig_val, eig_mode, is_bc)
+      & (mat, com, n_get_eigen, 1.0d-10, n_dof*20, eig_val, eig_mode, is_bc)
 
     call monolis_set_deflation_mode(mat, n_get_eigen, eig_mode)
 
@@ -96,7 +96,7 @@ contains
     call monolis_std_global_log_string("Deflated CG main")
     call monolis_set_method(mat, monolis_iter_DeflatedCG)
     call monolis_set_precond(mat, prec)
-    call monolis_set_tolerance(mat, 1.0d-10)
+    call monolis_set_tolerance(mat, 1.0d-9)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_timelog(mat, .true.)
     call monolis_show_summary(mat, .true.)

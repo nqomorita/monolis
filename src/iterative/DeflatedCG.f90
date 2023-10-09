@@ -87,6 +87,12 @@ contains
         & M, M_neib, NNDOF, W, X, X0, g, B, R, WTW, IPV_R)
     endif
 
+    call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, rho, tdotp, tcomm_dotp)
+
+    !if(rho/B2 < monoPRM%tol)then
+    !  stop "converge before loop"
+    !endif
+
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
@@ -185,6 +191,9 @@ contains
     call monolis_mat_initialize(monoMAT_deflated_eq)
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_DIAG
+    monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-11
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_iterlog) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
@@ -219,11 +228,11 @@ contains
     WtA = transpose(AW)
 
     call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
-      & monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%ndof, 1, 1, L(1:M,1:M))
+      & monoMAT_deflated_eq%R%A, M, 1, 1, L(1:M,1:M))
 
     do i = 1, monoCOM%recv_n_neib  - 1
       call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
-        & monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%ndof, 1, i + 1, L(1:M, i*M + 1:i*M + M))
+        & monoMAT_deflated_eq%R%A, M, 1, i + 1, L(1:M, i*M + 1:i*M + M))
     enddo
   end subroutine deflatedCG_initialize
 
@@ -309,9 +318,8 @@ contains
     call monolis_alloc_R_1d(Wg, NNDOF)
 
     monoMAT_deflated_eq%R%B = 0.0d0
-    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, monoMAT_deflated_eq%R%B, tdemv)
-    !> call monolis_lapack_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
-
+    !call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, monoMAT_deflated_eq%R%B, tdemv)
+    call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, R, monoMAT_deflated_eq%R%B, tdemv)
     call interface_monolis_solve_main_R(monoPRM_deflated_eq, monoCOM_deflated_eq, &
       & monoMAT_deflated_eq, monoPRE_deflated_eq)
 
@@ -323,8 +331,8 @@ contains
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, time, time)
 
-    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, monoMAT_deflated_eq%R%B, tdemv)
-    !> call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, R, monoMAT_deflated_eq%R%B, tdemv)
+    !call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, monoMAT_deflated_eq%R%B, tdemv)
+    call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, R, monoMAT_deflated_eq%R%B, tdemv)
 
     call interface_monolis_solve_main_R(monoPRM_deflated_eq, monoCOM_deflated_eq, &
       & monoMAT_deflated_eq, monoPRE_deflated_eq)
@@ -353,8 +361,8 @@ contains
     real(kdouble) :: Z(:)
     real(kdouble) :: tdemv, time, WtAZ(M_neib), WLinvWtAZ(NNDOF)
 
-    call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
-    !> call monolis_lapack_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+    !call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+    call monolis_lapack_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
 
     monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
 
@@ -364,8 +372,8 @@ contains
     call interface_monolis_solve_main_R(monoPRM_deflated_eq, monoCOM_deflated_eq, &
       & monoMAT_deflated_eq, monoPRE_deflated_eq)
 
-    call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WLinvWtAZ, tdemv)
-    !> call monolis_lapack_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WLinvWtAZ, tdemv)
+    !call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WLinvWtAZ, tdemv)
+    call monolis_lapack_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WLinvWtAZ, tdemv)
 
     call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, WLinvWtAZ, 1.0d0, P, P)
   end subroutine deflatedCG_omit
@@ -394,12 +402,12 @@ contains
 
     NNDOF = N*NDOF
     call monolis_alloc_R_1d(WWtWinvWtR, NNDOF)
-    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), WTR, time)
-    !> call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, R, WTR, time)
+    !call monolis_dense_matvec_local_R(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), WTR, time)
+    call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, R, WTR, time)
 
     call monolis_lapack_LU_solve_R(M, WTW, WTR, IPV_R, WTR)
-    call monolis_dense_matvec_local_R(NNDOF, M, W, WTR, WWtWinvWtR, time)
-    !> call monolis_lapack_dense_matvec_local_R(NNDOF, M, W, WTR, WWtWinvWtR, time)
+    !call monolis_dense_matvec_local_R(NNDOF, M, W, WTR, WWtWinvWtR, time)
+    call monolis_lapack_dense_matvec_local_R(NNDOF, M, W, WTR, WWtWinvWtR, time)
 
     call monolis_vec_AXPBY_R(N, NDOF, -1.0d0, WWtWinvWtR, 1.0d0, R, R)
   end subroutine deflatedCG_residual_replacement
@@ -445,8 +453,8 @@ contains
 
     S = X - X0
     call monolis_matvec_product_main_R(monoCOM, monoMAT, s, AX, time, time)
-    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W(1:NNDOF,1:M)), AX(1:NNDOF), monoMAT_deflated_eq%R%B(1:M), time)
-    !> call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, AX, monoMAT_deflated_eq%B, time)
+    !call monolis_dense_matvec_local_R(M, NNDOF, transpose(W(1:NNDOF,1:M)), AX(1:NNDOF), monoMAT_deflated_eq%R%B(1:M), time)
+    call monolis_lapack_dense_matvec_trans_local_R(M, NNDOF, W, AX, monoMAT_deflated_eq%R%B, time)
 
     call interface_monolis_solve_main_R(monoPRM_deflated_eq, monoCOM_deflated_eq, &
       & monoMAT_deflated_eq, monoPRE_deflated_eq)
