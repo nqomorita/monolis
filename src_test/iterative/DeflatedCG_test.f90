@@ -11,11 +11,10 @@ contains
     integer(kint) :: n_dof
 
     do n_dof = 1, 3
-      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
-      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
+      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
+      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
     enddo
-  stop
   end subroutine monolis_solver_DeflatedCG_test
 
   subroutine monolis_solver_DeflatedCG_test_main(n_dof, prec)
@@ -96,6 +95,7 @@ contains
     call monolis_std_global_log_string("Deflated CG main")
     call monolis_set_method(mat, monolis_iter_DeflatedCG)
     call monolis_set_precond(mat, prec)
+    call monolis_set_maxiter(mat, 2000)
     call monolis_set_tolerance(mat, 1.0d-9)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_timelog(mat, .true.)
