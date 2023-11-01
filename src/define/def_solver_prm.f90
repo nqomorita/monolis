@@ -96,25 +96,29 @@ module mod_monolis_def_solver
   !> パラメータ：リオーダリングの有無
   !integer(kint), parameter :: monolis_prm_I_is_reordering = 7
   !> パラメータ：解ベクトル初期化の有無
-  integer(kint), parameter :: monolis_prm_I_is_init_x = 8
+
+  integer(kint), parameter :: monolis_prm_I_is_init_x = 10
   !> パラメータ：対称行列向け処理の有無
-  integer(kint), parameter :: monolis_prm_I_is_sym_matrix = 9
+  integer(kint), parameter :: monolis_prm_I_is_sym_matrix = 11
   !> パラメータ：デバッグ出力の有無
-  integer(kint), parameter :: monolis_prm_I_is_debug = 10
+  integer(kint), parameter :: monolis_prm_I_is_debug = 12
   !> パラメータ：詳細な計算時間測定の有無
-  integer(kint), parameter :: monolis_prm_I_is_measurement = 11
+  integer(kint), parameter :: monolis_prm_I_is_measurement = 13
   !> パラメータ：行列対角成分確認の有無
-  integer(kint), parameter :: monolis_prm_I_is_check_diag = 12
+  integer(kint), parameter :: monolis_prm_I_is_check_diag = 14
   !> パラメータ：前処理情報保存の有無
-  integer(kint), parameter :: monolis_prm_I_is_prec_stored = 13
+  integer(kint), parameter :: monolis_prm_I_is_prec_stored = 15
+  !> パラメータ：反復法が収束しない場合のエラー停止
+  integer(kint), parameter :: monolis_prm_I_is_error_abort = 16
+
   !> パラメータ：反復回数と残差履歴の表示
-  integer(kint), parameter :: monolis_prm_I_show_iterlog = 14
+  integer(kint), parameter :: monolis_prm_I_show_iterlog = 20
   !> パラメータ：詳細な計算時間の表示
-  integer(kint), parameter :: monolis_prm_I_show_time = 15
+  integer(kint), parameter :: monolis_prm_I_show_time = 21
   !> パラメータ：ソルバ収束後のサマリの表示
-  integer(kint), parameter :: monolis_prm_I_show_summary = 16
+  integer(kint), parameter :: monolis_prm_I_show_summary = 22
   !> パラメータ：計算時間の統計的処理結果の表示
-  integer(kint), parameter :: monolis_prm_I_show_time_statistics = 17
+  integer(kint), parameter :: monolis_prm_I_show_time_statistics = 23
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -175,6 +179,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_is_measurement) = monolis_I_false
     monoPRM%Iarray(monolis_prm_I_is_check_diag) = monolis_I_false
     monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_is_error_abort) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_iterlog) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true

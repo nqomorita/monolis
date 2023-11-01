@@ -81,6 +81,13 @@ void monolis_set_prec_stored(
   mat->prm.Iarray[MONOLIS_PRM_I_IS_PREC_STORED] = param;
 }
 
+void monolis_set_error_abort(
+  MONOLIS* mat,
+  bool     param)
+{
+  mat->prm.Iarray[MONOLIS_PRM_I_IS_ERROR_ABORT] = param;
+}
+
 void monolis_show_iterlog(
   MONOLIS* mat,
   bool     param)

@@ -12,6 +12,7 @@
 !# subroutine monolis_set_performance_measurement(monolis, param)
 !# subroutine monolis_set_check_diag(monolis, param)
 !# subroutine monolis_set_prec_stored(monolis, param)
+!# subroutine monolis_set_error_abort(monolis, param)
 !# subroutine monolis_show_iterlog(monolis, param)
 !# subroutine monolis_show_timelog(monolis, param)
 !# subroutine monolis_show_summary(monolis, param)
@@ -189,6 +190,19 @@ contains
 
     monolis%PRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_conv_L2I(param)
   end subroutine monolis_set_prec_stored
+
+  !> @ingroup param
+  !> 反復法が収束しない場合のエラー停止の設定（true：プログラム停止、false：計算継続）
+  subroutine monolis_set_error_abort(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    logical, intent(in) :: param
+    integer(kint) :: iparam
+
+    monolis%PRM%Iarray(monolis_prm_I_is_error_abort) = monolis_conv_L2I(param)
+  end subroutine monolis_set_error_abort
 
   !> @ingroup param
   !> 反復回数と残差履歴の表示の設定

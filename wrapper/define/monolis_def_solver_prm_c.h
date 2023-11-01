@@ -70,25 +70,30 @@ static const int MONOLIS_PRM_I_IERR = 5;
 
 //static const int MONOLIS_PRM_I_IS_REORDERING = 7;
 
-static const int MONOLIS_PRM_I_IS_INIT_X = 8;
 
-static const int MONOLIS_PRM_I_IS_SYM_MATRIX = 9;
+static const int MONOLIS_PRM_I_IS_INIT_X = 10;
 
-static const int MONOLIS_PRM_I_IS_DEBUG = 10;
+static const int MONOLIS_PRM_I_IS_SYM_MATRIX = 11;
 
-static const int MONOLIS_PRM_I_IS_MEASUREMENT = 11;
+static const int MONOLIS_PRM_I_IS_DEBUG = 12;
 
-static const int MONOLIS_PRM_I_IS_CHECK_DIAG = 12;
+static const int MONOLIS_PRM_I_IS_MEASUREMENT = 13;
 
-static const int MONOLIS_PRM_I_IS_PREC_STORED = 13;
+static const int MONOLIS_PRM_I_IS_CHECK_DIAG = 14;
 
-static const int MONOLIS_PRM_I_SHOW_ITERLOG = 14;
+static const int MONOLIS_PRM_I_IS_PREC_STORED = 15;
 
-static const int MONOLIS_PRM_I_SHOW_TIME = 15;
+static const int MONOLIS_PRM_I_IS_ERROR_ABORT = 16;
 
-static const int MONOLIS_PRM_I_SHOW_SUMMARY = 16;
 
-static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 17;
+static const int MONOLIS_PRM_I_SHOW_ITERLOG = 20;
+
+static const int MONOLIS_PRM_I_SHOW_TIME = 21;
+
+static const int MONOLIS_PRM_I_SHOW_SUMMARY = 22;
+
+static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
+
 
 static const int MONOLIS_PRM_R_TOL = 1;
 
