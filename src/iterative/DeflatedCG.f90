@@ -89,9 +89,11 @@ contains
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, rho, tdotp, tcomm_dotp)
 
-    !if(rho/B2 < monoPRM%tol)then
-    !  stop "converge before loop"
-    !endif
+    if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
+      monoPRM%Iarray(monolis_prm_I_cur_iter) = 0
+      monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
+      return
+    endif
 
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
 
