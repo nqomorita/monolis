@@ -16,3 +16,6 @@
 [submodule "submodule/monolis_utils"]
 	path = submodule/monolis_utils
 	url = https://gitlab.com/morita/monolis_utils.git
+[submodule "submodule/ggtools"]
+	path = submodule/ggtools
+	url = https://gitlab.com/morita/ggtools.git
