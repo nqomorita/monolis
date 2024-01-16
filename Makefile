@@ -249,6 +249,7 @@ TST_C_OBJS    = $(subst $(TST_WRAP_DIR), $(OBJ_DIR), $(TST_C_SOURCES:.c=.o))
 all: \
 	cp_header \
 	cp_header_lib \
+	cp_bin_lib \
 	$(LIB_TARGET) \
 	$(LIBALL_TARGET) \
 	$(TEST_TARGET) \
@@ -304,12 +305,14 @@ cp_header:
 	$(CP) ./wrapper/monolis.h ./include/
 
 cp_header_lib:
-	$(CP) ./submodule/monolis_utils/bin/* ./bin/
 	$(CP) ./submodule/monolis_utils/include/* ./include/
 	$(CP) ./submodule/monolis_utils/lib/libmonolis_utils.a ./lib/
-	$(CP) ./submodule/gedatsu/bin/* ./bin/
 	$(CP) ./submodule/gedatsu/include/* ./include/
 	$(CP) ./submodule/gedatsu/lib/libgedatsu.a ./lib/
+
+cp_bin_lib:
+	$(CP) ./submodule/monolis_utils/bin/* ./bin/
+	$(CP) ./submodule/gedatsu/bin/* ./bin/
 
 $(LIBALL_TARGET):
 	ar -rc $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
