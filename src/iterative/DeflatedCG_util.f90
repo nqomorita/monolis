@@ -206,21 +206,20 @@ contains
   !> @ingroup dev_solver
   !> Deflated CG 法
   subroutine deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
-      & M, M_neib, NNDOF, W, X, Y, tdemv)
+      & M, NNDOF, W, X, Y, tdemv)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_mat) :: monoMAT_deflated_eq
     type(monolis_mat) :: monoPRE_deflated_eq
     integer(kint) :: M
-    integer(kint) :: M_neib
     integer(kint) :: NNDOF
     real(kdouble) :: W(:,:)
     real(kdouble) :: Y(:)
     real(kdouble) :: X(:)
-    real(kdouble) :: tdemv, time, WtZ(M_neib)
+    real(kdouble) :: tdemv, time, WtZ(M)
 
-    call monolis_dense_matvec_local_R(M_neib, NNDOF, W, X, WtZ, tdemv)
+    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), X, WtZ, tdemv)
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
 

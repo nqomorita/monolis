@@ -102,10 +102,11 @@ program main
     call monolis_set_deflation_mode(mat, n_deflation_mode, deflation_mode)
 
     !> solve deflation CG
-    call monolis_set_method(mat, monolis_iter_DeflatedCG)
-    !call monolis_set_precond(mat, monolis_prec_Diag)
-    call monolis_set_precond(mat, monolis_prec_SOR)
-    call monolis_set_maxiter(mat, 2000)
+    call monolis_set_method(mat, monolis_iter_DeflatedCG2)
+    !call monolis_set_precond(mat, monolis_prec_None)
+    call monolis_set_precond(mat, monolis_prec_Diag)
+    !call monolis_set_precond(mat, monolis_prec_SOR)
+    call monolis_set_maxiter(mat, 3000)
     call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog(mat, .false.)
     call monolis_show_iterlog(mat, .true.)

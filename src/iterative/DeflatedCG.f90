@@ -113,7 +113,7 @@ contains
         & M, M_neib, NNDOF, W, AW, WtA)
 
       call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
-        & M, M_neib, NNDOF, W, B, Qb, tdemv)
+        & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
         call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
