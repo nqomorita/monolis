@@ -92,8 +92,9 @@ contains
     call monolis_set_deflation_mode(mat, n_get_eigen, eig_mode)
 
     !> solve
+    !> monolis_iter_DeflatedCG1
     call monolis_std_global_log_string("Deflated CG main")
-    call monolis_set_method(mat, monolis_iter_DeflatedCG)
+    call monolis_set_method(mat, monolis_iter_DeflatedCG1)
     call monolis_set_precond(mat, prec)
     call monolis_set_maxiter(mat, 2000)
     call monolis_set_tolerance(mat, 1.0d-9)
@@ -108,7 +109,29 @@ contains
 
     b = 1.0d0
 
-    call monolis_test_check_eq_R("monolis_solver_DeflatedCG_test_main", a, b)
+    call monolis_test_check_eq_R("monolis_solver_DeflatedCG1_test_main", a, b)
+
+    !> monolis_iter_DeflatedCG2
+    call monolis_set_method(mat, monolis_iter_DeflatedCG2)
+
+    a = 0.0d0
+
+    call monolis_solve_R(mat, com, b, a)
+
+    b = 1.0d0
+
+    call monolis_test_check_eq_R("monolis_solver_DeflatedCG2_test_main", a, b)
+
+    !> monolis_iter_ADeflatedCG2
+    call monolis_set_method(mat, monolis_iter_ADeflatedCG2)
+
+    a = 0.0d0
+
+    call monolis_solve_R(mat, com, b, a)
+
+    b = 1.0d0
+
+    call monolis_test_check_eq_R("monolis_solver_ADeflatedCG_test_main", a, b)
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_DeflatedCG_test_main

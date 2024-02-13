@@ -22,11 +22,14 @@ module mod_monolis_def_solver
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 8
   !> パラメータ：Deflated CG 法
-  integer(kint), parameter :: monolis_iter_DeflatedCG    = 9
+  !integer(kint), parameter :: monolis_iter_DeflatedCG    = 9
+  integer(kint), parameter :: monolis_iter_DeflatedCG1   = 9
+  integer(kint), parameter :: monolis_iter_DeflatedCG2   = 10
+  integer(kint), parameter :: monolis_iter_ADeflatedCG2  = 11
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG       = 10
+  integer(kint), parameter :: monolis_iter_COCG = 12
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -51,7 +54,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(10) :: monolis_str_iter = (/&
+  character*24, dimension(12) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -61,7 +64,9 @@ module mod_monolis_def_solver
   & "BiCGSTAB_noprec    ", &
   !& "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
-  & "Deflated CG        ", &
+  & "Deflated CG1       ", &
+  & "Deflated CG2       ", &
+  & "ADeflated CG2      ", &
   !& "GMRES              ", &
   & "COCG               "/)
 

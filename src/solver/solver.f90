@@ -172,8 +172,14 @@ contains
       case (monolis_iter_PipeBiCGSTAB_noprec)
         call monolis_solver_PipeBiCGSTAB_noprec(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      case (monolis_iter_DeflatedCG)
-        call monolis_solver_DeflatedCG(monoPRM, monoCOM, monoMAT, monoPREC)
+      case (monolis_iter_DeflatedCG1)
+        call monolis_solver_DeflatedCG1(monoPRM, monoCOM, monoMAT, monoPREC)
+
+      case (monolis_iter_DeflatedCG2)
+        call monolis_solver_DeflatedCG2(monoPRM, monoCOM, monoMAT, monoPREC)
+
+      case (monolis_iter_ADeflatedCG2)
+        call monolis_solver_ADeflatedCG2(monoPRM, monoCOM, monoMAT, monoPREC)
 
       !case (monolis_iter_GMRES)
       !  call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)
