@@ -219,6 +219,11 @@ contains
     real(kdouble) :: X(:)
     real(kdouble) :: tdemv, time, WtZ(M)
 
+    if(M == 0)then
+      Y = 0.0d0
+      return
+    endif
+
     call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), X, WtZ, tdemv)
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
@@ -247,14 +252,19 @@ contains
     real(kdouble) :: Z(:)
     real(kdouble) :: tdemv, time, WtZ(M_neib), AWEinvWtZ(NNDOF)
 
-    call monolis_dense_matvec_local_R(M_neib, NNDOF, W, Z, WtZ, tdemv)
+    if(M == 0)then
+      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      return
+    endif
+
+    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), Z, WtZ, tdemv)
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
 
     call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
 
-    call monolis_dense_matvec_local_R(NNDOF, M, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
+    call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
 
     call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
   end subroutine deflatedCG_P
