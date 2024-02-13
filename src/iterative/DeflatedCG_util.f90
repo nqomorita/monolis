@@ -278,10 +278,10 @@ contains
     real(kdouble) :: Z(:)
     real(kdouble) :: tdemv, time, WtAZ(M_neib), WEinvWtAZ(NNDOF)
 
-    !if(M == 0)then
-    !  call monolis_vec_copy_R(1, NNDOF, Z, P)
-    !  return
-    !endif
+    if(M == 0)then
+      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      return
+    endif
 
     call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
 

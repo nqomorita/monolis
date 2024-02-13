@@ -136,12 +136,8 @@ contains
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-    if(M > 0)then
-      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
-        & M, M_neib, NNDOF, W, WtA, Z, P, tdemv)
-    else
-      call monolis_vec_copy_R(N, NDOF, Z, P)
-    endif
+    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      & M, M_neib, NNDOF, W, WtA, Z, P, tdemv)
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, R, Z, rho, tdotp, tcomm_dotp)
 
@@ -170,12 +166,8 @@ contains
 
       beta = rho/rho1
 
-      if(M > 0)then
-        call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
-          & M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
-      else
-        call monolis_vec_copy_R(N, NDOF, Z, PtX)
-      endif
+      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        & M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
       call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, PtX, P)
     enddo
