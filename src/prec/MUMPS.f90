@@ -51,7 +51,7 @@ contains
     !> num of OMP
     mumps%ICNTL(16) = 1
     !> iterative refinement
-    mumps%ICNTL(10) = 2
+    mumps%ICNTL(10) = 0
     mumps%CNTL(2) = 1.0e-8
     !> Out-Of-Core: 0:IN-CORE only, 1:OOC
     mumps%ICNTL(22) = 0
@@ -140,9 +140,10 @@ contains
 #ifdef WITH_MUMPS
     type(dmumps_struc), pointer :: mumps
 
-    mumps => monoPREC%DMUMPS%mumps
-
+    return
     !if(monoPRM%is_prec_stored) return
+
+    mumps => monoPREC%DMUMPS%mumps
 
     monoPREC%DMUMPS%is_factored = .false.
 
@@ -209,7 +210,7 @@ contains
     call monolis_mpi_update_I(monoCOM, 1, offset_id)
 
     do i = 1, monoCOM%recv_n_neib
-      jS = monoCOM%recv_index(i)+1
+      jS = monoCOM%recv_index(i) + 1
       jE = monoCOM%recv_index(i + 1)
       do j = jS, jE
         in = monoCOM%recv_item(j)
