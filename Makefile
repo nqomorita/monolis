@@ -20,7 +20,7 @@ TST_WRAP_DIR = ./wrapper_test
 DRV_DIR = ./driver
 LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
-CPP     = -cpp $(FLAG_DEBUG)
+CPP     = -cpp
 
 ##> option setting
 ifdef FLAGS
@@ -41,6 +41,11 @@ ifdef FLAGS
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
 		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+	endif
+
+	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
+		CPP    += -DWITH_MUMPS
+		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -ldmumps -lmumps_common -lpord -lmetis -lscalapack -llapack -lblas
 	endif
 endif
 
@@ -104,9 +109,9 @@ sor/sor_33.f90 \
 sor/sor_nn.f90 \
 diag.f90 \
 sor.f90 \
+MUMPS.f90 \
 precond.f90
 
-#MUMPS.f90 \
 #ilu.f90 \
 #Jacobi.f90 \
 #MF.f90 \
