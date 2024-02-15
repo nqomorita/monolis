@@ -91,6 +91,19 @@ contains
         & M, M_neib, NNDOF, W, AW, R, R, tdemv)
     endif
 
+    call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, rho, tdotp, tcomm_dotp)
+
+    if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
+      monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
+      monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
+      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        & M, NNDOF, W, B, Qb, tdemv)
+      PtX = 0.0d0
+      call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, Qb, 1.0d0, PtX, X)
+      call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
+      return
+    endif
+
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
     call monolis_vec_copy_R(N, NDOF, Z, P)
 
@@ -235,7 +248,7 @@ contains
     call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, rho, tdotp, tcomm_dotp)
 
     if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
-      monoPRM%Iarray(monolis_prm_I_cur_iter) = 0
+      monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
       monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
       return
     endif
@@ -379,7 +392,7 @@ contains
     call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, rho, tdotp, tcomm_dotp)
 
     if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
-      monoPRM%Iarray(monolis_prm_I_cur_iter) = 0
+      monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
       monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
       return
     endif

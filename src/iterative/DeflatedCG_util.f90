@@ -100,6 +100,7 @@ contains
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time_statistics) = .false.
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
 
     !> com section
     NP = monoCOM%recv_n_neib + 1
