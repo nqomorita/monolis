@@ -110,11 +110,12 @@ contains
 
       if(norm < ths) is_converge = .true.
 
-      if(monolis_mpi_get_local_my_rank(monoCOM%comm) == 0)then
-        write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
-      endif
+      !if(monolis_mpi_get_local_my_rank(monoCOM%comm) == 0)then
+      !  write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
+      !endif
 
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
+        write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
           do j = 1, NP*NDOF
