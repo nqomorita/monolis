@@ -120,6 +120,16 @@ void monolis_set_prec_stored(
   bool     param);
 
 /**
+ * @brief 反復法が収束しない場合のエラー停止の設定（true：プログラム停止、false：計算継続）
+ * @param[inout] mat monolis 構造体
+ * @param[in] prm パラメータ
+ * @ingroup param
+ */
+void monolis_set_error_abort(
+  MONOLIS* mat,
+  bool     param);
+
+/**
  * @brief 反復回数と残差履歴の表示の設定
  * @param[inout] mat monolis 構造体
  * @param[in] prm パラメータ

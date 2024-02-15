@@ -113,11 +113,12 @@ contains
 
     if(resid < monoPRM%Rarray(monolis_prm_R_tol))then
       is_converge = .true.
+      return
     endif
 
     if(iter == monoPRM%Iarray(monolis_prm_I_max_iter))then
-      !is_converge = .true.
-      if(monoPRM%Iarray(monolis_prm_I_is_measurement) == monolis_I_false)then
+      if(monoPRM%Iarray(monolis_prm_I_is_measurement) == monolis_I_false .and. &
+         monoPRM%Iarray(monolis_prm_I_is_error_abort) == monolis_I_true)then
         call monolis_std_error_string("reached the maximum number of iterations")
         call monolis_std_error_stop()
       endif
@@ -163,11 +164,12 @@ contains
 
     if(abs(resid) < monoPRM%Rarray(monolis_prm_R_tol))then
       is_converge = .true.
+      return
     endif
 
     if(iter == monoPRM%Iarray(monolis_prm_I_max_iter))then
-      !is_converge = .true.
-      if(monoPRM%Iarray(monolis_prm_I_is_measurement) == monolis_I_false)then
+      if(monoPRM%Iarray(monolis_prm_I_is_measurement) == monolis_I_false .and. &
+         monoPRM%Iarray(monolis_prm_I_is_error_abort) == monolis_I_true)then
         call monolis_std_error_string("reached the maximum number of iterations")
         call monolis_std_error_stop()
       endif

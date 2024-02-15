@@ -25,7 +25,7 @@ void monolis_initialize(
 void monolis_finalize(
   MONOLIS* mat)
 {
-  monolis_prm_initialize(&mat->prm);
-  monolis_mat_initialize(&mat->mat);
-  monolis_mat_initialize(&mat->prec);
+  monolis_prm_finalize(&mat->prm);
+  monolis_mat_finalize(&mat->mat);
+  monolis_mat_finalize(&mat->prec);
 }
