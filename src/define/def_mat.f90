@@ -3,6 +3,10 @@ module mod_monolis_def_mat
   use mod_monolis_utils
   implicit none
 
+#ifdef WITH_MUMPS
+  include 'dmumps_struc.h'
+#endif
+
   !> 行列構造体（実数型）
   type monolis_mat_val_R
     !> 全行列値
@@ -65,6 +69,16 @@ module mod_monolis_def_mat
     integer(kint), pointer :: perm(:) => null()
   end type monolis_mat_CSC
 
+  type monolis_mat_DMUMPS
+    integer(kint), allocatable :: offset_list(:)
+    integer(kint), allocatable :: offset_counts(:)
+    logical :: is_factored = .false.
+    logical :: is_self = .false.
+#ifdef WITH_MUMPS
+    type (dmumps_struc) :: mumps
+#endif
+  end type monolis_mat_DMUMPS
+
   !> 行列構造体（格子構造）
   !type monolis_mat_lattice
   !end type monolis_mat_lattice
@@ -87,6 +101,8 @@ module mod_monolis_def_mat
     type(monolis_mat_CSR) :: CSR
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
+    !> 行列構造体（DMUMPS 構造）
+    type(monolis_mat_DMUMPS) :: DMUMPS
   end type monolis_mat
 
 contains
