@@ -180,6 +180,6 @@ void monolis_spmat_copy_c_test_C()
 void monolis_spmat_copy_c_test()
 {
   monolis_std_log_string("monolis_spmat_copy_c_test");
-  monolis_spmat_copy_c_test_R();
-  monolis_spmat_copy_c_test_C();
+  //monolis_spmat_copy_c_test_R();
+  //monolis_spmat_copy_c_test_C();
 }

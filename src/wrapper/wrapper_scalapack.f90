@@ -8,8 +8,43 @@ module mod_monolis_scalapack
 contains
 
   !> @ingroup wrapper
+  !> Scalapack コミュニケータの初期化
+  subroutine monolis_scalapack_grid_initialize(comm, scalapack_comm)
+    implicit none
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
+    !> [in] コミュニケータ
+    integer(kint) :: scalapack_comm
+    integer(kint), allocatable :: user_map(:,:)
+    integer(kint) :: n_col, n_row
+
+    !# scalapack コミュニケータの初期化処理
+    n_row = monolis_mpi_get_local_comm_size(comm)
+    n_col = 1
+
+    call blacs_get(0, 0, scalapack_comm)
+
+    call monolis_alloc_I_2d(user_map, n_row, 1)
+    user_map(monolis_mpi_get_local_my_rank(comm) + 1,1) = monolis_mpi_get_global_my_rank()
+    call monolis_allreduce_I(n_row, user_map(:,1), monolis_mpi_max, comm)
+
+    call blacs_gridmap(scalapack_comm, user_map, n_row, n_row, n_col)
+  end subroutine monolis_scalapack_grid_initialize
+
+  !> @ingroup wrapper
+  !> Scalapack コミュニケータの終了
+  subroutine monolis_scalapack_grid_finalize(scalapack_comm)
+    implicit none
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
+
+    !# scalapack コミュニケータの終了処理
+    call blacs_gridexit(scalapack_comm)
+  end subroutine monolis_scalapack_grid_finalize
+
+  !> @ingroup wrapper
   !> PDGESVD 関数（実数型）
-  subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm)
+  subroutine monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm)
     implicit none
     !> [in] 行列の大きさ（行数 N）
     integer(kint), intent(in) :: N_loc
@@ -25,6 +60,8 @@ contains
     real(kdouble), intent(out) :: D(:,:)
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
     integer(kint) :: N_loc_max, M_fix, N
     integer(kint) :: comm_size, P
     integer(kint) :: i, j, fio
@@ -60,7 +97,7 @@ contains
     enddo
 
     !# 特異値分解
-    call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm)
+    call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm, scalapack_comm)
 
     !# 出力行列サイズの修正
     N = N_loc
@@ -86,7 +123,7 @@ contains
 
   !> @ingroup wrapper
   !> PDGESVD 関数（実数型、メイン関数）
-  subroutine monolis_scalapack_gesvd_R_main(N_loc, M, A, S, V, D, comm)
+  subroutine monolis_scalapack_gesvd_R_main(N_loc, M, A, S, V, D, comm, scalapack_comm)
     implicit none
     !> [in] 行列の大きさ（行数 N）
     integer(kint), intent(in) :: N_loc
@@ -102,29 +139,19 @@ contains
     real(kdouble), intent(out) :: D(:,:)
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
-    integer(kint) :: N, scalapack_comm, i, comm_temp
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
+    integer(kint) :: N, i, comm_temp
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
     integer(kint) :: NW, info
     integer(kint) :: my_col, my_row, n_col, n_row
-    integer(kint), allocatable :: user_map(:,:)
     real(kdouble), allocatable :: W(:)
     real(kdouble), allocatable :: A_temp(:,:)
 
     integer :: numroc
     external :: numroc
 
-    !# scalapack コミュニケータの初期化処理
-    n_row = monolis_mpi_get_local_comm_size(comm)
-    n_col = 1
-
-    call blacs_get(0, 0, scalapack_comm)
-
-    call monolis_alloc_I_2d(user_map, n_row, 1)
-    user_map(monolis_mpi_get_local_my_rank(comm) + 1,1) = monolis_mpi_get_global_my_rank()
-    call monolis_allreduce_I(n_row, user_map(:,1), monolis_mpi_max, comm)
-
-    call blacs_gridmap(scalapack_comm, user_map, n_row, n_row, n_col)
     call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
 
     !# Scalapack 用パラメータの取得
@@ -173,9 +200,6 @@ contains
 
     !# 計算結果 D 行列の通信
     call gesvd_R_update_D(n_row, P, M, lld_D, D, comm)
-
-    !# scalapack コミュニケータの終了処理
-    call blacs_gridexit(scalapack_comm)
   end subroutine monolis_scalapack_gesvd_R_main
 
   !> @ingroup wrapper

@@ -8,7 +8,25 @@ module mod_monolis_scalapack_wrapper
 
 contains
 
-  subroutine monolis_scalapack_gesvd_R_c(N_loc, M, P, A, S, V, D, comm) &
+  subroutine monolis_scalapack_grid_initialize_c(comm, scalapack_comm) &
+    & bind(c, name = "monolis_scalapack_grid_initialize_c_main")
+    implicit none
+    !> [in] コミュニケータ
+    integer(c_int), value :: comm
+    !> [in] コミュニケータ
+    integer(c_int) :: scalapack_comm
+    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
+  end subroutine monolis_scalapack_grid_initialize_c
+
+  subroutine monolis_scalapack_grid_finalize_c(scalapack_comm) &
+    & bind(c, name = "monolis_scalapack_grid_finalize_c_main")
+    implicit none
+    !> [in] コミュニケータ
+    integer(c_int), value :: scalapack_comm
+    call monolis_scalapack_grid_finalize(scalapack_comm)
+  end subroutine monolis_scalapack_grid_finalize_c
+
+  subroutine monolis_scalapack_gesvd_R_c(N_loc, M, P, A, S, V, D, comm, scalapack_comm) &
     & bind(c, name = "monolis_scalapack_gesvd_R_c_main")
     implicit none
     !> 行列の大きさ（行数 N）
@@ -27,6 +45,8 @@ contains
     real(c_double), target :: D(P*M)
     !> コミュニケータ
     integer(c_int), value :: comm
+    !> scalapack コミュニケータ
+    integer(c_int), value :: scalapack_comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)
     real(kdouble), allocatable :: S_temp(:,:)
@@ -42,7 +62,7 @@ contains
       enddo
     enddo
 
-    call monolis_scalapack_gesvd_R(N_loc, M, A_temp, S_temp, V, D_temp, comm)
+    call monolis_scalapack_gesvd_R(N_loc, M, A_temp, S_temp, V, D_temp, comm, scalapack_comm)
 
     do i = 1, P
       do j = 1, N_loc

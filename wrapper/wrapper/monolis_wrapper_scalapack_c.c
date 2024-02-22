@@ -4,6 +4,18 @@
 #include "monolis_utils.h"
 #include "monolis_wrapper_scalapack_c.h"
 
+void monolis_scalapack_grid_initialize(
+  int      comm,
+  int*     scalapack_comm)
+{
+  monolis_scalapack_grid_initialize_c_main(comm, scalapack_comm);
+}
+
+void monolis_scalapack_grid_finalize(
+  int      scalapack_comm){
+  monolis_scalapack_grid_finalize_c_main(scalapack_comm);
+}
+
 void monolis_scalapack_gesvd_R(
   int      N_loc,
   int      M,
@@ -11,7 +23,8 @@ void monolis_scalapack_gesvd_R(
   double** S,
   double*  V,
   double** D,
-  int      comm)
+  int      comm,
+  int      scalapack_comm)
 {
   int     P;
   int     i, j;
@@ -47,7 +60,8 @@ void monolis_scalapack_gesvd_R(
     S_tmp,
     V,
     D_tmp,
-    comm);
+    comm,
+    scalapack_comm);
 
   for (i = 0; i < P; ++i) {
     for (j = 0; j < N_loc; ++j) {

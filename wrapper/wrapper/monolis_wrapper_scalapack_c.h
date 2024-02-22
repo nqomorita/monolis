@@ -7,6 +7,31 @@ extern "C" {
 #endif
 
 /**
+ * @brief Scalapack コミュニケータの初期化関数
+ * @param[in] comm コミュニケータ
+ * @param[out] Scalapack コミュニケータ
+ * @ingroup wrapper
+ */
+void monolis_scalapack_grid_initialize(
+  int      comm,
+  int*     scalapack_comm);
+
+void monolis_scalapack_grid_initialize_c_main(
+  int      comm,
+  int*     scalapack_comm);
+
+/**
+ * @brief Scalapack コミュニケータの終了処理関数
+ * @param[in] Scalapack コミュニケータ
+ * @ingroup wrapper
+ */
+void monolis_scalapack_grid_finalize(
+  int      scalapack_comm);
+
+void monolis_scalapack_grid_finalize_c_main(
+  int      scalapack_comm);
+
+/**
  * @brief PDGESVD 関数（実数型）
  * @param[in] N_loc 行列の大きさ（行数 N）
  * @param[in] M 行列の大きさ（列数 M）
@@ -24,7 +49,8 @@ void monolis_scalapack_gesvd_R(
   double** S,
   double*  V,
   double** D,
-  int      comm);
+  int      comm,
+  int      scalapack_comm);
 
 /**
  * @brief 1 次元整数配列のメモリ確保
@@ -46,7 +72,8 @@ void monolis_scalapack_gesvd_R_c_main(
   double*  S,
   double*  V,
   double*  D,
-  int      comm);
+  int      comm,
+  int      scalapack_comm);
 
 #ifdef __cplusplus
 }
