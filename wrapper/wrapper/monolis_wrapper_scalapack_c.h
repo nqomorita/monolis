@@ -12,11 +12,11 @@ extern "C" {
  * @param[out] Scalapack コミュニケータ
  * @ingroup wrapper
  */
-void monolis_scalapack_grid_initialize(
+void monolis_scalapack_comm_initialize(
   int      comm,
   int*     scalapack_comm);
 
-void monolis_scalapack_grid_initialize_c_main(
+void monolis_scalapack_comm_initialize_c_main(
   int      comm,
   int*     scalapack_comm);
 
@@ -25,10 +25,10 @@ void monolis_scalapack_grid_initialize_c_main(
  * @param[in] Scalapack コミュニケータ
  * @ingroup wrapper
  */
-void monolis_scalapack_grid_finalize(
+void monolis_scalapack_comm_finalize(
   int      scalapack_comm);
 
-void monolis_scalapack_grid_finalize_c_main(
+void monolis_scalapack_comm_finalize_c_main(
   int      scalapack_comm);
 
 /**

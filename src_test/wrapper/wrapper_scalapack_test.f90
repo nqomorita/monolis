@@ -77,9 +77,9 @@ contains
       A(4,3) = 28.0d0
     endif
 
-    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
     call monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm)
-    call monolis_scalapack_grid_finalize(scalapack_comm)
+    call monolis_scalapack_comm_finalize(scalapack_comm)
 
     Vt = 0.0d0
     Vt(1,1) = V(1)
@@ -162,9 +162,9 @@ contains
       A(2,6) = 54.0d0
     endif
 
-    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
     call monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm)
-    call monolis_scalapack_grid_finalize(scalapack_comm)
+    call monolis_scalapack_comm_finalize(scalapack_comm)
 
     if(monolis_mpi_get_global_comm_size() == 1)then
       Vt = 0.0d0
@@ -260,9 +260,9 @@ contains
       A(2,6) = 54.0d0
     endif
 
-    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
     call monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm)
-    call monolis_scalapack_grid_finalize(scalapack_comm)
+    call monolis_scalapack_comm_finalize(scalapack_comm)
 
     Vt = 0.0d0
     Vt(1,1) = V(1)
@@ -309,7 +309,7 @@ contains
     V = 0.0d0
     D = 0.0d0
 
-    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       A(1,1) = 1.0d0
@@ -347,6 +347,6 @@ contains
       call monolis_test_check_eq_R("monolis_scalapack_gesvd_R 4-6", A(:,6), A_res(:,6))
     endif
 
-    call monolis_scalapack_grid_finalize(scalapack_comm)
+    call monolis_scalapack_comm_finalize(scalapack_comm)
   end subroutine monolis_scalapack_test_4
 end module mod_monolis_scalapack_test

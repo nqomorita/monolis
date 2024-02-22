@@ -54,9 +54,9 @@ void monolis_scalapack_test_1()
     A[3][2] = 28.0;
   }
 
-  monolis_scalapack_grid_initialize(comm, &scalapack_comm);
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
   monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm);
-  monolis_scalapack_grid_finalize(scalapack_comm);
+  monolis_scalapack_comm_finalize(scalapack_comm);
 
   for (i = 0; i < 3; ++i) {
     for (j = 0; j < 3; ++j) {
@@ -130,9 +130,9 @@ void monolis_scalapack_test_2()
     A[1][5] = 54.0;
   }
 
-  monolis_scalapack_grid_initialize(comm, &scalapack_comm);
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
   monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm);
-  monolis_scalapack_grid_finalize(scalapack_comm);
+  monolis_scalapack_comm_finalize(scalapack_comm);
 
   if(monolis_mpi_get_global_comm_size() == 1){
     for (i = 0; i < 2; ++i) {
@@ -224,9 +224,9 @@ void monolis_scalapack_test_3()
     A[1][5] = 54.0;
   }
 
-  monolis_scalapack_grid_initialize(comm, &scalapack_comm);
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
   monolis_scalapack_gesvd_R(N_loc, M, A, S, V, D, comm, scalapack_comm);
-  monolis_scalapack_grid_finalize(scalapack_comm);
+  monolis_scalapack_comm_finalize(scalapack_comm);
 
   for (i = 0; i < 2; ++i) {
     for (j = 0; j < 6; ++j) {
@@ -272,7 +272,7 @@ void monolis_scalapack_test_4()
   V = monolis_alloc_R_1d(V, 2);
   D = monolis_alloc_R_2d(D, 2, 6);
 
-  monolis_scalapack_grid_initialize(comm, &scalapack_comm);
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
 
   if(monolis_mpi_get_global_my_rank() == 0){
     A[0][0] = 1.0;
@@ -312,7 +312,7 @@ void monolis_scalapack_test_4()
     }
   }
 
-  monolis_scalapack_grid_finalize(scalapack_comm);
+  monolis_scalapack_comm_finalize(scalapack_comm);
 
 }
 

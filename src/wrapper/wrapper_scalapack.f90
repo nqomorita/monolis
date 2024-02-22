@@ -9,7 +9,7 @@ contains
 
   !> @ingroup wrapper
   !> Scalapack コミュニケータの初期化
-  subroutine monolis_scalapack_grid_initialize(comm, scalapack_comm)
+  subroutine monolis_scalapack_comm_initialize(comm, scalapack_comm)
     implicit none
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
@@ -29,18 +29,18 @@ contains
     call monolis_allreduce_I(n_row, user_map(:,1), monolis_mpi_max, comm)
 
     call blacs_gridmap(scalapack_comm, user_map, n_row, n_row, n_col)
-  end subroutine monolis_scalapack_grid_initialize
+  end subroutine monolis_scalapack_comm_initialize
 
   !> @ingroup wrapper
   !> Scalapack コミュニケータの終了
-  subroutine monolis_scalapack_grid_finalize(scalapack_comm)
+  subroutine monolis_scalapack_comm_finalize(scalapack_comm)
     implicit none
     !> [in] コミュニケータ
     integer(kint), intent(in) :: scalapack_comm
 
     !# scalapack コミュニケータの終了処理
     call blacs_gridexit(scalapack_comm)
-  end subroutine monolis_scalapack_grid_finalize
+  end subroutine monolis_scalapack_comm_finalize
 
   !> @ingroup wrapper
   !> PDGESVD 関数（実数型）

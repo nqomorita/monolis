@@ -8,23 +8,23 @@ module mod_monolis_scalapack_wrapper
 
 contains
 
-  subroutine monolis_scalapack_grid_initialize_c(comm, scalapack_comm) &
-    & bind(c, name = "monolis_scalapack_grid_initialize_c_main")
+  subroutine monolis_scalapack_comm_initialize_c(comm, scalapack_comm) &
+    & bind(c, name = "monolis_scalapack_comm_initialize_c_main")
     implicit none
     !> [in] コミュニケータ
     integer(c_int), value :: comm
     !> [in] コミュニケータ
     integer(c_int) :: scalapack_comm
-    call monolis_scalapack_grid_initialize(comm, scalapack_comm)
-  end subroutine monolis_scalapack_grid_initialize_c
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
+  end subroutine monolis_scalapack_comm_initialize_c
 
-  subroutine monolis_scalapack_grid_finalize_c(scalapack_comm) &
-    & bind(c, name = "monolis_scalapack_grid_finalize_c_main")
+  subroutine monolis_scalapack_comm_finalize_c(scalapack_comm) &
+    & bind(c, name = "monolis_scalapack_comm_finalize_c_main")
     implicit none
     !> [in] コミュニケータ
     integer(c_int), value :: scalapack_comm
-    call monolis_scalapack_grid_finalize(scalapack_comm)
-  end subroutine monolis_scalapack_grid_finalize_c
+    call monolis_scalapack_comm_finalize(scalapack_comm)
+  end subroutine monolis_scalapack_comm_finalize_c
 
   subroutine monolis_scalapack_gesvd_R_c(N_loc, M, P, A, S, V, D, comm, scalapack_comm) &
     & bind(c, name = "monolis_scalapack_gesvd_R_c_main")

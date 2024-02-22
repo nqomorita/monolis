@@ -4,16 +4,16 @@
 #include "monolis_utils.h"
 #include "monolis_wrapper_scalapack_c.h"
 
-void monolis_scalapack_grid_initialize(
+void monolis_scalapack_comm_initialize(
   int      comm,
   int*     scalapack_comm)
 {
-  monolis_scalapack_grid_initialize_c_main(comm, scalapack_comm);
+  monolis_scalapack_comm_initialize_c_main(comm, scalapack_comm);
 }
 
-void monolis_scalapack_grid_finalize(
+void monolis_scalapack_comm_finalize(
   int      scalapack_comm){
-  monolis_scalapack_grid_finalize_c_main(scalapack_comm);
+  monolis_scalapack_comm_finalize_c_main(scalapack_comm);
 }
 
 void monolis_scalapack_gesvd_R(
