@@ -10,7 +10,8 @@ LINK   = $(FC)
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
+USE_LIB1= -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+USE_LIB2= -L./lib -lscalapack -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -41,7 +42,7 @@ ifdef FLAGS
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
-		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+		USE_LIB2= 
 		LINK    = $(FC)
 	endif
 
@@ -52,8 +53,12 @@ ifdef FLAGS
 		CFLAGS  = -Kfast
 		MOD_DIR = -M ./include
 		LINK    = mpiFCCpx --linkfortran -SSL2
+		USE_LIB2= 
+		INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 	endif
 endif
+
+USE_LIB = $(USE_LIB1) $(USE_LIB2)
 
 ##> other commands
 MAKE = make
@@ -276,10 +281,10 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
-	$(FC) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
