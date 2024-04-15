@@ -5,6 +5,7 @@ FC     = mpif90
 FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
+LINK   = $(FC)
 
 ##> directory setting
 MOD_DIR = -J ./include
@@ -41,6 +42,16 @@ ifdef FLAGS
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
 		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+		LINK    = $(FC)
+	endif
+
+	ifeq ($(findstring A64FX, $(DFLAGS)), A64FX)
+		FC      = mpifrtpx
+		FFLAGS  = -Nalloc_assign -Kfast -SCALAPACK -SSL2
+		CC      = mpifccpx -Nclang 
+		CFLAGS  = -Kfast
+		MOD_DIR = -M ./include
+		LINK    = mpiFCCpx --linkfortran -SSL2
 	endif
 endif
 
