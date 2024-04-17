@@ -175,7 +175,8 @@ spmat_handler_util_wrap.f90
 
 SRC_WRAP_C = \
 scalapack_wrapper.f90 \
-monolis_wrapper_scalapack_c.c
+monolis_wrapper_scalapack_c.c \
+monolis_wrapper_ml_c.c
 
 SRC_SOLV_C = \
 monolis_solver_c.c \
