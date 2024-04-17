@@ -16,6 +16,9 @@ void monolis_spmat_copy_c_test_R()
   int i, nz;
   int** elem;
 
+  monolis_initialize(&mat_in);
+  monolis_initialize(&mat_out);
+
   n_node = 4;
   n_base = 2;
   n_dof  = 2;
@@ -101,6 +104,9 @@ void monolis_spmat_copy_c_test_C()
   int n_elem;
   int i, nz;
   int** elem;
+
+  monolis_initialize(&mat_in);
+  monolis_initialize(&mat_out);
 
   n_node = 4;
   n_base = 2;

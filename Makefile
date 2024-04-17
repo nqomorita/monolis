@@ -5,11 +5,13 @@ FC     = mpif90
 FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
+LINK   = $(FC)
 
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
+USE_LIB1= -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+USE_LIB2= -L./lib -lscalapack -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -40,7 +42,19 @@ ifdef FLAGS
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
-		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+		USE_LIB2= 
+		LINK    = $(FC)
+	endif
+
+	ifeq ($(findstring A64FX, $(DFLAGS)), A64FX)
+		FC      = mpifrtpx
+		FFLAGS  = -Nalloc_assign -Kfast -SCALAPACK -SSL2
+		CC      = mpifccpx -Nclang 
+		CFLAGS  = -Kfast
+		MOD_DIR = -M ./include
+		LINK    = mpiFCCpx --linkfortran -SSL2
+		USE_LIB2= 
+		INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
@@ -48,6 +62,8 @@ ifdef FLAGS
 		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -ldmumps -lmumps_common -lpord -lmetis -lscalapack -llapack -lblas
 	endif
 endif
+
+USE_LIB = $(USE_LIB1) $(USE_LIB2)
 
 ##> other commands
 MAKE = make
@@ -270,10 +286,10 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
-	$(FC) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
