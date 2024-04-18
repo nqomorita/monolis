@@ -104,8 +104,6 @@ vec_util.f90
 SRC_WRAP = \
 wrapper_lapack.f90 \
 wrapper_scalapack.f90 \
-wrapper_ml.f90 \
-monolis_wrapper_ml_util.c \
 monolis_wrapper_ml.c 
 
 #matmat.f90 \
@@ -126,6 +124,7 @@ sor/sor_nn.f90 \
 diag.f90 \
 sor.f90 \
 MUMPS.f90 \
+ML.f90 \
 precond.f90
 
 #ilu.f90 \
