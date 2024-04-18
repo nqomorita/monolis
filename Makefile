@@ -103,7 +103,10 @@ vec_util.f90
 
 SRC_WRAP = \
 wrapper_lapack.f90 \
-wrapper_scalapack.f90
+wrapper_scalapack.f90 \
+wrapper_ml.f90 \
+monolis_wrapper_ml_util.c \
+monolis_wrapper_ml.c 
 
 #matmat.f90 \
 
@@ -175,11 +178,7 @@ spmat_handler_util_wrap.f90
 
 SRC_WRAP_C = \
 scalapack_wrapper.f90 \
-monolis_wrapper_scalapack_c.c \
-monolis_ML_helper_nn_c.c \
-monolis_ML_helper_nn_f.f90 \
-monolis_ML_helper.f90 \
-monolis_wrapper_ml_c.c
+monolis_wrapper_scalapack_c.c 
 
 SRC_SOLV_C = \
 monolis_solver_c.c \
@@ -215,8 +214,8 @@ $(addprefix $(SRC_DIR)/,  $(SRC_ALL)) \
 $(addprefix $(WRAP_DIR)/, $(SRC_ALL_C)) \
 ./src/monolis_solver.f90 \
 ./src/monolis.f90
-LIB_OBJSt   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
-LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJSt:.c=.o))
+LIB_OBJS1   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
+LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJS1:.c=.o))
 
 ##> **********
 ##> test target (2)
@@ -303,6 +302,9 @@ $(OBJ_DIR)/%.o: $(TST_DIR)/%.f90
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
