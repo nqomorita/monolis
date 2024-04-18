@@ -10,8 +10,8 @@ LINK   = $(FC)
 ##> directory setting
 MOD_DIR = -J ./include
 INCLUDE = -I /Users/morita/opt/include -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB1= -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
-USE_LIB2= -L/Users/morita/opt/lib -lscalapack -lopenblas
+USE_LIB1= -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lml -lzoltan -lmetis
+USE_LIB2= -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
