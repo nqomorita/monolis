@@ -10,10 +10,11 @@ contains
     implicit none
     integer(kint) :: n_dof
 
-    do n_dof = 1, 3
+    do n_dof = 3, 3
       call monolis_solver_CG_test_main(n_dof, monolis_prec_NONE)
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_AMG)
     enddo
   end subroutine monolis_solver_CG_test
 

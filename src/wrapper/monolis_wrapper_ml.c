@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-//#include "monolis_util.h"
+#include "monolis_utils.h"
 
 #include "Trilinos_version.h"
 #include "ml_include.h"
@@ -87,31 +87,28 @@ static void ml_options_set(struct ml_options *mlopt, int *ierr) {
   mlopt->CoarsenScheme = DEFAULT_COARSEN_SCHEME;
   mlopt->MaxLevels = 2;
   mlopt->NumSweeps = 2;
-  mlopt->MaxCoarseSize = 10;
+  mlopt->MaxCoarseSize = 32;
 }
 
 int monolis_ML_getrow_nn(ML_Operator *mat_in, int N_requested_rows,
                        int requested_rows[], int allocated_space,
                        int cols[], double values[], int row_lengths[]) {
   int *id, ierr;
-  id = (int *)ML_Get_MyGetrowData(mat_in);
-  //monolis_ml_getrow_nn_(id, &N_requested_rows, requested_rows, &allocated_space,
-  //                    cols, values, row_lengths, &ierr);
+  monolis_ml_getrow_nn_(&N_requested_rows, requested_rows, &allocated_space,
+                        cols, values, row_lengths, &ierr);
   return ierr;
 }
 
 int monolis_ML_matvec_nn(ML_Operator *mat_in, int in_length, double p[],
                        int out_length, double ap[]) {
   int *id, ierr;
-  id = (int *)ML_Get_MyGetrowData(mat_in);
-  //monolis_ml_matvec_nn_(id, &in_length, p, &out_length, ap, &ierr);
+  monolis_ml_matvec_nn_(&in_length, p, &out_length, ap, &ierr);
   return ierr;
 }
 
 int monolis_ML_comm_nn(double x[], void *A_data) {
   int *id, ierr;
-  id = (int *)A_data;
-  //monolis_ml_comm_nn_(id, x, &ierr);
+  monolis_ml_comm_nn_(x, &ierr);
   return ierr;
 }
 
@@ -132,6 +129,7 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   int loglevel, myrank;
   int N_grids, N_levels;
   int nlocal, nlocal_allcolumns;
+  int *id;
   struct ml_options *mlopt;
   ML *ml_object;
   ML_Aggregate *agg_object;
@@ -146,8 +144,9 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   N_grids = mlopt->MaxLevels;
   ML_Create(&ml_object, N_grids);
 
-  //monolis_ml_get_nlocal_(id, &nlocal, &nlocal_allcolumns, ierr);
+  monolis_ml_get_nlocal_(&nlocal, &nlocal_allcolumns, ierr);
 
+  //*id = 1;
   ML_Init_Amatrix(ml_object, 0, nlocal, nlocal, NULL);
   ML_Set_Amatrix_Getrow(ml_object, 0, monolis_ML_getrow_nn, monolis_ML_comm_nn, nlocal_allcolumns);
   ML_Set_Amatrix_Matvec(ml_object, 0, monolis_ML_matvec_nn);
@@ -158,12 +157,13 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   ML_Aggregate_Create(&agg_object);
 
   /* Max coarse size */
-  {
-    int nglobal;
-    //monolis_Allreduce(&nlocal, &nglobal, 1, monolis_INT, monolis_SUM, monolis_comm_get_comm());
-    if (nglobal <= mlopt->MaxCoarseSize) mlopt->MaxCoarseSize = nglobal - 1; /* coarsen at least once */
-    if (mlopt->MaxCoarseSize > 0) ML_Aggregate_Set_MaxCoarseSize(agg_object, mlopt->MaxCoarseSize);
-  }
+//  {
+//    int nglobal;
+//    nglobal = nlocal;
+//    monolis_allreduce_I(1, &nglobal, MONOLIS_MPI_SUM, monolis_mpi_get_global_comm());
+//    if (nglobal <= mlopt->MaxCoarseSize) mlopt->MaxCoarseSize = nglobal - 1; /* coarsen at least once */
+//    if (mlopt->MaxCoarseSize > 0) ML_Aggregate_Set_MaxCoarseSize(agg_object, mlopt->MaxCoarseSize);
+//  }
 
   /* options */
   /* CoarsenScheme */
@@ -179,14 +179,13 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
     } else if (mlopt->CoarsenScheme == DD) {
       ML_Aggregate_Set_CoarsenScheme_DD(agg_object);
     }
-    /*
-    if (mlopt->MaxLevels == 2) {
+    
+    //if (mlopt->MaxLevels == 2) {
       ML_Aggregate_Set_LocalNumber(ml_object, agg_object, ML_ALL_LEVELS, 1);
-    } else if (mlopt->MaxLevels == 3) {
-      ML_Aggregate_Set_NodesPerAggr(ml_object, agg_object, ML_ALL_LEVELS, 512);
-      ML_Aggregate_Set_ReqLocalCoarseSize(ml_object->ML_num_levels, agg_object, ML_ALL_LEVELS, 128);
-    }
-    */
+    //} else if (mlopt->MaxLevels == 3) {
+    //  ML_Aggregate_Set_NodesPerAggr(ml_object, agg_object, ML_ALL_LEVELS, 512);
+    //  ML_Aggregate_Set_ReqLocalCoarseSize(ml_object->ML_num_levels, agg_object, ML_ALL_LEVELS, 128);
+    //}
   }
   /* ML_Aggregate_Set_Threshold(agg_object, threshold); */
   /* ML_Aggregate_Set_DampingFactor(agg_object, dampingfactor); */
@@ -201,9 +200,9 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   ML_Aggregate_Set_Dimensions(agg_object, *Ndof);
 
   /* Generate MultiGrid */
-  /* N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); */
-  N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object);
-  if (loglevel >= 1 && myrank == 0) fprintf(stderr, "INFO: ML generated num of levels is %d\n", N_levels);
+  N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
+  //N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object);
+  //if (loglevel >= 1 && myrank == 0) fprintf(stderr, "INFO: ML generated num of levels is %d\n", N_levels);
 
   /* Smoother */
   /*
@@ -219,19 +218,18 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
      * levels other than the coarsest level
      */
     for (level = 0; level < coarsest_level; level++) {
-      ML_Gen_Smoother_Cheby(ml_object, level, ML_BOTH, 20.0, mlopt->NumSweeps);
+      ML_Gen_Smoother_Cheby(ml_object, level, ML_BOTH, 20.0, 2);
     }
     /*
      * coarsest level
      */
-
-    if (mlopt->CoarseSolver == MUMPS) {
-      ML_Gen_Smoother_Amesos(ml_object, coarsest_level, ML_AMESOS_MUMPS, 1, 0.0, 1);
-    } else if (mlopt->CoarseSolver == KLU) {
-      ML_Gen_Smoother_Amesos(ml_object, coarsest_level, ML_AMESOS_KLU, 1, 0.0, 1);
-    } else {
+    //if (mlopt->CoarseSolver == MUMPS) {
+    //  ML_Gen_Smoother_Amesos(ml_object, coarsest_level, ML_AMESOS_MUMPS, 1, 0.0, 1);
+    //} else if (mlopt->CoarseSolver == KLU) {
+    //  ML_Gen_Smoother_Amesos(ml_object, coarsest_level, ML_AMESOS_KLU, 1, 0.0, 1);
+    //} else {
       ML_Gen_Smoother_Cheby(ml_object, coarsest_level, ML_BOTH, 20.0, 2);
-    }
+    //}
   }
 
   /* Solver */
@@ -250,23 +248,20 @@ void monolis_ML_wrapper_apply(double rhs[], int *ierr) {
   ML *ml_object;
 
   ml_object = MLInfo.ml_object;
-  //monolis_ml_get_nlocal_(id, &nlocal, &nlocal_allcolumns, ierr);
-  //if (*ierr != monolis_SUCCESS) return;
-  //sol = (double *)monolis_malloc(sizeof(double) * nlocal_allcolumns);
-  
-  /* MultiGrid V-cycle */
+  monolis_ml_get_nlocal_(&nlocal, &nlocal_allcolumns, ierr);
+
+  sol = monolis_alloc_R_1d(sol, nlocal_allcolumns);
+
   ML_Solve_MGV(ml_object, rhs, sol);
 
   for (i = 0; i < nlocal; i++) {
     rhs[i] = sol[i];
   }
 
-  //monolis_free(sol);
+  monolis_dealloc_R_1d(&sol);
 }
 
 void monolis_ML_wrapper_clear(int *ierr) {
-  struct ml_options *mlopt = &(MLInfo.opt);
-
   ML_Aggregate_Destroy(&(MLInfo.agg_object));
   ML_Destroy(&(MLInfo.ml_object));
 }

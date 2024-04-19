@@ -6,12 +6,6 @@ module mod_monolis_precond_ML
 
   implicit none
 
-  private
-
-  public :: monolis_precond_ml_setup_R
-  public :: monolis_precond_ml_apply_R
-  public :: monolis_precond_ml_clear_R
-
   type(monolis_mat), pointer, save :: monoMAT_save
   type(monolis_com), pointer, save :: monoCOM_save
 
@@ -72,49 +66,26 @@ contains
 
     call monolis_precond_ml_clear(ierr)
   end subroutine monolis_precond_ml_clear_R
+end module mod_monolis_precond_ML
 
   !> wrapper section
   subroutine monolis_ML_get_nlocal(nlocal, nlocal_allcolumns, ierr)
     use mod_monolis_utils
+    use mod_monolis_precond_ML
     implicit none
     integer(kint), intent(out) :: nlocal
     integer(kint), intent(out) :: nlocal_allcolumns
     integer(kint), intent(out) :: ierr
-    !type(monolisST_matrix), pointer :: hecMAT
     
-    !nlocal = hecMAT%N * hecMAT%NDOF
-    !nlocal_allcolumns = hecMAT%NP * hecMAT%NDOF
-    !ierr = 0
+    nlocal = monoMAT_save%N * monoMAT_save%NDOF
+    nlocal_allcolumns = monoMAT_save%NP * monoMAT_save%NDOF
+    ierr = 0
   end subroutine monolis_ML_get_nlocal
 
-  subroutine monolis_ML_get_opt(opt, ierr)
-    use mod_monolis_utils
-    implicit none
-    integer(kint), intent(out) :: opt(*)
-    integer(kint), intent(out) :: ierr
-    !type(monolisST_matrix), pointer :: hecMAT
-    integer(kint) :: iopt(10)
-
-    !call monolis_mat_get_solver_opt(hecMAT, iopt)
-    !opt(1:10) = iopt(1:10)
-    !ierr = 0
-  end subroutine monolis_ML_get_opt
-
-  subroutine monolis_ML_set_opt(opt, ierr)
-    use mod_monolis_utils
-    implicit none
-    integer(kint), intent(in) :: opt(*)
-    integer(kint), intent(out) :: ierr
-    integer(kint) :: iopt(10)
-    
-    !iopt(1:10) = opt(1:10)
-    !call monolis_mat_set_solver_opt(hecMAT, iopt)
-    !ierr = 0
-  end subroutine monolis_ML_set_opt
-
   subroutine monolis_ML_getrow_nn(n_requested_rows, requested_rows, &
-      allocated_space, cols, values, row_lengths, ierr)
+    allocated_space, cols, values, row_lengths, ierr)
     use mod_monolis_utils
+    use mod_monolis_precond_ML
     implicit none
     integer(kint), intent(in) :: n_requested_rows
     integer(kint), intent(in) :: requested_rows(n_requested_rows)
@@ -124,80 +95,66 @@ contains
     integer(kint), intent(out) :: row_lengths(n_requested_rows)
     integer(kint), intent(out) :: ierr
     integer(kint) :: m, i, row, inod, idof, nl, nd, nu, js, je, j, jj, jdof, start, ndof
+    integer(kint) :: n
 
-  !  !call monolis_mat_id_get(id, hecMAT, hecMESH)
-  !  ndof = hecMAT%NDOF
-  !  m = 1
-  !  do i = 1, n_requested_rows
-  !    row = requested_rows(i) + 1 ! '+1' for Fortran-numbering
-  !    inod = (row-1)/ndof + 1
-  !    idof = row - (inod-1)*ndof
-  !    nl = (hecMAT%indexL(inod) - hecMAT%indexL(inod-1)) * ndof
-  !    nd = ndof
-  !    nu = (hecMAT%indexU(inod) - hecMAT%indexU(inod-1)) * ndof
-  !    if (allocated_space < m + nl + nd + nu) return
-  !    start = m
-  !    js = hecMAT%indexL(inod-1)+1
-  !    je = hecMAT%indexL(inod)
-  !    do j = js, je
-  !      jj = hecMAT%itemL(j)
-  !      do jdof = 1, ndof
-  !        cols(m) = (jj-1)*ndof + jdof - 1 ! '-1' for C-numbering
-  !        values(m) = hecMAT%AL((j-1)*ndof*ndof + (idof-1)*ndof + jdof)
-  !        m = m+1
-  !      enddo
-  !    enddo
-  !    do jdof = 1, ndof
-  !      cols(m) = (inod-1)*ndof + jdof - 1 ! '-1' for C-numbering
-  !      values(m) = hecMAT%D((inod-1)*ndof*ndof + (idof-1)*ndof + jdof)
-  !      m = m+1
-  !    enddo
-  !    js = hecMAT%indexU(inod-1)+1
-  !    je = hecMAT%indexU(inod)
-  !    do j = js, je
-  !      jj = hecMAT%itemU(j)
-  !      do jdof = 1, ndof
-  !        cols(m) = (jj-1)*ndof + jdof - 1 ! '-1' for C-numbering
-  !        values(m) = hecMAT%AU((j-1)*ndof*ndof + (idof-1)*ndof + jdof)
-  !        m = m+1
-  !      enddo
-  !    enddo
-  !    row_lengths(i) = m - start
-  !  enddo
-  !  ierr = 1
+    ndof = monoMAT_save%NDOF
+    m = 1
+    do i = 1, n_requested_rows
+      row = requested_rows(i) + 1 ! '+1' for Fortran-numbering
+      inod = (row-1)/ndof + 1
+      idof = row - (inod-1)*ndof
+      
+      n = ndof*(monoMAT_save%CSR%index(inod + 1) - monoMAT_save%CSR%index(inod))
+      if (allocated_space < n) return
+      start = m
+      js = monoMAT_save%CSR%index(inod) + 1
+      je = monoMAT_save%CSR%index(inod + 1)
+      do j = js, je
+        jj = monoMAT_save%CSR%item(j)
+        do jdof = 1, ndof
+          cols(m) = (jj-1)*ndof + jdof - 1 ! '-1' for C-numbering
+          values(m) = monoMAT_save%R%A((j-1)*ndof*ndof + (idof-1)*ndof + jdof)
+          m = m + 1
+        enddo
+      enddo
+      row_lengths(i) = m - start
+    enddo
+    ierr = 1
   end subroutine monolis_ML_getrow_nn
 
-  subroutine monolis_ML_matvec_nn(in_length, p, out_length, ap, ierr)
+  subroutine monolis_ML_matvec_nn(in_length, X, out_length, Y, ierr)
     use mod_monolis_utils
+    use mod_monolis_matvec
+    use mod_monolis_precond_ML
     implicit none
     integer(kint), intent(in) :: in_length
-    real(kdouble), intent(in) :: p(in_length)
+    real(kdouble), intent(in) :: X(in_length)
     integer(kint), intent(in) :: out_length
-    real(kdouble), intent(out) :: ap(out_length)
+    real(kdouble), intent(out) :: Y(out_length)
     integer(kint), intent(out) :: ierr
-    real(kdouble), allocatable :: w(:)
+    real(kdouble), allocatable :: W(:)
     integer(kint) :: i
+    real(kdouble) :: tspmv, tcomm
 
-    !call monolis_mat_id_get(id, hecMAT, hecMESH)
-    !allocate(w(hecMAT%NP*hecMAT%NDOF))
-    !do i = 1, hecMAT%N*hecMAT%NDOF
-    !  w(i) = p(i)
-    !enddo
-    !call monolis_matvec(hecMESH, hecMAT, w, ap)
-    !deallocate(w)
-    !ierr = 0
+    allocate(W(monoMAT_save%NP*monoMAT_save%NDOF))
+    do i = 1, monoMAT_save%N*monoMAT_save%NDOF
+      W(i) = X(i)
+    enddo
+
+    call monolis_matvec_product_main_R(monoCOM_save, monoMAT_save, W, Y, tspmv, tcomm)
+    
+    deallocate(W)
+    ierr = 0
   end subroutine monolis_ML_matvec_nn
 
   subroutine monolis_ML_comm_nn(x, ierr)
     use mod_monolis_utils
+    use mod_monolis_precond_ML
     implicit none
     real(kdouble), intent(inout) :: x(*)
     integer(kint), intent(out) :: ierr
+    real(kdouble) :: tcomm
 
-    !type(monolisST_matrix), pointer :: hecMAT
-    !call monolis_mat_id_get(id, hecMAT, hecMESH)
-    !call monolis_update_R (hecMESH, x, hecMAT%NP, hecMAT%NDOF)
+    call monolis_mpi_update_R(monoCOM_save, monoMAT_save%ndof, x(1:monoMAT_save%NP*monoMAT_save%NDOF), tcomm)
     ierr = 0
   end subroutine monolis_ML_comm_nn
-
-end module mod_monolis_precond_ML
