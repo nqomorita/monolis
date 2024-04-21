@@ -67,7 +67,7 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
 
   //N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
   N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
-  //printf("N_levels %d \n", N_levels);
+  if(myrank == 0){ printf("N_levels %d \n", N_levels); }
 
   ML_Gen_Smoother_Jacobi(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);
   //ML_Gen_Smoother_GaussSeidel(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);

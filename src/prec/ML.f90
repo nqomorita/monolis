@@ -99,6 +99,7 @@ end module mod_monolis_precond_ML
 
     ndof = monoMAT_save%NDOF
     m = 1
+    ierr = 0
     do i = 1, n_requested_rows
       row = requested_rows(i) + 1 ! '+1' for Fortran-numbering
       inod = (row-1)/ndof + 1
@@ -106,7 +107,7 @@ end module mod_monolis_precond_ML
       
       n = ndof*(monoMAT_save%CSR%index(inod + 1) - monoMAT_save%CSR%index(inod))
       if (allocated_space < n) return
-      
+
       start = m
       js = monoMAT_save%CSR%index(inod) + 1
       je = monoMAT_save%CSR%index(inod + 1)
