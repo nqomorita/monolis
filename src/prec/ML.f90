@@ -106,6 +106,7 @@ end module mod_monolis_precond_ML
       
       n = ndof*(monoMAT_save%CSR%index(inod + 1) - monoMAT_save%CSR%index(inod))
       if (allocated_space < n) return
+      
       start = m
       js = monoMAT_save%CSR%index(inod) + 1
       je = monoMAT_save%CSR%index(inod + 1)
@@ -136,7 +137,8 @@ end module mod_monolis_precond_ML
     integer(kint) :: i
     real(kdouble) :: tspmv, tcomm
 
-    allocate(W(monoMAT_save%NP*monoMAT_save%NDOF))
+    allocate(W(monoMAT_save%NP*monoMAT_save%NDOF), source = 0.0d0)
+
     do i = 1, monoMAT_save%N*monoMAT_save%NDOF
       W(i) = X(i)
     enddo
