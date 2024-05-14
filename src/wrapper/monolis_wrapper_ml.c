@@ -46,7 +46,7 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   ML *ml_object;
   ML_Aggregate *agg_object;
 
-  N_grids = 2;
+  N_grids = 100;
   ML_Create(&ml_object, N_grids);
 
   myrank = monolis_mpi_get_global_my_rank();
@@ -60,20 +60,22 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
 
   nglobal = nlocal;
   monolis_allreduce_I(1, &nglobal, MONOLIS_MPI_SUM, monolis_mpi_get_global_comm());
-  ML_Aggregate_Set_MaxCoarseSize(agg_object, nglobal - 1);
-  //ML_Aggregate_Set_MaxCoarseSize(agg_object, 20);
-  ML_Aggregate_Set_CoarsenScheme_UncoupledMIS(agg_object);
+  
+  //ML_Aggregate_Set_MaxCoarseSize(agg_object, nglobal - 1);
+  //ML_Aggregate_Set_CoarsenScheme_UncoupledMIS(agg_object);
   //ML_Aggregate_Set_Dimensions(agg_object, *Ndof);
 
-  N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
-  //N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
+  //N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
+  N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
   if(myrank == 0){ printf("N_levels %d \n", N_levels); }
 
-  //ML_Gen_Smoother_Jacobi(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);
+  ML_Gen_Smoother_Jacobi(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);
   //ML_Gen_Smoother_GaussSeidel(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);
-  ML_Gen_Smoother_Cheby(ml_object, ML_ALL_LEVELS, ML_BOTH, 10.0, 1);
+  //ML_Gen_Smoother_Cheby(ml_object, ML_ALL_LEVELS, ML_BOTH, 10.0, 2);
 
-  ML_Gen_Solver(ml_object, ML_MGV, 0, N_levels - 1);
+  //ML_Gen_Solver(ml_object, ML_MGV, 0, N_levels - 1);
+  //ML_Gen_Solver(ml_object, ML_MGW, 0, N_levels - 1);
+  ML_Gen_Solver(ml_object, ML_MGFULLV, 0, N_levels - 1);
 
   /* Save objects */
   MLInfo.ml_object  = ml_object;

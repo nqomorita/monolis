@@ -43,11 +43,15 @@ contains
     !> [in] 行列構造体
     type(monolis_mat), intent(in) :: monoMAT
     real(kdouble) :: X(:), Y(:)
-    integer(kint) :: ierr
+    integer(kint) :: ierr, i
 
     call monolis_std_debug_log_header("monolis_precond_ml_apply_R")
-    call monolis_precond_ml_apply(X, ierr)
-    Y = X
+
+    do i = 1, monoMAT%N * monoMAT%NDOF
+      Y(i) = X(i)
+    enddo
+
+    call monolis_precond_ml_apply(Y, ierr)
   end subroutine monolis_precond_ml_apply_R
 
   !> @ingroup prec

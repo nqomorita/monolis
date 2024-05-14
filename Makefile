@@ -2,7 +2,7 @@
 
 ##> compiler setting
 FC     = mpif90
-FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
+FFLAGS = -fPIC -O2 -mtune=native -std=legacy -Wno-missing-include-dirs
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
 LINK   = $(FC)
