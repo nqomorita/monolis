@@ -53,6 +53,8 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_prec_MF     = 9
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
+  !> パラメータ：AMG ML
+  integer(kint), parameter :: monolis_prec_AMG = 5
 
   character*24, dimension(12) :: monolis_str_iter = (/&
   & "CG                 ", &
@@ -70,7 +72,7 @@ module mod_monolis_def_solver
   !& "GMRES              ", &
   & "COCG               "/)
 
-  character*24, dimension(0:4)  :: monolis_str_prec = (/&
+  character*24, dimension(0:5)  :: monolis_str_prec = (/&
   & "None  ", &
   & "Diag  ", &
 !  & "ILU   ", &
@@ -81,7 +83,8 @@ module mod_monolis_def_solver
   & "MUMPS ", &
 !  & "ROM   ", &
 !  & "MF    ", &
-  & "MUMPSL"/)
+  & "MUMPSL", &
+  & "AMG-ML"/)
 
   !> 整数パラメータのサイズ
   integer(kint), parameter :: monolis_prm_Iarray_size = 100

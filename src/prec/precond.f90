@@ -6,6 +6,7 @@ module mod_monolis_precond
   use mod_monolis_precond_diag
   use mod_monolis_precond_SOR
   use mod_monolis_precond_mumps
+  use mod_monolis_precond_ML
 
   implicit none
 
@@ -87,6 +88,8 @@ contains
     elseif(precond == monolis_prec_MUMPS_LOCAL)then
       call monolis_precond_MUMPS_setup_local(monoPREC)
       call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT, monoPREC)
+    elseif(precond == monolis_prec_AMG)then
+      call monolis_precond_ML_setup_R(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_MF)then
     !  call monolis_precond_MF_setup(monoPRM, monoCOM, monoMAT)
     endif
@@ -174,6 +177,8 @@ contains
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     elseif(precond == monolis_prec_MUMPS_LOCAL)then
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
+    elseif(precond == monolis_prec_AMG)then
+      call monolis_precond_ML_apply_R(monoPRM, monoCOM, monoMAT, X, Y)
     !elseif(precond == monolis_prec_MF)then
     !  call monolis_precond_MF_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(precond == monolis_prec_NONE)then
@@ -274,6 +279,8 @@ contains
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT, monoPREC)
     elseif(precond == monolis_prec_MUMPS_LOCAL)then
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT, monoPREC)
+    elseif(precond == monolis_prec_AMG)then
+      call monolis_precond_ML_clear_R(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_MF)then
     !  call monolis_precond_MF_clear(monoPRM, monoCOM, monoMAT)
     endif

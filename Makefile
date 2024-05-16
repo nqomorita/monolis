@@ -2,14 +2,13 @@
 
 ##> compiler setting
 FC     = mpif90
-FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
+FFLAGS = -fPIC -O2 -mtune=native -std=legacy -Wno-missing-include-dirs
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
+LINK   = $(FC)
 
 ##> directory setting
 MOD_DIR = -J ./include
-INCLUDE = -I /usr/include -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -22,7 +21,9 @@ LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp
 
-##> option setting
+INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+
+##> compiler option setting
 ifdef FLAGS
 	comma:= ,
 	empty:=
@@ -40,14 +41,51 @@ ifdef FLAGS
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
-		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+		LINK    = $(FC)
+	endif
+
+	ifeq ($(findstring A64FX, $(DFLAGS)), A64FX)
+		FC      = mpifrtpx
+		FFLAGS  = -Nalloc_assign -Kfast -SCALAPACK -SSL2
+		CC      = mpifccpx -Nclang 
+		CFLAGS  = -Kfast
+		MOD_DIR = -M ./include
+		LINK    = mpiFCCpx --linkfortran -SSL2
+		#INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+	endif
+endif
+
+USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
+#USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
+
+##> liblary option setting
+ifdef FLAGS
+	comma:= ,
+	empty:=
+	space:= $(empty) $(empty)
+	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
+
+	ifeq ($(findstring ML, $(DFLAGS)), ML)
+		CPP    += -DWITH_ML
+		#INCLUDE_ML = 
+		USE_LIB_ML = -L./lib -lml -lzoltan -lmetis
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		CPP    += -DWITH_MUMPS
-		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -ldmumps -lmumps_common -lpord -lmetis -lscalapack -llapack -lblas
+		#INCLUDE_MUMPS = 
+		USE_LIB_MUMPS = -L./lib -ldmumps -lmumps_common -lpord
+	endif
+
+	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
+		#INCLUDE_BLOPEX = 
+		CPP    += -DWITH_BLOPEX
+		USE_LIB_BLOPEX = -L./lib 
 	endif
 endif
+
+USE_LIB = $(USE_LIB_CORE) $(USE_LIB_ML) $(USE_LIB_MUMPS) $(USE_LIB_BLOPEX) $(USE_LIB_OPT)
 
 ##> other commands
 MAKE = make
@@ -90,7 +128,8 @@ SRC_WRAP1 = \
 wrapper_lapack.f90
 
 SRC_WRAP2 = \
-wrapper_scalapack.f90
+wrapper_scalapack.f90 \
+monolis_wrapper_ml.c 
 
 #matmat.f90 \
 
@@ -110,6 +149,7 @@ sor/sor_nn.f90 \
 diag.f90 \
 sor.f90 \
 MUMPS.f90 \
+ML.f90 \
 precond.f90
 
 #ilu.f90 \
@@ -161,7 +201,7 @@ spmat_handler_util_wrap.f90
 
 SRC_WRAP_C = \
 scalapack_wrapper.f90 \
-monolis_wrapper_scalapack_c.c
+monolis_wrapper_scalapack_c.c 
 
 SRC_SOLV_C = \
 monolis_solver_c.c \
@@ -198,8 +238,8 @@ $(addprefix $(SRC_DIR)/,  $(SRC_ALL)) \
 $(addprefix $(WRAP_DIR)/, $(SRC_ALL_C)) \
 ./src/monolis_solver.f90 \
 ./src/monolis.f90
-LIB_OBJSt   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
-LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJSt:.c=.o))
+LIB_OBJS1   = $(subst $(SRC_DIR), $(OBJ_DIR), $(LIB_SOURCES:.f90=.o))
+LIB_OBJS    = $(subst $(WRAP_DIR), $(OBJ_DIR), $(LIB_OBJS1:.c=.o))
 
 ##> **********
 ##> test target (2)
@@ -273,10 +313,10 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
-	$(FC) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
@@ -286,6 +326,9 @@ $(OBJ_DIR)/%.o: $(TST_DIR)/%.f90
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<

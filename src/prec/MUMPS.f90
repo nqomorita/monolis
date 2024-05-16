@@ -7,6 +7,7 @@ module mod_monolis_precond_mumps
 
   integer(kint), parameter :: mumps_mat_csr = 1
   integer(kint), parameter :: mumps_mat_coo = 2
+
   integer(kint), parameter :: mumps_mat_asym = 0
   integer(kint), parameter :: mumps_mat_spd = 1
   integer(kint), parameter :: mumps_mat_sym = 2
