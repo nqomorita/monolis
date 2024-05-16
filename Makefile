@@ -9,9 +9,6 @@ LINK   = $(FC)
 
 ##> directory setting
 MOD_DIR = -J ./include
-INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-USE_LIB1= -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lml -lzoltan -lmetis
-USE_LIB2= -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -24,7 +21,9 @@ LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp
 
-##> option setting
+INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+
+##> compiler option setting
 ifdef FLAGS
 	comma:= ,
 	empty:=
@@ -42,7 +41,6 @@ ifdef FLAGS
 		CC      = mpiicc
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
-		USE_LIB2= 
 		LINK    = $(FC)
 	endif
 
@@ -53,17 +51,41 @@ ifdef FLAGS
 		CFLAGS  = -Kfast
 		MOD_DIR = -M ./include
 		LINK    = mpiFCCpx --linkfortran -SSL2
-		USE_LIB2= 
-		INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+		#INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+	endif
+endif
+
+USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
+#USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
+
+##> liblary option setting
+ifdef FLAGS
+	comma:= ,
+	empty:=
+	space:= $(empty) $(empty)
+	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
+
+	ifeq ($(findstring ML, $(DFLAGS)), ML)
+		CPP    += -DWITH_ML
+		#INCLUDE_ML = 
+		USE_LIB_ML = -L./lib -lml -lzoltan -lmetis
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		CPP    += -DWITH_MUMPS
-		USE_LIB = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -ldmumps -lmumps_common -lpord -lmetis -lscalapack -llapack -lblas
+		#INCLUDE_MUMPS = 
+		USE_LIB_MUMPS = -L./lib -ldmumps -lmumps_common -lpord
+	endif
+
+	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
+		#INCLUDE_BLOPEX = 
+		CPP    += -DWITH_BLOPEX
+		USE_LIB_BLOPEX = -L./lib 
 	endif
 endif
 
-USE_LIB = $(USE_LIB1) $(USE_LIB2)
+USE_LIB = $(USE_LIB_CORE) $(USE_LIB_ML) $(USE_LIB_MUMPS) $(USE_LIB_BLOPEX) $(USE_LIB_OPT)
 
 ##> other commands
 MAKE = make

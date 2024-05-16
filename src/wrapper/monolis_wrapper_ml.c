@@ -43,6 +43,8 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   int N_grids, N_levels;
   int nlocal, nlocal_allcolumns;
   int *id;
+
+#ifdef WITH_ML  
   ML *ml_object;
   ML_Aggregate *agg_object;
 
@@ -80,12 +82,17 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   /* Save objects */
   MLInfo.ml_object  = ml_object;
   MLInfo.agg_object = agg_object;
+#else
+    printf("%s\n", "* monolis_wrapper_ml.c: ML is NOT enabled");
+    return;
+#endif
 }
 
 void monolis_ML_wrapper_apply(double rhs[], int *ierr) {
   int nlocal, nlocal_allcolumns;
   double *sol;
   int i;
+#ifdef WITH_ML  
   ML *ml_object;
 
   ml_object = MLInfo.ml_object;
@@ -100,11 +107,14 @@ void monolis_ML_wrapper_apply(double rhs[], int *ierr) {
   }
 
   monolis_dealloc_R_1d(&sol);
+#endif
 }
 
 void monolis_ML_wrapper_clear(int *ierr) {
+#ifdef WITH_ML  
   ML_Aggregate_Destroy(&(MLInfo.agg_object));
   ML_Destroy(&(MLInfo.ml_object));
+#endif
 }
 
 /* Fortran interface */
