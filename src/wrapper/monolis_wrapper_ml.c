@@ -3,12 +3,15 @@
 #include <errno.h>
 #include "monolis_utils.h"
 
+#ifdef WITH_ML
 #include "Trilinos_version.h"
 #include "ml_include.h"
 #include "ml_config.h"
+#endif
 
 #include "monolis_wrapper_ml.h"
 
+#ifdef WITH_ML
 int monolis_ML_getrow(ML_Operator *mat_in, int N_requested_rows,
                        int requested_rows[], int allocated_space,
                        int cols[], double values[], int row_lengths[]) {
@@ -24,6 +27,7 @@ int monolis_ML_matvec(ML_Operator *mat_in, int in_length, double p[],
   monolis_ml_matvec_nn_(&in_length, p, &out_length, ap, &ierr);
   return ierr;
 }
+#endif
 
 int monolis_ML_comm(double x[], void *A_data) {
   int ierr;
@@ -31,12 +35,14 @@ int monolis_ML_comm(double x[], void *A_data) {
   return ierr;
 }
 
+#ifdef WITH_ML
 struct ml_info {
   ML *ml_object;
   ML_Aggregate *agg_object;
 };
 
 static struct ml_info MLInfo;
+#endif
 
 void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   int loglevel, myrank, nglobal;
@@ -44,7 +50,7 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
   int nlocal, nlocal_allcolumns;
   int *id;
 
-#ifdef WITH_ML  
+#ifdef WITH_ML
   ML *ml_object;
   ML_Aggregate *agg_object;
 
