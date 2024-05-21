@@ -130,13 +130,11 @@ wrapper_scalapack.f90 \
 monolis_wrapper_ml.c \
 monolis_wrapper_blopex.c 
 
-#matmat.f90 \
-
-#SRC_FACT = \
-#11/fact_LU_11.f90 \
-#11/fact_MF_11.f90 \
-#33/fact_LU_33.f90 \
-#nn/fact_LU_nn.f90 \
+SRC_FACT = \
+LU/LU_nn.f90
+#11/LU_11.f90 \
+#11/MF_11.f90 \
+#33/LU_33.f90 \
 #fact_LU.f90 \
 #fact_MF.f90
 
@@ -147,6 +145,7 @@ sor/sor_33.f90 \
 sor/sor_nn.f90 \
 diag.f90 \
 sor.f90 \
+LU.f90 \
 MUMPS.f90 \
 ML.f90 \
 precond.f90
