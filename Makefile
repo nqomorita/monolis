@@ -127,7 +127,8 @@ vec_util.f90
 SRC_WRAP = \
 wrapper_lapack.f90 \
 wrapper_scalapack.f90 \
-monolis_wrapper_ml.c 
+monolis_wrapper_ml.c \
+monolis_wrapper_blopex.c 
 
 #matmat.f90 \
 
@@ -174,6 +175,8 @@ solver.f90
 SRC_EIGEN = \
 Lanczos_util.f90 \
 Lanczos.f90 \
+LOBPCG_util.f90 \
+LOBPCG.f90 \
 eigen_solver.f90
 
 ##> C wrapper section
