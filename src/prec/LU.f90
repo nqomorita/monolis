@@ -4,7 +4,7 @@ module mod_monolis_precond_LU
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   !use mod_monolis_precond_LU_33
-  !use mod_monolis_precond_LU_nn
+  !use mod_monolis_fact_LU_nn
 
   implicit none
 
