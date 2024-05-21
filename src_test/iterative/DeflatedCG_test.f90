@@ -12,8 +12,8 @@ contains
 
     do n_dof = 1, 3
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
-      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
-      !call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
+      call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
     enddo
   end subroutine monolis_solver_DeflatedCG_test
 
@@ -55,7 +55,8 @@ contains
 
     do i1 = 1, 10
       do i2 = 1, n_dof
-        call random_number(val)
+        !call random_number(val)
+        val = 2.0d0
         val = val + 2.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
@@ -64,7 +65,8 @@ contains
     do i1 = 1, 9
       do i2 = 1, n_dof
       do j2 = 1, n_dof
-        call random_number(val)
+        !call random_number(val)
+        val = 1.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i1), elem(2,i1), i2, j2, val)
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i1), elem(1,i1), j2, i2, val)
       enddo
@@ -84,7 +86,7 @@ contains
     call monolis_show_summary(mat, .false.)
     call monolis_show_timelog_statistics(mat, .false.)
 
-    n_get_eigen = 4*n_dof
+    n_get_eigen = n_dof
     is_bc = .false.
     call monolis_eigen_inverted_standard_lanczos_R &
       & (mat, com, n_get_eigen, 1.0d-10, n_dof*20, eig_val, eig_mode, is_bc)
@@ -97,7 +99,7 @@ contains
     call monolis_set_method(mat, monolis_iter_DeflatedCG1)
     call monolis_set_precond(mat, prec)
     call monolis_set_maxiter(mat, 2000)
-    call monolis_set_tolerance(mat, 1.0d-9)
+    call monolis_set_tolerance(mat, 1.0d-12)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_timelog(mat, .true.)
     call monolis_show_summary(mat, .true.)
@@ -109,8 +111,6 @@ contains
 
     b = 1.0d0
 
-write(*,*)a
-write(*,*)b
     call monolis_test_check_eq_R("monolis_solver_DeflatedCG1_test_main", a, b)
 
     !> monolis_iter_DeflatedCG2

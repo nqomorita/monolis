@@ -297,6 +297,8 @@ contains
 
     monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
 
+    WtAZ(1:M) = 0.0d0
+
     call monolis_mpi_update_reverse_R(monoCOM_deflated_eq, M, WtAZ, time)
 
     monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
