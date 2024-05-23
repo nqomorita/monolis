@@ -7,18 +7,20 @@ module mod_monolis_fact_factorize
 
 contains
 
-  subroutine monolis_matrix_factorize_mf(monoTREE, fact_array, fact_array_index, add_location)
+  subroutine monolis_matrix_factorize_mf(monoTREE, fact_order, fact_array, fact_array_index, add_location)
     implicit none
     type(monolis_mat) :: monoTREE
+    integer(kint) :: fact_order(:)
     real(kdouble) :: fact_array(:)
     integer(kint) :: fact_array_index(:)
     integer(kint) :: add_location(:)
     integer(kint) :: N
-    integer(kint) :: i, iS, iE, in, jn, j, n_fact
+    integer(kint) :: i, iS, iE, in, jn, j, k, n_fact
 
     N = monoTREE%N
 
-    do i = 1, N
+    do k = 1, N
+      i = fact_order(k)
       !> factorization
       iS = fact_array_index(i) + 1
       iE = fact_array_index(i + 1)
@@ -41,7 +43,6 @@ contains
     real(kdouble) :: inv, al, au
 
     inv = 1.0d0/A(1)
-    !inv = 1.0d0/A(1)
     A(1) = inv
     next = N + 1
     in = 0
@@ -64,7 +65,6 @@ contains
     index = 1
     do i = 1, N
       inv = 1.0d0/A(index)
-      !inv = 1.0d0/A(index)
       A(index) = inv
       next = index + N - i + 1
       in = 0
@@ -80,9 +80,10 @@ contains
     enddo
   end subroutine monolis_solve_dense_LDLt
 
-  subroutine monolis_matrix_copy_lu_factor(monoTREE, fact_array, fact_array_index)
+  subroutine monolis_matrix_copy_lu_factor(monoTREE, fact_order, fact_array, fact_array_index)
     implicit none
     type(monolis_mat) :: monoTREE
+    integer(kint) :: fact_order(:)
     real(kdouble) :: fact_array(:)
     integer(kint) :: fact_array_index(:)
     integer(kint) :: N

@@ -6,6 +6,7 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_fact_fillin
   use mod_monolis_fact_analysis
   use mod_monolis_fact_factorize
+  use mod_monolis_spmat_reorder
 
   implicit none
 
@@ -25,11 +26,14 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoPREC
+    type(monolis_mat) :: monoMAT_reorder
     logical :: is_asym = .false.
     logical :: is_fillin = .true.
 
     !> analysis phase
-    call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
+    call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
+
+    call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
 
     !write(*,*)"monoPREC%N", monoPREC%N
     !write(*,*)"monoPREC%NDOF", monoPREC%NDOF
@@ -46,17 +50,18 @@ contains
     !write(*,*)"fact_array", fact_array
     !write(*,*)"fact_array_index", fact_array_index
 
-    call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
+    call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
+      & fact_order, n_fact_array, fact_array, fact_array_index)
     !write(*,*)"fact_array", fact_array
 
     call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
     !write(*,*)"add_location", add_location
 
     !> factorization phase
-    call monolis_matrix_factorize_mf(monoPREC, fact_array, fact_array_index, add_location)
+    call monolis_matrix_factorize_mf(monoPREC, fact_order, fact_array, fact_array_index, add_location)
     !write(*,*)"fact_array", fact_array
 
-    call monolis_matrix_copy_lu_factor(monoPREC, fact_array, fact_array_index)
+    call monolis_matrix_copy_lu_factor(monoPREC, fact_order, fact_array, fact_array_index)
 
     !write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
     !write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
@@ -75,7 +80,7 @@ contains
   end subroutine monolis_fact_LU_nn_setup_C
 
   !> @ingroup prec
-  !> 前処理適用：LU 前処理（3x3 ブロック、実数型）
+  !> 前処理適用：LU 前処理（nxn ブロック、実数型）
   subroutine monolis_fact_LU_nn_apply_R(monoMAT, monoPREC, Y, X)
     implicit none
     !> [in] 行列構造体
@@ -135,7 +140,7 @@ contains
     deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 
-  !> 前処理適用：LU 前処理（3x3 ブロック、複素数型）
+  !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
   subroutine monolis_fact_LU_nn_apply_C(monoMAT, monoPREC, X, Y)
     implicit none
     !> [in] 行列構造体

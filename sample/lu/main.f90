@@ -17,7 +17,9 @@ program main
   real(kdouble), allocatable :: eig_val2(:), eig_mode2(:,:)
   logical, allocatable :: is_bc(:)
 
-  call monolis_std_log_string("monolis_solver_parallel_test linear")
+  call monolis_global_initialize()
+
+  call monolis_std_log_string("monolis_solver_LU_test")
 
   fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
   call monolis_input_node(fname, n_node, node)
@@ -79,14 +81,14 @@ program main
   a = 0.0d0
   b = c
 
-  call monolis_set_method(mat, 1)
-  call monolis_set_precond(mat, 1)
+  call monolis_set_method(mat, monolis_iter_CG)
+  call monolis_set_precond(mat, monolis_prec_LU)
 
   call monolis_solve_R(mat, com, b, a)
-
-  write(*,*)a
 
   call monolis_mpi_global_barrier();
 
   call monolis_finalize(mat)
+
+  call monolis_global_finalize()
 end program main

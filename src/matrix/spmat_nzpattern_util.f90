@@ -256,44 +256,35 @@ contains
 
   !> @ingroup dev_matrix
   !> 疎行列パターンから節点グラフを決定（メイン関数）
-  subroutine monolis_get_nodal_graph_by_nonzero_pattern(MAT, n_node, index, item)
+  subroutine monolis_get_nodal_graph_by_nonzero_pattern(MAT, N, index, item)
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(in) :: MAT
     !> [in] 節点数
-    integer(kint), intent(out) :: n_node
+    integer(kint), intent(out) :: N
     !> [in] index 配列
     integer(kint), allocatable :: index(:)
     !> [in] item 配列
     integer(kint), allocatable :: item(:)
-    integer(kint) :: i, j, nz, jS, jE
+    integer(kint) :: i, j, NZ, jS, jE, in, jn
 
-!    do i = 1, N
-!      in = index(i) - index(i-1)
-!
-!      if(0 < in)then
-!        allocate(nozero(in-1))
-!        nozero = 0
-!
-!        jn = 0
-!        jS = index(i-1) + 1
-!        jE = index(i  )
-!        do j = jS, jE
-!          if(item(j) /= i)then
-!            jn = jn + 1
-!            nozero(jn) = item(j)
-!          endif
-!        enddo
-!
-!        call reallocate_array(edge(i)%N, jn, edge(i)%node)
-!        edge(i)%N = jn
-!
-!        do j = 1, jn
-!          edge(i)%node(j) = nozero(j)
-!        enddo
-!        deallocate(nozero)
-!      endif
-!    enddo
+    N = MAT%N
+    NZ = MAT%CSR%index(N + 1) - N
+
+    call monolis_alloc_I_1d(index, N + 1)
+    call monolis_alloc_I_1d(item, NZ)
+
+    in = 0
+    do i = 1, N
+      index(i + 1) = MAT%CSR%index(i + 1) - i
+      jS = MAT%CSR%index(i) + 1
+      jE = MAT%CSR%index(i + 1)
+      do j = jS, jE
+        jn = MAT%CSR%item(j)
+        if(i == jn) cycle
+        in = in + 1
+        item(in) = jn
+      enddo
+    enddo
   end subroutine monolis_get_nodal_graph_by_nonzero_pattern
-
 end module mod_monolis_spmat_nonzero_pattern_util
