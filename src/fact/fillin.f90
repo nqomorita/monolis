@@ -6,14 +6,8 @@ module mod_monolis_fact_fillin
   implicit none
 
   type monolis_fillin
-    integer(kint) :: n_descendant
     integer(kint) :: n_ancestor
-    integer(kint), pointer :: descendant(:)
     integer(kint), pointer :: ancestor(:)
-    integer(kint), pointer :: update_index(:)
-    real(kdouble), pointer :: update(:,:,:)
-    logical :: factorized
-    logical :: updated
   end type monolis_fillin
 
 contains
@@ -40,19 +34,17 @@ contains
     allocate(tree(N))
 
     do i = 1, N
-      tree(i)%factorized = .false.
-      tree(i)%updated = .false.
-      tree(i)%n_descendant = 0
       tree(i)%n_ancestor = 0
 
       in = 0
-      jS = monoMAT%CSR%index(i-1) + 1
-      jE = monoMAT%CSR%index(i  )
+      jS = monoMAT%CSR%index(i) + 1
+      jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
         if(i < monoMAT%CSR%item(j) .and. monoMAT%CSR%item(j) <= N)then
           in = in + 1
         endif
       enddo
+
       tree(i)%n_ancestor = in
       allocate(tree(i)%ancestor(in))
 
@@ -67,9 +59,9 @@ contains
 
     if(is_fillin)then
       nbytes = N/bit+1
-      allocate(child_mask (nbytes))
-      allocate(parent_mask(nbytes))
-      allocate(fillin_mask(nbytes))
+      allocate(child_mask (nbytes), source = 0)
+      allocate(parent_mask(nbytes), source = 0)
+      allocate(fillin_mask(nbytes), source = 0)
 
       do i = 1, N
         if(tree(i)%n_ancestor < 2) cycle
@@ -123,14 +115,12 @@ contains
     deallocate(parent_mask)
     deallocate(fillin_mask)
 
-    !> Factorization array allocataion part
-
     !> SCSR allocation part
     monoTREE%N = monoMAT%N
     monoTREE%NDOF = monoMAT%NDOF
 
     allocate(monoTREE%SCSR%indexU(N+1))
-    in = 1
+    in = 0
     monoTREE%SCSR%indexU(1) = 0
     do i = 1, N
       monoTREE%SCSR%indexU(i+1) = monoTREE%SCSR%indexU(i) + tree(i)%n_ancestor + 1
@@ -203,90 +193,90 @@ contains
     !call monolis_palloc_R_1d(MAT%R%X, NP*NDOF)
   end subroutine monolis_matrix_alloc_with_fillin
 
-  subroutine monolis_matrix_copy_with_fillin(monoMAT, monoTREE, is_asym)
-    implicit none
-    type(monolis_mat) :: monoMAT
-    type(monolis_mat) :: monoTREE
-    integer(kint) :: N, NPU, NPL, NDOF, NDOF2
-    integer(kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
-    integer(kint) :: in, jn
-    logical :: is_asym
-
-    N = monoTREE%N
-    NPU = monoTREE%SCSR%indexU(N + 1)
-    NDOF = monoTREE%NDOF
-    NDOF2 = NDOF*NDOF
-
-    !value
-    allocate(monoTREE%R%D(NDOF2*N), source = 0.0d0)
-    do i = 1, N
-      jS = monoMAT%CSR%index(i-1) + 1
-      jE = monoMAT%CSR%index(i)
-      do j = jS, jE
-        in = monoMAT%CSR%item(j)
-        if(i == in)then
-          do l = 1, NDOF2
-            monoTREE%R%D(NDOF2*(i-1) + l) = monoMAT%R%A(NDOF2*(j-1) + l)
-          enddo
-        endif
-      enddo
-    enddo
-
-    allocate(monoTREE%R%U(NDOF2*NPU), source = 0.0d0)
-
-    do k = 1, N
-      iS = monoTREE%SCSR%indexU(k-1) + 1
-      iE = monoTREE%SCSR%indexU(k)
-      jS = monoMAT%CSR%index(k-1) + 1
-      jE = monoMAT%CSR%index(k)
-      aa:do j = jS, jE
-        jn = monoMAT%CSR%item(j)
-        !if(k < jn)then
-        if(k <= jn)then
-          do i = iS, iE
-            in = monoTREE%SCSR%itemU(i)
-            if(jn == in)then
-              lS = NDOF2*(i-1)
-              lE = NDOF2*(j-1)
-              do l = 1, NDOF2
-                monoTREE%R%U(lS + l) = monoMAT%R%A(lE + l)
-              enddo
-              iS = iS + 1
-              cycle aa
-            endif
-          enddo
-        endif
-      enddo aa
-    enddo
-
-!    if(is_asym)then
-!      monoTREE%NPL = NPU
-!      NPL = NPU
-!      allocate(monoTREE%L(NDOF2*NPL), source = 0.0d0)
+!  subroutine monolis_matrix_copy_with_fillin(monoMAT, monoTREE, is_asym)
+!    implicit none
+!    type(monolis_mat) :: monoMAT
+!    type(monolis_mat) :: monoTREE
+!    integer(kint) :: N, NPU, NPL, NDOF, NDOF2
+!    integer(kint) :: i, j, k, l, iS, iE, jS, jE, lS, lE
+!    integer(kint) :: in, jn
+!    logical :: is_asym
 !
-!      do k = 1, N
-!        iS = monoTREE%indexL(k-1) + 1
-!        iE = monoTREE%indexL(k)
-!        jS = monoMAT%index(k-1) + 1
-!        jE = monoMAT%index(k)
-!        bb:do j = jS, jE
-!          jn = monoMAT%item(j)
-!          if(jn < k)then
-!            do i = iS, iE
-!              in = monoTREE%itemL(i)
-!              if(jn == in)then
-!                lS = NDOF2*(i-1)
-!                lE = NDOF2*(j-1)
-!                do l = 1, NDOF2
-!                  monoTREE%L(lS + l) = monoMAT%A(lE + l)
-!                enddo
-!                iS = iS + 1
-!                cycle bb
-!              endif
-!            enddo
-!          endif
-!        enddo bb
+!    N = monoTREE%N
+!    NPU = monoTREE%SCSR%indexU(N + 1)
+!    NDOF = monoTREE%NDOF
+!    NDOF2 = NDOF*NDOF
+!
+!    !value
+!    allocate(monoTREE%R%D(NDOF2*N), source = 0.0d0)
+!    do i = 1, N
+!      jS = monoMAT%CSR%index(i-1) + 1
+!      jE = monoMAT%CSR%index(i)
+!      do j = jS, jE
+!        in = monoMAT%CSR%item(j)
+!        if(i == in)then
+!          do l = 1, NDOF2
+!            monoTREE%R%D(NDOF2*(i-1) + l) = monoMAT%R%A(NDOF2*(j-1) + l)
+!          enddo
+!        endif
 !      enddo
-!    endif
-  end subroutine monolis_matrix_copy_with_fillin
+!    enddo
+!
+!    allocate(monoTREE%R%U(NDOF2*NPU), source = 0.0d0)
+!
+!    do k = 1, N
+!      iS = monoTREE%SCSR%indexU(k-1) + 1
+!      iE = monoTREE%SCSR%indexU(k)
+!      jS = monoMAT%CSR%index(k-1) + 1
+!      jE = monoMAT%CSR%index(k)
+!      aa:do j = jS, jE
+!        jn = monoMAT%CSR%item(j)
+!        !if(k < jn)then
+!        if(k <= jn)then
+!          do i = iS, iE
+!            in = monoTREE%SCSR%itemU(i)
+!            if(jn == in)then
+!              lS = NDOF2*(i-1)
+!              lE = NDOF2*(j-1)
+!              do l = 1, NDOF2
+!                monoTREE%R%U(lS + l) = monoMAT%R%A(lE + l)
+!              enddo
+!              iS = iS + 1
+!              cycle aa
+!            endif
+!          enddo
+!        endif
+!      enddo aa
+!    enddo
+!
+!!    if(is_asym)then
+!!      monoTREE%NPL = NPU
+!!      NPL = NPU
+!!      allocate(monoTREE%L(NDOF2*NPL), source = 0.0d0)
+!!
+!!      do k = 1, N
+!!        iS = monoTREE%indexL(k-1) + 1
+!!        iE = monoTREE%indexL(k)
+!!        jS = monoMAT%index(k-1) + 1
+!!        jE = monoMAT%index(k)
+!!        bb:do j = jS, jE
+!!          jn = monoMAT%item(j)
+!!          if(jn < k)then
+!!            do i = iS, iE
+!!              in = monoTREE%itemL(i)
+!!              if(jn == in)then
+!!                lS = NDOF2*(i-1)
+!!                lE = NDOF2*(j-1)
+!!                do l = 1, NDOF2
+!!                  monoTREE%L(lS + l) = monoMAT%A(lE + l)
+!!                enddo
+!!                iS = iS + 1
+!!                cycle bb
+!!              endif
+!!            enddo
+!!          endif
+!!        enddo bb
+!!      enddo
+!!    endif
+!  end subroutine monolis_matrix_copy_with_fillin
 end module mod_monolis_fact_fillin

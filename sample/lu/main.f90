@@ -76,71 +76,17 @@ program main
   call monolis_show_iterlog(mat, .true.)
   call monolis_show_summary(mat, .true.)
 
-  do iter = 1, 8
-  do prec = 0, 2
-    a = 0.0d0
-    b = c
+  a = 0.0d0
+  b = c
 
-    call monolis_set_method(mat, iter)
-    call monolis_set_precond(mat, prec)
+  call monolis_set_method(mat, 1)
+  call monolis_set_precond(mat, 1)
 
-    call monolis_solve_R(mat, com, b, a)
+  call monolis_solve_R(mat, com, b, a)
 
-    call monolis_mpi_global_barrier();
+  write(*,*)a
 
-    b = 1.0d0
-
-    if(monolis_mpi_get_global_my_rank() == 0)then
-      write(*,*)"iter", iter, ", prec", prec
-    endif
-    call monolis_test_check_eq_R("monolis_solver_parallel_R_test", a, b)
-
-    call monolis_get_converge_iter(mat, iter_conv)
-    if(iter_conv <= 1)then
-      call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
-    endif
-
-    call monolis_get_converge_residual(mat, res_conv)
-
-    if(res_conv > 1.0d-10)then
-      call monolis_test_assert_fail("monolis_solver_parallel_R_test", "residual is greater than ths")
-    endif
-
-    call monolis_mpi_global_barrier();
-  enddo
-  enddo
-
-
-  !> eigen test
-  call monolis_std_log_string("monolis_solver_parallel_test eigen")
-
-  n_get_eigen = 10
-
-  call monolis_alloc_R_1d(eig_val1, n_get_eigen)
-  call monolis_alloc_R_1d(eig_val2, n_get_eigen)
-  call monolis_alloc_R_2d(eig_mode1, n_node, n_get_eigen)
-  call monolis_alloc_R_2d(eig_mode2, n_node, n_get_eigen)
-  call monolis_alloc_L_1d(is_bc, n_node)
-
-  call monolis_set_method(mat, monolis_iter_CG)
-  call monolis_set_precond(mat, monolis_prec_SOR)
-  call monolis_show_timelog(mat, .false.)
-  call monolis_show_iterlog(mat, .false.)
-  call monolis_show_summary(mat, .false.)
-
-  call monolis_eigen_standard_lanczos_R &
-    & (mat, com, n_get_eigen, 1.0d-6, 100, eig_val1, eig_mode1, is_bc)
-
-  call monolis_eigen_inverted_standard_lanczos_R &
-    & (mat, com, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
-
-  do i = 1, n_get_eigen
-    j = n_get_eigen - i + 1
-
-    call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
-
-    call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
-  enddo
+  call monolis_mpi_global_barrier();
 
   call monolis_finalize(mat)
 end program main

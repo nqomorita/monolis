@@ -3,8 +3,16 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_fact_fillin
+  use mod_monolis_fact_analysis
 
   implicit none
+
+  integer(kint) :: n_fact_array
+  integer(kint), allocatable :: fact_order(:)
+  integer(kint), allocatable :: fact_array_index(:)
+  integer(kint), allocatable :: add_location(:)
+  real(kdouble), allocatable :: fact_array(:)
 
 contains
 
@@ -16,7 +24,31 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoPREC
+    logical :: is_asym = .false.
+    logical :: is_fillin = .true.
 
+    call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
+
+    !write(*,*)"monoPREC%N", monoPREC%N
+    !write(*,*)"monoPREC%NDOF", monoPREC%NDOF
+    !write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
+    !write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
+
+    call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
+
+    call monolis_matrix_get_factorize_order(monoPREC, fact_order)
+    !write(*,*)"fact_order", fact_order
+
+    call monolis_matrix_get_factorize_array(monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
+    !write(*,*)"n_fact_array", n_fact_array
+    !write(*,*)"fact_array", fact_array
+    !write(*,*)"fact_array_index", fact_array_index
+
+    call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
+    !write(*,*)"fact_array", fact_array
+
+    call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
+    !write(*,*)"add_location", add_location
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -40,6 +72,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoPREC
     real(kdouble) :: X(:), Y(:)
 
+    Y = X
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（3x3 ブロック、複素数型）

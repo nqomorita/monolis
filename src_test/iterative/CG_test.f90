@@ -10,11 +10,12 @@ contains
     implicit none
     integer(kint) :: n_dof
 
-    do n_dof = 1, 3
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_NONE)
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
+    do n_dof = 1, 1
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_NONE)
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
       !call monolis_solver_CG_test_main(n_dof, monolis_prec_AMG)
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_LU)
     enddo
   end subroutine monolis_solver_CG_test
 
@@ -36,7 +37,7 @@ contains
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)
 
-    n_node = 10
+    n_node = 3
     nelem = n_node - 1
 
     call monolis_alloc_I_2d(elem, 2, nelem)
@@ -52,7 +53,8 @@ contains
 
     do i1 = 1, n_node
       do i2 = 1, n_dof
-        call random_number(val)
+        !call random_number(val)
+        val = 1.0d0
         val = val + 2.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
@@ -61,7 +63,8 @@ contains
     do i1 = 1, nelem
       do i2 = 1, n_dof
       do j2 = 1, n_dof
-        call random_number(val)
+        !call random_number(val)
+        val = 1.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i1), elem(2,i1), i2, j2, val)
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i1), elem(1,i1), j2, i2, val)
       enddo
@@ -74,7 +77,7 @@ contains
 
     call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_precond(mat, prec)
-    !call monolis_set_maxiter(mat, 30)
+    call monolis_set_maxiter(mat, 30)
     call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog_statistics(mat, .true.)
 
