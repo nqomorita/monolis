@@ -54,8 +54,8 @@ contains
     do i1 = 1, n_node
       do i2 = 1, n_dof
         !call random_number(val)
-        val = 1.0d0
-        val = val + 2.0d0
+        val = 4.0d0
+        !val = val + 2.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
     enddo
@@ -64,7 +64,7 @@ contains
       do i2 = 1, n_dof
       do j2 = 1, n_dof
         !call random_number(val)
-        val = 1.0d0
+        val = 2.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i1), elem(2,i1), i2, j2, val)
         call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i1), elem(1,i1), j2, i2, val)
       enddo

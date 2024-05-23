@@ -54,13 +54,13 @@ contains
 
     !> factorization phase
     call monolis_matrix_factorize_mf(monoPREC, fact_array, fact_array_index, add_location)
-    write(*,*)"fact_array", fact_array
+    !write(*,*)"fact_array", fact_array
 
     call monolis_matrix_copy_lu_factor(monoPREC, fact_array, fact_array_index)
 
-    write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
-    write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
-    write(*,*)"monoPREC%R%A", monoPREC%R%A
+    !write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
+    !write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
+    !write(*,*)"monoPREC%R%A", monoPREC%R%A
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -115,7 +115,7 @@ contains
     !D
     do i = 1, N
       in = idxU(i) + 1
-      X(i) = X(i)*A(in)
+      X(i) = X(i)/A(in)
     enddo
 
     !U

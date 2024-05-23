@@ -26,7 +26,7 @@ contains
       call monolis_matrix_update_LDLt(n_fact, fact_array(iS:iE))
 
       !> update
-      do j = 1, (n_fact - 1)*(n_fact - 2)/2
+      do j = 1, (n_fact)*(n_fact - 1)/2
         in = iS + n_fact + j - 1
         jn = add_location(in)
         fact_array(jn) = fact_array(jn) + fact_array(in)
@@ -40,7 +40,7 @@ contains
     real(kdouble) :: A(:)
     real(kdouble) :: inv, al, au
 
-    inv = 1.0d0/dsqrt(A(1))
+    inv = 1.0d0/A(1)
     !inv = 1.0d0/A(1)
     A(1) = inv
     next = N + 1
@@ -63,7 +63,7 @@ contains
 
     index = 1
     do i = 1, N
-      inv = 1.0d0/dsqrt(A(index))
+      inv = 1.0d0/A(index)
       !inv = 1.0d0/A(index)
       A(index) = inv
       next = index + N - i + 1
