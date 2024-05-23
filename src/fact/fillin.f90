@@ -109,11 +109,11 @@ contains
           tree(parent)%ancestor => array
         endif
       enddo
-    endif
 
-    deallocate(child_mask )
-    deallocate(parent_mask)
-    deallocate(fillin_mask)
+      deallocate(child_mask )
+      deallocate(parent_mask)
+      deallocate(fillin_mask)
+    endif
 
     !> SCSR allocation part
     monoTREE%N = monoMAT%N

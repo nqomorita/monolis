@@ -85,11 +85,15 @@ contains
 
     !call monolis_check_input_param(monoCOM, monoMAT)
 
+    !call monolis_matrix_reordering_fw_R()
+
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
+
+    !call monolis_matrix_reordering_bk_R()
 
     call monolis_timer_finalize(monoPRM, monoCOM)
   end subroutine monolis_solve_main_R

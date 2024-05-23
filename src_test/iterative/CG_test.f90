@@ -37,7 +37,7 @@ contains
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)
 
-    n_node = 3
+    n_node = 1000
     nelem = n_node - 1
 
     call monolis_alloc_I_2d(elem, 2, nelem)

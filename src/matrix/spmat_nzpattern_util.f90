@@ -253,4 +253,47 @@ contains
       call monolis_qsort_I_1d(itemR(jS:jE), 1, jE - jS + 1)
     enddo
   end subroutine monolis_get_CSC_format
+
+  !> @ingroup dev_matrix
+  !> 疎行列パターンから節点グラフを決定（メイン関数）
+  subroutine monolis_get_nodal_graph_by_nonzero_pattern(MAT, n_node, index, item)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(in) :: MAT
+    !> [in] 節点数
+    integer(kint), intent(out) :: n_node
+    !> [in] index 配列
+    integer(kint), allocatable :: index(:)
+    !> [in] item 配列
+    integer(kint), allocatable :: item(:)
+    integer(kint) :: i, j, nz, jS, jE
+
+!    do i = 1, N
+!      in = index(i) - index(i-1)
+!
+!      if(0 < in)then
+!        allocate(nozero(in-1))
+!        nozero = 0
+!
+!        jn = 0
+!        jS = index(i-1) + 1
+!        jE = index(i  )
+!        do j = jS, jE
+!          if(item(j) /= i)then
+!            jn = jn + 1
+!            nozero(jn) = item(j)
+!          endif
+!        enddo
+!
+!        call reallocate_array(edge(i)%N, jn, edge(i)%node)
+!        edge(i)%N = jn
+!
+!        do j = 1, jn
+!          edge(i)%node(j) = nozero(j)
+!        enddo
+!        deallocate(nozero)
+!      endif
+!    enddo
+  end subroutine monolis_get_nodal_graph_by_nonzero_pattern
+
 end module mod_monolis_spmat_nonzero_pattern_util
