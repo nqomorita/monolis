@@ -4,7 +4,7 @@ module mod_monolis_precond_LU
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   !use mod_monolis_precond_LU_33
-  !use mod_monolis_fact_LU_nn
+  use mod_monolis_fact_LU_nn
 
   implicit none
 
@@ -26,9 +26,9 @@ contains
     call monolis_std_debug_log_header("monolis_precond_LU_setup_R")
 
     !if(monoMAT%NDOF == 3)then
-    !  call monolis_precond_LU_33_setup_R(monoMAT, monoPREC)
+    !  call monolis_fact_LU_33_setup_R(monoMAT, monoPREC)
     !else
-    !  call monolis_precond_LU_nn_setup_R(monoMAT, monoPREC)
+      call monolis_fact_LU_nn_setup_R(monoMAT, monoPREC)
     !endif
   end subroutine monolis_precond_LU_setup_R
 
@@ -47,7 +47,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_LU_setup_C")
 
-    !call monolis_precond_LU_nn_setup_C(monoMAT, monoPREC)
+    !call monolis_fact_LU_nn_setup_C(monoMAT, monoPREC)
   end subroutine monolis_precond_LU_setup_C
 
   !> @ingroup prec
@@ -67,9 +67,9 @@ contains
     call monolis_std_debug_log_header("monolis_precond_LU_apply_R")
 
     !if(monoMAT%NDOF == 3)then
-    !  call monolis_precond_LU_33_apply_R(monoMAT, monoPREC, X, Y)
+    !  call monolis_fact_LU_33_apply_R(monoMAT, monoPREC, X, Y)
     !else
-    !  call monolis_precond_LU_nn_apply_R(monoMAT, monoPREC, X, Y)
+      call monolis_fact_LU_nn_apply_R(monoMAT, monoPREC, X, Y)
     !endif
   end subroutine monolis_precond_LU_apply_R
 
@@ -89,7 +89,7 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_LU_apply_C")
 
-    !call monolis_precond_LU_nn_apply_C(monoMAT, monoPREC, X, Y)
+    !call monolis_fact_LU_nn_apply_C(monoMAT, monoPREC, X, Y)
   end subroutine monolis_precond_LU_apply_C
 
   !> @ingroup prec
@@ -108,9 +108,9 @@ contains
     call monolis_std_debug_log_header("monolis_precond_LU_clear_R")
 
     !if(monoMAT%NDOF == 3)then
-    !  call monolis_precond_LU_33_clear_R(monoPREC)
+    !  call monolis_fact_LU_33_clear_R(monoPREC)
     !else
-    !  call monolis_precond_LU_nn_clear_R(monoPREC)
+      call monolis_fact_LU_nn_clear_R(monoPREC)
     !endif
   end subroutine monolis_precond_LU_clear_R
 
@@ -129,6 +129,6 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_LU_clear_C")
 
-    !call monolis_precond_LU_nn_clear_R(monoPREC)
+    !call monolis_fact_LU_nn_clear_R(monoPREC)
   end subroutine monolis_precond_LU_clear_C
 end module mod_monolis_precond_LU
