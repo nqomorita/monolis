@@ -5,6 +5,7 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_def_struc
   use mod_monolis_fact_fillin
   use mod_monolis_fact_analysis
+  use mod_monolis_fact_factorize
 
   implicit none
 
@@ -27,6 +28,7 @@ contains
     logical :: is_asym = .false.
     logical :: is_fillin = .true.
 
+    !> analysis phase
     call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
 
     !write(*,*)"monoPREC%N", monoPREC%N
@@ -49,6 +51,16 @@ contains
 
     call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
     !write(*,*)"add_location", add_location
+
+    !> factorization phase
+    call monolis_matrix_factorize_mf(monoPREC, fact_array, fact_array_index, add_location)
+    write(*,*)"fact_array", fact_array
+
+    call monolis_matrix_copy_lu_factor(monoPREC, fact_array, fact_array_index)
+
+    write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
+    write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
+    write(*,*)"monoPREC%R%A", monoPREC%R%A
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -64,15 +76,63 @@ contains
 
   !> @ingroup prec
   !> 前処理適用：LU 前処理（3x3 ブロック、実数型）
-  subroutine monolis_fact_LU_nn_apply_R(monoMAT, monoPREC, X, Y)
+  subroutine monolis_fact_LU_nn_apply_R(monoMAT, monoPREC, Y, X)
     implicit none
     !> [in] 行列構造体
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in] 前処理構造体
     type(monolis_mat), target, intent(in) :: monoPREC
     real(kdouble) :: X(:), Y(:)
+    integer(kint) :: N
+    integer(kint) :: i, j, k, in, jS, jE, kn
+    real(kdouble) :: X1, A1
+    real(kdouble), allocatable :: S(:)
+    integer(kint), pointer :: idxU(:), itemU(:)
+    real(kdouble), pointer :: A(:)
 
-    Y = X
+    N  = monoPREC%N
+    allocate(S(N), source = 0.0d0)
+
+    X = Y
+    idxU => monoPREC%SCSR%indexU
+    itemU => monoPREC%SCSR%itemU
+    A => monoPREC%R%A
+
+    !L
+    do i = 1, N
+      A1 = S(i)
+      in = idxU(i) + 1
+      X(i) = A(in)*(X(i) - A1)
+      X1 = X(i)
+      jS = idxU(i) + 2
+      jE = idxU(i + 1)
+      do j = jS, jE
+        in = itemU(j)
+        S(in) = S(in) + A(j)*X1
+      enddo
+    enddo
+
+    !D
+    do i = 1, N
+      in = idxU(i) + 1
+      X(i) = X(i)*A(in)
+    enddo
+
+    !U
+    do i = N, 1, -1
+      A1 = 0.0d0
+      jS = idxU(i) + 2
+      jE = idxU(i + 1)
+      do j = jE, jS, -1
+        in = itemU(j)
+        X1 = X(in)
+        A1 = A1 + A(j)*X1
+      enddo
+      in = idxU(i) + 1
+      X(i) = A(in)*(X(i) - A1)
+    enddo
+
+    deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（3x3 ブロック、複素数型）
