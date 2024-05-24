@@ -88,7 +88,7 @@ contains
     !> [in] 前処理構造体
     type(monolis_mat), target, intent(in) :: monoPREC
     real(kdouble) :: X(:), Y(:)
-    integer(kint) :: N
+    integer(kint) :: N, NDOF
     integer(kint) :: i, j, k, in, jS, jE, kn
     real(kdouble) :: X1, A1
     real(kdouble), allocatable :: S(:)
@@ -96,9 +96,13 @@ contains
     real(kdouble), pointer :: A(:)
 
     N  = monoPREC%N
+    NDOF = 1
     allocate(S(N), source = 0.0d0)
 
     X = Y
+    !S = Y(1:N)
+    !call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
+
     idxU => monoPREC%SCSR%indexU
     itemU => monoPREC%SCSR%itemU
     A => monoPREC%R%A
@@ -137,6 +141,8 @@ contains
       X(i) = A(in)*(X(i) - A1)
     enddo
 
+    !S = X(1:N)
+    !call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
     deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 

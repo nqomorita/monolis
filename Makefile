@@ -109,9 +109,9 @@ def_solver_prm_util.f90
 
 SRC_MAT = \
 spmat_copy.f90 \
-spmat_reordering.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
+spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90
 
