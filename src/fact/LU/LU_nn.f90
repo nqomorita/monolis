@@ -99,13 +99,13 @@ contains
     NDOF = 1
     allocate(S(N), source = 0.0d0)
 
-    X = Y
-    !S = Y(1:N)
-    !call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
+    S = Y(1:N)
+    call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
 
     idxU => monoPREC%SCSR%indexU
     itemU => monoPREC%SCSR%itemU
     A => monoPREC%R%A
+    S = 0.0d0
 
     !L
     do i = 1, N
@@ -141,8 +141,8 @@ contains
       X(i) = A(in)*(X(i) - A1)
     enddo
 
-    !S = X(1:N)
-    !call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
+    S = X(1:N)
+    call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
     deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 

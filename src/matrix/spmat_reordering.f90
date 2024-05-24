@@ -28,10 +28,10 @@ contains
 
     call gedatsu_part_graph_metis_reordering(N, index, item, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
 
-do i = 1, N
-monoMAT%REORDER%perm(i) = i
-monoMAT%REORDER%iperm(i) = i
-enddo
+    !call monolis_palloc_I_1d(monoMAT_reorder%REORDER%perm, N)
+    !call monolis_palloc_I_1d(monoMAT_reorder%REORDER%iperm, N)
+    !monoMAT_reorder%REORDER%perm  = monoMAT%REORDER%perm
+    !monoMAT_reorder%REORDER%iperm = monoMAT%REORDER%iperm
 
     call monolis_restruct_matrix(monoMAT, monoMAT_reorder, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
 
