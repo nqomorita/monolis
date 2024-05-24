@@ -35,37 +35,21 @@ contains
 
     call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
 
-    !write(*,*)"monoPREC%N", monoPREC%N
-    !write(*,*)"monoPREC%NDOF", monoPREC%NDOF
-    !write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
-    !write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
-
     call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
 
     call monolis_matrix_get_factorize_order(monoPREC, fact_order)
-    !write(*,*)"fact_order", fact_order
 
     call monolis_matrix_get_factorize_array(monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
-    !write(*,*)"n_fact_array", n_fact_array
-    !write(*,*)"fact_array", fact_array
-    !write(*,*)"fact_array_index", fact_array_index
 
     call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
       & fact_order, n_fact_array, fact_array, fact_array_index)
-    !write(*,*)"fact_array", fact_array
 
     call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
-    !write(*,*)"add_location", add_location
 
     !> factorization phase
     call monolis_matrix_factorize_mf(monoPREC, fact_order, fact_array, fact_array_index, add_location)
-    !write(*,*)"fact_array", fact_array
 
     call monolis_matrix_copy_lu_factor(monoPREC, fact_order, fact_array, fact_array_index)
-
-    !write(*,*)"monoPREC%SCSR%indexU", monoPREC%SCSR%indexU
-    !write(*,*)"monoPREC%SCSR%itemU", monoPREC%SCSR%itemU
-    !write(*,*)"monoPREC%R%A", monoPREC%R%A
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec

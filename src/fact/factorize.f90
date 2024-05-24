@@ -19,12 +19,19 @@ contains
 
     N = monoTREE%N
 
+!write(*,*)"monoTREE%CSR%indexU", monoTREE%SCSR%indexU
+!write(*,*)"monoTREE%CSR%itemU ", monoTREE%SCSR%itemU
+!write(*,*)"fact_array_index   ", fact_array_index
+
     do k = 1, N
       i = fact_order(k)
+!write(*,*)i
       !> factorization
       iS = fact_array_index(i) + 1
       iE = fact_array_index(i + 1)
       n_fact = monoTREE%SCSR%indexU(i + 1) - monoTREE%SCSR%indexU(i)
+      !n_fact = iE - iS + 1
+!write(*,*)iS, iE, n_fact
       call monolis_matrix_update_LDLt(n_fact, fact_array(iS:iE))
 
       !> update

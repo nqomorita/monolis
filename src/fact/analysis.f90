@@ -35,7 +35,12 @@ contains
       fact_order(i) = i
     enddo
 
+!write(*,*)"fact_order", fact_order
+!write(*,*)"fact_level", fact_level
     call monolis_qsort_I_2d(fact_level, fact_order, 1, N)
+!write(*,*)"fact_order", fact_order
+!write(*,*)"fact_level", fact_level
+    !> 最適化必要
   end subroutine monolis_matrix_get_factorize_order
 
   subroutine monolis_matrix_get_factorize_array(monoTREE, fact_order, n_fact_array, fact_array, fact_array_index)
@@ -54,7 +59,8 @@ contains
     allocate(fact_array_index(N + 1), source = 0)
 
     do j = 1, N
-      i = fact_order(j)
+      i = j
+      !i = fact_order(j)
       in = monoTREE%SCSR%indexU(i + 1) - monoTREE%SCSR%indexU(i)
       jn = in*(in + 1)/2
       n_fact_array = n_fact_array + jn

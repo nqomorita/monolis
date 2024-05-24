@@ -18,7 +18,6 @@ contains
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: item(:)
 
-    !if(monoPRM%is_debug) call monolis_debug_header("monolis_matrix_reordering_fw_R")
     t1 = monolis_get_time()
 
     call monolis_get_nodal_graph_by_nonzero_pattern(monoMAT, N, index, item)
@@ -28,23 +27,7 @@ contains
 
     call gedatsu_part_graph_metis_reordering(N, index, item, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
 
-    !call monolis_palloc_I_1d(monoMAT_reorder%REORDER%perm, N)
-    !call monolis_palloc_I_1d(monoMAT_reorder%REORDER%iperm, N)
-    !monoMAT_reorder%REORDER%perm  = monoMAT%REORDER%perm
-    !monoMAT_reorder%REORDER%iperm = monoMAT%REORDER%iperm
-
     call monolis_restruct_matrix(monoMAT, monoMAT_reorder, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
-
-!write(*,*)"monoMAT%N", monoMAT%N, monoMAT_reorder%N
-!write(*,*)"monoMAT%NP", monoMAT%NP, monoMAT_reorder%NP
-!write(*,*)"monoMAT%NDOF", monoMAT%NDOF, monoMAT_reorder%NDOF
-!write(*,*)"monoMAT%CSR%index A", monoMAT%CSR%index
-!write(*,*)"monoMAT%CSR%index B", monoMAT_reorder%CSR%index
-!write(*,*)"monoMAT%CSR%item A", monoMAT%CSR%item
-!write(*,*)"monoMAT%CSR%item B", monoMAT_reorder%CSR%item
-
-    !call monolis_copy_mat_nonzero_pattern_main_R(monoMAT, monoMAT_reorder)
-    !call monolis_copy_mat_value_main_R(monoMAT, monoMAT_reorder)
 
     t2 = monolis_get_time()
     !monoPRM%tprep = monoPRM%tprep + t2 - t1
@@ -55,7 +38,6 @@ contains
     type(monolis_mat) :: monoMAT
     real(kdouble) :: t1, t2
 
-    !if(monoPRM%is_debug) call monolis_debug_header("monolis_reorder_matrix_bk")
     t1 = monolis_get_time()
 
     !call monolis_reorder_back_vector_bk(monoMAT, monoMAT%NP, monoMAT%NDOF, monoMAT_reorder%X, monoMAT%X)
