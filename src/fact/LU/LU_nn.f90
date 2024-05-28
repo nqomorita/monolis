@@ -33,6 +33,7 @@ contains
     !> analysis phase
     call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
 
+    !call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
     call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
 
     call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
@@ -41,6 +42,7 @@ contains
 
     call monolis_matrix_get_factorize_array(monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
 
+    !call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, &
     call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
       & fact_order, n_fact_array, fact_array, fact_array_index)
 
@@ -85,6 +87,7 @@ contains
 
     S = Y(1:N)
     call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
+    !X = Y(1:N)
 
     idxU => monoPREC%SCSR%indexU
     itemU => monoPREC%SCSR%itemU

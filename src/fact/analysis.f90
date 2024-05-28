@@ -72,6 +72,9 @@ contains
     do j = 1, N
       fact_array_index(j + 1) = fact_array_index(j + 1) + fact_array_index(j)
     enddo
+
+!write(*,*)"n_fact_array", n_fact_array
+!write(*,*)"fact_array_index", fact_array_index
   end subroutine monolis_matrix_get_factorize_array
 
   subroutine monolis_matrix_set_value_of_factorize_array(monoMAT, monoTREE, fact_order, n_fact_array, fact_array, &
@@ -180,9 +183,9 @@ contains
       iS = fact_array_index(k) + 1 + frontal_size
       jS = fact_array_index(parent_id) + 1
       in = 0
-      do i = 1, n_child
+      do i = 1, n_parent
         if(.not. is_add(i)) cycle
-        aa:do j = i, n_child
+        aa:do j = i, n_parent
           if(.not. is_add(j)) cycle aa
           add_location(iS + in) = jS + in
           in = in + 1
@@ -193,5 +196,10 @@ contains
       deallocate(parent_rows)
       deallocate(is_add)
     enddo
+
+!write(*,*)"add_location"
+!write(*,"(10i4)")add_location
+!call flush()
+!call sleep(0.1)
   end subroutine monolis_matrix_get_add_location
 end module mod_monolis_fact_analysis

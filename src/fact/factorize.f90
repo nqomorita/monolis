@@ -38,6 +38,7 @@ contains
       do j = 1, (n_fact)*(n_fact - 1)/2
         in = iS + n_fact + j - 1
         jn = add_location(in)
+!write(*,*)jn, in
         fact_array(jn) = fact_array(jn) + fact_array(in)
       enddo
     enddo
