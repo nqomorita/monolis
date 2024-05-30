@@ -7,16 +7,36 @@ module mod_monolis_fact_analysis
 
 contains
 
-  subroutine monolis_matrix_get_super_node_information(monoTREE, super_node)
+  subroutine monolis_matrix_get_super_node_information(monoTREE, n_super_node, super_node)
     implicit none
     type(monolis_mat) :: monoTREE
     integer(kint), allocatable :: super_node(:)
-    integer(kint) :: N, i, j, in, jn, iS
+    integer(kint) :: n_super_node
+    integer(kint) :: N, i, j, in, jn, iS, d1, d2
 
     N = monoTREE%N
-
     allocate(super_node(N), source = 0)
-    
+
+    jn = 1
+    super_node(N) = 1
+    do i = N-1, 1, -1
+      j = monoTREE%SCSR%indexU(i) + 2
+      in = monoTREE%SCSR%itemU(j)
+
+      d1 = monoTREE%SCSR%indexU(i  + 1) - monoTREE%SCSR%indexU(i)
+      d2 = monoTREE%SCSR%indexU(in + 1) - monoTREE%SCSR%indexU(in)
+
+      !> check super node
+      if(d1 == d2 + 1)then
+        super_node(i) = jn
+      else
+        jn = jn + 1
+        super_node(i) = jn
+      endif
+      !write(*,*)d1, d2
+    enddo
+    n_super_node = jn
+    !write(*,*)"super_node", super_node
   end subroutine monolis_matrix_get_super_node_information
 
   subroutine monolis_matrix_get_factorize_order(monoTREE, fact_order)

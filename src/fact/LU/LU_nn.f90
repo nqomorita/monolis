@@ -11,6 +11,7 @@ module mod_monolis_fact_LU_nn
   implicit none
 
   integer(kint) :: n_fact_array
+  integer(kint) :: n_super_node
   integer(kint), allocatable :: super_node(:)
   integer(kint), allocatable :: fact_order(:)
   integer(kint), allocatable :: fact_array_index(:)
@@ -35,13 +36,13 @@ contains
     t(1) = monolis_get_time_global_sync()
 
     !> analysis phase
-    call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
+    !call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
 
     t(2) = monolis_get_time_global_sync()
     write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
 
-    !call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
-    call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
+    call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
+    !call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
 
     t(3) = monolis_get_time_global_sync()
     write(*,"(a,1pe10.3)")"monolis_matrix_get_fillin                  ", t(3) - t(2)
@@ -51,7 +52,7 @@ contains
     t(4) = monolis_get_time_global_sync()
     write(*,"(a,1pe10.3)")"monolis_matrix_alloc_with_fillin           ", t(4) - t(3)
 
-    call monolis_matrix_get_super_node_information(monoPREC, super_node)
+    call monolis_matrix_get_super_node_information(monoPREC, n_super_node, super_node)
 
     t(5) = monolis_get_time_global_sync()
     write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(5) - t(4)
@@ -66,8 +67,8 @@ contains
     t(7) = monolis_get_time_global_sync()
     write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_array         ", t(7) - t(6)
 
-    !call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, &
-    call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
+    call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, &
+    !call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
       & fact_order, n_fact_array, fact_array, fact_array_index)
 
     t(8) = monolis_get_time_global_sync()
@@ -121,9 +122,9 @@ contains
     NDOF = 1
     allocate(S(N), source = 0.0d0)
 
-    S = Y(1:N)
-    call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
-    !X = Y(1:N)
+    !S = Y(1:N)
+    !call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
+    X = Y(1:N)
 
     idxU => monoPREC%SCSR%indexU
     itemU => monoPREC%SCSR%itemU
@@ -164,8 +165,8 @@ contains
       X(i) = A(in)*(X(i) - A1)
     enddo
 
-    S = X(1:N)
-    call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
+    !S = X(1:N)
+    !call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
     deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 

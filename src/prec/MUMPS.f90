@@ -29,6 +29,9 @@ contains
     integer(kint) :: NDOF, NZ
 #ifdef WITH_MUMPS
     type (dmumps_struc), pointer :: mumps
+    real(kdouble) :: t1, t2, t3, t4, t5
+
+    t1 = monolis_get_time_global_sync()
 
     mumps => monoPREC%DMUMPS%mumps
 
@@ -98,6 +101,9 @@ contains
     mumps%ICNTL(18) = 3
 
     call DMUMPS(mumps)
+
+    t2 = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"analysis", t2 - t1
 #else
     write(*,*)"* monolis_precond_mumps_setup: MUMPS is NOT enabled"
     stop
