@@ -12,7 +12,7 @@ contains
     type(monolis_mat) :: monoTREE
     integer(kint), allocatable :: fact_level(:)
     integer(kint), allocatable :: fact_order(:)
-    integer(kint) :: N, i, j, in
+    integer(kint) :: N, i, j, in, jn, iS
 
     N = monoTREE%N
 
@@ -41,6 +41,24 @@ contains
 !write(*,*)"fact_order", fact_order
 !write(*,*)"fact_level", fact_level
     !> 最適化必要
+
+    iS = 1
+    do i = 1, N
+      in = fact_level(iS)
+      jn = 0
+      aa:do j = iS + 1, N
+        if(in == fact_level(j))then
+          jn = jn + 1
+        else
+          exit aa
+        endif
+      enddo aa
+      call monolis_qsort_I_1d(fact_order, iS, iS + jn)
+      iS = iS + jn + 1
+      if(iS > N) exit
+    enddo
+!write(*,*)"fact_order", fact_order
+!write(*,*)"fact_level", fact_level
   end subroutine monolis_matrix_get_factorize_order
 
   subroutine monolis_matrix_get_factorize_array(monoTREE, fact_order, n_fact_array, fact_array, fact_array_index)
@@ -180,15 +198,17 @@ contains
       !write(*,*)"is_add     : ", is_add
 
       frontal_size = n_child + 1
-      iS = fact_array_index(k) + 1 + frontal_size
-      jS = fact_array_index(parent_id) + 1
+      iS = fact_array_index(k) + frontal_size
+      jS = fact_array_index(parent_id) 
       in = 0
+      jn = 0
       do i = 1, n_parent
-        if(.not. is_add(i)) cycle
         aa:do j = i, n_parent
-          if(.not. is_add(j)) cycle aa
-          add_location(iS + in) = jS + in
-          in = in + 1
+          jn = jn + 1
+          if(is_add(i) .and. is_add(j))then
+            in = in + 1
+            add_location(iS + in) = jS + jn
+          endif
         enddo aa
       enddo
 
@@ -197,9 +217,17 @@ contains
       deallocate(is_add)
     enddo
 
+    do i = 1, N + 1
+      if(fact_array_index(i) < 0) stop "minus fact_array_index"
+    enddo
+
+    do i = 1, NZ
+      if(add_location(i) < 0) stop "minus add_location"
+    enddo
+
 !write(*,*)"add_location"
-!write(*,"(10i4)")add_location
+!write(*,"(20i4)")add_location
 !call flush()
-!call sleep(0.1)
+!call sleep(1)
   end subroutine monolis_matrix_get_add_location
 end module mod_monolis_fact_analysis

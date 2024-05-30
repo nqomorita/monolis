@@ -29,6 +29,9 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     logical :: is_asym = .false.
     logical :: is_fillin = .true.
+    real(kdouble) :: t1, t2, t3, t4, t5
+
+    t1 = monolis_get_time_global_sync()
 
     !> analysis phase
     call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
@@ -48,10 +51,16 @@ contains
 
     call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
 
+    t2 = monolis_get_time_global_sync()
+
     !> factorization phase
     call monolis_matrix_factorize_mf(monoPREC, fact_order, fact_array, fact_array_index, add_location)
 
     call monolis_matrix_copy_lu_factor(monoPREC, fact_order, fact_array, fact_array_index)
+
+    t3 = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"analysis", t2 - t1
+    write(*,"(a,1pe10.3)")"facrotiz", t3 - t2
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
