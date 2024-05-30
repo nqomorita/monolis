@@ -7,6 +7,18 @@ module mod_monolis_fact_analysis
 
 contains
 
+  subroutine monolis_matrix_get_super_node_information(monoTREE, super_node)
+    implicit none
+    type(monolis_mat) :: monoTREE
+    integer(kint), allocatable :: super_node(:)
+    integer(kint) :: N, i, j, in, jn, iS
+
+    N = monoTREE%N
+
+    allocate(super_node(N), source = 0)
+    
+  end subroutine monolis_matrix_get_super_node_information
+
   subroutine monolis_matrix_get_factorize_order(monoTREE, fact_order)
     implicit none
     type(monolis_mat) :: monoTREE

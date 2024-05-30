@@ -11,6 +11,7 @@ module mod_monolis_fact_LU_nn
   implicit none
 
   integer(kint) :: n_fact_array
+  integer(kint), allocatable :: super_node(:)
   integer(kint), allocatable :: fact_order(:)
   integer(kint), allocatable :: fact_array_index(:)
   integer(kint), allocatable :: add_location(:)
@@ -29,38 +30,64 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     logical :: is_asym = .false.
     logical :: is_fillin = .true.
-    real(kdouble) :: t1, t2, t3, t4, t5
+    real(kdouble) :: t(100)
 
-    t1 = monolis_get_time_global_sync()
+    t(1) = monolis_get_time_global_sync()
 
     !> analysis phase
     call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
 
+    t(2) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
+
     !call monolis_matrix_get_fillin(monoMAT, monoPREC, is_asym, is_fillin)
     call monolis_matrix_get_fillin(monoMAT_reorder, monoPREC, is_asym, is_fillin)
 
+    t(3) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_fillin                  ", t(3) - t(2)
+
     call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
+
+    t(4) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_alloc_with_fillin           ", t(4) - t(3)
+
+    call monolis_matrix_get_super_node_information(monoPREC, super_node)
+
+    t(5) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(5) - t(4)
 
     call monolis_matrix_get_factorize_order(monoPREC, fact_order)
 
+    t(6) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_order         ", t(6) - t(5)
+
     call monolis_matrix_get_factorize_array(monoPREC, fact_order, n_fact_array, fact_array, fact_array_index)
+
+    t(7) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_array         ", t(7) - t(6)
 
     !call monolis_matrix_set_value_of_factorize_array(monoMAT, monoPREC, &
     call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
       & fact_order, n_fact_array, fact_array, fact_array_index)
 
+    t(8) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_set_value_of_factorize_array", t(8) - t(7)
+
     call monolis_matrix_get_add_location(monoPREC, fact_order, fact_array_index, add_location)
 
-    t2 = monolis_get_time_global_sync()
+    t(9) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_add_location            ", t(9) - t(8)
 
     !> factorization phase
     call monolis_matrix_factorize_mf(monoPREC, fact_order, fact_array, fact_array_index, add_location)
 
+    t(10) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_factorize_mf                ", t(10) - t(9)
+
     call monolis_matrix_copy_lu_factor(monoPREC, fact_order, fact_array, fact_array_index)
 
-    t3 = monolis_get_time_global_sync()
-    write(*,"(a,1pe10.3)")"analysis", t2 - t1
-    write(*,"(a,1pe10.3)")"facrotiz", t3 - t2
+    t(11) = monolis_get_time_global_sync()
+    write(*,"(a,1pe10.3)")"monolis_matrix_copy_lu_factor", t(11) - t(10)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
