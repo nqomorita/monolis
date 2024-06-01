@@ -8,7 +8,7 @@ module mod_monolis_fact_factorize
 contains
 
   subroutine monolis_matrix_factorize_mf(monoTREE, n_super_node, super_node_id, super_node_size, &
-    & fact_array, fact_array_index, add_location)
+    & fact_array, fact_array_index, front_size, add_location)
     implicit none
     type(monolis_mat) :: monoTREE
     integer(kint) :: n_super_node
@@ -16,6 +16,7 @@ contains
     integer(kint) :: super_node_size(:)
     real(kdouble) :: fact_array(:)
     integer(kint) :: fact_array_index(:)
+    integer(kint) :: front_size(:)
     integer(kint) :: add_location(:)
     integer(kint) :: N
     integer(kint) :: i, iS, iE, in, jn, j, k, n_fact
@@ -24,6 +25,7 @@ contains
 
 !write(*,*)"monoTREE%CSR%indexU", monoTREE%SCSR%indexU
 !write(*,*)"monoTREE%CSR%itemU ", monoTREE%SCSR%itemU
+!call sleep(1)
 !write(*,*)"fact_array_index   ", fact_array_index
 !write(*,*)"n_super_node   ", n_super_node
 !write(*,*)"super_node_id  ", super_node_id
@@ -34,18 +36,20 @@ contains
       !> factorization
       iS = fact_array_index(k) + 1
       iE = fact_array_index(k + 1)
-      i = super_node_id(k)
-      n_fact = monoTREE%SCSR%indexU(i + 1) - monoTREE%SCSR%indexU(i)
+      n_fact = front_size(k)
       snode_size = super_node_size(k)
       !n_fact = iE - iS + 1
-!write(*,*)iS, iE, n_fact
+!write(*,*)iS, iE, n_fact, snode_size
       !call monolis_matrix_update_LDLt(n_fact, fact_array(iS:iE))
 !write(*,*)"k", k, snode_size
 !write(*,"(1p10e12.3)")fact_array(iS:iE)
+!write(*,*)"start", snode_size, n_fact, iS, iE
+!write(*,"(1p10e12.3)")fact_array(iS:iE)
       call monolis_matrix_n_step_update_LDLt(snode_size, n_fact, fact_array(iS:iE))
 !write(*,*)"end"
+
       !> update
-      uS = 0
+      uS = fact_array_index(k)
       do i = 1, snode_size
         uS = uS + n_fact + 1 - i
       enddo
@@ -56,6 +60,7 @@ contains
         n_update_size = n_update_size + n_fact + 1 - i
       enddo
 
+!write(*,*)"fact_array_index(k)", fact_array_index(k)
 !write(*,*)"snode_size", snode_size
 !write(*,*)"n_fact", n_fact
 !write(*,*)"uS", uS
@@ -63,6 +68,7 @@ contains
 !write(*,*)"add_location"
 !write(*,"(20i4)")add_location
 
+!write(*,*)"n_update_size", n_update_size
       do j = 1, n_update_size
         in = uS + j
         jn = add_location(in)
