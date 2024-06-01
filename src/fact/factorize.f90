@@ -97,10 +97,8 @@ contains
     real(kdouble) :: A(:)
     real(kdouble) :: inv, al, au
 
-!write(*,*)"nstep", nstep, N
     index = 1
     do i = 1, nstep
-!write(*,*)"index", index, A(index)
       inv = 1.0d0/A(index)
       A(index) = inv
       next = index + N - i + 1
@@ -109,7 +107,6 @@ contains
         al = A(index + j)
         do k = j, N - i
           au = A(index + k)
-!write(*,*)next + in, index + k, index + j
           A(next + in) = A(next + in) - al*au*inv
           in = in + 1
         enddo
@@ -144,15 +141,11 @@ contains
 
         n_fact = monoTREE%SCSR%indexU(jn + 1) - monoTREE%SCSR%indexU(jn)
         do k = 1, n_fact
-!write(*,*)in, iS + m, iS, m
           monoTREE%R%A(in) = fact_array(iS + m)
           m = m + 1
           in = in + 1
         enddo
       enddo
     enddo
-!write(*,*)"monoTREE%R%A"
-!write(*,"(1p10e12.3)")monoTREE%R%A
-!call sleep(1)
   end subroutine monolis_matrix_copy_lu_factor
 end module mod_monolis_fact_factorize

@@ -41,7 +41,6 @@ contains
         jn = jn + 1
         super_node_level(i) = jn
       endif
-!write(*,*)d1, d2
     enddo
     n_super_node = jn
 
@@ -93,55 +92,6 @@ contains
 
 !write(*,*)"super_node_parent_id", super_node_parent_id
   end subroutine monolis_matrix_get_super_node_information
-
-!  subroutine monolis_matrix_get_factorize_order(monoTREE, n_super_node, super_node_id, super_node_size)
-!    implicit none
-!    type(monolis_mat) :: monoTREE
-!    integer(kint) :: super_node_id(:)
-!    integer(kint) :: super_node_size(:)
-!    integer(kint), allocatable :: fact_level(:)
-!    integer(kint), allocatable :: fact_order(:)
-!    integer(kint) :: n_super_node
-!    integer(kint) :: N, i, j, in, jn, iS
-!
-!    N = monoTREE%N
-!
-!    allocate(fact_level(N), source = 0)
-!
-!    fact_level(N) = 1
-!
-!    do i = N-1, 1, -1
-!      j = monoTREE%SCSR%indexU(i) + 2
-!      in = monoTREE%SCSR%itemU(j)
-!      fact_level(i) = fact_level(in) + 1
-!    enddo
-!
-!    do i = 1, N
-!      fact_level(i) = N + 1 - fact_level(i)
-!    enddo
-!
-!    allocate(fact_order(n_super_node), source = 0)
-!
-!    do i = 1, n_super_node
-!      in = super_node_id(i)
-!      fact_order(i) = fact_level(in)
-!    enddo
-!
-!write(*,*)"fact_level", fact_level
-!write(*,*)"fact_order", fact_order
-!
-!    call monolis_qsort_I_2d(fact_order, super_node_id, 1, n_super_node)
-!
-!    do i = 1, n_super_node
-!      in = super_node_id(i)
-!      fact_order(i) = fact_level(in)
-!    enddo
-!
-!    call monolis_qsort_I_2d(fact_order, super_node_size, 1, n_super_node)
-!
-!write(*,*)"super_node_id  ", super_node_id
-!write(*,*)"super_node_size", super_node_size
-!  end subroutine monolis_matrix_get_factorize_order
 
   subroutine monolis_matrix_get_factorize_array(monoTREE, n_super_node, super_node_id, &
       & n_fact_array, fact_array, fact_array_index, front_size)
@@ -196,7 +146,6 @@ contains
 !write(*,*)"monoTREE%SCSR%itemU", monoTREE%SCSR%itemU
 
     do k = 1, n_super_node
-!write(*,*)"super_node_size(k)", super_node_size(k)
       ln = fact_array_index(k)
       do m = 1, super_node_size(k)
         if(m == 1)then
@@ -204,9 +153,7 @@ contains
         else
           j = monoTREE%SCSR%indexU(kn) + 2 
           kn = monoTREE%SCSR%itemU(j)
-!write(*,*)"item", kn, j, i
         endif
-!write(*,*)"item", kn
         iS = monoTREE%SCSR%indexU(kn) + 1
         iE = monoTREE%SCSR%indexU(kn + 1)
         jS = monoMAT%CSR%index(kn) + 1
@@ -214,13 +161,10 @@ contains
         aa:do i = iS, iE
           ln = ln + 1
           in = monoTREE%SCSR%itemU(i)
-!write(*,*)"jn", jn
           if(in < kn) cycle aa
           do j = jS, jE
             jn = monoMAT%CSR%item(j)
             if(jn == in)then
-!write(*,*)"jn", jn
-!write(*,*)"ln", ln, monoMAT%R%A(j), j
               fact_array(ln) = monoMAT%R%A(j)
               cycle aa
             endif
@@ -261,6 +205,7 @@ contains
       do m = 1, super_node_size(k)
         if(m == 1)then
           in = super_node_id(k)
+          update_id(k) = in
         else
           j = monoTREE%SCSR%indexU(in) + 2 
           in = monoTREE%SCSR%itemU(j)
@@ -268,6 +213,8 @@ contains
         endif
       enddo
     enddo
+
+!write(*,*)"update_id : ", update_id
 
     !> extended add 演算の fact_array における足し込み先 index
 
@@ -321,8 +268,6 @@ contains
         if(parent_id == super_node_id(i)) near_parent_id = i
       enddo
       jS = fact_array_index(near_parent_id) 
-
-!write(*,*)"is_add     : ", is_add
 
       in = 0
       jn = 0
