@@ -175,8 +175,8 @@ contains
       fact_array_index(j + 1) = fact_array_index(j + 1) + fact_array_index(j)
     enddo
 
-!write(*,*)"n_fact_array", n_fact_array
 !write(*,*)"front_size", front_size
+!write(*,*)"n_fact_array", n_fact_array
 !write(*,*)"fact_array_index", fact_array_index
   end subroutine monolis_matrix_get_factorize_array
 
@@ -229,7 +229,7 @@ contains
       enddo
     enddo
 
-!write(*,*)"fact_array A"
+!write(*,*)"fact_array"
 !write(*,"(1p10e12.3)")fact_array
 !call sleep(1)
   end subroutine monolis_matrix_set_value_of_factorize_array
@@ -321,6 +321,8 @@ contains
         if(parent_id == super_node_id(i)) near_parent_id = i
       enddo
       jS = fact_array_index(near_parent_id) 
+
+!write(*,*)"is_add     : ", is_add
 
       in = 0
       jn = 0

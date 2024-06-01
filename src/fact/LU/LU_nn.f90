@@ -129,7 +129,6 @@ contains
 
     S = Y(1:N)
     call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
-    X = Y(1:N)
 
     idxU => monoPREC%SCSR%indexU
     itemU => monoPREC%SCSR%itemU

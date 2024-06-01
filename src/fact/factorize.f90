@@ -23,29 +23,17 @@ contains
     integer(kint) :: uS
     integer(kint) :: update_size, n_update_size, snode_size
 
-!write(*,*)"monoTREE%CSR%indexU", monoTREE%SCSR%indexU
-!write(*,*)"monoTREE%CSR%itemU ", monoTREE%SCSR%itemU
-!call sleep(1)
-!write(*,*)"fact_array_index   ", fact_array_index
-!write(*,*)"n_super_node   ", n_super_node
-!write(*,*)"super_node_id  ", super_node_id
-!write(*,*)"fact_array_index  ", fact_array_index
-
     do k = 1, n_super_node
-!write(*,*)i
       !> factorization
       iS = fact_array_index(k) + 1
       iE = fact_array_index(k + 1)
       n_fact = front_size(k)
       snode_size = super_node_size(k)
-      !n_fact = iE - iS + 1
-!write(*,*)iS, iE, n_fact, snode_size
-      !call monolis_matrix_update_LDLt(n_fact, fact_array(iS:iE))
-!write(*,*)"k", k, snode_size
-!write(*,"(1p10e12.3)")fact_array(iS:iE)
-!write(*,*)"start", snode_size, n_fact, iS, iE
+!write(*,*)"start", snode_size
+!write(*,*)"n_fact", n_fact
 !write(*,"(1p10e12.3)")fact_array(iS:iE)
       call monolis_matrix_n_step_update_LDLt(snode_size, n_fact, fact_array(iS:iE))
+!write(*,"(1p10e12.3)")fact_array(iS:iE)
 !write(*,*)"end"
 
       !> update
@@ -63,8 +51,8 @@ contains
 !write(*,*)"fact_array_index(k)", fact_array_index(k)
 !write(*,*)"snode_size", snode_size
 !write(*,*)"n_fact", n_fact
-!write(*,*)"uS", uS
 !write(*,*)"n_update_size", n_update_size
+!write(*,*)"uS", uS
 !write(*,*)"add_location"
 !write(*,"(20i4)")add_location
 
@@ -72,12 +60,12 @@ contains
       do j = 1, n_update_size
         in = uS + j
         jn = add_location(in)
-!write(*,*)jn, in
+!write(*,*)jn, in, fact_array(jn), fact_array(in)
         fact_array(jn) = fact_array(jn) + fact_array(in)
       enddo
     enddo
 
-!write(*,*)"fact_array"
+!write(*,*)"fact_array after all"
 !write(*,"(1p10e12.3)")fact_array
 !call sleep(1)
   end subroutine monolis_matrix_factorize_mf
@@ -156,6 +144,7 @@ contains
 
         n_fact = monoTREE%SCSR%indexU(jn + 1) - monoTREE%SCSR%indexU(jn)
         do k = 1, n_fact
+!write(*,*)in, iS + m, iS, m
           monoTREE%R%A(in) = fact_array(iS + m)
           m = m + 1
           in = in + 1
