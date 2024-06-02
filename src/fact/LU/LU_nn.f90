@@ -59,16 +59,11 @@ contains
     t(5) = monolis_get_time()
     write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(5) - t(4)
 
-    !call monolis_matrix_get_factorize_order(monoPREC, n_super_node, super_node_id, super_node_size)
-
-    t(6) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_order         ", t(6) - t(5)
-
     call monolis_matrix_get_factorize_array(monoPREC, n_super_node, super_node_id, &
       & n_fact_array, fact_array, fact_array_index, front_size)
 
     t(7) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_array         ", t(7) - t(6)
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_array         ", t(7) - t(5)
 
     call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoPREC, &
       & n_super_node, super_node_id, super_node_size, fact_array, fact_array_index)

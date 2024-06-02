@@ -29,12 +29,8 @@ contains
       iE = fact_array_index(k + 1)
       n_fact = front_size(k)
       snode_size = super_node_size(k)
-!write(*,*)"start", snode_size
-!write(*,*)"n_fact", n_fact
-!write(*,"(1p10e12.3)")fact_array(iS:iE)
+
       call monolis_matrix_n_step_update_LDLt(snode_size, n_fact, fact_array(iS:iE))
-!write(*,"(1p10e12.3)")fact_array(iS:iE)
-!write(*,*)"end"
 
       !> update
       uS = fact_array_index(k)
@@ -48,26 +44,12 @@ contains
         n_update_size = n_update_size + n_fact + 1 - i
       enddo
 
-!write(*,*)"fact_array_index(k)", fact_array_index(k)
-!write(*,*)"snode_size", snode_size
-!write(*,*)"n_fact", n_fact
-!write(*,*)"n_update_size", n_update_size
-!write(*,*)"uS", uS
-!write(*,*)"add_location"
-!write(*,"(20i4)")add_location
-
-!write(*,*)"n_update_size", n_update_size
       do j = 1, n_update_size
         in = uS + j
         jn = add_location(in)
-!write(*,*)jn, in, fact_array(jn), fact_array(in)
         fact_array(jn) = fact_array(jn) + fact_array(in)
       enddo
     enddo
-
-!write(*,*)"fact_array after all"
-!write(*,"(1p10e12.3)")fact_array
-!call sleep(1)
   end subroutine monolis_matrix_factorize_mf
 
   subroutine monolis_matrix_update_LDLt(N, A)

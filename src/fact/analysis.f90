@@ -166,6 +166,7 @@ contains
             jn = monoMAT%CSR%item(j)
             if(jn == in)then
               fact_array(ln) = monoMAT%R%A(j)
+              jS = j + 1
               cycle aa
             endif
           enddo
@@ -249,7 +250,7 @@ contains
           jn = parent_rows(j)
           if(in == jn)then
             is_add(j) = .true.
-            jS = j
+            jS = j + 1
           endif
         enddo
       enddo
@@ -265,20 +266,27 @@ contains
 
       near_parent_id = 0
       do i = 1, n_super_node
-        if(parent_id == super_node_id(i)) near_parent_id = i
+        if(parent_id == super_node_id(i))then
+          near_parent_id = i
+          exit
+        endif
       enddo
       jS = fact_array_index(near_parent_id) 
 
       in = 0
       jn = 0
       do i = 1, n_parent
-        aa:do j = i, n_parent
+        if(.not. is_add(i))then
+          jn = jn + n_parent - i + 1
+          cycle
+        endif
+        do j = i, n_parent
           jn = jn + 1
-          if(is_add(i) .and. is_add(j))then
+          if(is_add(j))then
             in = in + 1
             add_location(iS + in) = jS + jn
           endif
-        enddo aa
+        enddo 
       enddo
 
       deallocate(child_rows)
