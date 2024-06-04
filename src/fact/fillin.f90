@@ -27,7 +27,7 @@ contains
     integer(kint), allocatable :: index(:)
     integer(kint), allocatable :: is_used(:)
     integer(kint) :: N, M, NPU
-    integer(kint) :: i, j, k, p, jS, jE, in, c
+    integer(kint) :: i, j, k, p, jS, jE, in, c, d
     integer(kint) :: nbytes
     integer(kint) :: is, ie
     integer(kint) :: range, parent, child
@@ -154,12 +154,18 @@ contains
         index(i) = index(i) + index(i-1)
       enddo
 
-!write(*,*)"temp"
-!write(*,"(10i4)")temp
-!write(*,*)"perm"
-!write(*,"(10i4)")perm
-!write(*,*)"index"
-!write(*,"(10i4)")index
+      do i = 1, M - 1
+        jS = index(i) + 1
+        jE = index(i + 1)
+        call monolis_qsort_I_1d(perm, jS, jE)
+      enddo
+
+write(*,*)"temp"
+write(*,"(10i4)")temp
+write(*,*)"perm"
+write(*,"(10i4)")perm
+write(*,*)"index"
+write(*,"(10i4)")index
 
       nbytes = N/bit+1
       allocate(child_mask (nbytes), source = 0)
@@ -207,6 +213,7 @@ contains
 
           ie = range/bit + 1
           parent_mask(is:ie) = ior(parent_mask(is:ie), child_mask(is:ie))
+          fillin_mask(is:ie) = fillin_mask(is:ie) + ieor(parent_mask(is:ie), child_mask(is:ie))
         enddo
 
         c = 0
@@ -214,7 +221,15 @@ contains
           c = c + popcnt(parent_mask(j))
         enddo
 
+        d = 0
+        do j = is, ie
+          d = d + popcnt(fillin_mask(j))
+        enddo
+
+        if(d == 0) cycle
+
         if(0 < c)then
+          fillin_mask(is:ie) = 0
           do p = jS, jE
             child = perm(p)
 
@@ -235,10 +250,33 @@ contains
                 array(in) = bit*(j-1)+m
               enddo
             enddo
+!write(*,*)"child", child
 !write(*,*)"array", array
             deallocate(tree(child)%ancestor)
             tree(child)%ancestor => array
           enddo
+
+          c = c - 1
+          allocate(array(c))
+          tree(parent)%n_ancestor = c
+
+          ie = parent/bit + 1
+          parent_mask(ie) = ibclr(parent_mask(ie), mod(parent,bit))
+          fillin_mask(is:ie) = parent_mask(is:ie)
+
+          in = 0
+          do j = is, ie
+            do k = 1, popcnt(fillin_mask(j))
+              in = in + 1
+              m = popcnt( iand(fillin_mask(j), - fillin_mask(j)) -1 )
+              fillin_mask(j) = ibclr(fillin_mask(j),m)
+              array(in) = bit*(j-1)+m
+            enddo
+          enddo
+!write(*,*)"parent", parent
+!write(*,*)"array", array
+          deallocate(tree(parent)%ancestor)
+          tree(parent)%ancestor => array
         endif
       enddo
 
