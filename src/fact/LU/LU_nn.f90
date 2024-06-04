@@ -48,16 +48,16 @@ contains
     t(3) = monolis_get_time()
     write(*,"(a,1pe10.3)")"monolis_matrix_get_fillin                  ", t(3) - t(2)
 
-    call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
-
-    t(4) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_alloc_with_fillin           ", t(4) - t(3)
-
     call monolis_matrix_get_super_node_information(monoPREC, n_super_node, &
       & super_node_id, super_node_size, super_node_parent_id)
 
+    t(4) = monolis_get_time()
+    write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(4) - t(3)
+
+    call monolis_matrix_alloc_with_fillin(monoPREC, is_asym)
+
     t(5) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(5) - t(4)
+    write(*,"(a,1pe10.3)")"monolis_matrix_alloc_with_fillin           ", t(5) - t(4)
 
     call monolis_matrix_get_factorize_array(monoPREC, n_super_node, super_node_id, &
       & n_fact_array, fact_array, fact_array_index, front_size)

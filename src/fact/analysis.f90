@@ -44,8 +44,6 @@ contains
     enddo
     n_super_node = jn
 
-!write(*,*)"super_node_level", super_node_level
-
     allocate(super_node_id(n_super_node), source = 0)
     allocate(super_node_size(n_super_node), source = 0)
     allocate(temp1(n_super_node), source = 0)
@@ -63,9 +61,6 @@ contains
       super_node_id(i) = temp1(n_super_node - i + 1)
       super_node_size(i) = temp2(n_super_node - i + 1)
     enddo
-
-!write(*,*)"super_node_id  ", super_node_id
-!write(*,*)"super_node_size", super_node_size
 
     !> supernode の親ノードの取得
     allocate(super_node_parent_id(n_super_node), source = 0)
@@ -90,7 +85,12 @@ contains
       super_node_parent_id(i) = in
     enddo aa
 
-!write(*,*)"super_node_parent_id", super_node_parent_id
+write(*,*)"super_node_id"
+write(*,"(20i4)")super_node_id
+write(*,*)"super_node_size"
+write(*,"(20i4)")super_node_size
+write(*,*)"super_node_parent_id"
+write(*,"(20i4)")super_node_parent_id
   end subroutine monolis_matrix_get_super_node_information
 
   subroutine monolis_matrix_get_factorize_array(monoTREE, n_super_node, super_node_id, &
@@ -124,10 +124,6 @@ contains
     do j = 1, n_super_node
       fact_array_index(j + 1) = fact_array_index(j + 1) + fact_array_index(j)
     enddo
-
-!write(*,*)"front_size", front_size
-!write(*,*)"n_fact_array", n_fact_array
-!write(*,*)"fact_array_index", fact_array_index
   end subroutine monolis_matrix_get_factorize_array
 
   subroutine monolis_matrix_set_value_of_factorize_array(monoMAT, monoTREE, &
@@ -141,9 +137,6 @@ contains
     real(kdouble) :: fact_array(:)
     integer(kint) :: fact_array_index(:)
     integer(kint) :: i, j, k, l, m, iSorg, iS, iE, jS, jE, in, jn, ln, kn
-
-!write(*,*)"monoTREE%SCSR%indexU", monoTREE%SCSR%indexU
-!write(*,*)"monoTREE%SCSR%itemU", monoTREE%SCSR%itemU
 
     do k = 1, n_super_node
       ln = fact_array_index(k)
@@ -173,10 +166,6 @@ contains
         enddo aa
       enddo
     enddo
-
-!write(*,*)"fact_array"
-!write(*,"(1p10e12.3)")fact_array
-!call sleep(1)
   end subroutine monolis_matrix_set_value_of_factorize_array
 
   subroutine monolis_matrix_get_add_location(monoTREE, n_super_node, super_node_id, super_node_size, &
@@ -215,8 +204,6 @@ contains
       enddo
     enddo
 
-!write(*,*)"update_id : ", update_id
-
     !> extended add 演算の fact_array における足し込み先 index
 
     NZ = fact_array_index(n_super_node + 1)
@@ -254,10 +241,6 @@ contains
           endif
         enddo
       enddo
-
-!write(*,*)"child_rows : ", child_rows
-!write(*,*)"parent_rows: ", parent_rows
-!write(*,*)"is_add     : ", is_add
 
       iS = fact_array_index(m)
       do i = 1, super_node_size(m)
@@ -301,10 +284,5 @@ contains
     do i = 1, NZ
       if(add_location(i) < 0) stop "minus add_location"
     enddo
-
-!write(*,*)"add_location"
-!write(*,"(20i4)")add_location
-!call flush()
-!call sleep(1)
   end subroutine monolis_matrix_get_add_location
 end module mod_monolis_fact_analysis
