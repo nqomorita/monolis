@@ -69,6 +69,18 @@ module mod_monolis_def_mat
     integer(kint), pointer :: perm(:) => null()
   end type monolis_mat_CSC
 
+  !> 行列構造体（reordering 構造）
+  type monolis_mat_reorder
+    !> perm 配列
+    integer(kint), pointer :: perm(:) => null()
+    !> iperm 配列
+    integer(kint), pointer :: iperm(:) => null()
+    !> rperm 配列
+    real(kdouble), pointer :: rperm(:) => null()
+    !> cperm 配列
+    complex(kdouble), pointer :: cperm(:) => null()
+  end type monolis_mat_reorder
+
   type monolis_mat_DMUMPS
     integer(kint), allocatable :: offset_list(:)
     integer(kint), allocatable :: offset_counts(:)
@@ -101,6 +113,8 @@ module mod_monolis_def_mat
     type(monolis_mat_CSR) :: CSR
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
+    !> 行列構造体（reordering 構造）
+    type(monolis_mat_reorder) :: REORDER
     !> 行列構造体（DMUMPS 構造）
     type(monolis_mat_DMUMPS) :: DMUMPS
   end type monolis_mat
@@ -123,6 +137,7 @@ contains
     call monolis_mat_initialize_SCSR(monoMAT%SCSR)
     call monolis_mat_initialize_CSR(monoMAT%CSR)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
+    call monolis_mat_initialize_REORDER(monoMAT%REORDER)
   end subroutine monolis_mat_initialize
 
   !> @ingroup def_mat_init
@@ -192,6 +207,19 @@ contains
   end subroutine monolis_mat_initialize_CSC
 
   !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（REORDER 構造）
+  subroutine monolis_mat_initialize_REORDER(REORDER)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_REORDER), intent(inout) :: REORDER
+
+    call monolis_pdealloc_I_1d(REORDER%perm)
+    call monolis_pdealloc_I_1d(REORDER%iperm)
+    call monolis_pdealloc_R_1d(REORDER%rperm)
+    call monolis_pdealloc_C_1d(REORDER%cperm)
+  end subroutine monolis_mat_initialize_REORDER
+
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
@@ -207,6 +235,7 @@ contains
     call monolis_mat_finalize_SCSR(monoMAT%SCSR)
     call monolis_mat_finalize_CSR(monoMAT%CSR)
     call monolis_mat_finalize_CSC(monoMAT%CSC)
+    call monolis_mat_finalize_REORDER(monoMAT%REORDER)
   end subroutine monolis_mat_finalize
 
   !> @ingroup def_mat_init
@@ -274,6 +303,19 @@ contains
     call monolis_pdealloc_I_1d(CSC%item)
     call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_finalize_CSC
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（REORDER 構造）
+  subroutine monolis_mat_finalize_REORDER(REORDER)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_REORDER), intent(inout) :: REORDER
+
+    call monolis_pdealloc_I_1d(REORDER%perm)
+    call monolis_pdealloc_I_1d(REORDER%iperm)
+    call monolis_pdealloc_R_1d(REORDER%rperm)
+    call monolis_pdealloc_C_1d(REORDER%cperm)
+  end subroutine monolis_mat_finalize_REORDER
 
   !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（実数型）

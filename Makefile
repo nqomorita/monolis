@@ -21,8 +21,8 @@ LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp
 
-#INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+#INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 
 ##> compiler option setting
 ifdef FLAGS
@@ -57,8 +57,8 @@ ifdef FLAGS
 endif
 
 USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
-#USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
-USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
+USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
+#USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
 
 ##> liblary option setting
 ifdef FLAGS
@@ -76,7 +76,7 @@ ifdef FLAGS
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		CPP    += -DWITH_MUMPS
 		#INCLUDE_MUMPS = 
-		USE_LIB_MUMPS = -L./lib -ldmumps -lmumps_common -lpord
+		USE_LIB_MUMPS = -L/Users/morita/opt/lib -ldmumps -lmumps_common -lpord
 	endif
 
 	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
@@ -111,6 +111,7 @@ SRC_MAT = \
 spmat_copy.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
+spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90
 
@@ -130,15 +131,17 @@ wrapper_lapack.f90
 
 SRC_WRAP2 = \
 wrapper_scalapack.f90 \
-monolis_wrapper_ml.c 
+monolis_wrapper_ml.c \
+monolis_wrapper_blopex.c 
 
-#matmat.f90 \
-
-#SRC_FACT = \
-#11/fact_LU_11.f90 \
-#11/fact_MF_11.f90 \
-#33/fact_LU_33.f90 \
-#nn/fact_LU_nn.f90 \
+SRC_FACT = \
+fillin.f90 \
+analysis.f90 \
+factorize.f90 \
+LU/LU_nn.f90
+#11/LU_11.f90 \
+#11/MF_11.f90 \
+#33/LU_33.f90 \
 #fact_LU.f90 \
 #fact_MF.f90
 
@@ -149,6 +152,7 @@ sor/sor_33.f90 \
 sor/sor_nn.f90 \
 diag.f90 \
 sor.f90 \
+LU.f90 \
 MUMPS.f90 \
 ML.f90 \
 precond.f90
@@ -176,6 +180,8 @@ solver.f90
 SRC_EIGEN = \
 Lanczos_util.f90 \
 Lanczos.f90 \
+LOBPCG_util.f90 \
+LOBPCG.f90 \
 eigen_solver.f90
 
 ##> C wrapper section
