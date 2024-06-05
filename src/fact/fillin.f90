@@ -121,7 +121,7 @@ contains
     endif
 
     !> relax supernode part
-    if(.false.)then
+    if(.true.)then
       allocate(is_used(N), source = 0)
       allocate(temp(N), source = 0)
       allocate(perm(N), source = 0)
@@ -161,123 +161,71 @@ contains
       enddo
 
 write(*,*)"temp"
-write(*,"(10i4)")temp
+write(*,"(20i4)")temp
 write(*,*)"perm"
-write(*,"(10i4)")perm
+write(*,"(20i4)")perm
 write(*,*)"index"
-write(*,"(10i4)")index
+write(*,"(20i4)")index
 
       nbytes = N/bit+1
       allocate(child_mask (nbytes), source = 0)
       allocate(parent_mask(nbytes), source = 0)
       allocate(fillin_mask(nbytes), source = 0)
 
-      do i = 1, M - 1
+      do i = M - 1, 1, -1
         jS = index(i) + 1
         jE = index(i + 1)
-        if(jE - jS + 1 == 1) cycle
-        do j = jS, jE
-          if(is_used(j) == 1) cycle
-        enddo
 
-        in = minval(perm(jS:jE))
-        is = in/bit + 1
-        child_mask(is:nbytes) = 0
+        is = minval(perm(jS:jE))/bit + 1
         parent_mask(is:nbytes) = 0
 
-        parent = parent_id(i)
-        is_used(parent) = 1
-
         range = 0
-        ie = i/bit + 1
-        parent_mask(ie) = ibset(parent_mask(ie), mod(parent,bit))
-        k = tree(parent)%n_ancestor
-        do j = 1, k
+        parent = parent_id(i)
+write(*,*)"parent", parent
+        call set_bit(parent, parent_mask, range, bit)
+        do j = 1, tree(parent)%n_ancestor
           in = tree(parent)%ancestor(j)
-          ie = in/bit + 1
-          parent_mask(ie) = ibset(parent_mask(ie), mod(in,bit))
-          range = max(range, in)
+          call set_bit(in, parent_mask, range, bit)
         enddo
 
-        do p = jS, jE
-          child = perm(p)
-          ie = child/bit + 1
-          child_mask(ie) = ibset(child_mask(ie), mod(child,bit))
-          k = tree(child)%n_ancestor
-          do j = 1, k
+        do m = jE, jS, -1
+          child = perm(m)
+          if(child == N - tree(child)%n_ancestor) cycle
+write(*,*)"child", child
+          child_mask(is:nbytes) = 0
+
+          do j = 1, tree(child)%n_ancestor
             in = tree(child)%ancestor(j)
-            ie = in/bit + 1
-            child_mask(ie) = ibset(child_mask(ie), mod(in,bit))
-            range = max(range, in)
+            call set_bit(in, child_mask, range, bit)
           enddo
 
           ie = range/bit + 1
-          parent_mask(is:ie) = ior(parent_mask(is:ie), child_mask(is:ie))
-          fillin_mask(is:ie) = fillin_mask(is:ie) + ieor(parent_mask(is:ie), child_mask(is:ie))
-        enddo
+          fillin_mask(is:ie) = ieor(child_mask(is:ie), parent_mask(is:ie))
 
-        c = 0
-        do j = is, ie
-          c = c + popcnt(parent_mask(j))
-        enddo
-
-        d = 0
-        do j = is, ie
-          d = d + popcnt(fillin_mask(j))
-        enddo
-
-        if(d == 0) cycle
-
-        if(0 < c)then
-          fillin_mask(is:ie) = 0
-          do p = jS, jE
-            child = perm(p)
-
-            c = c - 1
-            allocate(array(c))
-            tree(child)%n_ancestor = c
-
-            ie = child/bit + 1
-            parent_mask(ie) = ibclr(parent_mask(ie), mod(child,bit))
-            fillin_mask(is:ie) = parent_mask(is:ie)
-
-            in = 0
-            do j = is, ie
-              do k = 1, popcnt(fillin_mask(j))
-                in = in + 1
-                m = popcnt( iand(fillin_mask(j), - fillin_mask(j)) -1 )
-                fillin_mask(j) = ibclr(fillin_mask(j),m)
-                array(in) = bit*(j-1)+m
-              enddo
-            enddo
-!write(*,*)"child", child
-!write(*,*)"array", array
-            deallocate(tree(child)%ancestor)
-            tree(child)%ancestor => array
+          c = 0
+          do j = is, ie
+            c = c + popcnt(fillin_mask(j))
           enddo
+          write(*,*)"C", c
 
-          c = c - 1
+          if(c == 0) cycle
+          call set_bit(child, child_mask, range, bit)
+          fillin_mask(is:ie) = ior(child_mask(is:ie), parent_mask(is:ie))
+          
           allocate(array(c))
-          tree(parent)%n_ancestor = c
-
-          ie = parent/bit + 1
-          parent_mask(ie) = ibclr(parent_mask(ie), mod(parent,bit))
-          fillin_mask(is:ie) = parent_mask(is:ie)
-
+          tree(child)%n_ancestor = c
           in = 0
           do j = is, ie
             do k = 1, popcnt(fillin_mask(j))
               in = in + 1
-              m = popcnt( iand(fillin_mask(j), - fillin_mask(j)) -1 )
-              fillin_mask(j) = ibclr(fillin_mask(j),m)
-              array(in) = bit*(j-1)+m
+              c = popcnt( iand(fillin_mask(j), - fillin_mask(j)) -1 )
+              fillin_mask(j) = ibclr(fillin_mask(j),c)
+              array(in) = bit*(j-1)+c
             enddo
           enddo
-!write(*,*)"parent", parent
-!write(*,*)"array", array
-          deallocate(tree(parent)%ancestor)
+          deallocate(tree(child)%ancestor)
           tree(parent)%ancestor => array
-        endif
+        enddo
       enddo
 
       deallocate(child_mask )
@@ -345,6 +293,16 @@ write(*,"(10i4)")index
 !      deallocate(count)
 !    endif
   end subroutine monolis_matrix_get_fillin
+
+  subroutine set_bit(in, parent_mask, range, bit)
+    implicit none
+    integer(kint) :: in, range, ie
+    integer(kint) :: parent_mask(:)
+    integer(kint) :: bit 
+    ie = in/bit + 1
+    parent_mask(ie) = ibset(parent_mask(ie), mod(in, bit))
+    range = max(range, in)
+  end subroutine set_bit
 
   subroutine monolis_matrix_alloc_with_fillin(monoTREE, is_asym)
     implicit none

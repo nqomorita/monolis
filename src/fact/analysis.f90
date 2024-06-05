@@ -85,12 +85,12 @@ contains
       super_node_parent_id(i) = in
     enddo aa
 
-write(*,*)"super_node_id"
-write(*,"(20i4)")super_node_id
-write(*,*)"super_node_size"
-write(*,"(20i4)")super_node_size
-write(*,*)"super_node_parent_id"
-write(*,"(20i4)")super_node_parent_id
+!write(*,*)"super_node_id"
+!write(*,"(20i4)")super_node_id
+!write(*,*)"super_node_size"
+!write(*,"(20i4)")super_node_size
+!write(*,*)"super_node_parent_id"
+!write(*,"(20i4)")super_node_parent_id
   end subroutine monolis_matrix_get_super_node_information
 
   subroutine monolis_matrix_get_factorize_array(monoTREE, n_super_node, super_node_id, &
