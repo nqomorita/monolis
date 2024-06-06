@@ -121,7 +121,7 @@ contains
     endif
 
     !> relax supernode part
-    if(.true.)then
+    if(.false.)then
       allocate(is_used(N), source = 0)
       allocate(temp(N), source = 0)
       allocate(perm(N), source = 0)
@@ -160,12 +160,12 @@ contains
         call monolis_qsort_I_1d(perm, jS, jE)
       enddo
 
-write(*,*)"temp"
-write(*,"(20i4)")temp
-write(*,*)"perm"
-write(*,"(20i4)")perm
-write(*,*)"index"
-write(*,"(20i4)")index
+!write(*,*)"temp"
+!write(*,"(20i4)")temp
+!write(*,*)"perm"
+!write(*,"(20i4)")perm
+!write(*,*)"index"
+!write(*,"(20i4)")index
 
       nbytes = N/bit+1
       allocate(child_mask (nbytes), source = 0)
@@ -181,7 +181,7 @@ write(*,"(20i4)")index
 
         range = 0
         parent = parent_id(i)
-write(*,*)"parent", parent
+!write(*,*)"parent", parent
         call set_bit(parent, parent_mask, range, bit)
         do j = 1, tree(parent)%n_ancestor
           in = tree(parent)%ancestor(j)
@@ -191,7 +191,7 @@ write(*,*)"parent", parent
         do m = jE, jS, -1
           child = perm(m)
           if(child == N - tree(child)%n_ancestor) cycle
-write(*,*)"child", child
+!write(*,*)"child", child
           child_mask(is:nbytes) = 0
 
           do j = 1, tree(child)%n_ancestor
