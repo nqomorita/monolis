@@ -21,8 +21,8 @@ LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp
 
-INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-#INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+#INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 
 ##> compiler option setting
 ifdef FLAGS
@@ -57,8 +57,8 @@ ifdef FLAGS
 endif
 
 USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
-USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
-#USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
+#USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
+USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
 
 ##> liblary option setting
 ifdef FLAGS
