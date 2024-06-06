@@ -272,6 +272,86 @@ contains
 
   !> @ingroup dev_solver
   !> Deflated CG 法
+  subroutine deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      & M, M_neib, NNDOF, monoMAT_Wt, monoCOM_self, AW, Z, P, tdemv)
+    implicit none
+    type(monolis_prm) :: monoPRM_deflated_eq
+    type(monolis_com) :: monoCOM_deflated_eq
+    type(monolis_mat) :: monoMAT_deflated_eq
+    type(monolis_mat) :: monoPRE_deflated_eq
+    type(monolis_mat) :: monoMAT_Wt
+    type(monolis_com) :: monoCOM_self
+    integer(kint) :: M
+    integer(kint) :: M_neib
+    integer(kint) :: NNDOF
+    real(kdouble) :: AW(:,:)
+    real(kdouble) :: P(:)
+    real(kdouble) :: Z(:)
+    real(kdouble) :: tdemv, time, WtZ(M_neib), AWEinvWtZ(NNDOF)
+
+    if(M == 0)then
+      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      return
+    endif
+
+    !call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), Z, WtZ, tdemv)
+    call monolis_matvec_product_main_R(monoCOM_self, monoMAT_Wt, Z, WtZ, time, time)
+
+    monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
+
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
+
+    call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
+
+    call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
+  end subroutine deflatedCG_P_coarse
+
+  subroutine deflatedCG_get_coarse_W(NNDOF, M, W, monoMAT_Wt)
+    implicit none
+    type(monolis_mat) :: monoMAT_Wt
+    integer(kint) :: M
+    integer(kint) :: NNDOF
+    real(kdouble) :: W(:,:)
+    integer(kint) :: i, j, in
+
+    monoMAT_Wt%N = M
+    monoMAT_Wt%NP = M
+    monoMAT_Wt%NDOF = 1
+
+    call monolis_palloc_I_1d(monoMAT_Wt%CSR%index, M + 1)
+
+    in = 0
+    do i = 1, M
+      do j = 1, NNDOF
+        if(W(j,i) /= 0.0d0)then
+          in = in + 1
+          monoMAT_Wt%CSR%index(i + 1) = monoMAT_Wt%CSR%index(i + 1) + 1
+        endif
+      enddo
+    enddo
+
+    do i = 1, M
+      monoMAT_Wt%CSR%index(i + 1) = monoMAT_Wt%CSR%index(i + 1) + monoMAT_Wt%CSR%index(i)
+    enddo
+
+    call monolis_palloc_I_1d(monoMAT_Wt%CSR%item, in)
+    call monolis_palloc_R_1d(monoMAT_Wt%R%A, in)
+
+    in = 0
+    do i = 1, M
+      do j = 1, NNDOF
+        if(W(j,i) /= 0.0d0)then
+          in = in + 1
+          monoMAT_Wt%CSR%item(in) = j
+          monoMAT_Wt%R%A(in) = W(j,i)
+        endif
+      enddo
+    enddo
+  end subroutine deflatedCG_get_coarse_W
+
+  !> @ingroup dev_solver
+  !> Deflated CG 法
   subroutine deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
       & M, M_neib, NNDOF, W, WtA, Z, P,tdemv)
     implicit none

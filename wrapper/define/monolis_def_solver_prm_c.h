@@ -32,9 +32,11 @@ static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 //static const int MONOLIS_ITER_GMRES = 10;
 
-static const int MONOLIS_ITER_DEFLATEDCG = 9;
+static const int MONOLIS_ITER_DEFLATEDCG1 = 9;
+static const int MONOLIS_ITER_DEFLATEDCG2 = 10;
+static const int MONOLIS_ITER_ADEFLATEDCG2 = 11;
 
-static const int MONOLIS_ITER_COCG = 10;
+static const int MONOLIS_ITER_COCG = 12;
 
 static const int MONOLIS_PREC_NONE   = 0;
 
@@ -48,15 +50,17 @@ static const int MONOLIS_PREC_SOR    = 2;
 
 //static const int MONOLIS_PREC_SPIKE  = 5;
 
-//static const int MONOLIS_PREC_LU     = 6;
+static const int MONOLIS_PREC_LU     = 3;
 
-//static const int MONOLIS_PREC_MUMPS  = 7;
+static const int MONOLIS_PREC_MUMPS  = 4;
 
 //static const int MONOLIS_PREC_ROM    = 8;
 
 //static const int MONOLIS_PREC_MF     = 9;
 
-//static const int MONOLIS_PREC_MUMPS_LOCAL = 10;
+static const int MONOLIS_PREC_MUMPS_LOCAL = 5;
+
+static const int MONOLIS_PREC_AMG = 6;
 
 static const int MONOLIS_PRM_I_METHOD = 1;
 
