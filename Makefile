@@ -20,6 +20,7 @@ DRV_DIR = ./driver
 LIBRARY = libmonolis.a
 LIBRARY_SOLVER = libmonolis_solver.a
 CPP     = -cpp
+CPPFLAG =
 
 #INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
@@ -68,20 +69,20 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring ML, $(DFLAGS)), ML)
-		CPP    += -DWITH_ML
+		CPPFLAG += -DWITH_ML
 		#INCLUDE_ML = 
 		USE_LIB_ML = -L./lib -lml -lzoltan -lmetis
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
-		CPP    += -DWITH_MUMPS
+		CPPFLAG += -DWITH_MUMPS
 		#INCLUDE_MUMPS = 
 		USE_LIB_MUMPS = -L/Users/morita/opt/lib -ldmumps -lmumps_common -lpord
 	endif
 
 	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
 		#INCLUDE_BLOPEX = 
-		CPP    += -DWITH_BLOPEX
+		CPPFLAG += -DWITH_BLOPEX
 		USE_LIB_BLOPEX = -L./lib 
 	endif
 endif
@@ -320,28 +321,28 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(LINK) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(LINK) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
 	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+	$(FC) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.f90
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+	$(FC) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
-	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+	$(FC) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAG) $(INCLUDE) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
-	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAG) $(INCLUDE) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
-	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAG) $(INCLUDE) -o $@ -c $<
 
 cp_header:
 	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
