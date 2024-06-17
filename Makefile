@@ -100,6 +100,9 @@ SRC_WRAP = \
 wrapper_lapack.f90 \
 wrapper_scalapack.f90
 
+SRC_OPT = \
+nnls.f90 
+
 #matmat.f90 \
 
 #SRC_FACT = \
@@ -199,6 +202,7 @@ $(addprefix prec/, $(SRC_PREC)) \
 $(addprefix iterative/, $(SRC_ITER)) \
 $(addprefix solver/, $(SRC_SOLV)) \
 $(addprefix eigen/, $(SRC_EIGEN)) \
+$(addprefix optimize/, $(SRC_OPT))
 
 ##> lib objs
 LIB_SOURCES = \
