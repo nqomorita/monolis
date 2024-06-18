@@ -26,9 +26,9 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    integer(kint) :: j, idx(1)
+    integer(kint) :: idx(1), iter
     real(kdouble) :: alpha
-    logical :: is_all_positve, is_converge, is_all_false
+    logical :: is_all_positve, is_converge_inner, is_converge, is_all_false
     real(kdouble), allocatable :: AtA(:,:)
     real(kdouble), allocatable :: Atb(:)
     real(kdouble), allocatable :: s(:)
@@ -44,6 +44,7 @@ contains
     AtA = matmul(transpose(A), A)
     Atb = matmul(transpose(A), b)
     w = Atb
+    iter = 0
 
     do
       !> Get the "most" active coeff index and move to inactive set
@@ -56,19 +57,25 @@ contains
       call monolis_lapack_dsysv_with_select(n, AtA, Atb, s, P)
 
       !> Inner loop
-      aa:do j = 1, max_iter
-        call check_all_positive(n, s, P, is_all_positve)
-        if(is_all_positve) exit aa
+      aa:do
+        call check_tolerance_inner(n, s, tol, P, is_converge_inner)
+        if(is_converge_inner) exit aa
 
+        iter = iter + 1
+        if(iter > max_iter) exit
+
+        call update_candidate(n, s, P)
         call get_minimum_alpha(n, x, s, P, alpha)
+
         x = (1.0d0 - alpha)*x
         x = x + alpha*s
 
-        call check_tolerance_inner(n, x, tol, P, is_all_false)
+        call check_is_all(n, x, tol, P, is_all_false)
         if(is_all_false)then
           s = 0.0d0
           exit
         endif
+
         call monolis_lapack_dsysv_with_select(n, AtA, Atb, s, P)
       enddo aa
       x = s
@@ -121,7 +128,23 @@ contains
     enddo
   end subroutine check_tolerance_outer
 
-  subroutine check_tolerance_inner(n, x, tol, P, is_all_false)
+  subroutine check_tolerance_inner(n, s, tol, P, is_converge_inner)
+    implicit none
+    integer(kint) :: n
+    real(kdouble) :: s(:)
+    real(kdouble) :: tol
+    logical :: P(:)
+    logical :: is_converge_inner
+    integer(kint) :: i
+
+    is_converge_inner = .true.
+    do i = 1, n
+      if(.not. P(i)) cycle
+      if(s(i) < 0) is_converge_inner = .false.
+    enddo
+  end subroutine check_tolerance_inner
+
+  subroutine check_is_all(n, x, tol, P, is_all_false)
     implicit none
     integer(kint) :: n
     real(kdouble) :: x(:)
@@ -131,8 +154,11 @@ contains
     integer(kint) :: i
 
     do i = 1, n
-      if(.not. P(i)) cycle
-      if(x(i) < tol) P(i) = .false.
+      if(x(i) < tol)then
+        P(i) = .false.
+      else
+        P(i) = .true.
+      endif
     enddo
 
     is_all_false = .true.
@@ -142,7 +168,20 @@ contains
         return
       endif
     enddo
-  end subroutine check_tolerance_inner
+  end subroutine check_is_all
+
+  subroutine update_candidate(n, s, P)
+    implicit none
+    integer(kint) :: n
+    real(kdouble) :: s(:)
+    logical :: P(:)
+    integer(kint) :: i
+
+    do i = 1, n
+      if(.not. P(i)) cycle
+      if(s(i) > 0) P(i) = .false.
+    enddo
+  end subroutine update_candidate
 
   subroutine check_all_positive(n, s, P, is_all_positve)
     implicit none
@@ -152,12 +191,11 @@ contains
     logical :: is_all_positve
     integer(kint) :: i
 
-    is_all_positve = .false.
+    is_all_positve = .true.
     do i = 1, n
       if(.not. P(i)) cycle
-      if(s(i) < 0) return
+      if(s(i) > 0) is_all_positve = .false.
     enddo
-    is_all_positve = .true.
   end subroutine check_all_positive
 
 end module mod_monolis_opt_nnls
