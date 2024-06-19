@@ -36,6 +36,53 @@ contains
   end subroutine monolis_lapack_dstev
 
   !> @ingroup wrapper
+  !> DGEQPF 関数（対称行列の QR 分解、実数型）
+  subroutine monolis_lapack_dgeqrf(m, n, A, Q, R)
+    implicit none
+    !> [in] 行列の大きさ
+    integer(kint), intent(in) :: m
+    !> [in] 行列の大きさ
+    integer(kint), intent(in) :: n
+    !> [in] 行列
+    real(kdouble), intent(in) :: A(:,:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(out) :: Q(:,:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(out) :: R(:,:)
+    real(kdouble), allocatable :: work(:), tau(:)
+    integer(kint) :: i, j
+    integer(kint) :: lwork, info
+    real(kdouble) :: work1(1)
+
+    !> get optimal work size
+    call monolis_alloc_R_1d(tau, min(m, n))
+    call dgeqrf(m, n, A, m, tau, work1, -1, info)
+    lwork = int(work1(1))
+    call monolis_alloc_R_1d(work, lwork)
+
+    !> main function
+    call dgeqrf(m, n, A, m, tau, work, -1, info)
+
+    !> get R matrix
+    do i = 1, min(m, n)
+      do j = 1, i
+        R(j,i) = A(j,i)
+      enddo
+    enddo
+
+    !> get Q matrix
+    !> get optimal work size
+    call dorgqr(m, n, min(m, n), A, m, tau, work1, -1, info)
+    lwork = int(work1(1))
+    call monolis_dealloc_R_1d(work)
+
+    !> main function
+    call monolis_alloc_R_1d(work, lwork)
+    Q = A
+    call dorgqr(m, n, min(m, n), Q, m, tau, work, lwork, info)
+  end subroutine monolis_lapack_dgeqrf
+
+  !> @ingroup wrapper
   !> DSTEV 関数（対称行列の求解、実数型）
   subroutine monolis_lapack_dsysv(n, A, b, x)
     implicit none
@@ -50,12 +97,14 @@ contains
     real(kdouble), allocatable :: work(:)
     integer(kint) :: lwork, info, ipiv(n)
 
+    !> get optimal work size
     call monolis_alloc_R_1d(work, 1)
 
     x = b
     call dsysv("U", n, 1, A, n, ipiv, x, n, work, -1, info)
     lwork = int(work(1))
 
+    !> main function
     call monolis_dealloc_R_1d(work)
     call monolis_alloc_R_1d(work, lwork)
 

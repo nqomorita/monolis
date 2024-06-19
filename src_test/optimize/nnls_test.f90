@@ -61,6 +61,23 @@ contains
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 3a", x(1), 0.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 3b", x(2), 0.0d0)
+
+    call monolis_std_global_log_string("monolis_optimize_nnls_with_sparse_solution")
+
+    A(1,1) = 1.0d0; A(1,2) = 1.0d0; 
+    A(2,1) = 1.0d0; A(2,2) = 1.0d0; 
+    A(3,1) = 1.0d0; A(3,2) = 1.0d0; 
+    A(4,1) = 1.0d0; A(4,2) = 1.0d0; 
+
+    b(1) = 1.0d0
+    b(2) = 1.0d0
+    b(3) = 1.0d0
+    b(4) = 1.0d0
+
+    call monolis_optimize_nnls_with_sparse_solution(A, b, x, 4, 2, max_iter, tol, residual)
+
+    call monolis_test_check_eq_R1("monolis_optimize_nnls_test 4a", x(1), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_optimize_nnls_test 4b", x(2), 0.0d0)
   end subroutine monolis_optimize_nnls_test
 
 end module mod_monolis_opt_nnls_test
