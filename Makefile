@@ -175,6 +175,10 @@ SRC_WRAP_C = \
 scalapack_wrapper.f90 \
 monolis_wrapper_scalapack_c.c
 
+SRC_OPT_C = \
+nnls_wrapper.f90 \
+monolis_nnls_c.c 
+
 SRC_SOLV_C = \
 monolis_solver_c.c \
 solver_wrapper.f90
@@ -188,6 +192,7 @@ $(addprefix define/, $(SRC_DEFINE_C)) \
 $(addprefix linalg/, $(SRC_LINALG_C)) \
 $(addprefix matrix/, $(SRC_MAT_C)) \
 $(addprefix wrapper/, $(SRC_WRAP_C)) \
+$(addprefix optimize/, $(SRC_OPT_C)) \
 $(addprefix solver/, $(SRC_SOLV_C)) \
 $(addprefix eigen/, $(SRC_EIGEN_SOLV_C))
 
@@ -319,6 +324,7 @@ cp_header:
 	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
 	$(CP) ./wrapper/matrix/monolis_spmat_copy_c.h ./include/
 	$(CP) ./wrapper/wrapper/monolis_wrapper_scalapack_c.h ./include/
+	$(CP) ./wrapper/optimize/monolis_nnls_c.h ./include/
 	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
 	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
 	$(CP) ./wrapper/monolis_solver.h ./include/

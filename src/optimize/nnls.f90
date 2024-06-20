@@ -8,7 +8,7 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual)
+  subroutine monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, comm)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -26,6 +26,8 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: idx(1), iter, p, i, in
     real(kdouble) :: r0_norm, r_norm, res
     real(kdouble), allocatable :: r(:)
@@ -69,7 +71,7 @@ contains
 
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
       c = matmul(transpose(Q_z), b)
-      call monolis_optimize_nnls(R_z, c, w_z, p, p, max_iter, tol, res)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res, comm)
 
       !> 解の中で値が負の要素の非零指定を解除する
       in = 0
@@ -105,7 +107,7 @@ write(*,*)"r_norm/r0_norm", r_norm/r0_norm
     call monolis_dealloc_R_1d(r)
     call monolis_dealloc_R_1d(s)
     call monolis_dealloc_L_1d(is_nonzero)
-  end subroutine monolis_optimize_nnls_with_sparse_solution
+  end subroutine monolis_optimize_nnls_R_with_sparse_solution
 
   subroutine get_column_matrix(m, n, A, A_z, is_nonzero)
     implicit none
@@ -127,7 +129,7 @@ write(*,*)"r_norm/r0_norm", r_norm/r0_norm
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls(A, b, x, m, n, max_iter, tol, residual)
+  subroutine monolis_optimize_nnls_R(A, b, x, m, n, max_iter, tol, residual, comm)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -145,6 +147,8 @@ write(*,*)"r_norm/r0_norm", r_norm/r0_norm
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: idx(1), iter
     real(kdouble) :: alpha
     logical :: is_all_positve, is_converge_inner, is_converge, is_all_false
@@ -211,7 +215,7 @@ write(*,*)"r_norm/r0_norm", r_norm/r0_norm
     call monolis_dealloc_R_1d(s)
     call monolis_dealloc_R_1d(w)
     call monolis_dealloc_L_1d(P)
-  end subroutine monolis_optimize_nnls
+  end subroutine monolis_optimize_nnls_R
 
   subroutine get_minimum_alpha(n, x, s, P, alpha)
     implicit none
