@@ -17,6 +17,7 @@
 #include "./solver/monolis_solver_c_test.h"
 #include "./eigen/monolis_eigen_solver_c_test.h"
 #include "./wrapper/monolis_wrapper_scalapack_c_test.h"
+#include "./optimize/monolis_nnls_c_test.h"
 
 int main()
 {
@@ -45,6 +46,8 @@ int main()
   monolis_spmat_handler_util_c_test();
 
   monolis_scalapack_test();
+  
+  monolis_optimize_nnls_c_test();
 
   if(monolis_mpi_get_global_comm_size() == 1){
     monolis_solve_c_test();

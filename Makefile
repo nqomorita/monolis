@@ -252,6 +252,9 @@ monolis_spmat_handler_util_c_test.c
 SRC_WRAP_C_TEST = \
 monolis_wrapper_scalapack_c_test.c
 
+SRC_NNLS_C_TEST = \
+monolis_nnls_c_test.c
+
 SRC_SOLVER_C_TEST = \
 monolis_solver_c_test.c
 
@@ -263,6 +266,7 @@ $(addprefix define/, $(SRC_DEFINE_C_TEST)) \
 $(addprefix linalg/, $(SRC_LINALG_C_TEST)) \
 $(addprefix matrix/, $(SRC_MAT_C_TEST)) \
 $(addprefix wrapper/, $(SRC_WRAP_C_TEST)) \
+$(addprefix optimize/, $(SRC_NNLS_C_TEST)) \
 $(addprefix solver/, $(SRC_SOLVER_C_TEST)) \
 $(addprefix eigen/, $(SRC_EIGEN_SOLVER_C_TEST))
 

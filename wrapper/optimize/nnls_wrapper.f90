@@ -36,7 +36,7 @@ contains
 
     do i = 1, n
       do j = 1, m
-        A_temp(j,i) = A(n*(i-1) + j)
+        A_temp(j,i) = A(m*(i-1) + j)
       enddo
     enddo
 
@@ -71,7 +71,7 @@ contains
 
     do i = 1, n
       do j = 1, m
-        A_temp(j,i) = A(n*(i-1) + j)
+        A_temp(j,i) = A(m*(i-1) + j)
       enddo
     enddo
 

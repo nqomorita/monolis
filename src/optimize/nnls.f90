@@ -50,6 +50,7 @@ contains
     is_nonzero = .false.
     r = b
     p = 0
+    x = 0.0d0
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
@@ -99,7 +100,7 @@ contains
       call monolis_dealloc_R_1d(w_z)
       call monolis_dealloc_R_1d(c)
 
-write(*,*)"r_norm/r0_norm", r_norm/r0_norm
+!write(*,*)"r_norm/r0_norm", r_norm/r0_norm
 
       if(r_norm/r0_norm < tol) exit
     enddo
@@ -168,6 +169,7 @@ write(*,*)"r_norm/r0_norm", r_norm/r0_norm
     Atb = matmul(transpose(A), b)
     w = Atb
     iter = 0
+    x = 0.0d0
 
     do
       !> Get the "most" active coeff index and move to inactive set
