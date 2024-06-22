@@ -49,19 +49,22 @@ contains
 
     is_nonzero = .false.
     r = b
-    p = 0
     x = 0.0d0
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
       s = matmul(transpose(A), r)
 
-      !> 絶対値最大のインデックスを求め、その値を非零に指定する
-      idx = maxloc(abs(s))
+      !> 最大値のインデックスを求め、その値を非零に指定する
+      idx = maxloc(s, .not. is_nonzero)
       is_nonzero(idx(1)) = .true.
 
       !> 行列 A から is_nonzero 配列で非零に指定された列要素を取得
-      p = p + 1
+      p = 0
+      do i = 1, n
+        if(is_nonzero(i)) p = p + 1
+      enddo
+
       call monolis_alloc_R_2d(A_z, m, p)
       call monolis_alloc_R_2d(Q_z, m, p)
       call monolis_alloc_R_2d(R_z, p, p)
@@ -69,30 +72,33 @@ contains
       call monolis_alloc_R_1d(w_z, p)
 
       call get_column_matrix(m, n, A, A_z, is_nonzero)
-
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
+
       c = matmul(transpose(Q_z), b)
       call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res, comm)
+
+      !> x を更新
+      in = 0
+      do i = 1, n
+        if(.not. is_nonzero(i)) cycle
+        in = in + 1
+        x(i) = w_z(in)
+      enddo
 
       !> 解の中で値が負の要素の非零指定を解除する
       in = 0
       do i = 1, n
         if(is_nonzero(i))then
           in = in + 1
-          if(c(in) < 0) is_nonzero(i) = .false.
+          if(w_z(in) <= 0.0d0)then
+            is_nonzero(i) = .false.
+          endif
         endif
       enddo
 
       !> 残差を計算する
       r = b - matmul(A_z, w_z)
       call monolis_get_l2_norm_R(m, r, r_norm)
-
-      in = 0
-      do i = 1, n
-        if(.not. is_nonzero(i)) cycle
-        in = in + 1
-        x(i) = c(in)
-      enddo
 
       call monolis_dealloc_R_2d(A_z)
       call monolis_dealloc_R_2d(Q_z)
@@ -104,6 +110,8 @@ contains
 
       if(r_norm/r0_norm < tol) exit
     enddo
+
+    call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
 
     call monolis_dealloc_R_1d(r)
     call monolis_dealloc_R_1d(s)

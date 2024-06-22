@@ -49,37 +49,40 @@ contains
     real(kdouble), intent(out) :: Q(:,:)
     !> [in] 右辺ベクトル
     real(kdouble), intent(out) :: R(:,:)
-    real(kdouble), allocatable :: work(:), tau(:)
+    real(kdouble), allocatable :: A_(:,:), work(:), tau(:)
     integer(kint) :: i, j
     integer(kint) :: lwork, info
     real(kdouble) :: work1(1)
 
     !> get optimal work size
+    call monolis_alloc_R_2d(A_, m, n)
+    A_ = A
+
     call monolis_alloc_R_1d(tau, min(m, n))
-    call dgeqrf(m, n, A, m, tau, work1, -1, info)
+    call dgeqrf(m, n, A_, m, tau, work1, -1, info)
     lwork = int(work1(1))
     call monolis_alloc_R_1d(work, lwork)
 
     !> main function
-    call dgeqrf(m, n, A, m, tau, work, -1, info)
+    call dgeqrf(m, n, A_, m, tau, work, lwork, info)
 
     !> get R matrix
     do i = 1, min(m, n)
       do j = 1, i
-        R(j,i) = A(j,i)
+        R(j,i) = A_(j,i)
       enddo
     enddo
 
     !> get Q matrix
     !> get optimal work size
-    call dorgqr(m, n, min(m, n), A, m, tau, work1, -1, info)
+    call dorgqr(m, min(m, n), min(m, n), A_, m, tau, work1, -1, info)
     lwork = int(work1(1))
     call monolis_dealloc_R_1d(work)
 
     !> main function
     call monolis_alloc_R_1d(work, lwork)
-    Q = A
-    call dorgqr(m, n, min(m, n), Q, m, tau, work, lwork, info)
+    Q = A_
+    call dorgqr(m, min(m, n), min(m, n), Q, m, tau, work, lwork, info)
   end subroutine monolis_lapack_dgeqrf
 
   !> @ingroup wrapper
