@@ -8,7 +8,7 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, comm)
+  subroutine monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, monoCOM)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -26,9 +26,11 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    !> [in] MPI コミュニケータ
-    integer(kint), intent(in) :: comm
+    !> [in] COM 構造体
+    type(monolis_COM), intent(in) :: monoCOM
+    type(monolis_COM) :: COM_self
     integer(kint) :: idx(1), iter, p, i, in
+    integer(kint) :: comm_self
     real(kdouble) :: r0_norm, r_norm, res
     real(kdouble), allocatable :: r(:)
     real(kdouble), allocatable :: s(:)
@@ -38,6 +40,8 @@ contains
     real(kdouble), allocatable :: c(:)
     real(kdouble), allocatable :: w_z(:)
     logical, allocatable :: is_nonzero(:)
+
+    call monolis_com_initialize_by_self(COM_self)
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
@@ -75,7 +79,7 @@ contains
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
 
       c = matmul(transpose(Q_z), b)
-      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res, comm)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res, COM_self)
 
       !> x を更新
       in = 0
@@ -138,7 +142,7 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls_R(A, b, x, m, n, max_iter, tol, residual, comm)
+  subroutine monolis_optimize_nnls_R(A, b, x, m, n, max_iter, tol, residual, monoCOM)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -156,8 +160,8 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    !> [in] MPI コミュニケータ
-    integer(kint), intent(in) :: comm
+    !> [in] COM 構造体
+    type(monolis_COM), intent(in) :: monoCOM
     integer(kint) :: idx(1), iter
     real(kdouble) :: alpha
     logical :: is_all_positve, is_converge_inner, is_converge, is_all_false
@@ -166,6 +170,12 @@ contains
     real(kdouble), allocatable :: s(:)
     real(kdouble), allocatable :: w(:)
     logical, allocatable :: P(:)
+
+    if(monolis_mpi_get_local_comm_size(monoCOM%comm) /= 1)then
+      call monolis_std_error_string("monolis_optimize_nnls_R")
+      call monolis_std_error_string("This function supported for only serial computation")
+      call monolis_std_error_stop()
+    endif
 
     call monolis_alloc_R_2d(AtA, n, n)
     call monolis_alloc_R_1d(Atb, n)
@@ -273,7 +283,7 @@ contains
     is_converge_inner = .true.
     do i = 1, n
       if(.not. P(i)) cycle
-      if(s(i) < 0) is_converge_inner = .false.
+      if(s(i) < 0.0d0) is_converge_inner = .false.
     enddo
   end subroutine check_tolerance_inner
 
@@ -312,7 +322,7 @@ contains
 
     do i = 1, n
       if(.not. P(i)) cycle
-      if(s(i) > 0) P(i) = .false.
+      if(s(i) > 0.0d0) P(i) = .false.
     enddo
   end subroutine update_candidate
 
@@ -327,7 +337,7 @@ contains
     is_all_positve = .true.
     do i = 1, n
       if(.not. P(i)) cycle
-      if(s(i) > 0) is_all_positve = .false.
+      if(s(i) > 0.0d0) is_all_positve = .false.
     enddo
   end subroutine check_all_positive
 

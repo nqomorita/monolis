@@ -28,7 +28,7 @@ void monolis_optimize_nnls_R(
   int      max_iter,
   double   tol,
   double*  residual,
-  int      comm);
+  MONOLIS_COM* com);
 
 void monolis_optimize_nnls_R_c_main(
   double*  A,
@@ -39,7 +39,19 @@ void monolis_optimize_nnls_R_c_main(
   int      max_iter,
   double   tol,
   double*  residual,
-  int      comm);
+  int      my_rank,
+  int      comm,
+  int      comm_size,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
 
 /**
  * @brief Non-Negetive Least Squares 関数（疎な解ベクトル）
@@ -63,7 +75,7 @@ void monolis_optimize_nnls_R_with_sparse_solution(
   int      max_iter,
   double   tol,
   double*  residual,
-  int      comm);
+  MONOLIS_COM* com);
 
 void monolis_optimize_nnls_R_with_sparse_solution_c_main(
   double*  A,
@@ -74,7 +86,19 @@ void monolis_optimize_nnls_R_with_sparse_solution_c_main(
   int      max_iter,
   double   tol,
   double*  residual,
-  int      comm);
+  int      my_rank,
+  int      comm,
+  int      comm_size,
+  int      recv_n_neib,
+  int      recv_nitem,
+  int*     recv_neib_pe,
+  int*     recv_index,
+  int*     recv_item,
+  int      send_n_neib,
+  int      send_nitem,
+  int*     send_neib_pe,
+  int*     send_index,
+  int*     send_item);
 
 #ifdef __cplusplus
 }
