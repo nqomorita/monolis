@@ -41,16 +41,6 @@ void monolis_optimize_nnls_c_test_1()
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 1a", x[0], 1.0);
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 1b", x[1], 0.0);
 
-  A[0][0] = 1.0; A[0][1] = 1.0; 
-  A[1][0] = 1.0; A[1][1] = 1.0; 
-  A[2][0] = 1.0; A[2][1] = 1.0; 
-  A[3][0] = 1.0; A[3][1] = 1.0; 
-
-  b[0] = 1.0;
-  b[1] = 1.0;
-  b[2] = 1.0;
-  b[3] = 1.0;
-
   monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, &residual, &com);
 
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 4a", x[0], 1.0);
@@ -90,6 +80,11 @@ void monolis_optimize_nnls_c_test_2()
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 2a", x[0], 1.5);
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 2b", x[1], 1.0);
 
+  monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, &residual, &com);
+
+  monolis_test_check_eq_R1("monolis_optimize_nnls_test 5a", x[0], 1.5);
+  monolis_test_check_eq_R1("monolis_optimize_nnls_test 5b", x[1], 1.0);
+
   A[0][0] = 1.0; A[0][1] = 0.0; 
   A[1][0] = 1.0; A[1][1] = 0.0; 
   A[2][0] = 0.0; A[2][1] = 1.0; 
@@ -102,6 +97,11 @@ void monolis_optimize_nnls_c_test_2()
 
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 3a", x[0], 0.0);
   monolis_test_check_eq_R1("monolis_optimize_nnls_test 3b", x[1], 0.0);
+
+  monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, &residual, &com);
+
+  monolis_test_check_eq_R1("monolis_optimize_nnls_test 6a", x[0], 0.0);
+  monolis_test_check_eq_R1("monolis_optimize_nnls_test 6b", x[1], 0.0);
 }
 
 void monolis_optimize_nnls_c_test()
