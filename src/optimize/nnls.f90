@@ -28,6 +28,17 @@ contains
     real(kdouble), intent(out) :: residual
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
+    integer(kint) :: idx(1), iter, p, i, in
+    integer(kint) :: comm_self
+    real(kdouble) :: r0_norm, r_norm, res
+    real(kdouble), allocatable :: r(:)
+    real(kdouble), allocatable :: s(:)
+    real(kdouble), allocatable :: A_z(:,:)
+    real(kdouble), allocatable :: Q_z(:,:)
+    real(kdouble), allocatable :: R_z(:,:)
+    real(kdouble), allocatable :: c(:)
+    real(kdouble), allocatable :: w_z(:)
+    logical, allocatable :: is_nonzero(:)
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
