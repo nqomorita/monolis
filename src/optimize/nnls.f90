@@ -8,7 +8,7 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, monoCOM)
+  subroutine monolis_optimize_parallel_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, monoCOM)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -28,20 +28,6 @@ contains
     real(kdouble), intent(out) :: residual
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    type(monolis_COM) :: COM_self
-    integer(kint) :: idx(1), iter, p, i, in
-    integer(kint) :: comm_self
-    real(kdouble) :: r0_norm, r_norm, res
-    real(kdouble), allocatable :: r(:)
-    real(kdouble), allocatable :: s(:)
-    real(kdouble), allocatable :: A_z(:,:)
-    real(kdouble), allocatable :: Q_z(:,:)
-    real(kdouble), allocatable :: R_z(:,:)
-    real(kdouble), allocatable :: c(:)
-    real(kdouble), allocatable :: w_z(:)
-    logical, allocatable :: is_nonzero(:)
-
-    call monolis_com_initialize_by_self(COM_self)
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
@@ -79,7 +65,7 @@ contains
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
 
       c = matmul(transpose(Q_z), b)
-      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res, COM_self)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res)
 
       !> x を更新
       in = 0
@@ -111,7 +97,118 @@ contains
       call monolis_dealloc_R_1d(c)
 
 !write(*,*)"r_norm/r0_norm", r_norm/r0_norm
+      if(all(is_nonzero)) exit
+      if(r_norm/r0_norm < tol) exit
+    enddo
 
+    call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
+
+    call monolis_dealloc_R_1d(r)
+    call monolis_dealloc_R_1d(s)
+    call monolis_dealloc_L_1d(is_nonzero)
+  end subroutine monolis_optimize_parallel_nnls_R_with_sparse_solution
+
+  !> @ingroup linalg
+  !> Non-Negative Least Squares
+  subroutine monolis_optimize_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual)
+    implicit none
+    !> [in] 行列
+    real(kdouble), intent(in) :: A(:,:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: b(:)
+    !> [out] 解ベクトル
+    real(kdouble), intent(out) :: x(:)
+    !> [in] 行列の大きさ
+    integer(kint), intent(in) :: m
+    !> [in] 行列の大きさ
+    integer(kint), intent(in) :: n
+    !> [in] 最大反復回数
+    integer(kint), intent(in) :: max_iter
+    !> [out] 収束判定閾値
+    real(kdouble), intent(in) :: tol
+    !> [out] 残差
+    real(kdouble), intent(out) :: residual
+    integer(kint) :: idx(1), iter, p, i, in
+    integer(kint) :: comm_self
+    real(kdouble) :: r0_norm, r_norm, res
+    real(kdouble), allocatable :: r(:)
+    real(kdouble), allocatable :: s(:)
+    real(kdouble), allocatable :: A_z(:,:)
+    real(kdouble), allocatable :: Q_z(:,:)
+    real(kdouble), allocatable :: R_z(:,:)
+    real(kdouble), allocatable :: c(:)
+    real(kdouble), allocatable :: w_z(:)
+    logical, allocatable :: is_nonzero(:)
+
+    !> メモリの確保
+    call monolis_alloc_R_1d(r, m)
+    call monolis_alloc_R_1d(s, n)
+    call monolis_alloc_L_1d(is_nonzero, n)
+
+    !> 収束判定のためのノルム計算
+    call monolis_get_l2_norm_R(m, b, r0_norm)
+
+    is_nonzero = .false.
+    r = b
+    x = 0.0d0
+
+    do iter =  1, max_iter
+      !> 行列 A の転置と残差ベクトルをかける
+      s = matmul(transpose(A), r)
+
+      !> 最大値のインデックスを求め、その値を非零に指定する
+      idx = maxloc(s, .not. is_nonzero)
+      is_nonzero(idx(1)) = .true.
+
+      !> 行列 A から is_nonzero 配列で非零に指定された列要素を取得
+      p = 0
+      do i = 1, n
+        if(is_nonzero(i)) p = p + 1
+      enddo
+
+      call monolis_alloc_R_2d(A_z, m, p)
+      call monolis_alloc_R_2d(Q_z, m, p)
+      call monolis_alloc_R_2d(R_z, p, p)
+      call monolis_alloc_R_1d(c, p)
+      call monolis_alloc_R_1d(w_z, p)
+
+      call get_column_matrix(m, n, A, A_z, is_nonzero)
+      call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
+
+      c = matmul(transpose(Q_z), b)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res)
+
+      !> x を更新
+      in = 0
+      do i = 1, n
+        if(.not. is_nonzero(i)) cycle
+        in = in + 1
+        x(i) = w_z(in)
+      enddo
+
+      !> 解の中で値が負の要素の非零指定を解除する
+      in = 0
+      do i = 1, n
+        if(is_nonzero(i))then
+          in = in + 1
+          if(w_z(in) <= 0.0d0)then
+            is_nonzero(i) = .false.
+          endif
+        endif
+      enddo
+
+      !> 残差を計算する
+      r = b - matmul(A_z, w_z)
+      call monolis_get_l2_norm_R(m, r, r_norm)
+
+      call monolis_dealloc_R_2d(A_z)
+      call monolis_dealloc_R_2d(Q_z)
+      call monolis_dealloc_R_2d(R_z)
+      call monolis_dealloc_R_1d(w_z)
+      call monolis_dealloc_R_1d(c)
+
+!write(*,*)"r_norm/r0_norm", r_norm/r0_norm
+      if(all(is_nonzero)) exit
       if(r_norm/r0_norm < tol) exit
     enddo
 
@@ -142,7 +239,7 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_nnls_R(A, b, x, m, n, max_iter, tol, residual, monoCOM)
+  subroutine monolis_optimize_nnls_R(A, b, x, m, n, max_iter, tol, residual)
     implicit none
     !> [in] 行列
     real(kdouble), intent(in) :: A(:,:)
@@ -160,8 +257,6 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    !> [in] COM 構造体
-    type(monolis_COM), intent(in) :: monoCOM
     integer(kint) :: idx(1), iter
     real(kdouble) :: alpha
     logical :: is_all_positve, is_converge_inner, is_converge, is_all_false
@@ -170,12 +265,6 @@ contains
     real(kdouble), allocatable :: s(:)
     real(kdouble), allocatable :: w(:)
     logical, allocatable :: P(:)
-
-    if(monolis_mpi_get_local_comm_size(monoCOM%comm) /= 1)then
-      call monolis_std_error_string("monolis_optimize_nnls_R")
-      call monolis_std_error_string("This function supported for only serial computation")
-      call monolis_std_error_stop()
-    endif
 
     call monolis_alloc_R_2d(AtA, n, n)
     call monolis_alloc_R_1d(Atb, n)

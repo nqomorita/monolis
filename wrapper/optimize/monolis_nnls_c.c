@@ -12,13 +12,10 @@ void monolis_optimize_nnls_R(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  MONOLIS_COM* com)
+  double*  residual)
 {
   int     i, j;
   double* A_tmp;
-  int recv_nitem = com->recv_index[com->recv_n_neib];
-  int send_nitem = com->send_index[com->send_n_neib];
 
   A_tmp = monolis_alloc_R_1d(A_tmp, m*n);
 
@@ -36,21 +33,7 @@ void monolis_optimize_nnls_R(
     n,
     max_iter,
     tol,
-    residual,
-    /* comm */
-    com->my_rank,
-    com->comm,
-    com->comm_size,
-    com->recv_n_neib,
-    recv_nitem,
-    com->recv_neib_pe,
-    com->recv_index,
-    com->recv_item,
-    com->send_n_neib,
-    send_nitem,
-    com->send_neib_pe,
-    com->send_index,
-    com->send_item);
+    residual);
 }
 
 void monolis_optimize_nnls_R_with_sparse_solution(
@@ -61,13 +44,10 @@ void monolis_optimize_nnls_R_with_sparse_solution(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  MONOLIS_COM* com)
+  double*  residual)
 {
   int     i, j;
   double* A_tmp;
-  int recv_nitem = com->recv_index[com->recv_n_neib];
-  int send_nitem = com->send_index[com->send_n_neib];
 
   A_tmp = monolis_alloc_R_1d(A_tmp, m*n);
 
@@ -85,19 +65,5 @@ void monolis_optimize_nnls_R_with_sparse_solution(
     n,
     max_iter,
     tol,
-    residual,
-    /* comm */
-    com->my_rank,
-    com->comm,
-    com->comm_size,
-    com->recv_n_neib,
-    recv_nitem,
-    com->recv_neib_pe,
-    com->recv_index,
-    com->recv_item,
-    com->send_n_neib,
-    send_nitem,
-    com->send_neib_pe,
-    com->send_index,
-    com->send_item);
+    residual);
 }

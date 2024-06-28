@@ -9,7 +9,6 @@ contains
   !> Non-Negative Least Squares
   subroutine monolis_optimize_nnls_test()
     implicit none
-    type(monolis_COM) :: COM_self
     integer(kint) :: max_iter
     real(kdouble) :: tol, residual
     real(kdouble) :: A(4,2)
@@ -18,8 +17,6 @@ contains
 
     call monolis_std_global_log_string("monolis_optimize_nnls")
     call monolis_std_global_log_string("monolis_optimize_nnls_with_sparse_solution")
-
-    call monolis_com_initialize_by_self(COM_self)
 
     max_iter = 100
     tol = 1.0d-6
@@ -34,12 +31,12 @@ contains
     b(3) = 1.0d0
     b(4) = 1.0d0
 
-    call monolis_optimize_nnls_R(A, b, x, 4, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R(A, b, x, 4, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 1a", x(1), 1.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 1b", x(2), 0.0d0)
 
-    call monolis_optimize_nnls_R_with_sparse_solution(A, b, x, 4, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R_with_sparse_solution(A, b, x, 4, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 4a", x(1), 1.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 4b", x(2), 0.0d0)
@@ -53,12 +50,12 @@ contains
     b(2) = 1.0d0
     b(3) = 1.0d0
 
-    call monolis_optimize_nnls_R(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 2a", x(1), 1.5d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 2b", x(2), 1.0d0)
 
-    call monolis_optimize_nnls_R_with_sparse_solution(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R_with_sparse_solution(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 5a", x(1), 1.5d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 5b", x(2), 1.0d0)
@@ -71,12 +68,12 @@ contains
     b(2) =-1.0d0
     b(3) =-1.0d0
 
-    call monolis_optimize_nnls_R(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 3a", x(1), 0.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 3b", x(2), 0.0d0)
 
-    call monolis_optimize_nnls_R_with_sparse_solution(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual, COM_self)
+    call monolis_optimize_nnls_R_with_sparse_solution(A(1:3,1:2), b(1:3), x(1:2), 3, 2, max_iter, tol, residual)
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 6a", x(1), 0.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 6b", x(2), 0.0d0)

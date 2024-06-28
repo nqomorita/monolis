@@ -16,7 +16,6 @@ extern "C" {
  * @param[in] max_iter 最大反復回数
  * @param[in] tol 収束判定閾値
  * @param[out] residual 残差
- * @param[in] comm MPI コミュニケータ
  * @ingroup opt
  */
 void monolis_optimize_nnls_R(
@@ -27,8 +26,7 @@ void monolis_optimize_nnls_R(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  MONOLIS_COM* com);
+  double*  residual);
 
 void monolis_optimize_nnls_R_c_main(
   double*  A,
@@ -38,20 +36,7 @@ void monolis_optimize_nnls_R_c_main(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  int      my_rank,
-  int      comm,
-  int      comm_size,
-  int      recv_n_neib,
-  int      recv_nitem,
-  int*     recv_neib_pe,
-  int*     recv_index,
-  int*     recv_item,
-  int      send_n_neib,
-  int      send_nitem,
-  int*     send_neib_pe,
-  int*     send_index,
-  int*     send_item);
+  double*  residual);
 
 /**
  * @brief Non-Negetive Least Squares 関数（疎な解ベクトル）
@@ -63,7 +48,6 @@ void monolis_optimize_nnls_R_c_main(
  * @param[in] max_iter 最大反復回数
  * @param[in] tol 収束判定閾値
  * @param[out] residual 残差
- * @param[in] comm MPI コミュニケータ
  * @ingroup opt
  */
 void monolis_optimize_nnls_R_with_sparse_solution(
@@ -74,8 +58,7 @@ void monolis_optimize_nnls_R_with_sparse_solution(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  MONOLIS_COM* com);
+  double*  residual);
 
 void monolis_optimize_nnls_R_with_sparse_solution_c_main(
   double*  A,
@@ -85,20 +68,7 @@ void monolis_optimize_nnls_R_with_sparse_solution_c_main(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  int      my_rank,
-  int      comm,
-  int      comm_size,
-  int      recv_n_neib,
-  int      recv_nitem,
-  int*     recv_neib_pe,
-  int*     recv_index,
-  int*     recv_item,
-  int      send_n_neib,
-  int      send_nitem,
-  int*     send_neib_pe,
-  int*     send_index,
-  int*     send_item);
+  double*  residual);
 
 #ifdef __cplusplus
 }
