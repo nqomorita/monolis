@@ -23,8 +23,9 @@ cd ../..
 cd submodule/mumps
 mkdir build
 cd build
-cmake ..
-make -DCMAKE_INSTALL_PREFIX=$BASE_DIR -j 
+cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
+make -j 
+make install
 cd ../../..
 
 #> monolis_utils
