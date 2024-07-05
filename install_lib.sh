@@ -24,7 +24,7 @@ cd submodule/mumps
 mkdir build
 cd build
 cmake ..
-make -DCMAKE_INSTALL_PREFIX=$BASE_DIR -j
+make -DCMAKE_INSTALL_PREFIX=$BASE_DIR -j 
 cd ../../..
 
 #> monolis_utils
@@ -36,15 +36,3 @@ cd ../..
 cd submodule/gedatsu/
 make FLAGS=SUBMODULE
 cd ../..
-
-# under CeCILL license
-#cd submodule
-#wget http://www.kz.tsukuba.ac.jp/~nmorita/MUMPS_5.3.3.tar.gz
-#tar xvf MUMPS_5.3.3.tar.gz
-#mv MUMPS_5.3.3 mumps2
-#cd mumps2
-#cp ../Makefile.inc.mumps ./Makefile.inc
-#make d -j
-#cp include/*.h ${BASE_DIR}/include
-#cp lib/*.a ${BASE_DIR}/lib
-#cd ../..
