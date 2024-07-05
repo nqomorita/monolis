@@ -185,7 +185,8 @@ SRC_MAT_C = \
 monolis_spmat_copy_c.c \
 monolis_spmat_nzpattern_util_c.c \
 monolis_spmat_nzpattern_c.c \
-monolis_spmat_handler_c.c
+monolis_spmat_handler_c.c \
+monolis_spmat_handler_util_c.c
 
 SRC_WRAP_CF = \
 scalapack_wrapper.f90 
