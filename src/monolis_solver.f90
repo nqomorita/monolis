@@ -21,6 +21,7 @@ module mod_monolis_solver
   use mod_monolis_eigen_solver
   use mod_monolis_eigen_lanczos
   use mod_monolis_eigen_lanczos_util
+  use mod_monolis_opt_nnls
 
   !> @defgroup def_init 全体初期化・終了処理関数群
   !> 初期化・終了処理に関連する関数グループ

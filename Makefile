@@ -77,7 +77,7 @@ ifdef FLAGS
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		CPPFLAG += -DWITH_MUMPS
 		#INCLUDE_MUMPS = 
-		USE_LIB_MUMPS = -L/Users/morita/opt/lib -ldmumps -lmumps_common -lpord
+		USE_LIB_MUMPS = -L./lib -ldmumps -lmumps_common -lpord
 	endif
 
 	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
@@ -116,10 +116,6 @@ spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90
 
-#spmat_fillin.f90 \
-#spmat_reorder.f90 \
-#spmat_scaling.f90 \
-
 SRC_LINALG = \
 matvec.f90 \
 inner_product.f90 \
@@ -137,11 +133,9 @@ fillin.f90 \
 analysis.f90 \
 factorize.f90 \
 LU/LU_nn.f90
-#11/LU_11.f90 \
-#11/MF_11.f90 \
-#33/LU_33.f90 \
-#fact_LU.f90 \
-#fact_MF.f90
+
+SRC_OPT = \
+nnls.f90 
 
 SRC_PREC = \
 diag/diag_33.f90 \
@@ -155,10 +149,6 @@ MUMPS.f90 \
 ML.f90 \
 precond.f90
 
-#ilu.f90 \
-#Jacobi.f90 \
-#MF.f90 \
-
 SRC_ITER = \
 CG.f90 \
 BiCGSTAB.f90 \
@@ -170,9 +160,6 @@ PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
 COCG.f90
 
-#CABiCGSTAB_noprec.f90 \
-#GMRES.f90 \
-
 SRC_SOLV = \
 solver.f90
 
@@ -183,49 +170,6 @@ LOBPCG_util.f90 \
 LOBPCG.f90 \
 eigen_solver.f90
 
-##> C wrapper section
-SRC_DEFINE_C = \
-monolis_def_solver_prm_c.c \
-monolis_def_mat_c.c \
-monolis_def_struc_c.c \
-monolis_def_solver_prm_util_c.c
-
-SRC_LINALG_C = \
-matvec_wrap.f90 \
-inner_product_wrap.f90 \
-monolis_matvec_c.c \
-monolis_vec_util_c.c \
-monolis_inner_product_c.c
-
-SRC_MAT_C = \
-monolis_spmat_copy_c.c \
-monolis_spmat_nzpattern_util_c.c \
-monolis_spmat_nzpattern_c.c \
-monolis_spmat_handler_c.c \
-spmat_nzpattern_util_wrap.f90 \
-spmat_handler_util_wrap.f90
-
-SRC_WRAP_C = \
-scalapack_wrapper.f90 \
-monolis_wrapper_scalapack_c.c 
-
-SRC_SOLV_C = \
-monolis_solver_c.c \
-solver_wrapper.f90
-
-SRC_EIGEN_SOLV_C = \
-monolis_eigen_solver_c.c \
-eigen_solver_wrapper.f90
-
-SRC_ALL_C = \
-$(addprefix define/, $(SRC_DEFINE_C)) \
-$(addprefix linalg/, $(SRC_LINALG_C)) \
-$(addprefix matrix/, $(SRC_MAT_C)) \
-$(addprefix wrapper/, $(SRC_WRAP_C)) \
-$(addprefix solver/, $(SRC_SOLV_C)) \
-$(addprefix eigen/, $(SRC_EIGEN_SOLV_C))
-
-##> all targes
 SRC_ALL = \
 $(addprefix define/, $(SRC_DEFINE)) \
 $(addprefix matrix/, $(SRC_MAT)) \
@@ -236,6 +180,79 @@ $(addprefix prec/, $(SRC_PREC)) \
 $(addprefix iterative/, $(SRC_ITER)) \
 $(addprefix solver/, $(SRC_SOLV)) \
 $(addprefix eigen/, $(SRC_EIGEN)) \
+$(addprefix optimize/, $(SRC_OPT))
+
+##> C wrapper section
+SRC_DEFINE_C = \
+monolis_def_solver_prm_c.c \
+monolis_def_mat_c.c \
+monolis_def_struc_c.c \
+monolis_def_solver_prm_util_c.c
+
+SRC_LINALG_CF = \
+matvec_wrap.f90 \
+inner_product_wrap.f90
+
+SRC_LINALG_C = \
+monolis_matvec_c.c \
+monolis_vec_util_c.c \
+monolis_inner_product_c.c
+
+SRC_MAT_CF = \
+spmat_nzpattern_util_wrap.f90 \
+spmat_handler_util_wrap.f90
+
+SRC_MAT_C = \
+monolis_spmat_copy_c.c \
+monolis_spmat_nzpattern_util_c.c \
+monolis_spmat_nzpattern_c.c \
+monolis_spmat_handler_c.c
+
+SRC_WRAP_CF = \
+scalapack_wrapper.f90 
+
+SRC_WRAP_C = \
+monolis_wrapper_scalapack_c.c
+
+SRC_OPT_CF = \
+nnls_wrapper.f90 
+
+SRC_OPT_C = \
+monolis_nnls_c.c 
+
+SRC_SOLV_CF = \
+solver_wrapper.f90
+
+SRC_SOLV_C = \
+monolis_solver_c.c 
+
+SRC_EIGEN_SOLV_CF = \
+eigen_solver_wrapper.f90
+
+SRC_EIGEN_SOLV_C = \
+monolis_eigen_solver_c.c
+
+SRC_ALL_CC = \
+$(addprefix define/, $(SRC_DEFINE_C)) \
+$(addprefix linalg/, $(SRC_LINALG_C)) \
+$(addprefix matrix/, $(SRC_MAT_C)) \
+$(addprefix wrapper/, $(SRC_WRAP_C)) \
+$(addprefix optimize/, $(SRC_OPT_C)) \
+$(addprefix solver/, $(SRC_SOLV_C)) \
+$(addprefix eigen/, $(SRC_EIGEN_SOLV_C)) \
+
+SRC_ALL_CF = \
+$(addprefix define/, $(SRC_DEFINE_CF)) \
+$(addprefix linalg/, $(SRC_LINALG_CF)) \
+$(addprefix matrix/, $(SRC_MAT_CF)) \
+$(addprefix wrapper/, $(SRC_WRAP_CF)) \
+$(addprefix optimize/, $(SRC_OPT_CF)) \
+$(addprefix solver/, $(SRC_SOLV_CF)) \
+$(addprefix eigen/, $(SRC_EIGEN_SOLV_CF))
+
+SRC_ALL_C = \
+$(SRC_ALL_CF) \
+$(SRC_ALL_CC)
 
 ##> lib objs
 LIB_SOURCES = \
@@ -280,6 +297,9 @@ monolis_spmat_handler_util_c_test.c
 SRC_WRAP_C_TEST = \
 monolis_wrapper_scalapack_c_test.c
 
+SRC_NNLS_C_TEST = \
+monolis_nnls_c_test.c
+
 SRC_SOLVER_C_TEST = \
 monolis_solver_c_test.c
 
@@ -291,12 +311,30 @@ $(addprefix define/, $(SRC_DEFINE_C_TEST)) \
 $(addprefix linalg/, $(SRC_LINALG_C_TEST)) \
 $(addprefix matrix/, $(SRC_MAT_C_TEST)) \
 $(addprefix wrapper/, $(SRC_WRAP_C_TEST)) \
+$(addprefix optimize/, $(SRC_NNLS_C_TEST)) \
 $(addprefix solver/, $(SRC_SOLVER_C_TEST)) \
 $(addprefix eigen/, $(SRC_EIGEN_SOLVER_C_TEST))
 
 TST_SRC_C_ALL = $(SRC_ALL_C_TEST) monolis_c_test.c
 TST_C_SOURCES = $(addprefix $(TST_WRAP_DIR)/, $(TST_SRC_C_ALL))
 TST_C_OBJS    = $(subst $(TST_WRAP_DIR), $(OBJ_DIR), $(TST_C_SOURCES:.c=.o))
+
+##> header section
+C_HEADER = \
+$(SRC_ALL_CC:.c=.h) \
+monolis_solver.h \
+monolis.h 
+
+C_HEADER_FILES = \
+$(SRC_DEFINE_C:.c=.h) \
+$(SRC_LINALG_C:.c=.h) \
+$(SRC_MAT_C:.c=.h) \
+$(SRC_WRAP_C:.c=.h) \
+$(SRC_OPT_C:.c=.h) \
+$(SRC_SOLV_C:.c=.h) \
+$(SRC_EIGEN_SOLV_C:.c=.h) \
+monolis_solver.h \
+monolis.h
 
 ##> target
 all: \
@@ -342,23 +380,7 @@ $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(CPPFLAG) $(INCLUDE) -o $@ -c $<
 
 cp_header:
-	$(CP) ./wrapper/linalg/monolis_matvec_c.h ./include/
-	$(CP) ./wrapper/linalg/monolis_inner_product_c.h ./include/
-	$(CP) ./wrapper/linalg/monolis_vec_util_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_struc_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_mat_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_solver_prm_util_c.h ./include/
-	$(CP) ./wrapper/define/monolis_def_solver_prm_c.h ./include/
-	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_c.h ./include/
-	$(CP) ./wrapper/matrix/monolis_spmat_nzpattern_util_c.h ./include/
-	$(CP) ./wrapper/matrix/monolis_spmat_handler_c.h ./include/
-	$(CP) ./wrapper/matrix/monolis_spmat_handler_util_c.h ./include/
-	$(CP) ./wrapper/matrix/monolis_spmat_copy_c.h ./include/
-	$(CP) ./wrapper/wrapper/monolis_wrapper_scalapack_c.h ./include/
-	$(CP) ./wrapper/solver/monolis_solver_c.h ./include/
-	$(CP) ./wrapper/eigen/monolis_eigen_solver_c.h ./include/
-	$(CP) ./wrapper/monolis_solver.h ./include/
-	$(CP) ./wrapper/monolis.h ./include/
+	$(CP) $(addprefix $(WRAP_DIR)/, $(C_HEADER)) ./include/
 
 cp_header_lib:
 	$(CP) ./submodule/monolis_utils/include/* ./include/
@@ -374,16 +396,15 @@ $(LIBALL_TARGET):
 	ar -rc $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
 
 clean:
-	$(RM) \
-	$(LIB_OBJS) \
-	$(TST_OBJS) \
-	$(TST_C_OBJS) \
-	$(LIB_TARGET) \
-	$(LIBALL_TARGET) \
-	$(TEST_TARGET) \
-	$(TEST_C_TARGET) \
-	./include/*.mod \
-	./include/*.h \
-	./bin/*
+	$(RM) $(LIB_OBJS) \
+	$(RM) $(TST_OBJS) \
+	$(RM) $(TST_C_OBJS) \
+	$(RM) $(LIB_TARGET) \
+	$(RM) $(LIBALL_TARGET) \
+	$(RM) $(TEST_TARGET) \
+	$(RM) $(TEST_C_TARGET) \
+	$(RM) ./include/*.mod \
+	$(RM) $(addprefix ./include/, $(C_HEADER_FILES)) \
+	$(RM) ./bin/*
 
 .PHONY: clean
