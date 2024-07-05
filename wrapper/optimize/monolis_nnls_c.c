@@ -12,8 +12,7 @@ void monolis_optimize_nnls_R(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  int      comm)
+  double*  residual)
 {
   int     i, j;
   double* A_tmp;
@@ -34,8 +33,7 @@ void monolis_optimize_nnls_R(
     n,
     max_iter,
     tol,
-    residual,
-    comm);
+    residual);
 }
 
 void monolis_optimize_nnls_R_with_sparse_solution(
@@ -46,8 +44,7 @@ void monolis_optimize_nnls_R_with_sparse_solution(
   int      n,
   int      max_iter,
   double   tol,
-  double*  residual,
-  int      comm)
+  double*  residual)
 {
   int     i, j;
   double* A_tmp;
@@ -68,6 +65,5 @@ void monolis_optimize_nnls_R_with_sparse_solution(
     n,
     max_iter,
     tol,
-    residual,
-    comm);
+    residual);
 }

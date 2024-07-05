@@ -8,7 +8,7 @@ module mod_monolis_nnls_wrapper
 
 contains
 
-  subroutine monolis_optimize_nnls_R_c(A, b, x, m, n, max_iter, tol, residual, comm) &
+  subroutine monolis_optimize_nnls_R_c(A, b, x, m, n, max_iter, tol, residual) &
     & bind(c, name = "monolis_optimize_nnls_R_c_main")
     implicit none
     !> 入力行列（m x n）
@@ -27,11 +27,10 @@ contains
     real(c_double), value :: tol
     !> 特異値（n）
     real(c_double), target :: residual
-    !> コミュニケータ
-    integer(c_int), value :: comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)
 
+    !> for matrix
     call monolis_alloc_R_2d(A_temp, m, n)
 
     do i = 1, n
@@ -40,10 +39,10 @@ contains
       enddo
     enddo
 
-    call monolis_optimize_nnls_R(A_temp, b, x, m, n, max_iter, tol, residual, comm)
+    call monolis_optimize_nnls_R(A_temp, b, x, m, n, max_iter, tol, residual)
   end subroutine monolis_optimize_nnls_R_c
 
-  subroutine monolis_optimize_nnls_R_with_sparse_solution_c(A, b, x, m, n, max_iter, tol, residual, comm) &
+  subroutine monolis_optimize_nnls_R_with_sparse_solution_c(A, b, x, m, n, max_iter, tol, residual) &
     & bind(c, name = "monolis_optimize_nnls_R_with_sparse_solution_c_main")
     implicit none
     !> 入力行列（m x n）
@@ -62,11 +61,10 @@ contains
     real(c_double), value :: tol
     !> 特異値（n）
     real(c_double), target :: residual
-    !> コミュニケータ
-    integer(c_int), value :: comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)
 
+    !> for matrix
     call monolis_alloc_R_2d(A_temp, m, n)
 
     do i = 1, n
@@ -75,6 +73,6 @@ contains
       enddo
     enddo
 
-    call monolis_optimize_nnls_R_with_sparse_solution(A_temp, b, x, m, n, max_iter, tol, residual, comm)
+    call monolis_optimize_nnls_R_with_sparse_solution(A_temp, b, x, m, n, max_iter, tol, residual)
   end subroutine monolis_optimize_nnls_R_with_sparse_solution_c
 end module mod_monolis_nnls_wrapper
