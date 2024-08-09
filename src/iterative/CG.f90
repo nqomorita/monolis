@@ -25,7 +25,7 @@ contains
     type(monolis_mat), target, intent(inout) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
-    integer(kint) :: N, NP, NDOF, NNDOF
+    integer(kint) :: N, NP, NDOF
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
@@ -38,7 +38,6 @@ contains
     N     = monoMAT%N
     NP    = monoMAT%NP
     NDOF  = monoMAT%NDOF
-    NNDOF = N*NDOF
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
@@ -63,25 +62,25 @@ contains
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, R, Z, rho, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, R, Z, rho, tdotp, tcomm_dotp)
 
       if(1 < iter)then
         beta = rho/rho1
-        call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, Z, P)
+        call monolis_vec_AXPBY_R(N*NDOF, beta, P, 1.0d0, Z, P)
       else
-        call monolis_vec_copy_R(N, NDOF, Z, P)
+        call monolis_vec_copy_R(N*NDOF, Z, P)
       endif
 
       call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, P, Q, omega, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, P, Q, omega, tdotp, tcomm_dotp)
       alpha = rho/omega
 
-      call monolis_vec_AXPBY_R(N, NDOF, alpha, P, 1.0d0, X, X)
+      call monolis_vec_AXPBY_R(N*NDOF, alpha, P, 1.0d0, X, X)
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
       else
-        call monolis_vec_AXPBY_R(N, NDOF, -alpha, Q, 1.0d0, R, R)
+        call monolis_vec_AXPBY_R(N*NDOF, -alpha, Q, 1.0d0, R, R)
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)

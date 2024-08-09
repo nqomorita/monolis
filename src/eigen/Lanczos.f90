@@ -86,18 +86,18 @@ contains
       enddo
 
       if(iter > 1)then
-        call monolis_vec_AXPBY_R(N, NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+        call monolis_vec_AXPBY_R(N*NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
       else
         p = monoMAT%R%X
       endif
 
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, q(:,iter), alpha(iter))
 
-      call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
+      call monolis_vec_AXPBY_R(N*NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
+      call monolis_gram_schmidt_R(monoCOM, iter, N*NDOF, p, q)
 
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, p, beta_t)
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)
@@ -198,18 +198,18 @@ contains
       enddo
 
       if(iter > 1)then
-        call monolis_vec_AXPBY_R(N, NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+        call monolis_vec_AXPBY_R(N*NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
       else
         p = monoMAT%R%X
       endif
 
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, q(:,iter), alpha(iter))
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, q(:,iter), alpha(iter))
 
-      call monolis_vec_AXPBY_R(N, NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
+      call monolis_vec_AXPBY_R(N*NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt_R(monoCOM, iter, N, NDOF, p, q)
+      call monolis_gram_schmidt_R(monoCOM, iter, N*NDOF, p, q)
 
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, p, p, beta_t)
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, p, beta_t)
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)

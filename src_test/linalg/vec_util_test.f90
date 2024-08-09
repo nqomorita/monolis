@@ -34,7 +34,7 @@ contains
 
     iY = 0
 
-    call monolis_vec_copy_I(n, ndof, iX, iY)
+    call monolis_vec_copy_I(n*ndof, iX, iY)
 
     call monolis_test_check_eq_I1("monolis_vec_copy_test 1a", iY(1), 1)
     call monolis_test_check_eq_I1("monolis_vec_copy_test 1b", iY(2), 1)
@@ -45,7 +45,7 @@ contains
 
     rY = 0.0d0
 
-    call monolis_vec_copy_R(n, ndof, rX, rY)
+    call monolis_vec_copy_R(n*ndof, rX, rY)
 
     call monolis_test_check_eq_R1("monolis_vec_copy_test 2a", rY(1), 1.0d0)
     call monolis_test_check_eq_R1("monolis_vec_copy_test 2b", rY(2), 1.0d0)
@@ -56,7 +56,7 @@ contains
 
     cY = (0.0d0, 0.0d0)
 
-    call monolis_vec_copy_C(n, ndof, cX, cY)
+    call monolis_vec_copy_C(n*ndof, cX, cY)
 
     call monolis_test_check_eq_C1("monolis_vec_copy_test 3a", cY(1), (1.0d0, 1.0d0))
     call monolis_test_check_eq_C1("monolis_vec_copy_test 3b", cY(2), (1.0d0, 1.0d0))
@@ -91,7 +91,7 @@ contains
 
     iY = 2
 
-    call monolis_vec_AXPBY_I(n, ndof, ia, iX, ib, iY, iZ)
+    call monolis_vec_AXPBY_I(n*ndof, ia, iX, ib, iY, iZ)
 
     call monolis_test_check_eq_I1("monolis_vec_AXPBY_test 1a", iZ(1), 6)
     call monolis_test_check_eq_I1("monolis_vec_AXPBY_test 1b", iZ(2), 6)
@@ -106,7 +106,7 @@ contains
 
     rY = 2.0d0
 
-    call monolis_vec_AXPBY_R(n, ndof, ra, rX, rb, rY, rZ)
+    call monolis_vec_AXPBY_R(n*ndof, ra, rX, rb, rY, rZ)
 
     call monolis_test_check_eq_R1("monolis_vec_AXPBY_test 2a", rZ(1), 6.0d0)
     call monolis_test_check_eq_R1("monolis_vec_AXPBY_test 2b", rZ(2), 6.0d0)
@@ -121,7 +121,7 @@ contains
 
     cY = (2.0d0, 2.0d0)
 
-    call monolis_vec_AXPBY_C(n, ndof, ca, cX, cb, cY, cZ)
+    call monolis_vec_AXPBY_C(n*ndof, ca, cX, cb, cY, cZ)
 
     call monolis_test_check_eq_C1("monolis_vec_AXPBY_test 3a", cZ(1), (6.0d0, 6.0d0))
     call monolis_test_check_eq_C1("monolis_vec_AXPBY_test 3b", cZ(2), (6.0d0, 6.0d0))

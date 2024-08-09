@@ -30,7 +30,7 @@ contains
     call monolis_std_debug_log_header("monolis_set_converge_R")
 
     is_converge = .false.
-    call monolis_inner_product_main_R(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, monoMAT%N*monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
@@ -63,7 +63,7 @@ contains
     call monolis_std_debug_log_header("monolis_set_converge_C")
 
     is_converge = .false.
-    call monolis_inner_product_main_C(monoCOM, monoMAT%N, monoMAT%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, monoMAT%N*monoMAT%NDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
@@ -101,7 +101,7 @@ contains
     call monolis_std_debug_log_header("monolis_check_converge_R")
 
     is_converge = .false.
-    call monolis_inner_product_main_R(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, monoMAT%N*monoMAT%NDOF, R, R, R2, tdotp, tcomm)
     resid = dsqrt(R2/B2)
 
     monoPRM%Iarray(monolis_prm_I_cur_iter) = iter
@@ -152,7 +152,7 @@ contains
     call monolis_std_debug_log_header("monolis_check_converge_C")
 
     is_converge = .false.
-    call monolis_inner_product_main_C(monoCOM, monoMAT%N, monoMAT%NDOF, R, R, R2, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, monoMAT%N*monoMAT%NDOF, R, R, R2, tdotp, tcomm)
     resid = sqrt(R2/B2)
 
     monoPRM%Iarray(monolis_prm_I_cur_iter) = iter

@@ -16,7 +16,7 @@ contains
     implicit none
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 計算点数
+    !> [in] 計算点数✕計算点上の自由度
     integer(kint), intent(in) :: N
     !> [in] 計算点上の自由度
     integer(kint), intent(in) :: NDOF
@@ -38,7 +38,7 @@ contains
 
     call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
 
-    call monolis_inner_product_main_R(monoCOM, N, NDOF, q, q, norm, t1, t2)
+    call monolis_inner_product_main_R(monoCOM, N*NDOF, q, q, norm, t1, t2)
 
     norm = 1.0d0/dsqrt(norm)
     do i = 1, N*NDOF

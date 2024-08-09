@@ -88,7 +88,7 @@ contains
     iX(3) = 1; iY(3) = 3
     iX(4) = 1; iY(4) = 4
 
-    call monolis_inner_productV_I(monolis, com, n, ndof, iX, iY, isum)
+    call monolis_inner_productV_I(com, n*ndof, iX, iY, isum)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
       call monolis_test_check_eq_I1("monolis_linalg_test 4", isum, 20)
@@ -101,7 +101,7 @@ contains
     rX(3) = 1.0d0; rY(3) = 3.0d0
     rX(4) = 1.0d0; rY(4) = 4.0d0
 
-    call monolis_inner_productV_R(monolis, com, n, ndof, rX, rY, rsum)
+    call monolis_inner_productV_R(com, n*ndof, rX, rY, rsum)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
       call monolis_test_check_eq_R1("monolis_linalg_test 5", rsum, 20.0d0)
@@ -114,7 +114,7 @@ contains
     cX(3) = (1.0d0, 0.0d0); cY(3) = (3.0d0, 3.0d0)
     cX(4) = (1.0d0, 0.0d0); cY(4) = (4.0d0, 4.0d0)
 
-    call monolis_inner_productV_C(monolis, com, n, ndof, cX, cY, csum)
+    call monolis_inner_productV_C(com, n*ndof, cX, cY, csum)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
       call monolis_test_check_eq_C1("monolis_linalg_test 6", csum, (20.0d0, 20.0d0))
@@ -127,7 +127,7 @@ contains
     rX(3) = 1.0d0; rY(3) = 3.0d0
     rX(4) = 1.0d0; rY(4) = 4.0d0
 
-    call monolis_inner_product_main_R_no_comm(n, ndof, rX, rY, rsum)
+    call monolis_inner_product_main_R_no_comm(n*ndof, rX, rY, rsum)
 
     call monolis_test_check_eq_R1("monolis_linalg_test 7", rsum, 10.0d0)
   end subroutine monolis_linalg_test

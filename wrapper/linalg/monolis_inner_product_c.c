@@ -16,7 +16,17 @@ void monolis_inner_product_I(
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;
 
-  monolis_inner_product_I_c_main(n, ndof, x, y, sum, com->comm);
+  monolis_inner_product_I_c_main(n*ndof, x, y, sum, com->comm);
+}
+
+void monolis_inner_productV_I(
+  MONOLIS_COM* com,
+  int          m,
+  int*         x,
+  int*         y,
+  int*         sum)
+{
+  monolis_inner_product_I_c_main(m, x, y, sum, com->comm);
 }
 
 void monolis_inner_product_R(
@@ -30,13 +40,23 @@ void monolis_inner_product_R(
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;
 
-  monolis_inner_product_R_c_main(n, ndof, x, y, sum, com->comm);
+  monolis_inner_product_R_c_main(n*ndof, x, y, sum, com->comm);
+}
+
+void monolis_inner_productV_R(
+  MONOLIS_COM* com,
+  int          m,
+  double*      x,
+  double*      y,
+  double*      sum)
+{
+  monolis_inner_product_R_c_main(m, x, y, sum, com->comm);
 }
 
 void monolis_inner_product_C(
-  MONOLIS*        mat,
-  MONOLIS_COM*    com,
-  int             ndof,
+  MONOLIS*         mat,
+  MONOLIS_COM*     com,
+  int              ndof,
   double _Complex* x,
   double _Complex* y,
   double _Complex* sum)
@@ -44,5 +64,15 @@ void monolis_inner_product_C(
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;
 
-  monolis_inner_product_C_c_main(n, ndof, x, y, sum, com->comm);
+  monolis_inner_product_C_c_main(n*ndof, x, y, sum, com->comm);
+}
+
+void monolis_inner_productV_C(
+  MONOLIS_COM*     com,
+  int              m,
+  double _Complex* x,
+  double _Complex* y,
+  double _Complex* sum)
+{
+  monolis_inner_product_C_c_main(m, x, y, sum, com->comm);
 }
