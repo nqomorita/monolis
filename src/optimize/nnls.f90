@@ -30,7 +30,7 @@ contains
     integer(kint), intent(in) :: comm
     integer(kint) :: idx(1), iter, p, i, in
     integer(kint) :: comm_self
-    real(kdouble) :: r0_norm, r_norm, res
+    real(kdouble) :: r0_norm, r_norm, res, tol_in
     real(kdouble), allocatable :: r(:)
     real(kdouble), allocatable :: s(:)
     real(kdouble), allocatable :: A_z(:,:)
@@ -43,8 +43,8 @@ contains
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
-    call monolis_alloc_R_1d(s, n)
-    call monolis_alloc_L_1d(is_nonzero, n)
+    call monolis_alloc_R_1d(s, n_loc)
+    call monolis_alloc_L_1d(is_nonzero, n_loc)
 
     !> 収束判定のためのノルム計算
     r0_norm = 0.0d0
@@ -58,6 +58,8 @@ contains
     is_converge = .false.
     r = b
     x = 0.0d0
+    tol_in = tol
+    !tol_in = 1.0d-14*max(m, n_loc)
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
@@ -69,7 +71,7 @@ contains
 
       !> 行列 A から is_nonzero 配列で非零に指定された列要素を取得
       p = 0
-      do i = 1, n
+      do i = 1, n_loc
         if(is_nonzero(i)) p = p + 1
       enddo
 
@@ -79,15 +81,15 @@ contains
       call monolis_alloc_R_1d(c, p)
       call monolis_alloc_R_1d(w_z, p)
 
-      call get_column_matrix(m, n, A, A_z, is_nonzero)
+      call get_column_matrix(m, n_loc, A, A_z, is_nonzero)
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
 
       c = matmul(transpose(Q_z), b)
-      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol_in, res)
 
       !> x を更新
       in = 0
-      do i = 1, n
+      do i = 1, n_loc
         if(.not. is_nonzero(i)) cycle
         in = in + 1
         x(i) = w_z(in)
@@ -95,7 +97,7 @@ contains
 
       !> 解の中で値が負の要素の非零指定を解除する
       in = 0
-      do i = 1, n
+      do i = 1, n_loc
         if(is_nonzero(i))then
           in = in + 1
           if(w_z(in) <= 0.0d0)then
@@ -129,7 +131,7 @@ contains
 
     if(.not. is_converge)then
       call monolis_std_error_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
-      call monolis_std_error_string("Residual is not less than the threshold")
+      call monolis_std_error_string("Residual is not less than tolerance")
       call monolis_std_error_stop()
     endif
  
@@ -160,7 +162,7 @@ contains
     real(kdouble), intent(out) :: residual
     integer(kint) :: idx(1), iter, p, i, in
     integer(kint) :: comm_self
-    real(kdouble) :: r0_norm, r_norm, res
+    real(kdouble) :: r0_norm, r_norm, res, tol_in
     real(kdouble), allocatable :: r(:)
     real(kdouble), allocatable :: s(:)
     real(kdouble), allocatable :: A_z(:,:)
@@ -183,6 +185,8 @@ contains
     is_converge = .false.
     r = b
     x = 0.0d0
+    tol_in = tol
+    !tol_in = 1.0d-14*max(m, n)
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
@@ -208,7 +212,7 @@ contains
       call monolis_lapack_dgeqrf(m, p, A_z, Q_z, R_z)
 
       c = matmul(transpose(Q_z), b)
-      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol, res)
+      call monolis_optimize_nnls_R(R_z, c, w_z, p, p, max_iter, tol_in, res)
 
       !> x を更新
       in = 0
@@ -251,7 +255,7 @@ contains
 
     if(.not. is_converge)then
       call monolis_std_error_string("monolis_optimize_nnls_R_with_sparse_solution")
-      call monolis_std_error_string("Residual is not less than the threshold")
+      call monolis_std_error_string("Residual is not less than tolerance")
       call monolis_std_error_stop()
     endif
 
