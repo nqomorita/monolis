@@ -8,26 +8,26 @@ contains
 
   !> @ingroup linalg
   !> Non-Negative Least Squares
-  subroutine monolis_optimize_parallel_nnls_R_with_sparse_solution(A, b, x, m, n, max_iter, tol, residual, monoCOM)
+  subroutine monolis_optimize_parallel_nnls_R_with_sparse_solution(A, b, x, m, n_loc, max_iter, tol, residual, comm)
     implicit none
-    !> [in] 行列
+    !> [in] 行列（大きさ m x n_loc）
     real(kdouble), intent(in) :: A(:,:)
-    !> [in] 右辺ベクトル
+    !> [in] 右辺ベクトル（大きさ n_loc）
     real(kdouble), intent(in) :: b(:)
-    !> [out] 解ベクトル
+    !> [out] 解ベクトル（大きさ n_loc）
     real(kdouble), intent(out) :: x(:)
-    !> [in] 行列の大きさ
+    !> [in] 行列の大きさ（行数）
     integer(kint), intent(in) :: m
-    !> [in] 行列の大きさ
-    integer(kint), intent(in) :: n
+    !> [in] 行列の大きさ（列数）
+    integer(kint), intent(in) :: n_loc
     !> [in] 最大反復回数
     integer(kint), intent(in) :: max_iter
     !> [out] 収束判定閾値
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    !> [in] COM 構造体
-    type(monolis_COM), intent(in) :: monoCOM
+    !> [in] CMPI コミュニケータ
+    integer(kint), intent(in) :: comm
     integer(kint) :: idx(1), iter, p, i, in
     integer(kint) :: comm_self
     real(kdouble) :: r0_norm, r_norm, res
@@ -39,6 +39,7 @@ contains
     real(kdouble), allocatable :: c(:)
     real(kdouble), allocatable :: w_z(:)
     logical, allocatable :: is_nonzero(:)
+    logical :: is_converge
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
@@ -46,9 +47,15 @@ contains
     call monolis_alloc_L_1d(is_nonzero, n)
 
     !> 収束判定のためのノルム計算
-    call monolis_get_l2_norm_R(m, b, r0_norm)
+    r0_norm = 0.0d0
+    do i = 1, m
+      r0_norm = r0_norm + b(i)*b(i)
+    enddo
+    call monolis_allreduce_R1(r0_norm, monolis_mpi_sum, comm)
+    r0_norm = sqrt(r0_norm)
 
     is_nonzero = .false.
+    is_converge = .false.
     r = b
     x = 0.0d0
 
@@ -99,7 +106,12 @@ contains
 
       !> 残差を計算する
       r = b - matmul(A_z, w_z)
-      call monolis_get_l2_norm_R(m, r, r_norm)
+      r_norm = 0.0d0
+      do i = 1, n_loc
+        r_norm = r_norm + b(i)*b(i)
+      enddo
+      call monolis_allreduce_R1(r_norm, monolis_mpi_sum, comm)
+      r_norm = sqrt(r_norm)
 
       call monolis_dealloc_R_2d(A_z)
       call monolis_dealloc_R_2d(Q_z)
@@ -109,11 +121,18 @@ contains
 
 !write(*,*)"r_norm/r0_norm", r_norm/r0_norm
       if(all(is_nonzero)) exit
-      if(r_norm/r0_norm < tol) exit
+      if(r_norm/r0_norm < tol)then
+        is_converge = .true.
+        exit
+      endif
     enddo
 
-    call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
-
+    if(.not. is_converge)then
+      call monolis_std_error_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
+      call monolis_std_error_string("Residual is not less than the threshold")
+      call monolis_std_error_stop()
+    endif
+ 
     call monolis_dealloc_R_1d(r)
     call monolis_dealloc_R_1d(s)
     call monolis_dealloc_L_1d(is_nonzero)
@@ -150,6 +169,7 @@ contains
     real(kdouble), allocatable :: c(:)
     real(kdouble), allocatable :: w_z(:)
     logical, allocatable :: is_nonzero(:)
+    logical :: is_converge
 
     !> メモリの確保
     call monolis_alloc_R_1d(r, m)
@@ -160,6 +180,7 @@ contains
     call monolis_get_l2_norm_R(m, b, r0_norm)
 
     is_nonzero = .false.
+    is_converge = .false.
     r = b
     x = 0.0d0
 
@@ -220,10 +241,19 @@ contains
 
 !write(*,*)"r_norm/r0_norm", r_norm/r0_norm
       if(all(is_nonzero)) exit
-      if(r_norm/r0_norm < tol) exit
+      if(r_norm/r0_norm < tol)then
+        is_converge = .true.
+        exit
+      endif
     enddo
 
     call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
+
+    if(.not. is_converge)then
+      call monolis_std_error_string("monolis_optimize_nnls_R_with_sparse_solution")
+      call monolis_std_error_string("Residual is not less than the threshold")
+      call monolis_std_error_stop()
+    endif
 
     call monolis_dealloc_R_1d(r)
     call monolis_dealloc_R_1d(s)
