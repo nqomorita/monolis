@@ -110,7 +110,7 @@ contains
       r = b - matmul(A_z, w_z)
       r_norm = 0.0d0
       do i = 1, n_loc
-        r_norm = r_norm + b(i)*b(i)
+        r_norm = r_norm + r(i)*r(i)
       enddo
       call monolis_allreduce_R1(r_norm, monolis_mpi_sum, comm)
       r_norm = sqrt(r_norm)
