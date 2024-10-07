@@ -94,15 +94,7 @@ contains
         in = in + 1
         x(i) = w_z(in)
       enddo
-
-      !> x を更新
-      in = 0
-      do i = 1, n
-        if(.not. is_nonzero(i)) cycle
-        in = in + 1
-        x(i) = w_z(in)
-      enddo
-
+      
       !> 解の中で値が負の要素の非零指定を解除する
       in = 0
       do i = 1, n_loc
