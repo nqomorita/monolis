@@ -14,6 +14,7 @@ contains
     real(kdouble) :: A(4,2)
     real(kdouble) :: b(4)
     real(kdouble) :: x(2)
+    integer(kint) :: comm
 
     call monolis_std_global_log_string("monolis_optimize_nnls")
     call monolis_std_global_log_string("monolis_optimize_nnls_with_sparse_solution")
@@ -82,6 +83,31 @@ contains
 
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 6a", x(1), 0.0d0)
     call monolis_test_check_eq_R1("monolis_optimize_nnls_test 6b", x(2), 0.0d0)
+
+    comm = monolis_mpi_get_global_comm()
+
+    A = 0.0d0
+
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      A(1,1) = 1.0d0; A(1,2) = 1.0d0;
+      A(2,1) = 1.0d0; A(2,2) = 1.0d0;
+      A(3,1) = 1.0d0; A(3,2) = 1.0d0;
+      A(4,1) = 1.0d0; A(4,2) = 1.0d0;
+    else
+      A(1,1) = 1.0d0; A(1,2) = 1.0d0;
+      A(2,1) = 1.0d0; A(2,2) = 1.0d0;
+      A(3,1) = 1.0d0; A(3,2) = 1.0d0;
+      A(4,1) = 1.0d0; A(4,2) = 1.0d0;
+    endif
+
+    b(1) = 1.0d0
+    b(2) = 1.0d0
+    b(3) = 1.0d0
+    b(4) = 1.0d0
+
+    tol = 1.0d-6
+    call monolis_optimize_parallel_nnls_R_with_sparse_solution(A, b, x, 4, 2, max_iter, tol, residual, comm)
+
   end subroutine monolis_optimize_nnls_test
 
 end module mod_monolis_opt_nnls_test
