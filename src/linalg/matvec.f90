@@ -71,14 +71,18 @@ contains
 
     t1 = monolis_get_time()
 
-    call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    if(monoMAT%NDOF == -1)then
+      call monolis_mpi_update_V_R_main(monoCOM, monoMAT%n_dof_index, X, tcomm)
+    else
+      call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
+    endif
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     elseif(monoMAT%NDOF == 1)then
       call monolis_matvec_11_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     elseif(monoMAT%NDOF == -1)then
-      !call monolis_matvec_arbit_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
+      call monolis_matvec_V_R(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     else
       call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
     endif
@@ -109,14 +113,18 @@ contains
 
     t1 = monolis_get_time()
 
-    call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
+    if(monoMAT%NDOF == -1)then
+      call monolis_mpi_update_V_C_main(monoCOM, monoMAT%n_dof_index, X, tcomm)
+    else
+      call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
+    endif
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     elseif(monoMAT%NDOF == 1)then
       call monolis_matvec_11_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     elseif(monoMAT%NDOF == -1)then
-      !call monolis_matvec_arbit_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
+      call monolis_matvec_V_C(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     else
       call monolis_matvec_nn_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y, monoMAT%NDOF)
     endif
@@ -124,6 +132,128 @@ contains
     t2 = monolis_get_time()
     tspmv = tspmv + t2 - t1
   end subroutine monolis_matvec_product_main_C
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、可変ブロック）
+  subroutine monolis_matvec_V_R(N, n_dof_list, n_dof_index, n_dof_index2, index, item, A, X, Y)
+    implicit none
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] ブロックサイズのリスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 1 ブロックの自由度配列（index 型の圧縮形式）
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] 1 ブロックの自由度配列（index 型の圧縮形式、ブロック自由度の 2 乗値）
+    integer(kint), intent(in) :: n_dof_index2(:)
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    real(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n_dof
+    real(kdouble), allocatable :: XT(:), YT(:)
+
+    max_dof = maxval(n_dof_list)
+    call monolis_alloc_R_1d(XT, max_dof)
+    call monolis_alloc_R_1d(YT, max_dof)
+
+!$omp parallel default(none) &
+!$omp & shared(A, Y, X, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
+!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp do
+    do i = 1, N
+      YT = 0.0d0
+      jS = index(i) + 1
+      jE = index(i + 1)
+      do j = jS, jE
+        in = item(j)
+        n_dof = n_dof_list(in)
+        kn = n_dof_index(in)
+        do k = 1, n_dof
+          XT(k) = X(kn+k)
+        enddo
+        kn = n_dof_index2(in)
+        do k = 1, n_dof
+          do l = 1, n_dof
+            YT(k) = YT(k) + A(kn+n_dof*(k-1)+l) * XT(l)
+          enddo
+        enddo
+      enddo
+      kn = n_dof_index(i)
+      do k = 1, n_dof
+        Y(kn+k) = YT(k)
+      enddo
+    enddo
+!$omp end do
+!$omp end parallel
+  end subroutine monolis_matvec_V_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（複素数型、可変ブロック）
+  subroutine monolis_matvec_V_C(N, n_dof_list, n_dof_index, n_dof_index2, index, item, A, X, Y)
+    implicit none
+    !> [in] 行列サイズ
+    integer(kint), intent(in) :: N
+    !> [in] ブロックサイズのリスト
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 1 ブロックの自由度配列（index 型の圧縮形式）
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] 1 ブロックの自由度配列（index 型の圧縮形式、ブロック自由度の 2 乗値）
+    integer(kint), intent(in) :: n_dof_index2(:)
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in] 行列成分
+    complex(kdouble), intent(in) :: A(:)
+    !> [in] 右辺ベクトル
+    complex(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    complex(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n_dof
+    complex(kdouble), allocatable :: XT(:), YT(:)
+
+    max_dof = maxval(n_dof_list)
+    call monolis_alloc_C_1d(XT, max_dof)
+    call monolis_alloc_C_1d(YT, max_dof)
+
+!$omp parallel default(none) &
+!$omp & shared(A, Y, X, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
+!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp do
+    do i = 1, N
+      YT = 0.0d0
+      jS = index(i) + 1
+      jE = index(i + 1)
+      do j = jS, jE
+        in = item(j)
+        n_dof = n_dof_list(in)
+        kn = n_dof_index(in)
+        do k = 1, n_dof
+          XT(k) = X(kn+k)
+        enddo
+        kn = n_dof_index2(in)
+        do k = 1, n_dof
+          do l = 1, n_dof
+            YT(k) = YT(k) + A(kn+n_dof*(k-1)+l) * XT(l)
+          enddo
+        enddo
+      enddo
+      kn = n_dof_index(i)
+      do k = 1, n_dof
+        Y(kn+k) = YT(k)
+      enddo
+    enddo
+!$omp end do
+!$omp end parallel
+  end subroutine monolis_matvec_V_C
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、nxn ブロック）

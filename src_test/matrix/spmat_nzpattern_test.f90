@@ -213,7 +213,7 @@ contains
 
     call monolis_initialize(monolis)
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R &
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_R &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)
 
     call monolis_test_check_eq_I1("monolis_get_nzp_by_simple_mesh_with_arbit_dof_R_test 1", monolis%MAT%N, 6)
@@ -334,7 +334,7 @@ contains
 
     call monolis_initialize(monolis)
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C &
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_C &
       & (monolis, n_node, n_base, n_dof_list, n_elem, elem)
 
     call monolis_test_check_eq_I1("monolis_get_nzp_by_simple_mesh_with_arbit_dof_C_test 1", monolis%MAT%N, 6)

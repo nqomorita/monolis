@@ -58,106 +58,18 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_main
 
   !> @ingroup dev_matrix
-  !> 節点グラフから疎行列パターンを決定（任意節点自由度、メイン関数）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main( &
-    MAT, n_node, n_dof_list, index, item)
+  !> 節点数 index の作成
+  subroutine monolis_get_n_dof_index(MAT, n_dof_list)
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(inout) :: MAT
-    !> [in] 節点数
-    integer(kint), intent(in) :: n_node
-    !> [in] 自由度リスト
-    integer(kint), intent(in) :: n_dof_list(:)
-    !> [in] index 配列
-    integer(kint), intent(in) :: index(:)
-    !> [in] item 配列
-    integer(kint), intent(in) :: item(:)
-    integer(kint) :: i, in, j, jn, nz, jS, jE, k, kE, kS, l
-    integer(kint) :: total_dof, ncol, nrow
-    integer(kint), allocatable :: n_dof_index(:)
-
-    total_dof = 0
-    do i = 1, n_node
-      total_dof = total_dof + n_dof_list(i)
-    enddo
-
-    call monolis_alloc_I_1d(n_dof_index, n_node)
-
-    call monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
-
-    MAT%N = total_dof
-    MAT%NP = total_dof
-    MAT%NDOF = 1
-
-    call monolis_palloc_I_1d(MAT%CSR%index, total_dof + 1)
-
-    !# count nz
-    nz = 0
-    do i = 1, n_node
-      jS = index(i) + 1
-      jE = index(i + 1)
-      nz = nz + n_dof_list(i)*n_dof_list(i)
-      do j = jS, jE
-        jn = item(j)
-        nz = nz +  n_dof_list(i)*n_dof_list(jn)
-      enddo
-    enddo
-
-    call monolis_palloc_I_1d(MAT%CSR%item, nz)
-
-    !# construct index and item
-    in = 0
-    ncol = 0
-    do i = 1, n_node
-      jS = index(i) + 1
-      jE = index(i+1)
-      do k = 1, n_dof_list(i)
-        ncol = ncol + 1
-        nrow = n_dof_list(i)
-        do j = 1, n_dof_list(i)
-          in = in + 1
-          MAT%CSR%item(in) = n_dof_index(i) + j
-        enddo
-        do j = jS, jE
-          jn = item(j)
-          nrow = nrow + n_dof_list(jn)
-          do l = 1, n_dof_list(jn)
-            in = in + 1
-            MAT%CSR%item(in) = n_dof_index(jn) + l
-          enddo
-        enddo
-        MAT%CSR%index(ncol + 1) = MAT%CSR%index(ncol) + nrow
-
-        kS = MAT%CSR%index(ncol) + 1
-        kE = MAT%CSR%index(ncol + 1)
-        call monolis_qsort_I_1d(MAT%CSR%item(kS:kE), 1, kE-kS+1)
-      enddo
-    enddo
-
-    call monolis_palloc_I_1d(MAT%CSC%index, total_dof + 1)
-    call monolis_palloc_I_1d(MAT%CSC%item, nz)
-    call monolis_palloc_I_1d(MAT%CSC%perm, nz)
-
-    call monolis_get_CSC_format(MAT%N, MAT%N, nz, &
-      & MAT%CSR%index, MAT%CSR%item, &
-      & MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
-  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main
-
-  !> @ingroup dev_matrix
-  !> 節点数 index の作成
-  subroutine monolis_get_n_dof_index(n_node, n_dof_list, n_dof_index)
-    implicit none
-    !> [in] 節点数
-    integer(kint), intent(in) :: n_node
     !> [in] 節点自由度リスト
     integer(kint), intent(in) :: n_dof_list(:)
-    !> [in,out] 節点自由度 index
-    integer(kint), intent(inout) :: n_dof_index(:)
     integer(kint) :: i
 
-    do i = 1, n_node - 1
-      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
-    enddo
+!    do i = 1, n_node - 1
+!      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
+!    enddo
   end subroutine monolis_get_n_dof_index
 
   !> @ingroup dev_matrix
@@ -193,6 +105,24 @@ contains
     call monolis_palloc_C_1d(MAT%C%B, NP*NDOF)
     call monolis_palloc_C_1d(MAT%C%X, NP*NDOF)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_C
+
+  !> @ingroup dev_matrix
+  !> 疎行列の行列成分のメモリ確保（実数型）
+  subroutine monolis_alloc_nonzero_pattern_mat_val_V_R(MAT)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
+
+  end subroutine monolis_alloc_nonzero_pattern_mat_val_V_R
+
+  !> @ingroup dev_matrix
+  !> 疎行列の行列成分のメモリ確保（複素数型）
+  subroutine monolis_alloc_nonzero_pattern_mat_val_V_C(MAT)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_mat), intent(inout) :: MAT
+
+  end subroutine monolis_alloc_nonzero_pattern_mat_val_V_C
 
   !> @ingroup dev_matrix
   !> CSR 形式から CSC 形式のデータを生成

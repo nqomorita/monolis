@@ -87,6 +87,12 @@ module mod_monolis_def_mat
     integer(kint) :: NP
     !> 1 ブロックの自由度
     integer(kint) :: NDOF
+    !> 1 ブロックの自由度配列
+    integer(kint), pointer :: n_dof_list(:)
+    !> 1 ブロックの自由度配列（index 型の圧縮形式）
+    integer(kint), pointer :: n_dof_index(:)
+    !> 1 ブロックの自由度配列（index 型の圧縮形式、ブロック自由度の 2 乗値）
+    integer(kint), pointer :: n_dof_index2(:)
     !> 行列構造体（実数型）
     type(monolis_mat_val_R) :: R
     !> 行列構造体（複素数型）
@@ -111,6 +117,10 @@ contains
     monoMAT%N = 0
     monoMAT%NP = 0
     monoMAT%NDOF = 0
+
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_list)
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_index)
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_index2)
 
     call monolis_mat_initialize_val_R(monoMAT%R)
     call monolis_mat_initialize_val_C(monoMAT%C)
@@ -195,6 +205,10 @@ contains
     monoMAT%N = 0
     monoMAT%NP = 0
     monoMAT%NDOF = 0
+
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_list)
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_index)
+    call monolis_pdealloc_I_1d(monoMAT%n_dof_index2)
 
     call monolis_mat_finalize_val_R(monoMAT%R)
     call monolis_mat_finalize_val_C(monoMAT%C)
