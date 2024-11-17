@@ -10,6 +10,7 @@ module mod_monolis_solver
   use mod_monolis_spmat_nonzero_pattern_util
   use mod_monolis_spmat_nonzero_pattern
   use mod_monolis_spmat_copy
+  use mod_monolis_spmat_convert_sym
   use mod_monolis_inner_product
   use mod_monolis_converge
   use mod_monolis_matvec
