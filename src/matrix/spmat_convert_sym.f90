@@ -131,8 +131,9 @@ contains
     type(monolis_COM), intent(inout) :: com
     integer(kint) :: n_send, n_recv
     integer(kint) :: i, in, j, jn, jS, jE, k, kS, kE, kn, km, m, comm_size, n_dof
-    integer(kint) :: mi, mj
+    integer(kint) :: mi, mj, ki, kj, m1, m2
     real(kdouble) :: tcomm
+    integer(kint), allocatable :: perm(:), vertex_id_temp(:)
     integer(kint), allocatable :: vertex_id(:)
     integer(kint), allocatable :: n_send_list_all(:)
     integer(kint), allocatable :: n_recv_list_all(:)
@@ -140,6 +141,7 @@ contains
     integer(kint), allocatable :: recv_n_dof(:), recv_n_dof_tmp(:)
     integer(kint), allocatable :: send_id(:), recv_id(:)
     real(kdouble), allocatable :: send_val(:), recv_val(:)
+    real(kdouble), allocatable :: A1(:,:), A2(:,:), A3(:,:)
 
     !> 先にグローバル ID を振り直しておく
     n_dof = MAT%NDOF
@@ -239,32 +241,41 @@ contains
     call monolis_SendRecv_V_R1(com, n_dof*n_dof*send_n_dof, n_dof*n_dof*recv_n_dof, send_val, recv_val)
 
     !> データ更新パート
+    call monolis_alloc_R_2d(A1, n_dof, n_dof)
+    call monolis_alloc_R_2d(A2, n_dof, n_dof)
+    call monolis_alloc_R_2d(A3, n_dof, n_dof)
+
+    call monolis_alloc_I_1d(perm, mat%NP)
+    call monolis_alloc_I_1d(vertex_id_temp, mat%NP)
+    vertex_id_temp = vertex_id
+    call monolis_get_sequence_array_I(perm, mat%NP, 1, 1)
+    call monolis_qsort_I_2d(vertex_id_temp, perm, 1, mat%NP)
+
+    k = 0
     do i = 1, n_recv
       mi = recv_id(2*i-1)
       mj = recv_id(2*i)
-
-      jS = mat%CSR%index(i) + 1
-      jE = mat%CSR%index(i + 1)
+      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mi, ki)
+      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mj, kj)
+      jS = mat%CSC%index(kj) + 1
+      jE = mat%CSC%index(kj + 1)
       aa:do j = jS, jE
-        in = mat%CSR%item(j)
-        A1 = 0.0d0
-        if(i < in)then
-          cycle aa
-        elseif(i == in)then
-          call get_block_matrix(mat, n_dof, j, A1)
-          call get_sym_matrix(n_dof, A1, transpose(A1), A2)
-          call set_block_matrix(mat, n_dof, j, A2)
-        elseif(i > in)then
+        in = mat%CSC%item(j)
+        call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, in, kn)
+        if(ki == kn)then
+          k = k + 1
+          do m1 = 1, n_dof
+          do m2 = 1, n_dof
+            A1(m2,m1) = recv_val(n_dof*n_dof*(k-1) + n_dof*(m1-1) + m2)
+          enddo
+          enddo
           jn = mat%CSC%perm(j)
-          call get_block_matrix(mat, n_dof, j, A1)
           call get_block_matrix(mat, n_dof, jn, A2)
-          call get_sym_matrix(n_dof, A1, transpose(A2), A3)
-          call set_block_matrix(mat, n_dof, j, A3)
-          call set_block_matrix(mat, n_dof, jn, transpose(A3))
+          call get_sym_matrix(n_dof, A1, A2, A3)
+          call set_block_matrix(mat, n_dof, jn, A3)
         endif
       enddo aa
     enddo
-
   end subroutine monolis_matrix_convert_to_symmetric_outer_R
 
 end module mod_monolis_spmat_convert_sym
