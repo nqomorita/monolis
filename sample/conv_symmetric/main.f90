@@ -42,9 +42,13 @@ program main
 
     call monolis_initialize(mat)
 
-    call monolis_com_initialize_by_parted_files(com, &
-      monolis_mpi_get_global_comm(), &
-      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+    if(monolis_mpi_get_global_comm_size() > 1)then
+      call monolis_com_initialize_by_parted_files(com, &
+        monolis_mpi_get_global_comm(), &
+        MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+    else
+      call monolis_com_initialize_by_self(com)
+    endif
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 2, n_elem, elem)
 
@@ -78,24 +82,64 @@ program main
     call monolis_std_log_string("monolis_matrix_convert_to_symmetric_outer_R")
     call monolis_matrix_convert_to_symmetric_outer_R(mat%MAT, com)
 
-    do i = 1, mat%MAT%N
-      jS = mat%MAT%CSR%index(i) + 1
-      jE = mat%MAT%CSR%index(i + 1)
-      do j = jS, jE
-        in = mat%MAT%CSR%item(j)
-        nid(1) = global_nid(i)
-        nid(2) = global_nid(in)
-        if(mat%MAT%N < in)then
-          !> no update region
-            ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 1.0d0
-            if(ans /= mat%MAT%R%A(4*j-3)) stop "A1"
-            ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 2.0d0
-            if(ans /= mat%MAT%R%A(4*j-2)) stop "A2"
-            ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 3.0d0
-            if(ans /= mat%MAT%R%A(4*j-1)) stop "A3"
-            ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 4.0d0
-            if(ans /= mat%MAT%R%A(4*j  )) stop "A4"
-        else
+    if(monolis_mpi_get_global_comm_size() == 1)then
+      do i = 1, mat%MAT%N
+        jS = mat%MAT%CSR%index(i) + 1
+        jE = mat%MAT%CSR%index(i + 1)
+        do j = jS, jE
+          in = mat%MAT%CSR%item(j)
+          nid(1) = global_nid(i)
+          nid(2) = global_nid(in)
+          if(mat%MAT%N < in)then
+            !> no update region
+              ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 1.0d0
+              if(ans /= mat%MAT%R%A(4*j-3)) stop "A1"
+              ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 2.0d0
+              if(ans /= mat%MAT%R%A(4*j-2)) stop "A2"
+              ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 3.0d0
+              if(ans /= mat%MAT%R%A(4*j-1)) stop "A3"
+              ans = 10000.0d0*nid(1) + 100.0d0*nid(2) + 4.0d0
+              if(ans /= mat%MAT%R%A(4*j  )) stop "A4"
+          else
+            !> update region
+            if(i == in)then
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
+              if(ans /= mat%MAT%R%A(4*j-3)) stop "B1"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
+              if(ans /= mat%MAT%R%A(4*j-2)) stop "B2"
+              if(ans /= mat%MAT%R%A(4*j-1)) stop "B3"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
+              if(ans /= mat%MAT%R%A(4*j  )) stop "B4"
+            elseif(i < in)then
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
+              if(ans /= mat%MAT%R%A(4*j-3)) stop "C1"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
+              if(ans /= mat%MAT%R%A(4*j-2)) stop "C2"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
+              if(ans /= mat%MAT%R%A(4*j-1)) stop "C3"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 4.0d0
+              if(ans /= mat%MAT%R%A(4*j  )) stop "C4"
+            elseif(in < i)then
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
+              if(ans /= mat%MAT%R%A(4*j-3)) stop "D1"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
+              if(ans /= mat%MAT%R%A(4*j-2)) stop "D2"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
+              if(ans /= mat%MAT%R%A(4*j-1)) stop "D3"
+              ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 4.0d0
+              if(ans /= mat%MAT%R%A(4*j  )) stop "D4"
+            endif
+          endif
+        enddo
+      enddo
+    else
+      do i = 1, mat%MAT%N
+        jS = mat%MAT%CSR%index(i) + 1
+        jE = mat%MAT%CSR%index(i + 1)
+        do j = jS, jE
+          in = mat%MAT%CSR%item(j)
+          nid(1) = global_nid(i)
+          nid(2) = global_nid(in)
           !> update region
           if(i == in)then
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
@@ -124,9 +168,9 @@ program main
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 4.0d0
             if(ans /= mat%MAT%R%A(4*j  )) stop "D4"
           endif
-        endif
+        enddo
       enddo
-    enddo
+    endif
 
     call monolis_std_log_string("monolis_matrix_convert_to_symmetric_inner_R PASS")
     call monolis_std_log_string("monolis_matrix_convert_to_symmetric_outer_R PASS")
