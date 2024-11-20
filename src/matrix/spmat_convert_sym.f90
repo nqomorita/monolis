@@ -4,6 +4,11 @@ module mod_monolis_spmat_convert_sym
   use mod_monolis_def_struc
 
   implicit none
+  private
+
+  public :: monolis_matrix_convert_to_symmetric_R
+  public :: monolis_matrix_convert_to_symmetric_inner_R
+  public :: monolis_matrix_convert_to_symmetric_outer_R
 
 contains
 
