@@ -52,23 +52,26 @@ program main
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 2, n_elem, elem)
 
+!in = monolis_mpi_get_global_my_rank()
+!write(100+in,*)"global_nid", global_nid
+
     do i = 1, n_elem
       eid = elem(:,i)
       nid(1) = global_nid(elem(1,i))
       nid(2) = global_nid(elem(2,i))
-      if(eid(1) == eid(2))then
-        val = 10000.0d0*nid(1) + 100.0d0*nid(2)
+      if(nid(1) == nid(2))then
+        val = 10000.0d0*dble(nid(1)) + 100.0d0*dble(nid(2))
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val + 1.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 2, val + 2.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 1, val + 2.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 2, val + 3.0d0)
-      elseif(eid(1) < eid(2))then
-        val = 10000.0d0*nid(1) + 100.0d0*nid(2)
+      elseif(nid(1) < nid(2))then
+        val = 10000.0d0*dble(nid(1)) + 100.0d0*dble(nid(2))
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val + 1.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 2, val + 2.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 1, val + 3.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 2, val + 4.0d0)
-        val = 10000.0d0*nid(2) + 100.0d0*nid(1)
+        val = 10000.0d0*dble(nid(2)) + 100.0d0*dble(nid(1))
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(2), eid(1), 1, 1, val + 1.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(2), eid(1), 1, 2, val + 3.0d0)
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(2), eid(1), 2, 1, val + 2.0d0)
@@ -77,7 +80,7 @@ program main
     enddo
 
     call monolis_std_log_string("monolis_matrix_convert_to_symmetric_inner_R")
-    call monolis_matrix_convert_to_symmetric_inner_R(mat%MAT)
+    call monolis_matrix_convert_to_symmetric_inner_R(mat%MAT, com)
 
     call monolis_std_log_string("monolis_matrix_convert_to_symmetric_outer_R")
     call monolis_matrix_convert_to_symmetric_outer_R(mat%MAT, com)
@@ -133,7 +136,7 @@ program main
         enddo
       enddo
     else
-      do i = 1, mat%MAT%N
+      do i = 1, com%n_internal_vertex
         jS = mat%MAT%CSR%index(i) + 1
         jE = mat%MAT%CSR%index(i + 1)
         do j = jS, jE
@@ -141,32 +144,32 @@ program main
           nid(1) = global_nid(i)
           nid(2) = global_nid(in)
           !> update region
-          if(i == in)then
+          if(nid(1) == nid(2))then
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
-            if(ans /= mat%MAT%R%A(4*j-3)) stop "B1"
+            if(ans /= mat%MAT%R%A(4*j-3)) stop "E1"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
-            if(ans /= mat%MAT%R%A(4*j-2)) stop "B2"
-            if(ans /= mat%MAT%R%A(4*j-1)) stop "B3"
+            if(ans /= mat%MAT%R%A(4*j-2)) stop "E2"
+            if(ans /= mat%MAT%R%A(4*j-1)) stop "E3"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
-            if(ans /= mat%MAT%R%A(4*j  )) stop "B4"
-          elseif(i < in)then
+            if(ans /= mat%MAT%R%A(4*j  )) stop "E4"
+          elseif(nid(1) < nid(2))then
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
-            if(ans /= mat%MAT%R%A(4*j-3)) stop "C1"
+            if(ans /= mat%MAT%R%A(4*j-3)) stop "F1"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
-            if(ans /= mat%MAT%R%A(4*j-2)) stop "C2"
+            if(ans /= mat%MAT%R%A(4*j-2)) stop "F2"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
-            if(ans /= mat%MAT%R%A(4*j-1)) stop "C3"
+            if(ans /= mat%MAT%R%A(4*j-1)) stop "F3"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 4.0d0
-            if(ans /= mat%MAT%R%A(4*j  )) stop "C4"
-          elseif(in < i)then
+            if(ans /= mat%MAT%R%A(4*j  )) stop "F4"
+          elseif(nid(1) > nid(2))then
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 1.0d0
-            if(ans /= mat%MAT%R%A(4*j-3)) stop "D1"
+            if(ans /= mat%MAT%R%A(4*j-3)) stop "G1"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 3.0d0
-            if(ans /= mat%MAT%R%A(4*j-2)) stop "D2"
+            if(ans /= mat%MAT%R%A(4*j-2)) stop "G2"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 2.0d0
-            if(ans /= mat%MAT%R%A(4*j-1)) stop "D3"
+            if(ans /= mat%MAT%R%A(4*j-1)) stop "G3"
             ans = 5050.0d0*nid(1) + 5050.0d0*nid(2) + 4.0d0
-            if(ans /= mat%MAT%R%A(4*j  )) stop "D4"
+            if(ans /= mat%MAT%R%A(4*j  )) stop "G4"
           endif
         enddo
       enddo

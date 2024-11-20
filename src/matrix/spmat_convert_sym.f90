@@ -16,31 +16,40 @@ contains
     !> [in,out] monolis 構造体
     type(monolis_COM), intent(inout) :: com
 
-    call monolis_matrix_convert_to_symmetric_inner_R(monolis%MAT)
+    call monolis_matrix_convert_to_symmetric_inner_R(monolis%MAT, com)
     call monolis_matrix_convert_to_symmetric_outer_R(monolis%MAT, com)
   end subroutine monolis_matrix_convert_to_symmetric_R
 
   !> @ingroup matrix
   !> 行列を対称行列に変換（内部自由度）
-  subroutine monolis_matrix_convert_to_symmetric_inner_R(mat)
+  subroutine monolis_matrix_convert_to_symmetric_inner_R(mat, com)
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(inout) :: mat
-    integer(kint) :: i, j, in, jn, n_dof, n_dof_2, jS, jE
+    !> [in,out] monolis 構造体
+    type(monolis_COM), intent(inout) :: com
+    integer(kint) :: i, j, in, jn, n_dof, n_dof_2, jS, jE, N
     real(kdouble), allocatable :: A1(:,:), A2(:,:), A3(:,:)
 
     n_dof = mat%NDOF
     n_dof_2 = n_dof*n_dof
 
+    if(monolis_mpi_get_local_comm_size(com%comm) > 1)then
+      N = com%n_internal_vertex
+    else
+      N = mat%NP
+    endif
+
     call monolis_alloc_R_2d(A1, n_dof, n_dof)
     call monolis_alloc_R_2d(A2, n_dof, n_dof)
     call monolis_alloc_R_2d(A3, n_dof, n_dof)
 
-    do i = 1, mat%N
+    do i = 1, N
       jS = mat%CSR%index(i) + 1
       jE = mat%CSR%index(i + 1)
       aa:do j = jS, jE
         in = mat%CSR%item(j)
+        if(in > N) cycle
         A1 = 0.0d0
         if(i < in)then
           cycle aa
@@ -147,7 +156,7 @@ contains
     n_dof = MAT%NDOF
     comm_size = monolis_mpi_get_local_comm_size(com%comm)
     call monolis_alloc_I_1d(vertex_id, mat%NP)
-    call monolis_generate_global_vertex_id(mat%N, mat%NP, vertex_id, com)
+    call monolis_generate_global_vertex_id(com%n_internal_vertex, mat%NP, vertex_id, com)
 
     !> RECV の情報を見て、どの領域に送るかがわかる
     call monolis_alloc_I_1d(n_send_list_all, comm_size)
@@ -165,7 +174,7 @@ contains
         kE = mat%CSC%index(jn + 1)
         do k = kS, kE
           kn = mat%CSC%item(k)
-          if(kn < mat%N)then
+          if(kn <= com%n_internal_vertex)then
             n_send_list_all(in) = n_send_list_all(in) + 1
             n_send = n_send + 1
           endif
@@ -202,11 +211,11 @@ contains
         kE = mat%CSC%index(jn + 1)
         do k = kS, kE
           kn = mat%CSC%item(k)
-          km = mat%CSC%perm(kn)
-          if(kn < mat%N)then
+          km = mat%CSC%perm(k)
+          if(kn <= com%n_internal_vertex)then
             n_send = n_send + 1
-            send_id(2*n_send - 1) = vertex_id(jn)
-            send_id(2*n_send    ) = vertex_id(kn)
+            send_id(2*n_send - 1) = vertex_id(kn)
+            send_id(2*n_send    ) = vertex_id(jn)
             do m = 1, n_dof*n_dof
               send_val(n_dof*n_dof*(n_send - 1) + m) = mat%R%A(n_dof*n_dof*(km - 1) + m)
             enddo
@@ -255,24 +264,22 @@ contains
     do i = 1, n_recv
       mi = recv_id(2*i-1)
       mj = recv_id(2*i)
-      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mi, ki)
-      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mj, kj)
-      jS = mat%CSC%index(kj) + 1
-      jE = mat%CSC%index(kj + 1)
+      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mi, ki); ki = perm(ki)
+      call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, mj, kj); kj = perm(kj)
+      jS = mat%CSR%index(kj) + 1
+      jE = mat%CSR%index(kj + 1)
       aa:do j = jS, jE
-        in = mat%CSC%item(j)
-        call monolis_bsearch_I(vertex_id_temp, 1, mat%NP, in, kn)
-        if(ki == kn)then
+        in = mat%CSR%item(j)
+        if(mi == vertex_id(in))then
           k = k + 1
           do m1 = 1, n_dof
           do m2 = 1, n_dof
             A1(m2,m1) = recv_val(n_dof*n_dof*(k-1) + n_dof*(m1-1) + m2)
           enddo
           enddo
-          jn = mat%CSC%perm(j)
-          call get_block_matrix(mat, n_dof, jn, A2)
+          call get_block_matrix(mat, n_dof, j, A2)
           call get_sym_matrix(n_dof, A1, A2, A3)
-          call set_block_matrix(mat, n_dof, jn, A3)
+          call set_block_matrix(mat, n_dof, j, A3)
         endif
       enddo aa
     enddo
