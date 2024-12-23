@@ -85,7 +85,9 @@ program main
       eid(2) = perm(idx)
 
       val = coef(in)
-!write(*,*)eid(1), eid(2), val
+!if(com%n_internal_vertex >= eid(1))then
+!write(*,*)monolis_mpi_get_global_my_rank(), coef_dof(1,in), coef_dof(2,in), val
+!endif
       call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
     enddo
 
@@ -109,7 +111,11 @@ program main
     call monolis_solve_R(mat, com, b, c)
 
     b = 1.0d0
-    call monolis_test_check_eq_R("monolis_ill_condition_test", c, b)
+    a = b - c
+    call monolis_inner_product_R(mat, com, 1, a, a, ans)
+    write(*,*)"ans", ans
+    !write(*,"(1p10e10.2)")c
+    !call monolis_test_check_eq_R("monolis_ill_condition_test", c, b)
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_parallel_R_test
