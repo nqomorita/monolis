@@ -130,6 +130,7 @@ precond.f90
 SRC_ITER = \
 CG.f90 \
 BiCGSTAB.f90 \
+BiCGSTAB_N128.f90 \
 BiCGSTAB_noprec.f90 \
 GropCG.f90 \
 PipeCG.f90 \
