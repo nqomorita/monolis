@@ -92,8 +92,8 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    do iter = 1, 8
-    do prec = 0, 2
+    do iter = monolis_iter_CG, monolis_iter_BiCGSTAB_N128
+    do prec = monolis_prec_NONE, monolis_prec_SOR
       a = 0.0d0
       b = c
 
@@ -233,8 +233,8 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    do iter = 9, 9
-    do prec = 0, 2
+    do iter = monolis_iter_COCG, monolis_iter_COCG
+    do prec = monolis_prec_NONE, monolis_prec_SOR
       a = (0.0d0, 0.0d0)
       b = c
 
