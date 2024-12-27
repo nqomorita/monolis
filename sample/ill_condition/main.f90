@@ -105,7 +105,8 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    call monolis_set_method(mat, monolis_iter_BiCGSTAB)
+    call monolis_set_method(mat, monolis_iter_BiCGSTAB_N128)
+    !call monolis_set_method(mat, monolis_iter_BiCGSTAB)
     call monolis_set_precond(mat, monolis_prec_DIAG)
 
     call monolis_solve_R(mat, com, b, c)

@@ -239,7 +239,7 @@ contains
     real(kdouble), optional, intent(inout) :: tdotp
     !> [inout] 通信時間
     real(kdouble), optional, intent(inout) :: tcomm
-    type(monolis_R_N128) :: sum_N128
+    type(monolis_R_N128) :: sum_N128, a
     integer(kint) :: i
     !real(kdouble) :: rh, rl
     real(kdouble) :: t1, t2, t3
@@ -247,19 +247,18 @@ contains
     call monolis_std_debug_log_header("monolis_inner_product_main_R_N128")
 
     t1 = monolis_get_time()
-    sum = 0.0d0
+    sum_N128 = monolis_conv_R_to_R_N128(0.0d0)
 !$omp parallel default(none) &
 !$omp & shared(X, Y, sum) &
 !$omp & firstprivate(n, n_dof) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
     do i = 1, n * n_dof
-      sum = sum + X(i)*Y(i)
+      a = monolis_conv_R_to_R_N128(X(i)*Y(i))
+      call monolis_add_R_N128(sum_N128, a, sum_N128)
     enddo
 !$omp end do
 !$omp end parallel
-
-    sum_N128 = monolis_conv_R_to_R_N128(sum)
 
     t2 = monolis_get_time()
     call monolis_allreduce_R1_N128(sum_N128, monolis_mpi_sum, monoCOM%comm)
