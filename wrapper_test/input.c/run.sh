@@ -18,7 +18,7 @@ mpicc -I../../include \
 
 mpif90 -I../../include \
 -o solver main.o \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
 
 echo "serial"
 
