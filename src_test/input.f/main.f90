@@ -95,16 +95,20 @@ program main
       call monolis_com_n_vertex_list(com%n_internal_vertex, com%comm, vtxdist)
       do i = 1, com%n_internal_vertex
         shift = vtxdist(monolis_mpi_get_global_my_rank() + 1)
-        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i), 2.0d0)
-        if(shift + i - 1 >  0) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i - 1), 1.0d0)
-        if(shift + i + 1 < 10) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i + 1), 1.0d0)
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
+          & dense(i,shift + i), 2.0d0)
+        if(shift + i - 1 >  0) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
+          & dense(i,shift + i - 1), 1.0d0)
+        if(shift + i + 1 < 10) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
+          & dense(i,shift + i + 1), 1.0d0)
       enddo
     endif
 
     !> monolis_get_condition_number_R
     call monolis_get_condition_number_R(mat, com, condition_number)
 
-    call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R condition number test", condition_number, condition_number_lanczos)
+    call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R condition number test", &
+      & condition_number, condition_number_lanczos)
 
     call monolis_finalize(mat)
   end subroutine monolis_condition_number_R_test
@@ -250,7 +254,8 @@ program main
 
       call monolis_test_check_eq_R1("monolis_solver_parallel_R_test eigen value", eig_val1(i), eig_val2(j))
 
-      call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
+      call monolis_test_check_eq_R ("monolis_solver_parallel_R_test eigen mode", &
+        & dabs(eig_mode1(:,i)), dabs(eig_mode2(:,j)))
     enddo
 
     call monolis_finalize(mat)
