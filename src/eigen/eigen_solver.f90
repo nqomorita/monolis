@@ -78,7 +78,8 @@ contains
     !> [out] 条件数の推定値
     real(kdouble), intent(out) :: condition_number
     integer(kint) :: scalapack_comm
-    integer(kint) :: N, NT, NDOF
+    integer(kint) :: N, NT, NDOF, i
+    real(kdouble) :: min, max
     real(kdouble), allocatable :: dense(:,:)
     real(kdouble), allocatable :: S(:,:), V(:), D(:,:)
 
@@ -87,6 +88,7 @@ contains
     call monolis_scalapack_comm_initialize(monoCOM%comm, scalapack_comm)
 
     N = monolis%MAT%N
+    if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
     NT = N
     NDOF = monolis%MAT%NDOF
     call monolis_allreduce_I1(NT, monolis_mpi_sum, monoCOM%comm)
@@ -97,7 +99,14 @@ contains
 
     call monolis_scalapack_gesvd_R(NDOF*N, NDOF*NT, dense, S, V, D, monoCOM%comm, scalapack_comm)
     
-    !condition_number
+    min = 1.0d300
+    max = 0.0d0
+    do i = 1, NDOF*NT
+      if(min > dabs(V(i)) .and. dabs(V(i)) > 0.0d0) min = dabs(V(i))
+      if(max < dabs(V(i)) .and. dabs(V(i)) > 0.0d0) max = dabs(V(i))
+    enddo
+
+    condition_number = max/min
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
   end subroutine monolis_get_condition_number_R

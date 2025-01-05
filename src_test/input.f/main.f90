@@ -3,6 +3,7 @@ program main
   use mod_gedatsu
   implicit none
   integer(kint) :: iter, prec
+  real(kdouble) :: condition_number_lanczos
 
   call monolis_global_initialize()
 
@@ -12,9 +13,101 @@ program main
 
   call monolis_solver_parallel_C_test()
 
+  call monolis_condition_number_R_test()
+
   call monolis_global_finalize()
 
   contains
+
+  subroutine monolis_condition_number_R_test()
+    implicit none
+    type(monolis_structure) :: mat !> 疎行列変数
+    type(monolis_com) :: com
+    integer(kint) :: n_node, n_elem, n_base, n_id
+    integer(kint) :: n_coef, eid(2), i, shift
+    real(kdouble) :: val, condition_number
+    character(monolis_charlen) :: fname
+    integer(kint), allocatable :: elem(:,:), global_eid(:), global_nid(:), vtxdist(:)
+    real(kdouble), allocatable :: dense(:,:)
+    real(kdouble), allocatable :: coef(:), node(:,:)
+
+    call monolis_std_log_string("monolis_get_condition_number_R")
+
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+    call monolis_input_node(fname, n_node, node)
+
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
+    call monolis_input_elem(fname, n_elem, n_base, elem)
+
+    if(monolis_mpi_get_global_comm_size() > 1)then
+      fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat.id")
+      call monolis_input_global_id(fname, n_id, global_nid)
+
+      fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id")
+      call monolis_input_global_id(fname, n_id, global_eid)
+    else
+      call monolis_alloc_I_1d(global_eid, n_elem)
+      do i = 1, n_elem
+        global_eid(i) = i
+      enddo
+    endif
+
+    call monolis_initialize(mat)
+
+    call monolis_com_initialize_by_parted_files(com, &
+      monolis_mpi_get_global_comm(), &
+      MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
+
+    open(20, file = "coef.dat", status = "old")
+      read(20,*) n_coef
+      call monolis_alloc_R_1d(coef, n_coef)
+      do i = 1, n_coef
+        read(20,*) coef(i)
+      enddo
+    close(20)
+
+    do i = 1, n_elem
+      eid = elem(:,i)
+      val = coef(global_eid(i))
+      if(eid(1) == eid(2))then
+        call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
+      else
+        call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
+        call monolis_add_scalar_to_sparse_matrix_R(mat, eid(2), eid(1), 1, 1, val)
+      endif
+    enddo
+
+    !> monolis_convert_sparse_matrix_to_dense_matrix_R
+    call monolis_convert_sparse_matrix_to_dense_matrix_R(mat%MAT, com, dense)
+
+    if(monolis_mpi_get_global_comm_size() == 1)then
+      do i = 1, 10
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i), 2.0d0)
+      enddo
+      do i = 1, 9
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i+1), 1.0d0)
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i+1,i), 1.0d0)
+      enddo
+
+    elseif(monolis_mpi_get_global_comm_size() == 3)then
+      call monolis_com_n_vertex_list(com%n_internal_vertex, com%comm, vtxdist)
+      do i = 1, com%n_internal_vertex
+        shift = vtxdist(monolis_mpi_get_global_my_rank() + 1)
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i), 2.0d0)
+        if(shift + i - 1 >  0) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i - 1), 1.0d0)
+        if(shift + i + 1 < 10) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,shift + i + 1), 1.0d0)
+      enddo
+    endif
+
+    !> monolis_get_condition_number_R
+    call monolis_get_condition_number_R(mat, com, condition_number)
+
+    call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R condition number test", condition_number, condition_number_lanczos)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_condition_number_R_test
 
   subroutine monolis_solver_parallel_R_test()
     implicit none
@@ -149,6 +242,8 @@ program main
 
     call monolis_eigen_inverted_standard_lanczos_R &
       & (mat, com, n_get_eigen, 1.0d-6, 100, eig_val2, eig_mode2, is_bc)
+
+    condition_number_lanczos = eig_val1(1)/eig_val1(10)
 
     do i = 1, n_get_eigen
       j = n_get_eigen - i + 1

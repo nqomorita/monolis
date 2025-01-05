@@ -772,6 +772,7 @@ contains
     integer(kint), allocatable :: vertex_id(:)
 
     N = monoMAT%N
+    if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
