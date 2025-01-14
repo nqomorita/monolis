@@ -5,6 +5,7 @@ module mod_monolis_spmat_handler
   use mod_monolis_def_struc
   use mod_monolis_spmat_handler_util
   use mod_monolis_spmat_nonzero_pattern_util
+  use mod_gedatsu
 
   implicit none
 
@@ -377,4 +378,69 @@ contains
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
       & monolis%MAT%ndof, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_C
+
+  !# 密行列から疎行列の取得
+  !> @ingroup matrix
+  !> 密行列から疎行列情報の取得（実数型）
+  subroutine monolis_get_sparse_matrix_from_dense_matrix_R(MAT, n, m, n_dof, dense)
+    implicit none
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(inout) :: MAT
+    integer(kint), intent(in) :: n
+    integer(kint), intent(in) :: m
+    integer(kint), intent(in) :: n_dof
+    real(kdouble), intent(in) :: dense(:,:)
+    !logical, intent(in) :: is_symmetric
+    integer(kint) :: n_elem, n_base
+    integer(kint), allocatable :: elem(:,:), index(:), item(:)
+    integer(kint), allocatable :: nodal_index(:), nodal_item(:)
+
+    !# get nonzero pattern
+    call monolis_get_nonzero_pattern_from_dense(n, n_dof, dense, n_elem, n_base, elem)
+
+    call gedatsu_convert_simple_mesh_to_connectivity_graph(n_elem, n_base, elem, index, item)
+
+    call gedatsu_convert_connectivity_graph_to_nodal_graph(n, n_elem, index, item, nodal_index, nodal_item)
+
+    call monolis_get_nonzero_pattern_by_nodal_graph_main(MAT, n, n_dof, nodal_index, nodal_item)
+
+    call monolis_alloc_nonzero_pattern_mat_val_R(MAT)
+
+    !# set nonzero value
+    call monolis_set_value_from_dense(MAT, n, m, n_dof, dense)
+  end subroutine monolis_get_sparse_matrix_from_dense_matrix_R
+
+  subroutine monolis_set_value_from_dense(MAT, n, m, n_dof, dense)
+    implicit none
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(inout) :: MAT
+    integer(kint), intent(in) :: n
+    integer(kint), intent(in) :: m
+    integer(kint), intent(in) :: n_dof
+    real(kdouble), intent(in) :: dense(:,:)
+    real(kdouble) :: block(n_dof,n_dof)
+    integer(kint) :: i, j, in, jn, im, jm, ip, jp, iq, jq
+
+    do i = 1, m
+    aa:do j = 1, n
+      do in = 1, n_dof
+      do jn = 1, n_dof
+        im = n_dof*(i - 1) + in
+        jm = n_dof*(j - 1) + jn
+        if(dense(jm,im) /= 0.0d0)then
+          do ip = 1, n_dof
+          do jp = 1, n_dof
+            iq = n_dof*(i - 1) + ip
+            jq = n_dof*(j - 1) + jp
+            block(jp,ip) = dense(jq,iq)
+          enddo
+          enddo
+          call monolis_set_block_to_sparse_matrix_main_R(MAT%CSR%index, MAT%CSR%item, MAT%R%A, MAT%ndof, j, i, block)
+          cycle aa
+        endif
+      enddo
+      enddo
+    enddo aa
+    enddo
+  end subroutine monolis_set_value_from_dense
 end module mod_monolis_spmat_handler

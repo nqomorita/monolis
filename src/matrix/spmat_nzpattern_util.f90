@@ -287,4 +287,52 @@ contains
       enddo
     enddo
   end subroutine monolis_get_nodal_graph_by_nonzero_pattern
+  
+  subroutine monolis_get_nonzero_pattern_from_dense(n, n_dof, dense, n_elem, n_base, elem)
+    implicit none
+    integer(kint), intent(in) :: n
+    integer(kint), intent(in) :: n_dof
+    real(kdouble), intent(in) :: dense(:,:)
+    integer(kint) :: n_elem, n_base
+    integer(kint), allocatable :: elem(:,:)
+    integer(kint) :: i, j, in, jn, im, jm
+    
+    n_base = 2
+    n_elem = 0
+
+    do i = 1, n
+    aa:do j = i, n
+      do in = 1, n_dof
+      do jn = 1, n_dof
+        im = n_dof*(i - 1) + in
+        jm = n_dof*(j - 1) + jn
+        if(dense(jm,im) /= 0.0d0)then
+          n_elem = n_elem + 1
+          cycle aa
+        endif
+      enddo
+      enddo
+    enddo aa
+    enddo
+
+    call monolis_alloc_I_2d(elem, n_base, n_elem)
+
+    n_elem = 0
+    do i = 1, n
+    bb:do j = i, n
+      do in = 1, n_dof
+      do jn = 1, n_dof
+        im = n_dof*(i - 1) + in
+        jm = n_dof*(j - 1) + jn
+        if(dense(jm,im) /= 0.0d0)then
+          n_elem = n_elem + 1
+          elem(1,n_elem) = i
+          elem(2,n_elem) = j
+          cycle bb
+        endif
+      enddo
+      enddo
+    enddo bb
+    enddo
+  end subroutine monolis_get_nonzero_pattern_from_dense
 end module mod_monolis_spmat_nonzero_pattern_util

@@ -78,10 +78,11 @@ contains
     integer(kint), intent(in) :: M
     integer(kint), intent(in) :: M_neib
     integer(kint), intent(in) :: NNDOF
-    integer(kint) :: i, NP
+    integer(kint) :: i, NP, n_dof_loc
     real(kdouble) :: tdemv, time
     real(kdouble) :: W(:,:)
     real(kdouble), allocatable :: AW(:,:), WtA(:,:), L(:,:)
+    logical :: is_coarse_E = .false.
 
     !# allocation
     call monolis_alloc_R_2d(AW, NNDOF, M_neib)
@@ -153,6 +154,16 @@ contains
     endif
 
     !> mat section
+    call monolis_matmat_product_main_local_R(monoCOM_deflated_eq_self, monoMAT, M_neib, W, AW, time, time)
+    call monolis_dense_matmul_local_R(M, NNDOF, M_neib, transpose(W), AW, L, tdemv)
+    WtA = transpose(AW)
+
+if(is_coarse_E)then
+    !> sparse block (block size is set to 1 or param?)
+    n_dof_loc = 3
+    call monolis_get_sparse_matrix_from_dense_matrix_R(monoMAT_deflated_eq, M/n_dof_loc, M_neib/n_dof_loc, n_dof_loc, L)
+else
+    !> dense block
     monoMAT_deflated_eq%N = 1
     monoMAT_deflated_eq%NP = NP
     monoMAT_deflated_eq%NDOF = M
@@ -170,10 +181,6 @@ contains
     call monolis_alloc_nonzero_pattern_mat_val_R(monoMAT_deflated_eq)
 
     !# matrix value assign
-    call monolis_matmat_product_main_local_R(monoCOM_deflated_eq_self, monoMAT, M_neib, W, AW, time, time)
-    call monolis_dense_matmul_local_R(M, NNDOF, M_neib, transpose(W), AW, L, tdemv)
-    WtA = transpose(AW)
-
     call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
       & monoMAT_deflated_eq%R%A, M, 1, 1, L(1:M,1:M))
 
@@ -181,6 +188,7 @@ contains
       call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
         & monoMAT_deflated_eq%R%A, M, 1, i + 1, L(1:M, i*M + 1:i*M + M))
     enddo
+endif
   end subroutine deflatedCG_E_initialize
 
   !> @ingroup dev_solver
