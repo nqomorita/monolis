@@ -159,8 +159,9 @@ contains
     WtA = transpose(AW)
 
 if(is_coarse_E)then
-    !> sparse block (block size is set to 1 or param?)
-    n_dof_loc = 3
+    !> sparse block
+    n_dof_loc = monoPRM%Iarray(monolis_prm_I_n_local_block_size_of_AtAW)
+    if(n_dof_loc == 0) stop "monolis_get_sparse_matrix_from_dense_matrix_R"
     call monolis_get_sparse_matrix_from_dense_matrix_R(monoMAT_deflated_eq, M/n_dof_loc, M_neib/n_dof_loc, n_dof_loc, L)
 else
     !> dense block

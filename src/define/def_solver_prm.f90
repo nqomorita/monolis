@@ -133,6 +133,8 @@ module mod_monolis_def_solver
 
   !> パラメータ：Deflated CG 法のローカル入力基底本数
   integer(kint), parameter :: monolis_prm_I_n_local_deflation_mode = 30
+  !> パラメータ：Deflated CG 法の W^t AW のブロックサイズ
+  integer(kint), parameter :: monolis_prm_I_n_local_block_size_of_AtAW = 31
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
