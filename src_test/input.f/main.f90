@@ -24,7 +24,7 @@ program main
     type(monolis_structure) :: mat !> 疎行列変数
     type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, n_base, n_id
-    integer(kint) :: n_coef, eid(2), i, shift
+    integer(kint) :: n_coef, eid(2), i, shift, id1, id2
     real(kdouble) :: val, condition_number
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:), global_nid(:), vtxdist(:)
@@ -97,17 +97,22 @@ program main
         shift = vtxdist(monolis_mpi_get_global_my_rank() + 1)
         call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
           & dense(i,shift + i), 2.0d0)
-        if(shift + i - 1 >  0) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-          & dense(i,shift + i - 1), 1.0d0)
-        if(shift + i + 1 < 10) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-          & dense(i,shift + i + 1), 1.0d0)
+
+        id1 = global_nid(i)
+        do j = 1, com%n_internal_vertex
+          id2 = global_nid(j)
+          if(id1 == id2 - 1) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
+            & dense(i,shift + j - 1), 1.0d0)
+          if(id1 == id2 + 1) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
+            & dense(i,shift + j + 1), 1.0d0)
+        enddo
       enddo
     endif
 
     !> monolis_get_condition_number_R
     call monolis_get_condition_number_R(mat, com, condition_number)
 
-    call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R condition number test", &
+    call monolis_test_check_eq_R1("monolis_get_condition_number_R test", &
       & condition_number, condition_number_lanczos)
 
     call monolis_finalize(mat)
