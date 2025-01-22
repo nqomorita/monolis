@@ -24,7 +24,7 @@ program main
     type(monolis_structure) :: mat !> 疎行列変数
     type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, n_base, n_id
-    integer(kint) :: n_coef, eid(2), i, shift, id1, id2
+    integer(kint) :: n_coef, eid(2), i, j, shift, id1, id2, ndof
     real(kdouble) :: val, condition_number
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:), global_nid(:), vtxdist(:)
@@ -58,7 +58,8 @@ program main
       monolis_mpi_get_global_comm(), &
       MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, n_elem, elem)
+    ndof = 1
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, ndof, n_elem, elem)
 
     open(20, file = "coef.dat", status = "old")
       read(20,*) n_coef
@@ -102,9 +103,9 @@ program main
         do j = 1, com%n_internal_vertex
           id2 = global_nid(j)
           if(id1 == id2 - 1) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-            & dense(i,shift + j - 1), 1.0d0)
+            & dense(i,shift + j), 1.0d0)
           if(id1 == id2 + 1) call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-            & dense(i,shift + j + 1), 1.0d0)
+            & dense(i,shift + j), 1.0d0)
         enddo
       enddo
     endif
