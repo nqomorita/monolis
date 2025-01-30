@@ -45,7 +45,7 @@ contains
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
     logical :: is_converge
-    logical :: is_coarse_W = .true.
+    logical :: is_sparse_W = .true.
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -94,7 +94,7 @@ contains
       call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, R, R, tdemv)
 
-      if(is_coarse_W)then
+      if(is_sparse_W)then
         call monolis_com_initialize_by_self(monoCOM_self)
         call deflatedCG_get_coarse_W (NNDOF, M, W, monoMAT_Wt)
         call deflatedCG_get_coarse_AW(NNDOF, M_neib, AW, monoMAT_AW)
@@ -122,7 +122,7 @@ contains
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
 
-      if(is_coarse_W)then
+      if(is_sparse_W)then
         call deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
           & M, M_neib, NNDOF, monoMAT_Wt, monoMAT_AW, monoCOM_self, Q, Q, tdemv)
       else

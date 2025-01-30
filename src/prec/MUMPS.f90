@@ -31,10 +31,13 @@ contains
     type (dmumps_struc), pointer :: mumps
     real(kdouble) :: t1, t2, t3, t4, t5
 
-    mumps => monoPREC%DMUMPS%mumps
-
     if(monoPREC%DMUMPS%is_factored) return
     monoPREC%DMUMPS%is_factored = .true.
+
+    if(.not. allocated(monoPREC%DMUMPS%mumps))then
+      allocate(monoPREC%DMUMPS%mumps(1))
+    endif
+    mumps => monoPREC%DMUMPS%mumps(1)
 
     !> initialize
     mumps%JOB = -1
@@ -116,7 +119,7 @@ contains
 #ifdef WITH_MUMPS
     type (dmumps_struc), pointer :: mumps
 
-    mumps => monoPREC%DMUMPS%mumps
+    mumps => monoPREC%DMUMPS%mumps(1)
 
     !> Output log level
     mumps%ICNTL(4) = 0
@@ -142,10 +145,9 @@ contains
 #ifdef WITH_MUMPS
     type(dmumps_struc), pointer :: mumps
 
-    return
-    !if(monoPRM%is_prec_stored) return
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
 
-    mumps => monoPREC%DMUMPS%mumps
+    mumps => monoPREC%DMUMPS%mumps(1)
 
     monoPREC%DMUMPS%is_factored = .false.
 
@@ -157,10 +159,8 @@ contains
       deallocate(monoPREC%DMUMPS%offset_counts)
     endif
 
-    if(associated(mumps%IRN_loc)) deallocate(mumps%IRN_loc)
-    if(associated(mumps%JCN_loc)) deallocate(mumps%JCN_loc)
-    if(associated(mumps%A)) deallocate(mumps%A)
-    if(associated(mumps%RHS)) deallocate(mumps%RHS)
+    mumps%JOB = -2
+    call DMUMPS(mumps)
 #endif
   end subroutine monolis_precond_mumps_clear
 
@@ -267,7 +267,7 @@ contains
     if(monolis_mpi_get_local_comm_size(comm) == 1 .or. is_self)then
       RHS = X(1:N)
     else
-      call monolis_gatherv_R(X, N, &
+      call monolis_gather_V_R(X, N, &
         RHS, offset_counts, offset_list, &
         0, comm)
     endif
@@ -285,7 +285,7 @@ contains
     if(monolis_mpi_get_local_comm_size(comm) == 1 .or. is_self)then
       Y(1:N) = RHS
     else
-      call monolis_scatterv_R( &
+      call monolis_scatter_V_R( &
         RHS, offset_counts, offset_list, &
         Y, N, &
         0, comm)

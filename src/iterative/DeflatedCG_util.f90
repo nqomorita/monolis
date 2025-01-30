@@ -95,13 +95,15 @@ contains
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
     monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_DIAG
-    monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-11
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_Diag
+    !monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
+    monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_iterlog) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time_statistics) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_is_prec_stored) = 1
 
     !> com section
     NP = monoCOM%recv_n_neib + 1

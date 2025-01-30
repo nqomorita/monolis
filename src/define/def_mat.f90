@@ -87,7 +87,7 @@ module mod_monolis_def_mat
     logical :: is_factored = .false.
     logical :: is_self = .false.
 #ifdef WITH_MUMPS
-    type (dmumps_struc) :: mumps
+    type (dmumps_struc), allocatable :: mumps(:)
 #endif
   end type monolis_mat_DMUMPS
 
@@ -236,6 +236,7 @@ contains
     call monolis_mat_finalize_CSR(monoMAT%CSR)
     call monolis_mat_finalize_CSC(monoMAT%CSC)
     call monolis_mat_finalize_REORDER(monoMAT%REORDER)
+    call monolis_mat_finalize_MUMPS(monoMAT%DMUMPS)
   end subroutine monolis_mat_finalize
 
   !> @ingroup def_mat_init
@@ -316,6 +317,24 @@ contains
     call monolis_pdealloc_R_1d(REORDER%rperm)
     call monolis_pdealloc_C_1d(REORDER%cperm)
   end subroutine monolis_mat_finalize_REORDER
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（MUMPS 構造）
+  subroutine monolis_mat_finalize_MUMPS(MUMPS)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_DMUMPS), intent(inout) :: MUMPS
+
+    call monolis_dealloc_I_1d(MUMPS%offset_list)
+    call monolis_dealloc_I_1d(MUMPS%offset_counts)
+
+#ifdef WITH_MUMPS
+    if(allocated(MUMPS%mumps))then
+      MUMPS%mumps(1)%JOB = -2
+      call DMUMPS(MUMPS%mumps(1))
+    endif
+#endif
+  end subroutine monolis_mat_finalize_MUMPS
 
   !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（実数型）
