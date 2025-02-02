@@ -196,7 +196,7 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, X, B)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
@@ -217,7 +217,7 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, NNDOF, W, X, Y, tdemv)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
@@ -240,7 +240,7 @@ endif
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
 
-    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
 
     call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Y, tdemv)
@@ -248,7 +248,7 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, W, AW, Z, P, tdemv)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
@@ -273,7 +273,7 @@ endif
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
 
-    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
 
     call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
@@ -283,7 +283,7 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, monoMAT_Wt, monoMAT_AW, monoCOM_self, Z, P, tdemv)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
@@ -310,7 +310,7 @@ endif
 
     monoMAT_deflated_eq%R%B(1:M) = WtZ(1:M)
 
-    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
 
     !call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
@@ -407,7 +407,7 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, W, WtA, Z, P,tdemv)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
@@ -438,7 +438,7 @@ endif
 
     monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
 
-    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
 
     call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WEinvWtAZ, tdemv)
@@ -504,12 +504,13 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+  subroutine deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & IPV_R, W, AW, WtA, WtW)
     implicit none
     type(monolis_prm) :: monoPRM_deflated_eq
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_mat) :: monoMAT_deflated_eq
+    type(monolis_mat) :: monoPRE_deflated_eq
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
 
@@ -521,6 +522,7 @@ endif
 
     call monolis_prm_finalize(monoPRM_deflated_eq)
     call monolis_mat_finalize(monoMAT_deflated_eq)
+    call monolis_mat_finalize(monoPRE_deflated_eq)
     call monolis_com_finalize(monoCOM_deflated_eq)
   end subroutine deflatedCG_finalize
 end module mod_monolis_solver_DeflatedCG_util

@@ -15,7 +15,7 @@ contains
   subroutine monolis_precond_diag_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> [in] パラメータ構造体
-    type(monolis_prm), intent(in) :: monoPRM
+    type(monolis_prm), intent(inout) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     !> [in] 行列構造体
@@ -25,10 +25,16 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_diag_setup_R")
 
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_prepared) == 1) return
+
     if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_setup_R(monoMAT, monoPREC)
     else
       call monolis_precond_diag_nn_setup_R(monoMAT, monoPREC)
+    endif
+
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1)then
+      monoPRM%Iarray(monolis_prm_I_is_prec_prepared) = 1
     endif
   end subroutine monolis_precond_diag_setup_R
 
@@ -37,7 +43,7 @@ contains
   subroutine monolis_precond_diag_setup_C(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> [in] パラメータ構造体
-    type(monolis_prm), intent(in) :: monoPRM
+    type(monolis_prm), intent(inout) :: monoPRM
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     !> [in] 行列構造体
@@ -47,7 +53,13 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_diag_setup_C")
 
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_prepared) == 1) return
+
     call monolis_precond_diag_nn_setup_C(monoMAT, monoPREC)
+
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1)then
+      monoPRM%Iarray(monolis_prm_I_is_prec_prepared) = 1
+    endif
   end subroutine monolis_precond_diag_setup_C
 
   !> @ingroup prec
@@ -107,6 +119,8 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_diag_clear_R")
 
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
+
     if(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_clear_R(monoPREC)
     else
@@ -128,6 +142,8 @@ contains
     type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_diag_clear_C")
+
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
 
     call monolis_precond_diag_nn_clear_C(monoPREC)
   end subroutine monolis_precond_diag_clear_C

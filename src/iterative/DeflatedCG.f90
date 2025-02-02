@@ -91,7 +91,7 @@ contains
         & M, M_neib, NNDOF, W, AW, WtA)
       call deflatedCG_residual_replacement_initialize(M, NNDOF, W, WtW, IPV_R)
 
-      call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, R, R, tdemv)
 
       if(is_sparse_W)then
@@ -106,7 +106,7 @@ contains
     if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
       monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
       monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
-      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
       PtX = 0.0d0
       call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, Qb, 1.0d0, PtX, X)
@@ -123,10 +123,10 @@ contains
       call monolis_matvec_product_main_R(monoCOM, monoMAT, P, Q, tspmv, tcomm_spmv)
 
       if(is_sparse_W)then
-        call deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        call deflatedCG_P_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, M_neib, NNDOF, monoMAT_Wt, monoMAT_AW, monoCOM_self, Q, Q, tdemv)
       else
-        call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, M_neib, NNDOF, W, AW, Q, Q, tdemv)
       endif
 
@@ -156,9 +156,9 @@ contains
       call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, Z, P)
     enddo
 
-    call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, NNDOF, W, B, Qb, tdemv)
-    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
     call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, Qb, 1.0d0, PtX, X)
 
@@ -178,7 +178,7 @@ contains
     call monolis_dealloc_R_1d(PtX)
 
     if(M > 0)then
-      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
     endif
   end subroutine monolis_solver_DeflatedCG1
@@ -246,11 +246,11 @@ contains
       call deflatedCG_E_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, WtA)
 
-      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
-        call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
       endif
 
@@ -270,7 +270,7 @@ contains
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, W, WtA, Z, P, tdemv)
 
     call monolis_inner_product_main_R(monoCOM, N, NDOF, R, Z, rho, tdotp, tcomm_dotp)
@@ -300,7 +300,7 @@ contains
 
       beta = rho/rho1
 
-      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
       call monolis_vec_AXPBY_R(N, NDOF, beta, P, 1.0d0, PtX, P)
@@ -322,7 +322,7 @@ contains
     call monolis_dealloc_R_1d(PtX)
 
     if(M > 0)then
-      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
     endif
   end subroutine monolis_solver_DeflatedCG2
@@ -390,11 +390,11 @@ contains
       call deflatedCG_E_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, WtA)
 
-      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
-        call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+        call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
       endif
 
@@ -414,10 +414,10 @@ contains
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
-    call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+    call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
       & M, NNDOF, W, R, Qb, tdemv)
 
     call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, PtX, 1.0d0, Qb, Z)
@@ -446,10 +446,10 @@ contains
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
-      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, R, Qb, tdemv)
 
       call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, PtX, 1.0d0, Qb, Z)
@@ -479,7 +479,7 @@ contains
     call monolis_dealloc_R_1d(PtX)
 
     if(M > 0)then
-      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
+      call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
     endif
   end subroutine monolis_solver_ADeflatedCG2
