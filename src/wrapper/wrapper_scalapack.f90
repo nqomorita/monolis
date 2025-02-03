@@ -239,7 +239,7 @@ contains
     enddo
 
     call monolis_mat_to_vec_R(lld_D, M, D, D_temp)
-    call monolis_allgatherv_R(size, D_temp, D_full, counts, displs, comm)
+    call monolis_allgather_V_R(size, D_temp, D_full, counts, displs, comm)
 
     do i = 1, size
     do j = 1, n_row

@@ -39,6 +39,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
     }
     monolis_qsort_I_1d(
       &(mat->CSR.item[jS]),
+      jE - jS,
       0,
       jE - jS - 1);
   }
