@@ -114,13 +114,15 @@ void monolis_eigen_standard_lanczos_R_c_main(
  * @brief 条件数推定関数（非対称対応）
  * @param[inout] mat monolis 構造体
  * @param[in] com 通信テーブル構造体
- * @param[out] condition_number 推定固有値
+ * @param[out] singular_value_max 特異値の最大値
+ * @param[out] singular_value_max 特異値の最小値
  * @ingroup eigen
  */
 void monolis_get_condition_number_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
-  double*      condition_number);
+  double*      singular_value_max,
+  double*      singular_value_min);
 
 void monolis_get_condition_number_R_c_main(
   int     n,
@@ -145,7 +147,8 @@ void monolis_get_condition_number_R_c_main(
   int*    send_item,
   int*    Iarray,
   double* Rarray,
-  double* condition_number);
+  double* singular_value_max,
+  double* singular_value_min);
 
 #ifdef __cplusplus
 }

@@ -69,17 +69,18 @@ contains
 
   !> @ingroup eigen
   !> 条件数の推定（Scalapack 利用、実数型、非対称対応）
-  subroutine monolis_get_condition_number_R(monolis, monoCOM, condition_number)
+  subroutine monolis_get_condition_number_R(monolis, monoCOM, singular_value_max, singular_value_min)
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_structure), intent(inout) :: monolis
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [out] 条件数の推定値
-    real(kdouble), intent(out) :: condition_number
+    !> [out] 特異値（固有値）の最大値
+    real(kdouble), intent(out) :: singular_value_max
+    !> [out] 特異値（固有値）の最小値
+    real(kdouble), intent(out) :: singular_value_min
     integer(kint) :: scalapack_comm
     integer(kint) :: N, NT, NDOF, i
-    real(kdouble) :: min, max
     real(kdouble), allocatable :: dense(:,:)
     real(kdouble), allocatable :: S(:,:), V(:), D(:,:)
 
@@ -99,14 +100,12 @@ contains
 
     call monolis_scalapack_gesvd_R(NDOF*N, NDOF*NT, dense, S, V, D, monoCOM%comm, scalapack_comm)
     
-    min = 1.0d300
-    max = 0.0d0
+    singular_value_min = 1.0d300
+    singular_value_max = 0.0d0
     do i = 1, NDOF*NT
-      if(min > dabs(V(i)) .and. dabs(V(i)) > 0.0d0) min = dabs(V(i))
-      if(max < dabs(V(i)) .and. dabs(V(i)) > 0.0d0) max = dabs(V(i))
+      if(singular_value_min > dabs(V(i)) .and. dabs(V(i)) > 0.0d0) singular_value_min = dabs(V(i))
+      if(singular_value_max < dabs(V(i)) .and. dabs(V(i)) > 0.0d0) singular_value_max = dabs(V(i))
     enddo
-
-    condition_number = max/min
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
   end subroutine monolis_get_condition_number_R
