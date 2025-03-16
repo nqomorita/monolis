@@ -8,9 +8,11 @@ extern "C" {
 
 #include "monolis_utils.h"
 
+
 static const int MONOLIS_PRM_IARRAY_SIZE = 100;
 
 static const int MONOLIS_PRM_RARRAY_SIZE = 100;
+
 
 static const int MONOLIS_ITER_CG       = 1;
 
@@ -34,7 +36,10 @@ static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 static const int MONOLIS_ITER_BICGSTAB_N128 = 9;
 
-static const int MONOLIS_ITER_COCG = 10;
+static const int MONOLIS_ITER_SOR = 10;
+
+static const int MONOLIS_ITER_COCG = 11;
+
 
 static const int MONOLIS_PREC_NONE   = 0;
 
@@ -57,6 +62,7 @@ static const int MONOLIS_PREC_SOR    = 2;
 //static const int MONOLIS_PREC_MF     = 9;
 
 //static const int MONOLIS_PREC_MUMPS_LOCAL = 10;
+
 
 static const int MONOLIS_PRM_I_METHOD = 1;
 

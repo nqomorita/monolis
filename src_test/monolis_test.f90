@@ -21,6 +21,7 @@ program monolis_test
   use mod_monolis_solver_BiCGSTAB_noprec_test
   use mod_monolis_solver_PipeBiCGSTAB_test
   use mod_monolis_solver_PipeBiCGSTAB_noprec_test
+  use mod_monolis_solver_SOR_test
   use mod_monolis_solver_COCG_test
   use mod_monolis_lapack_test
   use mod_monolis_scalapack_test
@@ -66,6 +67,7 @@ program monolis_test
     call monolis_solver_BiCGSTAB_noprec_test()
     call monolis_solver_PipeBiCGSTAB_test()
     call monolis_solver_PipeBiCGSTAB_noprec_test()
+    call monolis_solver_SOR_test()
     call monolis_solver_COCG_test()
 
     call monolis_eigen_lanczos_util_test()

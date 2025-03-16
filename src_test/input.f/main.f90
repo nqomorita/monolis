@@ -195,7 +195,7 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    do iter = monolis_iter_CG, monolis_iter_BiCGSTAB_N128
+    do iter = monolis_iter_CG, monolis_iter_SOR
     do prec = monolis_prec_NONE, monolis_prec_SOR
       a = 0.0d0
       b = c
