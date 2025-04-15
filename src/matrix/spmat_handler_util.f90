@@ -755,4 +755,49 @@ contains
       enddo
     enddo
   end subroutine monolis_check_diagonal_zero_component_main_R
+
+  !> @ingroup dev_matrix
+  !> 疎行列から密行列に変換（実数型、メイン関数）
+  subroutine monolis_convert_sparse_matrix_to_dense_matrix_R(monoMAT, monoCOM, dense)
+    implicit none
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [out] 疎行列を変換した密行列
+    real(kdouble), intent(inout), allocatable :: dense(:,:)
+    integer(kint) :: N, NT, NDOF, NDOF2
+    integer(kint) :: comm_size
+    integer(kint) :: i, j, k1, k2, jS, jE, jn, kn, n1, n2
+    integer(kint), allocatable :: vertex_id(:)
+
+    N = monoMAT%N
+    if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
+    NDOF = monoMAT%NDOF
+    NDOF2 = NDOF*NDOF
+
+    call monolis_alloc_I_1d(vertex_id, monoMAT%NP)
+    call monolis_generate_global_vertex_id(N, monoMAT%NP, vertex_id, monoCOM)
+
+    NT = N
+    call monolis_allreduce_I1(NT, monolis_mpi_sum, monoCOM%comm)
+    call monolis_alloc_R_2d(dense, NDOF*N, NDOF*NT)
+
+    do i = 1, N
+      jS = monoMAT%CSR%index(i) + 1
+      jE = monoMAT%CSR%index(i + 1)
+      do j = jS, jE
+        jn = vertex_id(monoMAT%CSR%item(j))
+        kn = NDOF2*(j - 1)
+        do k1 = 1, NDOF
+        do k2 = 1, NDOF
+          n1 = NDOF*(i - 1) + k1
+          n2 = NDOF*(jn - 1) + k2
+          dense(n1, n2) = monoMAT%R%A(kn + NDOF*(k1 - 1) + k2)
+        enddo
+        enddo
+      enddo
+    enddo
+  end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R
+
 end module mod_monolis_spmat_handler_util

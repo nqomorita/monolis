@@ -32,7 +32,9 @@ static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 //static const int MONOLIS_ITER_GMRES = 10;
 
-static const int MONOLIS_ITER_COCG = 9;
+static const int MONOLIS_ITER_BICGSTAB_N128 = 9;
+
+static const int MONOLIS_ITER_COCG = 10;
 
 static const int MONOLIS_PREC_NONE   = 0;
 

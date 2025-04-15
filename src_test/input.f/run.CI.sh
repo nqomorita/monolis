@@ -12,7 +12,7 @@ mpif90 -I../../include \
 mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o solver main.f90 \
--L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
 
 ./solver
 

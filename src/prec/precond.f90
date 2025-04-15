@@ -98,7 +98,7 @@ contains
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprep = monoPRM%tprep + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prep) = monoPRM%Rarray(monolis_R_time_prep) + t2 - t1
   end subroutine monolis_precond_setup_R
 
   !> @ingroup prec
@@ -140,7 +140,7 @@ contains
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprep = monoPRM%tprep + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prep) = monoPRM%Rarray(monolis_R_time_prep) + t2 - t1
   end subroutine monolis_precond_setup_C
 
   !> @ingroup prec
@@ -192,11 +192,11 @@ contains
       enddo
     else
       write(*,*) "precond", precond
-      stop "monolis_precond_apply_R"
+      stop "The preconditioner is not implemented in monolis_precond_apply_R"
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprec = monoPRM%tprec + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prec) = monoPRM%Rarray(monolis_R_time_prec) + t2 - t1
   end subroutine monolis_precond_apply_R
 
   !> @ingroup prec
@@ -248,7 +248,7 @@ contains
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprec = monoPRM%tprec + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prec) = monoPRM%Rarray(monolis_R_time_prec) + t2 - t1
   end subroutine monolis_precond_apply_C
 
   !> @ingroup prec
@@ -293,7 +293,7 @@ contains
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprep = monoPRM%tprep + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prep) = monoPRM%Rarray(monolis_R_time_prep) + t2 - t1
   end subroutine monolis_precond_clear_R
 
   !> @ingroup prec
@@ -334,6 +334,6 @@ contains
     endif
 
     t2 = monolis_get_time()
-    !monoPRM%tprep = monoPRM%tprep + t2 - t1
+    monoPRM%Rarray(monolis_R_time_prep) = monoPRM%Rarray(monolis_R_time_prep) + t2 - t1
   end subroutine monolis_precond_clear_C
 end module mod_monolis_precond
