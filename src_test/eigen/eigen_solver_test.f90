@@ -20,7 +20,7 @@ contains
     type(monolis_com) :: com
     integer(kint) :: nnode, nelem, elem(4,9), n_dof
     integer(kint) :: i
-    real(kdouble) :: condition_number
+    real(kdouble) :: sv_max, sv_min, condition_number
 
     !> asymmetrix Teploitz matrix
     call monolis_initialize(mat)
@@ -51,7 +51,9 @@ contains
       call monolis_add_scalar_to_sparse_matrix_R(mat, i + 1, 11 - i, 1, 1, 1.0d0)
     enddo
 
-    call monolis_get_condition_number_R(mat, com, condition_number)
+    call monolis_get_condition_number_R(mat, com, sv_max, sv_min)
+
+    condition_number = sv_max/sv_min
 
     call monolis_test_check_eq_R1("monolis_get_condition_number_R_test", condition_number, 48.374150078708247d0)
 

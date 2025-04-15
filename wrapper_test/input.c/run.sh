@@ -7,7 +7,7 @@ mpif90 -I../../include \
 -o mesher mesher.f90 \
 -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -llapack -lblas
 
-./mesher -i mtx.dat
+mpirun -np 1 ./mesher -i mtx.dat
 
 ../../bin/gedatsu_simple_mesh_partitioner -n 3
 
@@ -22,7 +22,7 @@ mpif90 -I../../include \
 
 echo "serial"
 
-./solver
+mpirun -np 1 ./solver
 
 echo "parallel"
 

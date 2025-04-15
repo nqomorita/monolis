@@ -169,7 +169,7 @@ contains
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
     Iarray, Rarray, &
-    condition_number) &
+    singular_value_max, singular_value_min) &
     & bind(c, name = "monolis_get_condition_number_R_c_main")
     implicit none
     type(monolis_structure) :: monolis
@@ -186,7 +186,8 @@ contains
     integer(c_int), intent(in), target :: Iarray(100)
     real(c_double), intent(in), target :: Rarray(100)
     real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), intent(out), target :: condition_number
+    real(c_double), intent(out), target :: singular_value_max
+    real(c_double), intent(out), target :: singular_value_min
     integer(kint) :: i
 
     !> for monoMAT
@@ -223,7 +224,7 @@ contains
     monoCOM%recv_item = monoCOM%recv_item + 1
     monoCOM%send_item = monoCOM%send_item + 1
 
-    call monolis_get_condition_number_R(monolis, monoCOM, condition_number)
+    call monolis_get_condition_number_R(monolis, monoCOM, singular_value_max, singular_value_min)
 
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1

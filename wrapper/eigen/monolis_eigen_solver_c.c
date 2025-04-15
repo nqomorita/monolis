@@ -159,7 +159,8 @@ void monolis_eigen_inverted_standard_lanczos_R(
 void monolis_get_condition_number_R(
   MONOLIS*     mat,
   MONOLIS_COM* com,
-  double*      condition_number)
+  double*      singular_value_max,
+  double*      singular_value_min)
 {
   int n = mat->mat.N;
   if(com->comm_size > 1) n = com->n_internal_vertex;
@@ -195,5 +196,6 @@ void monolis_get_condition_number_R(
     /* parameter */
     mat->prm.Iarray,
     mat->prm.Rarray,
-    condition_number);
+    singular_value_max,
+    singular_value_min);
 }
