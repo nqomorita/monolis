@@ -181,7 +181,7 @@ contains
       enddo
     else
       write(*,*) "precond", precond
-      stop "monolis_precond_apply_R"
+      stop "The preconditioner is not implemented in monolis_precond_apply_R"
     endif
 
     t2 = monolis_get_time()
