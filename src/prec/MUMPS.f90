@@ -267,7 +267,7 @@ contains
     if(monolis_mpi_get_local_comm_size(comm) == 1 .or. is_self)then
       RHS = X(1:N)
     else
-      call monolis_gatherv_R(X, N, &
+      call monolis_gather_V_R(X, N, &
         RHS, offset_counts, offset_list, &
         0, comm)
     endif
@@ -285,7 +285,7 @@ contains
     if(monolis_mpi_get_local_comm_size(comm) == 1 .or. is_self)then
       Y(1:N) = RHS
     else
-      call monolis_scatterv_R( &
+      call monolis_scatter_V_R( &
         RHS, offset_counts, offset_list, &
         Y, N, &
         0, comm)
