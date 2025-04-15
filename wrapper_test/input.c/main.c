@@ -417,8 +417,9 @@ void monolis_condition_number_R_test(){
     }
   }
 
-  double condition_number;
-  monolis_get_condition_number_R(&mat, &com, &condition_number);
+  double condition_number, rmax, rmin;
+  monolis_get_condition_number_R(&mat, &com, &rmax, &rmin);
+  condition_number = rmax/rmin;
 
   printf("%.15f\n", condition_number);
 
