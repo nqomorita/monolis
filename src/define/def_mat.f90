@@ -88,11 +88,11 @@ module mod_monolis_def_mat
     !> 1 ブロックの自由度
     integer(kint) :: NDOF
     !> 1 ブロックの自由度配列
-    integer(kint), pointer :: n_dof_list(:)
+    integer(kint), pointer :: n_dof_list(:) => null()
     !> 1 ブロックの自由度配列（index 型の圧縮形式）
-    integer(kint), pointer :: n_dof_index(:)
+    integer(kint), pointer :: n_dof_index(:) => null()
     !> 1 ブロックの自由度配列（index 型の圧縮形式、ブロック自由度の 2 乗値）
-    integer(kint), pointer :: n_dof_index2(:)
+    integer(kint), pointer :: n_dof_index2(:) => null()
     !> 行列構造体（実数型）
     type(monolis_mat_val_R) :: R
     !> 行列構造体（複素数型）
