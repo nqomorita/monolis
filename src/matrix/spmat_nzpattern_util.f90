@@ -58,19 +58,36 @@ contains
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_main
 
   !> @ingroup dev_matrix
-  !> 節点数 index の作成
-  subroutine monolis_get_n_dof_index(MAT, n_dof_list)
+  !> 疎行列構造体に自由度リストを登録
+  subroutine monolis_set_n_dof_index(MAT, n_dof_list)
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(inout) :: MAT
     !> [in] 節点自由度リスト
     integer(kint), intent(in) :: n_dof_list(:)
-    integer(kint) :: i
+    integer(kint) :: i, j, jS, jE, in, NZ
 
-!    do i = 1, n_node - 1
-!      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
-!    enddo
-  end subroutine monolis_get_n_dof_index
+    NZ = MAT%CSR%index(MAT%NP + 1)
+
+    call monolis_palloc_I_1d(MAT%n_dof_list, MAT%NP)
+    call monolis_palloc_I_1d(MAT%n_dof_index, MAT%NP + 1)
+    call monolis_palloc_I_1d(MAT%n_dof_index2, NZ)
+
+    MAT%n_dof_list = n_dof_list
+
+    do i = 1, MAT%NP
+      MAT%n_dof_index(i + 1) = MAT%n_dof_index(i) + n_dof_list(i)
+    enddo
+
+    do i = 1, MAT%NP
+      jS = MAT%CSR%index(i) + 1
+      jE = MAT%CSR%index(i + 1)
+      do j = jS, jE
+        in = MAT%CSR%item(j)
+        MAT%n_dof_index2(j + 1) = MAT%n_dof_index2(j) + n_dof_list(i)*n_dof_list(in)
+      enddo
+    enddo
+  end subroutine monolis_set_n_dof_index
 
   !> @ingroup dev_matrix
   !> 疎行列の行列成分のメモリ確保（実数型）
@@ -112,7 +129,15 @@ contains
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(inout) :: MAT
+    integer(kint) :: N, NZ, in
 
+    N  = MAT%n_dof_index (MAT%NP + 1)
+    in = MAT%CSR%index(MAT%NP + 1)
+    NZ = MAT%n_dof_index2(in + 1)
+
+    call monolis_palloc_R_1d(MAT%R%A, NZ)
+    call monolis_palloc_R_1d(MAT%R%B, N)
+    call monolis_palloc_R_1d(MAT%R%X, N)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_V_R
 
   !> @ingroup dev_matrix
@@ -121,7 +146,15 @@ contains
     implicit none
     !> [in,out] monolis 構造体
     type(monolis_mat), intent(inout) :: MAT
+    integer(kint) :: N, NZ, in
 
+    N  = MAT%n_dof_index (MAT%NP + 1)
+    in = MAT%CSR%index(MAT%NP + 1)
+    NZ = MAT%n_dof_index2(in + 1)
+
+    call monolis_palloc_C_1d(MAT%C%A, NZ)
+    call monolis_palloc_C_1d(MAT%C%B, N)
+    call monolis_palloc_C_1d(MAT%C%X, N)
   end subroutine monolis_alloc_nonzero_pattern_mat_val_V_C
 
   !> @ingroup dev_matrix

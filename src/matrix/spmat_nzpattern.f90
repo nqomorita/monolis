@@ -107,7 +107,7 @@ contains
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, -1, nodal_index, nodal_item)
 
-    call monolis_get_n_dof_index(monolis%MAT, n_dof_list)
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_V_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_R
@@ -143,7 +143,7 @@ contains
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, -1, nodal_index, nodal_item)
 
-    call monolis_get_n_dof_index(monolis%MAT, n_dof_list)
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_V_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_C
@@ -267,7 +267,7 @@ contains
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, -1, index, item)
 
-    call monolis_get_n_dof_index(monolis%MAT, n_dof_list)
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_V_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_R
@@ -291,7 +291,7 @@ contains
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, -1, index, item)
 
-    call monolis_get_n_dof_index(monolis%MAT, n_dof_list)
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_V_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_C
