@@ -10,7 +10,9 @@ extern "C" {
  * @brief スカラ値を疎行列に設定（メイン関数、実数型）
  * @param[in] n_node 
  * @param[in] nz
- * @param[in] n_dof ブロック自由度
+ * @param[in] nza
+ * @param[in] n_dof_index ブロック自由度リスト
+ * @param[in] n_dof_index2 ブロック自由度リスト
  * @param[in] index index 配列
  * @param[in] item item 配列
  * @param[inout] A 係数行列
@@ -22,24 +24,27 @@ extern "C" {
  * @ingroup dev_matrix
  */
 void monolis_set_scalar_to_sparse_matrix_R_c_main(
-  int      n_node,
-  int      nz,
-  int      n_dof,
-  int*     index,
-  int*     item,
-  double*  A,
-  int      i,
-  int      j,
-  int      submat_i,
-  int      submat_j,
-  double   val);
+  int     n_node,
+  int     nz,
+  int     nza,
+  int*    n_dof_index,
+  int*    n_dof_index2,
+  int*    index,
+  int*    item,
+  double* A,
+  int     i,
+  int     j,
+  int     submat_i,
+  int     submat_j,
+  double  val);
 
 /**
  * @brief スカラ値を疎行列に足込（メイン関数、実数型）
  * @param[in] n_node 
  * @param[in] nz
- * @param[in] n_dof ブロック自由度
- * @param[in] index index 配列
+ * @param[in] nza
+ * @param[in] n_dof_index ブロック自由度リスト
+ * @param[in] n_dof_index2 ブロック自由度リスト
  * @param[in] item item 配列
  * @param[inout] A 係数行列
  * @param[in] i 行番号
@@ -50,17 +55,19 @@ void monolis_set_scalar_to_sparse_matrix_R_c_main(
  * @ingroup dev_matrix
  */
 void monolis_add_scalar_to_sparse_matrix_R_c_main(
-  int      n_node,
-  int      nz,
-  int      n_dof,
-  int*     index,
-  int*     item,
-  double*  A,
-  int      i,
-  int      j,
-  int      submat_i,
-  int      submat_j,
-  double   val);
+  int     n_node,
+  int     nz,
+  int     nza,
+  int*    n_dof_index,
+  int*    n_dof_index2,
+  int*    index,
+  int*    item,
+  double* A,
+  int     i,
+  int     j,
+  int     submat_i,
+  int     submat_j,
+  double  val);
 
 /**
  * @brief スカラ値を疎行列から取得（メイン関数、実数型）
@@ -79,18 +86,20 @@ void monolis_add_scalar_to_sparse_matrix_R_c_main(
  * @ingroup dev_matrix
  */
 void monolis_get_scalar_from_sparse_matrix_R_c_main(
-  int      n_node,
-  int      nz,
-  int      n_dof,
-  int*     index,
-  int*     item,
-  double*  A,
-  int      i,
-  int      j,
-  int      submat_i,
-  int      submat_j,
-  double*  val,
-  int*     is_find);
+  int     n_node,
+  int     nz,
+  int     nza,
+  int*    n_dof_index,
+  int*    n_dof_index2,
+  int*    index,
+  int*    item,
+  double* A,
+  int     i,
+  int     j,
+  int     submat_i,
+  int     submat_j,
+  double* val,
+  int*    is_find);
 
 /**
  * @brief 行列値を疎行列に足込（メイン関数、実数型）
@@ -110,7 +119,11 @@ void monolis_get_scalar_from_sparse_matrix_R_c_main(
 void monolis_add_matrix_to_sparse_matrix_main_R_c_main(
   int     n_node,
   int     nz,
-  int     n_dof,
+  int     nza,
+  int     nzm1,
+  int     nzm2,
+  int*    n_dof_index,
+  int*    n_dof_index2,
   int*    index,
   int*    item,
   double* A,
@@ -138,19 +151,22 @@ void monolis_add_matrix_to_sparse_matrix_main_R_c_main(
  * @ingroup dev_matrix
  */
 void monolis_set_Dirichlet_bc_R_c_main(
-  int      n_node,
-  int      nz,
-  int      n_dof,
-  int*     index,
-  int*     item,
-  int*     indexR,
-  int*     itemR,
-  int*     permR,
-  double*  A,
-  double*  b,
-  int      node_id,
-  int      n_dof_bc,
-  double   val);
+  int     n_node,
+  int     nz,
+  int     nza,
+  int     nzb,
+  int*    n_dof_index,
+  int*    n_dof_index2,
+  int*    index,
+  int*    item,
+  int*    indexR,
+  int*    itemR,
+  int*    permR,
+  double* A,
+  double* b,
+  int     node_id,
+  int     n_dof_bc,
+  double  val);
 
 /**
  * @brief スカラ値を疎行列に設定（メイン関数、複素数型）
@@ -168,16 +184,18 @@ void monolis_set_Dirichlet_bc_R_c_main(
  * @ingroup dev_matrix
  */
 void monolis_set_scalar_to_sparse_matrix_C_c_main(
-  int             n_node,
-  int             nz,
-  int             n_dof,
-  int*            index,
-  int*            item,
+  int              n_node,
+  int              nz,
+  int              nza,
+  int*             n_dof_index,
+  int*             n_dof_index2,
+  int*             index,
+  int*             item,
   double _Complex* A,
-  int             i,
-  int             j,
-  int             submat_i,
-  int             submat_j,
+  int              i,
+  int              j,
+  int              submat_i,
+  int              submat_j,
   double _Complex  val);
 
 /**
@@ -196,16 +214,18 @@ void monolis_set_scalar_to_sparse_matrix_C_c_main(
  * @ingroup dev_matrix
  */
 void monolis_add_scalar_to_sparse_matrix_C_c_main(
-  int             n_node,
-  int             nz,
-  int             n_dof,
-  int*            index,
-  int*            item,
+  int              n_node,
+  int              nz,
+  int              nza,
+  int*             n_dof_index,
+  int*             n_dof_index2,
+  int*             index,
+  int*             item,
   double _Complex* A,
-  int             i,
-  int             j,
-  int             submat_i,
-  int             submat_j,
+  int              i,
+  int              j,
+  int              submat_i,
+  int              submat_j,
   double _Complex  val);
 
 /**
@@ -225,18 +245,20 @@ void monolis_add_scalar_to_sparse_matrix_C_c_main(
  * @ingroup dev_matrix
  */
 void monolis_get_scalar_from_sparse_matrix_C_c_main(
-  int             n_node,
-  int             nz,
-  int             n_dof,
-  int*            index,
-  int*            item,
+  int              n_node,
+  int              nz,
+  int              nza,
+  int*             n_dof_index,
+  int*             n_dof_index2,
+  int*             index,
+  int*             item,
   double _Complex* A,
-  int             i,
-  int             j,
-  int             submat_i,
-  int             submat_j,
+  int              i,
+  int              j,
+  int              submat_i,
+  int              submat_j,
   double _Complex* val,
-  int*            is_find);
+  int*             is_find);
 
 /**
  * @brief 行列値を疎行列に足込（メイン関数、複素数型）
@@ -256,15 +278,19 @@ void monolis_get_scalar_from_sparse_matrix_C_c_main(
 void monolis_add_matrix_to_sparse_matrix_main_C_c_main(
   int              n_node,
   int              nz,
-  int              n_dof,
+  int              nza,
+  int              nzm1,
+  int              nzm2,
+  int*             n_dof_index,
+  int*             n_dof_index2,
   int*             index,
   int*             item,
-  double _Complex*  A,
+  double _Complex* A,
   int              n_base1,
   int              n_base2,
   int*             connectivity1,
   int*             connectivity2,
-  double _Complex*  val);
+  double _Complex* val);
 
 /**
  * @brief 境界条件処理（複素数型、メイン関数）
@@ -284,18 +310,21 @@ void monolis_add_matrix_to_sparse_matrix_main_C_c_main(
  * @ingroup dev_matrix
  */
 void monolis_set_Dirichlet_bc_C_c_main(
-  int             n_node,
-  int             nz,
-  int             n_dof,
-  int*            index,
-  int*            item,
-  int*            indexR,
-  int*            itemR,
-  int*            permR,
+  int              n_node,
+  int              nz,
+  int              nza,
+  int              nzb,
+  int*             n_dof_index,
+  int*             n_dof_index2,
+  int*             index,
+  int*             item,
+  int*             indexR,
+  int*             itemR,
+  int*             permR,
   double _Complex* A,
   double _Complex* b,
-  int             node_id,
-  int             n_dof_bc,
+  int              node_id,
+  int              n_dof_bc,
   double _Complex  val);
 
 #ifdef __cplusplus

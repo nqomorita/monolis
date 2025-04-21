@@ -16,13 +16,15 @@ void monolis_set_scalar_to_sparse_matrix_R(
   double   val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
 
   monolis_set_scalar_to_sparse_matrix_R_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.R.A,
@@ -42,13 +44,15 @@ void monolis_add_scalar_to_sparse_matrix_R(
   double   val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza;
 
   monolis_add_scalar_to_sparse_matrix_R_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.R.A,
@@ -71,13 +75,15 @@ void monolis_get_scalar_from_sparse_matrix_R(
   int n = mat->mat.NP;
   int n_node = mat->mat.NP;
   int nz = mat->mat.CSR.index[n_node];
-  int n_dof = mat->mat.NDOF;
+  int nza = mat->mat.n_dof_index2[nz];
   int is_find_t = 0;
 
   monolis_get_scalar_from_sparse_matrix_R_c_main(
     n,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.R.A,
@@ -103,7 +109,9 @@ void monolis_add_matrix_to_sparse_matrix_R(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
   double* val_t;
+  int nzm;
   int n, i, j;
 
   n = n_base*n_dof;
@@ -116,10 +124,20 @@ void monolis_add_matrix_to_sparse_matrix_R(
     }
   }
 
+  nzm = 0;
+  for(i = 0; i < n_base; ++i){
+    j = connectivity[i];
+    nzm += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
+
   monolis_add_matrix_to_sparse_matrix_main_R_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzm,
+    nzm,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.R.A,
@@ -143,24 +161,39 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
   double* val_t;
-  int n1, n2, i, j;
+  int nzm1, nzm2;
+  int i, j;
 
-  n1 = n_base1*n_dof;
-  n2 = n_base2*n_dof;
+  nzm1 = 0;
+  for(i = 0; i < n_base1; ++i){
+    j = connectivity1[i];
+    nzm1 += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
 
-  val_t = monolis_alloc_R_1d(val_t, n1*n2);
+  nzm2 = 0;
+  for(i = 0; i < n_base2; ++i){
+    j = connectivity2[i];
+    nzm2 += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
 
-  for(i = 0; i < n1; ++i){
-    for(j = 0; j < n2; ++j){
-      val_t[n2*i + j] = val[i][j];
+  val_t = monolis_alloc_R_1d(val_t, nzm1*nzm2);
+
+  for(i = 0; i < nzm1; ++i){
+    for(j = 0; j < nzm2; ++j){
+      val_t[nzm2*i + j] = val[i][j];
     }
   }
 
   monolis_add_matrix_to_sparse_matrix_main_R_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzm1,
+    nzm2,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.R.A,
@@ -244,11 +277,16 @@ void monolis_set_Dirichlet_bc_R(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
+  int nzb = mat->mat.n_dof_index[n_node];
 
   monolis_set_Dirichlet_bc_R_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzb,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.CSC.index,
@@ -272,11 +310,14 @@ void monolis_set_scalar_to_sparse_matrix_C(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
 
   monolis_set_scalar_to_sparse_matrix_C_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.C.A,
@@ -298,11 +339,14 @@ void monolis_add_scalar_to_sparse_matrix_C(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
 
   monolis_add_scalar_to_sparse_matrix_C_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.C.A,
@@ -325,13 +369,16 @@ void monolis_get_scalar_from_sparse_matrix_C(
   int n = mat->mat.NP;
   int n_node = mat->mat.NP;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
   int n_dof = mat->mat.NDOF;
   int is_find_t = 0;
 
   monolis_get_scalar_from_sparse_matrix_C_c_main(
     n,
     nz,
-    n_dof,
+    nza,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.C.A,
@@ -357,7 +404,8 @@ void monolis_add_matrix_to_sparse_matrix_C(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
-  int n, i, j;
+  int nza = mat->mat.n_dof_index2[nz];
+  int n, i, j, nzm;
   double _Complex* val_t;
 
   n = n_base*n_dof;
@@ -370,10 +418,20 @@ void monolis_add_matrix_to_sparse_matrix_C(
     }
   }
 
+  nzm = 0;
+  for(i = 0; i < n_base; ++i){
+    j = connectivity[i];
+    nzm += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
+
   monolis_add_matrix_to_sparse_matrix_main_C_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzm,
+    nzm,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.C.A,
@@ -397,24 +455,39 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_C(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
-  int n1, n2, i, j;
+  int nza = mat->mat.n_dof_index2[nz];
+  int i, j;
+  int nzm1, nzm2;
   double _Complex* val_t;
 
-  n1 = n_base1*n_dof;
-  n2 = n_base2*n_dof;
+  nzm1 = 0;
+  for(i = 0; i < n_base1; ++i){
+    j = connectivity1[i];
+    nzm1 += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
 
-  val_t = monolis_alloc_C_1d(val_t, n1*n2);
+  nzm2 = 0;
+  for(i = 0; i < n_base2; ++i){
+    j = connectivity2[i];
+    nzm2 += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
 
-  for(i = 0; i < n1; ++i){
-    for(j = 0; j < n2; ++j){
-      val_t[n2*i + j] = val[i][j];
+  val_t = monolis_alloc_C_1d(val_t, nzm1*nzm2);
+
+  for(i = 0; i < nzm1; ++i){
+    for(j = 0; j < nzm2; ++j){
+      val_t[nzm2*i + j] = val[i][j];
     }
   }
 
   monolis_add_matrix_to_sparse_matrix_main_C_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzm1,
+    nzm2,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.C.A,
@@ -498,11 +571,16 @@ void monolis_set_Dirichlet_bc_C(
   int n_node = mat->mat.NP;
   int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
+  int nzb = mat->mat.n_dof_index[n_node];
 
   monolis_set_Dirichlet_bc_C_c_main(
     n_node,
     nz,
-    n_dof,
+    nza,
+    nzb,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
     mat->mat.CSR.index,
     mat->mat.CSR.item,
     mat->mat.CSC.index,

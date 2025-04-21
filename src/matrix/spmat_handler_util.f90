@@ -29,7 +29,8 @@ contains
   !# setter
   !> @ingroup dev_matrix
   !> スカラ値を疎行列に設定（メイン関数、実数型）
-  subroutine monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -37,8 +38,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -49,19 +52,20 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
-    NDOF2 = ndof*ndof
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         A(im) = val
         return
       endif
@@ -72,7 +76,8 @@ contains
 
   !> @ingroup dev_matrix
   !> スカラ値を疎行列に設定（メイン関数、複素数型）
-  subroutine monolis_set_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_set_scalar_to_sparse_matrix_main_C(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -80,8 +85,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -92,19 +99,20 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     complex(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
-    NDOF2 = ndof*ndof
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         A(im) = val
         return
       endif
@@ -115,7 +123,8 @@ contains
 
   !> @ingroup dev_matrix
   !> 小行列を疎行列に設定（メイン関数、実数型）
-  subroutine monolis_set_block_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, val)
+  subroutine monolis_set_block_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -123,26 +132,28 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
     integer(kint), intent(in) :: cj
     !> [in] 設定値
-    real(kdouble), intent(in) :: val(ndof,ndof)
-    integer(kint) :: k, jn, im, jS, jE, i1, i2, NDOF2
-
-    NDOF2 = ndof*ndof
+    real(kdouble), intent(in) :: val(:,:)
+    integer(kint) :: j, jn, im, jS, jE, i1, i2, n1, n2
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do k = jS, jE
-      jn = item(k)
+    do j = jS, jE
+      jn = item(j)
       if(jn == cj)then
-        do i1 = 1, ndof
-        do i2 = 1, ndof
-          im = NDOF2*(k-1) + ndof*(i1-1) + i2
+        n1 = n_dof_index(ci + 1) - n_dof_index(ci)
+        n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+        do i1 = 1, n1
+        do i2 = 1, n2
+          im = n_dof_index2(j) + n2*(i1-1) + i2
           A(im) = val(i1, i2)
         enddo
         enddo
@@ -154,7 +165,8 @@ contains
 
   !> @ingroup dev_matrix
   !> 小行列を疎行列に設定（メイン関数、複素数型）
-  subroutine monolis_set_block_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, val)
+  subroutine monolis_set_block_to_sparse_matrix_main_C(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -162,26 +174,28 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
     integer(kint), intent(in) :: cj
     !> [in] 設定値
-    complex(kdouble), intent(in) :: val(ndof,ndof)
-    integer(kint) :: k, jn, im, jS, jE, i1, i2, NDOF2
-
-    NDOF2 = ndof*ndof
+    complex(kdouble), intent(in) :: val(:,:)
+    integer(kint) :: j, jn, im, jS, jE, i1, i2, n1, n2
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do k = jS, jE
-      jn = item(k)
+    do j = jS, jE
+      jn = item(j)
       if(jn == cj)then
-        do i1 = 1, ndof
-        do i2 = 1, ndof
-          im = NDOF2*(k-1) + ndof*(i1-1) + i2
+        n1 = n_dof_index(ci + 1) - n_dof_index(ci)
+        n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+        do i1 = 1, n1
+        do i2 = 1, n2
+          im = n_dof_index2(j) + n2*(i1-1) + i2
           A(im) = val(i1, i2)
         enddo
         enddo
@@ -194,7 +208,8 @@ contains
   !# getter
   !> @ingroup dev_matrix
   !> スカラ値を疎行列から取得（メイン関数、実数型）
-  subroutine monolis_get_scalar_from_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
+  subroutine monolis_get_scalar_from_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val, is_find)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -202,8 +217,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in] 係数行列
     real(kdouble), intent(in) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -216,13 +233,14 @@ contains
     real(kdouble), intent(out) :: val
     !> [out] 取得判定フラグ
     logical, intent(out) :: is_find
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
     val = 0.0d0
     is_find = .false.
 
-    NDOF2 = ndof*ndof
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) return
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) return
 
     jS = index(ci) + 1
@@ -230,7 +248,8 @@ contains
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         val = A(im)
         is_find = .true.
         return
@@ -240,7 +259,8 @@ contains
 
   !> @ingroup dev_matrix
   !> スカラ値を疎行列から取得（メイン関数、複素数型）
-  subroutine monolis_get_scalar_from_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val, is_find)
+  subroutine monolis_get_scalar_from_sparse_matrix_main_C(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val, is_find)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -248,8 +268,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in] 係数行列
     complex(kdouble), intent(in) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -262,13 +284,14 @@ contains
     complex(kdouble), intent(out) :: val
     !> [out] 取得判定フラグ
     logical, intent(out) :: is_find
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
     val = 0.0d0
     is_find = .false.
 
-    NDOF2 = ndof*ndof
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) return
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) return
 
     jS = index(ci) + 1
@@ -276,7 +299,8 @@ contains
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         val = A(im)
         is_find = .true.
         return
@@ -287,7 +311,8 @@ contains
   !# adder
   !> @ingroup dev_matrix
   !> スカラ値を疎行列に足込（メイン関数、実数型）
-  subroutine monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -295,8 +320,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     real(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -307,19 +334,20 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
-    NDOF2 = ndof*ndof
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         A(im) = A(im) + val
         return
       endif
@@ -330,7 +358,8 @@ contains
 
   !> @ingroup dev_matrix
   !> スカラ値を疎行列に足込（メイン関数、複素数型）
-  subroutine monolis_add_scalar_to_sparse_matrix_main_C(index, item, A, ndof, ci, cj, csub_i, csub_j, val)
+  subroutine monolis_add_scalar_to_sparse_matrix_main_C(index, item, A, n_dof_index, n_dof_index2, &
+    ci, cj, csub_i, csub_j, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -338,8 +367,10 @@ contains
     integer(kint), intent(in) :: item(:)
     !> [in,out] 係数行列
     complex(kdouble), intent(inout) :: A(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号
     integer(kint), intent(in) :: ci
     !> [in] 列番号
@@ -350,19 +381,20 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     complex(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, NDOF2
+    integer(kint) :: j, jn, im, jS, jE, ndof
 
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
-
-    NDOF2 = ndof*ndof
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     do j = jS, jE
       jn = item(j)
       if(jn == cj)then
-        im = NDOF2*(j-1) + ndof*(csub_i-1) + csub_j
+        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
         A(im) = A(im) + val
         return
       endif
@@ -373,7 +405,8 @@ contains
 
   !> @ingroup dev_matrix
   !> 行列値を疎行列に足込（メイン関数、実数型）
-  subroutine monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, ndof, e1, e2, val)
+  subroutine monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, &
+    n_dof_index, n_dof_index2, e1, e2, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -385,8 +418,10 @@ contains
     integer(kint), intent(in) :: n1
     !> [in] 入力行列の列サイズ
     integer(kint), intent(in) :: n2
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号リスト
     integer(kint), intent(in) :: e1(n1)
     !> [in] 列番号リスト
@@ -394,11 +429,11 @@ contains
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
+    integer(kint) :: i, j, k, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
     integer(kint) :: eperm1(n1), eperm2(n2)
-    real(kdouble) :: temp(n1*ndof,n2*ndof)
-
-    NDOF2 = ndof*ndof
+    integer(kint), allocatable :: idx1(:), idx2(:)
+    integer(kint), allocatable :: idx1t(:), idx2t(:)
+    real(kdouble), allocatable :: temp(:,:)
 
     e1t = e1
     call monolis_get_sequence_array_I(eperm1, n1, 1, 1)
@@ -408,31 +443,56 @@ contains
     call monolis_get_sequence_array_I(eperm2, n2, 1, 1)
     call monolis_qsort_I_2d(e2t, eperm2, 1, n2)
 
-    temp = 0.0d0
+    call monolis_alloc_I_1d(idx1, n1 + 1)
+    call monolis_alloc_I_1d(idx2, n2 + 1)
+
+    do i = 1, n1
+      in = e1(i)
+      idx1(i + 1) = idx1(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
     do i = 1, n2
-      i1 = eperm2(i)
-      do j = 1, n1
-        j1 = eperm1(j)
-        do i2 = 1, ndof
-          do j2 = 1, ndof
-            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(i1-1)+i2, ndof*(j1-1)+j2)
-          enddo
-        enddo
-      enddo
+      in = e2(i)
+      idx2(i + 1) = idx2(i) + n_dof_index(in + 1) - n_dof_index(in)
     enddo
 
     do i = 1, n1
       in = e1t(i)
+      idx1t(i + 1) = idx1t(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
+    do i = 1, n2
+      in = e2t(i)
+      idx2t(i + 1) = idx2t(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
+    call monolis_alloc_R_2d(temp, idx1(n1 + 1), idx2(n2 + 1))
+
+    do i2 = 1, n2
+      j2 = eperm2(i2)
+      do i1 = 1, n1
+        j1 = eperm1(i1)
+        do k2 = 1, n_dof_index(j2 + 1) - n_dof_index(j2)
+        do k1 = 1, n_dof_index(j1 + 1) - n_dof_index(j1)
+          temp(idx1t(j1)+k1, idx1t(j2)+k2) = val(idx1(i1)+k1, idx2(i2)+k2)
+        enddo
+        enddo
+      enddo
+    enddo
+
+    do i1 = 1, n1
+      in = e1t(i1)
       jS = index(in) + 1
       jE = index(in + 1)
-      aa:do j = 1, n2
-        do k = jS, jE
-          jn = item(k)
-          if(jn == e2t(j))then
-            do i1 = 1, ndof
-            do i2 = 1, ndof
-              im = NDOF2*(k-1) + ndof*(i1-1) + i2
-              A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
+      aa:do i2 = 1, n2
+        do j1 = jS, jE
+          jn = item(j1)
+          if(jn == e2t(j1))then
+            kn = n_dof_index(jn + 1) - n_dof_index(jn)
+            do k1 = 1, n_dof_index(in + 1) - n_dof_index(in)
+            do k2 = 1, kn
+              im = n_dof_index2(i2) + kn*(k1-1) + k2
+              A(im) = A(im) + temp(idx1(i)+k1, idx2(j)+k2)
             enddo
             enddo
             jS = k
@@ -446,7 +506,8 @@ contains
 
   !> @ingroup dev_matrix
   !> 行列値を疎行列に足込（メイン関数、複素数型）
-  subroutine monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n1, n2, ndof, e1, e2, val)
+  subroutine monolis_add_matrix_to_sparse_matrix_main_C(index, item, A, n1, n2, &
+    n_dof_index, n_dof_index2, e1, e2, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -458,8 +519,10 @@ contains
     integer(kint), intent(in) :: n1
     !> [in] 入力行列の列サイズ
     integer(kint), intent(in) :: n2
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 行番号リスト
     integer(kint), intent(in) :: e1(n1)
     !> [in] 列番号リスト
@@ -467,11 +530,11 @@ contains
     !> [in] 設定値
     complex(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, j, k, in, jn, im, jS, jE, i2, j2, i1, j1, NDOF2
+    integer(kint) :: i, j, k, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
     integer(kint) :: eperm1(n1), eperm2(n2)
-    complex(kdouble) :: temp(n1*ndof,n2*ndof)
-
-    NDOF2 = ndof*ndof
+    integer(kint), allocatable :: idx1(:), idx2(:)
+    integer(kint), allocatable :: idx1t(:), idx2t(:)
+    complex(kdouble), allocatable :: temp(:,:)
 
     e1t = e1
     call monolis_get_sequence_array_I(eperm1, n1, 1, 1)
@@ -481,31 +544,56 @@ contains
     call monolis_get_sequence_array_I(eperm2, n2, 1, 1)
     call monolis_qsort_I_2d(e2t, eperm2, 1, n2)
 
-    temp = 0.0d0
+    call monolis_alloc_I_1d(idx1, n1 + 1)
+    call monolis_alloc_I_1d(idx2, n2 + 1)
+
+    do i = 1, n1
+      in = e1(i)
+      idx1(i + 1) = idx1(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
     do i = 1, n2
-      i1 = eperm2(i)
-      do j = 1, n1
-        j1 = eperm1(j)
-        do i2 = 1, ndof
-          do j2 = 1, ndof
-            temp(ndof*(i-1)+i2, ndof*(j-1)+j2) = val(ndof*(i1-1)+i2, ndof*(j1-1)+j2)
-          enddo
-        enddo
-      enddo
+      in = e2(i)
+      idx2(i + 1) = idx2(i) + n_dof_index(in + 1) - n_dof_index(in)
     enddo
 
     do i = 1, n1
       in = e1t(i)
+      idx1t(i + 1) = idx1t(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
+    do i = 1, n2
+      in = e2t(i)
+      idx2t(i + 1) = idx2t(i) + n_dof_index(in + 1) - n_dof_index(in)
+    enddo
+
+    call monolis_alloc_C_2d(temp, idx1(n1 + 1), idx2(n2 + 1))
+
+    do i2 = 1, n2
+      j2 = eperm2(i2)
+      do i1 = 1, n1
+        j1 = eperm1(i1)
+        do k2 = 1, n_dof_index(j2 + 1) - n_dof_index(j2)
+        do k1 = 1, n_dof_index(j1 + 1) - n_dof_index(j1)
+          temp(idx1t(j1)+k1, idx1t(j2)+k2) = val(idx1(i1)+k1, idx2(i2)+k2)
+        enddo
+        enddo
+      enddo
+    enddo
+
+    do i1 = 1, n1
+      in = e1t(i1)
       jS = index(in) + 1
       jE = index(in + 1)
-      aa:do j = 1, n2
-        do k = jS, jE
-          jn = item(k)
-          if(jn == e2t(j))then
-            do i1 = 1, ndof
-            do i2 = 1, ndof
-              im = NDOF2*(k-1) + ndof*(i1-1) + i2
-              A(im) = A(im) + temp(ndof*(i-1)+i1, ndof*(j-1)+i2)
+      aa:do i2 = 1, n2
+        do j1 = jS, jE
+          jn = item(j1)
+          if(jn == e2t(j1))then
+            kn = n_dof_index(jn + 1) - n_dof_index(jn)
+            do k1 = 1, n_dof_index(in + 1) - n_dof_index(in)
+            do k2 = 1, kn
+              im = n_dof_index2(i2) + kn*(k1-1) + k2
+              A(im) = A(im) + temp(idx1(i)+k1, idx2(j)+k2)
             enddo
             enddo
             jS = k
@@ -520,7 +608,7 @@ contains
   !> @ingroup dev_matrix
   !> 境界条件処理（実数型、メイン関数）
   subroutine monolis_set_Dirichlet_bc_main_R(index, item, A, B, indexR, itemR, permA, &
-    & ndof, node_id, ndof_bc, val)
+    & n_dof_index, n_dof_index2, node_id, ndof_bc, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -536,21 +624,23 @@ contains
     integer(kint), intent(in) :: itemR(:)
     !> [in] 行列成分の CSC 形式との置換ベクトル
     integer(kint), intent(in) :: permA(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 自由度番号
     integer(kint), intent(in) :: node_id
     !> [in] ブロック番号
     integer(kint), intent(in) :: ndof_bc
     !> [in] 境界条件の設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
+    integer(kint) :: j, k, jn, kn, jS, jE, ndof
     logical :: is_add
 
+    ndof = n_dof_index(node_id + 1) - n_dof_index(node_id)
     if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
 
     is_add = .false.
-    NDOF2 = ndof*ndof
 
     jS = indexR(node_id) + 1
     jE = indexR(node_id + 1)
@@ -558,21 +648,23 @@ contains
       jn = itemR(j)
       kn = permA(j)
       do k = 1, ndof
-        B(ndof*(jn-1)+k) = B(ndof*(jn-1)+k) - val*A(NDOF2*(kn-1) + ndof*(k-1) + ndof_bc)
-        A(NDOF2*(kn-1) + ndof*(k-1) + ndof_bc) = 0.0d0
+        B(n_dof_index(jn)+k) = B(n_dof_index(jn)+k) - val*A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc)
+        A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc) = 0.0d0
       enddo
     enddo
 
     jS = index(node_id) + 1
     jE = index(node_id + 1)
     do j = jS, jE
+      jn = item(j)
+      ndof = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof
-        A(NDOF2*(j-1) + ndof*(ndof_bc-1) + k) = 0.0d0
+        A(n_dof_index2(j) + ndof*(ndof_bc-1) + k) = 0.0d0
       enddo
 
       jn = item(j)
       if(jn == node_id)then
-        A(NDOF2*(j-1) + (ndof+1)*(ndof_bc-1) + 1) = 1.0d0
+        A(n_dof_index2(j) + (ndof+1)*(ndof_bc-1) + 1) = 1.0d0
         is_add = .true.
       endif
     enddo
@@ -581,13 +673,13 @@ contains
       call monolis_stop_by_set_DBC(node_id)
     endif
 
-    B(ndof*node_id - ndof + ndof_bc) = val
+    B(n_dof_index(node_id) + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_R
 
   !> @ingroup dev_matrix
   !> 境界条件処理（複素数型、メイン関数）
   subroutine monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
-    & ndof, node_id, ndof_bc, val)
+    & n_dof_index, n_dof_index2, node_id, ndof_bc, val)
     implicit none
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
@@ -603,21 +695,23 @@ contains
     integer(kint), intent(in) :: itemR(:)
     !> [in] 行列成分の CSC 形式との置換ベクトル
     integer(kint), intent(in) :: permA(:)
-    !> [in] ブロック自由度
-    integer(kint), intent(in) :: ndof
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
     !> [in] 自由度番号
     integer(kint), intent(in) :: node_id
     !> [in] ブロック番号
     integer(kint), intent(in) :: ndof_bc
     !> [in] 境界条件の設定値
     complex(kdouble), intent(in) :: val
-    integer(kint) :: j, k, jn, kn, jS, jE, NDOF2
+    integer(kint) :: j, k, jn, kn, jS, jE, ndof
     logical :: is_add
 
+    ndof = n_dof_index(node_id + 1) - n_dof_index(node_id)
     if(ndof < ndof_bc) call monolis_stop_by_submatrix_access(ndof, ndof_bc)
 
     is_add = .false.
-    NDOF2 = ndof*ndof
 
     jS = indexR(node_id) + 1
     jE = indexR(node_id + 1)
@@ -625,21 +719,23 @@ contains
       jn = itemR(j)
       kn = permA(j)
       do k = 1, ndof
-        B(ndof*(jn-1)+k) = B(ndof*(jn-1)+k) - val*A(NDOF2*(kn-1) + ndof*(k-1) + ndof_bc)
-        A(NDOF2*(kn-1) + ndof*(k-1) + ndof_bc) = 0.0d0
+        B(n_dof_index(jn)+k) = B(n_dof_index(jn)+k) - val*A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc)
+        A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc) = 0.0d0
       enddo
     enddo
 
     jS = index(node_id) + 1
     jE = index(node_id + 1)
     do j = jS, jE
+      jn = item(j)
+      ndof = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof
-        A(NDOF2*(j-1) + ndof*(ndof_bc-1) + k) = 0.0d0
+        A(n_dof_index2(j) + ndof*(ndof_bc-1) + k) = 0.0d0
       enddo
 
       jn = item(j)
       if(jn == node_id)then
-        A(NDOF2*(j-1) + (ndof+1)*(ndof_bc-1) + 1) = 1.0d0
+        A(n_dof_index2(j) + (ndof+1)*(ndof_bc-1) + 1) = 1.0d0
         is_add = .true.
       endif
     enddo
@@ -648,7 +744,7 @@ contains
       call monolis_stop_by_set_DBC(node_id)
     endif
 
-    B(ndof*node_id - ndof + ndof_bc) = val
+    B(n_dof_index(node_id) + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_C
 
   !> @ingroup dev_matrix
@@ -730,13 +826,11 @@ contains
     type(monolis_prm), intent(in) :: monoPRM
     !> [in] monolis MAT 構造体
     type(monolis_mat), intent(in) :: monoMAT
-    integer(kint) :: i, j, k, jS, jE, in, kn, N, NDOF, NDOF2
+    integer(kint) :: i, j, k, jS, jE, in, kn, N, n_dof
 
     if(monoPRM%Iarray(monolis_prm_I_is_check_diag) == monolis_I_false) return
 
     N =  monoMAT%N
-    NDOF  = monoMAT%NDOF
-    NDOF2 = NDOF*NDOF
 
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
@@ -744,8 +838,9 @@ contains
       do j = jS, jE
         in = monoMAT%CSR%item(j)
         if(i == in)then
-          do k = 1, NDOF
-            kn = NDOF2*(j-1) + (NDOF+1)*(k-1) + 1
+          n_dof = monoMAT%n_dof_index(in + 1) - monoMAT%n_dof_index(in)
+          do k = 1, n_dof
+            kn = monoMAT%n_dof_index2(j) + (n_dof+1)*(k-1) + 1
             if(monoMAT%R%A(kn) == 0.0d0)then
               call monolis_stop_by_set_zero_diag_component(i, k)
               stop
@@ -766,36 +861,34 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [out] 疎行列を変換した密行列
     real(kdouble), intent(inout), allocatable :: dense(:,:)
-    integer(kint) :: N, NT, NDOF, NDOF2
+    integer(kint) :: N, NT, n_dof
     integer(kint) :: comm_size
     integer(kint) :: i, j, k1, k2, jS, jE, jn, kn, n1, n2
     integer(kint), allocatable :: vertex_id(:)
 
     N = monoMAT%N
     if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
-    NDOF = monoMAT%NDOF
-    NDOF2 = NDOF*NDOF
 
     call monolis_alloc_I_1d(vertex_id, monoMAT%NP)
     call monolis_generate_global_vertex_id(N, monoMAT%NP, vertex_id, monoCOM)
 
-    NT = N
+    NT = monoMAT%n_dof_index(N + 1)
     call monolis_allreduce_I1(NT, monolis_mpi_sum, monoCOM%comm)
-    call monolis_alloc_R_2d(dense, NDOF*N, NDOF*NT)
+    call monolis_alloc_R_2d(dense, monoMAT%n_dof_index(N + 1), NT)
 
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
-        jn = vertex_id(monoMAT%CSR%item(j))
-        kn = NDOF2*(j - 1)
-        do k1 = 1, NDOF
-        do k2 = 1, NDOF
-          n1 = NDOF*(i - 1) + k1
-          n2 = NDOF*(jn - 1) + k2
-          dense(n1, n2) = monoMAT%R%A(kn + NDOF*(k1 - 1) + k2)
-        enddo
-        enddo
+        !jn = vertex_id(monoMAT%CSR%item(j))
+        !kn = NDOF2*(j - 1)
+        !do k1 = 1, NDOF
+        !do k2 = 1, NDOF
+          !n1 = NDOF*(i - 1) + k1
+          !n2 = NDOF*(jn - 1) + k2
+          !dense(n1, n2) = monoMAT%R%A(kn + NDOF*(k1 - 1) + k2)
+        !enddo
+        !enddo
       enddo
     enddo
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R

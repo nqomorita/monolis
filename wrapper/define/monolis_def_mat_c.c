@@ -56,6 +56,8 @@ void monolis_mat_initialize(
   mat->N = 0;
   mat->NP = 0;
   mat->NDOF = 0;
+  mat->n_dof_index = NULL;
+  mat->n_dof_index2 = NULL;
   monolis_mat_initialize_val_R(&mat->R);
   monolis_mat_initialize_val_C(&mat->C);
   monolis_mat_initialize_SCSR(&mat->SCSR);
@@ -115,6 +117,8 @@ void monolis_mat_finalize(
   mat->N = 0;
   mat->NP = 0;
   mat->NDOF = 0;
+  monolis_dealloc_I_1d(&mat->n_dof_index);
+  monolis_dealloc_I_1d(&mat->n_dof_index2);
   monolis_mat_finalize_val_R(&mat->R);
   monolis_mat_finalize_val_C(&mat->C);
   monolis_mat_finalize_SCSR(&mat->SCSR);

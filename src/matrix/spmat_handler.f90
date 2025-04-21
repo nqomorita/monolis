@@ -29,7 +29,7 @@ contains
     real(kdouble), intent(in) :: val
 
     call monolis_set_scalar_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+      & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
   end subroutine monolis_set_scalar_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -50,7 +50,7 @@ contains
     complex(kdouble), intent(in) :: val
 
     call monolis_set_scalar_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+      & monolis%MAT%C%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
   end subroutine monolis_set_scalar_to_sparse_matrix_C
 
   !> @ingroup matrix
@@ -67,7 +67,7 @@ contains
     real(kdouble), intent(in) :: val(:,:)
 
     call monolis_set_block_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, monolis%MAT%ndof, i, j, val)
+      & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, val)
   end subroutine monolis_set_block_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -84,7 +84,7 @@ contains
     complex(kdouble), intent(in) :: val(:,:)
 
     call monolis_set_block_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, monolis%MAT%ndof, i, j, val)
+      & monolis%MAT%C%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, val)
   end subroutine monolis_set_block_to_sparse_matrix_C
 
   !# getter
@@ -108,7 +108,7 @@ contains
     logical, intent(out) :: is_find
 
     call monolis_get_scalar_from_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val, is_find)
+      & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val, is_find)
   end subroutine monolis_get_scalar_from_sparse_matrix_R
 
   !> @ingroup matrix
@@ -131,7 +131,7 @@ contains
     logical, intent(out) :: is_find
 
     call monolis_get_scalar_from_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val, is_find)
+      & monolis%MAT%C%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val, is_find)
   end subroutine monolis_get_scalar_from_sparse_matrix_C
 
   !# adder
@@ -153,7 +153,7 @@ contains
     real(kdouble), intent(in) :: val
 
     call monolis_add_scalar_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+      & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
   end subroutine monolis_add_scalar_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -174,7 +174,7 @@ contains
     complex(kdouble), intent(in) :: val
 
     call monolis_add_scalar_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, monolis%MAT%ndof, i, j, sub_i, sub_j, val)
+      & monolis%MAT%C%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
   end subroutine monolis_add_scalar_to_sparse_matrix_C
 
   !> @ingroup matrix
@@ -191,7 +191,8 @@ contains
     real(kdouble), intent(in) :: mat(:,:)
 
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, n_base, n_base, monolis%MAT%ndof, connectivity, connectivity, mat)
+      monolis%MAT%R%A, n_base, n_base, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
+      connectivity, connectivity, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -208,7 +209,8 @@ contains
     complex(kdouble), intent(in) :: mat(:,:)
 
     call monolis_add_matrix_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, n_base, n_base, monolis%MAT%ndof, connectivity, connectivity, mat)
+      monolis%MAT%C%A, n_base, n_base, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
+      connectivity, connectivity, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_C
 
   !> @ingroup matrix
@@ -230,7 +232,8 @@ contains
     real(kdouble), intent(in) :: mat(:,:)
 
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%R%A, n_base_i, n_base_j, monolis%MAT%ndof, connectivity_i, connectivity_j, mat)
+      monolis%MAT%R%A, n_base_i, n_base_j, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
+      connectivity_i, connectivity_j, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R
 
   !> @ingroup matrix
@@ -252,7 +255,8 @@ contains
     complex(kdouble), intent(in) :: mat(:,:)
 
     call monolis_add_matrix_to_sparse_matrix_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
-      & monolis%MAT%C%A, n_base_i, n_base_j, monolis%MAT%ndof, connectivity_i, connectivity_j, mat)
+      monolis%MAT%C%A, n_base_i, n_base_j, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
+      connectivity_i, connectivity_j, mat)
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_C
 
   !# CSR data setter
@@ -291,11 +295,21 @@ contains
     monolis%MAT%NP = NP
     monolis%MAT%NDOF = NDOF
 
+    call monolis_palloc_I_1d(monolis%MAT%n_dof_index, NP + 1)
+    call monolis_palloc_I_1d(monolis%MAT%n_dof_index2, NZ + 1)
     call monolis_palloc_I_1d(monolis%MAT%CSR%index, NP + 1)
     call monolis_palloc_I_1d(monolis%MAT%CSR%item, NZ)
     call monolis_palloc_R_1d(monolis%MAT%R%A, NDOF*NDOF*NZ)
     call monolis_palloc_R_1d(monolis%MAT%R%B, NDOF*NP)
     call monolis_palloc_R_1d(monolis%MAT%R%X, NDOF*NP)
+
+    do i = 1, NP
+      monolis%MAT%n_dof_index(i + 1) = monolis%MAT%n_dof_index(i) + NDOF
+    enddo
+
+    do i = 1, NZ
+      monolis%MAT%n_dof_index2(i + 1) = monolis%MAT%n_dof_index2(i) + NDOF*NDOF
+    enddo
 
     do i = 1, NP
       monolis%MAT%CSR%index(i) = index(i)
@@ -355,7 +369,7 @@ contains
 
     call monolis_set_Dirichlet_bc_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, monolis%MAT%R%A, B, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
-      & monolis%MAT%ndof, node_id, ndof_bc, val)
+      & monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_R
 
   !> @ingroup matrix
@@ -375,6 +389,6 @@ contains
 
     call monolis_set_Dirichlet_bc_main_C(monolis%MAT%CSR%index, monolis%MAT%CSR%item, monolis%MAT%C%A, B, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
-      & monolis%MAT%ndof, node_id, ndof_bc, val)
+      & monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_C
 end module mod_monolis_spmat_handler
