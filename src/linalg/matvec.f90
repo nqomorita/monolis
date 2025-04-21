@@ -78,7 +78,8 @@ contains
     elseif(monoMAT%NDOF == 1)then
       call monolis_matvec_11_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     elseif(monoMAT%NDOF == -1)then
-      call monolis_matvec_V_R(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
+      call monolis_matvec_V_R(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, &
+        monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     else
       call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
     endif
@@ -116,7 +117,8 @@ contains
     elseif(monoMAT%NDOF == 1)then
       call monolis_matvec_11_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     elseif(monoMAT%NDOF == -1)then
-      call monolis_matvec_V_C(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
+      call monolis_matvec_V_C(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, &
+        monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
     else
       call monolis_matvec_nn_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y, monoMAT%NDOF)
     endif
