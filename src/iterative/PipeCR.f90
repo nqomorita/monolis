@@ -119,7 +119,7 @@ contains
       alpha1 = 1.0d0/alpha
     enddo
 
-    call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
+    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv

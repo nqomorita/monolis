@@ -12,21 +12,22 @@ contains
 
   !> @ingroup eigen
   !> Lanczos 法の初期ベクトル生成
-  subroutine lanczos_initialze(monoCOM, N, NDOF, q, is_bc)
+  subroutine lanczos_initialze(monoMAT, monoCOM, q, is_bc)
     implicit none
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 計算点数✕計算点上の自由度
-    integer(kint), intent(in) :: N
-    !> [in] 計算点上の自由度
-    integer(kint), intent(in) :: NDOF
     !> [out] 入力ベクトル
     real(kdouble), intent(out) :: q(:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: i
+    integer(kint) :: i, N, NDOF
     real(kdouble) :: norm, t1, t2
     integer(kint), allocatable :: vtxdist(:)
+
+    N     = monoMAT%N
+    NDOF  = monoMAT%NDOF
 
     call monolis_com_n_vertex_list(N*NDOF, monoCOM%comm, vtxdist)
 
@@ -36,7 +37,7 @@ contains
       if(is_bc(i)) q(i) = 0.0d0
     enddo
 
-    call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
+    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, q, t1)
 
     call monolis_inner_product_main_R(monoCOM, N*NDOF, q, q, norm, t1, t2)
 
@@ -45,7 +46,7 @@ contains
       q(i) = q(i)*norm
     enddo
 
-    call monolis_mpi_update_R(monoCOM, NDOF, q, t1)
+    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, q, t1)
   end subroutine lanczos_initialze
 
   !> @ingroup eigen

@@ -73,7 +73,7 @@ contains
     call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
     call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
 
-    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc)
+    call lanczos_initialze(monoMAT, monoCOM, q(:,1), is_bc)
 
     do iter = 1, maxiter
       call monolis_set_RHS_R(monoMAT, q(:,iter))
@@ -120,7 +120,7 @@ contains
           do j = 1, NP*NDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
-          call monolis_mpi_update_R(monoCOM, NDOF, vec(:,i), tmp)
+          call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
         enddo
         exit
       endif
@@ -186,7 +186,7 @@ contains
     call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
     call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
 
-    call lanczos_initialze(monoCOM, N, NDOF, q(:,1), is_bc)
+    call lanczos_initialze(monoMAT, monoCOM, q(:,1), is_bc)
 
     do iter = 1, maxiter
       call monolis_matvec_product_main_R(monoCOM, monoMAT, q(:,iter), monoMAT%R%X, tspmv, tcomm_spmv)
@@ -236,7 +236,7 @@ contains
           do j = 1, NP*NDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
-          call monolis_mpi_update_R(monoCOM, NDOF, vec(:,i), tmp)
+          call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
         enddo
         exit
       endif

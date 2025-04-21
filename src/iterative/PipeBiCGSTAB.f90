@@ -151,7 +151,7 @@ contains
       RR    = RR1
     enddo
 
-    call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
+    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     call monolis_dealloc_R_1d(R )
     call monolis_dealloc_R_1d(RT)

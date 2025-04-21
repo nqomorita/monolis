@@ -25,7 +25,7 @@ contains
 
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
 
-    call monolis_mpi_update_R(monoCOM, monolis%MAT%NDOF, Y, tcomm)
+    call monolis_mpi_update_R_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
   end subroutine monolis_matvec_product_R
 
   !> @ingroup linalg
@@ -46,7 +46,7 @@ contains
 
     call monolis_matvec_product_main_C(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
 
-    call monolis_mpi_update_C(monoCOM, monolis%MAT%NDOF, Y, tcomm)
+    call monolis_mpi_update_C_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
   end subroutine monolis_matvec_product_C
 
   !> @ingroup dev_linalg
@@ -71,11 +71,7 @@ contains
 
     t1 = monolis_get_time()
 
-    if(monoMAT%NDOF == -1)then
-      call monolis_mpi_update_V_R_main(monoCOM, monoMAT%n_dof_index, X, tcomm)
-    else
-      call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, X, tcomm)
-    endif
+    call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
@@ -113,11 +109,7 @@ contains
 
     t1 = monolis_get_time()
 
-    if(monoMAT%NDOF == -1)then
-      call monolis_mpi_update_V_C_main(monoCOM, monoMAT%n_dof_index, X, tcomm)
-    else
-      call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, X, tcomm)
-    endif
+    call monolis_mpi_update_C_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_C(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%C%A, X, Y)
