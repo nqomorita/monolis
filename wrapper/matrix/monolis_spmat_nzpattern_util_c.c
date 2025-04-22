@@ -147,7 +147,7 @@ void monolis_set_n_dof_index(
 
   mat->n_dof_list = monolis_alloc_I_1d(mat->n_dof_list, np);
   mat->n_dof_index = monolis_alloc_I_1d(mat->n_dof_index, np + 1);
-  mat->n_dof_index2 = monolis_alloc_I_1d(mat->n_dof_index2, nz);
+  mat->n_dof_index2 = monolis_alloc_I_1d(mat->n_dof_index2, nz + 1);
 
   for (int i = 0; i < np; ++i) {
     mat->n_dof_list[i] = n_dof_list[i];
@@ -161,7 +161,7 @@ void monolis_set_n_dof_index(
     int jS = mat->CSR.index[i];
     int jE = mat->CSR.index[i + 1];
     for (int j = jS; j < jE; ++j) {
-      int in = mat->CSR.item[j];
+      int in = mat->CSR.item[j] - 1;
       mat->n_dof_index2[j + 1] = mat->n_dof_index2[j] + n_dof_list[i]*n_dof_list[in];
     }
   }

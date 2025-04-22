@@ -46,7 +46,7 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }
@@ -142,7 +142,7 @@ void monolis_get_nonzero_pattern_by_connectivity_R(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }
@@ -176,7 +176,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_R(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }
@@ -251,7 +251,7 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }
@@ -347,7 +347,7 @@ void monolis_get_nonzero_pattern_by_connectivity_C(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }
@@ -381,7 +381,7 @@ void monolis_get_nonzero_pattern_by_nodal_graph_C(
     index,
     item);
 
-  monolis_alloc_I_1d(n_dof_list, n_node);
+  n_dof_list = monolis_alloc_I_1d(n_dof_list, n_node);
   for (int i = 0; i < n_node; ++i) {
     n_dof_list[i] = n_dof;
   }

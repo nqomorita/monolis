@@ -8,7 +8,8 @@ module mod_monolis_solve_wrapper
 
 contains
 
-  subroutine monolis_solve_R_c(N, NP, NZ, NDOF, A, X, B, index, item, &
+  subroutine monolis_solve_R_c(N, NP, NZ, NDOF, n_dof_list, n_dof_index, n_dof_index2, &
+    A, X, B, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
@@ -20,6 +21,9 @@ contains
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(in), target :: n_dof_list(NP)
+    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
+    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
     integer(c_int), intent(in), target :: index(NP + 1)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -37,6 +41,9 @@ contains
     monolis%MAT%N = N
     monolis%MAT%NP = NP
     monolis%MAT%NDOF = NDOF
+    monolis%MAT%n_dof_list => n_dof_list
+    monolis%MAT%n_dof_index => n_dof_index
+    monolis%MAT%n_dof_index2 => n_dof_index2
     monolis%MAT%R%A => A
     monolis%MAT%R%X => X
     monolis%MAT%R%B => B
@@ -81,7 +88,8 @@ contains
     enddo
   end subroutine monolis_solve_R_c
 
-  subroutine monolis_solve_C_c(N, NP, NZ, NDOF, A, X, B, index, item, &
+  subroutine monolis_solve_C_c(N, NP, NZ, NDOF, n_dof_list, n_dof_index, n_dof_index2, &
+    A, X, B, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item, &
@@ -93,6 +101,9 @@ contains
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(c_int), intent(in), target :: n_dof_list(NP)
+    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
+    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
     integer(c_int), intent(in), target :: index(NP + 1)
     integer(c_int), intent(in), target :: item(NZ)
     integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
@@ -110,6 +121,9 @@ contains
     monolis%MAT%N = N
     monolis%MAT%NP = NP
     monolis%MAT%NDOF = NDOF
+    monolis%MAT%n_dof_list => n_dof_list
+    monolis%MAT%n_dof_index => n_dof_index
+    monolis%MAT%n_dof_index2 => n_dof_index2
     monolis%MAT%C%A => A
     monolis%MAT%C%X => X
     monolis%MAT%C%B => B

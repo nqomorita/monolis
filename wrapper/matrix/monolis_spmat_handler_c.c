@@ -45,7 +45,7 @@ void monolis_add_scalar_to_sparse_matrix_R(
 {
   int n_node = mat->mat.NP;
   int nz = mat->mat.CSR.index[n_node];
-  int nza;
+  int nza = mat->mat.n_dof_index2[nz];
 
   monolis_add_scalar_to_sparse_matrix_R_c_main(
     n_node,
