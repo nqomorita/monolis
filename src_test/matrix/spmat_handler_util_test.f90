@@ -57,10 +57,12 @@ contains
 
     A = 0.0d0
 
+    n_dof_index = 0
     do i = 1, 4
       n_dof_index(i + 1) = n_dof_index(i) + 2
     enddo
 
+    n_dof_index2 = 0
     do i = 1, 40
       n_dof_index2(i + 1) = n_dof_index2(i) + 4
     enddo
@@ -125,10 +127,12 @@ contains
 
     A = (0.0d0, 0.0d0)
 
+    n_dof_index = 0
     do i = 1, 4
       n_dof_index(i + 1) = n_dof_index(i) + 2
     enddo
 
+    n_dof_index2 = 0
     do i = 1, 40
       n_dof_index2(i + 1) = n_dof_index2(i) + 4
     enddo
@@ -190,10 +194,12 @@ contains
 
     A = 0.0d0
 
+    n_dof_index = 0
     do i = 1, 4
       n_dof_index(i + 1) = n_dof_index(i) + 2
     enddo
 
+    n_dof_index2 = 0
     do i = 1, 40
       n_dof_index2(i + 1) = n_dof_index2(i) + 4
     enddo
@@ -262,10 +268,12 @@ contains
 
     A = 0.0d0
 
+    n_dof_index = 0
     do i = 1, 4
       n_dof_index(i + 1) = n_dof_index(i) + 2
     enddo
 
+    n_dof_index2 = 0
     do i = 1, 40
       n_dof_index2(i + 1) = n_dof_index2(i) + 4
     enddo
@@ -373,6 +381,5 @@ contains
     ans = 0.0d0
     ans(5) = 433.0d0; ans(6) = 434.0d0; ans(7) = 43.0d0; ans(8) = 44.0d0;
     call monolis_test_check_eq_R("monolis_convert_sparse_matrix_to_dense_matrix_R_test 8", dense(8,:), ans)
-
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R_test
 end module mod_monolis_spmat_handler_util_test

@@ -429,7 +429,7 @@ contains
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, j, k, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
+    integer(kint) :: i, j, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
     integer(kint) :: eperm1(n1), eperm2(n2)
     integer(kint), allocatable :: idx1(:), idx2(:)
     integer(kint), allocatable :: idx1t(:), idx2t(:)
@@ -445,6 +445,8 @@ contains
 
     call monolis_alloc_I_1d(idx1, n1 + 1)
     call monolis_alloc_I_1d(idx2, n2 + 1)
+    call monolis_alloc_I_1d(idx1t, n1 + 1)
+    call monolis_alloc_I_1d(idx2t, n2 + 1)
 
     do i = 1, n1
       in = e1(i)
@@ -472,9 +474,9 @@ contains
       j2 = eperm2(i2)
       do i1 = 1, n1
         j1 = eperm1(i1)
-        do k2 = 1, n_dof_index(j2 + 1) - n_dof_index(j2)
-        do k1 = 1, n_dof_index(j1 + 1) - n_dof_index(j1)
-          temp(idx1t(j1)+k1, idx1t(j2)+k2) = val(idx1(i1)+k1, idx2(i2)+k2)
+        do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
+        do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
+          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(i1)+k1, idx2t(i2)+k2)
         enddo
         enddo
       enddo
@@ -487,19 +489,19 @@ contains
       aa:do i2 = 1, n2
         do j1 = jS, jE
           jn = item(j1)
-          if(jn == e2t(j1))then
-            kn = n_dof_index(jn + 1) - n_dof_index(jn)
-            do k1 = 1, n_dof_index(in + 1) - n_dof_index(in)
+          if(jn == e2t(i2))then
+            kn = idx2t(i2 + 1) - idx2t(i2)
+            do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
-              im = n_dof_index2(i2) + kn*(k1-1) + k2
-              A(im) = A(im) + temp(idx1(i)+k1, idx2(j)+k2)
+              im = n_dof_index2(j1) + kn*(k1-1) + k2
+              A(im) = A(im) + temp(idx1(i1)+k1, idx2(i2)+k2)
             enddo
             enddo
-            jS = k
+            jS = j1
             cycle aa
           endif
         enddo
-      call monolis_stop_by_matrix_assemble(e1t(i), e2t(j))
+      call monolis_stop_by_matrix_assemble(e1t(i1), e2t(i2))
       enddo aa
     enddo
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R
@@ -546,6 +548,8 @@ contains
 
     call monolis_alloc_I_1d(idx1, n1 + 1)
     call monolis_alloc_I_1d(idx2, n2 + 1)
+    call monolis_alloc_I_1d(idx1t, n1 + 1)
+    call monolis_alloc_I_1d(idx2t, n2 + 1)
 
     do i = 1, n1
       in = e1(i)
@@ -573,9 +577,9 @@ contains
       j2 = eperm2(i2)
       do i1 = 1, n1
         j1 = eperm1(i1)
-        do k2 = 1, n_dof_index(j2 + 1) - n_dof_index(j2)
-        do k1 = 1, n_dof_index(j1 + 1) - n_dof_index(j1)
-          temp(idx1t(j1)+k1, idx1t(j2)+k2) = val(idx1(i1)+k1, idx2(i2)+k2)
+        do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
+        do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
+          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(i1)+k1, idx2t(i2)+k2)
         enddo
         enddo
       enddo
@@ -588,19 +592,19 @@ contains
       aa:do i2 = 1, n2
         do j1 = jS, jE
           jn = item(j1)
-          if(jn == e2t(j1))then
-            kn = n_dof_index(jn + 1) - n_dof_index(jn)
-            do k1 = 1, n_dof_index(in + 1) - n_dof_index(in)
+          if(jn == e2t(i2))then
+            kn = idx2t(i2 + 1) - idx2t(i2)
+            do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
-              im = n_dof_index2(i2) + kn*(k1-1) + k2
-              A(im) = A(im) + temp(idx1(i)+k1, idx2(j)+k2)
+              im = n_dof_index2(j1) + kn*(k1-1) + k2
+              A(im) = A(im) + temp(idx1(i1)+k1, idx2(i2)+k2)
             enddo
             enddo
-            jS = k
+            jS = j1
             cycle aa
           endif
         enddo
-      call monolis_stop_by_matrix_assemble(e1t(i), e2t(j))
+      call monolis_stop_by_matrix_assemble(e1t(i1), e2t(i2))
       enddo aa
     enddo
   end subroutine monolis_add_matrix_to_sparse_matrix_main_C
@@ -863,8 +867,11 @@ contains
     real(kdouble), intent(inout), allocatable :: dense(:,:)
     integer(kint) :: N, NT, n_dof
     integer(kint) :: comm_size
-    integer(kint) :: i, j, k1, k2, jS, jE, jn, kn, n1, n2
+    integer(kint) :: i, j, k1, k2, jS, jE, jn, kn, n1, n2, nd1, nd2
+    integer(kint) :: in, my_rank
     integer(kint), allocatable :: vertex_id(:)
+    integer(kint), allocatable :: vtxdist(:), gindex(:)
+    real(kdouble) :: t1
 
     N = monoMAT%N
     if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
@@ -876,21 +883,37 @@ contains
     call monolis_allreduce_I1(NT, monolis_mpi_sum, monoCOM%comm)
     call monolis_alloc_R_2d(dense, monoMAT%n_dof_index(N + 1), NT)
 
+    in = monolis_mpi_get_local_comm_size(monoCOM%comm)
+    call monolis_alloc_I_1d(vtxdist, in + 1)
+    call monolis_com_n_vertex_list(monoMAT%n_dof_index(N + 1), monoCOM%comm, vtxdist)
+
+    do i = 1, in
+      vtxdist(i + 1) = vtxdist(i + 1) + vtxdist(i)
+    enddo
+
+    my_rank = monolis_mpi_get_local_my_rank(monoCOM%comm)
+    call monolis_alloc_I_1d(gindex, monoMAT%NP)
+    do i = 1, monoMAT%N - 1
+      gindex(i + 1) = gindex(i) + monoMAT%n_dof_list(i) + vtxdist(my_rank + 1)
+    enddo
+    call monolis_mpi_update_I(monoCOM, 1, gindex, t1)
+
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
-        !jn = vertex_id(monoMAT%CSR%item(j))
-        !kn = NDOF2*(j - 1)
-        !do k1 = 1, NDOF
-        !do k2 = 1, NDOF
-          !n1 = NDOF*(i - 1) + k1
-          !n2 = NDOF*(jn - 1) + k2
-          !dense(n1, n2) = monoMAT%R%A(kn + NDOF*(k1 - 1) + k2)
-        !enddo
-        !enddo
+        jn = vertex_id(monoMAT%CSR%item(j))
+        kn = monoMAT%n_dof_index2(j)
+        nd1 = monoMAT%n_dof_list(i)
+        nd2 = monoMAT%n_dof_list(monoMAT%CSR%item(j))
+        do k1 = 1, nd1
+        do k2 = 1, nd2
+          n1 = gindex(i ) + k1
+          n2 = gindex(jn) + k2
+          dense(n1, n2) = monoMAT%R%A(kn + nd2*(k1 - 1) + k2)
+        enddo
+        enddo
       enddo
     enddo
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R
-
 end module mod_monolis_spmat_handler_util

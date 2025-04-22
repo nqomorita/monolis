@@ -71,7 +71,7 @@ contains
 
     call monolis_palloc_I_1d(MAT%n_dof_list, MAT%NP)
     call monolis_palloc_I_1d(MAT%n_dof_index, MAT%NP + 1)
-    call monolis_palloc_I_1d(MAT%n_dof_index2, NZ)
+    call monolis_palloc_I_1d(MAT%n_dof_index2, NZ + 1)
 
     MAT%n_dof_list = n_dof_list
 

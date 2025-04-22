@@ -30,6 +30,7 @@ contains
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
@@ -39,6 +40,10 @@ contains
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_R
@@ -63,6 +68,7 @@ contains
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
@@ -72,6 +78,10 @@ contains
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_C
@@ -167,12 +177,17 @@ contains
     integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_R
@@ -196,12 +211,17 @@ contains
     integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_C
@@ -220,9 +240,14 @@ contains
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_R
@@ -241,9 +266,14 @@ contains
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_C

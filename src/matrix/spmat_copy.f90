@@ -58,6 +58,10 @@ contains
     NP = mat_in%MAT%NP
     NZ = mat_in%MAT%CSR%index(NP + 1)
 
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_list)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_list, NP)
+    mat_out%MAT%n_dof_list = mat_in%MAT%n_dof_list
+
     call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index)
     call monolis_palloc_I_1d(mat_out%MAT%n_dof_index, NP + 1)
     mat_out%MAT%n_dof_index = mat_in%MAT%n_dof_index
@@ -100,6 +104,10 @@ contains
 
     NP = mat_in%MAT%NP
     NZ = mat_in%MAT%CSR%index(NP + 1)
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_list)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_list, NP)
+    mat_out%MAT%n_dof_list = mat_in%MAT%n_dof_list
 
     call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index)
     call monolis_palloc_I_1d(mat_out%MAT%n_dof_index, NP + 1)
