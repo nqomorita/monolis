@@ -46,6 +46,7 @@ typedef struct {
   int N;
   int NP;
   int NDOF;
+  int* n_dof_list;
   int* n_dof_index;
   int* n_dof_index2;
   MONOLIS_MAT_VAL_R R;

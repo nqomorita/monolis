@@ -33,11 +33,27 @@ void monolis_alloc_nonzero_pattern_mat_val_R(
   MONOLIS_MAT* mat);
 
 /**
+ * @brief 疎行列の行列成分のメモリ確保（実数型）
+ * @param[inout] mat monolis 構造体
+ * @ingroup dev_matrix
+ */
+void monolis_alloc_nonzero_pattern_mat_val_V_R(
+  MONOLIS_MAT* mat);
+
+/**
  * @brief 疎行列の行列成分のメモリ確保（複素数型）
  * @param[inout] mat monolis 構造体
  * @ingroup dev_matrix
  */
 void monolis_alloc_nonzero_pattern_mat_val_C(
+  MONOLIS_MAT* mat);
+
+/**
+ * @brief 疎行列の行列成分のメモリ確保（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @ingroup dev_matrix
+ */
+void monolis_alloc_nonzero_pattern_mat_val_V_C(
   MONOLIS_MAT* mat);
 
 /**
@@ -61,6 +77,16 @@ void monolis_get_CSC_format(
   int* indexR,
   int* itemR,
   int* permR);
+
+/**
+ * @brief 疎行列構造体への自由度リスト登録
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_dof_list 計算点の自由度リスト
+ * @ingroup dev_matrix
+ */
+void monolis_set_n_dof_index(
+  MONOLIS_MAT* mat,
+  int*         n_dof_list);
 
 #ifdef __cplusplus
 }

@@ -82,6 +82,24 @@ void monolis_alloc_nonzero_pattern_mat_val_R(
   mat->R.D = NULL;
 }
 
+void monolis_alloc_nonzero_pattern_mat_val_V_R(
+  MONOLIS_MAT* mat)
+{
+  int n, nz, in;
+
+  n = mat->n_dof_index[mat->NP];
+  in = mat->CSR.index[mat->NP];
+  nz = mat->n_dof_index2[in];
+
+  mat->R.A = monolis_alloc_R_1d(mat->R.A, nz);
+  mat->R.X = monolis_alloc_R_1d(mat->R.X, n);
+  mat->R.B = monolis_alloc_R_1d(mat->R.B, n);
+
+  mat->R.L = NULL;
+  mat->R.U = NULL;
+  mat->R.D = NULL;
+}
+
 void monolis_alloc_nonzero_pattern_mat_val_C(
   MONOLIS_MAT* mat)
 {
@@ -98,4 +116,53 @@ void monolis_alloc_nonzero_pattern_mat_val_C(
   mat->C.L = NULL;
   mat->C.U = NULL;
   mat->C.D = NULL;
+}
+
+void monolis_alloc_nonzero_pattern_mat_val_V_C(
+  MONOLIS_MAT* mat)
+{
+  int n, nz, in;
+
+  n = mat->n_dof_index[mat->NP];
+  in = mat->CSR.index[mat->NP];
+  nz = mat->n_dof_index2[in];
+
+  mat->C.A = monolis_alloc_C_1d(mat->C.A, nz);
+  mat->C.X = monolis_alloc_C_1d(mat->C.X, n);
+  mat->C.B = monolis_alloc_C_1d(mat->C.B, n);
+
+  mat->C.L = NULL;
+  mat->C.U = NULL;
+  mat->C.D = NULL;
+}
+
+void monolis_set_n_dof_index(
+  MONOLIS_MAT* mat,
+  int*         n_dof_list)
+{
+  int np, nz;
+
+  np = mat->NP;
+  nz = mat->CSR.index[np];
+
+  mat->n_dof_list = monolis_alloc_I_1d(mat->n_dof_list, np);
+  mat->n_dof_index = monolis_alloc_I_1d(mat->n_dof_index, np + 1);
+  mat->n_dof_index2 = monolis_alloc_I_1d(mat->n_dof_index2, nz);
+
+  for (int i = 0; i < np; ++i) {
+    mat->n_dof_list[i] = n_dof_list[i];
+  }
+
+  for (int i = 0; i < np; ++i) {
+    mat->n_dof_index[i + 1] = mat->n_dof_index[i] + n_dof_list[i];
+  }
+
+  for (int i = 0; i < np; ++i) {
+    int jS = mat->CSR.index[i];
+    int jE = mat->CSR.index[i + 1];
+    for (int j = jS; j < jE; ++j) {
+      int in = mat->CSR.item[j];
+      mat->n_dof_index2[j + 1] = mat->n_dof_index2[j] + n_dof_list[i]*n_dof_list[in];
+    }
+  }
 }
