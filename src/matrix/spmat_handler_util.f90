@@ -887,14 +887,11 @@ contains
     call monolis_alloc_I_1d(vtxdist, in + 1)
     call monolis_com_n_vertex_list(monoMAT%n_dof_index(N + 1), monoCOM%comm, vtxdist)
 
-    do i = 1, in
-      vtxdist(i + 1) = vtxdist(i + 1) + vtxdist(i)
-    enddo
-
     my_rank = monolis_mpi_get_local_my_rank(monoCOM%comm)
     call monolis_alloc_I_1d(gindex, monoMAT%NP)
+    gindex = vtxdist(my_rank + 1)
     do i = 1, monoMAT%N - 1
-      gindex(i + 1) = gindex(i) + monoMAT%n_dof_list(i) + vtxdist(my_rank + 1)
+      gindex(i + 1) = gindex(i) + monoMAT%n_dof_list(i)
     enddo
     call monolis_mpi_update_I(monoCOM, 1, gindex, t1)
 
@@ -902,13 +899,13 @@ contains
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
-        jn = vertex_id(monoMAT%CSR%item(j))
+        jn = monoMAT%CSR%item(j)
         kn = monoMAT%n_dof_index2(j)
         nd1 = monoMAT%n_dof_list(i)
-        nd2 = monoMAT%n_dof_list(monoMAT%CSR%item(j))
+        nd2 = monoMAT%n_dof_list(jn)
         do k1 = 1, nd1
         do k2 = 1, nd2
-          n1 = gindex(i ) + k1
+          n1 = monoMAT%n_dof_index(i) + k1
           n2 = gindex(jn) + k2
           dense(n1, n2) = monoMAT%R%A(kn + nd2*(k1 - 1) + k2)
         enddo
