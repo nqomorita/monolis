@@ -288,6 +288,8 @@ contains
     integer(kint), allocatable :: rc(:), disp(:)
     real(kdouble), allocatable :: X_global(:)
     real(kdouble), allocatable :: Y_global(:)
+    real(kdouble), allocatable :: XY_global(:)
+    real(kdouble), allocatable :: XY_abs_global(:)
     type(monolis_R_N128) :: sum_N128, a
 
     !> gather part
@@ -300,6 +302,8 @@ contains
     if(my_rank == 0)then
       call monolis_alloc_R_1d(X_global, n_global*n_dof)
       call monolis_alloc_R_1d(Y_global, n_global*n_dof)
+      call monolis_alloc_R_1d(XY_global, n_global*n_dof)
+      call monolis_alloc_R_1d(XY_abs_global, n_global*n_dof)
 
       call monolis_alloc_I_1d(rc, comm_size)
       call monolis_alloc_I_1d(disp, comm_size)
@@ -318,9 +322,16 @@ contains
     sum_global = 0.0d0
 
     if(my_rank == 0)then
+      do i = 1, n_global*n_dof
+        XY_global(i) = X_global(i)*Y_global(i)
+      enddo
+
+      XY_abs_global = XY_global
+      call monolis_qsort_R_2d(XY_abs_global, XY_global, 1, n_global*n_dof)
+
       sum_N128 = monolis_conv_R_to_R_N128(0.0d0)
       do i = 1, n_global*n_dof
-        a = monolis_conv_R_to_R_N128(X_global(i)*Y_global(i))
+        a = monolis_conv_R_to_R_N128(XY_global(i))
         call monolis_add_R_N128(sum_N128, a, sum_N128)
       enddo
       sum_global = monolis_conv_R_N128_to_R(sum_N128)
