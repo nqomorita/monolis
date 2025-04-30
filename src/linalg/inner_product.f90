@@ -299,24 +299,24 @@ contains
     n_global = n
     call monolis_allreduce_I1(n_global, monolis_mpi_sum, monoCOM%comm)
 
-    if(my_rank == 0)then
+    !if(my_rank == 0)then
       call monolis_alloc_R_1d(X_global, n_global*n_dof)
       call monolis_alloc_R_1d(Y_global, n_global*n_dof)
       call monolis_alloc_R_1d(XY_global, n_global*n_dof)
       call monolis_alloc_R_1d(XY_abs_global, n_global*n_dof)
+    !endif
 
-      call monolis_alloc_I_1d(rc, comm_size)
-      call monolis_alloc_I_1d(disp, comm_size)
+    call monolis_alloc_I_1d(rc, comm_size)
+    call monolis_alloc_I_1d(disp, comm_size)
 
-      call monolis_allgather_I1(n, rc, monoCOM%comm)
-      do i = 1, comm_size - 1
-        disp(i + 1) = disp(i) + rc(i)
-      enddo
-    endif
+    call monolis_allgather_I1(n*n_dof, rc, monoCOM%comm)
+    do i = 1, comm_size - 1
+      disp(i + 1) = disp(i) + rc(i)
+    enddo
 
     root = 0
-    call monolis_gather_V_R(X, n, X_global, rc, disp, root, monoCOM%comm)
-    call monolis_gather_V_R(Y, n, Y_global, rc, disp, root, monoCOM%comm)
+    call monolis_gather_V_R(X, n*n_dof, X_global, rc, disp, root, monoCOM%comm)
+    call monolis_gather_V_R(Y, n*n_dof, Y_global, rc, disp, root, monoCOM%comm)
 
     !> main inner product routine
     sum_global = 0.0d0
@@ -326,7 +326,7 @@ contains
         XY_global(i) = X_global(i)*Y_global(i)
       enddo
 
-      XY_abs_global = XY_global
+      XY_abs_global = dabs(XY_global)
       call monolis_qsort_R_2d(XY_abs_global, XY_global, 1, n_global*n_dof)
 
       sum_N128 = monolis_conv_R_to_R_N128(0.0d0)
