@@ -180,7 +180,7 @@ void monolis_solver_parallel_R_test(){
   monolis_show_iterlog(&mat, true);
   monolis_show_summary(&mat, true);
 
-  for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_BICGSTAB_N128 + 1; ++iter) {
+  for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_IDRS + 1; ++iter) {
     for (prec = MONOLIS_PREC_NONE; prec < MONOLIS_PREC_SOR + 1; ++prec) {
 
       for(i = 0; i < n_node; i++){
