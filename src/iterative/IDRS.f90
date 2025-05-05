@@ -8,6 +8,7 @@ module mod_monolis_solver_IDRS
   use mod_monolis_inner_product
   use mod_monolis_vec_util
   use mod_monolis_converge
+  use mod_monolis_lapack
 
   implicit none
 
@@ -43,7 +44,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
-    S = 4
+    S = monoPRM%Iarray(MONOLIS_PRM_I_IDRS_DIM)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)

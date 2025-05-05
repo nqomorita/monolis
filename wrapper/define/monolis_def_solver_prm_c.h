@@ -100,6 +100,8 @@ static const int MONOLIS_PRM_I_SHOW_SUMMARY = 22;
 
 static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
 
+static const int MONOLIS_PRM_I_IDRS_DIM = 24;
+
 
 static const int MONOLIS_PRM_R_TOL = 1;
 

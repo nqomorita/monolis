@@ -129,6 +129,9 @@ module mod_monolis_def_solver
   !> パラメータ：計算時間の統計的処理結果の表示
   integer(kint), parameter :: monolis_prm_I_show_time_statistics = 23
 
+  !> パラメータ：IDR(S) 法の基底数
+  integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 24
+
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
   !> パラメータ：現在の残差
@@ -193,6 +196,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
