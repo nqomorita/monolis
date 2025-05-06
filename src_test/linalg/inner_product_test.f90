@@ -15,6 +15,7 @@ contains
     integer(kint) :: iX(4), iY(4), isum
     real(kdouble) :: rX(4), rY(4), rsum
     complex(kdouble) :: cX(4), cY(4), csum
+    real(kdouble) :: t1, t2
 
     call monolis_std_global_log_string("monolis_inner_product_main_C")
     call monolis_std_global_log_string("monolis_inner_product_main_I")
@@ -149,9 +150,23 @@ contains
     call monolis_inner_product_R_N128(monolis, com, ndof, rX, rY, rsum)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
-      call monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 20.0d0)
+      call monolis_test_check_eq_R1("monolis_linalg_test 8", rsum, 20.0d0)
     else
-      call monolis_test_check_eq_R1("monolis_linalg_test 2", rsum, 10.0d0)
+      call monolis_test_check_eq_R1("monolis_linalg_test 8", rsum, 10.0d0)
+    endif
+
+    !> case 9
+    rX(1) = 1.0d0; rY(1) = 4.0d0
+    rX(2) = 1.0d0; rY(2) = 3.0d0
+    rX(3) = 1.0d0; rY(3) = 2.0d0
+    rX(4) = 1.0d0; rY(4) = 1.0d0
+
+    call monolis_global_sorted_inner_product_main_R_N128(com, 2, ndof, rX, rY, rsum, t1, t2)
+
+    if(monolis_mpi_get_global_comm_size() == 2)then
+      call monolis_test_check_eq_R1("monolis_linalg_test 9", rsum, 20.0d0)
+    else
+      call monolis_test_check_eq_R1("monolis_linalg_test 9", rsum, 10.0d0)
     endif
   end subroutine monolis_linalg_test
 end module mod_monolis_linalg_test
