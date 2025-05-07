@@ -14,8 +14,8 @@ contains
       !call monolis_solver_CG_test_main(n_dof, monolis_prec_NONE)
       !call monolis_solver_CG_test_main(n_dof, monolis_prec_DIAG)
       !call monolis_solver_CG_test_main(n_dof, monolis_prec_SOR)
-      !call monolis_solver_CG_test_main(n_dof, monolis_prec_AMG)
-      call monolis_solver_CG_test_main(n_dof, monolis_prec_LU)
+      call monolis_solver_CG_test_main(n_dof, monolis_prec_AMG)
+      !call monolis_solver_CG_test_main(n_dof, monolis_prec_LU)
     enddo
   end subroutine monolis_solver_CG_test
 

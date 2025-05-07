@@ -9,6 +9,29 @@ module mod_monolis_precond_ML
   type(monolis_mat), pointer, save :: monoMAT_save
   type(monolis_com), pointer, save :: monoCOM_save
 
+  interface
+    subroutine monolis_precond_ml_setup(sym, ndof, ierr) &
+        bind(c, name="monolis_ML_wrapper_setup")
+      use iso_c_binding
+      integer(c_int) :: sym
+      integer(c_int) :: ndof
+      integer(c_int) :: ierr
+    end subroutine
+
+    subroutine monolis_precond_ml_apply(rhs, ierr) &
+        bind(c, name="monolis_ML_wrapper_apply")
+      use iso_c_binding
+      real(c_double) :: rhs(:)
+      integer(c_int) :: ierr
+    end subroutine
+
+    subroutine monolis_precond_ml_clear(ierr) &
+        bind(c, name="monolis_ML_wrapper_clear")
+      use iso_c_binding
+      integer(c_int) :: ierr
+    end subroutine
+  end interface
+
 contains
 
   !> @ingroup prec

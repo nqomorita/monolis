@@ -12,24 +12,38 @@
 #include "monolis_wrapper_ml.h"
 
 #ifdef WITH_ML
-int monolis_ML_getrow(ML_Operator *mat_in, int N_requested_rows,
-                       int requested_rows[], int allocated_space,
-                       int cols[], double values[], int row_lengths[]) {
+int monolis_ML_getrow(
+  ML_Operator *mat_in, 
+  int N_requested_rows,
+  int requested_rows[], 
+  int allocated_space,
+  int cols[], 
+  double values[], 
+  int row_lengths[])
+{
   int ierr;
   monolis_ml_getrow_nn_(&N_requested_rows, requested_rows, &allocated_space,
                         cols, values, row_lengths, &ierr);
   return ierr;
 }
 
-int monolis_ML_matvec(ML_Operator *mat_in, int in_length, double p[],
-                       int out_length, double ap[]) {
+int monolis_ML_matvec(
+  ML_Operator *mat_in, 
+  int in_length, 
+  double p[],
+  int out_length, 
+  double ap[])
+{
   int ierr;
   monolis_ml_matvec_nn_(&in_length, p, &out_length, ap, &ierr);
   return ierr;
 }
 #endif
 
-int monolis_ML_comm(double x[], void *A_data) {
+int monolis_ML_comm(
+  double x[], 
+  void *A_data)
+{
   int ierr;
   monolis_ml_comm_nn_(x, &ierr);
   return ierr;
@@ -44,7 +58,11 @@ struct ml_info {
 static struct ml_info MLInfo;
 #endif
 
-void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
+void monolis_ML_wrapper_setup(
+  int *sym, 
+  int *Ndof, 
+  int *ierr)
+{
   int loglevel, myrank, nglobal;
   int N_grids, N_levels;
   int nlocal, nlocal_allcolumns;
@@ -94,7 +112,10 @@ void monolis_ML_wrapper_setup(int *sym, int *Ndof, int *ierr) {
 #endif
 }
 
-void monolis_ML_wrapper_apply(double rhs[], int *ierr) {
+void monolis_ML_wrapper_apply(
+  double rhs[], 
+  int *ierr)
+{
   int nlocal, nlocal_allcolumns;
   double *sol;
   int i;
@@ -116,40 +137,12 @@ void monolis_ML_wrapper_apply(double rhs[], int *ierr) {
 #endif
 }
 
-void monolis_ML_wrapper_clear(int *ierr) {
+void monolis_ML_wrapper_clear(
+  int *ierr)
+{
 #ifdef WITH_ML  
   ML_Aggregate_Destroy(&(MLInfo.agg_object));
   ML_Destroy(&(MLInfo.ml_object));
 #endif
 }
 
-/* Fortran interface */
-void monolis_precond_ml_setup_(int *sym, int *ndof, int *ierr) {
-  monolis_ML_wrapper_setup(sym, ndof, ierr);
-}
-void monolis_precond_ml_setup__(int *sym, int *ndof, int *ierr) {
-  monolis_ML_wrapper_setup(sym, ndof, ierr);
-}
-void MONOLIS_PRECOND_ML_SETUP(int *sym, int *ndof, int *ierr) {
-  monolis_ML_wrapper_setup(sym, ndof, ierr);
-}
-
-void monolis_precond_ml_apply_(double rhs[], int *ierr) {
-  monolis_ML_wrapper_apply(rhs, ierr);
-}
-void monolis_precond_ml_apply__(double rhs[], int *ierr) {
-  monolis_ML_wrapper_apply(rhs, ierr);
-}
-void MONOLIS_PRECOND_ML_APPLY(double rhs[], int *ierr) {
-  monolis_ML_wrapper_apply(rhs, ierr);
-}
-
-void monolis_precond_ml_clear_(int *ierr) {
-  monolis_ML_wrapper_clear(ierr);
-}
-void monolis_precond_ml_clear__(int *ierr) {
-  monolis_ML_wrapper_clear(ierr);
-}
-void MONOLIS_ML_WRAPPER_CLEAR(int *ierr) {
-  monolis_ML_wrapper_clear(ierr);
-}
