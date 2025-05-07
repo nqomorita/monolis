@@ -28,7 +28,7 @@ contains
     integer(kint) :: N, NP, NDOF, NNDOF
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, zeta, eta, B2, r1, r2, rho
-    real(kdouble) :: y_y, y_r, y_v, v_v, v_r, denom
+    real(kdouble) :: y_y, y_r, y_v, v_v, v_r, denom, C(5)
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, ths
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:), Z(:), U(:), Y(:), R0(:), V(:), T1(:), T2(:)
@@ -101,14 +101,20 @@ contains
         endif
         eta = 0.0d0
       else
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, Y, Y, y_y, tdotp, tcomm_dotp)
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, Y, R, y_r, tdotp, tcomm_dotp)
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, Y, V, y_v, tdotp, tcomm_dotp)
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, V, V, v_v, tdotp, tcomm_dotp)
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, V, R, v_r, tdotp, tcomm_dotp)
-        
+        call monolis_inner_product_main_R_no_comm(N, NDOF, Y, Y, C(1))
+        call monolis_inner_product_main_R_no_comm(N, NDOF, Y, R, C(2))
+        call monolis_inner_product_main_R_no_comm(N, NDOF, Y, V, C(3))
+        call monolis_inner_product_main_R_no_comm(N, NDOF, V, V, C(4))
+        call monolis_inner_product_main_R_no_comm(N, NDOF, V, R, C(5))
+        call monolis_allreduce_R(5, C, monolis_mpi_sum, monoCOM%comm)
+        y_y = C(1)
+        y_r = C(2)
+        y_v = C(3)
+        v_v = C(4)
+        v_r = C(5)
+
         denom = v_v * y_y - y_v * y_v
-        
+
         if (abs(denom) == 0.0d0) then
           zeta = 1.0d0
           eta = 0.0d0
@@ -125,18 +131,19 @@ contains
       call monolis_vec_AXPBY_R(N, NDOF, eta, Z, -alpha, U, T1)
       call monolis_vec_AXPBY_R(N, NDOF, zeta, MR, 1.0d0, T1, Z)
 
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, U, AU, tspmv, tcomm_spmv)
       call monolis_vec_AXPBY_R(N, NDOF, eta, Y, -alpha, AU, T1)
       call monolis_vec_AXPBY_R(N, NDOF, zeta, V, 1.0d0, T1, Y)
 
       call monolis_vec_AXPBY_R(N, NDOF, alpha, P, 1.0d0, Z, T1)
       call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, T1, 1.0d0, X, X)
 
-      !if(mod(iter, iter_RR) == 0)then
-      !  call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      !else
+      if(mod(iter, iter_RR) == 0)then
+        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      else
         call monolis_vec_AXPBY_R(N, NDOF, -alpha, AP, -1.0d0, Y, T1)
         call monolis_vec_AXPBY_R(N, NDOF, 1.0d0, T1, 1.0d0, R, R)
-      !endif
+      endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
