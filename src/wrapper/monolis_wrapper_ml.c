@@ -14,54 +14,54 @@
 #ifdef WITH_ML
 int monolis_ML_getrow(
   ML_Operator *mat_in, 
-  int N_requested_rows,
-  int requested_rows[], 
-  int allocated_space,
-  int cols[], 
+  int    N_requested_rows,
+  int    requested_rows[], 
+  int    allocated_space,
+  int    cols[], 
   double values[], 
-  int row_lengths[])
+  int    row_lengths[])
 {
   int ierr;
-  monolis_ml_getrow_nn_(&N_requested_rows, requested_rows, &allocated_space,
+  monolis_ml_getrow_nn_c(&N_requested_rows, requested_rows, &allocated_space,
                         cols, values, row_lengths, &ierr);
   return ierr;
 }
 
 int monolis_ML_matvec(
   ML_Operator *mat_in, 
-  int in_length, 
+  int    in_length, 
   double p[],
-  int out_length, 
+  int    out_length, 
   double ap[])
 {
   int ierr;
-  monolis_ml_matvec_nn_(&in_length, p, &out_length, ap, &ierr);
+  monolis_ml_matvec_nn_c(&in_length, p, &out_length, ap, &ierr);
   return ierr;
 }
 #endif
 
 int monolis_ML_comm(
   double x[], 
-  void *A_data)
+  void   *A_data)
 {
   int ierr;
-  monolis_ml_comm_nn_(x, &ierr);
+  monolis_ml_comm_nn_c(x, &ierr);
   return ierr;
 }
 
 #ifdef WITH_ML
 struct ml_info {
-  ML *ml_object;
-  ML_Aggregate *agg_object;
+  ML*           ml_object;
+  ML_Aggregate* agg_object;
 };
 
 static struct ml_info MLInfo;
 #endif
 
 void monolis_ML_wrapper_setup(
-  int *sym, 
-  int *Ndof, 
-  int *ierr)
+  int* sym, 
+  int* Ndof, 
+  int* ierr)
 {
   int loglevel, myrank, nglobal;
   int N_grids, N_levels;
@@ -76,7 +76,7 @@ void monolis_ML_wrapper_setup(
   ML_Create(&ml_object, N_grids);
 
   myrank = monolis_mpi_get_global_my_rank();
-  monolis_ml_get_nlocal_(&nlocal, &nlocal_allcolumns, ierr);
+  monolis_ml_get_nlocal_c(&nlocal, &nlocal_allcolumns, ierr);
 
   ML_Init_Amatrix(ml_object, 0, nlocal, nlocal, &myrank);
   ML_Set_Amatrix_Getrow(ml_object, 0, monolis_ML_getrow, monolis_ML_comm, nlocal_allcolumns);
@@ -114,7 +114,7 @@ void monolis_ML_wrapper_setup(
 
 void monolis_ML_wrapper_apply(
   double rhs[], 
-  int *ierr)
+  int*   ierr)
 {
   int nlocal, nlocal_allcolumns;
   double *sol;
@@ -123,7 +123,7 @@ void monolis_ML_wrapper_apply(
   ML *ml_object;
 
   ml_object = MLInfo.ml_object;
-  monolis_ml_get_nlocal_(&nlocal, &nlocal_allcolumns, ierr);
+  monolis_ml_get_nlocal_c(&nlocal, &nlocal_allcolumns, ierr);
 
   sol = monolis_alloc_R_1d(sol, nlocal_allcolumns);
 
@@ -138,7 +138,7 @@ void monolis_ML_wrapper_apply(
 }
 
 void monolis_ML_wrapper_clear(
-  int *ierr)
+  int* ierr)
 {
 #ifdef WITH_ML  
   ML_Aggregate_Destroy(&(MLInfo.agg_object));

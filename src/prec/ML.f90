@@ -96,13 +96,15 @@ contains
 end module mod_monolis_precond_ML
 
   !> wrapper section
-  subroutine monolis_ML_get_nlocal(nlocal, nlocal_allcolumns, ierr)
+  subroutine monolis_ML_get_nlocal(nlocal, nlocal_allcolumns, ierr) &
+    bind(c, name = "monolis_ml_get_nlocal_c")
+    use iso_c_binding
     use mod_monolis_utils
     use mod_monolis_precond_ML
     implicit none
-    integer(kint), intent(out) :: nlocal
-    integer(kint), intent(out) :: nlocal_allcolumns
-    integer(kint), intent(out) :: ierr
+    integer(c_int), intent(out) :: nlocal
+    integer(c_int), intent(out) :: nlocal_allcolumns
+    integer(c_int), intent(out) :: ierr
     
     nlocal = monoMAT_save%N * monoMAT_save%NDOF
     nlocal_allcolumns = monoMAT_save%NP * monoMAT_save%NDOF
@@ -110,19 +112,21 @@ end module mod_monolis_precond_ML
   end subroutine monolis_ML_get_nlocal
 
   subroutine monolis_ML_getrow_nn(n_requested_rows, requested_rows, &
-    allocated_space, cols, values, row_lengths, ierr)
+    allocated_space, cols, values, row_lengths, ierr) &
+    bind(c, name = "monolis_ml_getrow_nn_c")
+    use iso_c_binding
     use mod_monolis_utils
     use mod_monolis_precond_ML
     implicit none
-    integer(kint), intent(in) :: n_requested_rows
-    integer(kint), intent(in) :: requested_rows(n_requested_rows)
-    integer(kint), intent(in) :: allocated_space
-    integer(kint), intent(out) :: cols(allocated_space)
-    real(kdouble), intent(out) :: values(allocated_space)
-    integer(kint), intent(out) :: row_lengths(n_requested_rows)
-    integer(kint), intent(out) :: ierr
-    integer(kint) :: m, i, row, inod, idof, nl, nd, nu, js, je, j, jj, jdof, start, ndof
-    integer(kint) :: n
+    integer(c_int), intent(in) :: n_requested_rows
+    integer(c_int), intent(in) :: requested_rows(n_requested_rows)
+    integer(c_int), intent(in) :: allocated_space
+    integer(c_int), intent(out) :: cols(allocated_space)
+    real(c_double), intent(out) :: values(allocated_space)
+    integer(c_int), intent(out) :: row_lengths(n_requested_rows)
+    integer(c_int), intent(out) :: ierr
+    integer(c_int) :: m, i, row, inod, idof, nl, nd, nu, js, je, j, jj, jdof, start, ndof
+    integer(c_int) :: n
 
     ndof = monoMAT_save%NDOF
     m = 1
@@ -151,19 +155,21 @@ end module mod_monolis_precond_ML
     ierr = 1
   end subroutine monolis_ML_getrow_nn
 
-  subroutine monolis_ML_matvec_nn(in_length, X, out_length, Y, ierr)
+  subroutine monolis_ML_matvec_nn(in_length, X, out_length, Y, ierr) &
+    bind(c, name = "monolis_ml_matvec_nn_c")
+    use iso_c_binding
     use mod_monolis_utils
     use mod_monolis_matvec
     use mod_monolis_precond_ML
     implicit none
-    integer(kint), intent(in) :: in_length
-    real(kdouble), intent(in) :: X(in_length)
-    integer(kint), intent(in) :: out_length
-    real(kdouble), intent(out) :: Y(out_length)
-    integer(kint), intent(out) :: ierr
-    real(kdouble), allocatable :: W(:)
-    integer(kint) :: i
-    real(kdouble) :: tspmv, tcomm
+    integer(c_int), intent(in) :: in_length
+    real(c_double), intent(in) :: X(in_length)
+    integer(c_int), intent(in) :: out_length
+    real(c_double), intent(out) :: Y(out_length)
+    integer(c_int), intent(out) :: ierr
+    real(c_double), allocatable :: W(:)
+    integer(c_int) :: i
+    real(c_double) :: tspmv, tcomm
 
     allocate(W(monoMAT_save%NP*monoMAT_save%NDOF), source = 0.0d0)
 
@@ -177,13 +183,15 @@ end module mod_monolis_precond_ML
     ierr = 0
   end subroutine monolis_ML_matvec_nn
 
-  subroutine monolis_ML_comm_nn(x, ierr)
+  subroutine monolis_ML_comm_nn(x, ierr) &
+    bind(c, name = "monolis_ml_comm_nn_c")
+    use iso_c_binding
     use mod_monolis_utils
     use mod_monolis_precond_ML
     implicit none
-    real(kdouble), intent(inout) :: x(*)
-    integer(kint), intent(out) :: ierr
-    real(kdouble) :: tcomm
+    real(c_double), intent(inout) :: x(*)
+    integer(c_int), intent(out) :: ierr
+    real(c_double) :: tcomm
 
     call monolis_mpi_update_R(monoCOM_save, monoMAT_save%ndof, x(1:monoMAT_save%NP*monoMAT_save%NDOF), tcomm)
     ierr = 0
