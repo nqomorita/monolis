@@ -32,7 +32,7 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:)
-    real(kdouble), allocatable :: E(:,:), F(:), Y(:), alpha(:), Z(:), V(:), T(:)
+    real(kdouble), allocatable :: E(:,:), F(:), Y(:), alpha(:), Z(:), V(:), T(:), C(:)
     real(kdouble), pointer :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_IDRS")
@@ -65,12 +65,17 @@ contains
     call monolis_alloc_R_2d(E, S, S)
     call monolis_alloc_R_1d(F, S)
     call monolis_alloc_R_1d(alpha, S)
+    call monolis_alloc_R_1d(C, S*S + S)
 
     call random_seed()
     call random_number(P)
+
     do i = 1, S
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, P(:,i), P(:,i), norm, tdotp, tcomm_dotp)
-      P(:,i) = P(:,i) / norm
+      call monolis_inner_product_main_R_no_comm(N, NDOF, P(:,i), P(:,i), C(i))
+    end do
+    call monolis_allreduce_R(S, C, monolis_mpi_sum, monoCOM%comm)
+    do i = 1, S
+      P(:,i) = P(:,i) / C(i)
     end do
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U(:,1))
@@ -87,12 +92,20 @@ contains
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       do i = 1, S
       do j = 1, S
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, P(:,i), G(:,j), E(i,j), tdotp, tcomm_dotp)
+        call monolis_inner_product_main_R_no_comm(N, NDOF, P(:,i), G(:,j), C(S*(i-1) + j))
       enddo
       enddo
-
       do i = 1, S
-        call monolis_inner_product_main_R(monoCOM, N, NDOF, P(:,i), R, F(i), tdotp, tcomm_dotp)
+        call monolis_inner_product_main_R_no_comm(N, NDOF, P(:,i), R, C(S*S + i))
+      enddo
+      call monolis_allreduce_R(S*S + S, C, monolis_mpi_sum, monoCOM%comm)
+      do i = 1, S
+      do j = 1, S
+        E(i,j) = (S*(i-1) + j)
+      enddo
+      enddo
+      do i = 1, S
+        F(i) = C(S*S + i)
       enddo
 
       call monolis_lapack_dsysv(S, E, F, alpha)
@@ -107,8 +120,11 @@ contains
 
       call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, T, tspmv, tcomm_spmv)
 
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, T, V, a1, tdotp, tcomm_dotp)
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, T, T, a2, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R_no_comm(N, NDOF, T, V, C(1))
+      call monolis_inner_product_main_R_no_comm(N, NDOF, T, T, C(2))
+      call monolis_allreduce_R(2, C, monolis_mpi_sum, monoCOM%comm)
+      a1 = C(1)
+      a2 = C(2)
       beta = a1/a2
 
       do i = 1, S
@@ -152,6 +168,7 @@ contains
     call monolis_dealloc_R_2d(E)
     call monolis_dealloc_R_1d(F)
     call monolis_dealloc_R_1d(alpha)
+    call monolis_dealloc_R_1d(C)
   end subroutine monolis_solver_IDRS
 
 end module mod_monolis_solver_IDRS
