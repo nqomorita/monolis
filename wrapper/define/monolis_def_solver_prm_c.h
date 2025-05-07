@@ -34,7 +34,11 @@ static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 static const int MONOLIS_ITER_BICGSTAB_N128 = 9;
 
-static const int MONOLIS_ITER_COCG = 10;
+static const int MONOLIS_ITER_BICGSAFE = 10;
+
+static const int MONOLIS_ITER_IDRS = 11;
+
+static const int MONOLIS_ITER_COCG = 12;
 
 static const int MONOLIS_PREC_NONE   = 0;
 
@@ -95,6 +99,8 @@ static const int MONOLIS_PRM_I_SHOW_TIME = 21;
 static const int MONOLIS_PRM_I_SHOW_SUMMARY = 22;
 
 static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
+
+static const int MONOLIS_PRM_I_IDRS_DIM = 24;
 
 
 static const int MONOLIS_PRM_R_TOL = 1;
