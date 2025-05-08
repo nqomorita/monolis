@@ -383,6 +383,7 @@ $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 
 cp_header:
 	$(CP) $(addprefix $(WRAP_DIR)/, $(C_HEADER)) ./include/
+	$(CP) ./src/wrapper/monolis_wrapper_ml.h ./include/
 
 cp_header_lib:
 	$(CP) ./submodule/monolis_utils/include/* ./include/
