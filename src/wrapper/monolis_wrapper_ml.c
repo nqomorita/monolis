@@ -102,12 +102,10 @@ void monolis_ML_wrapper_setup(
   N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
   if(myrank == 0){ printf("N_levels %d \n", N_levels); }
 
-//printf("%s\n", "* ML_Gen_Smoother_Jacobi");
   //ML_Gen_Smoother_Jacobi(ml_object, ML_ALL_LEVELS, ML_BOTH, 1, ML_DEFAULT);
   //ML_Gen_Smoother_GaussSeidel(ml_object, ML_ALL_LEVELS, ML_BOTH, 2, ML_DEFAULT);
   ML_Gen_Smoother_Cheby(ml_object, ML_ALL_LEVELS, ML_BOTH, 20.0, 2);
 
-//printf("%s\n", "* ML_Gen_Solver");
   ML_Gen_Solver(ml_object, ML_MGV, 0, N_levels - 1);
   //ML_Gen_Solver(ml_object, ML_MGW, 0, N_levels - 1);
   //ML_Gen_Solver(ml_object, ML_MGFULLV, 0, N_levels - 1);
@@ -132,19 +130,17 @@ void monolis_ML_wrapper_apply(
   ML *ml_object;
 
   ml_object = MLInfo.ml_object;
-//printf("%s\n", "* monolis_ml_get_nlocal_c");
+
   monolis_ml_get_nlocal_c(&nlocal, &nlocal_allcolumns, ierr);
 
   sol = monolis_alloc_R_1d(sol, nlocal_allcolumns);
 
-//printf("%s\n", "* ML_Solve_MGV");
   ML_Solve_MGV(ml_object, rhs, sol);
 
   for (i = 0; i < nlocal; i++) {
     rhs[i] = sol[i];
   }
 
-//printf("%s\n", "* monolis_dealloc_R_1d start");
   monolis_dealloc_R_1d(&sol);
 #endif
 }

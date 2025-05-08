@@ -13,22 +13,22 @@ module mod_monolis_precond_ML
     subroutine monolis_precond_ml_setup(sym, ndof, ierr) &
         bind(c, name="monolis_ML_wrapper_setup")
       use iso_c_binding
-      integer(c_int) :: sym
-      integer(c_int) :: ndof
-      integer(c_int) :: ierr
+      integer(c_int), target :: sym
+      integer(c_int), target :: ndof
+      integer(c_int), target :: ierr
     end subroutine
 
     subroutine monolis_precond_ml_apply(rhs, ierr) &
         bind(c, name="monolis_ML_wrapper_apply")
       use iso_c_binding
-      real(c_double) :: rhs(:)
-      integer(c_int) :: ierr
+      real(c_double), target :: rhs(*)
+      integer(c_int), target :: ierr
     end subroutine
 
     subroutine monolis_precond_ml_clear(ierr) &
         bind(c, name="monolis_ML_wrapper_clear")
       use iso_c_binding
-      integer(c_int) :: ierr
+      integer(c_int), target :: ierr
     end subroutine
   end interface
 
@@ -74,9 +74,7 @@ contains
       Y(i) = X(i)
     enddo
 
-!write(*,*)"monolis_precond_ml_apply start"
     call monolis_precond_ml_apply(Y, ierr)
-!write(*,*)"monolis_precond_ml_apply end"
   end subroutine monolis_precond_ml_apply_R
 
   !> @ingroup prec
