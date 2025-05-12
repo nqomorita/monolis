@@ -50,6 +50,7 @@ contains
     endif
 
     call monolis_alloc_R_1d(R, NDOF*NP)
+    call monolis_palloc_R_1d(monoMAT%R%D, NDOF*N)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
@@ -69,6 +70,7 @@ contains
     call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm_spmv)
 
     call monolis_dealloc_R_1d(R)
+    call monolis_pdealloc_R_1d(monoMAT%R%D)
   end subroutine monolis_solver_SOR
 
   subroutine monolis_solver_SOR_setup(monoMAT)
@@ -82,11 +84,9 @@ contains
     NDOF =  monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     A => monoMAT%R%A
+    D => monoMAT%R%D
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
-
-    call monolis_palloc_R_1d(monoMAT%R%D, NDOF*N)
-    D => monoMAT%R%D
 
 !$omp parallel default(none) &
 !$omp & shared(A, D, index, item) &
