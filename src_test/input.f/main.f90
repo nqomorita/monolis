@@ -25,7 +25,7 @@ program main
     type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, n_base, n_id
     integer(kint) :: n_coef, eid(2), i, j, shift, id1, id2, ndof
-    real(kdouble) :: val, condition_number
+    real(kdouble) :: val, condition_number, rmax, rmin
     character(monolis_charlen) :: fname
     integer(kint), allocatable :: elem(:,:), global_eid(:), global_nid(:), vtxdist(:)
     real(kdouble), allocatable :: dense(:,:)
@@ -111,7 +111,8 @@ program main
     endif
 
     !> monolis_get_condition_number_R
-    call monolis_get_condition_number_R(mat, com, condition_number)
+    call monolis_get_condition_number_R(mat, com, rmax, rmin)
+    condition_number = rmax/rmin
 
     call monolis_test_check_eq_R1("monolis_get_condition_number_R test", &
       & condition_number, condition_number_lanczos)
@@ -195,7 +196,7 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    do iter = monolis_iter_CG, monolis_iter_SOR
+    do iter = monolis_iter_CG, monolis_iter_IDRS
     do prec = monolis_prec_NONE, monolis_prec_SOR
       a = 0.0d0
       b = c

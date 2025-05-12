@@ -27,8 +27,12 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 9
   !> パラメータ：SOR 法
   integer(kint), parameter :: monolis_iter_SOR  = 10
+  !> パラメータ：BiCGSAFE 法
+  integer(kint), parameter :: monolis_iter_BiCGSAFE = 11
+  !> パラメータ：IDR(s) 法
+  integer(kint), parameter :: monolis_iter_IDRS = 12
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG = 11
+  integer(kint), parameter :: monolis_iter_COCG = 13
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -53,7 +57,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(11) :: monolis_str_iter = (/&
+  character*24, dimension(13) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -65,6 +69,8 @@ module mod_monolis_def_solver
   & "PipeBiCGSTAB_noprec", &
   & "BiCGSTAB_N128      ", &
   & "SOR                ", &
+  & "BiCGSAFE           ", &
+  & "IDR(s)             ", &
   !& "GMRES              ", &
   & "COCG               "/)
 
@@ -125,6 +131,9 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_show_summary = 22
   !> パラメータ：計算時間の統計的処理結果の表示
   integer(kint), parameter :: monolis_prm_I_show_time_statistics = 23
+
+  !> パラメータ：IDR(S) 法の基底数
+  integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 24
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -190,6 +199,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0

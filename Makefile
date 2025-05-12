@@ -138,6 +138,8 @@ PipeCR.f90 \
 PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
 SOR.f90 \
+BiCGSAFE.f90 \
+IDRS.f90 \
 COCG.f90
 
 #CABiCGSTAB_noprec.f90 \
