@@ -55,7 +55,7 @@ contains
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
-    call monolis_solver_SOR_setup(monoMAT, monoPREC)
+    call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_main_R(monoCOM, N, NDOF, B, B, B2, tdotp, tcomm_dotp)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
@@ -71,151 +71,72 @@ contains
     call monolis_dealloc_R_1d(R)
   end subroutine monolis_solver_SOR
 
-  subroutine monolis_solver_SOR_setup(monoMAT, monoPREC)
+  subroutine monolis_solver_SOR_setup(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    type(monolis_mat) :: monoPREC
     integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NP, NDOF, NDOF2
     integer(kint), pointer :: index(:), item(:)
-    real(kdouble), pointer :: A(:), ALU(:)
-    real(kdouble), allocatable :: T(:), LU(:,:)
+    real(kdouble), pointer :: A(:), D(:)
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
+    N =  monoMAT%N
+    NDOF =  monoMAT%NDOF
     NDOF2 = NDOF*NDOF
     A => monoMAT%R%A
     index => monoMAT%CSR%index
-    item  => monoMAT%CSR%item
+    item => monoMAT%CSR%item
 
-    !allocate(T(NDOF))
-    !allocate(LU(NDOF,NDOF))
-    !allocate(monoMAT%monoTree%D(NDOF2*NP))
-    !ALU => monoMAT%monoTree%D
-    !T   = 0.0d0
-    !ALU = 0.0d0
-    !LU  = 0.0d0
+    call monolis_palloc_R_1d(monoMAT%R%D, NDOF*N)
+    D => monoMAT%R%D
 
+!$omp parallel default(none) &
+!$omp & shared(A, D, index, item) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(i, j, jS, jE, in)
+!$omp do
     do i = 1, N
-      jS = index(i-1) + 1
-      jE = index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
       do ii = jS, jE
         in = item(ii)
         if(i == in)then
           do j = 1, NDOF
-            do k = 1, NDOF
-              LU(j,k) = A(NDOF2*(i-1) + NDOF*(j-1) + k)
-            enddo
-          enddo
-          do k = 1, NDOF
-            LU(k,k) = 1.0d0/LU(k,k)
-            do l = k+1, NDOF
-              LU(l,k) = LU(l,k)*LU(k,k)
-              do j = k+1, NDOF
-                T(j) = LU(l,j) - LU(l,k)*LU(k,j)
-              enddo
-              do j = k+1, NDOF
-                LU(l,j) = T(j)
-              enddo
-            enddo
-          enddo
-          do j = 1, NDOF
-            do k = 1, NDOF
-              ALU(NDOF2*(i-1) + NDOF*(j-1) + k) = LU(j,k)
-            enddo
+            D(NDOF*(i-1)+j) = A(NDOF2*(ii-1) + (NDOF+1)*(j-1) + 1)
           enddo
         endif
       enddo
     enddo
-
-    !deallocate(T)
-    !deallocate(LU)
+!$omp end do
+!$omp end parallel
   end subroutine monolis_solver_SOR_setup
 
   subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
-    integer(kint) :: i, j, k, l, in, N, NDOF, NDOF2, jS, jE
+    integer(kint) :: N, NP, NDOF
+    integer(kint) :: i
     integer(kint), pointer :: index(:), item(:)
-    real(kdouble) :: X(:), B(:), XT(NDOF), YT(NDOF), DT(NDOF), WT(NDOF)
-    real(kdouble), pointer :: A(:), ALU(:)
-    real(kdouble) :: t1, t2, omega
+    real(kdouble) :: X(:), B(:)
+    real(kdouble), allocatable :: Y(:)
+    real(kdouble), pointer :: D(:)
+    real(kdouble) :: omega
     real(kdouble) :: tspmv, tcomm
 
-    !ALU => monoMAT%monoTree%D
-    !N     = monoMAT%N
-    !NDOF  = monoMAT%NDOF
-    !NDOF2 = NDOF*NDOF
-    !A => monoMAT%R%A
-    !index => monoMAT%index
-    !item  => monoMAT%item
-    !omega = 1.0d0
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+    D => monoMAT%R%D
 
-    call monolis_mpi_update_R(monoCOM, NDOF, X, tcomm)
+    omega = 1.0d0
 
-    do i = 1, N
-      DT = 0.0d0
-      do k = 1, NDOF
-        XT(k) = X(NDOF*(i-1) + k)
-      enddo
-      do j = 1, NDOF
-        do k = 1, NDOF
-          DT(j) = DT(j) + A(NDOF2*(i-1) + NDOF*(j-1) + k)*XT(k)
-        enddo
-      enddo
+    call monolis_alloc_R_1d(Y, NDOF*NP)
 
-      YT = 0.0d0
-      jS = index(i-1) + 1
-      jE = index(i  )
-      do j = jS, jE
-        in = item(j)
-        if(in < i)then
-          do k = 1, NDOF
-            XT(k) = X(NDOF*(in-1) + k)
-          enddo
-          do k = 1, NDOF
-            do l = 1, NDOF
-              YT(k) = YT(k) - A(NDOF2*(j-1) + NDOF*(k-1) + l)*XT(l)
-            enddo
-          enddo
-        endif
-      enddo
+    call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
 
-      jS = index(i-1) + 1
-      jE = index(i  )
-      do j = jS, jE
-        in = item(j)
-        if(i < in)then
-          do k = 1, NDOF
-            XT(k) = X(NDOF*(in-1) + k)
-          enddo
-          do k = 1, NDOF
-            do l = 1, NDOF
-              YT(k) = YT(k) - A(NDOF2*(j-1) + NDOF*(k-1) + l)*XT(l)
-            enddo
-          enddo
-        endif
-      enddo
-
-      do k = 1, NDOF
-        WT(k) = omega*B(NDOF*(i-1) + k) + (1.0d0 - omega)*DT(k) + omega*YT(k)
-      enddo
-
-      do j = 2, NDOF
-        do k = 1, j-1
-          WT(j) = WT(j) - ALU(NDOF2*(i-1) + NDOF*(j-1) + k)*WT(k)
-        enddo
-      enddo
-      do j = NDOF, 1, -1
-        do k = NDOF, j+1, -1
-          WT(j) = WT(j) - ALU(NDOF2*(i-1) + NDOF*(j-1) + k)*WT(k)
-        enddo
-        WT(j) = ALU(NDOF2*(i-1) + (NDOF+1)*(j-1) + 1)*WT(j)
-      enddo
-      do k = 1, NDOF
-        X(NDOF*(i-1) + k) = WT(k)
-      enddo
+    do i = 1, N*NDOF
+      X(i) = (1.0d0 - omega)*X(i) + omega*(B(i) - Y(i) + D(i)*X(i)) / D(i)
     enddo
+
+    call monolis_dealloc_R_1d(Y)
   end subroutine monolis_solver_SOR_matvec
 end module mod_monolis_solver_SOR
