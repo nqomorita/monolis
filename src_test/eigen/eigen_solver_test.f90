@@ -5,8 +5,61 @@ module mod_monolis_eigen_solver_test
   implicit none
 
 contains
-
+  
   subroutine monolis_eigen_solver_test()
+    implicit none
+    call monolis_eigen_solver_test_main()
+    call monolis_get_condition_number_R_test()
+  end subroutine monolis_eigen_solver_test
+
+  subroutine monolis_get_condition_number_R_test()
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: mat
+    !> monolis 通信構造体
+    type(monolis_com) :: com
+    integer(kint) :: nnode, nelem, elem(4,9), n_dof
+    integer(kint) :: i
+    real(kdouble) :: sv_max, sv_min, condition_number
+
+    !> asymmetrix Teploitz matrix
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
+
+    nnode = 10
+    nelem = 9
+    n_dof = 1
+
+    elem(1,1) = 1; elem(2,1) = 9; elem(3,1) =10; elem(4,1) = 8;
+    elem(1,2) = 2; elem(2,2) = 8; elem(3,2) = 9; elem(4,2) =10;
+    elem(1,3) = 3; elem(2,3) = 7; elem(3,3) = 8; elem(4,3) = 9;
+    elem(1,4) = 4; elem(2,4) = 6; elem(3,4) = 7; elem(4,4) = 8;
+    elem(1,5) = 5; elem(2,5) = 5; elem(3,5) = 6; elem(4,5) = 7;
+    elem(1,6) = 6; elem(2,6) = 4; elem(3,6) = 5; elem(4,6) = 6;
+    elem(1,7) = 7; elem(2,7) = 3; elem(3,7) = 4; elem(4,7) = 5;
+    elem(1,8) = 8; elem(2,8) = 2; elem(3,8) = 3; elem(4,8) = 4
+    elem(1,9) = 9; elem(2,9) = 1; elem(3,9) = 2; elem(4,9) = 3;
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 4, n_dof, nelem, elem)
+
+    do i = 1, 10
+      call monolis_add_scalar_to_sparse_matrix_R(mat, i, 11 - i, 1, 1, 2.0d0)
+    enddo
+
+    do i = 1, 9
+      call monolis_add_scalar_to_sparse_matrix_R(mat, i,     10 - i, 1, 1, 1.0d0)
+      call monolis_add_scalar_to_sparse_matrix_R(mat, i + 1, 11 - i, 1, 1, 1.0d0)
+    enddo
+
+    call monolis_get_condition_number_R(mat, com, sv_max, sv_min)
+
+    condition_number = sv_max/sv_min
+
+    call monolis_test_check_eq_R1("monolis_get_condition_number_R_test", condition_number, 48.374150078708247d0)
+
+  end subroutine monolis_get_condition_number_R_test
+
+  subroutine monolis_eigen_solver_test_main()
     implicit none
     !> monolis 構造体
     type(monolis_structure) :: mat
@@ -186,6 +239,6 @@ contains
 
     call monolis_test_check_eq_R("monolis_eigen_standard_lanczos_R 5 d", dabs(r_ans), dabs(eig_mode(:,5)))
 
-  end subroutine monolis_eigen_solver_test
+  end subroutine monolis_eigen_solver_test_main
 end module mod_monolis_eigen_solver_test
 

@@ -39,8 +39,9 @@ void monolis_get_nonzero_pattern_by_nodal_graph_main(
     }
     monolis_qsort_I_1d(
       &(mat->CSR.item[jS]),
-      1,
-      jE - jS);
+      jE - jS,
+      0,
+      jE - jS - 1);
   }
 
   mat->CSC.index = monolis_alloc_I_1d(mat->CSC.index, n_node + 1);

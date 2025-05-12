@@ -23,8 +23,14 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 8
   !> パラメータ：GMRES 法
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
+  !> パラメータ：BiCGSTAB 法（擬似四倍精度）
+  integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 9
+  !> パラメータ：BiCGSAFE 法
+  integer(kint), parameter :: monolis_iter_BiCGSAFE = 10
+  !> パラメータ：IDR(s) 法
+  integer(kint), parameter :: monolis_iter_IDRS = 11
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG       = 9
+  integer(kint), parameter :: monolis_iter_COCG = 12
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -49,7 +55,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(9) :: monolis_str_iter = (/&
+  character*24, dimension(12) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -59,6 +65,9 @@ module mod_monolis_def_solver
   & "BiCGSTAB_noprec    ", &
   !& "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
+  & "BiCGSTAB_N128      ", &
+  & "BiCGSAFE           ", &
+  & "IDR(s)             ", &
   !& "GMRES              ", &
   & "COCG               "/)
 
@@ -119,6 +128,9 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_show_summary = 22
   !> パラメータ：計算時間の統計的処理結果の表示
   integer(kint), parameter :: monolis_prm_I_show_time_statistics = 23
+
+  !> パラメータ：IDR(S) 法の基底数
+  integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 24
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -184,6 +196,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
