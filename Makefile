@@ -84,7 +84,8 @@ spmat_copy.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
 spmat_nzpattern.f90 \
-spmat_handler.f90
+spmat_handler.f90 \
+spmat_convert_sym.f90
 
 #spmat_fillin.f90 \
 #spmat_reorder.f90 \
@@ -137,6 +138,7 @@ PipeCG.f90 \
 PipeCR.f90 \
 PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
+SOR.f90 \
 BiCGSAFE.f90 \
 IDRS.f90 \
 COCG.f90
