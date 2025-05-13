@@ -57,12 +57,12 @@ contains
     if(is_converge) return
 
     call monolis_solver_SOR_setup(monoMAT)
-    call monolis_inner_product_main_R(monoCOM, N, NDOF, B, B, B2, tdotp, tcomm_dotp)
+    call monolis_inner_product_main_R(monoCOM, N*NDOF, B, B, B2, tdotp, tcomm_dotp)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_solver_SOR_matvec(monoCOM, monoMAT, NDOF, X, B, tspmv, tcomm_spmv)
       call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      call monolis_inner_product_main_R(monoCOM, N, NDOF, R, R, R2, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R(monoCOM, N*NDOF, R, R, R2, tdotp, tcomm_dotp)
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
     enddo
