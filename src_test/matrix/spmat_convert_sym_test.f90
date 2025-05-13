@@ -20,7 +20,7 @@ contains
     n_node = 5
     n_elem = 4
 
-    !if(monolis_mpi_get_global_comm_size() == 2) return
+    if(monolis_mpi_get_global_comm_size() == 2) return
 
     elem(1,1) = 1; elem(2,1) = 2;
     elem(1,2) = 2; elem(2,2) = 3;
@@ -43,9 +43,23 @@ contains
     call monolis_add_scalar_to_sparse_matrix_R(mat, 5, 4, 1, 1, 1.0d0)
     call monolis_add_scalar_to_sparse_matrix_R(mat, 5, 5, 1, 1, 2.0d0)
 
-    !call monolis_matrix_convert_to_symmetric_inner_R(mat)
+    call monolis_matrix_convert_to_symmetric_inner_R(mat%MAT, com)
 
-    !call monolis_matrix_convert_to_symmetric_outer_R(monolis, com)
+    call monolis_matrix_convert_to_symmetric_outer_R(mat%MAT, com)
+
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 1), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 2), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 3), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 4), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 5), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 6), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 7), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 8), 2.5d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A( 9), 2.5d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A(10), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A(11), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A(12), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_spmat_convert_sym_test 1", mat%MAT%R%A(13), 2.0d0)
   end subroutine monolis_spmat_convert_sym_test
 
 end module mod_monolis_spmat_convert_sym_test
