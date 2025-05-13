@@ -36,7 +36,9 @@ static const int MONOLIS_ITER_DEFLATEDCG1 = 9;
 static const int MONOLIS_ITER_DEFLATEDCG2 = 10;
 static const int MONOLIS_ITER_ADEFLATEDCG2 = 11;
 
-static const int MONOLIS_ITER_COCG = 12;
+static const int MONOLIS_ITER_BICGSTAB_N128 = 12;
+
+static const int MONOLIS_ITER_COCG = 13;
 
 static const int MONOLIS_PREC_NONE   = 0;
 

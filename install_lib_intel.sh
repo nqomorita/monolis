@@ -8,7 +8,7 @@ BASE_DIR=$(pwd)
 
 #> METIS
 cd submodule/METIS
-make config cc=icc prefix=$BASE_DIR
+make config cc=icx prefix=$BASE_DIR
 make install
 cd ../..
 

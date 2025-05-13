@@ -38,9 +38,9 @@ ifdef FLAGS
 	endif
 
 	ifeq ($(findstring INTEL, $(DFLAGS)), INTEL)
-		FC      = mpiifort -qmkl=cluster
+		FC      = mpiifx -qmkl=cluster
 		FFLAGS  = -fPIC -O2 -align array64byte -nofor-main
-		CC      = mpiicc
+		CC      = mpiicx
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
 		LINK    = $(FC)
@@ -155,6 +155,7 @@ precond.f90
 SRC_ITER = \
 CG.f90 \
 BiCGSTAB.f90 \
+BiCGSTAB_N128.f90 \
 BiCGSTAB_noprec.f90 \
 GropCG.f90 \
 PipeCG.f90 \
@@ -388,6 +389,7 @@ $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 
 cp_header:
 	$(CP) $(addprefix $(WRAP_DIR)/, $(C_HEADER)) ./include/
+	$(CP) ./src/wrapper/monolis_wrapper_ml.h ./include/
 
 cp_header_lib:
 	$(CP) ./submodule/monolis_utils/include/* ./include/

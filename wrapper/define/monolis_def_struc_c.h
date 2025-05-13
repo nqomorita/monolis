@@ -17,13 +17,15 @@ typedef struct {
 } MONOLIS;
 
 /**
- * @brief monolis ライブラリの初期化処理処理
+ * @brief monolis ライブラリの初期化処理
+ * @details MPI の初期化関数が呼ばれる。
  * @ingroup def_init
  */
 void monolis_global_initialize();
 
 /**
  * @brief monolis ライブラリの終了処理処理
+ * @details MPI の終了処理関数が呼ばれる。
  * @ingroup def_init
  */
 void monolis_global_finalize();
@@ -31,6 +33,8 @@ void monolis_global_finalize();
 /**
  * @brief monolis 構造体の初期化処理
  * @param[out] mat monolis 構造体
+ * @details 未初期化・終了処理後の monolis 構造体ポインタを入力する。
+ * @details 構造体メンバのポインタを NULL 初期化する。構造体メンバのメモリ解放はしない。
  * @ingroup def_init
  */
 void monolis_initialize(
@@ -39,6 +43,8 @@ void monolis_initialize(
 /**
  * @brief monoils 構造体の終了処理
  * @param[inout] mat monolis 構造体
+ * @details 初期化処理後の monolis 構造体ポインタを入力する。
+ * @details 構造体メンバをメモリ解放し、ポインタ変数を NULL 初期化する。
  * @ingroup def_init
  */
 void monolis_finalize(
