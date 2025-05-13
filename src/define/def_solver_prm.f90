@@ -25,12 +25,14 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：BiCGSTAB 法（擬似四倍精度）
   integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 9
+  !> パラメータ：SOR 法
+  integer(kint), parameter :: monolis_iter_SOR  = 10
   !> パラメータ：BiCGSAFE 法
-  integer(kint), parameter :: monolis_iter_BiCGSAFE = 10
+  integer(kint), parameter :: monolis_iter_BiCGSAFE = 11
   !> パラメータ：IDR(s) 法
-  integer(kint), parameter :: monolis_iter_IDRS = 11
+  integer(kint), parameter :: monolis_iter_IDRS = 12
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG = 12
+  integer(kint), parameter :: monolis_iter_COCG = 13
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -55,7 +57,7 @@ module mod_monolis_def_solver
   !> パラメータ：ブロック LU 分解（MUMPS）
   integer(kint), parameter :: monolis_prec_MUMPS_LOCAL = 4
 
-  character*24, dimension(12) :: monolis_str_iter = (/&
+  character*24, dimension(13) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -66,6 +68,7 @@ module mod_monolis_def_solver
   !& "CABiCGSTAB_noprec  ", &
   & "PipeBiCGSTAB_noprec", &
   & "BiCGSTAB_N128      ", &
+  & "SOR                ", &
   & "BiCGSAFE           ", &
   & "IDR(s)             ", &
   !& "GMRES              ", &
