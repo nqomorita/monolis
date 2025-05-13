@@ -27,6 +27,26 @@ void monolis_get_nonzero_pattern_by_simple_mesh_R(
   int**    elem);
 
 /**
+ * @brief 単一メッシュデータ
+ * 
+ * から疎行列パターンを決定（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof_list 計算点が持つ自由度リスト
+ * @param[in] n_elem 要素数
+ * @param[in] elem 要素コネクティビティ
+ * @ingroup nzpattern
+ */
+void monolis_get_nonzero_pattern_by_simple_mesh_V_R(
+  MONOLIS* mat,
+  int      n_node,
+  int      n_base,
+  int*     n_dof_list,
+  int      n_elem,
+  int**    elem);
+
+/**
  * @brief コネクティビティグラフから疎行列パターンを決定（実数型）
  * @param[inout] mat monolis 構造体
  * @param[in] n_node 節点数
@@ -62,6 +82,22 @@ void monolis_get_nonzero_pattern_by_nodal_graph_R(
   int*     item);
 
 /**
+ * @brief 節点グラフから疎行列パターンを決定（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_dof_list 計算点が持つ自由度リスト
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @ingroup nzpattern
+ */
+void monolis_get_nonzero_pattern_by_nodal_graph_V_R(
+  MONOLIS* mat,
+  int      n_node,
+  int*     n_dof_list,
+  int*     index,
+  int*     item);
+
+/**
  * @brief 単一メッシュデータから疎行列パターンを決定（複素数型）
  * @param[inout] mat monolis 構造体
  * @param[in] n_node 節点数
@@ -76,6 +112,24 @@ void monolis_get_nonzero_pattern_by_simple_mesh_C(
   int      n_node,
   int      n_base,
   int      n_dof,
+  int      n_elem,
+  int**    elem);
+
+/**
+ * @brief 単一メッシュデータから疎行列パターンを決定（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_base 要素を構成する形状関数の数
+ * @param[in] n_dof_list 計算点が持つ自由度リスト
+ * @param[in] n_elem 要素数
+ * @param[in] elem 要素コネクティビティ
+ * @ingroup nzpattern
+ */
+void monolis_get_nonzero_pattern_by_simple_mesh_V_C(
+  MONOLIS* mat,
+  int      n_node,
+  int      n_base,
+  int*     n_dof_list,
   int      n_elem,
   int**    elem);
 
@@ -111,6 +165,22 @@ void monolis_get_nonzero_pattern_by_nodal_graph_C(
   MONOLIS* mat,
   int      n_node,
   int      n_dof,
+  int*     index,
+  int*     item);
+
+/**
+ * @brief 節点グラフから疎行列パターンを決定（複素数型）
+ * @param[inout] mat monolis 構造体
+ * @param[in] n_node 節点数
+ * @param[in] n_dof_list 計算点が持つ自由度リスト
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @ingroup nzpattern
+ */
+void monolis_get_nonzero_pattern_by_nodal_graph_V_C(
+  MONOLIS* mat,
+  int      n_node,
+  int*     n_dof_list,
   int*     index,
   int*     item);
 

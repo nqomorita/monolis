@@ -10,7 +10,8 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型）
-  subroutine monolis_matvec_product_R_c(N, NP, NZ, NDOF, A, X, Y, index, item, &
+  subroutine monolis_matvec_product_R_c(N, NP, NZ, NDOF, &
+    n_dof_list, n_dof_index, n_dof_index2, A, X, Y, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
@@ -30,6 +31,9 @@ contains
     real(c_double), intent(inout), target :: X(NDOF*NP)
     !> [out] 自由度
     real(c_double), intent(out), target :: Y(NDOF*NP)
+    integer(c_int), intent(in), target :: n_dof_list(NP)
+    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
+    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
     !> [in] 自由度
     integer(c_int), intent(in), target :: index(NP + 1)
     !> [in] 自由度
@@ -68,6 +72,9 @@ contains
     monoMAT%N = N
     monoMAT%NP = NP
     monoMAT%NDOF = NDOF
+    monoMAT%n_dof_list => n_dof_list
+    monoMAT%n_dof_index => n_dof_index
+    monoMAT%n_dof_index2 => n_dof_index2
     monoMAT%R%A => A
     monoMAT%R%X => X
     monoMAT%R%B => Y
@@ -100,7 +107,8 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数型）
-  subroutine monolis_matvec_product_C_c(N, NP, NZ, NDOF, A, X, Y, index, item, &
+  subroutine monolis_matvec_product_C_c(N, NP, NZ, NDOF, &
+    n_dof_list, n_dof_index, n_dof_index2, A, X, Y, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
     send_n_neib, send_nitem, send_neib_pe, send_index, send_item) &
@@ -120,6 +128,9 @@ contains
     complex(c_double), intent(inout), target :: X(NDOF*NP)
     !> [out] 自由度
     complex(c_double), intent(out), target :: Y(NDOF*NP)
+    integer(c_int), intent(in), target :: n_dof_list(NP)
+    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
+    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
     !> [in] 自由度
     integer(c_int), intent(in), target :: index(NP + 1)
     !> [in] 自由度
@@ -158,6 +169,9 @@ contains
     monoMAT%N = N
     monoMAT%NP = NP
     monoMAT%NDOF = NDOF
+    monoMAT%n_dof_list => n_dof_list
+    monoMAT%n_dof_index => n_dof_index
+    monoMAT%n_dof_index2 => n_dof_index2
     monoMAT%C%A => A
     monoMAT%C%X => X
     monoMAT%C%B => Y

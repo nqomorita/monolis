@@ -30,7 +30,7 @@ contains
 
     !call monolis_update_pre_R(monoCOM, monoMAT%NDOF, X, tcomm)
 
-    call monolis_matmat_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
+    !call monolis_matmat_nn(monoCOM, monoMAT, X, Y, monoMAT%NDOF)
 
     !call monolis_update_post_R(monoCOM, monoMAT%NDOF, X, tcomm)
 

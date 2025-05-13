@@ -71,6 +71,18 @@ contains
     NP = mat_in%NP
     NZ = mat_in%CSR%index(NP + 1)
 
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_list)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_list, NP)
+    mat_out%MAT%n_dof_list = mat_in%MAT%n_dof_list
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_index, NP + 1)
+    mat_out%MAT%n_dof_index = mat_in%MAT%n_dof_index
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index2)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_index2, NZ + 1)
+    mat_out%MAT%n_dof_index2 = mat_in%MAT%n_dof_index2
+
     NZU = 0
     if(associated(mat_in%SCSR%indexU))then
       NZU = mat_in%SCSR%indexU(NP + 1)
@@ -105,6 +117,18 @@ contains
 
     NP = mat_in%MAT%NP
     NZ = mat_in%MAT%CSR%index(NP + 1)
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_list)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_list, NP)
+    mat_out%MAT%n_dof_list = mat_in%MAT%n_dof_list
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_index, NP + 1)
+    mat_out%MAT%n_dof_index = mat_in%MAT%n_dof_index
+
+    call monolis_pdealloc_I_1d(mat_out%MAT%n_dof_index2)
+    call monolis_palloc_I_1d(mat_out%MAT%n_dof_index2, NZ + 1)
+    mat_out%MAT%n_dof_index2 = mat_in%MAT%n_dof_index2
 
     NZU = 0
     if(associated(mat_in%MAT%SCSR%indexU))then
