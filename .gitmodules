@@ -12,10 +12,10 @@
         ignore = dirty
 [submodule "submodule/gedatsu"]
 	path = submodule/gedatsu
-	url = https://gitlab.com/morita/gedatsu.git
+	url = https://gitlab.com/mmlab_tsukuba/gedatsu.git
 [submodule "submodule/monolis_utils"]
 	path = submodule/monolis_utils
-	url = https://gitlab.com/morita/monolis_utils.git
+	url = https://gitlab.com/mmlab_tsukuba/monolis_utils.git
 [submodule "submodule/ggtools"]
 	path = submodule/ggtools
-	url = https://gitlab.com/morita/ggtools.git
+	url = https://gitlab.com/mmlab_tsukuba/ggtools.git
