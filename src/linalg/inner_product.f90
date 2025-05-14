@@ -28,21 +28,17 @@ contains
     N = monolis%MAT%N
     if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_I(monoCOM, N, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_I(monoCOM, N*n_dof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_I
 
   !> @ingroup linalg
   !> ベクトル内積（整数型、任意のベクトルサイズ）
-  subroutine monolis_inner_product_V_I(monolis, monoCOM, n, n_dof, X, Y, sum)
+  subroutine monolis_inner_product_V_I(monoCOM, m, X, Y, sum)
     implicit none
-    !> [in] monolis 構造体
-    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     integer(kint), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -51,19 +47,17 @@ contains
     integer(kint), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_I(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_I(monoCOM, m, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_V_I
 
   !> @ingroup dev_linalg
   !> ベクトル内積（整数型、メイン関数）
-  subroutine monolis_inner_product_main_I(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+  subroutine monolis_inner_product_main_I(monoCOM, m, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     integer(kint), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -83,10 +77,10 @@ contains
     sum = 0
 !$omp parallel default(none) &
 !$omp & shared(X, Y, sum) &
-!$omp & firstprivate(n, n_dof) &
+!$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-    do i = 1, n * n_dof
+    do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
 !$omp end do
@@ -122,21 +116,17 @@ contains
     N = monolis%MAT%N
     if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_R(monoCOM, N, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, N*n_dof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_R
 
   !> @ingroup linalg
   !> ベクトル内積（実数型、任意のベクトルサイズ）
-  subroutine monolis_inner_product_V_R(monolis, monoCOM, n, n_dof, X, Y, sum)
+  subroutine monolis_inner_product_V_R(monoCOM, m, X, Y, sum)
     implicit none
-    !> [in] monolis 構造体
-    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -145,19 +135,17 @@ contains
     real(kdouble), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_R(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, m, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_V_R
 
   !> @ingroup dev_linalg
   !> ベクトル内積（実数型、メイン関数）
-  subroutine monolis_inner_product_main_R(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+  subroutine monolis_inner_product_main_R(monoCOM, m, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -177,10 +165,10 @@ contains
     sum = 0.0d0
 !$omp parallel default(none) &
 !$omp & shared(X, Y, sum) &
-!$omp & firstprivate(n, n_dof) &
+!$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-    do i = 1, n * n_dof
+    do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
 !$omp end do
@@ -364,21 +352,17 @@ contains
     N = monolis%MAT%N
     if(monoCOM%comm_size > 1) N = monoCOM%n_internal_vertex
 
-    call monolis_inner_product_main_C(monoCOM, N, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, N*n_dof, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_C
 
   !> @ingroup linalg
   !> ベクトル内積（複素数型、任意のベクトルサイズ）
-  subroutine monolis_inner_product_V_C(monolis, monoCOM, n, n_dof, X, Y, sum)
+  subroutine monolis_inner_product_V_C(monoCOM, m, X, Y, sum)
     implicit none
-    !> [in] monolis 構造体
-    type(monolis_structure), intent(in) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     complex(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -387,19 +371,17 @@ contains
     complex(kdouble), intent(out) :: sum
     real(kdouble) :: tdotp, tcomm
 
-    call monolis_inner_product_main_C(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, m, X, Y, sum, tdotp, tcomm)
   end subroutine monolis_inner_product_V_C
 
   !> @ingroup dev_linalg
   !> ベクトル内積（複素数型、メイン関数）
-  subroutine monolis_inner_product_main_C(monoCOM, n, n_dof, X, Y, sum, tdotp, tcomm)
+  subroutine monolis_inner_product_main_C(monoCOM, m, X, Y, sum, tdotp, tcomm)
     implicit none
     !> [in] monoCOM 構造体
     type(monolis_com), intent(in) :: monoCOM
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     complex(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -419,10 +401,10 @@ contains
     sum = 0.0d0
 !$omp parallel default(none) &
 !$omp & shared(X, Y, sum) &
-!$omp & firstprivate(n, n_dof) &
+!$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-    do i = 1, n * n_dof
+    do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
 !$omp end do
@@ -438,12 +420,10 @@ contains
 
   !> @ingroup dev_linalg
   !> ベクトル内積（実数型、メイン関数、通信なし）
-  subroutine monolis_inner_product_main_R_no_comm(n, n_dof, X, Y, sum)
+  subroutine monolis_inner_product_main_R_no_comm(m, X, Y, sum)
     implicit none
-    !> [in] 内部計算点数
-    integer(kint), intent(in) :: n
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
+    !> [in] 内部計算点数✕計算点が持つ自由度
+    integer(kint), intent(in) :: m
     !> [in] ベクトル 1
     real(kdouble), intent(in) :: X(:)
     !> [in] ベクトル 2
@@ -455,10 +435,10 @@ contains
     sum = 0.0d0
 !$omp parallel default(none) &
 !$omp & shared(X, Y, sum) &
-!$omp & firstprivate(n, n_dof) &
+!$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-    do i = 1, n * n_dof
+    do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
 !$omp end do

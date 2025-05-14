@@ -30,8 +30,14 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：BiCGSTAB 法（擬似四倍精度）
   integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 12
+  !> パラメータ：SOR 法
+  integer(kint), parameter :: monolis_iter_SOR  = 13
+  !> パラメータ：BiCGSAFE 法
+  integer(kint), parameter :: monolis_iter_BiCGSAFE = 14
+  !> パラメータ：IDR(s) 法
+  integer(kint), parameter :: monolis_iter_IDRS = 15
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG = 13
+  integer(kint), parameter :: monolis_iter_COCG = 16
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -72,6 +78,9 @@ module mod_monolis_def_solver
   & "Deflated CG2       ", &
   & "ADeflated CG2      ", &
   & "BiCGSTAB_N128      ", &
+  & "SOR                ", &
+  & "BiCGSAFE           ", &
+  & "IDR(s)             ", &
   !& "GMRES              ", &
   & "COCG               "/)
 
@@ -140,6 +149,8 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_n_local_deflation_mode = 30
   !> パラメータ：Deflated CG 法の W^t AW のブロックサイズ
   integer(kint), parameter :: monolis_prm_I_n_local_block_size_of_AtAW = 31
+  !> パラメータ：IDR(S) 法の基底数
+  integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 32
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -207,6 +218,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_time) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
+    monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0

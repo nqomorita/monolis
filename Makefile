@@ -114,7 +114,8 @@ spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
 spmat_reordering.f90 \
 spmat_nzpattern.f90 \
-spmat_handler.f90
+spmat_handler.f90 \
+spmat_convert_sym.f90
 
 SRC_LINALG = \
 matvec.f90 \
@@ -164,6 +165,9 @@ PipeBiCGSTAB.f90 \
 PipeBiCGSTAB_noprec.f90 \
 DeflatedCG_util.f90 \
 DeflatedCG.f90 \
+SOR.f90 \
+BiCGSAFE.f90 \
+IDRS.f90 \
 COCG.f90
 
 SRC_SOLV = \

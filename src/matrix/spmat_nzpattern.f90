@@ -30,6 +30,7 @@ contains
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
@@ -39,6 +40,10 @@ contains
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_R
@@ -63,6 +68,7 @@ contains
     integer(kint), allocatable :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_simple_mesh_to_connectivity_graph &
       & (n_elem, n_base, elem, index, item)
@@ -73,12 +79,16 @@ contains
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
 
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
+
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_simple_mesh_C
 
   !> @ingroup nzpattern
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、実数型）
-  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R( &
+  subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_R( &
     monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
     !> [in,out] monolis 構造体
@@ -104,15 +114,17 @@ contains
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
-    call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis%MAT, n_node, n_dof_list, nodal_index, nodal_item)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monolis%MAT, n_node, -1, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
-  end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_R
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
+
+    call monolis_alloc_nonzero_pattern_mat_val_V_R(monolis%MAT)
+  end subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_R
 
   !> @ingroup nzpattern
   !> 単一メッシュデータから疎行列パターンを決定（任意節点自由度、複素数型）
-  subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C( &
+  subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_C( &
     monolis, n_node, n_base, n_dof_list, n_elem, elem)
     implicit none
     !> [in,out] monolis 構造体
@@ -138,11 +150,13 @@ contains
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
-    call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis%MAT, n_node, n_dof_list, nodal_index, nodal_item)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monolis%MAT, n_node, -1, nodal_index, nodal_item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
-  end subroutine monolis_get_nonzero_pattern_by_simple_mesh_with_arbitrary_dof_C
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
+
+    call monolis_alloc_nonzero_pattern_mat_val_V_C(monolis%MAT)
+  end subroutine monolis_get_nonzero_pattern_by_simple_mesh_V_C
 
   !> @ingroup nzpattern
   !> コネクティビティグラフから疎行列パターンを決定（実数型）
@@ -163,12 +177,17 @@ contains
     integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_R
@@ -192,12 +211,17 @@ contains
     integer(kint), intent(out) :: item(:)
     integer(kint), allocatable :: nodal_index(:)
     integer(kint), allocatable :: nodal_item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call gedatsu_convert_connectivity_graph_to_nodal_graph &
       & (n_node, n_elem, index, item, nodal_index, nodal_item)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, nodal_index, nodal_item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_connectivity_C
@@ -216,9 +240,14 @@ contains
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_R
@@ -237,16 +266,21 @@ contains
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
+    integer(kint), allocatable :: n_dof_list(:)
 
     call monolis_get_nonzero_pattern_by_nodal_graph_main &
       & (monolis%MAT, n_node, ndof, index, item)
+
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+    n_dof_list = ndof
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
   end subroutine monolis_get_nonzero_pattern_by_nodal_graph_C
 
   !> @ingroup nzpattern
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、実数型）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R( &
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_R( &
     monolis, n_node, n_dof_list, index, item)
     implicit none
     !> [in,out] monolis 構造体
@@ -260,15 +294,17 @@ contains
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
 
-    call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis%MAT, n_node, n_dof_list, index, item)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monolis%MAT, n_node, -1, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_R(monolis%MAT)
-  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_R
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
+
+    call monolis_alloc_nonzero_pattern_mat_val_V_R(monolis%MAT)
+  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_R
 
   !> @ingroup nzpattern
   !> 節点グラフから疎行列パターンを決定（任意節点自由度、複素数型）
-  subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C( &
+  subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_C( &
     monolis, n_node, n_dof_list, index, item)
     implicit none
     !> [in,out] monolis 構造体
@@ -282,9 +318,11 @@ contains
     !> [in] item 配列
     integer(kint), intent(in) :: item(:)
 
-    call monolis_get_nonzero_pattern_by_nodal_graph_with_arbit_main &
-      & (monolis%MAT, n_node, n_dof_list, index, item)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monolis%MAT, n_node, -1, index, item)
 
-    call monolis_alloc_nonzero_pattern_mat_val_C(monolis%MAT)
-  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_with_arbitrary_dof_C
+    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
+
+    call monolis_alloc_nonzero_pattern_mat_val_V_C(monolis%MAT)
+  end subroutine monolis_get_nonzero_pattern_by_nodal_graph_V_C
 end module mod_monolis_spmat_nonzero_pattern

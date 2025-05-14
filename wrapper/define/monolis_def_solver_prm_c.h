@@ -8,9 +8,11 @@ extern "C" {
 
 #include "monolis_utils.h"
 
+
 static const int MONOLIS_PRM_IARRAY_SIZE = 100;
 
 static const int MONOLIS_PRM_RARRAY_SIZE = 100;
+
 
 static const int MONOLIS_ITER_CG       = 1;
 
@@ -38,7 +40,13 @@ static const int MONOLIS_ITER_ADEFLATEDCG2 = 11;
 
 static const int MONOLIS_ITER_BICGSTAB_N128 = 12;
 
-static const int MONOLIS_ITER_COCG = 13;
+static const int MONOLIS_ITER_SOR = 13;
+
+static const int MONOLIS_ITER_BICGSAFE = 14;
+
+static const int MONOLIS_ITER_IDRS = 15;
+
+static const int MONOLIS_ITER_COCG = 16;
 
 static const int MONOLIS_PREC_NONE   = 0;
 
@@ -63,6 +71,7 @@ static const int MONOLIS_PREC_MUMPS  = 4;
 static const int MONOLIS_PREC_MUMPS_LOCAL = 5;
 
 static const int MONOLIS_PREC_AMG = 6;
+
 
 static const int MONOLIS_PRM_I_METHOD = 1;
 
@@ -101,6 +110,8 @@ static const int MONOLIS_PRM_I_SHOW_TIME = 21;
 static const int MONOLIS_PRM_I_SHOW_SUMMARY = 22;
 
 static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
+
+static const int MONOLIS_PRM_I_IDRS_DIM = 24;
 
 
 static const int MONOLIS_PRM_R_TOL = 1;
