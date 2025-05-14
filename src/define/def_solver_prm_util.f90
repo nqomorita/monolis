@@ -122,7 +122,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_init_x) = monolis_conv_L2I(param)
   end subroutine monolis_set_init_x
@@ -135,7 +134,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_sym_matrix) = monolis_conv_L2I(param)
   end subroutine monolis_set_sym_matrix
@@ -148,7 +146,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_debug) = monolis_conv_L2I(param)
   end subroutine monolis_set_debug
@@ -161,7 +158,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_measurement) = monolis_conv_L2I(param)
   end subroutine monolis_set_performance_measurement
@@ -174,7 +170,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_check_diag) = monolis_conv_L2I(param)
   end subroutine monolis_set_check_diag
@@ -187,7 +182,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_conv_L2I(param)
   end subroutine monolis_set_prec_stored
@@ -200,7 +194,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_is_error_abort) = monolis_conv_L2I(param)
   end subroutine monolis_set_error_abort
@@ -213,7 +206,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_iterlog) = monolis_conv_L2I(param)
   end subroutine monolis_show_iterlog
@@ -226,7 +218,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_time) = monolis_conv_L2I(param)
   end subroutine monolis_show_timelog
@@ -239,7 +230,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_summary) = monolis_conv_L2I(param)
   end subroutine monolis_show_summary
@@ -252,7 +242,6 @@ contains
     type(monolis_structure), intent(inout) :: monolis
     !> [in] パラメータ
     logical, intent(in) :: param
-    integer(kint) :: iparam
 
     monolis%PRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_conv_L2I(param)
   end subroutine monolis_show_timelog_statistics

@@ -449,7 +449,8 @@ contains
             block(jp,ip) = dense(jq,iq)
           enddo
           enddo
-          call monolis_set_block_to_sparse_matrix_main_R(MAT%CSR%index, MAT%CSR%item, MAT%R%A, MAT%ndof, j, i, block)
+          call monolis_set_block_to_sparse_matrix_main_R(MAT%CSR%index, MAT%CSR%item, &
+            & MAT%R%A, MAT%n_dof_index, MAT%n_dof_index2, j, i, block)
           cycle aa
         endif
       enddo

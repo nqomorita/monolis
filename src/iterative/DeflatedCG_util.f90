@@ -185,11 +185,13 @@ else
 
     !# matrix value assign
     call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
-      & monoMAT_deflated_eq%R%A, M, 1, 1, L(1:M,1:M))
+      monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%n_dof_index, monoMAT_deflated_eq%n_dof_index2, &
+      1, 1, L(1:M,1:M))
 
     do i = 1, monoCOM%recv_n_neib
       call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
-        & monoMAT_deflated_eq%R%A, M, 1, i + 1, L(1:M, i*M + 1:i*M + M))
+        monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%n_dof_index, monoMAT_deflated_eq%n_dof_index2, &
+        1, i + 1, L(1:M, i*M + 1:i*M + M))
     enddo
 endif
   end subroutine deflatedCG_E_initialize
@@ -265,7 +267,7 @@ endif
     real(kdouble) :: tdemv, time, WtZ(M_neib), AWEinvWtZ(NNDOF)
 
     if(M == 0)then
-      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      call monolis_vec_copy_R(NNDOF, Z, P)
       return
     endif
 
@@ -278,7 +280,7 @@ endif
 
     call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
 
-    call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
+    call monolis_vec_AXPBY_R(NNDOF, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
   end subroutine deflatedCG_P
 
   !> @ingroup dev_solver
@@ -301,7 +303,7 @@ endif
     real(kdouble) :: tdemv, time, WtZ(M_neib), AWEinvWtZ(NNDOF)
 
     if(M == 0)then
-      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      call monolis_vec_copy_R(NNDOF, Z, P)
       return
     endif
 
@@ -316,7 +318,7 @@ endif
     !call monolis_dense_matvec_local_R(NNDOF, M_neib, AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, tdemv)
     call monolis_matvec_product_main_R(monoCOM_self, monoMAT_AW, monoMAT_deflated_eq%R%X, AWEinvWtZ, time, time)
 
-    call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
+    call monolis_vec_AXPBY_R(NNDOF, -1.0d0, AWEinvWtZ, 1.0d0, Z, P)
   end subroutine deflatedCG_P_coarse
 
   subroutine deflatedCG_get_coarse_W(NNDOF, M, W, monoMAT_Wt)
@@ -424,7 +426,7 @@ endif
     real(kdouble) :: tdemv, time, WtAZ(M_neib), WEinvWtAZ(NNDOF)
 
     if(M == 0)then
-      call monolis_vec_copy_R(1, NNDOF, Z, P)
+      call monolis_vec_copy_R(NNDOF, Z, P)
       return
     endif
 
@@ -443,7 +445,7 @@ endif
 
     call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, WEinvWtAZ, tdemv)
 
-    call monolis_vec_AXPBY_R(NNDOF, 1, -1.0d0, WEinvWtAZ, 1.0d0, Z, P)
+    call monolis_vec_AXPBY_R(NNDOF, -1.0d0, WEinvWtAZ, 1.0d0, Z, P)
   end subroutine deflatedCG_Pt
 
   !> @ingroup dev_solver
@@ -499,7 +501,7 @@ endif
 
     call monolis_dense_matvec_local_R(NNDOF, M, W, WTR, WWtWinvWtR, time)
 
-    call monolis_vec_AXPBY_R(N, NDOF, -1.0d0, WWtWinvWtR, 1.0d0, R, R)
+    call monolis_vec_AXPBY_R(N*NDOF, -1.0d0, WWtWinvWtR, 1.0d0, R, R)
   end subroutine deflatedCG_residual_replacement
 
   !> @ingroup dev_solver

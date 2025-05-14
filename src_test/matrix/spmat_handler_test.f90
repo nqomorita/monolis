@@ -18,10 +18,6 @@ contains
   subroutine monolis_set_scalar_to_sparse_matrix_R_test()
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint) :: i
-    integer(kint) :: j
-    integer(kint) :: sub_i
-    integer(kint) :: sub_j
     real(kdouble) :: val
     real(kdouble) :: bval(2,2)
     real(kdouble) :: B(8)
@@ -136,10 +132,6 @@ contains
   subroutine monolis_set_scalar_to_sparse_matrix_C_test()
     implicit none
     type(monolis_structure) :: monolis
-    integer(kint) :: i
-    integer(kint) :: j
-    integer(kint) :: sub_i
-    integer(kint) :: sub_j
     complex(kdouble) :: val
     complex(kdouble) :: bval(2,2)
     complex(kdouble) :: B(8)

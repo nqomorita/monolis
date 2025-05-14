@@ -64,7 +64,7 @@ module mod_monolis_def_solver
   !> パラメータ：AMG ML
   integer(kint), parameter :: monolis_prec_AMG = 6
 
-  character*24, dimension(13) :: monolis_str_iter = (/&
+  character*24, dimension(16) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -269,7 +269,6 @@ contains
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
-    logical :: is_output
 
     call monolis_std_debug_log_header("monolis_timer_finalize")
 

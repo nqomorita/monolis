@@ -227,7 +227,7 @@ contains
     real(kdouble), optional, intent(inout) :: tdotp
     !> [inout] 通信時間
     real(kdouble), optional, intent(inout) :: tcomm
-    type(monolis_R_N128) :: sum_N128, a
+    type(monolis_R_N128) :: sum_N128, a, b
     integer(kint) :: i
     real(kdouble) :: t1, t2, t3
 
@@ -238,7 +238,8 @@ contains
 
     do i = 1, n * n_dof
       a = monolis_conv_R_to_R_N128(X(i)*Y(i))
-      call monolis_add_R_N128(sum_N128, a, sum_N128)
+      b = monolis_copy_R_N128(sum_N128)
+      call monolis_add_R_N128(a, b, sum_N128)
     enddo
 
     t2 = monolis_get_time()
@@ -278,7 +279,7 @@ contains
     real(kdouble), allocatable :: Y_global(:)
     real(kdouble), allocatable :: XY_global(:)
     real(kdouble), allocatable :: XY_abs_global(:)
-    type(monolis_R_N128) :: sum_N128, a
+    type(monolis_R_N128) :: sum_N128, a, b
 
     !> gather part
     my_rank = monolis_mpi_get_local_my_rank(monoCOM%comm)
@@ -320,7 +321,8 @@ contains
       sum_N128 = monolis_conv_R_to_R_N128(0.0d0)
       do i = 1, n_global*n_dof
         a = monolis_conv_R_to_R_N128(XY_global(i))
-        call monolis_add_R_N128(sum_N128, a, sum_N128)
+        b = monolis_copy_R_N128(sum_N128)
+        call monolis_add_R_N128(a, b, sum_N128)
       enddo
       sum_global = monolis_conv_R_N128_to_R(sum_N128)
     endif
