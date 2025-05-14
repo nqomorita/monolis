@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ./monolis_test
 
 mpirun --oversubscribe --allow-run-as-root -np 2 ./monolis_test
