@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 INP=driver/input
 OUT=driver/output
 

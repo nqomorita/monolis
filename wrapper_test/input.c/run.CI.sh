@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "mesher"
 
 mpif90 -I../../include \

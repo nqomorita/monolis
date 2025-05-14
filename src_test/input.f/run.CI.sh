@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
 -o mesher mesher.f90 \
