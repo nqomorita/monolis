@@ -171,6 +171,14 @@ else
     monoMAT_deflated_eq%NP = NP
     monoMAT_deflated_eq%NDOF = M
 
+    call monolis_palloc_I_1d(monoMAT_deflated_eq%n_dof_index,  NP + 1)
+    call monolis_palloc_I_1d(monoMAT_deflated_eq%n_dof_index2, NP + 1)
+
+    do i = 1, NP
+      monoMAT_deflated_eq%n_dof_index (i + 1) = monoMAT_deflated_eq%n_dof_index (i) + M
+      monoMAT_deflated_eq%n_dof_index2(i + 1) = monoMAT_deflated_eq%n_dof_index2(i) + M*M
+    enddo
+
     call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%index, NP + 1)
     call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%item, NP)
 
