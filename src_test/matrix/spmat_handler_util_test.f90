@@ -24,10 +24,6 @@ contains
     real(kdouble) :: A(40)
     integer(kint) :: n_dof_index(5)
     integer(kint) :: n_dof_index2(41)
-    integer(kint) :: ci
-    integer(kint) :: cj
-    integer(kint) :: csub_i
-    integer(kint) :: csub_j
     integer(kint) :: i
     real(kdouble) :: val
     logical :: is_find
@@ -94,10 +90,6 @@ contains
     integer(kint) :: n_dof_index(5)
     integer(kint) :: n_dof_index2(41)
     integer(kint) :: ndof
-    integer(kint) :: ci
-    integer(kint) :: cj
-    integer(kint) :: csub_i
-    integer(kint) :: csub_j
     integer(kint) :: i
     complex(kdouble) :: val
     logical :: is_find
@@ -164,10 +156,7 @@ contains
     integer(kint) :: n_dof_index(5)
     integer(kint) :: n_dof_index2(41)
     integer(kint) :: ndof
-    integer(kint) :: ci
-    integer(kint) :: cj
     real(kdouble) :: val(2,2)
-    real(kdouble) :: B(5)
     integer(kint) :: e(1)
     integer(kint) :: i
 
@@ -239,8 +228,6 @@ contains
     integer(kint) :: n_dof_index(5)
     integer(kint) :: n_dof_index2(41)
     integer(kint) :: ndof
-    integer(kint) :: ci
-    integer(kint) :: cj
     complex(kdouble) :: val(2,2)
     integer(kint) :: e(1)
     integer(kint) :: i

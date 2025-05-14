@@ -24,7 +24,7 @@ contains
     type(monolis_structure) :: mat
     type(monolis_com) :: com
     integer(kint) :: n_node, nelem
-    integer(kint) :: i1, i2, j1, j2
+    integer(kint) :: i1, i2, j2
     integer(kint) :: n_dof, prec
     real(kdouble) :: val
     integer(kint), allocatable :: elem(:,:)

@@ -26,13 +26,13 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF, NNDOF
-    integer(kint) :: i, iter, iter_RR
+    integer(kint) :: iter, iter_RR
     real(kdouble) :: alpha, beta, zeta, eta, B2, r1, r2, rho
     real(kdouble) :: y_y, y_r, y_v, v_v, v_r, denom, C(5)
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, ths
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:), Z(:), U(:), Y(:), R0(:), V(:), T1(:), T2(:)
-    real(kdouble), allocatable :: AP(:), MR(:), AMR(:), AU(:)
+    real(kdouble), allocatable :: AP(:), MR(:), AU(:)
     real(kdouble), pointer :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_BiCGSAFE")
