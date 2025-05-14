@@ -71,10 +71,10 @@ contains
     call monolis_vec_copy_R(N*NDOF, R, RT)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
-      call monolis_inner_product_main_R_N128(monoCOM, N, NDOF, R, RT, rho, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R_N128(monoCOM, N*NDOF, R, RT, rho, tdotp, tcomm_dotp)
       if(rho == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R_N128(monoCOM, &
-          N, NDOF, R, RT, rho, tdotp, tcomm_dotp)
+          N*NDOF, R, RT, rho, tdotp, tcomm_dotp)
       endif
 
       if(1 < iter)then
@@ -88,10 +88,10 @@ contains
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, P, PT)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, PT, V, tspmv, tcomm_spmv)
-      call monolis_inner_product_main_R_N128(monoCOM, N, NDOF, RT, V, c2, tdotp, tcomm_dotp)
+      call monolis_inner_product_main_R_N128(monoCOM, N*NDOF, RT, V, c2, tdotp, tcomm_dotp)
       if(c2 == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R_N128(monoCOM, &
-          N, NDOF, RT, V, c2, tdotp, tcomm_dotp)
+          N*NDOF, RT, V, c2, tdotp, tcomm_dotp)
       endif
 
       alpha = rho / c2
@@ -109,7 +109,7 @@ contains
       CG(2) = monolis_conv_R_N128_to_R(CG_N128(2))
       if(CG(2) == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R_N128(monoCOM, &
-          N, NDOF, T, T, CG(2), tdotp, tcomm_dotp)
+          N*NDOF, T, T, CG(2), tdotp, tcomm_dotp)
       endif
 
       omega = CG(1) / CG(2)

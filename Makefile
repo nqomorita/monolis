@@ -92,10 +92,10 @@ spmat_convert_sym.f90
 #spmat_scaling.f90 \
 
 SRC_LINALG = \
-matvec.f90 \
 inner_product.f90 \
-mat_converge.f90 \
-vec_util.f90
+vec_util.f90 \
+matvec.f90 \
+mat_converge.f90 
 
 SRC_WRAP = \
 wrapper_lapack.f90 \

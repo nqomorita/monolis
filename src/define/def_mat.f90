@@ -277,11 +277,14 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in] 右辺ベクトル
     real(kdouble), intent(in) :: B(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_RHS_R")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       monoMAT%R%B(i) = B(i)
     enddo
   end subroutine monolis_set_RHS_R
@@ -294,11 +297,14 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in] 右辺ベクトル
     complex(kdouble), intent(in) :: B(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_RHS_C")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       monoMAT%C%B(i) = B(i)
     enddo
   end subroutine monolis_set_RHS_C
@@ -311,11 +317,14 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in] 解ベクトル
     real(kdouble), intent(in) :: X(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_initial_solution_R")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       monoMAT%R%X(i) = X(i)
     enddo
   end subroutine monolis_set_initial_solution_R
@@ -328,11 +337,14 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in] 解ベクトル
     complex(kdouble), intent(in) :: X(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_initial_solution_C")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       monoMAT%C%X(i) = X(i)
     enddo
   end subroutine monolis_set_initial_solution_C
@@ -345,11 +357,14 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [out] 解ベクトル
     real(kdouble), intent(out) :: X(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_get_solution_R")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       X(i) = monoMAT%R%X(i)
     enddo
   end subroutine monolis_get_solution_R
@@ -362,12 +377,41 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [out] 解ベクトル
     complex(kdouble), intent(out) :: X(:)
-    integer(kint) :: i
+    integer(kint) :: i, NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_get_solution_C")
 
-    do i = 1, monoMAT%NP*monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
+    do i = 1, NPNDOF
       X(i) = monoMAT%C%X(i)
     enddo
   end subroutine monolis_get_solution_C
+
+  !> @ingroup def_mat_init
+  !> 疎行列に対応するベクトル配列サイズの取得関数
+  subroutine monolis_get_vec_size(N, NP, NDOF, n_dof_index, N_size, NP_size)
+    implicit none
+    !> [in] 内部計算点数
+    integer(kint), intent(in) :: N
+    !> [in] 全計算点数
+    integer(kint), intent(in) :: NP
+    !> [in] 自由度（固定値）
+    integer(kint), intent(in) :: NDOF
+    !> [in] 自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [out] ベクトルサイズ（内部計算点数相当）
+    integer(kint), intent(out) :: N_size
+    !> [out] ベクトルサイズ（全計算点数相当）
+    integer(kint), intent(out) :: NP_size
+
+    if(NDOF == -1)then
+      n_size  = n_dof_index(N  + 1)
+      np_size = n_dof_index(NP + 1)
+    else
+      n_size  = N *NDOF
+      np_size = NP*NDOF
+    endif
+  end subroutine monolis_get_vec_size
 end module mod_monolis_def_mat

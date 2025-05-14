@@ -3,6 +3,7 @@ module mod_monolis_matvec
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_vec_util
   implicit none
 
 contains
@@ -149,7 +150,7 @@ contains
     real(kdouble), intent(in) :: X(:)
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
-    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n_dof
+    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n1, n2
     real(kdouble), allocatable :: XT(:), YT(:)
 
     max_dof = maxval(n_dof_list)
@@ -165,22 +166,23 @@ contains
       YT = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+      n1 = n_dof_list(i)
       do j = jS, jE
         in = item(j)
-        n_dof = n_dof_list(in)
+        n2 = n_dof_list(in)
         kn = n_dof_index(in)
-        do k = 1, n_dof
+        do k = 1, n2
           XT(k) = X(kn+k)
         enddo
         kn = n_dof_index2(in)
-        do k = 1, n_dof
-          do l = 1, n_dof
-            YT(k) = YT(k) + A(kn+n_dof*(k-1)+l) * XT(l)
+        do k = 1, n1
+          do l = 1, n2
+            YT(k) = YT(k) + A(kn+n2*(k-1)+l) * XT(l)
           enddo
         enddo
       enddo
       kn = n_dof_index(i)
-      do k = 1, n_dof
+      do k = 1, n1
         Y(kn+k) = YT(k)
       enddo
     enddo
@@ -210,7 +212,7 @@ contains
     complex(kdouble), intent(in) :: X(:)
     !> [out] 結果ベクトル
     complex(kdouble), intent(out) :: Y(:)
-    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n_dof
+    integer(kint) :: i, j, k, l, in, kn, jS, jE, max_dof, n1, n2
     complex(kdouble), allocatable :: XT(:), YT(:)
 
     max_dof = maxval(n_dof_list)
@@ -226,22 +228,23 @@ contains
       YT = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+      n1 = n_dof_list(i)
       do j = jS, jE
         in = item(j)
-        n_dof = n_dof_list(in)
+        n2 = n_dof_list(in)
         kn = n_dof_index(in)
-        do k = 1, n_dof
+        do k = 1, n2
           XT(k) = X(kn+k)
         enddo
         kn = n_dof_index2(in)
-        do k = 1, n_dof
-          do l = 1, n_dof
-            YT(k) = YT(k) + A(kn+n_dof*(k-1)+l) * XT(l)
+        do k = 1, n1
+          do l = 1, n2
+            YT(k) = YT(k) + A(kn+n2*(k-1)+l) * XT(l)
           enddo
         enddo
       enddo
       kn = n_dof_index(i)
-      do k = 1, n_dof
+      do k = 1, n1
         Y(kn+k) = YT(k)
       enddo
     enddo
@@ -539,21 +542,19 @@ contains
     real(kdouble), intent(inout) :: tspmv
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
-    integer(kint) :: i
+    integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF
+
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+
+    call monolis_get_vec_size(N, NP, NDOF, monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_std_debug_log_header("monolis_residual_main_R")
 
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
-!$omp parallel default(none) &
-!$omp & shared(monoMAT, B, R) &
-!$omp & private(i)
-!$omp do
-    do i = 1, monoMAT%N*monoMAT%NDOF
-      R(i) = B(i) - R(i)
-    enddo
-!$omp end do
-!$omp end parallel
+    call monolis_vec_AXPBY_R(NNDOF, 1.0d0, B, -1.0d0, R, R)
   end subroutine monolis_residual_main_R
 
   !> @ingroup dev_linalg
@@ -574,20 +575,18 @@ contains
     real(kdouble), intent(inout) :: tspmv
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
-    integer(kint) :: i
+    integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF
+
+    N     = monoMAT%N
+    NP    = monoMAT%NP
+    NDOF  = monoMAT%NDOF
+
+    call monolis_get_vec_size(N, NP, NDOF, monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_std_debug_log_header("monolis_residual_main_C")
 
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, R, tspmv, tcomm)
 
-!$omp parallel default(none) &
-!$omp & shared(monoMAT, B, R) &
-!$omp & private(i)
-!$omp do
-    do i = 1, monoMAT%N*monoMAT%NDOF
-      R(i) = B(i) - R(i)
-    enddo
-!$omp end do
-!$omp end parallel
+    call monolis_vec_AXPBY_C(NNDOF, (1.0d0, 0.0d0), B, (-1.0d0, 0.0d0), R, R)
   end subroutine monolis_residual_main_C
 end module mod_monolis_matvec

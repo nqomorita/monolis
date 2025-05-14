@@ -4,6 +4,7 @@ module mod_monolis_converge
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   use mod_monolis_inner_product
+  use mod_monolis_vec_util
   implicit none
 
 contains
@@ -26,11 +27,15 @@ contains
     real(kdouble), intent(inout) :: tdotp
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
+    integer(kint) :: NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_converge_R")
 
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
     is_converge = .false.
-    call monolis_inner_product_main_R(monoCOM, monoMAT%N*monoMAT%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
@@ -59,11 +64,15 @@ contains
     real(kdouble), intent(inout) :: tdotp
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
+    integer(kint) :: NNDOF, NPNDOF
 
     call monolis_std_debug_log_header("monolis_set_converge_C")
 
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
     is_converge = .false.
-    call monolis_inner_product_main_C(monoCOM, monoMAT%N*monoMAT%NDOF, B, B, B2, tdotp, tcomm)
+    call monolis_inner_product_main_C(monoCOM, NNDOF, B, B, B2, tdotp, tcomm)
 
     if(B2 == 0.0d0)then
       if(monoCOM%my_rank == 0)then
