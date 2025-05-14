@@ -64,7 +64,7 @@ contains
     integer(kint), intent(in) :: scalapack_comm
     integer(kint) :: N_loc_max, M_fix, N
     integer(kint) :: comm_size, P
-    integer(kint) :: i, j, fio
+    integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)
     real(kdouble), allocatable :: S_temp(:,:)
     real(kdouble), allocatable :: V_temp(:)
@@ -141,7 +141,7 @@ contains
     integer(kint), intent(in) :: comm
     !> [in] コミュニケータ
     integer(kint), intent(in) :: scalapack_comm
-    integer(kint) :: N, i, comm_temp
+    integer(kint) :: N
     integer(kint) :: NB, P, desc_A(9), desc_S(9), desc_D(9)
     integer(kint) :: lld_A, lld_S, lld_D
     integer(kint) :: NW, info

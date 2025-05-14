@@ -22,7 +22,7 @@ contains
     type(monolis_structure) :: mat
     type(monolis_com) :: com
     integer(kint) :: n_node, nelem, elem(2,9)
-    integer(kint) :: i1, i2, j1, j2
+    integer(kint) :: i1, i2, j2
     integer(kint) :: n_dof, prec
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)

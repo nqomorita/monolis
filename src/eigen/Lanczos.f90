@@ -38,7 +38,7 @@ contains
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: N, NP, NDOF, total_dof, j, k
+    integer(kint) :: N, NP, NDOF, total_dof, j
     integer(kint) :: i, iter, n_bc
     real(kdouble) :: beta_t, norm, tmp
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
@@ -150,7 +150,7 @@ contains
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: N, NP, NDOF, total_dof, n_bc, j, k
+    integer(kint) :: N, NP, NDOF, total_dof, n_bc, j
     integer(kint) :: i, iter
     real(kdouble) :: beta_t, norm, tmp
     real(kdouble) :: tspmv, tcomm_spmv

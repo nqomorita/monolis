@@ -28,11 +28,11 @@ contains
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF, NNDOF
     integer(kint) :: i, j, iter, iter_RR, S
-    real(kdouble) :: B2, norm, beta, a1, a2
+    real(kdouble) :: B2, beta, a1, a2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:)
-    real(kdouble), allocatable :: E(:,:), F(:), Y(:), alpha(:), Z(:), V(:), T(:), C(:)
+    real(kdouble), allocatable :: E(:,:), F(:), alpha(:), Z(:), V(:), T(:), C(:)
     real(kdouble), pointer :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_IDRS")

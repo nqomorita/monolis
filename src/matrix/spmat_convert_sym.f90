@@ -146,13 +146,11 @@ contains
     integer(kint) :: n_send, n_recv
     integer(kint) :: i, in, j, jn, jS, jE, k, kS, kE, kn, km, m, comm_size, n_dof
     integer(kint) :: mi, mj, ki, kj, m1, m2
-    real(kdouble) :: tcomm
     integer(kint), allocatable :: perm(:), vertex_id_temp(:)
     integer(kint), allocatable :: vertex_id(:)
     integer(kint), allocatable :: n_send_list_all(:)
     integer(kint), allocatable :: n_recv_list_all(:)
-    integer(kint), allocatable :: send_n_dof(:), send_n_dof_tmp(:)
-    integer(kint), allocatable :: recv_n_dof(:), recv_n_dof_tmp(:)
+    integer(kint), allocatable :: send_n_dof(:), recv_n_dof(:)
     integer(kint), allocatable :: send_id(:), recv_id(:)
     real(kdouble), allocatable :: send_val(:), recv_val(:)
     real(kdouble), allocatable :: A1(:,:), A2(:,:), A3(:,:)

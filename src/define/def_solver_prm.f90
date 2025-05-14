@@ -250,7 +250,6 @@ contains
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
-    logical :: is_output
 
     call monolis_std_debug_log_header("monolis_timer_finalize")
 

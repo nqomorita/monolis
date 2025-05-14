@@ -29,7 +29,6 @@ contains
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
     integer(kint) :: idx(1), iter, p, i, in
-    integer(kint) :: comm_self
     real(kdouble) :: r0_norm, r_norm, res
     real(kdouble), allocatable :: r(:)
     real(kdouble), allocatable :: s(:)
@@ -140,7 +139,6 @@ contains
     !> [out] 残差
     real(kdouble), intent(out) :: residual
     integer(kint) :: idx(1), iter, p, i, in
-    integer(kint) :: comm_self
     real(kdouble) :: r0_norm, r_norm, res
     real(kdouble), allocatable :: r(:)
     real(kdouble), allocatable :: s(:)
@@ -270,7 +268,7 @@ contains
     real(kdouble), intent(out) :: residual
     integer(kint) :: idx(1), iter
     real(kdouble) :: alpha
-    logical :: is_all_positve, is_converge_inner, is_converge, is_all_false
+    logical :: is_converge_inner, is_converge, is_all_false
     real(kdouble), allocatable :: AtA(:,:)
     real(kdouble), allocatable :: Atb(:)
     real(kdouble), allocatable :: s(:)
@@ -301,7 +299,7 @@ contains
 
       !> Inner loop
       aa:do
-        call check_tolerance_inner(n, s, tol, P, is_converge_inner)
+        call check_tolerance_inner(n, s, P, is_converge_inner)
         if(is_converge_inner) exit aa
 
         iter = iter + 1
@@ -371,11 +369,10 @@ contains
     enddo
   end subroutine check_tolerance_outer
 
-  subroutine check_tolerance_inner(n, s, tol, P, is_converge_inner)
+  subroutine check_tolerance_inner(n, s, P, is_converge_inner)
     implicit none
     integer(kint) :: n
     real(kdouble) :: s(:)
-    real(kdouble) :: tol
     logical :: P(:)
     logical :: is_converge_inner
     integer(kint) :: i

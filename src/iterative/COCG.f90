@@ -26,7 +26,7 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF
-    integer(kint) :: i, iter, iter_RR
+    integer(kint) :: iter, iter_RR
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     complex(kdouble) :: alpha, beta, rho, rho1, omega, B2
     complex(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)

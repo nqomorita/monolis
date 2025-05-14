@@ -65,20 +65,6 @@ module mod_monolis_def_mat
     integer(kint), pointer :: perm(:) => null()
   end type monolis_mat_CSC
 
-  !> 行列構造体（格子構造）
-  !type monolis_mat_lattice
-  !end type monolis_mat_lattice
-
-  !> 行列構造体（任意自由度構造）
-  type monolis_mat_arbit_dof
-    !> index 配列
-    integer(kint), pointer :: index(:) => null()
-    !> item 配列
-    integer(kint), pointer :: item(:) => null()
-    !> item 2 乗配列
-    integer(kint), pointer :: item_squared(:) => null()
-  end type monolis_mat_arbit_dof
-
   !> 行列構造体
   type monolis_mat
     !> 内部自由度数

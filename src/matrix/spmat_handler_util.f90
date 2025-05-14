@@ -429,7 +429,7 @@ contains
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, j, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
+    integer(kint) :: i, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
     integer(kint) :: eperm1(n1), eperm2(n2)
     integer(kint), allocatable :: idx1(:), idx2(:)
     integer(kint), allocatable :: idx1t(:), idx2t(:)
@@ -532,7 +532,7 @@ contains
     !> [in] 設定値
     complex(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, j, k, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
+    integer(kint) :: i, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
     integer(kint) :: eperm1(n1), eperm2(n2)
     integer(kint), allocatable :: idx1(:), idx2(:)
     integer(kint), allocatable :: idx1t(:), idx2t(:)
@@ -865,8 +865,7 @@ contains
     type(monolis_com), intent(in) :: monoCOM
     !> [out] 疎行列を変換した密行列
     real(kdouble), intent(inout), allocatable :: dense(:,:)
-    integer(kint) :: N, NT, n_dof
-    integer(kint) :: comm_size
+    integer(kint) :: N, NT
     integer(kint) :: i, j, k1, k2, jS, jE, jn, kn, n1, n2, nd1, nd2
     integer(kint) :: in, my_rank
     integer(kint), allocatable :: vertex_id(:)

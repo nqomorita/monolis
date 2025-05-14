@@ -76,7 +76,7 @@ contains
   subroutine monolis_solver_SOR_setup(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    integer(kint) :: i, ii, j, jS, jE, in, k, l, N, NP, NDOF, NDOF2
+    integer(kint) :: i, ii, j, jS, jE, in, N, NDOF, NDOF2
     integer(kint), pointer :: index(:), item(:)
     real(kdouble), pointer :: A(:), D(:)
 
@@ -115,7 +115,6 @@ contains
     type(monolis_mat) :: monoMAT
     integer(kint) :: N, NP, NDOF
     integer(kint) :: i
-    integer(kint), pointer :: index(:), item(:)
     real(kdouble) :: X(:), B(:)
     real(kdouble), allocatable :: Y(:)
     real(kdouble), pointer :: D(:)

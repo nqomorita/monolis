@@ -26,14 +26,13 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: N, NP, NDOF
-    integer(kint) :: i, iter, iter_RR
+    integer(kint) :: iter, iter_RR
     real(kdouble) :: tol, resid, R2, B2, U2
     real(kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta, phi, utol
-    real(kdouble) :: buf(3), CG(3)
+    real(kdouble) :: CG(3)
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
     real(kdouble), pointer :: B(:), X(:)
-    logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_solver_PipeCR")
 
