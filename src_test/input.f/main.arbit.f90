@@ -179,9 +179,13 @@ program main
       if(mod(j,2) /= 0)then
         n_dof_list(i) = 1
       else
+        !n_dof_list(i) = 1
         n_dof_list(i) = 2
       endif
     enddo
+
+    !call monolis_get_nonzero_pattern_by_simple_mesh_R( &
+    !  mat, n_node, 2, 1, n_elem, elem)
 
     call monolis_get_nonzero_pattern_by_simple_mesh_V_R( &
       mat, n_node, 2, n_dof_list, n_elem, elem)
@@ -203,6 +207,8 @@ program main
         else
           call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
           call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 2, val)
+          call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
+          call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
         endif
       else
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
@@ -219,11 +225,6 @@ program main
     a = 1.0d0
 
     call monolis_matvec_product_R(mat, com, a, c)
-
-!write(*,*)mat%MAT%n_dof_index
-!write(*,*)mat%MAT%n_dof_index2
-!write(*,*)mat%MAT%R%A
-!write(*,"(1p10e12.4)")c
 
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-10)

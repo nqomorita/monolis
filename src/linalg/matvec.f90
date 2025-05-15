@@ -174,7 +174,7 @@ contains
         do k = 1, n2
           XT(k) = X(kn+k)
         enddo
-        kn = n_dof_index2(in)
+        kn = n_dof_index2(j)
         do k = 1, n1
           do l = 1, n2
             YT(k) = YT(k) + A(kn+n2*(k-1)+l) * XT(l)
@@ -236,7 +236,7 @@ contains
         do k = 1, n2
           XT(k) = X(kn+k)
         enddo
-        kn = n_dof_index2(in)
+        kn = n_dof_index2(j)
         do k = 1, n1
           do l = 1, n2
             YT(k) = YT(k) + A(kn+n2*(k-1)+l) * XT(l)
@@ -542,13 +542,10 @@ contains
     real(kdouble), intent(inout) :: tspmv
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
-    integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF
+    integer(kint) :: NNDOF, NPNDOF
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
-
-    call monolis_get_vec_size(N, NP, NDOF, monoMAT%n_dof_index, NNDOF, NPNDOF)
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_std_debug_log_header("monolis_residual_main_R")
 
@@ -575,13 +572,10 @@ contains
     real(kdouble), intent(inout) :: tspmv
     !> [in,out] 通信時間
     real(kdouble), intent(inout) :: tcomm
-    integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF
+    integer(kint) :: NNDOF, NPNDOF
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
-
-    call monolis_get_vec_size(N, NP, NDOF, monoMAT%n_dof_index, NNDOF, NPNDOF)
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_std_debug_log_header("monolis_residual_main_C")
 
