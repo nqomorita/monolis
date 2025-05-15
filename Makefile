@@ -117,8 +117,10 @@ nnls.f90
 SRC_PREC = \
 diag/diag_33.f90 \
 diag/diag_nn.f90 \
+diag/diag_V.f90 \
 sor/sor_33.f90 \
 sor/sor_nn.f90 \
+sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
 precond.f90

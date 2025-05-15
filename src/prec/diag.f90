@@ -5,6 +5,7 @@ module mod_monolis_precond_diag
   use mod_monolis_def_struc
   use mod_monolis_precond_diag_33
   use mod_monolis_precond_diag_nn
+  use mod_monolis_precond_diag_V
 
   implicit none
 
@@ -26,7 +27,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_setup_R")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_setup_R (monoMAT, monoPREC)
+      call monolis_precond_diag_V_setup_R (monoMAT, monoPREC)
     elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_setup_R(monoMAT, monoPREC)
     else
@@ -50,7 +51,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_setup_C")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_setup_C (monoMAT, monoPREC)
+      call monolis_precond_diag_V_setup_C (monoMAT, monoPREC)
     else
       call monolis_precond_diag_nn_setup_C(monoMAT, monoPREC)
     endif
@@ -73,7 +74,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_apply_R")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_apply_R (monoMAT, monoPREC, X, Y)
+      call monolis_precond_diag_V_apply_R (monoMAT, monoPREC, X, Y)
     elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_apply_R(monoMAT, monoPREC, X, Y)
     else
@@ -98,7 +99,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_apply_C")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_apply_C (monoMAT, monoPREC, X, Y)
+      call monolis_precond_diag_V_apply_C (monoMAT, monoPREC, X, Y)
     else
       call monolis_precond_diag_nn_apply_C(monoMAT, monoPREC, X, Y)
     endif
@@ -120,7 +121,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_clear_R")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_clear_R (monoPREC)
+      call monolis_precond_diag_V_clear_R (monoPREC)
     elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_clear_R(monoPREC)
     else
@@ -144,7 +145,7 @@ contains
     call monolis_std_debug_log_header("monolis_precond_diag_clear_C")
 
     if(monoMAT%NDOF == -1)then
-      !call monolis_precond_diag_V_clear_C (monoPREC)
+      call monolis_precond_diag_V_clear_C (monoPREC)
     else
       call monolis_precond_diag_nn_clear_C(monoPREC)
     endif
