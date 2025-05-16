@@ -35,9 +35,6 @@ contains
 
     call monolis_std_debug_log_header("monolis_solver_CG")
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
@@ -51,7 +48,8 @@ contains
       X = 0.0d0
     endif
 
-    call monolis_get_vec_size(N, NP, NDOF, monoMAT%n_dof_index, NNDOF, NPNDOF)
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_alloc_R_1d(R, NPNDOF)
     call monolis_alloc_R_1d(Z, NPNDOF)
@@ -91,7 +89,7 @@ contains
       rho1 = rho
     enddo
 
-    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
+    call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
