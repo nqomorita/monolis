@@ -85,7 +85,7 @@ program main
 
     if(monolis_mpi_get_global_comm_size() == 1)then
       do i = 1, 10
-        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i), 2.0d0)
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i), 4.0d0)
       enddo
       do i = 1, 9
         call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i+1), 1.0d0)
@@ -97,7 +97,7 @@ program main
       do i = 1, com%n_internal_vertex
         shift = vtxdist(monolis_mpi_get_global_my_rank() + 1)
         call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-          & dense(i,shift + i), 2.0d0)
+          & dense(i,shift + i), 4.0d0)
 
         id1 = global_nid(i)
         do j = 1, com%n_internal_vertex

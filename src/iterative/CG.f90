@@ -25,7 +25,7 @@ contains
     type(monolis_mat), target, intent(inout) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
-    integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF
+    integer(kint) :: NNDOF, NPNDOF
     integer(kint) :: iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp

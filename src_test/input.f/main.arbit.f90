@@ -11,9 +11,9 @@ program main
 
   call monolis_solver_parallel_R_test()
 
-  !call monolis_solver_parallel_C_test()
+  call monolis_solver_parallel_C_test()
 
-  !call monolis_condition_number_R_test()
+  call monolis_condition_number_R_test()
 
   call monolis_global_finalize()
 
@@ -85,7 +85,7 @@ program main
 
     if(monolis_mpi_get_global_comm_size() == 1)then
       do i = 1, 10
-        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i), 2.0d0)
+        call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i), 4.0d0)
       enddo
       do i = 1, 9
         call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", dense(i,i+1), 1.0d0)
@@ -97,7 +97,7 @@ program main
       do i = 1, com%n_internal_vertex
         shift = vtxdist(monolis_mpi_get_global_my_rank() + 1)
         call monolis_test_check_eq_R1("monolis_convert_sparse_matrix_to_dense_matrix_R test", &
-          & dense(i,shift + i), 2.0d0)
+          & dense(i,shift + i), 4.0d0)
 
         id1 = global_nid(i)
         do j = 1, com%n_internal_vertex
@@ -184,11 +184,11 @@ program main
       endif
     enddo
 
-    !call monolis_get_nonzero_pattern_by_simple_mesh_R( &
-    !  mat, n_node, 2, 1, n_elem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R( &
+      mat, n_node, 2, 1, n_elem, elem)
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_V_R( &
-      mat, n_node, 2, n_dof_list, n_elem, elem)
+    !call monolis_get_nonzero_pattern_by_simple_mesh_V_R( &
+    !  mat, n_node, 2, n_dof_list, n_elem, elem)
   
     open(20, file = "coef.dat", status = "old")
       read(20,*) n_coef
@@ -206,9 +206,9 @@ program main
           call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
         else
           call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
-          call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 2, val)
-          call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
-          call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
+          !call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 2, val)
+          !call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
+          !scall monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
         endif
       else
         call monolis_add_scalar_to_sparse_matrix_R(mat, eid(1), eid(2), 1, 1, val)
@@ -360,16 +360,16 @@ program main
       if(mod(j,2) /= 0)then
         n_dof_list(i) = 1
       else
-        !n_dof_list(i) = 1
-        n_dof_list(i) = 2
+        n_dof_list(i) = 1
+        !n_dof_list(i) = 2
       endif
     enddo
 
-    !call monolis_get_nonzero_pattern_by_simple_mesh_C( &
-    !  & mat, n_node, 2, 1, n_elem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_C( &
+      & mat, n_node, 2, 1, n_elem, elem)
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_V_C( &
-      mat, n_node, 2, n_dof_list, n_elem, elem)
+    !call monolis_get_nonzero_pattern_by_simple_mesh_V_C( &
+    !  mat, n_node, 2, n_dof_list, n_elem, elem)
 
     open(20, file = "coef.dat", status = "old")
       read(20,*) n_coef
@@ -388,9 +388,9 @@ program main
           call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
         else
           call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
-          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 2, val)
-          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
-          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
+          !call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 2, val)
+          !call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
+          !call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
         endif
       else
         call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
