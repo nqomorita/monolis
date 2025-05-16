@@ -22,31 +22,31 @@ contains
     real(kdouble), intent(out) :: q(:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: i, N, NDOF
+    integer(kint) :: i, NNDOF, NPNDOF
     real(kdouble) :: norm, t1, t2
     integer(kint), allocatable :: vtxdist(:)
 
-    N     = monoMAT%N
-    NDOF  = monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
 
-    call monolis_com_n_vertex_list(N*NDOF, monoCOM%comm, vtxdist)
+    call monolis_com_n_vertex_list(NNDOF, monoCOM%comm, vtxdist)
 
-    call monolis_get_rundom_number_R(N*NDOF, q, vtxdist(monoCOM%my_rank + 1))
+    call monolis_get_rundom_number_R(NNDOF, q, vtxdist(monoCOM%my_rank + 1))
 
-    do i = 1, N*NDOF
+    do i = 1, NNDOF
       if(is_bc(i)) q(i) = 0.0d0
     enddo
 
-    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, q, t1)
+    call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, q, t1)
 
-    call monolis_inner_product_main_R(monoCOM, N*NDOF, q, q, norm, t1, t2)
+    call monolis_inner_product_main_R(monoCOM, NNDOF, q, q, norm, t1, t2)
 
     norm = 1.0d0/dsqrt(norm)
-    do i = 1, N*NDOF
+    do i = 1, NNDOF
       q(i) = q(i)*norm
     enddo
 
-    call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, q, t1)
+    call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, q, t1)
   end subroutine lanczos_initialze
 
   !> @ingroup eigen

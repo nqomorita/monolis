@@ -138,7 +138,7 @@ program main
     real(kdouble), allocatable :: eig_val2(:), eig_mode2(:,:)
     logical, allocatable :: is_bc(:)
 
-    call monolis_std_log_string("monolis_solver_parallel_test linear")
+    call monolis_std_log_string("monolis_solver_parallel_R_test linear")
 
     fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
     call monolis_input_node(fname, n_node, node)
@@ -274,9 +274,9 @@ program main
 
     call monolis_alloc_R_1d(eig_val1, n_get_eigen)
     call monolis_alloc_R_1d(eig_val2, n_get_eigen)
-    call monolis_alloc_R_2d(eig_mode1, n_node, n_get_eigen)
-    call monolis_alloc_R_2d(eig_mode2, n_node, n_get_eigen)
-    call monolis_alloc_L_1d(is_bc, n_node)
+    call monolis_alloc_R_2d(eig_mode1, n, n_get_eigen)
+    call monolis_alloc_R_2d(eig_mode2, n, n_get_eigen)
+    call monolis_alloc_L_1d(is_bc, n)
 
     call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_precond(mat, monolis_prec_SOR)
@@ -308,21 +308,34 @@ program main
     implicit none
     type(monolis_structure) :: mat !> 疎行列変数
     type(monolis_com) :: com
-    integer(kint) :: n_node, n_elem, n_base, n_id
+    integer(kint) :: n_node, n_elem, n_base, n_id, n
     integer(kint) :: n_coef, eid(2)
-    integer(kint) :: i, iter_conv
+    integer(kint) :: i, j, iter_conv
     real(kdouble) :: r, res_conv
     complex(kdouble) :: val
     character(monolis_charlen) :: fname
-    integer(kint), allocatable :: elem(:,:), global_eid(:)
+    integer(kint), allocatable :: global_nid(:)
+    integer(kint), allocatable :: elem(:,:), global_eid(:), n_dof_list(:)
     real(kdouble), allocatable :: coef(:), node(:,:)
     complex(kdouble), allocatable :: a(:), b(:), c(:)
+
+    call monolis_std_log_string("monolis_solver_parallel_C_test linear")
 
     fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
     call monolis_input_node(fname, n_node, node)
 
     fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
     call monolis_input_elem(fname, n_elem, n_base, elem)
+
+    if(monolis_mpi_get_global_comm_size() > 1)then
+      fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat.id")
+      call monolis_input_global_id(fname, n_id, global_nid)
+    else
+      call monolis_alloc_I_1d(global_nid, n_node)
+      do i = 1, n_node
+        global_nid(i) = i
+      enddo
+    endif
 
     if(monolis_mpi_get_global_comm_size() > 1)then
       fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat.id")
@@ -340,7 +353,23 @@ program main
       monolis_mpi_get_global_comm(), &
       MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_C(mat, n_node, 2, 1, n_elem, elem)
+    call monolis_alloc_I_1d(n_dof_list, n_node)
+
+    do i = 1, n_node
+      j = global_nid(i)
+      if(mod(j,2) /= 0)then
+        n_dof_list(i) = 1
+      else
+        !n_dof_list(i) = 1
+        n_dof_list(i) = 2
+      endif
+    enddo
+
+    !call monolis_get_nonzero_pattern_by_simple_mesh_C( &
+    !  & mat, n_node, 2, 1, n_elem, elem)
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_C( &
+      mat, n_node, 2, n_dof_list, n_elem, elem)
 
     open(20, file = "coef.dat", status = "old")
       read(20,*) n_coef
@@ -355,16 +384,25 @@ program main
       r = coef(global_eid(i))
       val = complex(r, r)
       if(eid(1) == eid(2))then
-        call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
+        if(mod(eid(1),2) /= 0)then
+          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
+        else
+          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
+          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 2, val)
+          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 2, 0.25d0*val)
+          call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 2, 1, 0.25d0*val)
+        endif
       else
         call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
         call monolis_add_scalar_to_sparse_matrix_C(mat, eid(2), eid(1), 1, 1, val)
       endif
     enddo
 
-    call monolis_alloc_C_1d(a, n_node)
-    call monolis_alloc_C_1d(b, n_node)
-    call monolis_alloc_C_1d(c, n_node)
+    n = mat%MAT%n_dof_index(n_node + 1)
+
+    call monolis_alloc_C_1d(a, n)
+    call monolis_alloc_C_1d(b, n)
+    call monolis_alloc_C_1d(c, n)
 
     a = (1.0d0, 1.0d0)
 

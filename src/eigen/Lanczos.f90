@@ -38,7 +38,7 @@ contains
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: N, NP, NDOF, total_dof, j
+    integer(kint) :: NNDOF, NPNDOF, total_dof, j
     integer(kint) :: i, iter, n_bc
     real(kdouble) :: beta_t, norm, tmp
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
@@ -46,16 +46,16 @@ contains
 
     call monolis_std_debug_log_header("monolis_eigen_inverted_standard_lanczos_R_main")
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
     norm = 0.0d0
     is_converge = .false.
 
-    total_dof = N*NDOF
+    total_dof = NNDOF
 
     n_bc = 0
-    do i = 1, N*NDOF
+    do i = 1, NNDOF
       if(is_bc(i)) n_bc = n_bc + 1
     enddo
 
@@ -69,9 +69,9 @@ contains
     call monolis_alloc_R_1d(beta, maxiter)
     call monolis_alloc_R_1d(eigen_value, maxiter)
     call monolis_alloc_R_1d(prev, maxiter)
-    call monolis_alloc_R_1d(p, NP*NDOF)
-    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
-    call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
+    call monolis_alloc_R_1d(p, NPNDOF)
+    call monolis_alloc_R_2d(q, NPNDOF, maxiter + 1)
+    call monolis_alloc_R_2d(eigen_mode, NPNDOF, n_get_eigen)
 
     call lanczos_initialze(monoMAT, monoCOM, q(:,1), is_bc)
 
@@ -81,27 +81,27 @@ contains
       monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
       call monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
-      do i = 1, NP*NDOF
+      do i = 1, NPNDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
       if(iter > 1)then
-        call monolis_vec_AXPBY_R(N*NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+        call monolis_vec_AXPBY_R(NNDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
       else
         p = monoMAT%R%X
       endif
 
-      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, q(:,iter), alpha(iter))
+      call monolis_inner_product_main_R(monoCOM, NNDOF, p, q(:,iter), alpha(iter))
 
-      call monolis_vec_AXPBY_R(N*NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
+      call monolis_vec_AXPBY_R(NNDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt_R(monoCOM, iter, N*NDOF, p, q)
+      call monolis_gram_schmidt_R(monoCOM, iter, NNDOF, p, q)
 
-      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, p, beta_t)
+      call monolis_inner_product_main_R(monoCOM, NNDOF, p, p, beta_t)
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)
-      do i = 1, NP*NDOF
+      do i = 1, NPNDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
 
@@ -117,10 +117,10 @@ contains
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
-          do j = 1, NP*NDOF
+          do j = 1, NPNDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
-          call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
+          call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
         enddo
         exit
       endif
@@ -150,8 +150,8 @@ contains
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
-    integer(kint) :: N, NP, NDOF, total_dof, n_bc, j
-    integer(kint) :: i, iter
+    integer(kint) :: NNDOF, NPNDOF, total_dof, j
+    integer(kint) :: i, iter, n_bc
     real(kdouble) :: beta_t, norm, tmp
     real(kdouble) :: tspmv, tcomm_spmv
     real(kdouble), allocatable :: p(:), q(:,:), alpha(:), beta(:), eigen_value(:), eigen_mode(:,:), prev(:)
@@ -159,16 +159,16 @@ contains
 
     call monolis_std_debug_log_header("monolis_eigen_standard_lanczos_R_main")
 
-    N     = monoMAT%N
-    NP    = monoMAT%NP
-    NDOF  = monoMAT%NDOF
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+
     norm = 0.0d0
     is_converge = .false.
 
-    total_dof = N*NDOF
+    total_dof = NNDOF
 
     n_bc = 0
-    do i = 1, N*NDOF
+    do i = 1, NNDOF
       if(is_bc(i)) n_bc = n_bc + 1
     enddo
 
@@ -182,9 +182,9 @@ contains
     call monolis_alloc_R_1d(beta, maxiter)
     call monolis_alloc_R_1d(eigen_value, maxiter)
     call monolis_alloc_R_1d(prev, maxiter)
-    call monolis_alloc_R_1d(p, NP*NDOF)
-    call monolis_alloc_R_2d(q, NP*NDOF, maxiter + 1)
-    call monolis_alloc_R_2d(eigen_mode, NP*NDOF, n_get_eigen)
+    call monolis_alloc_R_1d(p, NPNDOF)
+    call monolis_alloc_R_2d(q, NPNDOF, maxiter + 1)
+    call monolis_alloc_R_2d(eigen_mode, NPNDOF, n_get_eigen)
 
     call lanczos_initialze(monoMAT, monoCOM, q(:,1), is_bc)
 
@@ -193,27 +193,27 @@ contains
 
       call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, monoMAT%R%X, tcomm_spmv)
 
-      do i = 1, N*NDOF
+      do i = 1, NNDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
 
       if(iter > 1)then
-        call monolis_vec_AXPBY_R(N*NDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
+        call monolis_vec_AXPBY_R(NNDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
       else
         p = monoMAT%R%X
       endif
 
-      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, q(:,iter), alpha(iter))
+      call monolis_inner_product_main_R(monoCOM, NNDOF, p, q(:,iter), alpha(iter))
 
-      call monolis_vec_AXPBY_R(N*NDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
+      call monolis_vec_AXPBY_R(NNDOF, -alpha(iter), q(:,iter), 1.0d0, p, p)
 
-      call monolis_gram_schmidt_R(monoCOM, iter, N*NDOF, p, q)
+      call monolis_gram_schmidt_R(monoCOM, iter, NNDOF, p, q)
 
-      call monolis_inner_product_main_R(monoCOM, N*NDOF, p, p, beta_t)
+      call monolis_inner_product_main_R(monoCOM, NNDOF, p, p, beta_t)
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)
-      do i = 1, NP*NDOF
+      do i = 1, NPNDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
 
@@ -233,10 +233,10 @@ contains
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
-          do j = 1, NP*NDOF
+          do j = 1, NPNDOF
             vec(j,i) = eigen_mode(j,i)
           enddo
-          call monolis_mpi_update_R_wrapper(monoCOM, NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
+          call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, vec(:,i), tmp)
         enddo
         exit
       endif
