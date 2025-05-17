@@ -14,9 +14,9 @@ mpif90 -I../../include \
 -o solver main.f90 \
 -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
 
-mpirun -np 1 ./solver
+#mpirun -np 1 ./solver
 
-mpirun -np 3 ./solver
+#mpirun -np 3 ./solver
 
 mpif90 -I../../include \
 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
@@ -25,4 +25,4 @@ mpif90 -I../../include \
 
 mpirun -np 1 ./solver_arbit
 
-mpirun -np 3 ./solver_arbit
+#mpirun -np 3 ./solver_arbit

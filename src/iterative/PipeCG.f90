@@ -66,7 +66,6 @@ contains
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
-    call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U)
     call monolis_matvec_product_main_R(monoCOM, monoMAT, U, V, tspmv, tcomm_spmv)
 
@@ -88,9 +87,6 @@ contains
       gamma = CG(1)
       delta = CG(2)
       R2    = CG(3)
-
-      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
 
       if(1 < iter)then
         beta  = gamma*gamma1
@@ -116,6 +112,9 @@ contains
         call monolis_vec_AXPBY_R(NNDOF,-alpha, Z, 1.0d0, V, V)
         call monolis_vec_AXPBY_R(NNDOF, alpha, P, 1.0d0, X, X)
       endif
+
+      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+      if(is_converge) exit
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)

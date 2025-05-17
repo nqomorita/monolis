@@ -191,7 +191,7 @@ contains
         do k = NDOF, j+1, -1
           T(j) = T(j) - ALU(kn + NDOF*(j-1) + k)*T(k)
         enddo
-        T(j) = ALU(kn + (NDOF+1)*(j-1) + 1)*T(j)
+        T(j) = ALU(kn + NDOF*(j-1) + j)*T(j)
       enddo
       kn = kn + NDOF*NDOF
       do j = 1, NDOF

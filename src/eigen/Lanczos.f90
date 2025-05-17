@@ -191,8 +191,6 @@ contains
     do iter = 1, maxiter
       call monolis_matvec_product_main_R(monoCOM, monoMAT, q(:,iter), monoMAT%R%X, tspmv, tcomm_spmv)
 
-      call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, monoMAT%R%X, tcomm_spmv)
-
       do i = 1, NNDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo

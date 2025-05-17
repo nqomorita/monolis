@@ -229,7 +229,7 @@ contains
         do k = n1, j+1, -1
           XT(j) = XT(j) - ALU(nz + n1*(j-1) + k)*XT(k)
         enddo
-        XT(j) = ALU(nz + (n1+1)*(j-1) + 1)*XT(j)
+        XT(j) = ALU(nz + n1*(j-1) + j)*XT(j)
       enddo
       do k = 1, n1
         Y(in + k) = XT(k)
@@ -279,14 +279,16 @@ contains
         do k = n1, j+1, -1
           XT(j) = XT(j) - ALU(nz + n1*(j-1) + k)*XT(k)
         enddo
-        XT(j) = ALU(nz + (n1+1)*(j-1) + 1)*XT(j)
+        XT(j) = ALU(nz + n1*(j-1) + j)*XT(j)
       enddo
       in = monoMAT%n_dof_index(i)
       do k = 1, n1
         Y(in + k) = Y(in + k) - XT(k)
       enddo
-      if(i > 1) in = monoMAT%n_dof_list(i - 1)
-      nz = nz - in*in
+      if(i > 1)then
+        in = monoMAT%n_dof_list(i - 1)
+        nz = nz - in*in
+      endif
     enddo
 
     deallocate(XT)
@@ -366,7 +368,7 @@ contains
         do k = n1, j+1, -1
           XT(j) = XT(j) - ALU(nz + n1*(j-1) + k)*XT(k)
         enddo
-        XT(j) = ALU(nz + (n1+1)*(j-1) + 1)*XT(j)
+        XT(j) = ALU(nz + n1*(j-1) + j)*XT(j)
       enddo
       do k = 1, n1
         Y(in + k) = XT(k)
@@ -416,14 +418,16 @@ contains
         do k = n1, j+1, -1
           XT(j) = XT(j) - ALU(nz + n1*(j-1) + k)*XT(k)
         enddo
-        XT(j) = ALU(nz + (n1+1)*(j-1) + 1)*XT(j)
+        XT(j) = ALU(nz + n1*(j-1) + j)*XT(j)
       enddo
       in = monoMAT%n_dof_index(i)
       do k = 1, n1
         Y(in + k) = Y(in + k) - XT(k)
       enddo
-      if(i > 1) in = monoMAT%n_dof_list(i - 1)
-      nz = nz - in*in
+      if(i > 1)then
+        in = monoMAT%n_dof_list(i - 1)
+        nz = nz - in*in
+      endif
     enddo
 
     deallocate(XT)
