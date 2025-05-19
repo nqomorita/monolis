@@ -276,8 +276,11 @@ program main
     call monolis_show_summary(mat, .true.)
 
     do iter = monolis_iter_CG, monolis_iter_IDRS
-    do prec = monolis_prec_NONE, monolis_prec_DIAG
-    !do prec = monolis_prec_NONE, monolis_prec_SOR
+    do prec = monolis_prec_NONE, monolis_prec_SOR
+      if(iter == monolis_iter_PIPECG .and. prec == monolis_prec_SOR) cycle
+      if(iter == monolis_iter_PIPECR .and. prec == monolis_prec_SOR) cycle
+      if(iter == monolis_iter_PipeBiCGSTAB .and. prec == monolis_prec_SOR) cycle
+
       a = 0.0d0
       b = c
 
@@ -437,7 +440,8 @@ program main
       r = coef(global_eid(i))
       val = complex(r, r)
       if(eid(1) == eid(2))then
-        if(mod(eid(1),2) /= 0)then
+        j = global_nid(eid(1))
+        if(mod(j,2) /= 0)then
           call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
         else
           call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
