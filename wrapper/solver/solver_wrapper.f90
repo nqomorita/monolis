@@ -8,7 +8,8 @@ module mod_monolis_solve_wrapper
 
 contains
 
-  subroutine monolis_solve_R_c(N, NP, NZ, NDOF, n_dof_list, n_dof_index, n_dof_index2, &
+  subroutine monolis_solve_R_c(N, NP, NZ, NDOF, NPNDOF, NZNDOF2, &
+    n_dof_list, n_dof_index, n_dof_index2, &
     A, X, B, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
@@ -19,6 +20,8 @@ contains
     type(monolis_structure) :: monolis
     type(monolis_com) :: monoCOM
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
+    integer(c_int), intent(in), value :: NPNDOF
+    integer(c_int), intent(in), value :: NZNDOF2
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), target :: n_dof_list(NP)
@@ -32,9 +35,9 @@ contains
     integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
     integer(c_int), target :: Iarray(100)
     real(c_double), target :: Rarray(100)
-    real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    real(c_double), target :: X(NDOF*NP)
-    real(c_double), intent(in), target :: B(NDOF*NP)
+    real(c_double), intent(in), target :: A(NZNDOF2)
+    real(c_double), target :: X(NPNDOF)
+    real(c_double), intent(in), target :: B(NPNDOF)
     integer(kint) :: i
 
     !> for monoMAT
@@ -88,7 +91,8 @@ contains
     enddo
   end subroutine monolis_solve_R_c
 
-  subroutine monolis_solve_C_c(N, NP, NZ, NDOF, n_dof_list, n_dof_index, n_dof_index2, &
+  subroutine monolis_solve_C_c(N, NP, NZ, NDOF, NPNDOF, NZNDOF2, &
+    n_dof_list, n_dof_index, n_dof_index2, &
     A, X, B, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
@@ -99,6 +103,8 @@ contains
     type(monolis_structure) :: monolis
     type(monolis_com) :: monoCOM
     integer(c_int), intent(in), value :: N, NP, NZ, NDOF
+    integer(c_int), intent(in), value :: NPNDOF
+    integer(c_int), intent(in), value :: NZNDOF2
     integer(c_int), intent(in), value :: my_rank, comm, comm_size
     integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
     integer(c_int), intent(in), target :: n_dof_list(NP)
@@ -112,9 +118,9 @@ contains
     integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
     integer(c_int), target :: Iarray(100)
     real(c_double), target :: Rarray(100)
-    complex(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
-    complex(c_double), target :: X(NDOF*NP)
-    complex(c_double), intent(in), target :: B(NDOF*NP)
+    complex(c_double), intent(in), target :: A(NZNDOF2)
+    complex(c_double), target :: X(NPNDOF)
+    complex(c_double), intent(in), target :: B(NPNDOF)
     integer(kint) :: i
 
     !> for monoMAT

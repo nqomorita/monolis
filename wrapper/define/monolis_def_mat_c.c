@@ -127,3 +127,27 @@ void monolis_mat_finalize(
   monolis_mat_finalize_CSR(&mat->CSR);
   monolis_mat_finalize_CSC(&mat->CSC);
 }
+
+void monolis_get_vec_size(
+  int N,
+  int NP,
+  int NDOF,
+  int NZ,
+  int* n_dof_index,
+  int* n_dof_index2,
+  int* N_size,
+  int* NP_size,
+  int* NZ_size)
+{
+  if(NDOF == -1){
+    *N_size  = n_dof_index[N];
+    *NP_size = n_dof_index[NP];
+    *NZ_size = n_dof_index2[NZ];
+  } else {
+    *N_size  = N *NDOF;
+    *NP_size = NP*NDOF;
+    *NZ_size = NZ*NDOF*NDOF;
+  }
+}
+
+

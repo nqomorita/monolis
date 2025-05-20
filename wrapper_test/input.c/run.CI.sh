@@ -25,3 +25,16 @@ mpif90 -I../../include \
 ./solver
 
 mpirun --oversubscribe --allow-run-as-root -np 3 solver
+
+echo "solver arbit"
+
+mpicc -I../../include \
+-c -o main.arbit.o main.arbit.c
+
+mpif90 -I../../include \
+-o solver.arbit main.arbit.o \
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
+
+./solver.arbit
+
+mpirun --oversubscribe --allow-run-as-root -np 3 solver.arbit
