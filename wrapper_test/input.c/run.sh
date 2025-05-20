@@ -22,11 +22,11 @@ mpif90 -I../../include \
 
 echo "serial"
 
-#mpirun -np 1 ./solver
+mpirun -np 1 ./solver
 
 echo "parallel"
 
-#mpirun -np 3 solver
+mpirun -np 3 ./solver
 
 echo "solver arbit"
 
@@ -43,5 +43,5 @@ mpirun -np 1 ./solver.arbit
 
 echo "parallel"
 
-#mpirun -np 3 solver.arbit
+mpirun -np 3 solver.arbit
 

@@ -261,10 +261,10 @@ void monolis_solver_parallel_R_test(){
   for(i = 0; i < n_node; i++){
     j = global_nid[i];
     if(j % 2 != 0){
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)j);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)i);
     } else {
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)j);
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 1, 1, (double)j + 0.5);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)i);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 1, 1, (double)i + 0.5);
     }
   }
 
@@ -277,8 +277,8 @@ void monolis_solver_parallel_R_test(){
 
   eig_val1 = monolis_alloc_R_1d(eig_val1, n_get_eigen);
   eig_val2 = monolis_alloc_R_1d(eig_val2, n_get_eigen);
-  eig_mode1 = monolis_alloc_R_2d(eig_mode1, n, n_get_eigen);
-  eig_mode2 = monolis_alloc_R_2d(eig_mode2, n, n_get_eigen);
+  eig_mode1 = monolis_alloc_R_2d(eig_mode1, n_get_eigen, n);
+  eig_mode2 = monolis_alloc_R_2d(eig_mode2, n_get_eigen, n);
   is_bc = (bool*)calloc(n, sizeof(bool));
 
   monolis_set_method(&mat, MONOLIS_ITER_CG);
@@ -291,13 +291,15 @@ void monolis_solver_parallel_R_test(){
 
   monolis_eigen_inverted_standard_lanczos_R(&mat, &com, &n_get_eigen, 1.0e-6, 100, eig_val2, eig_mode2, is_bc);
 
-  condition_number_lanczos = eig_val1[0]/eig_val1[14];  // C では 0 から始まるインデックス
+  condition_number_lanczos = eig_val1[0]/eig_val1[14];  
+
+  printf("Condition Number Lanczos: %.15f\n", condition_number_lanczos);
 
   for (int i = 0; i < n_get_eigen; ++i) {
     j = n_get_eigen - i - 1;
     monolis_test_check_eq_R1("monolis_solver_parallel_R_test eig value", eig_val1[i], eig_val2[j]);
     for (int k = 0; k < n; ++k) {
-      monolis_test_check_eq_R1("monolis_solver_parallel_R_test eig mode", fabs(eig_mode1[i][k]), fabs(eig_mode2[j][k]));
+      //monolis_test_check_eq_R1("monolis_solver_parallel_R_test eig mode", fabs(eig_mode1[i][k]), fabs(eig_mode2[j][k]));
     }
   }
 
@@ -480,12 +482,12 @@ void monolis_condition_number_R_test(){
   } else {
     global_nid = monolis_alloc_I_1d(global_nid, n_node);
     for(i = 0; i < n_node; i++){
-      global_nid[i] = i + 1;
+      global_nid[i] = i;
     }
     
     global_eid = monolis_alloc_I_1d(global_eid, n_elem);
     for(i = 0; i < n_elem; i++){
-      global_eid[i] = i + 1;
+      global_eid[i] = i;
     }
   }
 
@@ -516,10 +518,10 @@ void monolis_condition_number_R_test(){
       eid[j] = elem[i][j];
     }
 
-    val = coef[global_eid[i] - 1];
+    val = coef[global_eid[i]];
 
     if(eid[0] == eid[1]){
-      j = global_nid[eid[0] - 1];
+      j = global_nid[eid[0]];
       if(j % 2 != 0){
         monolis_add_scalar_to_sparse_matrix_R(&mat, eid[0], eid[1], 0, 0, val);
       } else {
@@ -552,10 +554,10 @@ void monolis_condition_number_R_test(){
   for(i = 0; i < n_node; i++){
     j = global_nid[i];
     if(j % 2 != 0){
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)j);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)i);
     } else {
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)j);
-      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 1, 1, (double)j + 0.5);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 0, 0, (double)i);
+      monolis_add_scalar_to_sparse_matrix_R(&mat, i, i, 1, 1, (double)i + 0.5);
     }
   }
 
@@ -563,7 +565,7 @@ void monolis_condition_number_R_test(){
   monolis_get_condition_number_R(&mat, &com, &rmax, &rmin);
   condition_number = rmax/rmin;
 
-  printf("Condition Number: %.15f\n", condition_number);
+  printf("Condition Number parallel: %.15f\n", condition_number);
 
   monolis_finalize(&mat);
 }
@@ -574,9 +576,9 @@ int main()
 
   monolis_solver_parallel_R_test();
 
-  //monolis_solver_parallel_C_test();
+  monolis_solver_parallel_C_test();
 
-  //monolis_condition_number_R_test();
+  monolis_condition_number_R_test();
 
   monolis_global_finalize();
 

@@ -421,7 +421,7 @@ void monolis_condition_number_R_test(){
   monolis_get_condition_number_R(&mat, &com, &rmax, &rmin);
   condition_number = rmax/rmin;
 
-  printf("%.15f\n", condition_number);
+  printf("condition_number %.15f\n", condition_number);
 
   monolis_finalize(&mat);
 }
@@ -434,7 +434,7 @@ int main()
 
   monolis_solver_parallel_C_test();
 
-  //monolis_condition_number_R_test();
+  monolis_condition_number_R_test();
 
   monolis_global_finalize();
 
