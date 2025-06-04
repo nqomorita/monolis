@@ -80,31 +80,34 @@ contains
     !> [out] 特異値（固有値）の最小値
     real(kdouble), intent(out) :: singular_value_min
     integer(kint) :: scalapack_comm
-    integer(kint) :: N, NT, NDOF, i
+    integer(kint) :: i, N, NNDOF, NPNDOF, NT
     real(kdouble), allocatable :: dense(:,:)
     real(kdouble), allocatable :: S(:,:), V(:), D(:,:)
+
+    N = monolis%MAT%N
+    if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
+
+    call monolis_get_vec_size(N, monolis%MAT%NP, monolis%MAT%NDOF, &
+      monolis%MAT%n_dof_index, NNDOF, NPNDOF)
 
     call monolis_convert_sparse_matrix_to_dense_matrix_R(monolis%MAT, monoCOM, dense)
 
     call monolis_scalapack_comm_initialize(monoCOM%comm, scalapack_comm)
 
-    N = monolis%MAT%N
-    if(monolis_mpi_get_local_comm_size(monoCOM%comm) > 1) N = monoCOM%n_internal_vertex
-    NT = N
-    NDOF = monolis%MAT%NDOF
+    NT = NNDOF
     call monolis_allreduce_I1(NT, monolis_mpi_sum, monoCOM%comm)
 
-    call monolis_alloc_R_2d(S, NDOF*N, NDOF*NT)
-    call monolis_alloc_R_1d(V, NDOF*NT)
-    call monolis_alloc_R_2d(D, NDOF*NT, NDOF*NT)
+    call monolis_alloc_R_2d(S, NNDOF, NT)
+    call monolis_alloc_R_1d(V, NT)
+    call monolis_alloc_R_2d(D, NT, NT)
 
-    call monolis_scalapack_gesvd_R(NDOF*N, NDOF*NT, dense, S, V, D, monoCOM%comm, scalapack_comm)
+    call monolis_scalapack_gesvd_R(NNDOF, NT, dense, S, V, D, monoCOM%comm, scalapack_comm)
     
     singular_value_min = 1.0d300
     singular_value_max = 0.0d0
-    do i = 1, NDOF*NT
-      if(singular_value_min > dabs(V(i)) .and. dabs(V(i)) > 0.0d0) singular_value_min = dabs(V(i))
-      if(singular_value_max < dabs(V(i)) .and. dabs(V(i)) > 0.0d0) singular_value_max = dabs(V(i))
+    do i = 1, NT
+      if(singular_value_min > V(i)) singular_value_min = V(i)
+      if(singular_value_max < V(i)) singular_value_max = V(i)
     enddo
 
     call monolis_scalapack_comm_finalize(scalapack_comm)

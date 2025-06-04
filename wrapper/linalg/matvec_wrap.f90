@@ -10,7 +10,7 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型）
-  subroutine monolis_matvec_product_R_c(N, NP, NZ, NDOF, &
+  subroutine monolis_matvec_product_R_c(N, NP, NZ, NDOF, NPNDOF, NZNDOF2, &
     n_dof_list, n_dof_index, n_dof_index2, A, X, Y, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
@@ -25,12 +25,14 @@ contains
     integer(c_int), intent(in), value :: NZ
     !> [in] 自由度
     integer(c_int), intent(in), value :: NDOF
+    integer(c_int), intent(in), value :: NPNDOF
+    integer(c_int), intent(in), value :: NZNDOF2
     !> [in] 自由度
-    real(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
+    real(c_double), intent(in), target :: A(NZNDOF2)
     !> [in,out] 自由度
-    real(c_double), intent(inout), target :: X(NDOF*NP)
+    real(c_double), intent(inout), target :: X(NPNDOF)
     !> [out] 自由度
-    real(c_double), intent(out), target :: Y(NDOF*NP)
+    real(c_double), intent(out), target :: Y(NPNDOF)
     integer(c_int), intent(in), target :: n_dof_list(NP)
     integer(c_int), intent(in), target :: n_dof_index(NP + 1)
     integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
@@ -99,7 +101,7 @@ contains
 
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
 
-    call monolis_mpi_update_R(monoCOM, monoMAT%NDOF, Y, tcomm)
+    call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, Y, tcomm)
 
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1
@@ -107,7 +109,7 @@ contains
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数型）
-  subroutine monolis_matvec_product_C_c(N, NP, NZ, NDOF, &
+  subroutine monolis_matvec_product_C_c(N, NP, NZ, NDOF, NPNDOF, NZNDOF2, &
     n_dof_list, n_dof_index, n_dof_index2, A, X, Y, index, item, &
     my_rank, comm, comm_size, &
     recv_n_neib, recv_nitem, recv_neib_pe, recv_index, recv_item, &
@@ -122,12 +124,14 @@ contains
     integer(c_int), intent(in), value :: NZ
     !> [in] 自由度
     integer(c_int), intent(in), value :: NDOF
+    integer(c_int), intent(in), value :: NPNDOF
+    integer(c_int), intent(in), value :: NZNDOF2
     !> [in] 自由度
-    complex(c_double), intent(in), target :: A(NDOF*NDOF*NZ)
+    complex(c_double), intent(in), target :: A(NZNDOF2)
     !> [in,out] 自由度
-    complex(c_double), intent(inout), target :: X(NDOF*NP)
+    complex(c_double), intent(inout), target :: X(NPNDOF)
     !> [out] 自由度
-    complex(c_double), intent(out), target :: Y(NDOF*NP)
+    complex(c_double), intent(out), target :: Y(NPNDOF)
     integer(c_int), intent(in), target :: n_dof_list(NP)
     integer(c_int), intent(in), target :: n_dof_index(NP + 1)
     integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
@@ -196,7 +200,7 @@ contains
 
     call monolis_matvec_product_main_C(monoCOM, monoMAT, X, Y, tspmv, tcomm)
 
-    call monolis_mpi_update_C(monoCOM, monoMAT%NDOF, Y, tcomm)
+    call monolis_mpi_update_C_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, Y, tcomm)
 
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1

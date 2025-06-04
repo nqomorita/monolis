@@ -99,7 +99,6 @@ AR   = - ar ruv
 ##> **********
 ##> target (1)
 LIB_TARGET = $(LIB_DIR)/$(LIBRARY_SOLVER)
-LIBALL_TARGET = $(LIB_DIR)/$(LIBRARY)
 
 ##> source file define
 SRC_DEFINE = \
@@ -118,10 +117,10 @@ spmat_handler.f90 \
 spmat_convert_sym.f90
 
 SRC_LINALG = \
-matvec.f90 \
 inner_product.f90 \
-mat_converge.f90 \
-vec_util.f90
+vec_util.f90 \
+matvec.f90 \
+mat_converge.f90 
 
 SRC_WRAP = \
 wrapper_lapack.f90 \
@@ -141,8 +140,10 @@ nnls.f90
 SRC_PREC = \
 diag/diag_33.f90 \
 diag/diag_nn.f90 \
+diag/diag_V.f90 \
 sor/sor_33.f90 \
 sor/sor_nn.f90 \
+sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
 LU.f90 \
@@ -348,15 +349,13 @@ all: \
 	cp_header_lib \
 	cp_bin_lib \
 	$(LIB_TARGET) \
-	$(LIBALL_TARGET) \
 	$(TEST_TARGET) \
 	$(TEST_C_TARGET)
 
 lib: \
 	cp_header \
 	cp_header_lib \
-	$(LIB_TARGET) \
-	$(LIBALL_TARGET)
+	$(LIB_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
@@ -394,20 +393,19 @@ cp_header_lib:
 	$(CP) ./submodule/monolis_utils/lib/libmonolis_utils.a ./lib/
 	$(CP) ./submodule/gedatsu/include/* ./include/
 	$(CP) ./submodule/gedatsu/lib/libgedatsu.a ./lib/
+	$(CP) ./submodule/ggtools/include/* ./include/
+	$(CP) ./submodule/ggtools/lib/libggtools.a ./lib/
 
 cp_bin_lib:
 	$(CP) ./submodule/monolis_utils/bin/* ./bin/
 	$(CP) ./submodule/gedatsu/bin/* ./bin/
-
-$(LIBALL_TARGET):
-	ar -rc $(LIB_DIR)/libmonolis.a $(LIB_DIR)/libmonolis_solver.a $(LIB_DIR)/libgedatsu.a $(LIB_DIR)/libmonolis_utils.a
+#	$(CP) ./submodule/ggtools/bin/* ./bin/
 
 clean:
 	$(RM) $(LIB_OBJS) \
 	$(RM) $(TST_OBJS) \
 	$(RM) $(TST_C_OBJS) \
 	$(RM) $(LIB_TARGET) \
-	$(RM) $(LIBALL_TARGET) \
 	$(RM) $(TEST_TARGET) \
 	$(RM) $(TEST_C_TARGET) \
 	$(RM) ./include/*.mod \

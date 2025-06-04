@@ -15,9 +15,14 @@ void monolis_matvec_product_R(
   if(com->comm_size > 1 ) n = com->n_internal_vertex;
   int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.NP];
   int recv_nitem = com->recv_index[com->recv_n_neib];
   int send_nitem = com->send_index[com->send_n_neib];
+  int nz = mat->mat.CSR.index[mat->mat.NP];
+  int NNDOF, NPNDOF, NZNDOF2;
+
+  monolis_get_vec_size(n, np, ndof, nz, 
+    mat->mat.n_dof_index, mat->mat.n_dof_index2,
+    &NNDOF, &NPNDOF, &NZNDOF2);
 
   monolis_matvec_product_R_c_main(
     /* mat */
@@ -25,6 +30,8 @@ void monolis_matvec_product_R(
     np,
     nz,
     ndof,
+    NPNDOF,
+    NZNDOF2,
     mat->mat.n_dof_list,
     mat->mat.n_dof_index,
     mat->mat.n_dof_index2,
@@ -59,9 +66,14 @@ void monolis_matvec_product_C(
   if(com->comm_size > 1 ) n = com->n_internal_vertex;
   int np = mat->mat.NP;
   int ndof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.NP];
   int recv_nitem = com->recv_index[com->recv_n_neib];
   int send_nitem = com->send_index[com->send_n_neib];
+  int nz = mat->mat.CSR.index[mat->mat.NP];
+  int NNDOF, NPNDOF, NZNDOF2;
+
+  monolis_get_vec_size(n, np, ndof, nz, 
+    mat->mat.n_dof_index, mat->mat.n_dof_index2,
+    &NNDOF, &NPNDOF, &NZNDOF2);
 
   monolis_matvec_product_C_c_main(
     /* mat */
@@ -69,6 +81,8 @@ void monolis_matvec_product_C(
     np,
     nz,
     ndof,
+    NPNDOF,
+    NZNDOF2,
     mat->mat.n_dof_list,
     mat->mat.n_dof_index,
     mat->mat.n_dof_index2,

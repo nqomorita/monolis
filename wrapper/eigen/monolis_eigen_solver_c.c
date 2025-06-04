@@ -26,11 +26,16 @@ void monolis_eigen_standard_lanczos_R(
   int i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
+  int NNDOF, NPNDOF, NZNDOF2;
 
-  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*(*n_get_eigen));
-  is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, np*n_dof);
+  monolis_get_vec_size(n, np, n_dof, nz, 
+    mat->mat.n_dof_index, mat->mat.n_dof_index2,
+    &NNDOF, &NPNDOF, &NZNDOF2);
 
-  for(i = 0; i < np*n_dof; i++){
+  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, NPNDOF*(*n_get_eigen));
+  is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, NPNDOF);
+
+  for(i = 0; i < NPNDOF; i++){
     if (is_Dirichlet_bc[i]) {
       is_Dirichlet_bc_int[i] = 1;
     } else {
@@ -44,6 +49,8 @@ void monolis_eigen_standard_lanczos_R(
     np,
     nz,
     n_dof,
+    NPNDOF,
+    NZNDOF2,
     mat->mat.n_dof_list,
     mat->mat.n_dof_index,
     mat->mat.n_dof_index2,
@@ -75,8 +82,8 @@ void monolis_eigen_standard_lanczos_R(
     is_Dirichlet_bc_int);
 
   for(i = 0; i < *n_get_eigen; i++){
-    for(j = 0; j < np*n_dof; j++){
-      eigen_mode[i][j] = eigen_mode_tmp[np*n_dof*i + j];
+    for(j = 0; j < NPNDOF; j++){
+      eigen_mode[i][j] = eigen_mode_tmp[NPNDOF*i + j];
     }
   }
 
@@ -104,11 +111,16 @@ void monolis_eigen_inverted_standard_lanczos_R(
   int i, j;
   int* is_Dirichlet_bc_int;
   double* eigen_mode_tmp;
+  int NNDOF, NPNDOF, NZNDOF2;
 
-  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, np*n_dof*(*n_get_eigen));
-  is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, np*n_dof);
+  monolis_get_vec_size(n, np, n_dof, nz, 
+    mat->mat.n_dof_index, mat->mat.n_dof_index2,
+    &NNDOF, &NPNDOF, &NZNDOF2);
 
-  for(i = 0; i < np*n_dof; i++){
+  eigen_mode_tmp = monolis_alloc_R_1d(eigen_mode_tmp, NPNDOF*(*n_get_eigen));
+  is_Dirichlet_bc_int = monolis_alloc_I_1d(is_Dirichlet_bc_int, NPNDOF);
+
+  for(i = 0; i < NPNDOF; i++){
     if (is_Dirichlet_bc[i]) {
       is_Dirichlet_bc_int[i] = 1;
     } else {
@@ -122,6 +134,8 @@ void monolis_eigen_inverted_standard_lanczos_R(
     np,
     nz,
     n_dof,
+    NPNDOF,
+    NZNDOF2,
     mat->mat.n_dof_list,
     mat->mat.n_dof_index,
     mat->mat.n_dof_index2,
@@ -153,8 +167,8 @@ void monolis_eigen_inverted_standard_lanczos_R(
     is_Dirichlet_bc_int);
 
   for(i = 0; i < *n_get_eigen; i++){
-    for(j = 0; j < np*n_dof; j++){
-      eigen_mode[i][j] = eigen_mode_tmp[np*n_dof*i + j];
+    for(j = 0; j < NPNDOF; j++){
+      eigen_mode[i][j] = eigen_mode_tmp[NPNDOF*i + j];
     }
   }
 
@@ -175,6 +189,11 @@ void monolis_get_condition_number_R(
   int n_dof = mat->mat.NDOF;
   int recv_nitem = com->recv_index[com->recv_n_neib];
   int send_nitem = com->send_index[com->send_n_neib];
+  int NNDOF, NPNDOF, NZNDOF2;
+
+  monolis_get_vec_size(n, np, n_dof, nz, 
+    mat->mat.n_dof_index, mat->mat.n_dof_index2,
+    &NNDOF, &NPNDOF, &NZNDOF2);
 
   monolis_get_condition_number_R_c_main(
     /* mat */
@@ -182,6 +201,8 @@ void monolis_get_condition_number_R(
     np,
     nz,
     n_dof,
+    NPNDOF,
+    NZNDOF2,
     mat->mat.n_dof_list,
     mat->mat.n_dof_index,
     mat->mat.n_dof_index2,
@@ -192,6 +213,7 @@ void monolis_get_condition_number_R(
     com->my_rank,
     com->comm,
     com->comm_size,
+    com->n_internal_vertex,
     com->recv_n_neib,
     recv_nitem,
     com->recv_neib_pe,

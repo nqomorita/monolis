@@ -160,6 +160,7 @@ contains
     !> 出力ベクトル
     real(kdouble) :: Y(:)
     integer(kint) :: i, precond
+    integer(kint) :: NNDOF, NPNDOF
     real(kdouble) :: t1, t2
 
     call monolis_std_debug_log_header("monolis_precond_apply_R")
@@ -187,7 +188,9 @@ contains
     !elseif(precond == monolis_prec_MF)then
     !  call monolis_precond_MF_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(precond == monolis_prec_NONE)then
-      do i = 1, monoMAT%N*monoMAT%NDOF
+      call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+        monoMAT%n_dof_index, NNDOF, NPNDOF)
+      do i = 1, NNDOF
         Y(i) = X(i)
       enddo
     else
@@ -216,6 +219,7 @@ contains
     !> 出力ベクトル
     complex(kdouble) :: Y(:)
     integer(kint) :: i, precond
+    integer(kint) :: NNDOF, NPNDOF
     real(kdouble) :: t1, t2
 
     call monolis_std_debug_log_header("monolis_precond_apply_C")
@@ -239,7 +243,9 @@ contains
     !elseif(precond == monolis_prec_MF)then
     !  call monolis_precond_MF_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(precond == monolis_prec_NONE)then
-      do i = 1, monoMAT%N*monoMAT%NDOF
+      call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+        monoMAT%n_dof_index, NNDOF, NPNDOF)
+      do i = 1, NNDOF
         Y(i) = X(i)
       enddo
     else

@@ -19,3 +19,12 @@ mpif90 -I../../include \
 ./solver
 
 mpirun --oversubscribe --allow-run-as-root -np 3 solver
+
+mpif90 -I../../include \
+-std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow \
+-o solver_arbit main.arbit.f90 \
+-L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -lscalapack -llapack -lblas
+
+./solver_arbit
+
+mpirun --oversubscribe --allow-run-as-root -np 3 solver_arbit
