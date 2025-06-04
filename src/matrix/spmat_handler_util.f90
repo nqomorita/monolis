@@ -476,7 +476,7 @@ contains
         j1 = eperm1(i1)
         do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
         do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(i1)+k1, idx2t(i2)+k2)
+          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(j1)+k1, idx2t(j2)+k2)
         enddo
         enddo
       enddo
@@ -579,7 +579,7 @@ contains
         j1 = eperm1(i1)
         do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
         do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(i1)+k1, idx2t(i2)+k2)
+          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(j1)+k1, idx2t(j2)+k2)
         enddo
         enddo
       enddo
