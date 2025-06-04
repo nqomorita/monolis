@@ -65,6 +65,7 @@ contains
       T(3,2) = ALU(9*l-1)
       T(3,3) = ALU(9*l  )
       do k = 1, 3
+        if(T(k,k) == 0.0d0) T(k,k) = 1.0d0
         T(k,k) = 1.0d0/T(k,k)
         do i = k+1, 3
           T(i,k) = T(i,k) * T(k,k)
