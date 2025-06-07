@@ -32,3 +32,8 @@ cd ../..
 cd submodule/gedatsu/
 make FLAGS=A64FX,SUBMODULE
 cd ../..
+
+#> gedatsu
+cd submodule/ggtools/
+make FLAGS=A64FX,SUBMODULE
+cd ../..

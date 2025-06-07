@@ -37,3 +37,8 @@ cd ../..
 cd submodule/gedatsu/
 make FLAGS=SUBMODULE
 cd ../..
+
+#> gedatsu
+cd submodule/ggtools/
+make FLAGS=SUBMODULE
+cd ../..

@@ -152,6 +152,21 @@ void monolis_mat_finalize_CSC(
 void monolis_mat_finalize(
   MONOLIS_MAT* mat);
 
+/**
+ * @brief 疎行列に対応するベクトル配列サイズの取得関数
+ * @ingroup linalg
+ */
+void monolis_get_vec_size(
+  int N,
+  int NP,
+  int NDOF,
+  int NZ,
+  int* n_dof_index,
+  int* n_dof_index2,
+  int* N_size,
+  int* NP_size,
+  int* NZ_size);
+
 #ifdef __cplusplus
 }
 #endif

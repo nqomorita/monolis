@@ -5,6 +5,7 @@ module mod_monolis_precond_sor
   use mod_monolis_def_struc
   use mod_monolis_precond_sor_33
   use mod_monolis_precond_sor_nn
+  use mod_monolis_precond_sor_V
 
   implicit none
 
@@ -25,7 +26,9 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_setup_R")
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_setup_R(monoMAT, monoPREC)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_sor_33_setup_R(monoMAT, monoPREC)
     else
       call monolis_precond_sor_nn_setup_R(monoMAT, monoPREC)
@@ -47,7 +50,11 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_setup_C")
 
-    call monolis_precond_sor_nn_setup_C(monoMAT, monoPREC)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_setup_C(monoMAT, monoPREC)
+    else
+      call monolis_precond_sor_nn_setup_C(monoMAT, monoPREC)
+      endif
   end subroutine monolis_precond_sor_setup_C
 
   !> @ingroup prec
@@ -66,7 +73,9 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_apply_R")
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_apply_R(monoMAT, monoPREC, X, Y)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_sor_33_apply_R(monoMAT, monoPREC, X, Y)
     else
       call monolis_precond_sor_nn_apply_R(monoMAT, monoPREC, X, Y)
@@ -89,7 +98,11 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_apply_C")
 
-    call monolis_precond_sor_nn_apply_C(monoMAT, monoPREC, X, Y)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_apply_C(monoMAT, monoPREC, X, Y)
+    else
+      call monolis_precond_sor_nn_apply_C(monoMAT, monoPREC, X, Y)
+    endif
   end subroutine monolis_precond_sor_apply_C
 
   !> @ingroup prec
@@ -107,7 +120,9 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_clear_R")
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_clear_R(monoPREC)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_sor_33_clear_R(monoPREC)
     else
       call monolis_precond_sor_nn_clear_R(monoPREC)
@@ -129,6 +144,10 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_sor_clear_C")
 
-    call monolis_precond_sor_nn_clear_R(monoPREC)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_sor_V_clear_R(monoPREC)
+    else
+      call monolis_precond_sor_nn_clear_R(monoPREC)
+    endif
   end subroutine monolis_precond_sor_clear_C
 end module mod_monolis_precond_sor

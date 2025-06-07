@@ -5,6 +5,7 @@ module mod_monolis_precond_diag
   use mod_monolis_def_struc
   use mod_monolis_precond_diag_33
   use mod_monolis_precond_diag_nn
+  use mod_monolis_precond_diag_V
 
   implicit none
 
@@ -27,7 +28,9 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_prepared) == 1) return
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_setup_R (monoMAT, monoPREC)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_setup_R(monoMAT, monoPREC)
     else
       call monolis_precond_diag_nn_setup_R(monoMAT, monoPREC)
@@ -55,7 +58,11 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_prepared) == 1) return
 
-    call monolis_precond_diag_nn_setup_C(monoMAT, monoPREC)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_setup_C (monoMAT, monoPREC)
+    else
+      call monolis_precond_diag_nn_setup_C(monoMAT, monoPREC)
+    endif
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1)then
       monoPRM%Iarray(monolis_prm_I_is_prec_prepared) = 1
@@ -78,7 +85,9 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_diag_apply_R")
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_apply_R (monoMAT, monoPREC, X, Y)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_apply_R(monoMAT, monoPREC, X, Y)
     else
       call monolis_precond_diag_nn_apply_R(monoMAT, monoPREC, X, Y)
@@ -101,7 +110,11 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_diag_apply_C")
 
-    call monolis_precond_diag_nn_apply_C(monoMAT, monoPREC, X, Y)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_apply_C (monoMAT, monoPREC, X, Y)
+    else
+      call monolis_precond_diag_nn_apply_C(monoMAT, monoPREC, X, Y)
+    endif
   end subroutine monolis_precond_diag_apply_C
 
   !> @ingroup prec
@@ -121,7 +134,9 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
 
-    if(monoMAT%NDOF == 3)then
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_clear_R (monoPREC)
+    elseif(monoMAT%NDOF == 3)then
       call monolis_precond_diag_33_clear_R(monoPREC)
     else
       call monolis_precond_diag_nn_clear_R(monoPREC)
@@ -145,6 +160,10 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
 
-    call monolis_precond_diag_nn_clear_C(monoPREC)
+    if(monoMAT%NDOF == -1)then
+      call monolis_precond_diag_V_clear_C (monoPREC)
+    else
+      call monolis_precond_diag_nn_clear_C(monoPREC)
+    endif
   end subroutine monolis_precond_diag_clear_C
 end module mod_monolis_precond_diag

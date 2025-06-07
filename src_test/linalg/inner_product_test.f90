@@ -161,7 +161,7 @@ contains
     rX(3) = 1.0d0; rY(3) = 2.0d0
     rX(4) = 1.0d0; rY(4) = 1.0d0
 
-    call monolis_global_sorted_inner_product_main_R_N128(com, 2, ndof, rX, rY, rsum, t1, t2)
+    call monolis_global_sorted_inner_product_main_R_N128(com, 2*ndof, rX, rY, rsum, t1, t2)
 
     if(monolis_mpi_get_global_comm_size() == 2)then
       call monolis_test_check_eq_R1("monolis_linalg_test 9", rsum, 20.0d0)
