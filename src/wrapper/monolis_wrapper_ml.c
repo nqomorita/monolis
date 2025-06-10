@@ -83,7 +83,7 @@ void monolis_ML_wrapper_setup(
   myrank = monolis_mpi_get_global_my_rank();
   monolis_ml_get_nlocal_c(&nlocal, &nlocal_allcolumns, ierr);
 
-  ML_Init_Amatrix(ml_object, 0, nlocal, nlocal_allcolumns, &myrank);
+  ML_Init_Amatrix(ml_object, 0, nlocal, nlocal, &myrank);
   ML_Set_Amatrix_Getrow(ml_object, 0, monolis_ML_getrow, monolis_ML_comm, nlocal_allcolumns);
   ML_Set_Amatrix_Matvec(ml_object, 0, monolis_ML_matvec);
 
