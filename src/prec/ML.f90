@@ -137,10 +137,7 @@ end module mod_monolis_precond_ML
       idof = row - (inod-1)*ndof
       
       n = ndof*(monoMAT_save%CSR%index(inod + 1) - monoMAT_save%CSR%index(inod))
-      if (allocated_space < m + n)then
-        ierr = -1
-        return
-      endif
+      if (allocated_space < m + n) return
 
       start = m
       js = monoMAT_save%CSR%index(inod) + 1
@@ -153,7 +150,7 @@ end module mod_monolis_precond_ML
           m = m + 1
         enddo
       enddo
-      row_lengths(i) = je - js + 1
+      row_lengths(i) = m - start
     enddo
     ierr = 1
   end subroutine monolis_ML_getrow_nn
