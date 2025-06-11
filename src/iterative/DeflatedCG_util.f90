@@ -40,7 +40,7 @@ contains
     W(:,1:M) = monoPRM%deflation_mode(:,1:M)
 
     do i = 1, M
-      call monolis_mpi_update_R(monoCOM, NDOF, W(:,i), tcomm)
+      call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, W(:,i), tcomm)
     enddo
 
     id = M

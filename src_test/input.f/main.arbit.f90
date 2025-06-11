@@ -277,6 +277,9 @@ program main
 
     do iter = monolis_iter_CG, monolis_iter_IDRS
     do prec = monolis_prec_NONE, monolis_prec_SOR
+      if(iter == monolis_iter_DeflatedCG1) cycle
+      if(iter == monolis_iter_DeflatedCG2) cycle
+      if(iter == monolis_iter_ADeflatedCG2) cycle
       if(iter == monolis_iter_PIPECG .and. prec == monolis_prec_SOR) cycle
       if(iter == monolis_iter_PIPECR .and. prec == monolis_prec_SOR) cycle
       if(iter == monolis_iter_PipeBiCGSTAB .and. prec == monolis_prec_SOR) cycle
