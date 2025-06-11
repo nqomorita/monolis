@@ -1,6 +1,6 @@
 [submodule "submodule/METIS"]
 	path = submodule/METIS
-	url = https://github.com/KarypisLab/METIS.git
+	url = https://github.com/nqomorita/METIS.git
 	ignore = dirty
 [submodule "submodule/mumps"]
 	path = submodule/mumps
@@ -19,3 +19,4 @@
 [submodule "submodule/ggtools"]
 	path = submodule/ggtools
 	url = https://gitlab.com/mmlab_tsukuba/ggtools.git
+
