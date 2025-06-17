@@ -22,15 +22,18 @@ cd ../..
 
 #> monolis_utils
 cd submodule/monolis_utils/
+make clean
 make FLAGS=INTEL
 cd ../..
 
 #> gedatsu
 cd submodule/gedatsu/
+make clean
 make FLAGS=INTEL,SUBMODULE
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
+make clean
 make FLAGS=INTEL,SUBMODULE
 cd ../..
