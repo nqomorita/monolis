@@ -13,6 +13,8 @@ program main
 
   contains
 
+!grep -e 文字列1 -e 文字列2 -e 文字列3 テキストファイル
+
   subroutine monolis_solver_parallel_R_test()
     implicit none
     type(monolis_structure) :: mat !> 疎行列変数
@@ -101,12 +103,14 @@ program main
 
     call monolis_set_maxiter(mat, 1000)
     call monolis_set_tolerance(mat, 1.0d-10)
-    call monolis_show_timelog(mat, .true.)
-    call monolis_show_iterlog(mat, .true.)
+    call monolis_show_timelog(mat, .false.)
+    call monolis_show_iterlog(mat, .false.)
     call monolis_show_summary(mat, .true.)
 
-    call monolis_set_method(mat, monolis_iter_BiCGSTAB_N128)
+    !call monolis_set_method(mat, monolis_iter_BiCGSTAB_N128)
     !call monolis_set_method(mat, monolis_iter_BiCGSTAB)
+    !call monolis_set_method(mat, monolis_iter_BiCGSAFE)
+    call monolis_set_method(mat, monolis_iter_IDRS)
     call monolis_set_precond(mat, monolis_prec_DIAG)
 
     call monolis_solve_R(mat, com, b, c)
