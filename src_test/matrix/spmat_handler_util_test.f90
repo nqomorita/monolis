@@ -15,6 +15,7 @@ contains
     call monolis_set_block_to_sparse_matrix_main_R_test()
     call monolis_set_block_to_sparse_matrix_main_C_test()
     call monolis_convert_sparse_matrix_to_dense_matrix_R_test()
+    call monolis_variable_dof_sparse_matrix_R_test()
   end subroutine monolis_spmat_handler_util_test
 
   subroutine monolis_set_scalar_to_sparse_matrix_main_R_test()
@@ -369,4 +370,80 @@ contains
     ans(5) = 433.0d0; ans(6) = 434.0d0; ans(7) = 43.0d0; ans(8) = 44.0d0;
     call monolis_test_check_eq_R("monolis_convert_sparse_matrix_to_dense_matrix_R_test 8", dense(8,:), ans)
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R_test
+
+  subroutine monolis_variable_dof_sparse_matrix_R_test()
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: mat
+    integer(kint) :: nnode, nelem, elem(3,2), n_dof_list(4)
+    integer(kint) :: i
+    real(kdouble) :: val
+    logical :: is_find
+
+    if(monolis_mpi_get_global_comm_size() /= 1) return
+
+    call monolis_std_global_log_string("monolis_variable_dof_sparse_matrix_R_test")
+    call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_V_R")
+
+    call monolis_initialize(mat)
+
+    ! 4節点、2要素のメッシュ設定
+    nnode = 4
+    nelem = 2
+
+    ! 三角形要素
+    elem(1,1) = 1; elem(2,1) = 2; elem(3,1) = 3;
+    elem(1,2) = 2; elem(2,2) = 3; elem(3,2) = 4;
+
+    ! 各節点の自由度を異なる値に設定
+    ! 節点1: 1自由度, 節点2: 2自由度, 節点3: 3自由度, 節点4: 1自由度
+    n_dof_list(1) = 1
+    n_dof_list(2) = 2
+    n_dof_list(3) = 3
+    n_dof_list(4) = 1
+
+    ! monolis_get_nonzero_pattern_by_simple_mesh_V_Rで非ゼロ構造を決定
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_R(mat, nnode, 3, n_dof_list, nelem, elem)
+
+    ! 各節点の対角成分に値を設定してテスト
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 1, 1, 11.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 1, 1, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 1", val, 11.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 1, 1, 21.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 2, 2, 22.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 2, 2, 1, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 2", val, 21.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 2, 2, 2, 2, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 3", val, 22.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 3, 1, 1, 31.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 3, 2, 2, 32.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 3, 3, 3, 33.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 3, 1, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 4", val, 31.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 3, 2, 2, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 5", val, 32.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 3, 3, 3, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 6", val, 33.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 4, 4, 1, 1, 41.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 4, 4, 1, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 7", val, 41.0d0)
+
+    ! 非対角成分のテスト（要素接続による）
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 1, 12.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 2, 1, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8", val, 12.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 3, 2, 1, 23.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 2, 3, 2, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 9", val, 23.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 4, 3, 1, 34.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 4, 3, 1, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 10", val, 34.0d0)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_variable_dof_sparse_matrix_R_test
 end module mod_monolis_spmat_handler_util_test

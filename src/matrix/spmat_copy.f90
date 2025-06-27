@@ -45,7 +45,8 @@ contains
     type(monolis_structure), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_structure), intent(inout) :: mat_out
-    integer(kint) :: NP, NZ, NZU, NZL
+    integer(kint) :: NP, NZ
+    integer(kint) :: N_t, NP_t, NZ_t, NZD, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
     mat_out%MAT%NP = mat_in%MAT%NP
@@ -70,18 +71,12 @@ contains
     call monolis_palloc_I_1d(mat_out%MAT%n_dof_index2, NZ + 1)
     mat_out%MAT%n_dof_index2 = mat_in%MAT%n_dof_index2
 
-    NZU = 0
-    if(associated(mat_in%MAT%SCSR%indexU))then
-      NZU = mat_in%MAT%SCSR%indexU(NP + 1)
-    endif
+    call monolis_get_vec_size(mat_in%MAT%N, mat_in%MAT%NP, mat_in%MAT%NDOF, &
+      mat_in%MAT%n_dof_index, N_t, NP_t)
+    call monolis_get_mat_size(mat_in%MAT, NZ_t, NZD, NZU, NZL)
 
-    NZL = 0
-    if(associated(mat_in%MAT%SCSR%indexL))then
-      NZL = mat_in%MAT%SCSR%indexL(NP + 1)
-    endif
-
-    call monolis_copy_mat_nonzero_pattern_val_R(mat_in%MAT%NP, mat_in%MAT%NDOF, NZ, NZU, NZL, &
-      & mat_in%MAT%R, mat_out%MAT%R)
+    call monolis_copy_mat_nonzero_pattern_val_R(NP_t, NZ_t, NZD, NZU, NZL, &
+      mat_in%MAT%R, mat_out%MAT%R)
   end subroutine monolis_copy_mat_nonzero_pattern_R
 
   !> @ingroup matrix_copy
@@ -92,7 +87,8 @@ contains
     type(monolis_structure), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_structure), intent(inout) :: mat_out
-    integer(kint) :: NP, NZ, NZU, NZL
+    integer(kint) :: NP, NZ
+    integer(kint) :: N_t, NP_t, NZ_t, NZD, NZU, NZL
 
     mat_out%MAT%N = mat_in%MAT%N
     mat_out%MAT%NP = mat_in%MAT%NP
@@ -117,30 +113,24 @@ contains
     call monolis_palloc_I_1d(mat_out%MAT%n_dof_index2, NZ + 1)
     mat_out%MAT%n_dof_index2 = mat_in%MAT%n_dof_index2
 
-    NZU = 0
-    if(associated(mat_in%MAT%SCSR%indexU))then
-      NZU = mat_in%MAT%SCSR%indexU(NP + 1)
-    endif
+    call monolis_get_vec_size(mat_in%MAT%N, mat_in%MAT%NP, mat_in%MAT%NDOF, &
+      mat_in%MAT%n_dof_index, N_t, NP_t)
+    call monolis_get_mat_size(mat_in%MAT, NZ_t, NZD, NZU, NZL)
 
-    NZL = 0
-    if(associated(mat_in%MAT%SCSR%indexL))then
-      NZL = mat_in%MAT%SCSR%indexL(NP + 1)
-    endif
-
-    call monolis_copy_mat_nonzero_pattern_val_C(mat_in%MAT%NP, mat_in%MAT%NDOF, NZ, NZU, NZL, &
+    call monolis_copy_mat_nonzero_pattern_val_C(NP_t, NZ_t, NZD, NZU, NZL, &
       & mat_in%MAT%C, mat_out%MAT%C)
   end subroutine monolis_copy_mat_nonzero_pattern_C
 
   !> @ingroup matrix_copy
   !> 行列の非零値のコピー（実数型）
-  subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_val_R(NP, NZ, NZD, NZU, NZL, mat_in, mat_out)
     implicit none
     !> [in] 全計算点数
     integer(kint), intent(in) :: NP
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: NDOF
     !> [in] 非零要素数
     integer(kint), intent(in) :: NZ
+    !> [in] 非零要素数（対角）
+    integer(kint), intent(in) :: NZD
     !> [in] 非零要素数（上三角）
     integer(kint), intent(in) :: NZU
     !> [in] 非零要素数（下三角）
@@ -151,46 +141,46 @@ contains
     type(monolis_mat_val_R), intent(inout) :: mat_out
 
     call monolis_pdealloc_R_1d(mat_out%X)
-    call monolis_palloc_R_1d(mat_out%X, NP*NDOF)
+    call monolis_palloc_R_1d(mat_out%X, NP)
     mat_out%X = mat_in%X
 
     call monolis_pdealloc_R_1d(mat_out%B)
-    call monolis_palloc_R_1d(mat_out%B, NP*NDOF)
+    call monolis_palloc_R_1d(mat_out%B, NP)
     mat_out%B = mat_in%B
 
     call monolis_pdealloc_R_1d(mat_out%A)
-    call monolis_palloc_R_1d(mat_out%A, NZ*NDOF*NDOF)
+    call monolis_palloc_R_1d(mat_out%A, NZ)
     mat_out%A = mat_in%A
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_R_1d(mat_out%U)
-      call monolis_palloc_R_1d(mat_out%U, NZU*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%U, NZU)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_R_1d(mat_out%L)
-      call monolis_palloc_R_1d(mat_out%L, NZL*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%L, NZL)
       mat_out%L = mat_in%L
     endif
 
     if(associated(mat_in%D))then
       call monolis_pdealloc_R_1d(mat_out%D)
-      call monolis_palloc_R_1d(mat_out%D, NP*NDOF*NDOF)
+      call monolis_palloc_R_1d(mat_out%D, NZD)
       mat_out%D = mat_in%D
     endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_R
 
   !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（複素数型）
-  subroutine monolis_copy_mat_nonzero_pattern_val_C(NP, NDOF, NZ, NZU, NZL, mat_in, mat_out)
+  subroutine monolis_copy_mat_nonzero_pattern_val_C(NP, NZ, NZD, NZU, NZL, mat_in, mat_out)
     implicit none
     !> [in] 全計算点数
     integer(kint), intent(in) :: NP
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: NDOF
     !> [in] 非零要素数
     integer(kint), intent(in) :: NZ
+    !> [in] 非零要素数（対角）
+    integer(kint), intent(in) :: NZD
     !> [in] 非零要素数（上三角）
     integer(kint), intent(in) :: NZU
     !> [in] 非零要素数（下三角）
@@ -201,32 +191,32 @@ contains
     type(monolis_mat_val_C), intent(inout) :: mat_out
 
     call monolis_pdealloc_C_1d(mat_out%X)
-    call monolis_palloc_C_1d(mat_out%X, NP*NDOF)
+    call monolis_palloc_C_1d(mat_out%X, NP)
     mat_out%X = mat_in%X
 
     call monolis_pdealloc_C_1d(mat_out%B)
-    call monolis_palloc_C_1d(mat_out%B, NP*NDOF)
+    call monolis_palloc_C_1d(mat_out%B, NP)
     mat_out%B = mat_in%B
 
     call monolis_pdealloc_C_1d(mat_out%A)
-    call monolis_palloc_C_1d(mat_out%A, NZ*NDOF*NDOF)
+    call monolis_palloc_C_1d(mat_out%A, NZ)
     mat_out%A = mat_in%A
 
     if(associated(mat_in%U))then
       call monolis_pdealloc_C_1d(mat_out%U)
-      call monolis_palloc_C_1d(mat_out%U, NZU*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%U, NZU)
       mat_out%U = mat_in%U
     endif
 
     if(associated(mat_in%L))then
       call monolis_pdealloc_C_1d(mat_out%L)
-      call monolis_palloc_C_1d(mat_out%L, NZL*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%L, NZL)
       mat_out%L = mat_in%L
     endif
 
     if(associated(mat_in%D))then
       call monolis_pdealloc_C_1d(mat_out%D)
-      call monolis_palloc_C_1d(mat_out%D, NP*NDOF*NDOF)
+      call monolis_palloc_C_1d(mat_out%D, NZD)
       mat_out%D = mat_in%D
     endif
   end subroutine monolis_copy_mat_nonzero_pattern_val_C

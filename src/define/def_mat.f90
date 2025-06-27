@@ -414,4 +414,65 @@ contains
       np_size = NP*NDOF
     endif
   end subroutine monolis_get_vec_size
+  !> @ingroup def_mat_init
+
+  !> 疎行列に対応するベクトル配列サイズの取得関数
+  subroutine monolis_get_mat_size(MAT, NZ, NZD, NZU, NZL)
+    implicit none
+    !> [in,out] 疎行列構造体
+    type(monolis_mat), intent(in) :: MAT
+    !> [in] 内部計算点数
+    integer(kint), intent(out) :: NZ
+    !> [in] 全計算点数
+    integer(kint), intent(out) :: NZD
+    !> [in] 自由度（固定値）
+    integer(kint), intent(out) :: NZU
+    !> [in] 自由度（固定値）
+    integer(kint), intent(out) :: NZL
+    integer(kint) :: i, j, in, jS, jE, NP, NDOF
+
+    NP = MAT%NP
+    NDOF = MAT%NDOF
+
+    if(NDOF == -1)then
+      in = MAT%CSR%index(NP + 1)
+      NZ = MAT%n_dof_index2(in + 1)
+
+      NZD = 0
+      NZU = 0
+      NZL = 0
+      do i = 1, NP
+        jS = MAT%CSR%index(i) + 1
+        jE = MAT%CSR%index(i + 1)
+        do j = jS, jE
+          in = MAT%CSR%item(j)
+          if(i == in)then
+            NZD = NZD + MAT%n_dof_index(i)*MAT%n_dof_index(in)
+          elseif(i < in)then
+            NZU = NZU + MAT%n_dof_index(i)*MAT%n_dof_index(in)
+          elseif(in < i)then
+            NZL = NZL + MAT%n_dof_index(i)*MAT%n_dof_index(in)
+          endif
+        enddo
+      enddo
+
+    else
+      NZ = MAT%CSR%index(NP + 1)
+      NZ = NZ*NDOF*NDOF
+
+      NZU = 0
+      if(associated(MAT%SCSR%indexU))then
+        NZU = MAT%SCSR%indexU(NP + 1)
+      endif
+  
+      NZL = 0
+      if(associated(MAT%SCSR%indexL))then
+        NZL = MAT%SCSR%indexL(NP + 1)
+      endif
+
+      NZD = NZD*NDOF*NDOF
+      NZU = NZU*NDOF*NDOF
+      NZL = NZL*NDOF*NDOF
+    endif
+  end subroutine monolis_get_mat_size
 end module mod_monolis_def_mat
