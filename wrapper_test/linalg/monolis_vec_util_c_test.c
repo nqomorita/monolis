@@ -21,7 +21,7 @@ void monolis_vec_util_c_test(){
   ix[2] = 3;
   ix[3] = 4;
 
-  monolis_vec_copy_I(1, 4, ix, iy);
+  monolis_vec_copy_I(4, ix, iy);
 
   monolis_test_check_eq_I1("monolis_vec_copy_I", ix[0], iy[0]);
   monolis_test_check_eq_I1("monolis_vec_copy_I", ix[1], iy[1]);
@@ -33,7 +33,7 @@ void monolis_vec_util_c_test(){
   rx[2] = 3.0;
   rx[3] = 4.0;
 
-  monolis_vec_copy_R(1, 4, rx, ry);
+  monolis_vec_copy_R(4, rx, ry);
 
   monolis_test_check_eq_R1("monolis_vec_copy_R", rx[0], ry[0]);
   monolis_test_check_eq_R1("monolis_vec_copy_R", rx[1], ry[1]);
@@ -45,7 +45,7 @@ void monolis_vec_util_c_test(){
   cx[2] = 3.0;
   cx[3] = 4.0;
 
-  monolis_vec_copy_C(1, 4, cx, cy);
+  monolis_vec_copy_C(4, cx, cy);
 
   monolis_test_check_eq_R1("monolis_vec_copy_C", cx[0], cy[0]);
   monolis_test_check_eq_R1("monolis_vec_copy_C", cx[1], cy[1]);

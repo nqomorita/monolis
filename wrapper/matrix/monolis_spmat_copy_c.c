@@ -31,7 +31,8 @@ void monolis_copy_mat_nonzero_pattern_R(
   MONOLIS* mat_in,
   MONOLIS* mat_out)
 {
-  int NP, NZ, NZU, NZL;
+  int N, NP, NZ, NZU, NZL;
+  int Nt, NPt, NZt, NZD;
 
   mat_out->mat.N = mat_in->mat.N;
   mat_out->mat.NP = mat_in->mat.NP;
@@ -41,35 +42,35 @@ void monolis_copy_mat_nonzero_pattern_R(
   monolis_copy_mat_nonzero_pattern_CSC (mat_in->mat.NP, &mat_in->mat.CSC,  &mat_out->mat.CSC);
   monolis_copy_mat_nonzero_pattern_SCSR(mat_in->mat.NP, &mat_in->mat.SCSR, &mat_out->mat.SCSR);
 
+  N  = mat_in->mat.N;
   NP = mat_in->mat.NP;
   NZ = mat_in->mat.CSR.index[NP];
 
-  NZU = 0;
-  if(mat_in->mat.SCSR.indexU != NULL){
-    NZU = mat_in->mat.SCSR.indexU[NP];
-  }
-
-  NZL = 0;
-  if(mat_in->mat.SCSR.indexL != NULL){
-    NZL = mat_in->mat.SCSR.indexL[NP];
-  }
-
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_list);
   mat_out->mat.n_dof_list = monolis_alloc_I_1d(mat_out->mat.n_dof_list, NP);
-  monolis_vec_copy_I(NP, 1, mat_in->mat.n_dof_list, mat_out->mat.n_dof_list);
+  monolis_vec_copy_I(NP, mat_in->mat.n_dof_list, mat_out->mat.n_dof_list);
 
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_index);
   mat_out->mat.n_dof_index = monolis_alloc_I_1d(mat_out->mat.n_dof_index, NP + 1);
-  monolis_vec_copy_I(NP + 1, 1, mat_in->mat.n_dof_index, mat_out->mat.n_dof_index);
+  monolis_vec_copy_I(NP + 1, mat_in->mat.n_dof_index, mat_out->mat.n_dof_index);
 
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_index2);
   mat_out->mat.n_dof_index2 = monolis_alloc_I_1d(mat_out->mat.n_dof_index2, NZ + 1);
-  monolis_vec_copy_I(NZ + 1, 1, mat_in->mat.n_dof_index2, mat_out->mat.n_dof_index2);
+  monolis_vec_copy_I(NZ + 1, mat_in->mat.n_dof_index2, mat_out->mat.n_dof_index2);
+
+  monolis_get_vec_size(N, NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &Nt, &NPt, &NZt);
+  monolis_get_mat_size(&mat_in->mat, &NZt, &NZD, &NZU, &NZL);
 
   monolis_copy_mat_nonzero_pattern_val_R(
-    mat_in->mat.NP,
-    mat_in->mat.NDOF,
-    NZ, NZU, NZL,
+    NPt,
+    NZt,
+    NZD,
+    NZU,
+    NZL,
     &mat_in->mat.R,
     &mat_out->mat.R);
 }
@@ -78,7 +79,8 @@ void monolis_copy_mat_nonzero_pattern_C(
   MONOLIS* mat_in,
   MONOLIS* mat_out)
 {
-  int NP, NZ, NZU, NZL;
+  int N, NP, NZ, NZU, NZL;
+  int Nt, NPt, NZt, NZD;
 
   mat_out->mat.N = mat_in->mat.N;
   mat_out->mat.NP = mat_in->mat.NP;
@@ -88,116 +90,116 @@ void monolis_copy_mat_nonzero_pattern_C(
   monolis_copy_mat_nonzero_pattern_CSC (mat_in->mat.NP, &mat_in->mat.CSC,  &mat_out->mat.CSC);
   monolis_copy_mat_nonzero_pattern_SCSR(mat_in->mat.NP, &mat_in->mat.SCSR, &mat_out->mat.SCSR);
 
+  N  = mat_in->mat.N;
   NP = mat_in->mat.NP;
   NZ = mat_in->mat.CSR.index[NP];
 
-  NZU = 0;
-  if(mat_in->mat.SCSR.indexU != NULL){
-    NZU = mat_in->mat.SCSR.indexU[NP];
-  }
-
-  NZL = 0;
-  if(mat_in->mat.SCSR.indexL != NULL){
-    NZL = mat_in->mat.SCSR.indexL[NP];
-  }
-
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_list);
   mat_out->mat.n_dof_list = monolis_alloc_I_1d(mat_out->mat.n_dof_list, NP);
-  monolis_vec_copy_I(NP, 1, mat_in->mat.n_dof_list, mat_out->mat.n_dof_list);
+  monolis_vec_copy_I(NP, mat_in->mat.n_dof_list, mat_out->mat.n_dof_list);
 
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_index);
   mat_out->mat.n_dof_index = monolis_alloc_I_1d(mat_out->mat.n_dof_index, NP + 1);
-  monolis_vec_copy_I(NP + 1, 1, mat_in->mat.n_dof_index, mat_out->mat.n_dof_index);
+  monolis_vec_copy_I(NP + 1, mat_in->mat.n_dof_index, mat_out->mat.n_dof_index);
 
   monolis_dealloc_I_1d(&mat_out->mat.n_dof_index2);
   mat_out->mat.n_dof_index2 = monolis_alloc_I_1d(mat_out->mat.n_dof_index2, NZ + 1);
-  monolis_vec_copy_I(NZ + 1, 1, mat_in->mat.n_dof_index2, mat_out->mat.n_dof_index2);
+  monolis_vec_copy_I(NZ + 1, mat_in->mat.n_dof_index2, mat_out->mat.n_dof_index2);
+
+  monolis_get_vec_size(N, NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &Nt, &NPt, &NZt);
+  monolis_get_mat_size(&mat_in->mat, &NZt, &NZD, &NZU, &NZL);
 
   monolis_copy_mat_nonzero_pattern_val_C(
-    mat_in->mat.NP,
-    mat_in->mat.NDOF,
-    NZ, NZU, NZL,
+    NPt,
+    NZt,
+    NZD,
+    NZU,
+    NZL,
     &mat_in->mat.C,
     &mat_out->mat.C);
 }
 
 void monolis_copy_mat_nonzero_pattern_val_R(
   int      NP,
-  int      NDOF,
   int      NZ,
+  int      NZD,
   int      NZU,
   int      NZL,
   MONOLIS_MAT_VAL_R* mat_in,
   MONOLIS_MAT_VAL_R* mat_out)
 {
   monolis_dealloc_R_1d(&mat_out->X);
-  mat_out->X = monolis_alloc_R_1d(mat_out->X, NP*NDOF);
-  monolis_vec_copy_R(NP, NDOF, mat_in->X, mat_out->X);
+  mat_out->X = monolis_alloc_R_1d(mat_out->X, NP);
+  monolis_vec_copy_R(NP, mat_in->X, mat_out->X);
 
   monolis_dealloc_R_1d(&mat_out->B);
-  mat_out->B = monolis_alloc_R_1d(mat_out->B, NP*NDOF);
-  monolis_vec_copy_R(NP, NDOF, mat_in->B, mat_out->B);
+  mat_out->B = monolis_alloc_R_1d(mat_out->B, NP);
+  monolis_vec_copy_R(NP, mat_in->B, mat_out->B);
 
   monolis_dealloc_R_1d(&mat_out->A);
-  mat_out->A = monolis_alloc_R_1d(mat_out->A, NZ*NDOF*NDOF);
-  monolis_vec_copy_R(NZ, NDOF*NDOF, mat_in->A, mat_out->A);
+  mat_out->A = monolis_alloc_R_1d(mat_out->A, NZ);
+  monolis_vec_copy_R(NZ, mat_in->A, mat_out->A);
 
   if(mat_in->U != NULL){
     monolis_dealloc_R_1d(&mat_out->U);
-    mat_out->U = monolis_alloc_R_1d(mat_out->U, NZU*NDOF*NDOF);
-    monolis_vec_copy_R(NZU, NDOF*NDOF, mat_in->U, mat_out->U);
+    mat_out->U = monolis_alloc_R_1d(mat_out->U, NZU);
+    monolis_vec_copy_R(NZU, mat_in->U, mat_out->U);
   }
 
   if(mat_in->L != NULL){
     monolis_dealloc_R_1d(&mat_out->L);
-    mat_out->L = monolis_alloc_R_1d(mat_out->L, NZ*NDOF*NDOF);
-    monolis_vec_copy_R(NZL, NDOF*NDOF, mat_in->L, mat_out->L);
+    mat_out->L = monolis_alloc_R_1d(mat_out->L, NZL);
+    monolis_vec_copy_R(NZL, mat_in->L, mat_out->L);
   }
 
   if(mat_in->D != NULL){
     monolis_dealloc_R_1d(&mat_out->D);
-    mat_out->D = monolis_alloc_R_1d(mat_out->D, NP*NDOF*NDOF);
-    monolis_vec_copy_R(NP, NDOF*NDOF, mat_in->D, mat_out->D);
+    mat_out->D = monolis_alloc_R_1d(mat_out->D, NZD);
+    monolis_vec_copy_R(NP, mat_in->D, mat_out->D);
   }
 }
 
 void monolis_copy_mat_nonzero_pattern_val_C(
   int      NP,
-  int      NDOF,
   int      NZ,
+  int      NZD,
   int      NZU,
   int      NZL,
   MONOLIS_MAT_VAL_C* mat_in,
   MONOLIS_MAT_VAL_C* mat_out)
 {
   monolis_dealloc_C_1d(&mat_out->X);
-  mat_out->X = monolis_alloc_C_1d(mat_out->X, NP*NDOF);
-  monolis_vec_copy_C(NP, NDOF, mat_in->X, mat_out->X);
+  mat_out->X = monolis_alloc_C_1d(mat_out->X, NP);
+  monolis_vec_copy_C(NP, mat_in->X, mat_out->X);
 
   monolis_dealloc_C_1d(&mat_out->B);
-  mat_out->B = monolis_alloc_C_1d(mat_out->B, NP*NDOF);
-  monolis_vec_copy_C(NP, NDOF, mat_in->B, mat_out->B);
+  mat_out->B = monolis_alloc_C_1d(mat_out->B, NP);
+  monolis_vec_copy_C(NP, mat_in->B, mat_out->B);
 
   monolis_dealloc_C_1d(&mat_out->A);
-  mat_out->A = monolis_alloc_C_1d(mat_out->A, NZ*NDOF*NDOF);
-  monolis_vec_copy_C(NZ, NDOF*NDOF, mat_in->A, mat_out->A);
+  mat_out->A = monolis_alloc_C_1d(mat_out->A, NZ);
+  monolis_vec_copy_C(NZ, mat_in->A, mat_out->A);
 
   if(mat_in->U != NULL){
     monolis_dealloc_C_1d(&mat_out->U);
-    mat_out->U = monolis_alloc_C_1d(mat_out->U, NZU*NDOF*NDOF);
-    monolis_vec_copy_C(NZU, NDOF*NDOF, mat_in->U, mat_out->U);
+    mat_out->U = monolis_alloc_C_1d(mat_out->U, NZU);
+    monolis_vec_copy_C(NZU, mat_in->U, mat_out->U);
   }
 
   if(mat_in->L != NULL){
     monolis_dealloc_C_1d(&mat_out->L);
-    mat_out->L = monolis_alloc_C_1d(mat_out->L, NZ*NDOF*NDOF);
-    monolis_vec_copy_C(NZL, NDOF*NDOF, mat_in->L, mat_out->L);
+    mat_out->L = monolis_alloc_C_1d(mat_out->L, NZL);
+    monolis_vec_copy_C(NZL, mat_in->L, mat_out->L);
   }
 
   if(mat_in->D != NULL){
     monolis_dealloc_C_1d(&mat_out->D);
-    mat_out->D = monolis_alloc_C_1d(mat_out->D, NP*NDOF*NDOF);
-    monolis_vec_copy_C(NP, NDOF*NDOF, mat_in->D, mat_out->D);
+    mat_out->D = monolis_alloc_C_1d(mat_out->D, NZD);
+    monolis_vec_copy_C(NP, mat_in->D, mat_out->D);
   }
 }
 
@@ -211,11 +213,11 @@ void monolis_copy_mat_nonzero_pattern_CSR(
 
   monolis_dealloc_I_1d(&mat_out->index);
   mat_out->index = monolis_alloc_I_1d(mat_out->index, NP + 1);
-  monolis_vec_copy_I(NP + 1, 1, mat_in->index, mat_out->index);
+  monolis_vec_copy_I(NP + 1, mat_in->index, mat_out->index);
 
   monolis_dealloc_I_1d(&mat_out->item);
   mat_out->item = monolis_alloc_I_1d(mat_out->item, NZ);
-  monolis_vec_copy_I(NZ, 1, mat_in->item, mat_out->item);
+  monolis_vec_copy_I(NZ, mat_in->item, mat_out->item);
 }
 
 void monolis_copy_mat_nonzero_pattern_CSC(
@@ -228,15 +230,15 @@ void monolis_copy_mat_nonzero_pattern_CSC(
 
   monolis_dealloc_I_1d(&mat_out->index);
   mat_out->index = monolis_alloc_I_1d(mat_out->index, NP + 1);
-  monolis_vec_copy_I(NP + 1, 1, mat_in->index, mat_out->index);
+  monolis_vec_copy_I(NP + 1, mat_in->index, mat_out->index);
 
   monolis_dealloc_I_1d(&mat_out->item);
   mat_out->item = monolis_alloc_I_1d(mat_out->item, NZ);
-  monolis_vec_copy_I(NZ, 1, mat_in->item, mat_out->item);
+  monolis_vec_copy_I(NZ, mat_in->item, mat_out->item);
 
   monolis_dealloc_I_1d(&mat_out->perm);
   mat_out->perm = monolis_alloc_I_1d(mat_out->perm, NZ);
-  monolis_vec_copy_I(NZ, 1, mat_in->perm, mat_out->perm);
+  monolis_vec_copy_I(NZ, mat_in->perm, mat_out->perm);
 }
 
 void monolis_copy_mat_nonzero_pattern_SCSR(
@@ -249,27 +251,27 @@ void monolis_copy_mat_nonzero_pattern_SCSR(
   if(mat_in->indexU != NULL){
     monolis_dealloc_I_1d(&mat_out->indexU);
     mat_out->indexU = monolis_alloc_I_1d(mat_out->indexU, NP + 1);
-    monolis_vec_copy_I(NP + 1, 1, mat_in->indexU, mat_out->indexU);
+    monolis_vec_copy_I(NP + 1, mat_in->indexU, mat_out->indexU);
   }
 
   if(mat_in->itemU != NULL){
     NZ = mat_in->indexU[NP];
     monolis_dealloc_I_1d(&mat_out->itemU);
     mat_out->itemU = monolis_alloc_I_1d(mat_out->itemU, NZ);
-    monolis_vec_copy_I(NZ, 1, mat_in->itemU, mat_out->itemU);
+    monolis_vec_copy_I(NZ, mat_in->itemU, mat_out->itemU);
   }
 
   if(mat_in->indexL != NULL){
     monolis_dealloc_I_1d(&mat_out->indexL);
     mat_out->indexL = monolis_alloc_I_1d(mat_out->indexL, NP + 1);
-    monolis_vec_copy_I(NP + 1, 1, mat_in->indexL, mat_out->indexL);
+    monolis_vec_copy_I(NP + 1, mat_in->indexL, mat_out->indexL);
   }
 
   if(mat_in->itemL != NULL){
     NZ = mat_in->indexL[NP];
     monolis_dealloc_I_1d(&mat_out->itemL);
     mat_out->itemL = monolis_alloc_I_1d(mat_out->itemL, NZ);
-    monolis_vec_copy_I(NZ, 1, mat_in->itemL, mat_out->itemL);
+    monolis_vec_copy_I(NZ, mat_in->itemL, mat_out->itemL);
   }
 }
 
@@ -287,10 +289,15 @@ void monolis_copy_mat_value_matrix_R(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int nz = mat_in->mat.CSR.index[mat_in->mat.NP];
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*n_dof*nz; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NZ; i++) {
     mat_out->mat.R.A[i] = mat_in->mat.R.A[i];
   }
 }
@@ -300,10 +307,15 @@ void monolis_copy_mat_value_solution_R(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int np = mat_in->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat_out->mat.R.X[i] = mat_in->mat.R.X[i];
   }
 }
@@ -313,10 +325,15 @@ void monolis_copy_mat_value_rhs_R(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int np = mat_in->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat_out->mat.R.B[i] = mat_in->mat.R.B[i];
   }
 }
@@ -335,10 +352,15 @@ void monolis_copy_mat_value_matrix_C(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int nz = mat_in->mat.CSR.index[mat_in->mat.N];
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*n_dof*nz; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NZ; i++) {
     mat_out->mat.C.A[i] = mat_in->mat.C.A[i];
   }
 }
@@ -348,10 +370,15 @@ void monolis_copy_mat_value_solution_C(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int np = mat_in->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat_out->mat.C.X[i] = mat_in->mat.C.X[i];
   }
 }
@@ -361,10 +388,15 @@ void monolis_copy_mat_value_rhs_C(
   MONOLIS* mat_out)
 {
   int i;
-  int n_dof = mat_in->mat.NDOF;
-  int np = mat_in->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat_in->mat.N, mat_in->mat.NP, mat_in->mat.NDOF, 
+    mat_in->mat.CSR.index[mat_in->mat.NP],
+    mat_in->mat.n_dof_index, 
+    mat_in->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat_out->mat.C.B[i] = mat_in->mat.C.B[i];
   }
 }
@@ -381,10 +413,15 @@ void monolis_clear_mat_value_matrix_R(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.N];
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*n_dof*nz; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NZ; i++) {
     mat->mat.R.A[i] = 0.0;
   }
 }
@@ -393,10 +430,15 @@ void monolis_clear_mat_value_solution_R(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int np = mat->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat->mat.R.X[i] = 0.0;
   }
 }
@@ -405,10 +447,15 @@ void monolis_clear_mat_value_rhs_R(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int np = mat->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat->mat.R.B[i] = 0.0;
   }
 }
@@ -425,10 +472,15 @@ void monolis_clear_mat_value_matrix_C(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int nz = mat->mat.CSR.index[mat->mat.N];
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*n_dof*nz; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NZ; i++) {
     mat->mat.C.A[i] = 0.0;
   }
 }
@@ -437,10 +489,15 @@ void monolis_clear_mat_value_solution_C(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int np = mat->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NP; i++) {
     mat->mat.C.X[i] = 0.0;
   }
 }
@@ -449,10 +506,15 @@ void monolis_clear_mat_value_rhs_C(
   MONOLIS* mat)
 {
   int i;
-  int n_dof = mat->mat.NDOF;
-  int np = mat->mat.NP;
+  int N, NP, NZ;
 
-  for(i = 0; i < n_dof*np; i++) {
+  monolis_get_vec_size(mat->mat.N, mat->mat.NP, mat->mat.NDOF, 
+    mat->mat.CSR.index[mat->mat.NP],
+    mat->mat.n_dof_index, 
+    mat->mat.n_dof_index2,
+    &N, &NP, &NZ);
+
+  for(i = 0; i < NZ; i++) {
     mat->mat.C.B[i] = 0.0;
   }
 }

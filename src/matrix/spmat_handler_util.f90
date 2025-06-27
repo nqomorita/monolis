@@ -651,6 +651,7 @@ contains
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
+      ndof = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof
         B(n_dof_index(jn)+k) = B(n_dof_index(jn)+k) - val*A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc)
         A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc) = 0.0d0
@@ -722,6 +723,7 @@ contains
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
+      ndof = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof
         B(n_dof_index(jn)+k) = B(n_dof_index(jn)+k) - val*A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc)
         A(n_dof_index2(kn) + ndof*(k-1) + ndof_bc) = 0.0d0

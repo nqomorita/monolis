@@ -150,4 +150,54 @@ void monolis_get_vec_size(
   }
 }
 
+void monolis_get_mat_size(
+  MONOLIS_MAT* mat,
+  int* NZ,
+  int* NZD,
+  int* NZU,
+  int* NZL)
+{
+  int NP   = mat->NP;
+  int NDOF = mat->NDOF;
 
+  if(NDOF == -1){
+    int in = mat->CSR.index[NP];
+    *NZ = mat->n_dof_index2[in];
+
+    *NZD = 0;
+    *NZU = 0;
+    *NZL = 0;
+    for (int i = 0; i < NP; ++i) {
+      int jS = mat->CSR.index[i];
+      int jE = mat->CSR.index[i + 1];
+      for (int j = jS; j < jE; ++j) {
+        in = mat->CSR.item[j];
+        if (i == in) {
+          *NZD += mat->n_dof_index[i] * mat->n_dof_index[in];
+        } else if (i < in) {
+          *NZU += mat->n_dof_index[i] * mat->n_dof_index[in];
+        } else {
+          *NZL += mat->n_dof_index[i] * mat->n_dof_index[in];
+        }
+      }
+    }
+
+  } else {
+    *NZ = mat->CSR.index[NP];
+    *NZ = *NZ*NDOF*NDOF;
+
+    *NZU = 0;
+    if(mat->SCSR.indexU != NULL){
+      *NZU = mat->SCSR.indexU[NP];
+    }
+
+    *NZL = 0;
+    if(mat->SCSR.indexL != NULL){
+      *NZL = mat->SCSR.indexL[NP];
+    }
+
+    *NZD = NP  *NDOF*NDOF;
+    *NZU = *NZU*NDOF*NDOF;
+    *NZL = *NZL*NDOF*NDOF;
+  }
+}

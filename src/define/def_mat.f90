@@ -470,7 +470,7 @@ contains
         NZL = MAT%SCSR%indexL(NP + 1)
       endif
 
-      NZD = NZD*NDOF*NDOF
+      NZD = NP*NDOF*NDOF
       NZU = NZU*NDOF*NDOF
       NZL = NZL*NDOF*NDOF
     endif
