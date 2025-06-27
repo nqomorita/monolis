@@ -436,6 +436,10 @@ contains
     call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 2, 1, 1, val, is_find)
     call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8", val, 12.0d0)
 
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 2, 13.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 2, 1, 2, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8a", val, 13.0d0)
+
     call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 3, 2, 1, 23.0d0)
     call monolis_get_scalar_from_sparse_matrix_R(mat, 2, 3, 2, 1, val, is_find)
     call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 9", val, 23.0d0)

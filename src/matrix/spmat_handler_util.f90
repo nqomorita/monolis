@@ -56,7 +56,7 @@ contains
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci) + 1
@@ -103,7 +103,7 @@ contains
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci) + 1
@@ -338,7 +338,7 @@ contains
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci) + 1
@@ -385,7 +385,7 @@ contains
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
     if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
-    ndof = n_dof_index(ci + 1) - n_dof_index(ci)
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
 
     jS = index(ci) + 1

@@ -247,6 +247,14 @@ void monolis_spmat_handler_c_test_V_R(){
   monolis_add_scalar_to_sparse_matrix_R(&mat, 0, 0, 0, 0, val);
   monolis_test_check_eq_R1("monolis_spmat_handler_c_test_V_R 3", mat.mat.R.A[0], 2.0);
 
+  val = 10.0;
+  monolis_add_scalar_to_sparse_matrix_R(&mat, 0, 1, 0, 0, val);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_V_R 3a", mat.mat.R.A[1], 10.0);
+
+  val = 11.0;
+  monolis_add_scalar_to_sparse_matrix_R(&mat, 0, 1, 0, 1, val);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_V_R 3b", mat.mat.R.A[2], 11.0);
+
   // 節点2（2自由度）に対するテスト
   val = 3.0;
   monolis_set_scalar_to_sparse_matrix_R(&mat, 1, 1, 0, 0, val);
