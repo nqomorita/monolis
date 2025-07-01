@@ -468,7 +468,7 @@ contains
       idx2t(i + 1) = idx2t(i) + n_dof_index(in + 1) - n_dof_index(in)
     enddo
 
-    call monolis_alloc_R_2d(temp, idx1(n1 + 1), idx2(n2 + 1))
+    call monolis_alloc_R_2d(temp, idx1t(n1 + 1), idx2t(n2 + 1))
 
     do i2 = 1, n2
       j2 = eperm2(i2)
@@ -476,7 +476,7 @@ contains
         j1 = eperm1(i1)
         do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
         do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(j1)+k1, idx2t(j2)+k2)
+          temp(idx1t(i1)+k1, idx2t(i2)+k2) = val(idx1(j1)+k1, idx2(j2)+k2)
         enddo
         enddo
       enddo
@@ -494,7 +494,7 @@ contains
             do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
               im = n_dof_index2(j1) + kn*(k1-1) + k2
-              A(im) = A(im) + temp(idx1(i1)+k1, idx2(i2)+k2)
+              A(im) = A(im) + temp(idx1t(i1)+k1, idx2t(i2)+k2)
             enddo
             enddo
             jS = j1
