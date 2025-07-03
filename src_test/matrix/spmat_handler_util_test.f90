@@ -377,7 +377,7 @@ contains
     type(monolis_structure) :: mat
     integer(kint) :: nnode, nelem, elem(3,2), n_dof_list(4)
     integer(kint) :: i
-    real(kdouble) :: val
+    real(kdouble) :: val, B(7)
     logical :: is_find
 
     if(monolis_mpi_get_global_comm_size() /= 1) return
@@ -436,6 +436,10 @@ contains
     call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 2, 1, 1, val, is_find)
     call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8", val, 12.0d0)
 
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 2, 3, 2, 50.0d0)
+    call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 2, 3, 2, val, is_find)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8a", val, 50.0d0)
+
     call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 2, 13.0d0)
     call monolis_get_scalar_from_sparse_matrix_R(mat, 1, 2, 1, 2, val, is_find)
     call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 8a", val, 13.0d0)
@@ -447,6 +451,16 @@ contains
     call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 4, 3, 1, 34.0d0)
     call monolis_get_scalar_from_sparse_matrix_R(mat, 3, 4, 3, 1, val, is_find)
     call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 10", val, 34.0d0)
+
+    B = 0.0d0
+    call monolis_set_Dirichlet_bc_R(mat, B, 2, 2, 1.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 11", B(1), -13.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 12", B(2), 0.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 13", B(3), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 14", B(4), 0.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 15", B(5), 0.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 16", B(6), -50.0d0)
+    call monolis_test_check_eq_R1("monolis_variable_dof_sparse_matrix_R_test 17", B(7), 0.0d0)
 
     call monolis_finalize(mat)
   end subroutine monolis_variable_dof_sparse_matrix_R_test
