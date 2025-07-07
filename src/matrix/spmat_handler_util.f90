@@ -571,7 +571,7 @@ contains
       idx2t(i + 1) = idx2t(i) + n_dof_index(in + 1) - n_dof_index(in)
     enddo
 
-    call monolis_alloc_C_2d(temp, idx1(n1 + 1), idx2(n2 + 1))
+    call monolis_alloc_C_2d(temp, idx1t(n1 + 1), idx2t(n2 + 1))
 
     do i2 = 1, n2
       j2 = eperm2(i2)
@@ -579,7 +579,7 @@ contains
         j1 = eperm1(i1)
         do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
         do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-          temp(idx1(i1)+k1, idx2(i2)+k2) = val(idx1t(j1)+k1, idx2t(j2)+k2)
+          temp(idx1t(i1)+k1, idx2t(i2)+k2) = val(idx1(j1)+k1, idx2(j2)+k2)
         enddo
         enddo
       enddo
@@ -597,7 +597,7 @@ contains
             do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
               im = n_dof_index2(j1) + kn*(k1-1) + k2
-              A(im) = A(im) + temp(idx1(i1)+k1, idx2(i2)+k2)
+              A(im) = A(im) + temp(idx1t(i1)+k1, idx2t(i2)+k2)
             enddo
             enddo
             jS = j1
@@ -638,7 +638,7 @@ contains
     integer(kint), intent(in) :: ndof_bc
     !> [in] 境界条件の設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, k, jn, kn, jS, jE, ndof1, ndof2
+    integer(kint) :: j, k, jn, kn, m, n, jS, jE, ndof1, ndof2
     logical :: is_add
 
     ndof1 = n_dof_index(node_id + 1) - n_dof_index(node_id)
@@ -648,13 +648,16 @@ contains
 
     jS = indexR(node_id) + 1
     jE = indexR(node_id + 1)
+    !< ndof1: 横、ndof2: 縦
     do j = jS, jE
       jn = itemR(j)
       kn = permA(j)
       ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof2
-        B(n_dof_index(jn)+k) = B(n_dof_index(jn)+k) - val*A(n_dof_index2(kn) + ndof1*(k-1) + ndof_bc)
-        A(n_dof_index2(kn) + ndof1*(k-1) + ndof_bc) = 0.0d0
+        m = n_dof_index2(kn) + ndof1*(k-1) + ndof_bc
+        n = n_dof_index(jn) + k
+        B(n) = B(n) - val*A(m)
+        A(m) = 0.0d0
       enddo
     enddo
 
@@ -662,14 +665,16 @@ contains
     jE = index(node_id + 1)
     do j = jS, jE
       jn = item(j)
+      !< ndof2: 横、ndof1: 縦
       ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
       do k = 1, ndof2
-        A(n_dof_index2(j) + ndof1*(ndof_bc-1) + k) = 0.0d0
+        m = n_dof_index2(j) + ndof2*(ndof_bc-1)
+        A(m + k) = 0.0d0
       enddo
 
-      jn = item(j)
       if(jn == node_id)then
-        A(n_dof_index2(j) + (ndof1+1)*(ndof_bc-1) + 1) = 1.0d0
+        m = n_dof_index2(j) + (ndof2+1)*(ndof_bc-1) + 1
+        A(m) = 1.0d0
         is_add = .true.
       endif
     enddo
@@ -836,7 +841,7 @@ contains
 
     if(monoPRM%Iarray(monolis_prm_I_is_check_diag) == monolis_I_false) return
 
-    N =  monoMAT%N
+    N = monoMAT%N
 
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
@@ -844,7 +849,7 @@ contains
       do j = jS, jE
         in = monoMAT%CSR%item(j)
         if(i == in)then
-          n_dof = monoMAT%n_dof_index(in + 1) - monoMAT%n_dof_index(in)
+          n_dof = monoMAT%n_dof_index(i + 1) - monoMAT%n_dof_index(i)
           do k = 1, n_dof
             kn = monoMAT%n_dof_index2(j) + (n_dof+1)*(k-1) + 1
             if(monoMAT%R%A(kn) == 0.0d0)then
