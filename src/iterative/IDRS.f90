@@ -27,12 +27,12 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
-    integer(kint) :: i, j, iter, iter_RR, S
-    real(kdouble) :: B2, beta, a1, a2
+    integer(kint) :: i, j, k, iter, iter_RR, S
+    real(kdouble) :: B2, omega, alpha, beta, Q(3), rho, kappa
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
-    real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:)
-    real(kdouble), allocatable :: E(:,:), F(:), alpha(:), Z(:), V(:), T(:), C(:)
+    real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:), M(:,:)
+    real(kdouble), allocatable :: F(:), Z(:), V(:), T(:), C(:), tmp(:)
     real(kdouble), pointer :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_IDRS")
@@ -61,93 +61,112 @@ contains
     call monolis_alloc_R_2d(P, NPNDOF, S)
     call monolis_alloc_R_2d(U, NPNDOF, S)
     call monolis_alloc_R_2d(G, NPNDOF, S)
-    call monolis_alloc_R_2d(E, S, S)
+    call monolis_alloc_R_2d(M, S, S)
+    call monolis_alloc_R_1d(C, S)
     call monolis_alloc_R_1d(F, S)
-    call monolis_alloc_R_1d(alpha, S)
-    call monolis_alloc_R_1d(C, S*S + S)
+    call monolis_alloc_R_1d(tmp, S)
 
+    !# 行列 P の初期化
     call random_seed()
     call random_number(P)
 
     do i = 1, S
-      call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), P(:,i), C(i))
+      call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), P(:,i), tmp(i))
     end do
-    call monolis_allreduce_R(S, C, monolis_mpi_sum, monoCOM%comm)
+    call monolis_allreduce_R(S, tmp, monolis_mpi_sum, monoCOM%comm)
     do i = 1, S
-      P(:,i) = P(:,i) / C(i)
+      P(:,i) = P(:,i) / tmp(i)
     end do
 
-    call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U(:,1))
-    call monolis_matvec_product_main_R(monoCOM, monoMAT, U(:,1), G(:,1), tspmv, tcomm_spmv)
-    do i = 2, S
-      U(:,i) = U(:,1)
-      G(:,i) = G(:,1)
-    end do
+    do i = 1, S
+      M(i,i) = 1.0d0
+    enddo
+
+    omega = 1.0d0
+    kappa = 1.0d-12
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
+      !# f の更新
       do i = 1, S
-      do j = 1, S
-        call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), G(:,j), C(S*(i-1) + j))
+        call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), R, F(i))
       enddo
-      enddo
-      do i = 1, S
-        call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), R, C(S*S + i))
-      enddo
-      call monolis_allreduce_R(S*S + S, C, monolis_mpi_sum, monoCOM%comm)
-      do i = 1, S
-      do j = 1, S
-        E(i,j) = (S*(i-1) + j)
-      enddo
-      enddo
-      do i = 1, S
-        F(i) = C(S*S + i)
+      call monolis_allreduce_R(S, F, monolis_mpi_sum, monoCOM%comm)
+
+      do k = 1, S
+        !# M C = F の求解
+        call monolis_lapack_dsysv(S, M, F, C)
+
+        !# V の更新
+        V = R
+        do i = k, S
+          V = V - C(i)*G(:,i)
+        enddo
+
+        !# Z = M V
+        call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, V, Z)
+
+        !# U の更新
+        U(:,k) = omega*Z
+        do i = k, S
+          U(:,k) = U(:,k) + C(i)*U(:,i)
+        enddo
+
+        !# G_k = A U_k
+        call monolis_matvec_product_main_R(monoCOM, monoMAT, U(:,k), G(:,k), tspmv, tcomm_spmv)
+
+        do i = 1, k - 1
+          call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), alpha)
+          alpha = alpha / M(i,i)
+
+          G(:,k) = G(:,k) - alpha*G(:,i)
+          U(:,k) = U(:,k) - alpha*U(:,i)
+        enddo
+
+        do i = k, S
+          call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), M(i,k))
+        enddo
+
+        beta = F(k) / M(k,k)
+
+        call monolis_vec_AXPBY_R(NNDOF, -beta, G(:,k), 1.0d0, R, R)
+        call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
+
+        call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(is_converge) exit
+
+        if(k + 1 < S)then
+          do i = 1, k
+            F(i) = 0.0d0
+          enddo
+          do i = k + 1, S
+            F(i) = F(i) - beta*M(i,k)
+          enddo
+        endif
       enddo
 
-      call monolis_lapack_dsysv(S, E, F, alpha)
-
-      call monolis_vec_copy_R(NNDOF, R, V)
-
-      do i = 1, S
-        call monolis_vec_AXPBY_R(NNDOF, -alpha(i), G(:,i), 1.0d0, V, V)
-      enddo
-
-      call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, V, Z)
-
+      call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, T, tspmv, tcomm_spmv)
 
-      call monolis_inner_product_main_R_no_comm(NNDOF, T, V, C(1))
-      call monolis_inner_product_main_R_no_comm(NNDOF, T, T, C(2))
-      call monolis_allreduce_R(2, C, monolis_mpi_sum, monoCOM%comm)
-      a1 = C(1)
-      a2 = C(2)
-      beta = a1/a2
+      call monolis_inner_product_main_R_no_comm(NNDOF, T, R, Q(1))
+      call monolis_inner_product_main_R_no_comm(NNDOF, T, T, Q(2))
+      call monolis_inner_product_main_R_no_comm(NNDOF, R, R, Q(3))
+      call monolis_allreduce_R(3, Q, monolis_mpi_sum, monoCOM%comm)
+      omega = Q(1)/Q(2)
 
-      do i = 1, S
-        call monolis_vec_AXPBY_R(NNDOF, alpha(i), U(:,i), 1.0d0, X, X)
-      enddo
-
-      call monolis_vec_AXPBY_R(NNDOF, beta, Z, 1.0d0, X, X)
-
-      if(mod(iter, iter_RR) == 0)then
-        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      else
-        call monolis_vec_AXPBY_R(NNDOF, -beta, T, 1.0d0, V, R)
+      rho = Q(1)/( dsqrt(Q(2))*dsqrt(Q(3)) )
+      if(dabs(rho) < kappa)then
+        omega = omega*kappa/dabs(rho)
       endif
+
+      call monolis_vec_AXPBY_R(NNDOF, -omega, T, 1.0d0, R, R)
+      call monolis_vec_AXPBY_R(NNDOF,  omega, Z, 1.0d0, X, X)
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
-
-      do i = 1, S - 1
-        G(:,i) = G(:,i + 1)
-        U(:,i) = U(:,i + 1)
-      enddo
-
-      call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U(:,S))
-      call monolis_matvec_product_main_R(monoCOM, monoMAT, U(:,S), G(:,S), tspmv, tcomm_spmv)
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
@@ -164,10 +183,10 @@ contains
     call monolis_dealloc_R_2d(P)
     call monolis_dealloc_R_2d(U)
     call monolis_dealloc_R_2d(G)
-    call monolis_dealloc_R_2d(E)
-    call monolis_dealloc_R_1d(F)
-    call monolis_dealloc_R_1d(alpha)
+    call monolis_dealloc_R_2d(M)
     call monolis_dealloc_R_1d(C)
+    call monolis_dealloc_R_1d(F)
+    call monolis_dealloc_R_1d(tmp)
   end subroutine monolis_solver_IDRS
 
 end module mod_monolis_solver_IDRS
