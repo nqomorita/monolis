@@ -35,7 +35,7 @@ contains
     real(kdouble), allocatable :: F(:), Z(:), V(:), T(:), C(:), tmp(:)
     real(kdouble), pointer :: B(:), X(:)
 
-    call monolis_std_debug_log_header("monolis_solver_IDRS")
+    call monolis_std_debug_log_header("monolis_solver_IDRS_BIORTHO")
 
     X => monoMAT%R%X
     B => monoMAT%R%B
@@ -70,12 +70,16 @@ contains
     call random_seed()
     call random_number(P)
 
+    do i = 2, S
+      call monolis_gram_schmidt_R(monoCOM, i - 1, NNDOF, P(:,i), P)
+    enddo
+
     do i = 1, S
       call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), P(:,i), tmp(i))
     end do
     call monolis_allreduce_R(S, tmp, monolis_mpi_sum, monoCOM%comm)
     do i = 1, S
-      P(:,i) = P(:,i) / tmp(i)
+      P(:,i) = P(:,i) / dsqrt(tmp(i))
     end do
 
     do i = 1, S
@@ -83,7 +87,7 @@ contains
     enddo
 
     omega = 1.0d0
-    kappa = 1.0d-12
+    kappa = 0.7d0
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
@@ -98,7 +102,13 @@ contains
 
       do k = 1, S
         !# M C = F の求解
-        call monolis_lapack_dsysv(S, M, F, C)
+        C = F
+        do i = 1, S
+          do j = 1, i - 1
+            C(i) = C(i) - M(i,j) * C(j)
+          enddo
+          C(i) = C(i) / M(i,i)
+        enddo
 
         !# V の更新
         V = R
@@ -130,18 +140,16 @@ contains
           call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), M(i,k))
         enddo
 
+        if(M(k,k) == 0.0d0) stop "zero"
         beta = F(k) / M(k,k)
 
-        call monolis_vec_AXPBY_R(NNDOF, -beta, G(:,k), 1.0d0, R, R)
         call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
+        call monolis_vec_AXPBY_R(NNDOF, -beta, G(:,k), 1.0d0, R, R)
 
         call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
         if(is_converge) exit
 
-        if(k + 1 < S)then
-          do i = 1, k
-            F(i) = 0.0d0
-          enddo
+        if(k < S)then
           do i = k + 1, S
             F(i) = F(i) - beta*M(i,k)
           enddo
@@ -155,15 +163,19 @@ contains
       call monolis_inner_product_main_R_no_comm(NNDOF, T, T, Q(2))
       call monolis_inner_product_main_R_no_comm(NNDOF, R, R, Q(3))
       call monolis_allreduce_R(3, Q, monolis_mpi_sum, monoCOM%comm)
-      omega = Q(1)/Q(2)
-
       rho = Q(1)/( dsqrt(Q(2))*dsqrt(Q(3)) )
+
+      omega = Q(1)/Q(2)
       if(dabs(rho) < kappa)then
         omega = omega*kappa/dabs(rho)
       endif
 
-      call monolis_vec_AXPBY_R(NNDOF, -omega, T, 1.0d0, R, R)
       call monolis_vec_AXPBY_R(NNDOF,  omega, Z, 1.0d0, X, X)
+      call monolis_vec_AXPBY_R(NNDOF, -omega, T, 1.0d0, R, R)
+
+      if(mod(iter, iter_RR) == 0)then
+        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit

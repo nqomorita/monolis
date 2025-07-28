@@ -111,6 +111,8 @@ program main
     !call monolis_set_method(mat, monolis_iter_BiCGSTAB)
     !call monolis_set_method(mat, monolis_iter_BiCGSAFE)
     call monolis_set_method(mat, monolis_iter_IDRS)
+    call monolis_set_solver_IDRS_num_basis(mat, 4)
+
     call monolis_set_precond(mat, monolis_prec_DIAG)
 
     call monolis_solve_R(mat, com, b, c)
