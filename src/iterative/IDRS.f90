@@ -32,10 +32,10 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:), M(:,:)
-    real(kdouble), allocatable :: F(:), Z(:), V(:), T(:), C(:), tmp(:)
+    real(kdouble), allocatable :: F(:), Z(:), V(:), T(:), C(:)
     real(kdouble), pointer :: B(:), X(:)
 
-    call monolis_std_debug_log_header("monolis_solver_IDRS_BIORTHO")
+    call monolis_std_debug_log_header("monolis_solver_IDRS")
 
     X => monoMAT%R%X
     B => monoMAT%R%B
@@ -64,22 +64,22 @@ contains
     call monolis_alloc_R_2d(M, S, S)
     call monolis_alloc_R_1d(C, S)
     call monolis_alloc_R_1d(F, S)
-    call monolis_alloc_R_1d(tmp, S)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
     !# 行列 P の初期化
-    call random_seed()
     call random_number(P)
 
-    !call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, alpha)
-    !do i = 1, S
-    !  call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), R, beta)
-    !  beta = beta / alpha
-    !  call monolis_vec_AXPBY_R(NNDOF, -beta, R, 1.0d0, P(:,i), P(:,i))
-    !enddo
+    call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, alpha)
+    do i = 1, S
+      call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), R, beta)
+      beta = beta / alpha
+      call monolis_vec_AXPBY_R(NNDOF, -beta, R, 1.0d0, P(:,i), P(:,i))
+      call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), P(:,i), alpha)
+      P(:,i) = P(:,i)/dsqrt(alpha)
+    enddo
 
     !# P の列ベクトル同士の直交化（Gram-Schmidt）
     do i = 2, S
@@ -131,6 +131,7 @@ contains
 
         do i = 1, k - 1
           call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), alpha)
+          if(M(i,i) == 0.0d0) stop "zero divide B"
           alpha = alpha / M(i,i)
 
           G(:,k) = G(:,k) - alpha*G(:,i)
@@ -141,7 +142,7 @@ contains
           call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), M(i,k))
         enddo
 
-        if(M(k,k) == 0.0d0) stop "zero divide B"
+        if(M(k,k) == 0.0d0) stop "zero divide C"
         beta = F(k) / M(k,k)
 
         call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
@@ -166,6 +167,9 @@ contains
       call monolis_inner_product_main_R_no_comm(NNDOF, R, R, Q(3))
       call monolis_allreduce_R(3, Q, monolis_mpi_sum, monoCOM%comm)
       rho = Q(1)/( dsqrt(Q(2))*dsqrt(Q(3)) )
+
+      if(rho == 0.0d0) stop "zero divide D"
+      if(Q(2) == 0.0d0) stop "zero divide E"
 
       omega = Q(1)/Q(2)
       if(dabs(rho) < kappa)then
@@ -200,7 +204,6 @@ contains
     call monolis_dealloc_R_2d(M)
     call monolis_dealloc_R_1d(C)
     call monolis_dealloc_R_1d(F)
-    call monolis_dealloc_R_1d(tmp)
   end subroutine monolis_solver_IDRS
 
 end module mod_monolis_solver_IDRS
