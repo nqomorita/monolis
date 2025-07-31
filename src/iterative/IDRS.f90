@@ -66,21 +66,25 @@ contains
     call monolis_alloc_R_1d(F, S)
     call monolis_alloc_R_1d(tmp, S)
 
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    if(is_converge) return
+
     !# 行列 P の初期化
     call random_seed()
     call random_number(P)
 
+    call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, alpha)
+    do i = 1, S
+      call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), R, beta)
+      beta = beta / alpha
+      call monolis_vec_AXPBY_R(NNDOF, -beta, R, 1.0d0, P(:,i), P(:,i))
+    enddo
+
+    !# P の列ベクトル同士の直交化（Gram-Schmidt）
     do i = 2, S
       call monolis_gram_schmidt_R(monoCOM, i - 1, NNDOF, P(:,i), P)
     enddo
-
-    do i = 1, S
-      call monolis_inner_product_main_R_no_comm(NNDOF, P(:,i), P(:,i), tmp(i))
-    end do
-    call monolis_allreduce_R(S, tmp, monolis_mpi_sum, monoCOM%comm)
-    do i = 1, S
-      P(:,i) = P(:,i) / dsqrt(tmp(i))
-    end do
 
     do i = 1, S
       M(i,i) = 1.0d0
@@ -88,10 +92,6 @@ contains
 
     omega = 1.0d0
     kappa = 0.7d0
-
-    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       !# f の更新
@@ -120,8 +120,8 @@ contains
         call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, V, Z)
 
         !# U の更新
-        U(:,k) = omega*Z
-        do i = k, S
+        U(:,k) = omega*Z + C(k)*U(:,k)
+        do i = k + 1, S
           U(:,k) = U(:,k) + C(i)*U(:,i)
         enddo
 
@@ -155,6 +155,7 @@ contains
           enddo
         endif
       enddo
+      if(is_converge) exit
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, T, tspmv, tcomm_spmv)
