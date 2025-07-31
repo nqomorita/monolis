@@ -39,7 +39,7 @@ contains
 
     X => monoMAT%R%X
     B => monoMAT%R%B
-    iter_RR = 200
+    iter_RR = 50
     S = monoPRM%Iarray(MONOLIS_PRM_I_IDRS_DIM)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
@@ -149,7 +149,13 @@ contains
         call monolis_vec_AXPBY_R(NNDOF, -beta, G(:,k), 1.0d0, R, R)
 
         call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-        if(is_converge) exit
+
+        if(is_converge)then
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+          is_converge = .false.
+          call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+          if(is_converge) exit
+        endif
 
         if(k < S)then
           do i = k + 1, S
