@@ -74,12 +74,12 @@ contains
     call random_seed()
     call random_number(P)
 
-    call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, alpha)
-    do i = 1, S
-      call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), R, beta)
-      beta = beta / alpha
-      call monolis_vec_AXPBY_R(NNDOF, -beta, R, 1.0d0, P(:,i), P(:,i))
-    enddo
+    !call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, alpha)
+    !do i = 1, S
+    !  call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), R, beta)
+    !  beta = beta / alpha
+    !  call monolis_vec_AXPBY_R(NNDOF, -beta, R, 1.0d0, P(:,i), P(:,i))
+    !enddo
 
     !# P の列ベクトル同士の直交化（Gram-Schmidt）
     do i = 2, S
@@ -107,6 +107,7 @@ contains
           do j = 1, i - 1
             C(i) = C(i) - M(i,j) * C(j)
           enddo
+          if(M(i,i) == 0.0d0) stop "zero divide A"
           C(i) = C(i) / M(i,i)
         enddo
 
@@ -140,7 +141,7 @@ contains
           call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), M(i,k))
         enddo
 
-        if(M(k,k) == 0.0d0) stop "zero"
+        if(M(k,k) == 0.0d0) stop "zero divide B"
         beta = F(k) / M(k,k)
 
         call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
