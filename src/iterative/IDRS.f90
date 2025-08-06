@@ -148,14 +148,12 @@ contains
         call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
         call monolis_vec_AXPBY_R(NNDOF, -beta, G(:,k), 1.0d0, R, R)
 
-        !call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(k == S)then
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+        endif
 
-        !if(is_converge)then
-        !  call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-        !  is_converge = .false.
-        !  call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-        !  if(is_converge) exit
-        !endif
+        call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(is_converge) exit
 
         if(k < S)then
           do i = k + 1, S
@@ -163,7 +161,7 @@ contains
           enddo
         endif
       enddo
-      !if(is_converge) exit
+      if(is_converge) exit
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, T, tspmv, tcomm_spmv)
@@ -185,12 +183,18 @@ contains
       call monolis_vec_AXPBY_R(NNDOF,  omega, Z, 1.0d0, X, X)
       call monolis_vec_AXPBY_R(NNDOF, -omega, T, 1.0d0, R, R)
 
-      if(mod(iter, iter_RR) == 0)then
-        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      endif
+      !if(mod(iter, iter_RR) == 0)then
+      !  call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      !endif
 
-      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
+      !call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+
+      !if(is_converge)then
+      !  call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      !  is_converge = .false.
+      !  call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+      !  if(is_converge) exit
+      !endif
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
