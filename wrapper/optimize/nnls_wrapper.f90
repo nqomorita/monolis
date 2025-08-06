@@ -18,11 +18,11 @@ contains
     !> 特異値（n）
     real(c_double), target :: x(n)
     !> 行列の大きさ（行数 m）
-    integer(c_int), value :: m
+    integer(kint_c), value :: m
     !> 行列の大きさ（列数 n）
-    integer(c_int), value :: n
+    integer(kint_c), value :: n
     !> 最大反復回数
-    integer(c_int), value :: max_iter
+    integer(kint_c), value :: max_iter
     !> 特異値（n）
     real(c_double), value :: tol
     !> 特異値（n）
@@ -52,11 +52,11 @@ contains
     !> 特異値（n）
     real(c_double), target :: x(n)
     !> 行列の大きさ（行数 m）
-    integer(c_int), value :: m
+    integer(kint_c), value :: m
     !> 行列の大きさ（列数 n）
-    integer(c_int), value :: n
+    integer(kint_c), value :: n
     !> 最大反復回数
-    integer(c_int), value :: max_iter
+    integer(kint_c), value :: max_iter
     !> 特異値（n）
     real(c_double), value :: tol
     !> 特異値（n）
