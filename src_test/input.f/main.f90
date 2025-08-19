@@ -216,7 +216,7 @@ program main
       call monolis_test_check_eq_R("monolis_solver_parallel_R_test", a, b)
 
       call monolis_get_converge_iter(mat, iter_conv)
-      if(iter_conv <= 1)then
+      if(iter_conv < 1)then
         call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
       endif
 
@@ -357,7 +357,7 @@ program main
       call monolis_test_check_eq_C("monolis_solver_parallel_C_test", a, b)
 
       call monolis_get_converge_iter(mat, iter_conv)
-      if(iter_conv <= 1)then
+      if(iter_conv < 1)then
         call monolis_test_assert_fail("monolis_solver_parallel_R_test", "conv iter is less than 1")
       endif
 
