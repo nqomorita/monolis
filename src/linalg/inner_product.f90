@@ -251,6 +251,79 @@ contains
   end subroutine monolis_inner_product_main_R_N128
 
   !> @ingroup linalg
+  !> ベクトル内積（実数型、ランク 0 に全ての配列要素を集め、絶対値昇順で内積計算）
+  subroutine monolis_global_sorted_inner_product_main_R(monoCOM, n, X, Y, sum, tdotp, tcomm)
+    implicit none
+    !> [in] monoCOM 構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] 内部計算点数
+    integer(kint), intent(in) :: n
+    !> [in] ベクトル 1
+    real(kdouble), intent(in) :: X(:)
+    !> [in] ベクトル 2
+    real(kdouble), intent(in) :: Y(:)
+    !> [out] 内積結果
+    real(kdouble), intent(out) :: sum
+    !> [inout] 内積時間
+    real(kdouble), intent(inout) :: tdotp
+    !> [inout] 通信時間
+    real(kdouble), intent(inout) :: tcomm
+    integer(kint) :: n_global, i, my_rank, comm_size, root
+    real(kdouble) :: sum_global
+    integer(kint), allocatable :: rc(:), disp(:)
+    real(kdouble), allocatable :: X_global(:)
+    real(kdouble), allocatable :: Y_global(:)
+    real(kdouble), allocatable :: XY_global(:)
+    real(kdouble), allocatable :: XY_abs_global(:)
+
+    !> gather part
+    my_rank = monolis_mpi_get_local_my_rank(monoCOM%comm)
+    comm_size = monolis_mpi_get_local_comm_size(monoCOM%comm)
+
+    n_global = n
+    call monolis_allreduce_I1(n_global, monolis_mpi_sum, monoCOM%comm)
+
+    !if(my_rank == 0)then
+      call monolis_alloc_R_1d(X_global, n_global)
+      call monolis_alloc_R_1d(Y_global, n_global)
+      call monolis_alloc_R_1d(XY_global, n_global)
+      call monolis_alloc_R_1d(XY_abs_global, n_global)
+    !endif
+
+    call monolis_alloc_I_1d(rc, comm_size)
+    call monolis_alloc_I_1d(disp, comm_size)
+
+    call monolis_allgather_I1(n, rc, monoCOM%comm)
+    do i = 1, comm_size - 1
+      disp(i + 1) = disp(i) + rc(i)
+    enddo
+
+    root = 0
+    call monolis_gather_V_R(X, n, X_global, rc, disp, root, monoCOM%comm)
+    call monolis_gather_V_R(Y, n, Y_global, rc, disp, root, monoCOM%comm)
+
+    !> main inner product routine
+    sum_global = 0.0d0
+
+    if(my_rank == 0)then
+      do i = 1, n_global
+        XY_global(i) = X_global(i)*Y_global(i)
+      enddo
+
+      XY_abs_global = dabs(XY_global)
+      call monolis_qsort_R_2d(XY_abs_global, XY_global, 1, n_global)
+
+      do i = 1, n_global
+        sum_global = sum_global + XY_global(i)
+      enddo
+    endif
+
+    !sum = sum_global
+    call monolis_allreduce_R1(sum_global, monolis_mpi_sum, monoCOM%comm)
+    sum = sum_global
+  end subroutine monolis_global_sorted_inner_product_main_R
+
+  !> @ingroup linalg
   !> ベクトル内積（擬似四倍精度実数型、ランク 0 に全ての配列要素を集め、絶対値昇順で内積計算）
   subroutine monolis_global_sorted_inner_product_main_R_N128(monoCOM, n, X, Y, sum, tdotp, tcomm)
     implicit none
