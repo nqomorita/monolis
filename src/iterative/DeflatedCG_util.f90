@@ -94,17 +94,27 @@ contains
     call monolis_mat_initialize(monoMAT_deflated_eq)
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
+    !# pattern 1
     !monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_SOR
     !monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_Diag
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
+    !monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
+
+    !# pattern 2
+    !monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
     !monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
+    !monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
+
+    !# pattern 3
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_SOR
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10
+
+    !# common settings
     monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_iterlog) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time_statistics) = .false.
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10
     monoPRM_deflated_eq%Iarray(monolis_prm_I_is_prec_stored) = 1
 
     !> com section
