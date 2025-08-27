@@ -59,7 +59,8 @@ contains
     type(monolis_mat), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_mat), intent(inout) :: mat_out
-    integer(kint) :: NP, NZ, NZU, NZL
+    integer(kint) :: NP, NZ
+    integer(kint) :: N_t, NP_t, NZ_t, NZD, NZU, NZL
 
     mat_out%N = mat_in%N
     mat_out%NP = mat_in%NP
@@ -84,13 +85,13 @@ contains
     call monolis_palloc_I_1d(mat_out%n_dof_index2, NZ + 1)
     mat_out%n_dof_index2 = mat_in%n_dof_index2
 
-    call monolis_get_vec_size(mat_in%MAT%N, mat_in%MAT%NP, mat_in%MAT%NDOF, &
-      mat_in%MAT%n_dof_index, N_t, NP_t)
-    call monolis_get_mat_size(mat_in%MAT, NZ_t, NZD, NZU, NZL)
+    call monolis_get_vec_size(mat_in%N, mat_in%NP, mat_in%NDOF, &
+      mat_in%n_dof_index, N_t, NP_t)
+    call monolis_get_mat_size(mat_in, NZ_t, NZD, NZU, NZL)
 
     call monolis_copy_mat_nonzero_pattern_val_R(NP_t, NZ_t, NZD, NZU, NZL, &
-      mat_in%MAT%R, mat_out%MAT%R)
-  end subroutine monolis_copy_mat_nonzero_pattern_R
+      mat_in%R, mat_out%R)
+  end subroutine monolis_copy_mat_nonzero_pattern_main_R
 
   !> @ingroup matrix_copy
   !> 行列の非零パターンのコピー（複素数型）
