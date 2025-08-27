@@ -102,6 +102,7 @@ program main
     call monolis_set_deflation_mode(mat, n_deflation_mode, deflation_mode)
 
     !> solve deflation CG
+    !call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_method(mat, monolis_iter_DeflatedCG1)
     !call monolis_set_precond(mat, monolis_prec_None)
     call monolis_set_precond(mat, monolis_prec_Diag)
