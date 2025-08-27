@@ -200,7 +200,7 @@ void monolis_solver_parallel_R_test(){
       }
 
       monolis_get_converge_iter(&mat, &iter_conv);
-      if(iter_conv <= 1){
+      if(iter_conv < 1){
         monolis_test_assert_fail("monolis_solver_parallel_R_test Clang", "conv iter is less than 1");
       }
 
@@ -344,7 +344,7 @@ void monolis_solver_parallel_C_test(){
       }
 
       monolis_get_converge_iter(&mat, &iter_conv);
-      if(iter_conv <= 1){
+      if(iter_conv < 1){
         monolis_test_assert_fail("monolis_solver_parallel_C_test Clang", "conv iter is less than 1");
       }
 

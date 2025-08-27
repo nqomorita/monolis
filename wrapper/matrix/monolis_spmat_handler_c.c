@@ -111,23 +111,20 @@ void monolis_add_matrix_to_sparse_matrix_R(
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
   double* val_t;
-  int nzm;
-  int n, i, j;
-
-  n = n_base*n_dof;
-
-  val_t = monolis_alloc_R_1d(val_t, n*n);
-
-  for(i = 0; i < n; ++i){
-    for(j = 0; j < n; ++j){
-      val_t[n*i + j] = val[i][j];
-    }
-  }
+  int nzm, i, j;
 
   nzm = 0;
   for(i = 0; i < n_base; ++i){
     j = connectivity[i];
     nzm += mat->mat.n_dof_index[j + 1] - mat->mat.n_dof_index[j];
+  }
+
+  val_t = monolis_alloc_R_1d(val_t, nzm*nzm);
+
+  for(i = 0; i < nzm; ++i){
+    for(j = 0; j < nzm; ++j){
+      val_t[nzm*i + j] = val[i][j];
+    }
   }
 
   monolis_add_matrix_to_sparse_matrix_main_R_c_main(
@@ -159,7 +156,6 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_R(
   double** val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
   double* val_t;
@@ -275,7 +271,6 @@ void monolis_set_Dirichlet_bc_R(
   double   val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
   int nzb = mat->mat.n_dof_index[n_node];
@@ -308,7 +303,6 @@ void monolis_set_scalar_to_sparse_matrix_C(
   double _Complex val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
 
@@ -337,7 +331,6 @@ void monolis_add_scalar_to_sparse_matrix_C(
   double _Complex val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
 
@@ -370,7 +363,6 @@ void monolis_get_scalar_from_sparse_matrix_C(
   int n_node = mat->mat.NP;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
-  int n_dof = mat->mat.NDOF;
   int is_find_t = 0;
 
   monolis_get_scalar_from_sparse_matrix_C_c_main(
@@ -453,7 +445,6 @@ void monolis_add_matrix_to_sparse_matrix_offdiag_C(
   double _Complex** val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
   int i, j;
@@ -569,7 +560,6 @@ void monolis_set_Dirichlet_bc_C(
   double _Complex  val)
 {
   int n_node = mat->mat.NP;
-  int n_dof = mat->mat.NDOF;
   int nz = mat->mat.CSR.index[n_node];
   int nza = mat->mat.n_dof_index2[nz];
   int nzb = mat->mat.n_dof_index[n_node];

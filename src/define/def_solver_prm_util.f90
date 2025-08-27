@@ -198,6 +198,18 @@ contains
   end subroutine monolis_set_error_abort
 
   !> @ingroup param
+  !> IDR(s) 法の基底数
+  subroutine monolis_set_solver_IDRS_num_basis(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_IDRS_DIM) = param
+  end subroutine monolis_set_solver_IDRS_num_basis
+
+  !> @ingroup param
   !> 反復回数と残差履歴の表示の設定
   subroutine monolis_show_iterlog(monolis, param)
     implicit none
