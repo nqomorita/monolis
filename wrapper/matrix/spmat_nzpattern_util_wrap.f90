@@ -11,12 +11,12 @@ contains
   subroutine monolis_get_CSC_format_c(NC, NR, NZ, index, item, indexR, itemR, permR) &
     & bind(c, name = "monolis_get_CSC_format")
     implicit none
-    integer(c_int), intent(in), value :: NC, NR, NZ
-    integer(c_int), intent(in), target :: index(0:NC)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), target :: indexR(0:NR)
-    integer(c_int), target :: itemR(NZ)
-    integer(c_int), target :: permR(NZ)
+    integer(kint_c), intent(in), value :: NC, NR, NZ
+    integer(kint_c), intent(in), target :: index(0:NC)
+    integer(kint_c), intent(in), target :: item(NZ)
+    integer(kint_c), target :: indexR(0:NR)
+    integer(kint_c), target :: itemR(NZ)
+    integer(kint_c), target :: permR(NZ)
     integer(kint), pointer :: indexRt(:)
     integer(kint), pointer :: itemRt(:)
     integer(kint), pointer :: permRt(:)

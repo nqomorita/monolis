@@ -12,9 +12,9 @@ contains
     & bind(c, name = "monolis_scalapack_comm_initialize_c_main")
     implicit none
     !> [in] コミュニケータ
-    integer(c_int), value :: comm
+    integer(kint_c), value :: comm
     !> [in] コミュニケータ
-    integer(c_int) :: scalapack_comm
+    integer(kint_c) :: scalapack_comm
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
   end subroutine monolis_scalapack_comm_initialize_c
 
@@ -22,7 +22,7 @@ contains
     & bind(c, name = "monolis_scalapack_comm_finalize_c_main")
     implicit none
     !> [in] コミュニケータ
-    integer(c_int), value :: scalapack_comm
+    integer(kint_c), value :: scalapack_comm
     call monolis_scalapack_comm_finalize(scalapack_comm)
   end subroutine monolis_scalapack_comm_finalize_c
 
@@ -30,11 +30,11 @@ contains
     & bind(c, name = "monolis_scalapack_gesvd_R_c_main")
     implicit none
     !> 行列の大きさ（行数 N）
-    integer(c_int), value :: N_loc
+    integer(kint_c), value :: N_loc
     !> 行列の大きさ（列数 M）
-    integer(c_int), value :: M
+    integer(kint_c), value :: M
     !> 行列の大きさの最小値
-    integer(c_int), value :: P
+    integer(kint_c), value :: P
     !> 入力行列（N_loc x M）
     real(c_double), target :: A(N_loc*M)
     !> 左特異行列（N_loc x P）
@@ -44,9 +44,9 @@ contains
     !> 右特異行列（P x M）
     real(c_double), target :: D(P*M)
     !> コミュニケータ
-    integer(c_int), value :: comm
+    integer(kint_c), value :: comm
     !> scalapack コミュニケータ
-    integer(c_int), value :: scalapack_comm
+    integer(kint_c), value :: scalapack_comm
     integer(kint) :: i, j
     real(kdouble), allocatable :: A_temp(:,:)
     real(kdouble), allocatable :: S_temp(:,:)

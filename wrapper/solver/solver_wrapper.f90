@@ -19,21 +19,21 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     type(monolis_com) :: monoCOM
-    integer(c_int), intent(in), value :: N, NP, NZ, NDOF
-    integer(c_int), intent(in), value :: NPNDOF
-    integer(c_int), intent(in), value :: NZNDOF2
-    integer(c_int), intent(in), value :: my_rank, comm, comm_size
-    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
-    integer(c_int), intent(in), target :: n_dof_list(NP)
-    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
-    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
-    integer(c_int), intent(in), target :: index(NP + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
-    integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
-    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
-    integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
-    integer(c_int), target :: Iarray(100)
+    integer(kint_c), intent(in), value :: N, NP, NZ, NDOF
+    integer(kint_c), intent(in), value :: NPNDOF
+    integer(kint_c), intent(in), value :: NZNDOF2
+    integer(kint_c), intent(in), value :: my_rank, comm, comm_size
+    integer(kint_c), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(kint_c), intent(in), target :: n_dof_list(NP)
+    integer(kint_c), intent(in), target :: n_dof_index(NP + 1)
+    integer(kint_c), intent(in), target :: n_dof_index2(NZ + 1)
+    integer(kint_c), intent(in), target :: index(NP + 1)
+    integer(kint_c), intent(in), target :: item(NZ)
+    integer(kint_c), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(kint_c), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
+    integer(kint_c), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(kint_c), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
+    integer(kint_c), target :: Iarray(100)
     real(c_double), target :: Rarray(100)
     real(c_double), intent(in), target :: A(NZNDOF2)
     real(c_double), target :: X(NPNDOF)
@@ -102,21 +102,21 @@ contains
     implicit none
     type(monolis_structure) :: monolis
     type(monolis_com) :: monoCOM
-    integer(c_int), intent(in), value :: N, NP, NZ, NDOF
-    integer(c_int), intent(in), value :: NPNDOF
-    integer(c_int), intent(in), value :: NZNDOF2
-    integer(c_int), intent(in), value :: my_rank, comm, comm_size
-    integer(c_int), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
-    integer(c_int), intent(in), target :: n_dof_list(NP)
-    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
-    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
-    integer(c_int), intent(in), target :: index(NP + 1)
-    integer(c_int), intent(in), target :: item(NZ)
-    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
-    integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
-    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
-    integer(c_int), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
-    integer(c_int), target :: Iarray(100)
+    integer(kint_c), intent(in), value :: N, NP, NZ, NDOF
+    integer(kint_c), intent(in), value :: NPNDOF
+    integer(kint_c), intent(in), value :: NZNDOF2
+    integer(kint_c), intent(in), value :: my_rank, comm, comm_size
+    integer(kint_c), intent(in), value :: recv_n_neib, send_n_neib, recv_nitem, send_nitem
+    integer(kint_c), intent(in), target :: n_dof_list(NP)
+    integer(kint_c), intent(in), target :: n_dof_index(NP + 1)
+    integer(kint_c), intent(in), target :: n_dof_index2(NZ + 1)
+    integer(kint_c), intent(in), target :: index(NP + 1)
+    integer(kint_c), intent(in), target :: item(NZ)
+    integer(kint_c), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(kint_c), intent(in), target :: recv_index(recv_n_neib + 1), recv_item(recv_nitem)
+    integer(kint_c), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(kint_c), intent(in), target :: send_index(send_n_neib + 1), send_item(send_nitem)
+    integer(kint_c), target :: Iarray(100)
     real(c_double), target :: Rarray(100)
     complex(c_double), intent(in), target :: A(NZNDOF2)
     complex(c_double), target :: X(NPNDOF)

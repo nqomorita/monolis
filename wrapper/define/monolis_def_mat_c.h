@@ -167,6 +167,17 @@ void monolis_get_vec_size(
   int* NP_size,
   int* NZ_size);
 
+/**
+ * @brief 疎行列に対応するベクトル配列サイズの取得関数
+ * @ingroup linalg
+ */
+void monolis_get_mat_size(
+  MONOLIS_MAT* mat,
+  int* NZ_t, 
+  int* NZD, 
+  int* NZU, 
+  int* NZL);
+
 #ifdef __cplusplus
 }
 #endif

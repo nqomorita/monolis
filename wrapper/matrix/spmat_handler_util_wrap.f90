@@ -13,11 +13,11 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_set_scalar_to_sparse_matrix_R_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     real(c_double) :: A(NZA)
     real(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
@@ -34,11 +34,11 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_add_scalar_to_sparse_matrix_R_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     real(c_double) :: A(NZA)
     real(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
@@ -55,13 +55,13 @@ contains
     index, item, A, i, j, sub_i, sub_j, val, is_find) &
     bind(c, name = "monolis_get_scalar_from_sparse_matrix_R_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     real(c_double) :: A(NZA)
-    integer(c_int) :: is_find
+    integer(kint_c) :: is_find
     real(c_double) :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
     logical :: is_find_t
@@ -80,13 +80,13 @@ contains
     index, item, A, n_base1, n_base2, conn1, conn2, mat) &
     bind(c, name = "monolis_add_matrix_to_sparse_matrix_main_R_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, NZM1, NZM2, n_base1, n_base2
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: conn1(n_base1)
-    integer(c_int), intent(in) :: conn2(n_base2)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, NZM1, NZM2, n_base1, n_base2
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: conn1(n_base1)
+    integer(kint_c), intent(in) :: conn2(n_base2)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     real(c_double) :: A(NZA)
     real(c_double) :: mat(NZM1*NZM2)
     integer(kint) :: conn1t(n_base1), conn2t(n_base2), i, j
@@ -109,15 +109,15 @@ contains
     index, item, indexR, itemR, permR, A, B, node_id, ndof_bc, val) &
     bind(c, name = "monolis_set_Dirichlet_bc_R_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, NZB, node_id, ndof_bc
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: indexR(N + 1)
-    integer(c_int), intent(in) :: itemR(NZ)
-    integer(c_int), intent(in) :: permR(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, NZB, node_id, ndof_bc
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: indexR(N + 1)
+    integer(kint_c), intent(in) :: itemR(NZ)
+    integer(kint_c), intent(in) :: permR(NZ)
     real(c_double), intent(in), value :: val
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     real(c_double) :: A(NZA)
     real(c_double) :: B(NZB)
     integer(kint) :: nid_t, ndof_bc_t
@@ -132,11 +132,11 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_set_scalar_to_sparse_matrix_C_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     complex(c_double) :: A(NZA)
     complex(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
@@ -153,11 +153,11 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_add_scalar_to_sparse_matrix_C_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     complex(c_double) :: A(NZA)
     complex(c_double), value :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
@@ -174,12 +174,12 @@ contains
     index, item, A, i, j, sub_i, sub_j, val, is_find) &
     bind(c, name = "monolis_get_scalar_from_sparse_matrix_C_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int) :: is_find
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c) :: is_find
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     complex(c_double) :: A(NZA)
     complex(c_double) :: val
     integer(kint) :: i_t, j_t, sub_i_t, sub_j_t
@@ -199,13 +199,13 @@ contains
     index, item, A, n_base1, n_base2, conn1, conn2, mat) &
     bind(c, name = "monolis_add_matrix_to_sparse_matrix_main_C_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, NZM1, NZM2, n_base1, n_base2
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: conn1(n_base1)
-    integer(c_int), intent(in) :: conn2(n_base2)
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, NZM1, NZM2, n_base1, n_base2
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: conn1(n_base1)
+    integer(kint_c), intent(in) :: conn2(n_base2)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     complex(c_double) :: A(NZA)
     complex(c_double) :: mat(NZM1*NZM2)
     integer(kint) :: conn1t(n_base1), conn2t(n_base2), i, j
@@ -228,15 +228,15 @@ contains
     index, item, indexR, itemR, permR, A, B, node_id, ndof_bc, val) &
     bind(c, name = "monolis_set_Dirichlet_bc_C_c_main")
     implicit none
-    integer(c_int), intent(in), value :: N, NZ, NZA, NZB, node_id, ndof_bc
-    integer(c_int), intent(in) :: index(N + 1)
-    integer(c_int), intent(in) :: item(NZ)
-    integer(c_int), intent(in) :: indexR(N + 1)
-    integer(c_int), intent(in) :: itemR(NZ)
-    integer(c_int), intent(in) :: permR(NZ)
+    integer(kint_c), intent(in), value :: N, NZ, NZA, NZB, node_id, ndof_bc
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: indexR(N + 1)
+    integer(kint_c), intent(in) :: itemR(NZ)
+    integer(kint_c), intent(in) :: permR(NZ)
     complex(c_double), intent(in), value :: val
-    integer(c_int), intent(in) :: n_dof_index(N + 1)
-    integer(c_int), intent(in) :: n_dof_index2(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
     complex(c_double) :: A(NZA)
     complex(c_double) :: B(NZB)
     integer(kint) :: nid_t, ndof_bc_t

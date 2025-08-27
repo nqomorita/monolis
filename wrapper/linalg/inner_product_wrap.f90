@@ -14,15 +14,15 @@ contains
     & bind(c, name = "monolis_inner_product_I_c_main")
     implicit none
     !> [in] 内部計算点数✕計算点が持つ自由度
-    integer(c_int), intent(in), value :: m
+    integer(kint_c), intent(in), value :: m
     !> [in] ベクトル 1
-    integer(c_int), intent(in) :: x(m)
+    integer(kint_c), intent(in) :: x(m)
     !> [in] ベクトル 2
-    integer(c_int), intent(in) :: y(m)
+    integer(kint_c), intent(in) :: y(m)
     !> [out] 内積結果
-    integer(c_int) :: sum
+    integer(kint_c) :: sum
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm
+    integer(kint_c), intent(in), value :: comm
     type(monolis_com) :: monoCOM
     real(kdouble) :: tdotp, tcomm
 
@@ -36,7 +36,7 @@ contains
     & bind(c, name = "monolis_inner_product_R_c_main")
     implicit none
     !> [in] 内部計算点数✕計算点が持つ自由度
-    integer(c_int), intent(in), value :: m
+    integer(kint_c), intent(in), value :: m
     !> [in] ベクトル 1
     real(c_double), intent(in) :: x(m)
     !> [in] ベクトル 2
@@ -44,7 +44,7 @@ contains
     !> [out] 内積結果
     real(c_double) :: sum
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm
+    integer(kint_c), intent(in), value :: comm
     type(monolis_com) :: monoCOM
     real(kdouble) :: tdotp, tcomm
 
@@ -58,7 +58,7 @@ contains
     & bind(c, name = "monolis_inner_product_C_c_main")
     implicit none
     !> [in] 内部計算点数✕計算点が持つ自由度
-    integer(c_int), intent(in), value :: m
+    integer(kint_c), intent(in), value :: m
     !> [in] ベクトル 1
     complex(c_double), intent(in) :: x(m)
     !> [in] ベクトル 2
@@ -66,7 +66,7 @@ contains
     !> [out] 内積結果
     complex(c_double) :: sum
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm
+    integer(kint_c), intent(in), value :: comm
     type(monolis_com) :: monoCOM
     real(kdouble) :: tdotp, tcomm
 

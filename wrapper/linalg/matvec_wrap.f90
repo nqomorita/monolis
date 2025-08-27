@@ -18,54 +18,54 @@ contains
     & bind(c, name = "monolis_matvec_product_R_c_main")
     implicit none
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: N
+    integer(kint_c), intent(in), value :: N
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: NP
+    integer(kint_c), intent(in), value :: NP
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: NZ
+    integer(kint_c), intent(in), value :: NZ
     !> [in] 自由度
-    integer(c_int), intent(in), value :: NDOF
-    integer(c_int), intent(in), value :: NPNDOF
-    integer(c_int), intent(in), value :: NZNDOF2
+    integer(kint_c), intent(in), value :: NDOF
+    integer(kint_c), intent(in), value :: NPNDOF
+    integer(kint_c), intent(in), value :: NZNDOF2
     !> [in] 自由度
     real(c_double), intent(in), target :: A(NZNDOF2)
     !> [in,out] 自由度
     real(c_double), intent(inout), target :: X(NPNDOF)
     !> [out] 自由度
     real(c_double), intent(out), target :: Y(NPNDOF)
-    integer(c_int), intent(in), target :: n_dof_list(NP)
-    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
-    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
+    integer(kint_c), intent(in), target :: n_dof_list(NP)
+    integer(kint_c), intent(in), target :: n_dof_index(NP + 1)
+    integer(kint_c), intent(in), target :: n_dof_index2(NZ + 1)
     !> [in] 自由度
-    integer(c_int), intent(in), target :: index(NP + 1)
+    integer(kint_c), intent(in), target :: index(NP + 1)
     !> [in] 自由度
-    integer(c_int), intent(in), target :: item(NZ)
+    integer(kint_c), intent(in), target :: item(NZ)
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: my_rank
+    integer(kint_c), intent(in), value :: my_rank
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm
+    integer(kint_c), intent(in), value :: comm
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm_size
+    integer(kint_c), intent(in), value :: comm_size
     !> [in] recv する隣接領域数
-    integer(c_int), intent(in), value :: recv_n_neib
+    integer(kint_c), intent(in), value :: recv_n_neib
     !> [in] recv の item 数
-    integer(c_int), intent(in), value :: recv_nitem
+    integer(kint_c), intent(in), value :: recv_nitem
     !> [in] recv する隣接領域 id
-    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(kint_c), intent(in), target :: recv_neib_pe(recv_n_neib)
     !> [in] recv の index 配列
-    integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1)
+    integer(kint_c), intent(in), target :: recv_index(recv_n_neib + 1)
     !> [in] recv の item 配列（受信する節点番号データ）
-    integer(c_int), intent(in), target :: recv_item(recv_nitem)
+    integer(kint_c), intent(in), target :: recv_item(recv_nitem)
     !> [in] send する隣接領域数
-    integer(c_int), intent(in), value :: send_n_neib
+    integer(kint_c), intent(in), value :: send_n_neib
     !> [in] send の item 数
-    integer(c_int), intent(in), value :: send_nitem
+    integer(kint_c), intent(in), value :: send_nitem
     !> [in] send する隣接領域 id
-    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(kint_c), intent(in), target :: send_neib_pe(send_n_neib)
     !> [in] send の index 配列
-    integer(c_int), intent(in), target :: send_index(send_n_neib + 1)
+    integer(kint_c), intent(in), target :: send_index(send_n_neib + 1)
     !> [in] send の item 配列（送信する節点番号データ）
-    integer(c_int), intent(in), target :: send_item(send_nitem)
+    integer(kint_c), intent(in), target :: send_item(send_nitem)
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kdouble) :: tspmv, tcomm
@@ -117,54 +117,54 @@ contains
     & bind(c, name = "monolis_matvec_product_C_c_main")
     implicit none
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: N
+    integer(kint_c), intent(in), value :: N
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: NP
+    integer(kint_c), intent(in), value :: NP
     !> [in] 配列サイズ
-    integer(c_int), intent(in), value :: NZ
+    integer(kint_c), intent(in), value :: NZ
     !> [in] 自由度
-    integer(c_int), intent(in), value :: NDOF
-    integer(c_int), intent(in), value :: NPNDOF
-    integer(c_int), intent(in), value :: NZNDOF2
+    integer(kint_c), intent(in), value :: NDOF
+    integer(kint_c), intent(in), value :: NPNDOF
+    integer(kint_c), intent(in), value :: NZNDOF2
     !> [in] 自由度
     complex(c_double), intent(in), target :: A(NZNDOF2)
     !> [in,out] 自由度
     complex(c_double), intent(inout), target :: X(NPNDOF)
     !> [out] 自由度
     complex(c_double), intent(out), target :: Y(NPNDOF)
-    integer(c_int), intent(in), target :: n_dof_list(NP)
-    integer(c_int), intent(in), target :: n_dof_index(NP + 1)
-    integer(c_int), intent(in), target :: n_dof_index2(NZ + 1)
+    integer(kint_c), intent(in), target :: n_dof_list(NP)
+    integer(kint_c), intent(in), target :: n_dof_index(NP + 1)
+    integer(kint_c), intent(in), target :: n_dof_index2(NZ + 1)
     !> [in] 自由度
-    integer(c_int), intent(in), target :: index(NP + 1)
+    integer(kint_c), intent(in), target :: index(NP + 1)
     !> [in] 自由度
-    integer(c_int), intent(in), target :: item(NZ)
+    integer(kint_c), intent(in), target :: item(NZ)
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: my_rank
+    integer(kint_c), intent(in), value :: my_rank
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm
+    integer(kint_c), intent(in), value :: comm
     !> [in] MPI コミュニケータ
-    integer(c_int), intent(in), value :: comm_size
+    integer(kint_c), intent(in), value :: comm_size
     !> [in] recv する隣接領域数
-    integer(c_int), intent(in), value :: recv_n_neib
+    integer(kint_c), intent(in), value :: recv_n_neib
     !> [in] recv の item 数
-    integer(c_int), intent(in), value :: recv_nitem
+    integer(kint_c), intent(in), value :: recv_nitem
     !> [in] recv する隣接領域 id
-    integer(c_int), intent(in), target :: recv_neib_pe(recv_n_neib)
+    integer(kint_c), intent(in), target :: recv_neib_pe(recv_n_neib)
     !> [in] recv の index 配列
-    integer(c_int), intent(in), target :: recv_index(recv_n_neib + 1)
+    integer(kint_c), intent(in), target :: recv_index(recv_n_neib + 1)
     !> [in] recv の item 配列（受信する節点番号データ）
-    integer(c_int), intent(in), target :: recv_item(recv_nitem)
+    integer(kint_c), intent(in), target :: recv_item(recv_nitem)
     !> [in] send する隣接領域数
-    integer(c_int), intent(in), value :: send_n_neib
+    integer(kint_c), intent(in), value :: send_n_neib
     !> [in] send の item 数
-    integer(c_int), intent(in), value :: send_nitem
+    integer(kint_c), intent(in), value :: send_nitem
     !> [in] send する隣接領域 id
-    integer(c_int), intent(in), target :: send_neib_pe(send_n_neib)
+    integer(kint_c), intent(in), target :: send_neib_pe(send_n_neib)
     !> [in] send の index 配列
-    integer(c_int), intent(in), target :: send_index(send_n_neib + 1)
+    integer(kint_c), intent(in), target :: send_index(send_n_neib + 1)
     !> [in] send の item 配列（送信する節点番号データ）
-    integer(c_int), intent(in), target :: send_item(send_nitem)
+    integer(kint_c), intent(in), target :: send_item(send_nitem)
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     real(kdouble) :: tspmv, tcomm
