@@ -142,7 +142,13 @@ contains
           call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,i), G(:,k), M(i,k))
         enddo
 
-        if(M(k,k) == 0.0d0) stop "zero divide C"
+        if(M(k,k) == 0.0d0)then
+          !# recover section
+          U(:,k) = U(:,k) + omega*Z
+          call monolis_matvec_product_main_R(monoCOM, monoMAT, U(:,k), G(:,k), tspmv, tcomm_spmv)
+          call monolis_inner_product_main_R(monoCOM, NNDOF, P(:,k), G(:,k), M(k,k))
+          if(M(k,k) == 0.0d0) stop "zero divide C"
+        endif
         beta = F(k) / M(k,k)
 
         call monolis_vec_AXPBY_R(NNDOF,  beta, U(:,k), 1.0d0, X, X)
