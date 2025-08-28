@@ -14,7 +14,8 @@ module mod_monolis_solver_SOR
   public monolis_solver_SOR
 
 contains
-
+ 
+  !# 一時的に Gauss Seidel 法の加速を採用している
   subroutine monolis_solver_SOR(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> [in,out] パラメータ構造体

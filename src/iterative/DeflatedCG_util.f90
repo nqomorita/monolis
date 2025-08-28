@@ -116,6 +116,7 @@ contains
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time_statistics) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_is_prec_stored) = 1
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_is_error_abort) = .false.
 
     !> com section
     NP = monoCOM%recv_n_neib + 1
