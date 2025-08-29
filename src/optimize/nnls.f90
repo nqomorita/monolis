@@ -131,7 +131,7 @@ contains
     if(.not. is_converge)then
       call monolis_std_error_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
       call monolis_std_error_string("Residual is not less than tolerance")
-      call monolis_std_error_stop()
+      !call monolis_std_error_stop()
     endif
  
     call monolis_dealloc_R_1d(r)
@@ -254,7 +254,7 @@ contains
     if(.not. is_converge)then
       call monolis_std_error_string("monolis_optimize_nnls_R_with_sparse_solution")
       call monolis_std_error_string("Residual is not less than tolerance")
-      call monolis_std_error_stop()
+      !call monolis_std_error_stop()
     endif
 
     call monolis_dealloc_R_1d(r)
