@@ -30,8 +30,8 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：BiCGSTAB 法（擬似四倍精度）
   integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 12
-  !> パラメータ：SOR 法
-  integer(kint), parameter :: monolis_iter_SOR  = 13
+  !> パラメータ：JACOBI 法
+  integer(kint), parameter :: monolis_iter_JACOBI  = 13
   !> パラメータ：BiCGSAFE 法
   integer(kint), parameter :: monolis_iter_BiCGSAFE = 14
   !> パラメータ：IDR(s) 法

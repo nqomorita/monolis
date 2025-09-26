@@ -70,7 +70,7 @@ contains
 
     call monolis_matvec_product_R(mat, com, a, b)
 
-    call monolis_set_method(mat, monolis_iter_SOR)
+    call monolis_set_method(mat, monolis_iter_JACOBI)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-10)
     call monolis_show_timelog_statistics(mat, .true.)

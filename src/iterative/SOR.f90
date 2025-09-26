@@ -1,5 +1,5 @@
-!> SOR 法モジュール
-module mod_monolis_solver_SOR
+!> JACOBI 法モジュール
+module mod_monolis_solver_JACOBI
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
@@ -11,12 +11,11 @@ module mod_monolis_solver_SOR
 
   implicit none
   private
-  public monolis_solver_SOR
+  public monolis_solver_JACOBI
 
 contains
- 
-  !# 一時的に Gauss Seidel 法の加速を採用している
-  subroutine monolis_solver_SOR(monoPRM, monoCOM, monoMAT, monoPREC)
+
+  subroutine monolis_solver_JACOBI(monoPRM, monoCOM, monoMAT, monoPREC)
     implicit none
     !> [in,out] パラメータ構造体
     type(monolis_prm), intent(inout) :: monoPRM
@@ -57,15 +56,15 @@ contains
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
-    call monolis_solver_SOR_setup(monoMAT)
+    call monolis_solver_JACOBI_setup(monoMAT)
     call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
-    if(omega < 0.0d0)then
-      call monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
+    if(omega <= 0.0d0)then
+      call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
     endif
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
-      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm_spmv)
+      call monolis_solver_JACOBI_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm_spmv)
       call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
@@ -76,9 +75,9 @@ contains
 
     call monolis_dealloc_R_1d(R)
     call monolis_pdealloc_R_1d(monoMAT%R%D)
-  end subroutine monolis_solver_SOR
+  end subroutine monolis_solver_JACOBI
 
-  subroutine monolis_solver_SOR_setup(monoMAT)
+  subroutine monolis_solver_JACOBI_setup(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, ii, j, jS, jE, in, N, n1, n2, nz
@@ -105,9 +104,9 @@ contains
         endif
       enddo
     enddo
-  end subroutine monolis_solver_SOR_setup
+  end subroutine monolis_solver_JACOBI_setup
 
-  subroutine monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
+  subroutine monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat), target :: monoMAT
@@ -170,9 +169,9 @@ contains
     omega = 0.9d0 * (2.0d0 / U)
 
     call monolis_dealloc_R_1d(s)
-  end subroutine monolis_solver_SOR_get_auto_relax_factor
+  end subroutine monolis_solver_JACOBI_get_auto_relax_factor
 
-  subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm)
+  subroutine monolis_solver_JACOBI_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -195,5 +194,5 @@ contains
     enddo
 
     call monolis_dealloc_R_1d(Y)
-  end subroutine monolis_solver_SOR_matvec
-end module mod_monolis_solver_SOR
+  end subroutine monolis_solver_JACOBI_matvec
+end module mod_monolis_solver_JACOBI

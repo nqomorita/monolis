@@ -23,7 +23,7 @@ void monolis_prm_initialize(
 
   prm->Iarray[MONOLIS_PRM_I_METHOD] = 1;
   prm->Iarray[MONOLIS_PRM_I_PRECOND] = 1;
-  prm->Iarray[MONOLIS_PRM_I_MAX_ITER] = 1000;
+  prm->Iarray[MONOLIS_PRM_I_MAX_ITER] = 10000;
   prm->Iarray[MONOLIS_PRM_I_CUR_ITER] = 0;
   prm->Iarray[MONOLIS_PRM_I_IERR] = -1;
   prm->Iarray[MONOLIS_PRM_I_IS_INIT_X] = MONOLIS_I_TRUE;
@@ -38,8 +38,12 @@ void monolis_prm_initialize(
   prm->Iarray[MONOLIS_PRM_I_SHOW_SUMMARY] = MONOLIS_I_TRUE;
   prm->Iarray[MONOLIS_PRM_I_SHOW_TIME_STATISTICS] = MONOLIS_I_FALSE;
   prm->Iarray[MONOLIS_PRM_I_IDRS_DIM] = 4;
+  prm->Iarray[MONOLIS_PRM_I_DCG_INNER_METHOD] = 1;
+  prm->Iarray[MONOLIS_PRM_I_DCG_INNER_PREC] = 1;
+  prm->Iarray[MONOLIS_PRM_I_DCG_INNER_MAX_ITER] = 10000;
 
   prm->Rarray[MONOLIS_PRM_R_TOL] = 1.0e-8;
+  prm->Rarray[MONOLIS_PRM_R_DCG_INNER_RELAXATION_FACTOR] = -1.0;
 }
 
 void monolis_prm_finalize(

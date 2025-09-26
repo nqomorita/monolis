@@ -34,13 +34,14 @@ static const int MONOLIS_ITER_PIPEBICGSTAB_NOPREC = 8;
 
 //static const int MONOLIS_ITER_GMRES = 10;
 
+static const int MONOLIS_ITER_DEFLATEDCG = 9;
 static const int MONOLIS_ITER_DEFLATEDCG1 = 9;
 static const int MONOLIS_ITER_DEFLATEDCG2 = 10;
 static const int MONOLIS_ITER_ADEFLATEDCG2 = 11;
 
 static const int MONOLIS_ITER_BICGSTAB_N128 = 12;
 
-static const int MONOLIS_ITER_SOR = 13;
+static const int MONOLIS_ITER_JACOBI = 13;
 
 static const int MONOLIS_ITER_BICGSAFE = 14;
 
@@ -102,6 +103,8 @@ static const int MONOLIS_PRM_I_IS_PREC_STORED = 15;
 
 static const int MONOLIS_PRM_I_IS_ERROR_ABORT = 16;
 
+static const int MONOLIS_PRM_I_IS_PREC_PREPARED = 17;
+
 
 static const int MONOLIS_PRM_I_SHOW_ITERLOG = 20;
 
@@ -111,7 +114,18 @@ static const int MONOLIS_PRM_I_SHOW_SUMMARY = 22;
 
 static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
 
-static const int MONOLIS_PRM_I_IDRS_DIM = 24;
+
+static const int MONOLIS_PRM_I_N_LOCAL_DEFLATION_MODE = 30;
+
+static const int MONOLIS_PRM_I_N_LOCAL_BLOCK_SIZE_OF_ATAW = 31;
+
+static const int MONOLIS_PRM_I_IDRS_DIM = 32;
+
+static const int MONOLIS_PRM_I_DCG_INNER_METHOD = 33;
+
+static const int MONOLIS_PRM_I_DCG_INNER_PREC = 34;
+
+static const int MONOLIS_PRM_I_DCG_INNER_MAX_ITER = 35;
 
 
 static const int MONOLIS_PRM_R_TOL = 1;
@@ -131,6 +145,9 @@ static const int MONOLIS_R_TIME_PREC = 7;
 static const int MONOLIS_R_TIME_COMM_DOTP = 8;
 
 static const int MONOLIS_R_TIME_COMM_SPMV = 9;
+
+static const int MONOLIS_PRM_R_DCG_INNER_RELAXATION_FACTOR = 10;
+
 
 typedef struct {
   char   com_top_dir_name[1024];

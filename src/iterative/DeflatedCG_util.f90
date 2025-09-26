@@ -97,8 +97,8 @@ contains
     method = monoPRM%Iarray(monolis_prm_I_DCG_inner_method)
     if(method == monolis_iter_CG)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    elseif(method == monolis_iter_SOR)then
-      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_SOR
+    elseif(method == monolis_iter_JACOBI)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
     else
       stop "deflatedCG_E_initialize set method"
     endif
