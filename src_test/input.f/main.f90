@@ -198,6 +198,7 @@ program main
 
     do iter = monolis_iter_CG, monolis_iter_COCG - 1
     do prec = monolis_prec_NONE, monolis_prec_SOR
+      if(iter == monolis_iter_DeflatedCG1 .and. prec == monolis_prec_SOR) cycle
       a = 0.0d0
       b = c
 
