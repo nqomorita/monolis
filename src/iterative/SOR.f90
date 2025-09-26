@@ -61,7 +61,7 @@ contains
     call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
     if(omega < 0.0d0)then
-      call monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, omega)
+      call monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, NNDOF, omega)
     endif
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
@@ -107,13 +107,66 @@ contains
     enddo
   end subroutine monolis_solver_SOR_setup
 
-  subroutine monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, omega)
+  subroutine monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, NNDOF, omega)
     implicit none
     type(monolis_com) :: monoCOM
-    type(monolis_mat) :: monoMAT
-    integer(kint) :: i
-    real(kdouble) :: omega
+    type(monolis_mat), target :: monoMAT
+    integer(kint) :: NNDOF
+    integer(kint) :: i, ii, j, jS, jE, in, n1, n2, n3, nz, dof_i, dof_j
+    real(kdouble) :: omega, U, ri, ri_max, s_i, s_j, Aij_abs
+    real(kdouble), allocatable :: s(:)
+    integer(kint), pointer :: index(:), item(:)
+    real(kdouble), pointer :: A(:), D(:)
 
+    A => monoMAT%R%A
+    D => monoMAT%R%D
+    index => monoMAT%CSR%index
+    item => monoMAT%CSR%item
+
+    !# s[i] = 1/sqrt(Aii) を計算
+    call monolis_alloc_R_1d(s, NNDOF)
+    
+    do i = 1, NNDOF
+      s(i) = 1.0d0 / dsqrt(dabs(D(i)))
+    enddo
+
+    !# ri = sum_{j!=i} |Aij| * s[i] * s[j] を各行で計算
+    ri_max = 0.0d0
+    
+    do i = 1, monoMAT%N
+      jS = index(i) + 1
+      jE = index(i + 1)
+      n1 = monoMAT%n_dof_list(i)
+      n2 = monoMAT%n_dof_index(i)
+      
+      do dof_i = 1, n1
+        ri = 0.0d0
+        s_i = s(n2 + dof_i)
+        
+        do ii = jS, jE
+          in = item(ii)
+          n3 = monoMAT%n_dof_list(in)
+          if(i /= in)then
+            nz = monoMAT%n_dof_index2(ii)
+            do dof_j = 1, n3
+              s_j = s(monoMAT%n_dof_index(in) + dof_j)
+              Aij_abs = dabs(A(nz + n3*(dof_i-1) + dof_j))
+              ri = ri + Aij_abs * s_i * s_j
+            enddo
+          endif
+        enddo
+        
+        ri_max = max(ri_max, ri)
+      enddo
+    enddo
+
+    !# 全プロセス間で ri の最大値を取得
+    call monolis_allreduce_R1(ri_max, monolis_mpi_max, monoCOM%comm)
+
+    U = 1.0d0 + ri_max
+    omega = 0.9d0 * (2.0d0 / U)
+
+    call monolis_dealloc_R_1d(s)
   end subroutine monolis_solver_SOR_get_auto_relax_factor
 
   subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm)
