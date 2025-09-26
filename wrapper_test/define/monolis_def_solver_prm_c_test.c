@@ -14,7 +14,7 @@ void monolis_def_solver_c_test(){
 
   monolis_test_check_eq_I1("monolis_def_solver_c_test 1", mat.prm.Iarray[MONOLIS_PRM_I_METHOD], 1);
   monolis_test_check_eq_I1("monolis_def_solver_c_test 2", mat.prm.Iarray[MONOLIS_PRM_I_PRECOND], 1);
-  monolis_test_check_eq_I1("monolis_def_solver_c_test 3", mat.prm.Iarray[MONOLIS_PRM_I_MAX_ITER], 1000);
+  monolis_test_check_eq_I1("monolis_def_solver_c_test 3", mat.prm.Iarray[MONOLIS_PRM_I_MAX_ITER], 10000);
   monolis_test_check_eq_I1("monolis_def_solver_c_test 4", mat.prm.Iarray[MONOLIS_PRM_I_IS_INIT_X], 1);
   monolis_test_check_eq_I1("monolis_def_solver_c_test 5", mat.prm.Iarray[MONOLIS_PRM_I_IS_SYM_MATRIX], 0);
   monolis_test_check_eq_I1("monolis_def_solver_c_test 6", mat.prm.Iarray[MONOLIS_PRM_I_IS_DEBUG], 0);
