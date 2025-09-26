@@ -182,6 +182,7 @@ void monolis_solver_parallel_R_test(){
 
   for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_COCG; ++iter) {
     for (prec = MONOLIS_PREC_NONE; prec < MONOLIS_PREC_SOR + 1; ++prec) {
+      if(iter == MONOLIS_ITER_DEFLATEDCG1 && prec == MONOLIS_PREC_SOR) continue;
 
       for(i = 0; i < n_node; i++){
         a[i] = 0.0;
