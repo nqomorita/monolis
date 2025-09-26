@@ -199,18 +199,6 @@ contains
   end subroutine monolis_set_error_abort
 
   !> @ingroup param
-  !> IDR(s) 法の基底数
-  subroutine monolis_set_solver_IDRS_num_basis(monolis, param)
-    implicit none
-    !> [in,out] monolis 構造体
-    type(monolis_structure), intent(inout) :: monolis
-    !> [in] パラメータ
-    integer, intent(in) :: param
-
-    monolis%PRM%Iarray(monolis_prm_I_IDRS_DIM) = param
-  end subroutine monolis_set_solver_IDRS_num_basis
-
-  !> @ingroup param
   !> 反復回数と残差履歴の表示の設定
   subroutine monolis_show_iterlog(monolis, param)
     implicit none
@@ -284,6 +272,54 @@ contains
     monolis%PRM%deflation_mode = deflation_mode
   end subroutine monolis_set_deflation_mode
 
+  !> @ingroup param
+  !> IDR(s) 法の基底数
+  subroutine monolis_set_solver_IDRS_num_basis(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_IDRS_DIM) = param
+  end subroutine monolis_set_solver_IDRS_num_basis
+
+  !> @ingroup param
+  !> DCG 内側ループの縮退方程式を解くソルバ
+  subroutine monolis_set_solver_DCG_inner_method(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_DCG_inner_method) = param
+  end subroutine monolis_set_solver_DCG_inner_method
+
+  !> @ingroup param
+  !> DCG 内側ループの縮退方程式を解くソルバの前処理
+  subroutine monolis_set_solver_DCG_inner_prec(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_DCG_inner_prec) = param
+  end subroutine monolis_set_solver_DCG_inner_prec
+
+  !> @ingroup param
+  !> DCG 内側ループの縮退方程式求解の最大反復回数
+  subroutine monolis_set_solver_DCG_inner_max_iter(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_DCG_inner_max_iter) = param
+  end subroutine monolis_set_solver_DCG_inner_max_iter
+
   !# Rarray section
   !> @ingroup param
   !> 収束判定閾値の設定
@@ -295,6 +331,17 @@ contains
     real(kdouble), intent(in) :: param
     monolis%PRM%Rarray(monolis_prm_R_tol) = param
   end subroutine monolis_set_tolerance
+
+  !> @ingroup param
+  !> 収束判定閾値の設定
+  subroutine monolis_set_solver_DCG_inner_relax_factor(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    real(kdouble), intent(in) :: param
+    monolis%PRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = param
+  end subroutine monolis_set_solver_DCG_inner_relax_factor
 
   !> @ingroup param
   !> 現在の残差の取得

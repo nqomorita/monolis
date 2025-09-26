@@ -28,7 +28,7 @@ contains
     type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
     integer(kint) :: iter
-    real(kdouble) :: R2, B2
+    real(kdouble) :: R2, B2, omega
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), pointer :: B(:), X(:)
     real(kdouble), allocatable :: R(:)
@@ -41,6 +41,7 @@ contains
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
     tdotp = monoPRM%Rarray(monolis_R_time_dotp)
     tcomm_dotp = monoPRM%Rarray(monolis_R_time_comm_dotp)
+    omega = monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor)
 
     if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
       X = 0.0d0
@@ -59,8 +60,12 @@ contains
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
+    if(omega < 0.0d0)then
+      call monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, omega)
+    endif
+
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
-      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, tspmv, tcomm_spmv)
+      call monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm_spmv)
       call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
@@ -102,7 +107,16 @@ contains
     enddo
   end subroutine monolis_solver_SOR_setup
 
-  subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, tspmv, tcomm)
+  subroutine monolis_solver_SOR_get_auto_relax_factor(monoCOM, monoMAT, omega)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: i
+    real(kdouble) :: omega
+
+  end subroutine monolis_solver_SOR_get_auto_relax_factor
+
+  subroutine monolis_solver_SOR_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
@@ -115,8 +129,6 @@ contains
     real(kdouble) :: tspmv, tcomm
 
     D => monoMAT%R%D
-
-    omega = 1.0d0
 
     call monolis_alloc_R_1d(Y, NPNDOF)
 

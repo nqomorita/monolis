@@ -22,7 +22,7 @@ module mod_monolis_def_solver
   !> パラメータ：Pipelined BiCGSTAB 法（前処理なし）
   integer(kint), parameter :: monolis_iter_PipeBiCGSTAB_noprec = 8
   !> パラメータ：Deflated CG 法
-  !integer(kint), parameter :: monolis_iter_DeflatedCG    = 9
+  integer(kint), parameter :: monolis_iter_DeflatedCG    = 9
   integer(kint), parameter :: monolis_iter_DeflatedCG1   = 9
   integer(kint), parameter :: monolis_iter_DeflatedCG2   = 10
   integer(kint), parameter :: monolis_iter_ADeflatedCG2  = 11
@@ -151,6 +151,12 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_n_local_block_size_of_AtAW = 31
   !> パラメータ：IDR(S) 法の基底数
   integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 32
+  !> DCG 内側ループの縮退方程式を解くソルバ
+  integer(kint), parameter :: monolis_prm_I_DCG_inner_method = 33
+  !> DCG 内側ループの縮退方程式を解くソルバの前処理
+  integer(kint), parameter :: monolis_prm_I_DCG_inner_prec = 34
+  !> DCG 内側ループの縮退方程式求解の最大反復回数
+  integer(kint), parameter :: monolis_prm_I_DCG_inner_max_iter = 35
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -170,6 +176,9 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_R_time_comm_dotp = 8
   !> パラメータ：疎行列ベクトル積の通信時間
   integer(kint), parameter :: monolis_R_time_comm_spmv = 9
+
+  !> DCG 内側ループの縮退方程式求解の加速係数
+  integer(kint), parameter :: monolis_prm_R_DCG_inner_relaxation_factor = 10
 
   !> パラメータ構造体
   type monolis_prm
@@ -202,7 +211,7 @@ contains
 
     monoPRM%Iarray(monolis_prm_I_method) = 1
     monoPRM%Iarray(monolis_prm_I_precond) = 1
-    monoPRM%Iarray(monolis_prm_I_max_iter) = 1000
+    monoPRM%Iarray(monolis_prm_I_max_iter) = 10000
     monoPRM%Iarray(monolis_prm_I_cur_iter) = 0
     monoPRM%Iarray(monolis_prm_I_ierr) = -1
     !monoPRM%Iarray(monolis_prm_I_is_scaling) = monolis_I_false
@@ -219,9 +228,14 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
     monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
+    monoPRM%Iarray(monolis_prm_I_DCG_inner_method) = 1
+    monoPRM%Iarray(monolis_prm_I_DCG_inner_prec) = 1
+    monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter) = 10000
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
+    monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = -1.0d0
+
     monoPRM%Rarray(monolis_R_time_sol) = 0.0d0
     monoPRM%Rarray(monolis_R_time_prep) = 0.0d0
     monoPRM%Rarray(monolis_R_time_spmv) = 0.0d0

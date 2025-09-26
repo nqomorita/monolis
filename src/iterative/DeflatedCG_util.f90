@@ -78,7 +78,7 @@ contains
     integer(kint), intent(in) :: M
     integer(kint), intent(in) :: M_neib
     integer(kint), intent(in) :: NNDOF
-    integer(kint) :: i, NP, n_dof_loc
+    integer(kint) :: i, NP, n_dof_loc, method, prec, maxiter
     real(kdouble) :: tdemv, time
     real(kdouble) :: W(:,:)
     real(kdouble), allocatable :: AW(:,:), WtA(:,:), L(:,:)
@@ -94,20 +94,28 @@ contains
     call monolis_mat_initialize(monoMAT_deflated_eq)
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
-    !# pattern 1
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_Diag
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
+    method = monoPRM%Iarray(monolis_prm_I_DCG_inner_method)
+    if(method == monolis_iter_CG)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
+    elseif(method == monolis_iter_SOR)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_SOR
+    else
+      stop "deflatedCG_E_initialize set method"
+    endif
 
-    !# pattern 2
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
-    !monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10000
+    prec = monoPRM%Iarray(monolis_prm_I_DCG_inner_prec)
+    if(prec == monolis_prec_NONE)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
+    elseif(prec == monolis_prec_DIAG)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_DIAG
+    elseif(prec == monolis_prec_MUMPS)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
+    else
+      stop "deflatedCG_E_initialize set prec"
+    endif
 
-    !# pattern 3
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_SOR
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
-    monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = 10
+    maxiter = monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter)
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = maxiter
 
     !# common settings
     monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
