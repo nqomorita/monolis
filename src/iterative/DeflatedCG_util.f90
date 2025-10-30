@@ -90,8 +90,8 @@ contains
     type(gedatsu_graph) :: metagraph
     type(monolis_structure) :: monolis_deflated_eq
     integer(kint) :: iS, iE
-    real(kdouble) :: maxvalue
-    integer(kint) :: pos(2)
+    ! real(kdouble) :: maxvalue
+    ! integer(kint) :: pos(2)
     integer(kint), allocatable :: n_dof_list(:)
 
     !# allocation
@@ -258,10 +258,14 @@ contains
     n_dof_list(1) = M
     call monolis_mpi_update_I(monoCOM_deflated_eq, 1, n_dof_list)
 
-    call monolis_initialize(monolis_deflated_eq)
-    call monolis_get_nonzero_pattern_by_nodal_graph_V_R( &
-      monolis_deflated_eq, metagraph%n_vertex, n_dof_list, metagraph%index, metagraph%item)
-    call monolis_copy_mat_nonzero_pattern_main_R(monolis_deflated_eq%MAT, monoMAT_deflated_eq)
+    ! call monolis_initialize(monolis_deflated_eq)
+    ! call monolis_get_nonzero_pattern_by_nodal_graph_V_R( &
+    !   monolis_deflated_eq, metagraph%n_vertex, n_dof_list, metagraph%index, metagraph%item)
+    ! call monolis_copy_mat_nonzero_pattern_main_R(monolis_deflated_eq%MAT, monoMAT_deflated_eq)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monoMAT_deflated_eq, metagraph%n_vertex, -1, metagraph%index, metagraph%item)
+    call monolis_set_n_dof_index(monoMAT_deflated_eq, n_dof_list)
+    call monolis_alloc_nonzero_pattern_mat_val_V_R(monoMAT_deflated_eq)
 
     !# matrix value assign
     iS = 1
@@ -274,7 +278,7 @@ contains
     enddo
 
     call gedatsu_graph_finalize(metagraph)
-    call monolis_finalize(monolis_deflated_eq)
+    ! call monolis_finalize(monolis_deflated_eq)
   end subroutine deflatedCG_E_initialize
 
   !> @ingroup dev_solver
@@ -505,8 +509,6 @@ contains
     real(kdouble) :: P(:)
     real(kdouble) :: Z(:)
     real(kdouble) :: tdemv, time, WtAZ(M_neib), WEinvWtAZ(NNDOF)
-    integer(kint) :: i
-    integer(kint), allocatable :: n_dof_list(:), n_dof_index(:)
 
     if(M == 0)then
       call monolis_vec_copy_R(NNDOF, Z, P)
@@ -520,15 +522,7 @@ contains
     WtAZ(1:M) = 0.0d0
 
     ! call monolis_mpi_update_reverse_R(monoCOM_deflated_eq, M, WtAZ, time)
-    call monolis_alloc_I_1d(n_dof_list, monoCOM_deflated_eq%recv_n_neib + 1)
-    call monolis_alloc_I_1d(n_dof_index, monoCOM_deflated_eq%recv_n_neib + 2)
-    n_dof_list(1) = M
-    call monolis_mpi_update_I(monoCOM_deflated_eq, 1, n_dof_list)
-    n_dof_index(1) = 0
-    do i = 1, monoCOM_deflated_eq%recv_n_neib + 1
-      n_dof_index(i+1) = n_dof_index(i) + n_dof_list(i)
-    enddo
-    call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, n_dof_index, WtAZ, time)
+    call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, monoMAT_deflated_eq%n_dof_index, WtAZ, time)
 
     monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
 
