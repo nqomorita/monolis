@@ -23,7 +23,11 @@ CPP     = -cpp
 CPPFLAG =
 
 #INCLUDE = -I /Users/morita/opt/include -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
-INCLUDE = -I ./include -I /usr/include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+
+USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
+#USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
+USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
 
 ##> compiler option setting
 ifdef FLAGS
@@ -53,13 +57,9 @@ ifdef FLAGS
 		CFLAGS  = -Kfast
 		MOD_DIR = -M ./include
 		LINK    = mpiFCCpx --linkfortran -SSL2
-		#INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
+		USE_LIB_OPT =
 	endif
 endif
-
-USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
-#USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
-USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
 
 ##> liblary option setting
 ifdef FLAGS
