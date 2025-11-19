@@ -31,7 +31,7 @@ contains
     real(kdouble) :: CG(2), B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), allocatable :: R(:), RT(:), P(:), S(:), T(:), V(:)
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
     logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_solver_BiCGSTAB_noprec")

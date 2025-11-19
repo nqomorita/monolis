@@ -29,7 +29,7 @@ contains
     integer(kint) :: iter
     real(kdouble) :: R2, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
     real(kdouble), allocatable :: R(:)
     logical :: is_converge
 

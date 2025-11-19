@@ -31,7 +31,7 @@ contains
     real(kdouble) :: CG(3), B2, R2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
     logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_solver_PipeCG")

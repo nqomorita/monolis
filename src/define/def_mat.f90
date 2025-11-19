@@ -6,63 +6,63 @@ module mod_monolis_def_mat
   !> 行列構造体（実数型）
   type monolis_mat_val_R
     !> 全行列値
-    real(kdouble), pointer :: A(:) => null()
+    real(kdouble), pointer, contiguous :: A(:) => null()
     !> 行列値（狭義上三角）
-    real(kdouble), pointer :: U(:) => null()
+    real(kdouble), pointer, contiguous :: U(:) => null()
     !> 行列値（対角成分）
-    real(kdouble), pointer :: D(:) => null()
+    real(kdouble), pointer, contiguous :: D(:) => null()
     !> 行列値（狭義下三角）
-    real(kdouble), pointer :: L(:) => null()
+    real(kdouble), pointer, contiguous :: L(:) => null()
     !> 解ベクトル
-    real(kdouble), pointer :: X(:) => null()
+    real(kdouble), pointer, contiguous :: X(:) => null()
     !> 右辺ベクトル
-    real(kdouble), pointer :: B(:) => null()
+    real(kdouble), pointer, contiguous :: B(:) => null()
   end type monolis_mat_val_R
 
   !> 行列構造体（複素数型）
   type monolis_mat_val_C
     !> 全行列値
-    complex(kdouble), pointer :: A(:) => null()
+    complex(kdouble), pointer, contiguous :: A(:) => null()
     !> 行列値（狭義上三角）
-    complex(kdouble), pointer :: U(:) => null()
+    complex(kdouble), pointer, contiguous :: U(:) => null()
     !> 行列値（対角成分）
-    complex(kdouble), pointer :: D(:) => null()
+    complex(kdouble), pointer, contiguous :: D(:) => null()
     !> 行列値（狭義下三角）
-    complex(kdouble), pointer :: L(:) => null()
+    complex(kdouble), pointer, contiguous :: L(:) => null()
     !> 解ベクトル
-    complex(kdouble), pointer :: X(:) => null()
+    complex(kdouble), pointer, contiguous :: X(:) => null()
     !> 右辺ベクトル
-    complex(kdouble), pointer :: B(:) => null()
+    complex(kdouble), pointer, contiguous :: B(:) => null()
   end type monolis_mat_val_C
 
   !> 行列構造体（セパレート CSR 構造）
   type monolis_mat_separated_CSR
     !> index 配列（狭義上三角）
-    integer(kint), pointer :: indexU(:) => null()
+    integer(kint), pointer, contiguous :: indexU(:) => null()
     !> item 配列（狭義上三角）
-    integer(kint), pointer :: itemU(:) => null()
+    integer(kint), pointer, contiguous :: itemU(:) => null()
     !> index 配列（狭義下三角）
-    integer(kint), pointer :: indexL(:) => null()
+    integer(kint), pointer, contiguous :: indexL(:) => null()
     !> item 配列（狭義下三角）
-    integer(kint), pointer :: itemL(:) => null()
+    integer(kint), pointer, contiguous :: itemL(:) => null()
   end type monolis_mat_separated_CSR
 
   !> 行列構造体（CSR 構造）
   type monolis_mat_CSR
     !> index 配列
-    integer(kint), pointer :: index(:) => null()
+    integer(kint), pointer, contiguous :: index(:) => null()
     !> item 配列
-    integer(kint), pointer :: item(:) => null()
+    integer(kint), pointer, contiguous :: item(:) => null()
   end type monolis_mat_CSR
 
   !> 行列構造体（CSC 構造）
   type monolis_mat_CSC
     !> index 配列
-    integer(kint), pointer :: index(:) => null()
+    integer(kint), pointer, contiguous :: index(:) => null()
     !> item 配列
-    integer(kint), pointer :: item(:) => null()
+    integer(kint), pointer, contiguous :: item(:) => null()
     !> CSR 形式に対する行列値の置換ベクトル
-    integer(kint), pointer :: perm(:) => null()
+    integer(kint), pointer, contiguous :: perm(:) => null()
   end type monolis_mat_CSC
 
   !> 行列構造体
@@ -74,11 +74,11 @@ module mod_monolis_def_mat
     !> 1 ブロックの自由度
     integer(kint) :: NDOF
     !> 1 ブロックの自由度配列
-    integer(kint), pointer :: n_dof_list(:) => null()
+    integer(kint), pointer, contiguous :: n_dof_list(:) => null()
     !> 1 ブロックの自由度配列（index 型の圧縮形式）
-    integer(kint), pointer :: n_dof_index(:) => null()
+    integer(kint), pointer, contiguous :: n_dof_index(:) => null()
     !> 1 ブロックの自由度配列（index 型の圧縮形式、ブロック自由度の 2 乗値）
-    integer(kint), pointer :: n_dof_index2(:) => null()
+    integer(kint), pointer, contiguous :: n_dof_index2(:) => null()
     !> 行列構造体（実数型）
     type(monolis_mat_val_R) :: R
     !> 行列構造体（複素数型）

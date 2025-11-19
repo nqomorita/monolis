@@ -31,7 +31,7 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_CG")
 
