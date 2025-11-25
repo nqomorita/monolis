@@ -67,6 +67,8 @@ contains
     call DMUMPS(mumps)
 
     !> factorization
+    if(monoMAT%ndof <= 0) stop "MUMPS NDOF"
+
     NDOF = monoMAT%ndof
     mumps%N = NDOF*monoMAT%N
 

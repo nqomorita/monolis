@@ -95,24 +95,24 @@ contains
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
     method = monoPRM%Iarray(monolis_prm_I_DCG_inner_method)
-    if(method == monolis_iter_CG)then
+    !if(method == monolis_iter_CG)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    elseif(method == monolis_iter_JACOBI)then
-      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
-    else
-      stop "deflatedCG_E_initialize set method"
-    endif
+    !elseif(method == monolis_iter_JACOBI)then
+     ! monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
+    !else
+    !  stop "deflatedCG_E_initialize set method"
+    !endif
 
     prec = monoPRM%Iarray(monolis_prm_I_DCG_inner_prec)
-    if(prec == monolis_prec_NONE)then
-      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
-    elseif(prec == monolis_prec_DIAG)then
+    !if(prec == monolis_prec_NONE)then
+    !  monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
+    !elseif(prec == monolis_prec_DIAG)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_DIAG
-    elseif(prec == monolis_prec_MUMPS)then
-      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
-    else
-      stop "deflatedCG_E_initialize set prec"
-    endif
+    !elseif(prec == monolis_prec_MUMPS)then
+    !  monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
+    !else
+    !  stop "deflatedCG_E_initialize set prec"
+    !endif
 
     maxiter = monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter)
     monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = maxiter
@@ -441,9 +441,12 @@ endif
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_Pt(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-      & M, M_neib, NNDOF, W, WtA, Z, P,tdemv)
+  subroutine deflatedCG_Pt(monoCOM, monoMAT, &
+      monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+      M, M_neib, NNDOF, W, WtA, Z, P,tdemv)
     implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
     type(monolis_prm) :: monoPRM_deflated_eq
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_mat) :: monoMAT_deflated_eq
@@ -462,7 +465,9 @@ endif
       return
     endif
 
-    call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+    !call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+    call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, P, time, time)
+    call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), P, WtAZ, tdemv)
 
     monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
 
