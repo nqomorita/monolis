@@ -9,6 +9,7 @@ LINK   = $(FC)
 
 ##> directory setting
 MOD_DIR = -J ./include
+INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 BIN_DIR = ./bin
 SRC_DIR = ./src
 TST_DIR = ./src_test
@@ -47,6 +48,7 @@ ifdef FLAGS
 		CC      = mpiicx
 		CFLAGS  = -fPIC -O2 -no-multibyte-chars
 		MOD_DIR = -module ./include
+		USE_LIB_OPT=
 		LINK    = $(FC)
 	endif
 
@@ -56,8 +58,8 @@ ifdef FLAGS
 		CC      = mpifccpx -Nclang 
 		CFLAGS  = -Kfast
 		MOD_DIR = -M ./include
-		LINK    = mpiFCCpx --linkfortran -SSL2
 		USE_LIB_OPT =
+		LINK    = mpiFCCpx --linkfortran -SSL2
 	endif
 endif
 
@@ -88,6 +90,7 @@ ifdef FLAGS
 endif
 
 USE_LIB = $(USE_LIB_CORE) $(USE_LIB_ML) $(USE_LIB_MUMPS) $(USE_LIB_BLOPEX) $(USE_LIB_OPT)
+
 
 ##> other commands
 MAKE = make

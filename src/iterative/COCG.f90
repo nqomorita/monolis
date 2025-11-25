@@ -30,7 +30,7 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     complex(kdouble) :: alpha, beta, rho, rho1, omega, B2
     complex(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
-    complex(kdouble), pointer :: B(:), X(:)
+    complex(kdouble), pointer, contiguous :: B(:), X(:)
     logical :: is_converge
 
 #ifdef DEBUG

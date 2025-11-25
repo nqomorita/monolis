@@ -26,7 +26,7 @@ contains
     real(kdouble), intent(in) :: tol
     !> [out] 残差
     real(kdouble), intent(out) :: residual
-    !> [in] CMPI コミュニケータ
+    !> [in] MPI コミュニケータ
     integer(kint), intent(in) :: comm
     integer(kint) :: idx(1), iter, p, i, in
     real(kdouble) :: r0_norm, r_norm, res, tol_in
@@ -57,8 +57,8 @@ contains
     is_converge = .false.
     r = b
     x = 0.0d0
-    tol_in = tol
-    !tol_in = 1.0d-14*max(m, n_loc)
+    !tol_in = tol
+    tol_in = 1.0d-14*max(m, n_loc)
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
@@ -128,12 +128,14 @@ contains
       endif
     enddo
 
+    call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
+
     if(.not. is_converge)then
-      call monolis_std_error_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
-      call monolis_std_error_string("Residual is not less than tolerance")
+      !call monolis_std_warning_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
+      !call monolis_std_warning_string("Residual is not less than tolerance")
       !call monolis_std_error_stop()
     endif
- 
+
     call monolis_dealloc_R_1d(r)
     call monolis_dealloc_R_1d(s)
     call monolis_dealloc_L_1d(is_nonzero)
@@ -183,8 +185,8 @@ contains
     is_converge = .false.
     r = b
     x = 0.0d0
-    tol_in = tol
-    !tol_in = 1.0d-14*max(m, n)
+    !tol_in = tol
+    tol_in = 1.0d-14*max(m, n)
 
     do iter =  1, max_iter
       !> 行列 A の転置と残差ベクトルをかける
@@ -252,8 +254,8 @@ contains
     call monolis_get_l2_norm_R(m, matmul(A, x) - b, residual)
 
     if(.not. is_converge)then
-      call monolis_std_error_string("monolis_optimize_nnls_R_with_sparse_solution")
-      call monolis_std_error_string("Residual is not less than tolerance")
+      !call monolis_std_warning_string("monolis_optimize_nnls_R_with_sparse_solution")
+      !call monolis_std_warning_string("Residual is not less than tolerance")
       !call monolis_std_error_stop()
     endif
 

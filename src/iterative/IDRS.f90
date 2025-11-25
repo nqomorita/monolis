@@ -33,7 +33,7 @@ contains
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:,:), U(:,:), G(:,:), M(:,:)
     real(kdouble), allocatable :: F(:), Z(:), V(:), T(:), C(:)
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
 
     call monolis_std_debug_log_header("monolis_solver_IDRS")
 

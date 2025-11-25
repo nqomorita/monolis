@@ -32,7 +32,7 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), allocatable :: R(:), RT(:), R0(:), W0(:), WT(:), T(:), PT(:), S(:), ST(:)
     real(kdouble), allocatable :: Z(:), ZT(:), Q(:), QT(:), Y(:), V(:)
-    real(kdouble), pointer :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: B(:), X(:)
     logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_solver_PipeBiCGSTAB")
