@@ -465,17 +465,15 @@ endif
       return
     endif
 
-    !call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
     call monolis_matvec_product_main_R(monoCOM, monoMAT, Z, P, time, time)
     call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), P, WtAZ, tdemv)
-
     monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
 
-    WtAZ(1:M) = 0.0d0
-
-    call monolis_mpi_update_reverse_R(monoCOM_deflated_eq, M, WtAZ, time)
-
-    monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
+    !call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+    !monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
+    !WtAZ(1:M) = 0.0d0
+    !call monolis_mpi_update_reverse_R(monoCOM_deflated_eq, M, WtAZ, time)
+    !monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
 
     call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
     & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
