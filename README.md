@@ -1,6 +1,6 @@
 # monolis_utils
 
--monolithic linear solver
+- Metagraph-Oriented Network for Linear Iterative Solvers
 
 ## manual
 
