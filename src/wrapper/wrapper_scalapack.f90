@@ -249,4 +249,77 @@ contains
 
     call monolis_vec_to_mat_R(P, M, D_perm, D)
   end subroutine gesvd_R_update_D
+
+  !> @ingroup wrapper
+  !> PDGETRF 関数（実数型、LU分解）
+  subroutine monolis_scalapack_getrf_R(N_loc, N, A, ipiv, scalapack_comm)
+    implicit none
+    !> [in] 行列の大きさ（ローカル行数）
+    integer(kint), intent(in) :: N_loc
+    !> [in] 行列の大きさ（全体のサイズ N x N）
+    integer(kint), intent(in) :: N
+    !> [in,out] 入力行列（N_loc x N）、出力はLU分解後の行列
+    real(kdouble), intent(inout) :: A(:,:)
+    !> [out] ピボット情報（N_loc）
+    integer(kint), intent(out) :: ipiv(:)
+    !> [in] Scalapack コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
+    integer(kint) :: NB, desc_A(9)
+    integer(kint) :: lld_A
+    integer(kint) :: info
+    integer(kint) :: my_col, my_row, n_col, n_row
+
+    integer :: numroc
+    external :: numroc
+
+    call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
+
+    desc_A = 0
+    NB = 1
+    lld_A = numroc(N, NB, my_row, 0, n_row)
+
+    call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
+
+    call pdgetrf(N, N, A, 1, 1, desc_A, ipiv, info)
+  end subroutine monolis_scalapack_getrf_R
+
+  !> @ingroup wrapper
+  !> PDGETRS 関数（実数型、LU分解による線形方程式の求解）
+  subroutine monolis_scalapack_getrs_R(N_loc, N, NRHS, A, ipiv, B, scalapack_comm)
+    implicit none
+    !> [in] 行列の大きさ（ローカル行数）
+    integer(kint), intent(in) :: N_loc
+    !> [in] 行列の大きさ（全体のサイズ N x N）
+    integer(kint), intent(in) :: N
+    !> [in] 右辺ベクトルの数
+    integer(kint), intent(in) :: NRHS
+    !> [in] LU分解された行列（N_loc x N）
+    real(kdouble), intent(in) :: A(:,:)
+    !> [in] ピボット情報（N_loc）
+    integer(kint), intent(in) :: ipiv(:)
+    !> [in,out] 右辺ベクトル（N_loc x NRHS）、出力は解ベクトル
+    real(kdouble), intent(inout) :: B(:,:)
+    !> [in] Scalapack コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
+    integer(kint) :: NB, desc_A(9), desc_B(9)
+    integer(kint) :: lld_A, lld_B
+    integer(kint) :: info
+    integer(kint) :: my_col, my_row, n_col, n_row
+
+    integer :: numroc
+    external :: numroc
+
+    call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
+
+    desc_A = 0
+    desc_B = 0
+    NB = 1
+    lld_A = numroc(N, NB, my_row, 0, n_row)
+    lld_B = numroc(N, NB, my_row, 0, n_row)
+
+    call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
+    call descinit(desc_B, N, NRHS, NB, NB, 0, 0, scalapack_comm, lld_B, info)
+
+    call pdgetrs("N", N, NRHS, A, 1, 1, desc_A, ipiv, B, 1, 1, desc_B, info)
+  end subroutine monolis_scalapack_getrs_R
 end module mod_monolis_scalapack
