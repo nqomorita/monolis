@@ -95,24 +95,24 @@ contains
     call monolis_com_initialize_by_self(monoCOM_deflated_eq_self)
 
     method = monoPRM%Iarray(monolis_prm_I_DCG_inner_method)
-    !if(method == monolis_iter_CG)then
+    if(method == monolis_iter_CG)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
-    !elseif(method == monolis_iter_JACOBI)then
-     ! monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
-    !else
-    !  stop "deflatedCG_E_initialize set method"
-    !endif
+    elseif(method == monolis_iter_JACOBI)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
+    else
+      stop "deflatedCG_E_initialize set method"
+    endif
 
     prec = monoPRM%Iarray(monolis_prm_I_DCG_inner_prec)
-    !if(prec == monolis_prec_NONE)then
-    !  monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
-    !elseif(prec == monolis_prec_DIAG)then
+    if(prec == monolis_prec_NONE)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_NONE
+    elseif(prec == monolis_prec_DIAG)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_DIAG
-    !elseif(prec == monolis_prec_MUMPS)then
-    !  monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
-    !else
-    !  stop "deflatedCG_E_initialize set prec"
-    !endif
+    elseif(prec == monolis_prec_MUMPS)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_precond) = monolis_prec_MUMPS
+    else
+      stop "deflatedCG_E_initialize set prec"
+    endif
 
     maxiter = monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter)
     monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = maxiter
