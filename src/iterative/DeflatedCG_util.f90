@@ -79,7 +79,7 @@ contains
     integer(kint), intent(in) :: M_neib
     integer(kint), intent(in) :: NNDOF
     integer(kint) :: i, NP, n_dof_loc, method, prec, maxiter
-    real(kdouble) :: tdemv, time
+    real(kdouble) :: tdemv, time, omega
     real(kdouble) :: W(:,:)
     real(kdouble), allocatable :: AW(:,:), WtA(:,:), L(:,:)
     logical :: is_coarse_E = .false.
@@ -116,6 +116,9 @@ contains
 
     maxiter = monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter)
     monoPRM_deflated_eq%Iarray(monolis_prm_I_max_iter) = maxiter
+
+    omega = monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor)
+    monoPRM_deflated_eq%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
 
     !# common settings
     monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
