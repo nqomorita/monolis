@@ -75,3 +75,83 @@ void monolis_scalapack_gesvd_R(
     }
   }
 }
+
+void monolis_scalapack_getrf_R(
+  int      N_loc,
+  int      N,
+  double** A,
+  int*     ipiv,
+  int      comm,
+  int      scalapack_comm)
+{
+  int     i, j;
+  double* A_tmp;
+
+  A_tmp = monolis_alloc_R_1d(A_tmp, N_loc*N);
+
+  for (i = 0; i < N; ++i) {
+    for (j = 0; j < N_loc; ++j) {
+      A_tmp[i*N_loc + j] = A[j][i];
+    }
+  }
+
+  monolis_scalapack_getrf_R_c_main(
+    N_loc,
+    N,
+    A_tmp,
+    ipiv,
+    comm,
+    scalapack_comm);
+
+  for (i = 0; i < N; ++i) {
+    for (j = 0; j < N_loc; ++j) {
+      A[j][i] = A_tmp[i*N_loc + j];
+    }
+  }
+}
+
+void monolis_scalapack_getrs_R(
+  int      N_loc,
+  int      N,
+  int      NRHS,
+  double** A,
+  int*     ipiv,
+  double** B,
+  int      comm,
+  int      scalapack_comm)
+{
+  int     i, j;
+  double* A_tmp;
+  double* B_tmp;
+
+  A_tmp = monolis_alloc_R_1d(A_tmp, N_loc*N);
+  B_tmp = monolis_alloc_R_1d(B_tmp, N_loc*NRHS);
+
+  for (i = 0; i < N; ++i) {
+    for (j = 0; j < N_loc; ++j) {
+      A_tmp[i*N_loc + j] = A[j][i];
+    }
+  }
+
+  for (i = 0; i < NRHS; ++i) {
+    for (j = 0; j < N_loc; ++j) {
+      B_tmp[i*N_loc + j] = B[j][i];
+    }
+  }
+
+  monolis_scalapack_getrs_R_c_main(
+    N_loc,
+    N,
+    NRHS,
+    A_tmp,
+    ipiv,
+    B_tmp,
+    comm,
+    scalapack_comm);
+
+  for (i = 0; i < NRHS; ++i) {
+    for (j = 0; j < N_loc; ++j) {
+      B[j][i] = B_tmp[i*N_loc + j];
+    }
+  }
+}

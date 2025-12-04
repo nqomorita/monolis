@@ -75,6 +75,64 @@ void monolis_scalapack_gesvd_R_c_main(
   int      comm,
   int      scalapack_comm);
 
+/**
+ * @brief PDGETRF 関数（実数型、LU分解）
+ * @param[in] N_loc 行列の大きさ（ローカル行数）
+ * @param[in] N 行列の大きさ（全体のサイズ N x N）
+ * @param[in,out] A 入力行列（N_loc x N）、出力はLU分解後の行列
+ * @param[out] ipiv ピボット情報（N_loc）
+ * @param[in] comm コミュニケータ
+ * @param[in] scalapack_comm Scalapack コミュニケータ
+ * @ingroup wrapper
+ */
+void monolis_scalapack_getrf_R(
+  int      N_loc,
+  int      N,
+  double** A,
+  int*     ipiv,
+  int      comm,
+  int      scalapack_comm);
+
+void monolis_scalapack_getrf_R_c_main(
+  int      N_loc,
+  int      N,
+  double*  A,
+  int*     ipiv,
+  int      comm,
+  int      scalapack_comm);
+
+/**
+ * @brief PDGETRS 関数（実数型、LU分解による線形方程式の求解）
+ * @param[in] N_loc 行列の大きさ（ローカル行数）
+ * @param[in] N 行列の大きさ（全体のサイズ N x N）
+ * @param[in] NRHS 右辺ベクトルの数
+ * @param[in] A LU分解された行列（N_loc x N）
+ * @param[in] ipiv ピボット情報（N_loc）
+ * @param[in,out] B 右辺ベクトル（N_loc x NRHS）、出力は解ベクトル
+ * @param[in] comm コミュニケータ
+ * @param[in] scalapack_comm Scalapack コミュニケータ
+ * @ingroup wrapper
+ */
+void monolis_scalapack_getrs_R(
+  int      N_loc,
+  int      N,
+  int      NRHS,
+  double** A,
+  int*     ipiv,
+  double** B,
+  int      comm,
+  int      scalapack_comm);
+
+void monolis_scalapack_getrs_R_c_main(
+  int      N_loc,
+  int      N,
+  int      NRHS,
+  double*  A,
+  int*     ipiv,
+  double*  B,
+  int      comm,
+  int      scalapack_comm);
+
 #ifdef __cplusplus
 }
 #endif
