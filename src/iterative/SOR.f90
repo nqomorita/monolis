@@ -61,6 +61,7 @@ contains
 
     if(omega <= 0.0d0)then
       call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
+      monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
     endif
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
