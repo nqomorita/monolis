@@ -140,7 +140,7 @@ contains
       jE = index(i + 1)
       n1 = monoMAT%n_dof_list(i)
       n2 = monoMAT%n_dof_index(i)
-      
+
       do dof_i = 1, n1
         ri = 0.0d0
         s_i = s(n2 + dof_i)
@@ -148,14 +148,13 @@ contains
         do ii = jS, jE
           in = item(ii)
           n3 = monoMAT%n_dof_list(in)
-          if(i /= in)then
-            nz = monoMAT%n_dof_index2(ii)
-            do dof_j = 1, n3
-              s_j = s(monoMAT%n_dof_index(in) + dof_j)
-              Aij_abs = dabs(A(nz + n3*(dof_i-1) + dof_j))
-              ri = ri + Aij_abs * s_i * s_j
-            enddo
-          endif
+          nz = monoMAT%n_dof_index2(ii)
+          aa:do dof_j = 1, n3
+            if(n2 + dof_i == monoMAT%n_dof_index(in) + dof_j) cycle aa
+            s_j = s(monoMAT%n_dof_index(in) + dof_j)
+            Aij_abs = dabs(A(nz + n3*(dof_i-1) + dof_j))
+            ri = ri + Aij_abs * s_i * s_j
+          enddo aa
         enddo
         
         ri_max = max(ri_max, ri)
