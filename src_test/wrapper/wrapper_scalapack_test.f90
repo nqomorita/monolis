@@ -445,8 +445,6 @@ contains
     real(kdouble) :: B(2,2)
     !> 解ベクトル（N_loc x 2）
     real(kdouble) :: X(2,2), X_ref(2,2)
-    !> 検算用
-    real(kdouble) :: AX(2,2)
     integer(kint) :: comm
     integer(kint) :: scalapack_comm
 
@@ -490,8 +488,6 @@ contains
     call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, comm, scalapack_comm)
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
-
-write(*,*)X
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A = [[3,2],[1,4]], 右辺1 = [1,2]^T の解
