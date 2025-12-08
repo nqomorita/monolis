@@ -428,7 +428,7 @@ contains
       X_ref(2,1) = 0.9646017699115
     endif
 
-    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", X_ref(:,1), X(:,1))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", X(:,1), X_ref(:,1))
   end subroutine monolis_scalapack_test_5
 
   subroutine monolis_scalapack_test_6()
@@ -516,7 +516,7 @@ contains
       X_ref(2,2) = 0.9646017699115
     endif
 
-    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X_ref(:,1), X(:,1))
-    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", X_ref(:,2), X(:,2))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X(:,1), X_ref(:,1))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", X(:,2), X_ref(:,2))
   end subroutine monolis_scalapack_test_6
 end module mod_monolis_scalapack_test

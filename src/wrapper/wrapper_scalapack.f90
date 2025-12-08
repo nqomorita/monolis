@@ -324,12 +324,12 @@ contains
 
     call pdgetrs("N", N, NRHS, A, 1, 1, desc_A, ipiv, B, 1, 1, desc_B, info)
 
-    call getrs_R_update_X(N, lld_B, NRHS, B, comm)
+    call getrs_R_update_X(N, lld_B, NRHS, B, n_row, comm)
   end subroutine monolis_scalapack_getrs_R
 
   !> @ingroup wrapper
   !> 解ベクトルのアップデート（実数型、解情報の更新）
-  subroutine getrs_R_update_X(N, lld_B, NRHS, B, comm)
+  subroutine getrs_R_update_X(N, lld_B, NRHS, B, n_row, comm)
     implicit none
     !> [in] 
     integer(kint), intent(in) :: NRHS
@@ -339,23 +339,23 @@ contains
     real(kdouble), intent(inout) :: B(:,:)
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
-    integer(kint) :: i, j, size
+    integer(kint) :: i, j, n_row, size
     integer(kint), allocatable :: counts(:), displs(:)
     real(kdouble), allocatable :: B_temp(:)
     real(kdouble), allocatable :: B_full(:)
     real(kdouble), allocatable :: B_perm(:)
 
-    size = lld_B*N
+    size = lld_B*NRHS
 
     call monolis_alloc_R_1d(B_temp, size)
     call monolis_alloc_R_1d(B_full, N*NRHS)
     call monolis_alloc_R_1d(B_perm, N*NRHS)
-    call monolis_alloc_I_1d(counts, NRHS)
-    call monolis_alloc_I_1d(displs, NRHS)
+    call monolis_alloc_I_1d(counts, n_row)
+    call monolis_alloc_I_1d(displs, n_row)
 
     counts = size
 
-    do i = 2, NRHS
+    do i = 2, n_row
       displs(i) = size*(i-1)
     enddo
 
@@ -363,11 +363,11 @@ contains
     call monolis_allgather_V_R(size, B_temp, B_full, counts, displs, comm)
 
     do i = 1, size
-    do j = 1, NRHS
-      B_perm(NRHS*(i-1) + j) = B_full(i + size*(j - 1))
+    do j = 1, n_row
+      B_perm(n_row*(i-1) + j) = B_full(i + size*(j - 1))
     enddo
     enddo
 
-    call monolis_vec_to_mat_R(N, NRHS, B_perm, B)
+    call monolis_vec_to_mat_R(lld_B, NRHS, B_perm, B)
   end subroutine getrs_R_update_X
 end module mod_monolis_scalapack
