@@ -359,13 +359,13 @@ contains
     !> 行列の大きさ（全体のサイズ N x N）
     integer(kint) :: N = 4
     !> 入力行列（N_loc x N）
-    real(kdouble) :: A(2,4), A_orig(2,4)
+    real(kdouble) :: A(2,4)
     !> ピボット情報（N_loc）
     integer(kint) :: ipiv(2)
     !> 右辺ベクトル（N_loc x 1）
-    real(kdouble) :: B(2,1), B_orig(2,1)
+    real(kdouble) :: B(2,1)
     !> 解ベクトル（N_loc x 1）
-    real(kdouble) :: X(2,1)
+    real(kdouble) :: X(2,1), X_ref(2,1)
     !> 検算用
     real(kdouble) :: AX(2,1)
     integer(kint) :: comm
@@ -382,13 +382,13 @@ contains
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A の設定 (正定値対称行列)
       A(1,1) = 4.0d0
-      A(2,1) = 1.0d0
       A(1,2) = 1.0d0
-      A(2,2) = 3.0d0
-
       A(1,3) = 2.0d0
-      A(2,3) = 1.0d0
       A(1,4) = 1.0d0
+
+      A(2,1) = 1.0d0
+      A(2,2) = 3.0d0
+      A(2,3) = 1.0d0
       A(2,4) = 2.0d0
 
       ! 右辺ベクトル B の設定
@@ -396,21 +396,18 @@ contains
       B(2,1) = 2.0d0
     else
       A(1,1) = 2.0d0
-      A(2,1) = 1.0d0
       A(1,2) = 1.0d0
-      A(2,2) = 2.0d0
-
       A(1,3) = 5.0d0
-      A(2,3) = 1.0d0
       A(1,4) = 1.0d0
+
+      A(2,1) = 1.0d0
+      A(2,2) = 2.0d0
+      A(2,3) = 1.0d0
       A(2,4) = 4.0d0
 
       B(1,1) = 3.0d0
       B(2,1) = 4.0d0
     endif
-
-    A_orig = A
-    B_orig = B
 
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
 
@@ -419,14 +416,19 @@ contains
 
     ! 線形方程式の求解
     X = B
-    call monolis_scalapack_getrs_R(N_loc, N, 1, A, ipiv, X, scalapack_comm)
+    call monolis_scalapack_getrs_R(N_loc, N, 1, A, ipiv, X, comm, scalapack_comm)
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
-    ! 検算: AX = B
-    !AX = matmul(A_orig, X)
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      X_ref(1,1) = -0.23008849557522
+      X_ref(2,1) = -0.070796460176991
+    else
+      X_ref(1,1) = 0.51327433628319
+      X_ref(2,1) = 0.9646017699115
+    endif
 
-    !call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", B_orig(:,1), AX(:,1))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", X_ref(:,1), X(:,1))
   end subroutine monolis_scalapack_test_5
 
   subroutine monolis_scalapack_test_6()
@@ -434,15 +436,15 @@ contains
     !> 行列の大きさ（ローカル行数）
     integer(kint) :: N_loc = 2
     !> 行列の大きさ（全体のサイズ N x N）
-    integer(kint) :: N = 2
+    integer(kint) :: N = 4
     !> 入力行列（N_loc x N）
-    real(kdouble) :: A(2,2), A_orig(2,2)
+    real(kdouble) :: A(2,4)
     !> ピボット情報（N_loc）
     integer(kint) :: ipiv(2)
     !> 右辺ベクトル（N_loc x 2）、2つの右辺
-    real(kdouble) :: B(2,2), B_orig(2,2)
+    real(kdouble) :: B(2,2)
     !> 解ベクトル（N_loc x 2）
-    real(kdouble) :: X(2,2)
+    real(kdouble) :: X(2,2), X_ref(2,2)
     !> 検算用
     real(kdouble) :: AX(2,2)
     integer(kint) :: comm
@@ -458,30 +460,36 @@ contains
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A の設定
-      A(1,1) = 3.0d0
-      A(2,1) = 1.0d0
-      A(1,2) = 2.0d0
-      A(2,2) = 4.0d0
+      A(1,1) = 4.0d0
+      A(1,2) = 1.0d0
+      A(1,3) = 2.0d0
+      A(1,4) = 1.0d0
 
-      ! 右辺ベクトル B の設定（2つの右辺）
+      A(2,1) = 1.0d0
+      A(2,2) = 3.0d0
+      A(2,3) = 1.0d0
+      A(2,4) = 2.0d0
+
       B(1,1) = 1.0d0
       B(2,1) = 2.0d0
       B(1,2) = 3.0d0
       B(2,2) = 4.0d0
     else
-      A(1,1) = 5.0d0
-      A(2,1) = 2.0d0
+      A(1,1) = 2.0d0
       A(1,2) = 1.0d0
-      A(2,2) = 3.0d0
+      A(1,3) = 5.0d0
+      A(1,4) = 1.0d0
+
+      A(2,1) = 1.0d0
+      A(2,2) = 2.0d0
+      A(2,3) = 1.0d0
+      A(2,4) = 4.0d0
 
       B(1,1) = 5.0d0
       B(2,1) = 6.0d0
       B(1,2) = 7.0d0
       B(2,2) = 8.0d0
     endif
-
-    A_orig = A
-    B_orig = B
 
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
 
@@ -490,14 +498,25 @@ contains
 
     ! 線形方程式の求解（2つの右辺）
     X = B
-    call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, scalapack_comm)
+    call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, comm, scalapack_comm)
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
-    ! 検算: AX = B
-    !AX = matmul(A_orig, X)
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      X_ref(1,1) = -0.23008849557522
+      X_ref(2,1) = -0.070796460176991
 
-    !call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", B_orig(:,1), AX(:,1))
-    !call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", B_orig(:,2), AX(:,2))
+      X_ref(1,2) = -0.23008849557522
+      X_ref(2,2) = -0.070796460176991
+    else
+      X_ref(1,1) = 0.51327433628319
+      X_ref(2,1) = 0.9646017699115
+
+      X_ref(1,2) = 0.51327433628319
+      X_ref(2,2) = 0.9646017699115
+    endif
+
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X_ref(:,1), X(:,1))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", X_ref(:,2), X(:,2))
   end subroutine monolis_scalapack_test_6
 end module mod_monolis_scalapack_test

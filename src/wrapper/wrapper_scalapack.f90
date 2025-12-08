@@ -285,7 +285,7 @@ contains
 
   !> @ingroup wrapper
   !> PDGETRS 関数（実数型、LU分解による線形方程式の求解）
-  subroutine monolis_scalapack_getrs_R(N_loc, N, NRHS, A, ipiv, B, scalapack_comm)
+  subroutine monolis_scalapack_getrs_R(N_loc, N, NRHS, A, ipiv, B, comm, scalapack_comm)
     implicit none
     !> [in] 行列の大きさ（ローカル行数）
     integer(kint), intent(in) :: N_loc
@@ -299,6 +299,8 @@ contains
     integer(kint), intent(in) :: ipiv(:)
     !> [in,out] 右辺ベクトル（N_loc x NRHS）、出力は解ベクトル
     real(kdouble), intent(inout) :: B(:,:)
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
     !> [in] Scalapack コミュニケータ
     integer(kint), intent(in) :: scalapack_comm
     integer(kint) :: NB, desc_A(9), desc_B(9)
@@ -321,5 +323,51 @@ contains
     call descinit(desc_B, N, NRHS, NB, NB, 0, 0, scalapack_comm, lld_B, info)
 
     call pdgetrs("N", N, NRHS, A, 1, 1, desc_A, ipiv, B, 1, 1, desc_B, info)
+
+    call getrs_R_update_X(N, lld_B, NRHS, B, comm)
   end subroutine monolis_scalapack_getrs_R
+
+  !> @ingroup wrapper
+  !> 解ベクトルのアップデート（実数型、解情報の更新）
+  subroutine getrs_R_update_X(N, lld_B, NRHS, B, comm)
+    implicit none
+    !> [in] 
+    integer(kint), intent(in) :: NRHS
+    integer(kint), intent(in) :: lld_B
+    integer(kint), intent(in) :: N
+    !> [in,out] 解ベクトル
+    real(kdouble), intent(inout) :: B(:,:)
+    !> [in] コミュニケータ
+    integer(kint), intent(in) :: comm
+    integer(kint) :: i, j, size
+    integer(kint), allocatable :: counts(:), displs(:)
+    real(kdouble), allocatable :: B_temp(:)
+    real(kdouble), allocatable :: B_full(:)
+    real(kdouble), allocatable :: B_perm(:)
+
+    size = lld_B*N
+
+    call monolis_alloc_R_1d(B_temp, size)
+    call monolis_alloc_R_1d(B_full, N*NRHS)
+    call monolis_alloc_R_1d(B_perm, N*NRHS)
+    call monolis_alloc_I_1d(counts, NRHS)
+    call monolis_alloc_I_1d(displs, NRHS)
+
+    counts = size
+
+    do i = 2, NRHS
+      displs(i) = size*(i-1)
+    enddo
+
+    call monolis_mat_to_vec_R(lld_B, NRHS, B, B_temp)
+    call monolis_allgather_V_R(size, B_temp, B_full, counts, displs, comm)
+
+    do i = 1, size
+    do j = 1, NRHS
+      B_perm(NRHS*(i-1) + j) = B_full(i + size*(j - 1))
+    enddo
+    enddo
+
+    call monolis_vec_to_mat_R(N, NRHS, B_perm, B)
+  end subroutine getrs_R_update_X
 end module mod_monolis_scalapack
