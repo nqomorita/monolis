@@ -329,45 +329,51 @@ contains
 
   !> @ingroup wrapper
   !> 解ベクトルのアップデート（実数型、解情報の更新）
+  !> ScaLAPACK の block-cyclic 分散から連続した 1 次元分散に再配置
   subroutine getrs_R_update_X(N, lld_B, NRHS, B, n_row, comm)
     implicit none
-    !> [in] 
-    integer(kint), intent(in) :: NRHS
-    integer(kint), intent(in) :: lld_B
+    !> [in] 行列の全体サイズ
     integer(kint), intent(in) :: N
+    !> [in] ローカル行数
+    integer(kint), intent(in) :: lld_B
+    !> [in] 右辺ベクトル数
+    integer(kint), intent(in) :: NRHS
     !> [in,out] 解ベクトル
     real(kdouble), intent(inout) :: B(:,:)
+    !> [in] プロセス数
+    integer(kint), intent(in) :: n_row
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
-    integer(kint) :: i, j, n_row, size
-    integer(kint), allocatable :: counts(:), displs(:)
-    real(kdouble), allocatable :: B_temp(:)
-    real(kdouble), allocatable :: B_full(:)
-    real(kdouble), allocatable :: B_perm(:)
+    integer(kint) :: i, j, k, chunk_size
+    integer(kint), allocatable :: scounts(:), sdispls(:)
+    integer(kint), allocatable :: rcounts(:), rdispls(:)
+    real(kdouble), allocatable :: sendbuf(:), recvbuf(:)
 
-    size = lld_B*NRHS
+    chunk_size = lld_B * NRHS / n_row
 
-    call monolis_alloc_R_1d(B_temp, size)
-    call monolis_alloc_R_1d(B_full, N*NRHS)
-    call monolis_alloc_R_1d(B_perm, N*NRHS)
-    call monolis_alloc_I_1d(counts, n_row)
-    call monolis_alloc_I_1d(displs, n_row)
+    call monolis_alloc_R_1d(sendbuf, lld_B * NRHS)
+    call monolis_alloc_R_1d(recvbuf, lld_B * NRHS)
+    call monolis_alloc_I_1d(scounts, n_row)
+    call monolis_alloc_I_1d(sdispls, n_row)
+    call monolis_alloc_I_1d(rcounts, n_row)
+    call monolis_alloc_I_1d(rdispls, n_row)
 
-    counts = size
-
-    do i = 2, n_row
-      displs(i) = size*(i-1)
+    scounts = chunk_size
+    rcounts = chunk_size
+    do i = 1, n_row
+      sdispls(i) = (i - 1) * chunk_size
+      rdispls(i) = (i - 1) * chunk_size
     enddo
 
-    call monolis_mat_to_vec_R(lld_B, NRHS, B, B_temp)
-    call monolis_allgather_V_R(size, B_temp, B_full, counts, displs, comm)
-
-    do i = 1, size
-    do j = 1, n_row
-      B_perm(n_row*(i-1) + j) = B_full(i + size*(j - 1))
-    enddo
+    do i = 1, lld_B
+      do k = 1, NRHS
+        j = mod(i - 1, n_row)  ! 送信先ランク
+        sendbuf((j * chunk_size) + ((i - 1) / n_row) * NRHS + k) = B(i, k)
+      enddo
     enddo
 
-    call monolis_vec_to_mat_R(lld_B, NRHS, B_perm, B)
+    call monolis_alltoall_V_R(sendbuf, scounts, sdispls, recvbuf, rcounts, rdispls, comm)
+
+    call monolis_vec_to_mat_R(lld_B, NRHS, recvbuf, B)
   end subroutine getrs_R_update_X
 end module mod_monolis_scalapack
