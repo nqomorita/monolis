@@ -421,11 +421,11 @@ contains
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
     if(monolis_mpi_get_global_my_rank() == 0)then
-      X_ref(1,1) = -0.23008849557522
-      X_ref(2,1) = -0.070796460176991
+      X_ref(1,1) = -0.2300884955d0
+      X_ref(2,1) = -0.0707964601d0
     else
-      X_ref(1,1) = 0.51327433628319
-      X_ref(2,1) = 0.9646017699115
+      X_ref(1,1) = 0.513274336d0
+      X_ref(2,1) = 0.9646017699d0
     endif
 
     call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", X(:,1), X_ref(:,1))
@@ -438,7 +438,7 @@ contains
     !> 行列の大きさ（全体のサイズ N x N）
     integer(kint) :: N = 4
     !> 入力行列（N_loc x N）
-    real(kdouble) :: A(2,4)
+    real(kdouble) :: A(2,2)
     !> ピボット情報（N_loc）
     integer(kint) :: ipiv(2)
     !> 右辺ベクトル（N_loc x 2）、2つの右辺
@@ -460,30 +460,21 @@ contains
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A の設定
-      A(1,1) = 4.0d0
-      A(1,2) = 1.0d0
-      A(1,3) = 2.0d0
-      A(1,4) = 1.0d0
-
+      A(1,1) = 3.0d0
       A(2,1) = 1.0d0
-      A(2,2) = 3.0d0
-      A(2,3) = 1.0d0
-      A(2,4) = 2.0d0
+      A(1,2) = 2.0d0
+      A(2,2) = 4.0d0
 
+      ! 右辺ベクトル B の設定（2つの右辺）
       B(1,1) = 1.0d0
       B(2,1) = 2.0d0
       B(1,2) = 3.0d0
       B(2,2) = 4.0d0
     else
-      A(1,1) = 2.0d0
+      A(1,1) = 5.0d0
+      A(2,1) = 2.0d0
       A(1,2) = 1.0d0
-      A(1,3) = 5.0d0
-      A(1,4) = 1.0d0
-
-      A(2,1) = 1.0d0
-      A(2,2) = 2.0d0
-      A(2,3) = 1.0d0
-      A(2,4) = 4.0d0
+      A(2,2) = 3.0d0
 
       B(1,1) = 5.0d0
       B(2,1) = 6.0d0
@@ -502,6 +493,7 @@ contains
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
+write(*,*)X
     if(monolis_mpi_get_global_my_rank() == 0)then
       X_ref(1,1) = -0.23008849557522
       X_ref(2,1) = -0.070796460176991
