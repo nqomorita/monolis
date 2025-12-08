@@ -436,7 +436,7 @@ contains
     !> 行列の大きさ（ローカル行数）
     integer(kint) :: N_loc = 2
     !> 行列の大きさ（全体のサイズ N x N）
-    integer(kint) :: N = 4
+    integer(kint) :: N = 2
     !> 入力行列（N_loc x N）
     real(kdouble) :: A(2,2)
     !> ピボット情報（N_loc）
@@ -484,28 +484,31 @@ contains
 
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
 
-    ! LU分解
     call monolis_scalapack_getrf_R(N_loc, N, A, ipiv, scalapack_comm)
 
-    ! 線形方程式の求解（2つの右辺）
     X = B
     call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, comm, scalapack_comm)
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
 write(*,*)X
+
     if(monolis_mpi_get_global_my_rank() == 0)then
-      X_ref(1,1) = -0.23008849557522
-      X_ref(2,1) = -0.070796460176991
+      ! 行列 A = [[3,2],[1,4]], 右辺1 = [1,2]^T の解
+      X_ref(1,1) = 0.1d0
+      X_ref(2,1) = 0.475d0
 
-      X_ref(1,2) = -0.23008849557522
-      X_ref(2,2) = -0.070796460176991
+      ! 行列 A = [[3,2],[1,4]], 右辺2 = [3,4]^T の解
+      X_ref(1,2) = 0.5d0
+      X_ref(2,2) = 0.875d0
     else
-      X_ref(1,1) = 0.51327433628319
-      X_ref(2,1) = 0.9646017699115
+      ! 行列 A = [[5,1],[2,3]], 右辺1 = [5,6]^T の解
+      X_ref(1,1) = 0.69230769230769d0
+      X_ref(2,1) = 1.5384615384615d0
 
-      X_ref(1,2) = 0.51327433628319
-      X_ref(2,2) = 0.9646017699115
+      ! 行列 A = [[5,1],[2,3]], 右辺2 = [7,8]^T の解
+      X_ref(1,2) = 1.0d0
+      X_ref(2,2) = 2.0d0
     endif
 
     call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X(:,1), X_ref(:,1))
