@@ -105,7 +105,7 @@ contains
       enddo
     enddo
 
-    call monolis_scalapack_getrf_R(N_loc, N, A_temp, ipiv_temp, scalapack_comm)
+    call monolis_scalapack_getrf_R(N_loc, N, A_temp, ipiv_temp, comm, scalapack_comm)
 
     do i = 1, N
       do j = 1, N_loc
@@ -162,7 +162,7 @@ contains
       ipiv_temp(i) = ipiv(i)
     enddo
 
-    call monolis_scalapack_getrs_R(N_loc, N, NRHS, A_temp, ipiv_temp, B_temp, scalapack_comm)
+    call monolis_scalapack_getrs_R(N_loc, N, NRHS, A_temp, ipiv_temp, B_temp, comm, scalapack_comm)
 
     do i = 1, NRHS
       do j = 1, N_loc

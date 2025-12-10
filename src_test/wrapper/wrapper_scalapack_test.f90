@@ -360,16 +360,17 @@ contains
     integer(kint) :: N = 4
     !> 入力行列（N_loc x N）
     real(kdouble) :: A(2,4)
-    !> ピボット情報（N_loc）
-    integer(kint) :: ipiv(2)
+    !> ピボット情報（N_loc * 2）
+    integer(kint) :: ipiv(4)
     !> 右辺ベクトル（N_loc x 1）
     real(kdouble) :: B(2,1)
     !> 解ベクトル（N_loc x 1）
     real(kdouble) :: X(2,1), X_ref(2,1)
     !> 検算用
-    real(kdouble) :: AX(2,1)
     integer(kint) :: comm
     integer(kint) :: scalapack_comm
+
+    if(monolis_mpi_get_global_comm_size() == 1) return
 
     call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R")
 
@@ -411,10 +412,6 @@ contains
 
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
 
-    ! LU分解
-    call monolis_scalapack_getrf_R(N_loc, N, A, ipiv, scalapack_comm)
-
-    ! 線形方程式の求解
     X = B
     call monolis_scalapack_getrs_R(N_loc, N, 1, A, ipiv, X, comm, scalapack_comm)
 
@@ -439,14 +436,16 @@ contains
     integer(kint) :: N = 2
     !> 入力行列（N_loc x N）
     real(kdouble) :: A(2,2)
-    !> ピボット情報（N_loc）
-    integer(kint) :: ipiv(2)
+    !> ピボット情報（N_loc * 2）
+    integer(kint) :: ipiv(4)
     !> 右辺ベクトル（N_loc x 2）、2つの右辺
     real(kdouble) :: B(2,2)
     !> 解ベクトル（N_loc x 2）
     real(kdouble) :: X(2,2), X_ref(2,2)
     integer(kint) :: comm
     integer(kint) :: scalapack_comm
+
+    if(monolis_mpi_get_global_comm_size() == 1) return
 
     call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R (self_comm)")
 
@@ -458,31 +457,29 @@ contains
 
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A の設定
-      A(1,1) = 3.0d0
-      A(2,1) = 1.0d0
-      A(1,2) = 2.0d0
-      A(2,2) = 4.0d0
-
-      ! 右辺ベクトル B の設定（2つの右辺）
-      B(1,1) = 1.0d0
-      B(2,1) = 2.0d0
-      B(1,2) = 3.0d0
-      B(2,2) = 4.0d0
-    else
-      A(1,1) = 5.0d0
+      A(1,1) = 4.0d0
       A(2,1) = 2.0d0
       A(1,2) = 1.0d0
       A(2,2) = 3.0d0
 
-      B(1,1) = 5.0d0
-      B(2,1) = 6.0d0
-      B(1,2) = 7.0d0
-      B(2,2) = 8.0d0
+      ! 右辺ベクトル B の設定（2つの右辺）
+      B(1,1) = 1.0d0
+      B(2,1) = 1.0d0
+      B(1,2) = 2.0d0
+      B(2,2) = 2.0d0
+    else
+      A(1,1) = 4.0d0
+      A(2,1) = 2.0d0
+      A(1,2) = 1.0d0
+      A(2,2) = 3.0d0
+
+      B(1,1) = 3.0d0
+      B(2,1) = 3.0d0
+      B(1,2) = 4.0d0
+      B(2,2) = 4.0d0
     endif
 
     call monolis_scalapack_comm_initialize(comm, scalapack_comm)
-
-    call monolis_scalapack_getrf_R(N_loc, N, A, ipiv, scalapack_comm)
 
     X = B
     call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, comm, scalapack_comm)

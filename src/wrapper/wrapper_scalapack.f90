@@ -250,38 +250,36 @@ contains
     call monolis_vec_to_mat_R(P, M, D_perm, D)
   end subroutine gesvd_R_update_D
 
-  !> @ingroup wrapper
-  !> PDGETRF 関数（実数型、LU分解）
-  subroutine monolis_scalapack_getrf_R(N_loc, N, A, ipiv, scalapack_comm)
-    implicit none
-    !> [in] 行列の大きさ（ローカル行数）
-    integer(kint), intent(in) :: N_loc
-    !> [in] 行列の大きさ（全体のサイズ N x N）
-    integer(kint), intent(in) :: N
-    !> [in,out] 入力行列（N_loc x N）、出力はLU分解後の行列
-    real(kdouble), intent(inout) :: A(:,:)
-    !> [out] ピボット情報（N_loc）
-    integer(kint), intent(out) :: ipiv(:)
-    !> [in] Scalapack コミュニケータ
-    integer(kint), intent(in) :: scalapack_comm
-    integer(kint) :: NB, desc_A(9)
-    integer(kint) :: lld_A
-    integer(kint) :: info
-    integer(kint) :: my_col, my_row, n_col, n_row
-
-    integer :: numroc
-    external :: numroc
-
-    call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
-
-    desc_A = 0
-    NB = 1
-    lld_A = numroc(N, NB, my_row, 0, n_row)
-
-    call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
-
-    call pdgetrf(N, N, A, 1, 1, desc_A, ipiv, info)
-  end subroutine monolis_scalapack_getrf_R
+!  !> @ingroup wrapper
+!  !> PDGETRF 関数（実数型、LU分解）
+!  subroutine monolis_scalapack_getrf_R(N_loc, N, A, ipiv, comm, scalapack_comm)
+!    implicit none
+!    !> [in] 行列の大きさ（ローカル行数）
+!    integer(kint), intent(in) :: N_loc
+!    !> [in] 行列の大きさ（全体のサイズ N x N）
+!    integer(kint), intent(in) :: N
+!    !> [in,out] 入力行列（N_loc x N）、出力はLU分解後の行列
+!    real(kdouble), intent(inout) :: A(:,:)
+!    !> [out] ピボット情報（N_loc）
+!    integer(kint), intent(inout) :: ipiv(:)
+!    !> [in] Scalapack コミュニケータ
+!    integer(kint), intent(in) :: comm
+!    integer(kint), intent(in) :: scalapack_comm
+!    integer(kint) :: NB, desc_A(9)
+!    integer(kint) :: lld_A
+!    integer(kint) :: info
+!    integer(kint) :: my_col, my_row, n_col, n_row
+!    integer, external :: numroc
+!
+!    call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
+!
+!    NB = 1
+!    desc_A = 0
+!    lld_A = max(1, numroc(n, nb, my_row, 0, n_row))
+!    call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
+!
+!    call pdgetrf(N, N, A, 1, 1, desc_A, ipiv, info)
+!  end subroutine monolis_scalapack_getrf_R
 
   !> @ingroup wrapper
   !> PDGETRS 関数（実数型、LU分解による線形方程式の求解）
@@ -296,7 +294,7 @@ contains
     !> [in] LU分解された行列（N_loc x N）
     real(kdouble), intent(in) :: A(:,:)
     !> [in] ピボット情報（N_loc）
-    integer(kint), intent(in) :: ipiv(:)
+    integer(kint), intent(inout) :: ipiv(:)
     !> [in,out] 右辺ベクトル（N_loc x NRHS）、出力は解ベクトル
     real(kdouble), intent(inout) :: B(:,:)
     !> [in] コミュニケータ
@@ -305,37 +303,63 @@ contains
     integer(kint), intent(in) :: scalapack_comm
     integer(kint) :: NB, desc_A(9), desc_B(9)
     integer(kint) :: lld_A, lld_B
-    integer(kint) :: info
+    integer(kint) :: i, j, info, comm_size, N_loc_max, N_fix
     integer(kint) :: my_col, my_row, n_col, n_row
-
-    integer :: numroc
-    external :: numroc
+    integer, external :: numroc
+    real(kdouble), allocatable :: A_temp(:,:)
+    real(kdouble), allocatable :: B_temp(:,:)
 
     call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
 
+    !# N の取得（各領域の行数を統一）
+    comm_size = monolis_mpi_get_local_comm_size(comm)
+    N_loc_max = N_loc
+    call monolis_allreduce_I1(N_loc_max, monolis_mpi_max, comm)
+    N_fix = comm_size*N_loc
+
+    call monolis_alloc_R_2d(A_temp, N_loc_max, N_fix)
+    call monolis_alloc_R_2d(B_temp, N_loc_max, NRHS)
+
+    do i = 1, N_fix
+    do j = 1, N_loc_max
+      A_temp(j,i) = A(j,i)
+    enddo
+    enddo
+
+    do i = 1, NRHS
+    do j = 1, N_loc_max
+      B_temp(j,i) = B(j,i)
+    enddo
+    enddo
+
+    NB = 1
     desc_A = 0
     desc_B = 0
-    NB = 1
-    lld_A = numroc(N, NB, my_row, 0, n_row)
-    lld_B = numroc(N, NB, my_row, 0, n_row)
+    lld_A = max(1, numroc(N, NB, my_row, 0, n_row))
+    lld_B = max(1, numroc(N, NB, my_row, 0, n_row))
 
     call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
     call descinit(desc_B, N, NRHS, NB, NB, 0, 0, scalapack_comm, lld_B, info)
 
-    call pdgetrs("N", N, NRHS, A, 1, 1, desc_A, ipiv, B, 1, 1, desc_B, info)
+    call pdgetrf(N, N, A_temp, 1, 1, desc_A, ipiv, info)
+    call pdgetrs("N", N, NRHS, A_temp, 1, 1, desc_A, ipiv, B_temp, 1, 1, desc_B, info)
 
-    call getrs_R_update_X(N, lld_B, NRHS, B, n_row, comm)
+    call getrs_R_update_X(N_loc_max, NRHS, B_temp, n_row, comm)
+
+    do i = 1, NRHS
+    do j = 1, N_loc
+      B(j,i) = B_temp(j,i)
+    enddo
+    enddo
   end subroutine monolis_scalapack_getrs_R
 
   !> @ingroup wrapper
   !> 解ベクトルのアップデート（実数型、解情報の更新）
   !> ScaLAPACK の block-cyclic 分散から連続した 1 次元分散に再配置
-  subroutine getrs_R_update_X(N, lld_B, NRHS, B, n_row, comm)
+  subroutine getrs_R_update_X(N_loc, NRHS, B, n_row, comm)
     implicit none
     !> [in] 行列の全体サイズ
-    integer(kint), intent(in) :: N
-    !> [in] ローカル行数
-    integer(kint), intent(in) :: lld_B
+    integer(kint), intent(in) :: N_loc
     !> [in] 右辺ベクトル数
     integer(kint), intent(in) :: NRHS
     !> [in,out] 解ベクトル
@@ -344,36 +368,35 @@ contains
     integer(kint), intent(in) :: n_row
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
-    integer(kint) :: i, j, k, chunk_size
+    integer(kint) :: i, j, k, comm_size
     integer(kint), allocatable :: scounts(:), sdispls(:)
     integer(kint), allocatable :: rcounts(:), rdispls(:)
     real(kdouble), allocatable :: sendbuf(:), recvbuf(:)
 
-    chunk_size = lld_B * NRHS / n_row
-
-    call monolis_alloc_R_1d(sendbuf, lld_B * NRHS)
-    call monolis_alloc_R_1d(recvbuf, lld_B * NRHS)
+    call monolis_alloc_R_1d(sendbuf, N_loc * NRHS)
+    call monolis_alloc_R_1d(recvbuf, N_loc * NRHS)
     call monolis_alloc_I_1d(scounts, n_row)
     call monolis_alloc_I_1d(sdispls, n_row)
     call monolis_alloc_I_1d(rcounts, n_row)
     call monolis_alloc_I_1d(rdispls, n_row)
 
-    scounts = chunk_size
-    rcounts = chunk_size
+    comm_size = monolis_mpi_get_local_comm_size(comm)
+
+    scounts = NRHS
+    rcounts = NRHS
     do i = 1, n_row
-      sdispls(i) = (i - 1) * chunk_size
-      rdispls(i) = (i - 1) * chunk_size
+      sdispls(i) = (i - 1) * NRHS
+      rdispls(i) = (i - 1) * NRHS
     enddo
 
-    do i = 1, lld_B
-      do k = 1, NRHS
-        j = mod(i - 1, n_row)  ! 送信先ランク
-        sendbuf((j * chunk_size) + ((i - 1) / n_row) * NRHS + k) = B(i, k)
+    do i = 1, N_loc
+      do j = 1, NRHS
+        sendbuf(NRHS*(i-1) + j) = B(i, j)
       enddo
     enddo
 
     call monolis_alltoall_V_R(sendbuf, scounts, sdispls, recvbuf, rcounts, rdispls, comm)
 
-    call monolis_vec_to_mat_R(lld_B, NRHS, recvbuf, B)
+    call monolis_vec_to_mat_R(N_loc, NRHS, recvbuf, B)
   end subroutine getrs_R_update_X
 end module mod_monolis_scalapack
