@@ -316,10 +316,161 @@ void monolis_scalapack_test_4()
 
 }
 
+void monolis_scalapack_test_5()
+{
+  int    N_loc = 2;
+  int    N = 4;
+  int    NRHS = 1;
+  double** A;
+  int*     ipiv;
+  double** B;
+  double** X_ref;
+  int    comm, scalapack_comm;
+  int    i;
+
+  if(monolis_mpi_get_global_comm_size() == 1) return;
+
+  monolis_std_log_string("monolis_scalapack_getrf_R/getrs_R");
+
+  comm = monolis_mpi_get_global_comm();
+
+  A = monolis_alloc_R_2d(A, 2, 4);
+  ipiv = monolis_alloc_I_1d(ipiv, 4);
+  B = monolis_alloc_R_2d(B, 2, 1);
+  X_ref = monolis_alloc_R_2d(X_ref, 2, 1);
+
+  if(monolis_mpi_get_global_my_rank() == 0){
+    A[0][0] = 4.0;
+    A[0][1] = 1.0;
+    A[0][2] = 2.0;
+    A[0][3] = 1.0;
+
+    A[1][0] = 1.0;
+    A[1][1] = 3.0;
+    A[1][2] = 1.0;
+    A[1][3] = 2.0;
+
+    B[0][0] = 1.0;
+    B[1][0] = 2.0;
+  } else {
+    A[0][0] = 2.0;
+    A[0][1] = 1.0;
+    A[0][2] = 5.0;
+    A[0][3] = 1.0;
+
+    A[1][0] = 1.0;
+    A[1][1] = 2.0;
+    A[1][2] = 1.0;
+    A[1][3] = 4.0;
+
+    B[0][0] = 3.0;
+    B[1][0] = 4.0;
+  }
+
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
+
+  monolis_scalapack_getrs_R(N_loc, N, NRHS, A, ipiv, B, comm, scalapack_comm);
+
+  monolis_scalapack_comm_finalize(scalapack_comm);
+
+  if(monolis_mpi_get_global_my_rank() == 0){
+    X_ref[0][0] = -0.2300884955;
+    X_ref[1][0] = -0.0707964601;
+  } else {
+    X_ref[0][0] = 0.513274336;
+    X_ref[1][0] = 0.9646017699;
+  }
+
+  for(i = 0; i < 2; i++){
+    monolis_test_check_eq_R1("monolis_scalapack_getrf_R/getrs_R 5", B[i][0], X_ref[i][0]);
+  }
+}
+
+void monolis_scalapack_test_6()
+{
+  int    N_loc = 2;
+  int    N = 2;
+  int    NRHS = 2;
+  double** A;
+  int*     ipiv;
+  double** B;
+  double** X_ref;
+  int    comm, scalapack_comm;
+  int    i, j;
+
+  if(monolis_mpi_get_global_comm_size() == 1) return;
+
+  monolis_std_log_string("monolis_scalapack_getrf_R/getrs_R (self_comm)");
+
+  comm = monolis_mpi_get_self_comm();
+
+  A = monolis_alloc_R_2d(A, 2, 2);
+  ipiv = monolis_alloc_I_1d(ipiv, 4);
+  B = monolis_alloc_R_2d(B, 2, 2);
+  X_ref = monolis_alloc_R_2d(X_ref, 2, 2);
+
+  for(i = 0; i < 2; i++){
+    for(j = 0; j < 2; j++){
+      A[i][j] = 0.0;
+      B[i][j] = 0.0;
+    }
+  }
+  for(i = 0; i < 4; i++){
+    ipiv[i] = 0;
+  }
+
+  if(monolis_mpi_get_global_my_rank() == 0){
+    A[0][0] = 4.0;
+    A[0][1] = 2.0;
+    A[1][0] = 1.0;
+    A[1][1] = 3.0;
+
+    B[0][0] = 1.0;
+    B[1][0] = 1.0;
+    B[0][1] = 2.0;
+    B[1][1] = 2.0;
+  } else {
+    A[0][0] = 4.0;
+    A[0][1] = 2.0;
+    A[1][0] = 1.0;
+    A[1][1] = 3.0;
+
+    B[0][0] = 2.0;
+    B[1][0] = 2.0;
+    B[0][1] = 4.0;
+    B[1][1] = 4.0;
+  }
+
+  monolis_scalapack_comm_initialize(comm, &scalapack_comm);
+
+  monolis_scalapack_getrs_R(N_loc, N, NRHS, A, ipiv, B, comm, scalapack_comm);
+
+  monolis_scalapack_comm_finalize(scalapack_comm);
+
+  if(monolis_mpi_get_global_my_rank() == 0){
+    X_ref[0][0] = 0.1;
+    X_ref[1][0] = 0.3;
+    X_ref[0][1] = 0.2;
+    X_ref[1][1] = 0.6;
+  } else {
+    X_ref[0][0] = 0.2;
+    X_ref[1][0] = 0.6;
+    X_ref[0][1] = 0.4;
+    X_ref[1][1] = 1.2;
+  }
+
+  for(i = 0; i < 2; i++){
+    monolis_test_check_eq_R1("monolis_scalapack_getrf_R/getrs_R 6-1", B[i][0], X_ref[i][0]);
+    monolis_test_check_eq_R1("monolis_scalapack_getrf_R/getrs_R 6-2", B[i][1], X_ref[i][1]);
+  }
+}
+
 void monolis_scalapack_test()
 {
   monolis_scalapack_test_1();
   monolis_scalapack_test_2();
   monolis_scalapack_test_3();
   monolis_scalapack_test_4();
+  monolis_scalapack_test_5();
+  monolis_scalapack_test_6();
 }
