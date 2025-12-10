@@ -343,9 +343,10 @@ contains
 
     call pdgetrf(N, N, A_temp, 1, 1, desc_A, ipiv, info)
     call pdgetrs("N", N, NRHS, A_temp, 1, 1, desc_A, ipiv, B_temp, 1, 1, desc_B, info)
-
+write(*,*)"B_temp", B_temp
     call getrs_R_update_X(N_loc_max, NRHS, B_temp, n_row, comm)
-
+write(*,*)"B", B_temp
+call sleep(1)
     do i = 1, NRHS
     do j = 1, N_loc
       B(j,i) = B_temp(j,i)
@@ -368,7 +369,7 @@ contains
     integer(kint), intent(in) :: n_row
     !> [in] コミュニケータ
     integer(kint), intent(in) :: comm
-    integer(kint) :: i, j, k, comm_size
+    integer(kint) :: i, j, k, in, comm_size
     integer(kint), allocatable :: scounts(:), sdispls(:)
     integer(kint), allocatable :: rcounts(:), rdispls(:)
     real(kdouble), allocatable :: sendbuf(:), recvbuf(:)
@@ -382,21 +383,27 @@ contains
 
     comm_size = monolis_mpi_get_local_comm_size(comm)
 
-    scounts = NRHS
-    rcounts = NRHS
+    scounts = NRHS*N_loc/comm_size
+    rcounts = NRHS*N_loc/comm_size
     do i = 1, n_row
-      sdispls(i) = (i - 1) * NRHS
-      rdispls(i) = (i - 1) * NRHS
+      sdispls(i) = (i - 1) * NRHS*N_loc/comm_size
+      rdispls(i) = (i - 1) * NRHS*N_loc/comm_size
     enddo
 
     do i = 1, N_loc
+      k = mod(i - 1, comm_size) + (i - 1)/comm_size + 1
       do j = 1, NRHS
-        sendbuf(NRHS*(i-1) + j) = B(i, j)
+        sendbuf(NRHS*(i-1) + j) = B(k, j)
       enddo
     enddo
 
     call monolis_alltoall_V_R(sendbuf, scounts, sdispls, recvbuf, rcounts, rdispls, comm)
 
-    call monolis_vec_to_mat_R(N_loc, NRHS, recvbuf, B)
+    do i = 1, N_loc
+      k = mod(i - 1, comm_size) + (i - 1)/comm_size + 1
+      do j = 1, NRHS
+        B(k, j) = sendbuf(NRHS*(i-1) + j)
+      enddo
+    enddo
   end subroutine getrs_R_update_X
 end module mod_monolis_scalapack

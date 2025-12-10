@@ -76,6 +76,7 @@ void monolis_scalapack_gesvd_R(
   }
 }
 
+/*
 void monolis_scalapack_getrf_R(
   int      N_loc,
   int      N,
@@ -109,6 +110,7 @@ void monolis_scalapack_getrf_R(
     }
   }
 }
+*/
 
 void monolis_scalapack_getrs_R(
   int      N_loc,

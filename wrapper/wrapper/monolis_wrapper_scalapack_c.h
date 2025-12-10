@@ -85,6 +85,7 @@ void monolis_scalapack_gesvd_R_c_main(
  * @param[in] scalapack_comm Scalapack コミュニケータ
  * @ingroup wrapper
  */
+/*
 void monolis_scalapack_getrf_R(
   int      N_loc,
   int      N,
@@ -100,6 +101,7 @@ void monolis_scalapack_getrf_R_c_main(
   int*     ipiv,
   int      comm,
   int      scalapack_comm);
+*/
 
 /**
  * @brief PDGETRS 関数（実数型、LU分解による線形方程式の求解）

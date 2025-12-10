@@ -458,8 +458,8 @@ contains
     if(monolis_mpi_get_global_my_rank() == 0)then
       ! 行列 A の設定
       A(1,1) = 4.0d0
-      A(2,1) = 2.0d0
-      A(1,2) = 1.0d0
+      A(1,2) = 2.0d0
+      A(2,1) = 1.0d0
       A(2,2) = 3.0d0
 
       ! 右辺ベクトル B の設定（2つの右辺）
@@ -469,12 +469,12 @@ contains
       B(2,2) = 2.0d0
     else
       A(1,1) = 4.0d0
-      A(2,1) = 2.0d0
-      A(1,2) = 1.0d0
+      A(1,2) = 2.0d0
+      A(2,1) = 1.0d0
       A(2,2) = 3.0d0
 
-      B(1,1) = 3.0d0
-      B(2,1) = 3.0d0
+      B(1,1) = 2.0d0
+      B(2,1) = 2.0d0
       B(1,2) = 4.0d0
       B(2,2) = 4.0d0
     endif
@@ -487,21 +487,17 @@ contains
     call monolis_scalapack_comm_finalize(scalapack_comm)
 
     if(monolis_mpi_get_global_my_rank() == 0)then
-      ! 行列 A = [[3,2],[1,4]], 右辺1 = [1,2]^T の解
       X_ref(1,1) = 0.1d0
-      X_ref(2,1) = 0.475d0
+      X_ref(2,1) = 0.3d0
 
-      ! 行列 A = [[3,2],[1,4]], 右辺2 = [3,4]^T の解
-      X_ref(1,2) = 0.5d0
-      X_ref(2,2) = 0.875d0
+      X_ref(1,2) = 0.2d0
+      X_ref(2,2) = 0.60
     else
-      ! 行列 A = [[5,1],[2,3]], 右辺1 = [5,6]^T の解
-      X_ref(1,1) = 0.69230769230769d0
-      X_ref(2,1) = 1.5384615384615d0
+      X_ref(1,1) = 0.2d0
+      X_ref(2,1) = 0.6d0
 
-      ! 行列 A = [[5,1],[2,3]], 右辺2 = [7,8]^T の解
-      X_ref(1,2) = 1.0d0
-      X_ref(2,2) = 2.0d0
+      X_ref(1,2) = 0.4d0
+      X_ref(2,2) = 1.2d0
     endif
 
     call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X(:,1), X_ref(:,1))
