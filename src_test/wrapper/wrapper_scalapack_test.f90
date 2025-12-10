@@ -491,7 +491,7 @@ contains
       X_ref(2,1) = 0.3d0
 
       X_ref(1,2) = 0.2d0
-      X_ref(2,2) = 0.60
+      X_ref(2,2) = 0.6d0
     else
       X_ref(1,1) = 0.2d0
       X_ref(2,1) = 0.6d0

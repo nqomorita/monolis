@@ -343,10 +343,9 @@ contains
 
     call pdgetrf(N, N, A_temp, 1, 1, desc_A, ipiv, info)
     call pdgetrs("N", N, NRHS, A_temp, 1, 1, desc_A, ipiv, B_temp, 1, 1, desc_B, info)
-write(*,*)"B_temp", B_temp
+
     call getrs_R_update_X(N_loc_max, NRHS, B_temp, n_row, comm)
-write(*,*)"B", B_temp
-call sleep(1)
+
     do i = 1, NRHS
     do j = 1, N_loc
       B(j,i) = B_temp(j,i)
@@ -402,7 +401,7 @@ call sleep(1)
     do i = 1, N_loc
       k = mod(i - 1, comm_size) + (i - 1)/comm_size + 1
       do j = 1, NRHS
-        B(k, j) = sendbuf(NRHS*(i-1) + j)
+        B(k, j) = recvbuf(NRHS*(i-1) + j)
       enddo
     enddo
   end subroutine getrs_R_update_X
