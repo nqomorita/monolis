@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "monolis_utils.h"
-#include "monolis_wrapper_scalapack_c.h"
+#include "monolis.h"
 
 void monolis_scalapack_test_1()
 {
