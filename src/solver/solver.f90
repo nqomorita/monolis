@@ -14,6 +14,7 @@ module mod_monolis_solve
   use mod_monolis_solver_PipeBiCGSTAB_noprec
   use mod_monolis_solver_DeflatedCG
   use mod_monolis_solver_JACOBI
+  use mod_monolis_solver_Chebyshev
   use mod_monolis_solver_BiCGSAFE
   use mod_monolis_solver_IDRS
   use mod_monolis_solver_COCG
@@ -202,6 +203,9 @@ contains
       case (monolis_iter_IDRS)
         call monolis_solver_IDRS(monoPRM, monoCOM, monoMAT, monoPREC)
 
+      case (monolis_iter_CHEBYSHEV)
+        call monolis_solver_Chebyshev(monoPRM, monoCOM, monoMAT, monoPREC)
+        
       !case (monolis_iter_GMRES)
       !  call monolis_solver_GMRES(monoPRM, monoCOM, monoMAT)
 

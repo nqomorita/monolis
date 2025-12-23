@@ -30,7 +30,7 @@ contains
     real(kdouble) :: R2, B2, omega
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), pointer, contiguous :: B(:), X(:)
-    real(kdouble), allocatable :: R(:)
+    !real(kdouble), allocatable :: R(:)
     logical :: is_converge
 
     X => monoMAT%R%X
@@ -49,32 +49,33 @@ contains
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
-    call monolis_alloc_R_1d(R, NPNDOF)
+    !call monolis_alloc_R_1d(R, NPNDOF)
     call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
 
-    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+    !call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    !if(is_converge) return
 
     call monolis_solver_JACOBI_setup(monoMAT)
-    call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
+    !call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
     if(omega <= 0.0d0)then
       call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
       monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
     endif
 
+    !> Deflatin 前処理専用の最適化
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_solver_JACOBI_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm_spmv)
-      call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-      call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
-      call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
+      !call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+      !call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
+      !call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+      !if(is_converge) exit
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
-    call monolis_dealloc_R_1d(R)
+    !call monolis_dealloc_R_1d(R)
     call monolis_pdealloc_R_1d(monoMAT%R%D)
   end subroutine monolis_solver_JACOBI
 

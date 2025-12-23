@@ -320,6 +320,18 @@ contains
     monolis%PRM%Iarray(monolis_prm_I_DCG_inner_max_iter) = param
   end subroutine monolis_set_solver_DCG_inner_max_iter
 
+  !> @ingroup param
+  !> Chebyshev 反復法の次数
+  subroutine monolis_set_solver_CHEBYSHEV_degree(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_CHEBYSHEV_degree) = param
+  end subroutine monolis_set_solver_CHEBYSHEV_degree
+
   !# Rarray section
   !> @ingroup param
   !> 収束判定閾値の設定

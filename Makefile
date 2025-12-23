@@ -167,6 +167,7 @@ PipeBiCGSTAB_noprec.f90 \
 DeflatedCG_util.f90 \
 DeflatedCG.f90 \
 SOR.f90 \
+Chebyshev.f90 \
 BiCGSAFE.f90 \
 IDRS.f90 \
 COCG.f90

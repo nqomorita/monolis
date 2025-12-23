@@ -36,8 +36,10 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_iter_BiCGSAFE = 14
   !> パラメータ：IDR(s) 法
   integer(kint), parameter :: monolis_iter_IDRS = 15
+  !> パラメータ：Chebyshev 反復法
+  integer(kint), parameter :: monolis_iter_CHEBYSHEV = 16
   !> パラメータ：COCG 法
-  integer(kint), parameter :: monolis_iter_COCG = 16
+  integer(kint), parameter :: monolis_iter_COCG = 17
 
   !> パラメータ：前処理なし
   integer(kint), parameter :: monolis_prec_NONE   = 0
@@ -64,7 +66,7 @@ module mod_monolis_def_solver
   !> パラメータ：AMG ML
   integer(kint), parameter :: monolis_prec_AMG = 6
 
-  character*24, dimension(16) :: monolis_str_iter = (/&
+  character*24, dimension(17) :: monolis_str_iter = (/&
   & "CG                 ", &
   & "GropCG             ", &
   & "PipeCG             ", &
@@ -81,6 +83,7 @@ module mod_monolis_def_solver
   & "SOR                ", &
   & "BiCGSAFE           ", &
   & "IDR(s)             ", &
+  & "CHEBYSHEV          ", &
   !& "GMRES              ", &
   & "COCG               "/)
 
@@ -157,6 +160,8 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_DCG_inner_prec = 34
   !> DCG 内側ループの縮退方程式求解の最大反復回数
   integer(kint), parameter :: monolis_prm_I_DCG_inner_max_iter = 35
+  !> Chebyshev 反復法の次数
+  integer(kint), parameter :: monolis_prm_I_CHEBYSHEV_degree = 36
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
