@@ -57,8 +57,15 @@ contains
     !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     !if(is_converge) return
 
-    call monolis_solver_power_method_eigenvalue_estimation( &
-      monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
+    lambda_min = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_min_eigen_value)
+    lambda_max = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value)
+
+    if(lambda_min == 0.0d0 .or. lambda_max == 0.0d0)then
+      call monolis_solver_power_method_eigenvalue_estimation( &
+        monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
+      monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_min_eigen_value) = lambda_min
+      monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value) = lambda_max
+    endif
 
     !call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
