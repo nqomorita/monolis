@@ -14,8 +14,9 @@ module mod_monolis_solver_DeflatedCG_util
   use mod_monolis_vec_util
   use mod_monolis_spmat_handler
   use mod_monolis_spmat_nonzero_pattern_util
+  use mod_monolis_spmat_nonzero_pattern
 
-  implicit none
+implicit none
 
 contains
 
@@ -30,33 +31,16 @@ contains
     !> 縮約次数 (local)
     integer(kint) :: NPNDOF, M, M_neib
     !> 縮約基底ベクトル
-    real(kdouble), allocatable :: W(:,:)
+    real(kdouble), allocatable :: W(:,:), temp(:,:)
     real(kdouble) :: tcomm
     integer(kint) :: iS, in, i, j, k, ierr, id, NDOF
 
     call monolis_alloc_R_2d(W, NPNDOF, M_neib)
+    call monolis_alloc_R_2d(temp, NPNDOF, M)
 
     NDOF  = monoMAT%NDOF
-    W(:,1:M) = monoPRM%deflation_mode(:,1:M)
-
-    do i = 1, M
-      call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, W(:,i), tcomm)
-    enddo
-
-    id = M
-    do i = 1, monoCOM%recv_n_neib
-      iS = monoCOM%recv_index(i)
-      in = monoCOM%recv_index(i + 1) - iS
-      do j = 1, M
-        id = id + 1
-        do k = iS + 1, iS + in
-          W(NDOF*(monoCOM%recv_item(k)-1)+1:NDOF*(monoCOM%recv_item(k)),id) = &
-        & W(NDOF*(monoCOM%recv_item(k)-1)+1:NDOF*(monoCOM%recv_item(k)),j)
-
-          W(NDOF*(monoCOM%recv_item(k)-1)+1:NDOF*(monoCOM%recv_item(k)),j) = 0.0d0
-        enddo
-      enddo
-    enddo
+    temp(:,1:M) = monoPRM%deflation_mode(:,1:M)
+    call monolis_mpi_get_neib_vector_R(monoCOM, M, monoMAT%NDOF, temp, W, tcomm)
   end subroutine deflatedCG_set_deflation_mode
 
   !> @ingroup dev_solver
@@ -82,7 +66,10 @@ contains
     real(kdouble) :: tdemv, time, omega
     real(kdouble) :: W(:,:)
     real(kdouble), allocatable :: AW(:,:), WtA(:,:), L(:,:)
-    logical :: is_coarse_E = .false.
+    type(gedatsu_graph) :: metagraph
+    type(monolis_structure) :: monolis_deflated_eq
+    integer(kint) :: iS, iE
+    integer(kint), allocatable :: n_dof_list(:)
 
     !# allocation
     call monolis_alloc_R_2d(AW, NNDOF, M_neib)
@@ -184,51 +171,43 @@ contains
     call monolis_dense_matmul_local_R(M, NNDOF, M_neib, transpose(W), AW, L, tdemv)
     WtA = transpose(AW)
 
-if(is_coarse_E)then
-    !> sparse block
-    n_dof_loc = monoPRM%Iarray(monolis_prm_I_n_local_block_size_of_AtAW)
-    if(n_dof_loc == 0) stop "monolis_get_sparse_matrix_from_dense_matrix_R"
-    call monolis_get_sparse_matrix_from_dense_matrix_R(monoMAT_deflated_eq, M/n_dof_loc, M_neib/n_dof_loc, n_dof_loc, L)
-else
-    !> dense block
-    monoMAT_deflated_eq%N = 1
-    monoMAT_deflated_eq%NP = NP
-    monoMAT_deflated_eq%NDOF = M
-
-    call monolis_palloc_I_1d(monoMAT_deflated_eq%n_dof_index,  NP + 1)
-    call monolis_palloc_I_1d(monoMAT_deflated_eq%n_dof_index2, NP + 1)
-    call monolis_palloc_I_1d(monoMAT_deflated_eq%n_dof_list, NP)
-
-    monoMAT_deflated_eq%n_dof_list = M
-
-    do i = 1, NP
-      monoMAT_deflated_eq%n_dof_index (i + 1) = monoMAT_deflated_eq%n_dof_index (i) + M
-      monoMAT_deflated_eq%n_dof_index2(i + 1) = monoMAT_deflated_eq%n_dof_index2(i) + M*M
+    !> Deflation equationの係数行列の作成
+    !> metagraphの作成 → 非零構造の作成 → 行列成分の値を入れる
+    !> monoCOM%recv_n_neibとmonoCOM%recv_n_neibは等しいという前提
+    call gedatsu_graph_initialize(metagraph)
+    call gedatsu_graph_set_n_vertex(metagraph, monoCOM%recv_n_neib + 1)
+    call monolis_alloc_I_1d(metagraph%item, monoCOM%recv_n_neib*2)
+    metagraph%index(2) = monoCOM%recv_n_neib  !> 隣接領域数
+    do i = 1, monoCOM%recv_n_neib  !> 隣接領域(袖領域)は自領域とだけ結合
+      metagraph%index(i + 2) = metagraph%index(i + 1) + 1
+    enddo
+    do i = 1, monoCOM%recv_n_neib
+      metagraph%item(i) = i + 1
+    enddo
+    do i = 1, monoCOM%recv_n_neib
+      metagraph%item(monoCOM%recv_n_neib + i) = 1
     enddo
 
-    call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%index, NP + 1)
-    call monolis_palloc_I_1d(monoMAT_deflated_eq%CSR%item, NP)
+    call monolis_alloc_I_1d(n_dof_list, monoCOM%recv_n_neib + 1)
+    n_dof_list(1) = M
+    call monolis_mpi_update_I(monoCOM_deflated_eq, 1, n_dof_list)
 
-    monoMAT_deflated_eq%CSR%index(1) = 0
-
-    do i = 1, NP
-      monoMAT_deflated_eq%CSR%index(1 + i) = NP
-      monoMAT_deflated_eq%CSR%item(i) = i
-    enddo
-
-    call monolis_alloc_nonzero_pattern_mat_val_R(monoMAT_deflated_eq)
+    call monolis_get_nonzero_pattern_by_nodal_graph_main &
+      & (monoMAT_deflated_eq, metagraph%n_vertex, -1, metagraph%index, metagraph%item)
+    call monolis_set_n_dof_index(monoMAT_deflated_eq, n_dof_list)
+    call monolis_alloc_nonzero_pattern_mat_val_V_R(monoMAT_deflated_eq)
 
     !# matrix value assign
-    call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
-      monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%n_dof_index, monoMAT_deflated_eq%n_dof_index2, &
-      1, 1, L(1:M,1:M))
-
-    do i = 1, monoCOM%recv_n_neib
+    iS = 1
+    do i = 1, monoCOM%recv_n_neib + 1
+      iE = iS + n_dof_list(i) - 1
       call monolis_set_block_to_sparse_matrix_main_R(monoMAT_deflated_eq%CSR%index, monoMAT_deflated_eq%CSR%item, &
         monoMAT_deflated_eq%R%A, monoMAT_deflated_eq%n_dof_index, monoMAT_deflated_eq%n_dof_index2, &
-        1, i + 1, L(1:M, i*M + 1:i*M + M))
+        1, i, L(1:M, iS:iE))
+      iS = iE + 1
     enddo
-endif
+
+    call gedatsu_graph_finalize(metagraph)
   end subroutine deflatedCG_E_initialize
 
   !> @ingroup dev_solver

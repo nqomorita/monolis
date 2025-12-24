@@ -66,8 +66,8 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 100
-    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
-    M_neib = M*(monoCOM%recv_n_neib + 1)
+    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)  !> Mはプロセスごとに可変
+    call monolis_mpi_get_n_neib_vector(monoCOM, M, M_neib)    !> M_neibは通信して取得
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
@@ -378,8 +378,9 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 100
-    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
-    M_neib = M*(monoCOM%recv_n_neib + 1)
+    M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)  !> Mはプロセスごとに可変
+    ! M_neib = M*(monoCOM%recv_n_neib + 1)
+    call monolis_mpi_get_n_neib_vector(monoCOM, M, M_neib)    !> M_neibは通信して取得
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
