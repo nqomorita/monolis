@@ -106,17 +106,17 @@ contains
     d = (lambda_max + lambda_min) / 2.0d0
     alpha = 0.0d0
 
-    do k = 0, degree
+    do k = 1, degree
       call monolis_matvec_product_main_R(monoCOM, monoMAT, X, R, tspmv, tcomm)
       do i = 1, NNDOF
         R(i) = B(i) - R(i)
       enddo
 
-      if(k == 0)then
+      if(k == 1)then
         alpha = 1.0d0 / d
-      elseif(k == 1)then
+      elseif(k == 2)then
         alpha = 2.0d0*d / (2.0d0*d*d - c*c)
-      elseif(k > 1)then
+      elseif(k >= 3)then
         alpha = 4.0d0 / (d - alpha*c*c)
       endif
 
