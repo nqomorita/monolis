@@ -47,7 +47,10 @@ static const int MONOLIS_ITER_BICGSAFE = 14;
 
 static const int MONOLIS_ITER_IDRS = 15;
 
-static const int MONOLIS_ITER_COCG = 16;
+static const int MONOLIS_ITER_CHEBYSHEV = 16;
+
+static const int MONOLIS_ITER_COCG = 17;
+
 
 static const int MONOLIS_PREC_NONE   = 0;
 
