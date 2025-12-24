@@ -27,6 +27,7 @@ program monolis_test
   use mod_monolis_solver_SOR_test
   use mod_monolis_solver_BiCGSAFE_test
   use mod_monolis_solver_IDRS_test
+  use mod_monolis_solver_Chebyshev_test
   use mod_monolis_solver_COCG_test
   use mod_monolis_lapack_test
   use mod_monolis_scalapack_test
@@ -78,6 +79,7 @@ program monolis_test
     call monolis_solver_SOR_test()
     call monolis_solver_BiCGSAFE_test()
     call monolis_solver_IDRS_test()
+    call monolis_solver_Chebyshev_test()
     call monolis_solver_COCG_test()
 
     call monolis_eigen_lanczos_util_test()
