@@ -30,12 +30,12 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_iter_GMRES    = 10
   !> パラメータ：BiCGSTAB 法（擬似四倍精度）
   integer(kint), parameter :: monolis_iter_BiCGSTAB_N128 = 12
-  !> パラメータ：JACOBI 法
-  integer(kint), parameter :: monolis_iter_JACOBI  = 13
   !> パラメータ：BiCGSAFE 法
-  integer(kint), parameter :: monolis_iter_BiCGSAFE = 14
+  integer(kint), parameter :: monolis_iter_BiCGSAFE = 13
   !> パラメータ：IDR(s) 法
-  integer(kint), parameter :: monolis_iter_IDRS = 15
+  integer(kint), parameter :: monolis_iter_IDRS = 14
+  !> パラメータ：JACOBI 法
+  integer(kint), parameter :: monolis_iter_JACOBI = 15
   !> パラメータ：Chebyshev 反復法
   integer(kint), parameter :: monolis_iter_CHEBYSHEV = 16
   !> パラメータ：COCG 法
@@ -80,9 +80,9 @@ module mod_monolis_def_solver
   & "Deflated CG2       ", &
   & "ADeflated CG2      ", &
   & "BiCGSTAB_N128      ", &
-  & "SOR                ", &
   & "BiCGSAFE           ", &
   & "IDR(s)             ", &
+  & "SOR                ", &
   & "CHEBYSHEV          ", &
   !& "GMRES              ", &
   & "COCG               "/)

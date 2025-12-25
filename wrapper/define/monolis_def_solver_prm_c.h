@@ -41,11 +41,11 @@ static const int MONOLIS_ITER_ADEFLATEDCG2 = 11;
 
 static const int MONOLIS_ITER_BICGSTAB_N128 = 12;
 
-static const int MONOLIS_ITER_JACOBI = 13;
+static const int MONOLIS_ITER_BICGSAFE = 13;
 
-static const int MONOLIS_ITER_BICGSAFE = 14;
+static const int MONOLIS_ITER_IDRS = 14;
 
-static const int MONOLIS_ITER_IDRS = 15;
+static const int MONOLIS_ITER_JACOBI = 15;
 
 static const int MONOLIS_ITER_CHEBYSHEV = 16;
 

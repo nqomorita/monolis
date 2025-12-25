@@ -275,7 +275,7 @@ program main
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_summary(mat, .true.)
 
-    do iter = monolis_iter_CG, monolis_iter_IDRS
+    do iter = monolis_iter_CG, monolis_iter_JACOBI - 1
     do prec = monolis_prec_NONE, monolis_prec_SOR
       if(iter == monolis_iter_DeflatedCG1) cycle
       if(iter == monolis_iter_DeflatedCG2) cycle

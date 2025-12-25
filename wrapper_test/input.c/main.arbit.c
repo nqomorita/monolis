@@ -213,7 +213,7 @@ void monolis_solver_parallel_R_test(){
   monolis_show_iterlog(&mat, true);
   monolis_show_summary(&mat, true);
 
-  for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_IDRS + 1; ++iter) {
+  for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_JACOBI; ++iter) {
     for (prec = MONOLIS_PREC_NONE; prec < MONOLIS_PREC_SOR + 1; ++prec) {
       // いくつかの組み合わせはスキップ
       if(iter == MONOLIS_ITER_DEFLATEDCG1) continue;
