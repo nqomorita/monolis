@@ -86,6 +86,8 @@ contains
       monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CG
     elseif(method == monolis_iter_JACOBI)then
       monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_JACOBI
+    elseif(method == monolis_iter_CHEBYSHEV)then
+      monoPRM_deflated_eq%Iarray(monolis_prm_I_method) = monolis_iter_CHEBYSHEV
     else
       stop "deflatedCG_E_initialize set method"
     endif
@@ -106,6 +108,9 @@ contains
 
     omega = monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor)
     monoPRM_deflated_eq%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
+
+    maxiter = monoPRM%Iarray(monolis_prm_I_CHEBYSHEV_degree)
+    monoPRM_deflated_eq%Iarray(monolis_prm_I_CHEBYSHEV_degree) = maxiter
 
     !# common settings
     monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
