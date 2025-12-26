@@ -12,6 +12,7 @@ module mod_monolis_solver_JACOBI
   implicit none
   private
   public monolis_solver_JACOBI
+  public monolis_solver_power_method_eigenvalue_estimation
 
 contains
 
@@ -27,7 +28,7 @@ contains
     type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
     integer(kint) :: iter
-    real(kdouble) :: R2, B2, omega
+    real(kdouble) :: R2, B2, omega, no_use
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), pointer, contiguous :: B(:), X(:)
     !real(kdouble), allocatable :: R(:)
@@ -60,7 +61,10 @@ contains
     !call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
     if(omega <= 0.0d0)then
-      call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
+      !call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
+      !monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
+      call monolis_solver_power_method_eigenvalue_estimation( &
+        monoCOM, monoMAT, NNDOF, NPNDOF, no_use, omega)
       monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
     endif
 
@@ -171,6 +175,99 @@ contains
 
     call monolis_dealloc_R_1d(s)
   end subroutine monolis_solver_JACOBI_get_auto_relax_factor
+
+  subroutine monolis_solver_power_method_eigenvalue_estimation( &
+    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: NNDOF, NPNDOF
+    real(kdouble) :: lambda_min, lambda_max
+    real(kdouble) :: tspmv, tcomm
+    integer(kint) :: iter, max_iter
+    integer(kint) :: i
+    real(kdouble) :: lambda, lambda_old, tol, norm_v
+    real(kdouble), allocatable :: v(:), Av(:)
+
+    max_iter = 10
+    tol = 1.0d-6
+
+    call monolis_alloc_R_1d(v, NPNDOF)
+    call monolis_alloc_R_1d(Av, NPNDOF)
+
+    ! Initialize random vector for power method
+    call random_seed()
+
+    do i = 1, NNDOF
+      call random_number(v(i))
+      v(i) = v(i) - 0.5d0  ! center around zero
+    enddo
+
+    ! Normalize initial vector
+    norm_v = 0.0d0
+    do i = 1, NNDOF
+      norm_v = norm_v + v(i)**2
+    enddo
+    call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+    norm_v = dsqrt(norm_v)
+    
+    if(norm_v > 0.0d0) then
+      do i = 1, NNDOF
+        v(i) = v(i) / norm_v
+      enddo
+    endif
+
+    lambda_max = 0.0d0
+
+    ! Power method for maximum eigenvalue
+    do iter = 1, max_iter
+      lambda_old = lambda_max
+
+      ! Av = A * v
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, v, Av, tspmv, tcomm)
+
+      ! lambda = v^T * Av / (v^T * v)
+      lambda = 0.0d0
+      norm_v = 0.0d0
+      do i = 1, NNDOF
+        lambda = lambda + v(i) * Av(i)
+        norm_v = norm_v + v(i)**2
+      enddo
+
+      call monolis_allreduce_R1(lambda, monolis_mpi_sum, monoCOM%comm)
+      call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+
+      lambda_max = lambda / norm_v
+
+      ! Normalize Av for next iteration
+      norm_v = 0.0d0
+      do i = 1, NNDOF
+        norm_v = norm_v + Av(i)**2
+      enddo
+      call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+      norm_v = dsqrt(norm_v)
+
+      if(norm_v > 0.0d0) then
+        do i = 1, NNDOF
+          v(i) = Av(i) / norm_v
+        enddo
+      endif
+
+      ! Check convergence
+      if(iter > 1 .and. dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
+    enddo
+
+    ! Estimate minimum eigenvalue using Gershgorin circle theorem
+    ! For symmetric positive definite matrices, use a simple approximation
+    lambda_min = 0.1d0 * lambda_max
+
+    ! Ensure proper bounds
+    if(lambda_min <= 0.0d0) lambda_min = 0.1d0
+    if(lambda_max <= lambda_min) lambda_max = 10.0d0 * lambda_min
+
+    call monolis_dealloc_R_1d(v)
+    call monolis_dealloc_R_1d(Av)
+  end subroutine monolis_solver_power_method_eigenvalue_estimation
 
   subroutine monolis_solver_JACOBI_matvec(monoCOM, monoMAT, NNDOF, NPNDOF, X, B, omega, tspmv, tcomm)
     implicit none
