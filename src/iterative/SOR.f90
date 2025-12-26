@@ -51,21 +51,24 @@ contains
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
     !call monolis_alloc_R_1d(R, NPNDOF)
-    call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
 
     !call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     !if(is_converge) return
 
-    call monolis_solver_JACOBI_setup(monoMAT)
+    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
+      call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
+      call monolis_solver_JACOBI_setup(monoMAT)
+      monoPRM%Iarray(monolis_prm_I_is_solv_prepared) = 1
+    endif
     !call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
 
     if(omega <= 0.0d0)then
-      !call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
-      !monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
-      call monolis_solver_power_method_eigenvalue_estimation( &
-        monoCOM, monoMAT, NNDOF, NPNDOF, no_use, omega)
+      call monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
       monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
+      !call monolis_solver_power_method_eigenvalue_estimation( &
+      !  monoCOM, monoMAT, NNDOF, NPNDOF, no_use, omega)
+      !monoPRM%Rarray(monolis_prm_R_DCG_inner_relaxation_factor) = omega
     endif
 
     !> Deflatin 前処理専用の最適化
@@ -80,7 +83,9 @@ contains
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     !call monolis_dealloc_R_1d(R)
-    call monolis_pdealloc_R_1d(monoMAT%R%D)
+    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
+      call monolis_pdealloc_R_1d(monoMAT%R%D)
+    endif
   end subroutine monolis_solver_JACOBI
 
   subroutine monolis_solver_JACOBI_setup(monoMAT)
@@ -195,15 +200,13 @@ contains
     call monolis_alloc_R_1d(v, NPNDOF)
     call monolis_alloc_R_1d(Av, NPNDOF)
 
-    ! Initialize random vector for power method
     call random_seed()
 
     do i = 1, NNDOF
       call random_number(v(i))
-      v(i) = v(i) - 0.5d0  ! center around zero
+      v(i) = v(i) - 0.5d0
     enddo
 
-    ! Normalize initial vector
     norm_v = 0.0d0
     do i = 1, NNDOF
       norm_v = norm_v + v(i)**2
@@ -219,14 +222,12 @@ contains
 
     lambda_max = 0.0d0
 
-    ! Power method for maximum eigenvalue
     do iter = 1, max_iter
       lambda_old = lambda_max
 
       ! Av = A * v
       call monolis_matvec_product_main_R(monoCOM, monoMAT, v, Av, tspmv, tcomm)
 
-      ! lambda = v^T * Av / (v^T * v)
       lambda = 0.0d0
       norm_v = 0.0d0
       do i = 1, NNDOF
@@ -239,7 +240,6 @@ contains
 
       lambda_max = lambda / norm_v
 
-      ! Normalize Av for next iteration
       norm_v = 0.0d0
       do i = 1, NNDOF
         norm_v = norm_v + Av(i)**2
@@ -253,15 +253,11 @@ contains
         enddo
       endif
 
-      ! Check convergence
       if(iter > 1 .and. dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
     enddo
 
-    ! Estimate minimum eigenvalue using Gershgorin circle theorem
-    ! For symmetric positive definite matrices, use a simple approximation
     lambda_min = 0.1d0 * lambda_max
 
-    ! Ensure proper bounds
     if(lambda_min <= 0.0d0) lambda_min = 0.1d0
     if(lambda_max <= lambda_min) lambda_max = 10.0d0 * lambda_min
 

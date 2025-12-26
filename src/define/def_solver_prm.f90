@@ -138,6 +138,8 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_is_error_abort = 16
   !> パラメータ：前処理情報保存の有無
   integer(kint), parameter :: monolis_prm_I_is_prec_prepared = 17
+  !> パラメータ：ソルバの処理情報保存の有無
+  integer(kint), parameter :: monolis_prm_I_is_solv_prepared = 18
 
   !> パラメータ：反復回数と残差履歴の表示
   integer(kint), parameter :: monolis_prm_I_show_iterlog = 20

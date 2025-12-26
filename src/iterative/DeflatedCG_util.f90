@@ -201,6 +201,7 @@ contains
       & (monoMAT_deflated_eq, metagraph%n_vertex, -1, metagraph%index, metagraph%item)
     call monolis_set_n_dof_index(monoMAT_deflated_eq, n_dof_list)
     call monolis_alloc_nonzero_pattern_mat_val_V_R(monoMAT_deflated_eq)
+    monoMAT_deflated_eq%N = 1
 
     !# matrix value assign
     iS = 1
