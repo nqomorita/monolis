@@ -8,6 +8,7 @@ module mod_monolis_solver_Chebyshev
   use mod_monolis_inner_product
   use mod_monolis_vec_util
   use mod_monolis_converge
+  use mod_monolis_solver_JACOBI
 
   implicit none
 
@@ -28,7 +29,7 @@ contains
     type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
     integer(kint) :: i, iter, degree
-    real(kdouble) :: R2, B2, lambda_min, lambda_max
+    real(kdouble) :: R2, B2, eig_ratio, lambda_max
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), pointer, contiguous :: B(:), X(:)
     real(kdouble), allocatable :: R(:)
@@ -49,6 +50,8 @@ contains
       X = 0.0d0
     endif
 
+    eig_ratio = 30.0d0
+
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
@@ -67,13 +70,11 @@ contains
       enddo
     endif
 
-    lambda_min = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_min_eigen_value)
     lambda_max = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value)
 
-    if(lambda_min == 0.0d0 .or. lambda_max == 0.0d0)then
+    if(lambda_max == 0.0d0)then
       call monolis_solver_power_method_eigenvalue_estimation( &
-        monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
-      monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_min_eigen_value) = lambda_min
+        monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max, eig_ratio)
       monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value) = lambda_max
     endif
 
@@ -82,7 +83,7 @@ contains
     !> Deflatin 前処理専用の最適化
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_solver_Chebyshev_iteration( &
-        monoCOM, monoMAT, NNDOF, NPNDOF, X, B, lambda_min, lambda_max, degree, tspmv, tcomm_spmv)
+        monoCOM, monoMAT, NNDOF, NPNDOF, X, B, lambda_max, eig_ratio, degree, tspmv, tcomm_spmv)
       !call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
       !call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
       !call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
@@ -97,17 +98,17 @@ contains
   end subroutine monolis_solver_Chebyshev
 
   subroutine monolis_solver_Chebyshev_iteration( &
-    monoCOM, monoMAT, NNDOF, NPNDOF, X, B, lambda_min, lambda_max, degree, tspmv, tcomm)
+    monoCOM, monoMAT, NNDOF, NPNDOF, X, B, lambda_max, eig_ratio, degree, tspmv, tcomm)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: NNDOF, NPNDOF, degree
     real(kdouble) :: X(:), B(:)
-    real(kdouble) :: lambda_min, lambda_max
+    real(kdouble) :: lambda_max
     real(kdouble) :: tspmv, tcomm
-    integer(kint) :: i
+    integer(kint) :: i, iter
     real(kdouble) :: alpha, beta, delta, theta, inv_theta
-    real(kdouble) :: s1, d1, d2, rhok, rhokp1
+    real(kdouble) :: s1, d1, d2, rhok, rhokp1, eig_ratio
     real(kdouble), allocatable :: V(:), W(:)
     real(kdouble), pointer :: invD(:)
 
@@ -131,7 +132,7 @@ contains
 
     rhok = 1.0d0 / s1
 
-    do k = 1, degree - 1
+    do iter = 1, degree - 1
       call monolis_matvec_product_main_R(monoCOM, monoMAT, X, V, tspmv, tcomm)
     
       rhokp1 = 1.0d0 / (2.0d0*s1 - rhok)
@@ -155,22 +156,20 @@ contains
   end subroutine monolis_solver_Chebyshev_iteration
 
   subroutine monolis_solver_power_method_eigenvalue_estimation( &
-    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
+    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max, eig_ratio)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: NNDOF, NPNDOF
-    real(kdouble) :: lambda_min, lambda_max
+    real(kdouble) :: lambda_max, eig_ratio
     real(kdouble) :: tspmv, tcomm
     integer(kint) :: iter, max_iter
     integer(kint) :: i
-    real(kdouble) :: eig_ratio
     real(kdouble) :: lambda, lambda_old, tol, norm_v
     real(kdouble), allocatable :: v(:), y(:)
     real(kdouble), pointer :: invD(:)
 
     max_iter = 10
-    eig_ratio = 30.0d0
     tol = 1.0d-4
 
     invD => monoMAT%R%D
@@ -236,10 +235,6 @@ contains
         if(dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
       endif
     enddo
-
-    llambda_min = lambda_max / eig_ratio
-    if(lambda_min <= 0.0d0) lambda_min = 0.1d0
-    if(lambda_max <= lambda_min) lambda_max = 10.0d0 * lambda_min
 
     call monolis_dealloc_R_1d(v)
     call monolis_dealloc_R_1d(y)

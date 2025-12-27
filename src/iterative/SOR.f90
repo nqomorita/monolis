@@ -12,6 +12,7 @@ module mod_monolis_solver_JACOBI
   implicit none
   private
   public monolis_solver_JACOBI
+  public monolis_solver_JACOBI_setup
 
 contains
 
