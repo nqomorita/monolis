@@ -27,7 +27,7 @@ contains
     !> [in,out] preconditioner structure
     type(monolis_mat), target, intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
-    integer(kint) :: iter, degree
+    integer(kint) :: i, iter, degree
     real(kdouble) :: R2, B2, lambda_min, lambda_max
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), pointer, contiguous :: B(:), X(:)
@@ -57,6 +57,16 @@ contains
     !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     !if(is_converge) return
 
+    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
+      call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
+      call monolis_solver_JACOBI_setup(monoMAT)
+      monoPRM%Iarray(monolis_prm_I_is_solv_prepared) = 1
+
+      do i = 1, NNDOF
+        monoMAT%R%D(i) = monoMAT%R%D(i) / 1.0d0
+      enddo
+    endif
+
     lambda_min = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_min_eigen_value)
     lambda_max = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value)
 
@@ -81,7 +91,9 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
-    call monolis_dealloc_R_1d(R)
+    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
+      call monolis_dealloc_R_1d(R)
+    endif
   end subroutine monolis_solver_Chebyshev
 
   subroutine monolis_solver_Chebyshev_iteration( &
@@ -93,43 +105,53 @@ contains
     real(kdouble) :: X(:), B(:)
     real(kdouble) :: lambda_min, lambda_max
     real(kdouble) :: tspmv, tcomm
-    integer(kint) :: k, i
-    real(kdouble) :: alpha, beta, c, d, theta
-    real(kdouble) :: alpha_new, beta_new
-    real(kdouble), allocatable :: P(:), R(:)
+    integer(kint) :: i
+    real(kdouble) :: alpha, beta, delta, theta, inv_theta
+    real(kdouble) :: s1, d1, d2, rhok, rhokp1
+    real(kdouble), allocatable :: V(:), W(:)
+    real(kdouble), pointer :: invD(:)
 
-    call monolis_alloc_R_1d(P, NPNDOF)
-    call monolis_alloc_R_1d(R, NPNDOF)
+    invD => monoMAT%R%D
+    if(degree <= 0) return
 
-    ! Initialize Chebyshev polynomial parameters
-    c = (lambda_max - lambda_min) / 2.0d0
-    d = (lambda_max + lambda_min) / 2.0d0
-    alpha = 0.0d0
+    call monolis_alloc_R_1d(V, NPNDOF)
+    call monolis_alloc_R_1d(W, NPNDOF)
 
-    do k = 1, degree
-      call monolis_matvec_product_main_R(monoCOM, monoMAT, X, R, tspmv, tcomm)
+    alpha = lambda_max / eig_ratio
+    beta  = 1.1d0 * lambda_max
+    delta = 2.0d0 / (beta - alpha)
+    theta = 0.5d0 * (beta + alpha)
+    s1    = theta * delta
+    inv_theta = 1.0d0 / theta
+
+    do i = 1, NNDOF
+      W(i) = invD(i) * B(i) * inv_theta
+      X(i) = W(i)
+    enddo
+
+    rhok = 1.0d0 / s1
+
+    do k = 1, degree - 1
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, X, V, tspmv, tcomm)
+    
+      rhokp1 = 1.0d0 / (2.0d0*s1 - rhok)
+      d1     = rhokp1 * rhok
+      d2     = 2.0d0 * rhokp1 * delta
+      rhok   = rhokp1
+
+      ! W = d1*W + d2*D^{-1}(B - V)
       do i = 1, NNDOF
-        R(i) = B(i) - R(i)
+        W(i) = d1*W(i) + d2*invD(i)*(B(i) - V(i))
       enddo
 
-      if(k == 1)then
-        alpha = 1.0d0 / d
-      elseif(k == 2)then
-        alpha = 2.0d0*d / (2.0d0*d*d - c*c)
-      elseif(k >= 3)then
-        alpha = 4.0d0 / (d - alpha*c*c)
-      endif
-
-      beta = alpha*d - 1.0d0
-
+      ! X = X + W
       do i = 1, NNDOF
-        P(i) = alpha*R(i) - beta*P(i)
-        X(i) = X(i) + P(i)
+        X(i) = X(i) + W(i)
       enddo
     enddo
 
-    call monolis_dealloc_R_1d(P)
-    call monolis_dealloc_R_1d(R)
+    call monolis_dealloc_R_1d(V)
+    call monolis_dealloc_R_1d(W)
   end subroutine monolis_solver_Chebyshev_iteration
 
   subroutine monolis_solver_power_method_eigenvalue_estimation( &
@@ -142,14 +164,19 @@ contains
     real(kdouble) :: tspmv, tcomm
     integer(kint) :: iter, max_iter
     integer(kint) :: i
+    real(kdouble) :: eig_ratio
     real(kdouble) :: lambda, lambda_old, tol, norm_v
-    real(kdouble), allocatable :: v(:), Av(:)
+    real(kdouble), allocatable :: v(:), y(:)
+    real(kdouble), pointer :: invD(:)
 
     max_iter = 10
-    tol = 1.0d-6
+    eig_ratio = 30.0d0
+    tol = 1.0d-4
+
+    invD => monoMAT%R%D
 
     call monolis_alloc_R_1d(v, NPNDOF)
-    call monolis_alloc_R_1d(Av, NPNDOF)
+    call monolis_alloc_R_1d(y, NPNDOF)
 
     call random_seed()
 
@@ -176,13 +203,16 @@ contains
     do iter = 1, max_iter
       lambda_old = lambda_max
 
-      ! Av = A * v
-      call monolis_matvec_product_main_R(monoCOM, monoMAT, v, Av, tspmv, tcomm)
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, v, y, tspmv, tcomm)
+
+      do i = 1, NNDOF
+        y(i) = invD(i) * y(i)
+      enddo
 
       lambda = 0.0d0
       norm_v = 0.0d0
       do i = 1, NNDOF
-        lambda = lambda + v(i) * Av(i)
+        lambda = lambda + v(i) * y(i)
         norm_v = norm_v + v(i)**2
       enddo
 
@@ -193,27 +223,26 @@ contains
 
       norm_v = 0.0d0
       do i = 1, NNDOF
-        norm_v = norm_v + Av(i)**2
+        norm_v = norm_v + y(i)**2
       enddo
       call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
       norm_v = dsqrt(norm_v)
 
-      if(norm_v > 0.0d0) then
-        do i = 1, NNDOF
-          v(i) = Av(i) / norm_v
-        enddo
-      endif
+      do i = 1, NNDOF
+        v(i) = y(i) / norm_v
+      enddo
 
-      if(iter > 1 .and. dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
+      if(iter > 1)then
+        if(dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
+      endif
     enddo
 
-    lambda_min = 0.1d0 * lambda_max
-
+    llambda_min = lambda_max / eig_ratio
     if(lambda_min <= 0.0d0) lambda_min = 0.1d0
     if(lambda_max <= lambda_min) lambda_max = 10.0d0 * lambda_min
 
     call monolis_dealloc_R_1d(v)
-    call monolis_dealloc_R_1d(Av)
+    call monolis_dealloc_R_1d(y)
   end subroutine monolis_solver_power_method_eigenvalue_estimation
 
 end module mod_monolis_solver_Chebyshev
