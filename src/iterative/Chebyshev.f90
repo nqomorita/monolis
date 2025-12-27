@@ -8,7 +8,6 @@ module mod_monolis_solver_Chebyshev
   use mod_monolis_inner_product
   use mod_monolis_vec_util
   use mod_monolis_converge
-  use mod_monolis_solver_JACOBI
 
   implicit none
 
@@ -132,5 +131,89 @@ contains
     call monolis_dealloc_R_1d(P)
     call monolis_dealloc_R_1d(R)
   end subroutine monolis_solver_Chebyshev_iteration
+
+  subroutine monolis_solver_power_method_eigenvalue_estimation( &
+    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_min, lambda_max)
+    implicit none
+    type(monolis_com) :: monoCOM
+    type(monolis_mat) :: monoMAT
+    integer(kint) :: NNDOF, NPNDOF
+    real(kdouble) :: lambda_min, lambda_max
+    real(kdouble) :: tspmv, tcomm
+    integer(kint) :: iter, max_iter
+    integer(kint) :: i
+    real(kdouble) :: lambda, lambda_old, tol, norm_v
+    real(kdouble), allocatable :: v(:), Av(:)
+
+    max_iter = 10
+    tol = 1.0d-6
+
+    call monolis_alloc_R_1d(v, NPNDOF)
+    call monolis_alloc_R_1d(Av, NPNDOF)
+
+    call random_seed()
+
+    do i = 1, NNDOF
+      call random_number(v(i))
+      v(i) = v(i) - 0.5d0
+    enddo
+
+    norm_v = 0.0d0
+    do i = 1, NNDOF
+      norm_v = norm_v + v(i)**2
+    enddo
+    call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+    norm_v = dsqrt(norm_v)
+    
+    if(norm_v > 0.0d0) then
+      do i = 1, NNDOF
+        v(i) = v(i) / norm_v
+      enddo
+    endif
+
+    lambda_max = 0.0d0
+
+    do iter = 1, max_iter
+      lambda_old = lambda_max
+
+      ! Av = A * v
+      call monolis_matvec_product_main_R(monoCOM, monoMAT, v, Av, tspmv, tcomm)
+
+      lambda = 0.0d0
+      norm_v = 0.0d0
+      do i = 1, NNDOF
+        lambda = lambda + v(i) * Av(i)
+        norm_v = norm_v + v(i)**2
+      enddo
+
+      call monolis_allreduce_R1(lambda, monolis_mpi_sum, monoCOM%comm)
+      call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+
+      lambda_max = lambda / norm_v
+
+      norm_v = 0.0d0
+      do i = 1, NNDOF
+        norm_v = norm_v + Av(i)**2
+      enddo
+      call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
+      norm_v = dsqrt(norm_v)
+
+      if(norm_v > 0.0d0) then
+        do i = 1, NNDOF
+          v(i) = Av(i) / norm_v
+        enddo
+      endif
+
+      if(iter > 1 .and. dabs(lambda_max - lambda_old) < tol * dabs(lambda_max)) exit
+    enddo
+
+    lambda_min = 0.1d0 * lambda_max
+
+    if(lambda_min <= 0.0d0) lambda_min = 0.1d0
+    if(lambda_max <= lambda_min) lambda_max = 10.0d0 * lambda_min
+
+    call monolis_dealloc_R_1d(v)
+    call monolis_dealloc_R_1d(Av)
+  end subroutine monolis_solver_power_method_eigenvalue_estimation
 
 end module mod_monolis_solver_Chebyshev
