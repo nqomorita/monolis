@@ -21,6 +21,7 @@ extern "C" {
 #include "monolis_spmat_copy_c.h"
 #include "monolis_eigen_solver_c.h"
 #include "monolis_nnls_c.h"
+#include "monolis_wrapper_scalapack_c.h"
 
 /**
  * @defgroup def_init 全体初期化・終了処理関数群

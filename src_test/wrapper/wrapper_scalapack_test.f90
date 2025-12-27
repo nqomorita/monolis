@@ -13,6 +13,8 @@ contains
     call monolis_scalapack_test_2()
     call monolis_scalapack_test_3()
     call monolis_scalapack_test_4()
+    call monolis_scalapack_test_5()
+    call monolis_scalapack_test_6()
   end subroutine monolis_scalapack_test
 
   subroutine monolis_scalapack_test_1()
@@ -349,4 +351,156 @@ contains
 
     call monolis_scalapack_comm_finalize(scalapack_comm)
   end subroutine monolis_scalapack_test_4
+
+  subroutine monolis_scalapack_test_5()
+    implicit none
+    !> 行列の大きさ（ローカル行数）
+    integer(kint) :: N_loc = 2
+    !> 行列の大きさ（全体のサイズ N x N）
+    integer(kint) :: N = 4
+    !> 入力行列（N_loc x N）
+    real(kdouble) :: A(2,4)
+    !> ピボット情報（N_loc * 2）
+    integer(kint) :: ipiv(4)
+    !> 右辺ベクトル（N_loc x 1）
+    real(kdouble) :: B(2,1)
+    !> 解ベクトル（N_loc x 1）
+    real(kdouble) :: X(2,1), X_ref(2,1)
+    !> 検算用
+    integer(kint) :: comm
+    integer(kint) :: scalapack_comm
+
+    if(monolis_mpi_get_global_comm_size() == 1) return
+
+    call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R")
+
+    comm = monolis_mpi_get_global_comm()
+
+    A = 0.0d0
+    B = 0.0d0
+    ipiv = 0
+
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      ! 行列 A の設定 (正定値対称行列)
+      A(1,1) = 4.0d0
+      A(1,2) = 1.0d0
+      A(1,3) = 2.0d0
+      A(1,4) = 1.0d0
+
+      A(2,1) = 1.0d0
+      A(2,2) = 3.0d0
+      A(2,3) = 1.0d0
+      A(2,4) = 2.0d0
+
+      ! 右辺ベクトル B の設定
+      B(1,1) = 1.0d0
+      B(2,1) = 2.0d0
+    else
+      A(1,1) = 2.0d0
+      A(1,2) = 1.0d0
+      A(1,3) = 5.0d0
+      A(1,4) = 1.0d0
+
+      A(2,1) = 1.0d0
+      A(2,2) = 2.0d0
+      A(2,3) = 1.0d0
+      A(2,4) = 4.0d0
+
+      B(1,1) = 3.0d0
+      B(2,1) = 4.0d0
+    endif
+
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
+
+    X = B
+    call monolis_scalapack_getrs_R(N_loc, N, 1, A, ipiv, X, comm, scalapack_comm)
+
+    call monolis_scalapack_comm_finalize(scalapack_comm)
+
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      X_ref(1,1) = -0.2300884955d0
+      X_ref(2,1) = -0.0707964601d0
+    else
+      X_ref(1,1) = 0.513274336d0
+      X_ref(2,1) = 0.9646017699d0
+    endif
+
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 5", X(:,1), X_ref(:,1))
+  end subroutine monolis_scalapack_test_5
+
+  subroutine monolis_scalapack_test_6()
+    implicit none
+    !> 行列の大きさ（ローカル行数）
+    integer(kint) :: N_loc = 2
+    !> 行列の大きさ（全体のサイズ N x N）
+    integer(kint) :: N = 2
+    !> 入力行列（N_loc x N）
+    real(kdouble) :: A(2,2)
+    !> ピボット情報（N_loc * 2）
+    integer(kint) :: ipiv(4)
+    !> 右辺ベクトル（N_loc x 2）、2つの右辺
+    real(kdouble) :: B(2,2)
+    !> 解ベクトル（N_loc x 2）
+    real(kdouble) :: X(2,2), X_ref(2,2)
+    integer(kint) :: comm
+    integer(kint) :: scalapack_comm
+
+    if(monolis_mpi_get_global_comm_size() == 1) return
+
+    call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R (self_comm)")
+
+    comm = monolis_mpi_get_self_comm()
+
+    A = 0.0d0
+    B = 0.0d0
+    ipiv = 0
+
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      ! 行列 A の設定
+      A(1,1) = 4.0d0
+      A(1,2) = 2.0d0
+      A(2,1) = 1.0d0
+      A(2,2) = 3.0d0
+
+      ! 右辺ベクトル B の設定（2つの右辺）
+      B(1,1) = 1.0d0
+      B(2,1) = 1.0d0
+      B(1,2) = 2.0d0
+      B(2,2) = 2.0d0
+    else
+      A(1,1) = 4.0d0
+      A(1,2) = 2.0d0
+      A(2,1) = 1.0d0
+      A(2,2) = 3.0d0
+
+      B(1,1) = 2.0d0
+      B(2,1) = 2.0d0
+      B(1,2) = 4.0d0
+      B(2,2) = 4.0d0
+    endif
+
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
+
+    X = B
+    call monolis_scalapack_getrs_R(N_loc, N, 2, A, ipiv, X, comm, scalapack_comm)
+
+    call monolis_scalapack_comm_finalize(scalapack_comm)
+
+    if(monolis_mpi_get_global_my_rank() == 0)then
+      X_ref(1,1) = 0.1d0
+      X_ref(2,1) = 0.3d0
+
+      X_ref(1,2) = 0.2d0
+      X_ref(2,2) = 0.6d0
+    else
+      X_ref(1,1) = 0.2d0
+      X_ref(2,1) = 0.6d0
+
+      X_ref(1,2) = 0.4d0
+      X_ref(2,2) = 1.2d0
+    endif
+
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X(:,1), X_ref(:,1))
+    call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", X(:,2), X_ref(:,2))
+  end subroutine monolis_scalapack_test_6
 end module mod_monolis_scalapack_test
