@@ -89,8 +89,8 @@ contains
     implicit none
     type(monolis_mat) :: monoMAT
     integer(kint) :: i, ii, j, jS, jE, in, N, n1, n2, nz
-    integer(kint), pointer :: index(:), item(:)
-    real(kdouble), pointer :: A(:), D(:)
+    integer(kint), pointer, contiguous :: index(:), item(:)
+    real(kdouble), pointer, contiguous :: A(:), D(:)
 
     A => monoMAT%R%A
     D => monoMAT%R%D
@@ -123,8 +123,8 @@ contains
     real(kdouble) :: omega, U, ri, ri_max, s_i, s_j, Aij_abs
     real(kdouble) :: tcomm_spmv
     real(kdouble), allocatable :: s(:)
-    integer(kint), pointer :: index(:), item(:)
-    real(kdouble), pointer :: A(:), D(:)
+    integer(kint), pointer, contiguous :: index(:), item(:)
+    real(kdouble), pointer, contiguous :: A(:), D(:)
 
     A => monoMAT%R%A
     D => monoMAT%R%D
@@ -186,7 +186,7 @@ contains
     integer(kint) :: i
     real(kdouble) :: X(:), B(:)
     real(kdouble), allocatable :: Y(:)
-    real(kdouble), pointer :: D(:)
+    real(kdouble), pointer, contiguous :: D(:)
     real(kdouble) :: omega
     real(kdouble) :: tspmv, tcomm
 

@@ -74,7 +74,7 @@ contains
 
     if(lambda_max == 0.0d0)then
       call monolis_solver_power_method_eigenvalue_estimation( &
-        monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max, eig_ratio)
+        monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max)
       monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value) = lambda_max
     endif
 
@@ -110,7 +110,7 @@ contains
     real(kdouble) :: alpha, beta, delta, theta, inv_theta
     real(kdouble) :: s1, d1, d2, rhok, rhokp1, eig_ratio
     real(kdouble), allocatable :: V(:), W(:)
-    real(kdouble), pointer :: invD(:)
+    real(kdouble), pointer, contiguous :: invD(:)
 
     invD => monoMAT%R%D
     if(degree <= 0) return
@@ -140,12 +140,10 @@ contains
       d2     = 2.0d0 * rhokp1 * delta
       rhok   = rhokp1
 
-      ! W = d1*W + d2*D^{-1}(B - V)
       do i = 1, NNDOF
         W(i) = d1*W(i) + d2*invD(i)*(B(i) - V(i))
       enddo
 
-      ! X = X + W
       do i = 1, NNDOF
         X(i) = X(i) + W(i)
       enddo
@@ -156,20 +154,20 @@ contains
   end subroutine monolis_solver_Chebyshev_iteration
 
   subroutine monolis_solver_power_method_eigenvalue_estimation( &
-    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max, eig_ratio)
+    monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max)
     implicit none
     type(monolis_com) :: monoCOM
     type(monolis_mat) :: monoMAT
     integer(kint) :: NNDOF, NPNDOF
-    real(kdouble) :: lambda_max, eig_ratio
+    real(kdouble) :: lambda_max
     real(kdouble) :: tspmv, tcomm
     integer(kint) :: iter, max_iter
     integer(kint) :: i
     real(kdouble) :: lambda, lambda_old, tol, norm_v
     real(kdouble), allocatable :: v(:), y(:)
-    real(kdouble), pointer :: invD(:)
+    real(kdouble), pointer, contiguous :: invD(:)
 
-    max_iter = 10
+    max_iter = 50
     tol = 1.0d-4
 
     invD => monoMAT%R%D
@@ -178,24 +176,19 @@ contains
     call monolis_alloc_R_1d(y, NPNDOF)
 
     call random_seed()
-
-    do i = 1, NNDOF
-      call random_number(v(i))
-      v(i) = v(i) - 0.5d0
-    enddo
+    call random_number(v)
 
     norm_v = 0.0d0
     do i = 1, NNDOF
       norm_v = norm_v + v(i)**2
     enddo
+
     call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
-    norm_v = dsqrt(norm_v)
+    norm_v = 1.0d0/dsqrt(norm_v)
     
-    if(norm_v > 0.0d0) then
-      do i = 1, NNDOF
-        v(i) = v(i) / norm_v
-      enddo
-    endif
+    do i = 1, NNDOF
+      v(i) = v(i)*norm_v
+    enddo
 
     lambda_max = 0.0d0
 
@@ -225,10 +218,10 @@ contains
         norm_v = norm_v + y(i)**2
       enddo
       call monolis_allreduce_R1(norm_v, monolis_mpi_sum, monoCOM%comm)
-      norm_v = dsqrt(norm_v)
+      norm_v = 1.0d0/dsqrt(norm_v)
 
       do i = 1, NNDOF
-        v(i) = y(i) / norm_v
+        v(i) = y(i)*norm_v
       enddo
 
       if(iter > 1)then
