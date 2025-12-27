@@ -20,3 +20,6 @@
 	path = submodule/ggtools
 	url = https://gitlab.com/mmlab_tsukuba/ggtools.git
 
+[submodule "submodule/ParMETIS"]
+	path = submodule/ParMETIS
+	url = https://github.com/nqomorita/ParMETIS.git
