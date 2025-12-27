@@ -19,6 +19,13 @@ make install
 cd ../..
 #make config i64=1 prefix=$BASE_DIR
 
+#> ParMETIS
+cd submodule/ParMETIS
+make config prefix=$BASE_DIR
+#make config i64=1 prefix=$BASE_DIR
+make install
+cd ../..
+
 #> MUMPS
 cd submodule/mumps
 mkdir build
