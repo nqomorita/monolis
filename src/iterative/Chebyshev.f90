@@ -50,7 +50,7 @@ contains
       X = 0.0d0
     endif
 
-    eig_ratio = 30.0d0
+    eig_ratio = 100.0d0
 
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
@@ -66,16 +66,16 @@ contains
       monoPRM%Iarray(monolis_prm_I_is_solv_prepared) = 1
 
       do i = 1, NNDOF
-        monoMAT%R%D(i) = monoMAT%R%D(i) / 1.0d0
+        monoMAT%R%D(i) =  1.0d0 / monoMAT%R%D(i)
       enddo
     endif
 
-    lambda_max = monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value)
+    lambda_max = monoPRM%Rarray(monolis_prm_R_CHEBYSHEV_max_eigen_value)
 
     if(lambda_max == 0.0d0)then
       call monolis_solver_power_method_eigenvalue_estimation( &
         monoCOM, monoMAT, NNDOF, NPNDOF, lambda_max)
-      monoPRM%Rarray(monolis_prm_I_CHEBYSHEV_max_eigen_value) = lambda_max
+      monoPRM%Rarray(monolis_prm_R_CHEBYSHEV_max_eigen_value) = lambda_max
     endif
 
     !call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
@@ -91,10 +91,6 @@ contains
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
-
-    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
-      call monolis_dealloc_R_1d(R)
-    endif
   end subroutine monolis_solver_Chebyshev
 
   subroutine monolis_solver_Chebyshev_iteration( &
@@ -125,9 +121,11 @@ contains
     s1    = theta * delta
     inv_theta = 1.0d0 / theta
 
+    call monolis_matvec_product_main_R(monoCOM, monoMAT, X, V, tspmv, tcomm)
+
     do i = 1, NNDOF
-      W(i) = invD(i) * B(i) * inv_theta
-      X(i) = W(i)
+      W(i) = invD(i) * (B(i) - V(i)) * inv_theta
+      X(i) = X(i) + W(i)
     enddo
 
     rhok = 1.0d0 / s1

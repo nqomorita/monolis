@@ -164,9 +164,6 @@ module mod_monolis_def_solver
   integer(kint), parameter :: monolis_prm_I_DCG_inner_max_iter = 35
   !> Chebyshev 反復法の次数
   integer(kint), parameter :: monolis_prm_I_CHEBYSHEV_degree = 36
-  !> Chebyshev 反復法に用いる最大・最小固有値
-  integer(kint), parameter :: monolis_prm_I_CHEBYSHEV_max_eigen_value = 37
-  integer(kint), parameter :: monolis_prm_I_CHEBYSHEV_min_eigen_value = 38
 
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
@@ -189,6 +186,10 @@ module mod_monolis_def_solver
 
   !> DCG 内側ループの縮退方程式求解の加速係数
   integer(kint), parameter :: monolis_prm_R_DCG_inner_relaxation_factor = 10
+
+  !> Chebyshev 反復法に用いる最大・最小固有値
+  integer(kint), parameter :: monolis_prm_R_CHEBYSHEV_max_eigen_value = 11
+  integer(kint), parameter :: monolis_prm_R_CHEBYSHEV_min_eigen_value = 12
 
   !> パラメータ構造体
   type monolis_prm
