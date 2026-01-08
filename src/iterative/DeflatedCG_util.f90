@@ -462,7 +462,7 @@ contains
       call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
       monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
       WtAZ(1:M) = 0.0d0
-      call monolis_mpi_update_reverse_R(monoCOM_deflated_eq, M, WtAZ, time)
+      call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, monoMAT_deflated_eq%n_dof_index, WtAZ, time)
       monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
     endif
 
