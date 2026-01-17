@@ -94,6 +94,7 @@ SRC_LINALG = \
 inner_product.f90 \
 vec_util.f90 \
 matvec.f90 \
+matmat.f90 \
 mat_converge.f90 
 
 SRC_WRAP = \
