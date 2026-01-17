@@ -919,4 +919,67 @@ contains
       enddo
     enddo
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R
+
+  !> @ingroup dev_matrix
+  !> CSR 形式の疎行列を CSC 形式に変換（実数型）
+  subroutine monolis_convert_CSR_matrix_to_CSC_matrix_R(monoCOM, A_in, A_out)
+    implicit none
+    !> [in] 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(in) :: A_in
+    !> [in] monolis MAT 構造体
+    type(monolis_mat), intent(inout) :: A_out
+    integer(kint) :: i, j, k, jS, jE, col, ndof, nnz, N, NP
+    integer(kint), allocatable :: col_count(:), col_offset(:), perm(:)
+
+    N = A_in%N
+    NP = A_in%NP
+    nnz = A_in%CSR%index(NP + 1)
+    ndof = A_in%NDOF
+
+    A_out%N = N
+    A_out%NP = NP
+    A_out%NDOF = ndof
+
+    call monolis_palloc_I_1d(A_out%CSR%index, NP + 1)
+    call monolis_palloc_I_1d(A_out%CSR%item, nnz)
+    call monolis_palloc_R_1d(A_out%R%A, ndof*ndof*nnz)
+    call monolis_alloc_I_1d(col_count, NP)
+    call monolis_alloc_I_1d(perm, nnz)
+
+    do i = 1, N
+      jS = A_in%CSR%index(i) + 1
+      jE = A_in%CSR%index(i + 1)
+      do j = jS, jE
+        col = A_in%CSR%item(j)
+        col_count(col) = col_count(col) + 1
+      enddo
+    enddo
+
+    do i = 1, NP
+      A_out%CSC%index(i + 1) = A_out%CSC%index(i) + col_count(i)
+    enddo
+
+    call monolis_alloc_I_1d(col_offset, NP)
+
+    !# CSR を走査して CSC の item を埋める
+    do i = 1, N
+      jS = A_in%CSR%index(i) + 1
+      jE = A_in%CSR%index(i + 1)
+      do j = jS, jE
+        col = A_in%CSR%item(j)
+        k = A_out%CSC%index(col) + col_offset(col) + 1
+        A_out%CSC%item(k) = i
+        perm(k) = j
+        col_offset(col) = col_offset(col) + 1
+      enddo
+    enddo
+
+    !# 行列値をコピー（perm を使って並び替え）
+    do i = 1, nnz
+      A_out%R%A(i) = A_in%R%A(perm(i))
+    enddo
+  end subroutine monolis_convert_CSR_matrix_to_CSC_matrix_R
+
 end module mod_monolis_spmat_handler_util
