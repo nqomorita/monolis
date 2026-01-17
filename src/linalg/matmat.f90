@@ -87,8 +87,8 @@ contains
     C%NP = A%NP
     C%NDOF = NDOF
 
-    call monolis_alloc_L_1d(is_nonzero, NP)
-    call monolis_alloc_I_1d(row_C, NP)
+    call monolis_alloc_L_1d(is_nonzero, B%NP)
+    call monolis_alloc_I_1d(row_C, B%NP)
     call monolis_palloc_I_1d(C%CSR%index, NP + 1)
 
     !# 各行について非零要素数をカウント

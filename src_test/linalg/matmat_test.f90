@@ -44,12 +44,6 @@ contains
     call monolis_get_nonzero_pattern_by_simple_mesh_R(A, n_node, n_base, n_dof, n_elem, elem)
     call monolis_get_nonzero_pattern_by_simple_mesh_R(B, n_node, n_base, n_dof, n_elem, elem)
 
-    !# A と B に値を設定（単位行列）
-    do i = 1, n_node
-      A%MAT%R%A((A%MAT%CSR%index(i)+1)) = 1.0d0
-      B%MAT%R%A((B%MAT%CSR%index(i)+1)) = 1.0d0
-    enddo
-
     !# シンボリック計算
     call monolis_matmat_symbolic(com, A%MAT, B%MAT, C%MAT, n_dof)
 
@@ -60,9 +54,19 @@ contains
 
     !# CSR%index の検証（各行の非零要素数）
     call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 4", C%MAT%CSR%index(1), 0)
-    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 5", C%MAT%CSR%index(2) - C%MAT%CSR%index(1), 2)
-    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 6", C%MAT%CSR%index(3) - C%MAT%CSR%index(2), 3)
-    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 7", C%MAT%CSR%index(4) - C%MAT%CSR%index(3), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 5", C%MAT%CSR%index(2), 3)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 6", C%MAT%CSR%index(3), 6)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 7", C%MAT%CSR%index(4), 9)
+
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8a", C%MAT%CSR%item(1), 1)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8b", C%MAT%CSR%item(2), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8c", C%MAT%CSR%item(3), 3)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8d", C%MAT%CSR%item(4), 1)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8e", C%MAT%CSR%item(5), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8f", C%MAT%CSR%item(6), 3)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8g", C%MAT%CSR%item(7), 1)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8h", C%MAT%CSR%item(8), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_symbolic_test 8i", C%MAT%CSR%item(9), 3)
 
     call monolis_finalize(A)
     call monolis_finalize(B)
@@ -100,35 +104,36 @@ contains
     call monolis_get_nonzero_pattern_by_simple_mesh_R(B, n_node, n_base, n_dof, n_elem, elem)
 
     !# A に値を設定（対角2、非対角1）
-    A%MAT%R%A(1) = 2.0d0  ! A(1,1)
-    A%MAT%R%A(2) = 1.0d0  ! A(1,2)
-    A%MAT%R%A(3) = 1.0d0  ! A(2,1)
-    A%MAT%R%A(4) = 2.0d0  ! A(2,2)
-    A%MAT%R%A(5) = 1.0d0  ! A(2,3)
-    A%MAT%R%A(6) = 1.0d0  ! A(3,2)
-    A%MAT%R%A(7) = 2.0d0  ! A(3,3)
+    A%MAT%R%A(1) = 2.0d0
+    A%MAT%R%A(2) = 1.0d0
+    A%MAT%R%A(3) = 1.0d0
+    A%MAT%R%A(4) = 2.0d0
+    A%MAT%R%A(5) = 1.0d0
+    A%MAT%R%A(6) = 1.0d0
+    A%MAT%R%A(7) = 2.0d0
 
     !# B に値を設定（単位行列）
-    B%MAT%R%A(1) = 1.0d0  ! B(1,1)
-    B%MAT%R%A(2) = 0.0d0  ! B(1,2)
-    B%MAT%R%A(3) = 0.0d0  ! B(2,1)
-    B%MAT%R%A(4) = 1.0d0  ! B(2,2)
-    B%MAT%R%A(5) = 0.0d0  ! B(2,3)
-    B%MAT%R%A(6) = 0.0d0  ! B(3,2)
-    B%MAT%R%A(7) = 1.0d0  ! B(3,3)
+    B%MAT%R%A(1) = 2.0d0
+    B%MAT%R%A(2) = 1.0d0
+    B%MAT%R%A(3) = 1.0d0
+    B%MAT%R%A(4) = 2.0d0
+    B%MAT%R%A(5) = 1.0d0
+    B%MAT%R%A(6) = 1.0d0
+    B%MAT%R%A(7) = 2.0d0
 
     !# シンボリック計算と数値計算
     call monolis_matmat_symbolic(com, A%MAT, B%MAT, C%MAT, n_dof)
     call monolis_matmat_value_nn(com, A%MAT, B%MAT, C%MAT, n_dof)
 
-    !# 結果の検証（C = A * I = A となるはず）
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 1", C%MAT%R%A(1), 2.0d0)
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 2", C%MAT%R%A(2), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 1", C%MAT%R%A(1), 5.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 2", C%MAT%R%A(2), 4.0d0)
     call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 3", C%MAT%R%A(3), 1.0d0)
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 4", C%MAT%R%A(4), 2.0d0)
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 5", C%MAT%R%A(5), 1.0d0)
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 6", C%MAT%R%A(6), 1.0d0)
-    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 7", C%MAT%R%A(7), 2.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 4", C%MAT%R%A(4), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 5", C%MAT%R%A(5), 6.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 6", C%MAT%R%A(6), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 7", C%MAT%R%A(7), 1.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 8", C%MAT%R%A(8), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_value_nn_test 9", C%MAT%R%A(9), 5.0d0)
 
     call monolis_finalize(A)
     call monolis_finalize(B)
@@ -159,37 +164,39 @@ contains
 
     call monolis_alloc_I_2d(elem, n_elem, n_base)
     elem(1,1) = 1; elem(1,2) = 2
-    elem(2,1) = 2; elem(2,2) = 3
+    elem(2,1) = 1; elem(2,2) = 3
 
-    !# 行列 A と B の非零パターンを作成（2自由度）
     call monolis_get_nonzero_pattern_by_simple_mesh_R(A, n_node, n_base, n_dof, n_elem, elem)
     call monolis_get_nonzero_pattern_by_simple_mesh_R(B, n_node, n_base, n_dof, n_elem, elem)
 
-    !# A に値を設定（各ブロックを単位行列）
-    do i = 1, 7
-      do j = 1, n_dof
-        A%MAT%R%A((i-1)*n_dof*n_dof + (j-1)*n_dof + j) = 1.0d0
-      enddo
-    enddo
+    A%MAT%R%A = 1.0d0
+    A%MAT%R%A(1) = 1.0d0
+    A%MAT%R%A(2) = 2.0d0
+    A%MAT%R%A(3) = 3.0d0
+    A%MAT%R%A(4) = 4.0d0
+    B%MAT%R%A = 1.0d0
 
-    !# B に値を設定（各ブロックを2倍の単位行列）
-    do i = 1, 7
-      do j = 1, n_dof
-        B%MAT%R%A((i-1)*n_dof*n_dof + (j-1)*n_dof + j) = 2.0d0
-      enddo
-    enddo
-
-    !# 統合テスト（シンボリック + 数値計算）
     call monolis_matmat_nn(com, A%MAT, B%MAT, C%MAT, n_dof)
 
-    !# 結果の検証（C = I * 2I = 2I となるはず）
-    tol = 1.0d-12
-    do i = 1, 7
-      do j = 1, n_dof
-        write(*,*)"monolis_matmat_nn_test block ", i, &
-          & C%MAT%R%A((i-1)*n_dof*n_dof + (j-1)*n_dof + j)
-      enddo
-    enddo
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 1", C%MAT%CSR%index(1), 0)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 2", C%MAT%CSR%index(2), 1)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 3", C%MAT%CSR%index(3), 3)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 4", C%MAT%CSR%index(4), 5)
+
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 5", C%MAT%CSR%item(1), 1)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 6", C%MAT%CSR%item(2), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 7", C%MAT%CSR%item(3), 3)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 8", C%MAT%CSR%item(4), 2)
+    call monolis_test_check_eq_I1("monolis_matmat_nn_test 9", C%MAT%CSR%item(5), 3)
+
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a1", C%MAT%R%A(1), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a2", C%MAT%R%A(2), 3.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a3", C%MAT%R%A(3), 7.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a4", C%MAT%R%A(4), 7.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a5", C%MAT%R%A(5), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a5", C%MAT%R%A(6), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a5", C%MAT%R%A(7), 4.0d0)
+    call monolis_test_check_eq_R1("monolis_matmat_nn_test a5", C%MAT%R%A(8), 4.0d0)
 
     call monolis_finalize(A)
     call monolis_finalize(B)
