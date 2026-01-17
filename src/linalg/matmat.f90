@@ -78,82 +78,66 @@ contains
 
     NP = A%NP
 
-    ! 行列 C の構造を初期化
+    !# 行列 C の構造を初期化
     C%N = A%N
     C%NP = A%NP
     C%NDOF = NDOF
 
-    ! 一時配列の確保
     call monolis_alloc_I_1d(mask, NP)
     call monolis_alloc_L_1d(is_nonzero, NP)
     call monolis_alloc_I_1d(row_C, NP)
-    
-    ! マスク配列の初期化
-    mask = 0
-    is_nonzero = .false.
-
-    ! C の各行の非零要素数を計算
-    call monolis_pdealloc_I_1d(C%CSR%index)
     call monolis_palloc_I_1d(C%CSR%index, NP + 1)
-    C%CSR%index(1) = 0
 
-    ! 各行について非零要素数をカウント
+    !# 各行について非零要素数をカウント
     do i = 1, NP
       nz = 0
       is_nonzero = .false.
 
-      ! A の i 行の各非零要素について
+      !# A の i 行の各非零要素について
       jS = A%CSR%index(i) + 1
       jE = A%CSR%index(i + 1)
       do jA = jS, jE
         col_A = A%CSR%item(jA)
 
-        ! B の col_A 行の各非零要素について
+        !# B の col_A 行の各非零要素について
         jS = B%CSR%index(col_A) + 1
         jE = B%CSR%index(col_A + 1)
         do jB = jS, jE
           col_B = B%CSR%item(jB)
 
-          ! C(i, col_B) が非零になる
+          !# C(i, col_B) が非零になる
           if(.not. is_nonzero(col_B))then
             is_nonzero(col_B) = .true.
             nz = nz + 1
-            row_C(nz) = col_B
           endif
         enddo
-      enddo
-
-      ! この行の非零要素をリセット
-      do j = 1, nz
-        is_nonzero(row_C(j)) = .false.
       enddo
 
       C%CSR%index(i + 1) = C%CSR%index(i) + nz
     enddo
 
-    ! C%CSR%item の確保と設定
+    !# C%CSR%item の確保と設定
     nz = C%CSR%index(NP + 1)
-    call monolis_pdealloc_I_1d(C%CSR%item)
     call monolis_palloc_I_1d(C%CSR%item, nz)
 
-    ! 各行の列インデックスを設定
+    !# 各行の列インデックスを設定
     do i = 1, NP
       nz = 0
       is_nonzero = .false.
 
-      ! A の i 行の各非零要素について
+      !# A の i 行の各非零要素について
       jS = A%CSR%index(i) + 1
       jE = A%CSR%index(i + 1)
       do jA = jS, jE
         col_A = A%CSR%item(jA)
 
-        ! B の col_A 行の各非零要素について
+        !# B の col_A 行の各非零要素について
         jS = B%CSR%index(col_A) + 1
         jE = B%CSR%index(col_A + 1)
         do jB = jS, jE
           col_B = B%CSR%item(jB)
 
-          ! C(i, col_B) が非零になる
+          !# C(i, col_B) が非零になる
           if(.not. is_nonzero(col_B))then
             is_nonzero(col_B) = .true.
             nz = nz + 1
@@ -169,27 +153,8 @@ contains
       do j = jS, jE
         C%CSR%item(j) = row_C(j - jS + 1)
       enddo
-
-      ! この行の非零要素をリセット
-      do j = 1, nz
-        is_nonzero(row_C(j)) = .false.
-      enddo
     enddo
 
-    ! CSC 形式の生成
-    call monolis_pdealloc_I_1d(C%CSC%index)
-    call monolis_pdealloc_I_1d(C%CSC%item)
-    call monolis_pdealloc_I_1d(C%CSC%perm)
-    call monolis_palloc_I_1d(C%CSC%index, NP + 1)
-    nz = C%CSR%index(NP + 1)
-    call monolis_palloc_I_1d(C%CSC%item, nz)
-    call monolis_palloc_I_1d(C%CSC%perm, nz)
-
-    call monolis_get_CSC_format(C%N, C%N, nz, &
-      & C%CSR%index, C%CSR%item, &
-      & C%CSC%index, C%CSC%item, C%CSC%perm)
-
-    ! 一時配列の解放
     call monolis_dealloc_I_1d(mask)
     call monolis_dealloc_L_1d(is_nonzero)
     call monolis_dealloc_I_1d(row_C)
