@@ -15,6 +15,7 @@ contains
     call monolis_set_block_to_sparse_matrix_main_R_test()
     call monolis_set_block_to_sparse_matrix_main_C_test()
     call monolis_convert_sparse_matrix_to_dense_matrix_R_test()
+    call monolis_convert_CSR_matrix_to_CSC_matrix_R_test()
     call monolis_variable_dof_sparse_matrix_R_test()
   end subroutine monolis_spmat_handler_util_test
 
@@ -464,4 +465,86 @@ contains
 
     call monolis_finalize(mat)
   end subroutine monolis_variable_dof_sparse_matrix_R_test
+
+  subroutine monolis_convert_CSR_matrix_to_CSC_matrix_R_test()
+    implicit none
+    !> monolis 構造体
+    type(monolis_structure) :: mat
+    type(monolis_mat) :: mat_csc
+    !> monolis 通信構造体
+    type(monolis_com) :: com
+    integer(kint) :: nnode, nelem, elem(2,3), n_dof
+    integer(kint) :: i, j, col, row, idx
+    real(kdouble) :: val
+    logical :: is_found
+
+    if(monolis_mpi_get_global_comm_size() /= 1) return
+
+    call monolis_std_global_log_string("monolis_convert_CSR_matrix_to_CSC_matrix_R_test")
+    call monolis_std_global_log_string("monolis_convert_CSR_matrix_to_CSC_matrix_R")
+
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_self(com)
+    call monolis_mat_initialize(mat_csc)
+
+    ! 4節点、3要素、自由度2のメッシュを作成
+    nnode = 4
+    nelem = 3
+    n_dof = 2
+
+    elem(1,1) = 1; elem(2,1) = 2;
+    elem(1,2) = 2; elem(2,2) = 3;
+    elem(1,3) = 3; elem(2,3) = 4;
+
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, nnode, 2, n_dof, nelem, elem)
+
+    ! CSR行列に値を設定
+    ! 対角成分
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 1, 1, 11.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 1, 2, 12.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 2, 1, 13.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 1, 2, 2, 14.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 1, 1, 21.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 1, 2, 22.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 2, 1, 23.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 2, 2, 2, 24.0d0)
+
+    ! 非対角成分
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 1, 1, 121.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 1, 2, 2, 2, 124.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 1, 1, 1, 211.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 1, 2, 2, 214.0d0)
+
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 2, 3, 1, 1, 231.0d0)
+    call monolis_add_scalar_to_sparse_matrix_R(mat, 3, 2, 1, 1, 321.0d0)
+
+    ! CSR から CSC への変換を実行
+    call monolis_convert_CSR_matrix_to_CSC_matrix_R(com, mat%MAT, mat_csc)
+
+    ! CSC 構造体の検証
+    ! 自由度数の確認
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test N", mat_csc%N, nnode)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test NP", mat_csc%NP, nnode)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test NDOF", mat_csc%NDOF, n_dof)
+
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test 1", mat_csc%CSR%index(1), 0)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test 2", mat_csc%CSR%index(2), 2)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test 3", mat_csc%CSR%index(3), 5)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test 4", mat_csc%CSR%index(4), 8)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test 5", mat_csc%CSR%index(5), 10)
+
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(1), 1)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(2), 2)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(3), 1)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(4), 2)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(5), 3)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(6), 2)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(7), 3)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(8), 4)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(9), 3)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_matrix_to_CSC_matrix_R_test ", mat_csc%CSR%item(10), 4)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_convert_CSR_matrix_to_CSC_matrix_R_test
 end module mod_monolis_spmat_handler_util_test

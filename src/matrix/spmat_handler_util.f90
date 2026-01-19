@@ -958,7 +958,7 @@ contains
     enddo
 
     do i = 1, NP
-      A_out%CSC%index(i + 1) = A_out%CSC%index(i) + col_count(i)
+      A_out%CSR%index(i + 1) = A_out%CSR%index(i) + col_count(i)
     enddo
 
     call monolis_alloc_I_1d(col_offset, NP)
@@ -969,8 +969,8 @@ contains
       jE = A_in%CSR%index(i + 1)
       do j = jS, jE
         col = A_in%CSR%item(j)
-        k = A_out%CSC%index(col) + col_offset(col) + 1
-        A_out%CSC%item(k) = i
+        k = A_out%CSR%index(col) + col_offset(col) + 1
+        A_out%CSR%item(k) = i
         perm(k) = j
         col_offset(col) = col_offset(col) + 1
       enddo
