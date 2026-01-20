@@ -15,6 +15,7 @@ program monolis_test
   use mod_monolis_matalg_dense_test
   use mod_monolis_converge_test
   use mod_monolis_matvec_test
+  use mod_monolis_matmat_test
   use mod_monolis_solver_CG_test
   use mod_monolis_solver_GropCG_test
   use mod_monolis_solver_PipeCG_test
@@ -57,6 +58,7 @@ program monolis_test
   call monolis_converge_test()
   call monolis_matvec_test()
   call monolis_matalg_dense_test()
+  call monolis_matmat_test()
 
   call monolis_precond_test()
   call monolis_solve_test()

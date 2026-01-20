@@ -121,6 +121,7 @@ inner_product.f90 \
 matalg_dense.f90 \
 vec_util.f90 \
 matvec.f90 \
+matmat.f90 \
 mat_converge.f90 
 
 SRC_WRAP1 = \

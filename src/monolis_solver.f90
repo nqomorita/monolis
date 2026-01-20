@@ -14,6 +14,7 @@ module mod_monolis_solver
   use mod_monolis_inner_product
   use mod_monolis_converge
   use mod_monolis_matvec
+  use mod_monolis_matmat
   use mod_monolis_vec_util
   use mod_monolis_solve
   use mod_monolis_precond
