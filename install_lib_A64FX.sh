@@ -15,6 +15,13 @@ BASE_DIR=$(pwd)
 #make install
 #cd ../..
 
+#> ParMETIS
+#cd submodule/ParMETIS
+#make config prefix=$BASE_DIR
+#make config i64=1 prefix=$BASE_DIR
+#make install
+#cd ../..
+
 #> MUMPS
 #cd submodule/mumps
 #mkdir build

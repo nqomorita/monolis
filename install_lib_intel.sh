@@ -12,6 +12,13 @@ make config cc=icx prefix=$BASE_DIR
 make install
 cd ../..
 
+#> ParMETIS
+cd submodule/ParMETIS
+make config cc=mpiicx prefix=$BASE_DIR
+#make config i64=1 prefix=$BASE_DIR
+make install
+cd ../..
+
 #> MUMPS
 #cd submodule/mumps
 #mkdir build
