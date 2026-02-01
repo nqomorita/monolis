@@ -29,7 +29,7 @@ contains
     integer(kint) :: iter, iter_RR
     real(kdouble) :: alpha, beta, zeta, eta, B2, r1, r2, rho
     real(kdouble) :: y_y, y_r, y_v, v_v, v_r, denom, C(5)
-    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, ths
+    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     logical :: is_converge
     real(kdouble), allocatable :: R(:), P(:), Z(:), U(:), Y(:), R0(:), V(:), T1(:), T2(:)
     real(kdouble), allocatable :: AP(:), MR(:), AU(:)
@@ -40,7 +40,6 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
-    ths   = 1.0d-15
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
@@ -87,12 +86,18 @@ contains
       call monolis_vec_AXPBY_R(NNDOF, beta, T1, 1.0d0, V, AP)
 
       call monolis_inner_product_main_R(monoCOM, NNDOF, R0, AP, r2, tdotp, tcomm_dotp)
+
+      if(dabs(r2) == 0.0d0)then
+        call monolis_global_sorted_inner_product_main_R(monoCOM, &
+          NNDOF, R0, AP, r2, tdotp, tcomm_dotp)
+      endif
+
       alpha = r1 / r2
 
       if (iter == 1) then
         call monolis_inner_product_main_R(monoCOM, NNDOF, V, R, v_r, tdotp, tcomm_dotp)
         call monolis_inner_product_main_R(monoCOM, NNDOF, V, V, v_v, tdotp, tcomm_dotp)
-        
+
         if (abs(v_v) == 0.0d0) then
           zeta = 1.0d0
         else
@@ -149,7 +154,12 @@ contains
 
       rho = r1
       call monolis_inner_product_main_R(monoCOM, NNDOF, R0, R, r1, tdotp, tcomm_dotp)
-      
+
+      if(dabs(r1) == 0.0d0)then
+        call monolis_global_sorted_inner_product_main_R(monoCOM, &
+          NNDOF, R0, R, r1, tdotp, tcomm_dotp)
+      endif
+
       if (abs(zeta) == 0.0d0 .or. abs(rho) == 0.0d0) then
         beta = 0.0d0
       else
