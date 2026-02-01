@@ -70,7 +70,7 @@ contains
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, RT, rho, tdotp, tcomm_dotp)
-      if(rho == 0.0d0)then
+      if(dabs(rho) == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, R, RT, rho, tdotp, tcomm_dotp)
       endif
@@ -87,7 +87,7 @@ contains
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, P, PT)
       call monolis_matvec_product_main_R(monoCOM, monoMAT, PT, V, tspmv, tcomm_spmv)
       call monolis_inner_product_main_R(monoCOM, NNDOF, RT, V, c2, tdotp, tcomm_dotp)
-      if(c2 == 0.0d0)then
+      if(dabs(c2) == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, RT, V, c2, tdotp, tcomm_dotp)
       endif
@@ -101,7 +101,7 @@ contains
       call monolis_inner_product_main_R_no_comm(NNDOF, T, S, CG(1))
       call monolis_inner_product_main_R_no_comm(NNDOF, T, T, CG(2))
       call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
-      if(CG(2) == 0.0d0)then
+      if(dabs(CG(2)) == 0.0d0)then
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, T, T, CG(2), tdotp, tcomm_dotp)
       endif
