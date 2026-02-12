@@ -2,6 +2,7 @@ module mod_monolis_matmat
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_spmat_nonzero_pattern_util
   implicit none
 
 contains
@@ -87,6 +88,14 @@ contains
     C%NP = A%NP
     C%NDOF = NDOF
 
+    call monolis_palloc_I_1d(C%n_dof_list, C%NP)
+    call monolis_palloc_I_1d(C%n_dof_index, C%NP + 1)
+
+    C%n_dof_list = NDOF
+    do i = 1, C%NP
+      C%n_dof_index(i+1) = C%n_dof_index(i) + NDOF
+    enddo
+
     call monolis_alloc_L_1d(is_nonzero, B%NP)
     call monolis_alloc_I_1d(row_C, B%NP)
     call monolis_palloc_I_1d(C%CSR%index, NP + 1)
@@ -122,6 +131,11 @@ contains
     !# C%CSR%item の確保と設定
     nz = C%CSR%index(NP + 1)
     call monolis_palloc_I_1d(C%CSR%item, nz)
+    call monolis_palloc_I_1d(C%n_dof_index2, nz + 1)
+
+    do i = 1, nz
+      C%n_dof_index2(i+1) = C%n_dof_index2(i) + NDOF*NDOF
+    enddo
 
     !# 各行の列インデックスを設定
     do i = 1, NP
@@ -160,6 +174,16 @@ contains
 
     call monolis_dealloc_L_1d(is_nonzero)
     call monolis_dealloc_I_1d(row_C)
+
+    nz = C%CSR%index(NP + 1)
+
+    call monolis_palloc_I_1d(C%CSC%index, C%NP + 1)
+    call monolis_palloc_I_1d(C%CSC%item, nz)
+    call monolis_palloc_I_1d(C%CSC%perm, nz)
+
+    call monolis_get_CSC_format(C%N, C%NP, nz, &
+      & C%CSR%index, C%CSR%item, &
+      & C%CSC%index, C%CSC%item, C%CSC%perm)
   end subroutine monolis_matmat_symbolic
 
   subroutine monolis_matmat_value_nn(monoCOM, A, B, C, NDOF)
@@ -233,6 +257,9 @@ contains
         enddo
       enddo
     enddo
+
+    call monolis_palloc_R_1d(C%R%B, A%NP * NDOF)
+    call monolis_palloc_R_1d(C%R%X, A%NP * NDOF)
 
     call monolis_dealloc_R_2d(temp)
   end subroutine monolis_matmat_value_nn
