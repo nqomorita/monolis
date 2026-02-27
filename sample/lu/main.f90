@@ -90,10 +90,10 @@ program main
   a = 0.0d0
   b = c
 
-  call monolis_set_method(mat, monolis_iter_CG)
-  call monolis_set_precond(mat, monolis_prec_MUMPS)
+  !call monolis_set_method(mat, monolis_iter_CG)
+  !call monolis_set_precond(mat, monolis_prec_MUMPS)
 
-  call monolis_solve_R(mat, com, b, a)
+  !call monolis_solve_R(mat, com, b, a)
   !write(*,"(1p10e12.4)")a
 
   call monolis_finalize(mat)

@@ -68,13 +68,13 @@ module mod_monolis_def_mat
   !> 行列構造体（reordering 構造）
   type monolis_mat_reorder
     !> perm 配列
-    integer(kint), pointer :: perm(:) => null()
+    integer(kint), pointer, contiguous :: perm(:) => null()
     !> iperm 配列
-    integer(kint), pointer :: iperm(:) => null()
+    integer(kint), pointer, contiguous :: iperm(:) => null()
     !> rperm 配列
-    real(kdouble), pointer :: rperm(:) => null()
+    real(kdouble), pointer, contiguous :: rperm(:) => null()
     !> cperm 配列
-    complex(kdouble), pointer :: cperm(:) => null()
+    complex(kdouble), pointer, contiguous :: cperm(:) => null()
   end type monolis_mat_reorder
 
   type :: monolis_mat_frontal
@@ -86,34 +86,24 @@ module mod_monolis_def_mat
   end type
 
   type :: matrix_data
-    ! ---- CSR sparse matrix ----
     integer(kint) :: n     ! matrix dimension
     integer(kint) :: ndof  ! matrix dimension
     integer(kint) :: nz    ! number of non-zeros
     integer(kint), allocatable :: row_ptr(:), col_ind(:)
-    ! ndof*ndof*nz
     real(kdouble), allocatable :: a_elt(:)
-
-    ! ---- Ordering ----
     integer(kint), allocatable :: perm(:)     ! fill-reducing permutation
     integer(kint), allocatable :: invperm(:)  ! inverse permutation
   end type
 
   type :: monolis_mat_lu
     type(monolis_mat_frontal), allocatable :: factors(:)
-
-    ! ---- Elimination tree ----
     integer(kint), allocatable :: parent(:)   ! parent(i) in elimination tree
-
-    ! ---- Supernode description ----
     integer(kint) :: nsuper                     ! number of supernodes
     integer(kint), allocatable :: snode_belong(:)  ! snode_belong(i)=s : variable i belongs to supernode s
     integer(kint), allocatable :: snode_start(:)   ! first variable of supernode s (in permuted order)
     integer(kint), allocatable :: snode_size(:)    ! pivot count of supernode s
     integer(kint), allocatable :: snode_parent(:)  ! parent supernode
     integer(kint), allocatable :: snode_fsize(:)   ! frontal matrix size of supernode s
-
-    ! ---- Frontal tree (child-sibling) ----
     integer(kint), allocatable :: sfils(:)    ! first child supernode
     integer(kint), allocatable :: sfrere(:)   ! next sibling supernode
   end type
