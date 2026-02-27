@@ -23,7 +23,8 @@ subroutine build_elimination_tree(mat, lu)
   integer(kint), allocatable :: ancestor(:)
   integer(kint), allocatable :: adj_ptr(:), adj_list(:)
   integer(kint), allocatable :: adj_count(:)
-  integer(kint) :: k, pi, pj, tmp, r, c, pos, i
+  integer(kint), allocatable :: flag(:)       ! MUMPS ANA_K-style O(1) dedup
+  integer(kint) :: k, pi, pj, tmp, r, c, pos, i, nadj
 
   n = mat%n; nz = mat%nz
   allocate(lu%parent(n))
@@ -31,67 +32,86 @@ subroutine build_elimination_tree(mat, lu)
   associate(row_ptr => mat%row_ptr, col_ind => mat%col_ind, &
             invperm => mat%invperm, perm => mat%perm, parent => lu%parent)
 
-  ! ---- Step 1: Build CSR adjacency for the permuted lower triangle ----
-  ! For each edge (pi, pj) with pi < pj, store pi in adj_list of column pj
-  ! (i.e., for column pj, the list of earlier columns connected to it)
-  allocate(adj_count(n))
+  ! ---- Step 1: Build CSC adjacency for the permuted lower triangle ----
+  ! Single-pass counting + FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
+  allocate(adj_count(n), flag(n))
   adj_count = 0
+  flag = 0
 
+  ! Count phase with deduplication: for each column pj, count distinct pi < pj
   do r = 1, n
+    pi = invperm(r)
     do k = row_ptr(r)+1, row_ptr(r+1)
       c = col_ind(k)
       if (r == c) cycle
-      pi = invperm(r)
       pj = invperm(c)
-      if (pi > pj) then; tmp = pi; pi = pj; pj = tmp; end if
-      adj_count(pj) = adj_count(pj) + 1
+      ! Ensure pi_local < pj_local (lower triangle in permuted order)
+      if (pi < pj) then
+        if (flag(pi) /= pj) then   ! O(1) duplicate check
+          flag(pi) = pj
+          adj_count(pj) = adj_count(pj) + 1
+        end if
+      else
+        if (flag(pj) /= pi) then
+          flag(pj) = pi
+          adj_count(pi) = adj_count(pi) + 1
+        end if
+      end if
     end do
   end do
 
+  ! Build pointer array
   allocate(adj_ptr(n+1))
   adj_ptr(1) = 1
   do k = 2, n+1
     adj_ptr(k) = adj_ptr(k-1) + adj_count(k-1)
   end do
+  nadj = adj_ptr(n+1) - 1
 
-  allocate(adj_list(adj_ptr(n+1)-1))
-  adj_count = 0  ! reuse as insertion counter
+  ! Fill phase with deduplication
+  allocate(adj_list(max(nadj, 1)))
+  adj_count = 0
+  flag = 0
 
   do r = 1, n
+    pi = invperm(r)
     do k = row_ptr(r)+1, row_ptr(r+1)
       c = col_ind(k)
       if (r == c) cycle
-      pi = invperm(r)
       pj = invperm(c)
-      if (pi > pj) then; tmp = pi; pi = pj; pj = tmp; end if
-      adj_count(pj) = adj_count(pj) + 1
-      adj_list(adj_ptr(pj) + adj_count(pj) - 1) = pi
+      if (pi < pj) then
+        if (flag(pi) /= pj) then
+          flag(pi) = pj
+          adj_count(pj) = adj_count(pj) + 1
+          adj_list(adj_ptr(pj) + adj_count(pj) - 1) = pi
+        end if
+      else
+        if (flag(pj) /= pi) then
+          flag(pj) = pi
+          adj_count(pi) = adj_count(pi) + 1
+          adj_list(adj_ptr(pi) + adj_count(pi) - 1) = pj
+        end if
+      end if
     end do
   end do
 
-  ! ---- Step 2: Liu's elimination tree algorithm ----
+  deallocate(flag)
+
+  ! ---- Step 2: Liu's elimination tree algorithm with path compression ----
   allocate(ancestor(n))
   parent = 0
 
   do k = 1, n
-    ancestor(k) = k   ! each node is its own root initially
+    ancestor(k) = k
 
-    ! Process all edges to earlier columns
     do pos = adj_ptr(k), adj_ptr(k+1) - 1
       pj = adj_list(pos)   ! pj < k
 
-      ! Find root of pj's subtree with path compression
+      ! Find root with path halving (faster than full path compression)
       r = pj
       do while (ancestor(r) /= r)
+        ancestor(r) = ancestor(ancestor(r))  ! path halving
         r = ancestor(r)
-      end do
-
-      ! Path compression: flatten all nodes on the path to root
-      i = pj
-      do while (i /= r)
-        tmp = ancestor(i)
-        ancestor(i) = r
-        i = tmp
       end do
 
       if (r /= k) then
@@ -127,41 +147,54 @@ subroutine identify_supernodes(mat, lu)
   integer(kint), allocatable :: sbelong(:), sstart(:), ssize(:), sparent(:), sfsize(:)
   integer(kint), allocatable :: col_count(:)  ! nonzero count in each column of L (permuted)
   integer(kint), allocatable :: children_count(:)
-  integer(kint) :: i, k, r, c, pi, pj, tmp
+  integer(kint), allocatable :: flag(:)       ! FLAG array for O(1) dedup (MUMPS ANA_K style)
+  integer(kint) :: i, k, r, c, pi, pj
   integer(kint) :: nemin
   logical :: can_merge
 
   n = mat%n; nz = mat%nz
   nemin = 16  ! relaxation parameter
 
-  allocate(col_count(n), children_count(n), sbelong(n))
+  allocate(col_count(n), children_count(n), sbelong(n), flag(n))
   col_count = 1   ! diagonal always present
   children_count = 0
+  flag = 0
 
   associate(row_ptr => mat%row_ptr, col_ind => mat%col_ind, &
             perm => mat%perm, invperm => mat%invperm, parent => lu%parent)
 
   ! ---- Step 1: Estimate column counts of L ----
-  ! For each off-diagonal entry in the permuted lower triangle,
-  ! the column with the smaller permuted index gets +1.
-  ! This is an approximation (exact requires symbolic factorization).
+  ! FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
+  ! For each off-diagonal entry, the column with the smaller permuted index gets +1.
   do r = 1, n
+    pi = invperm(r)
     do k = row_ptr(r)+1, row_ptr(r+1)
       c = col_ind(k)
       if (r == c) cycle
-      pi = invperm(r)
       pj = invperm(c)
-      if (pi > pj) then
-        tmp = pi; pi = pj; pj = tmp
+      if (pi < pj) then
+        if (flag(pi) /= pj) then  ! O(1) dedup: avoid counting same (pi,pj) twice
+          flag(pi) = pj
+          col_count(pi) = col_count(pi) + 1
+        end if
+      else
+        if (flag(pj) /= pi) then
+          flag(pj) = pi
+          col_count(pj) = col_count(pj) + 1
+        end if
       end if
-      col_count(pi) = col_count(pi) + 1
     end do
   end do
 
-  ! Also propagate fill through the tree: if parent(i)=j then
-  ! col j inherits (col_count(i)-1) entries minus one for column i itself.
-  ! Simple approximation: col_count(parent(i)) += max(col_count(i) - 1, 0)
-  ! We skip this for now and rely on the structure-based merge criterion.
+  ! Propagate fill through the tree (MUMPS ANA_LNEW style):
+  ! col_count(parent(i)) gets contribution from child i
+  do i = 1, n
+    if (parent(i) > 0 .and. parent(i) <= n) then
+      if (col_count(i) > 1) then
+        col_count(parent(i)) = max(col_count(parent(i)), col_count(i) - 1)
+      end if
+    end if
+  end do
 
   ! Count children
   do i = 1, n
@@ -171,21 +204,14 @@ subroutine identify_supernodes(mat, lu)
   end do
 
   ! ---- Step 2: Fundamental supernode detection ----
-  ! column j starts a new supernode if:
-  !   parent(j-1) /= j  OR  children_count(j) > 1
-  !   (i.e., parent chain is broken or j has multiple children)
   sbelong(1) = 1
   nsuper = 1
   do i = 2, n
     can_merge = .true.
-    ! parent of previous column must be this column
     if (parent(i-1) /= i) can_merge = .false.
-    ! this column must have exactly one child (the previous column)
     if (children_count(i) > 1) can_merge = .false.
-    ! column count compatibility (approximate)
     if (can_merge .and. col_count(i) > 0 .and. col_count(i-1) > 0) then
       if (col_count(i) /= col_count(i-1) - 1) then
-        ! Allow relaxed merging if nodes are small
         if (col_count(i-1) > nemin .and. col_count(i) > nemin) then
           can_merge = .false.
         end if
@@ -204,21 +230,18 @@ subroutine identify_supernodes(mat, lu)
   allocate(sstart(nsuper), ssize(nsuper), sparent(nsuper), sfsize(nsuper))
   sstart = 0; ssize = 0; sparent = 0; sfsize = 0
 
-  ! sstart = first variable, ssize = count of variables
   do i = 1, n
     k = sbelong(i)
     ssize(k) = ssize(k) + 1
     if (sstart(k) == 0) sstart(k) = i
   end do
 
-  ! sparent: parent supernode
   do i = 1, nsuper
-    ! last variable in this supernode
     k = sstart(i) + ssize(i) - 1
     if (parent(k) > 0 .and. parent(k) <= n) then
       sparent(i) = sbelong(parent(k))
     else
-      sparent(i) = 0   ! root
+      sparent(i) = 0
     end if
   end do
 
@@ -226,15 +249,12 @@ subroutine identify_supernodes(mat, lu)
   call relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, &
                         parent, col_count, nemin)
 
-  ! ---- Step 5: Compute frontal sizes ----
-  ! frontal size = npiv + number of rows/cols that appear in the
-  ! frontal matrix but are not pivoted (the "index" set beyond pivots)
+  ! ---- Step 5: Compute frontal sizes (O(nz) CSC-based approach) ----
   call compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
                              nsuper, sstart, ssize, sparent, sbelong, sfsize)
 
   end associate
 
-  ! Store results into lu
   lu%nsuper = nsuper
   lu%snode_belong = sbelong
   lu%snode_start = sstart
@@ -242,11 +262,12 @@ subroutine identify_supernodes(mat, lu)
   lu%snode_parent = sparent
   lu%snode_fsize = sfsize
 
-  deallocate(col_count, children_count)
+  deallocate(col_count, children_count, flag)
 end subroutine
 
 !==============================================================================
 ! Relaxed supernode merging: merge parent-child pairs when both are small
+! Optimized: O(n) sbelong update using sstart/ssize ranges instead of O(n*nsuper)
 !==============================================================================
 subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, &
                             parent, col_count, nemin)
@@ -257,7 +278,7 @@ subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, 
   integer(kint), intent(in)    :: parent(n), col_count(n)
 
   logical, allocatable :: merged(:)
-  integer(kint) :: i, s, sp, new_nsuper
+  integer(kint) :: i, s, sp, new_nsuper, j
   integer(kint), allocatable :: new_sstart(:), new_ssize(:), new_sparent(:), new_sfsize(:)
   integer(kint), allocatable :: map(:)
 
@@ -269,8 +290,6 @@ subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, 
     sp = sparent(s)
     if (sp > 0 .and. sp <= nsuper .and. sp /= s) then
       if (ssize(s) <= nemin .and. ssize(sp) <= nemin) then
-        ! Check that s is the only child feeding into sp
-        ! (simple check: merge only if sparent is the immediate successor)
         if (sstart(sp) == sstart(s) + ssize(s)) then
           merged(s) = .true.
         end if
@@ -278,17 +297,15 @@ subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, 
     end if
   end do
 
-  ! Apply merges: fold merged supernodes into their parents
+  ! Apply merges using direct range update (O(total_merged_size) instead of O(n*nmerged))
   do s = 1, nsuper
     if (merged(s)) then
       sp = sparent(s)
-      ! Expand parent to include child
       sstart(sp) = min(sstart(sp), sstart(s))
       ssize(sp) = ssize(sp) + ssize(s)
-      sparent(sp) = sparent(sp)   ! keep parent's parent
-      ! Update sbelong
-      do i = 1, n
-        if (sbelong(i) == s) sbelong(i) = sp
+      ! Direct range update: only touch variables belonging to supernode s
+      do j = sstart(s), sstart(s) + ssize(s) - 1
+        if (j >= 1 .and. j <= n) sbelong(j) = sp
       end do
     end if
   end do
@@ -315,7 +332,6 @@ subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, 
       new_sfsize(i) = sfsize(s)
       if (sparent(s) > 0 .and. sparent(s) <= nsuper) then
         sp = sparent(s)
-        ! Find the non-merged ancestor
         do while (merged(sp) .and. sp > 0 .and. sp <= nsuper)
           sp = sparent(sp)
         end do
@@ -330,12 +346,11 @@ subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, 
     end if
   end do
 
-  ! Update sbelong
+  ! Update sbelong with map
   do i = 1, n
     sbelong(i) = map(sbelong(i))
   end do
 
-  ! Replace arrays
   deallocate(sstart, ssize, sparent, sfsize)
   nsuper = new_nsuper
   allocate(sstart(nsuper), ssize(nsuper), sparent(nsuper), sfsize(nsuper))
@@ -350,11 +365,9 @@ end subroutine
 !==============================================================================
 ! Compute frontal sizes for each supernode
 !
-! The frontal size of supernode s is:
-!   nfront(s) = npiv(s) + |{ row indices in L columns of s that are > last pivot of s }|
-!
-! We compute this by finding all row indices that appear in the columns
-! belonging to supernode s (in the permuted matrix + fill from children).
+! Optimized O(nz) approach: build permuted CSC, then scan only columns
+! belonging to each supernode. Uses marker array with supernode-based
+! timestamp to avoid O(n) resets per supernode.
 !==============================================================================
 subroutine compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
                                  nsuper, sstart, ssize, sparent, sbelong, sfsize)
@@ -366,72 +379,101 @@ subroutine compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
   integer(kint), intent(in) :: sparent(nsuper), sbelong(n)
   integer(kint), intent(inout) :: sfsize(nsuper)
 
-  integer(kint), allocatable :: row_set(:)
-  logical, allocatable :: marker(:)
-  integer(kint) :: s, k, pi, pj, tmp, r, c, cnt
-  integer(kint) :: first_col, last_col, child
+  ! Permuted CSC representation
+  integer(kint), allocatable :: csc_ptr(:), csc_row(:)
+  integer(kint), allocatable :: csc_count(:)
+  ! Marker with supernode-id timestamp (avoids reset)
+  integer(kint), allocatable :: marker(:)
+  integer(kint) :: s, k, pi, pj, r, c, cnt, nadj
+  integer(kint) :: first_col, last_col, col, pos
+  integer(kint) :: child_cnt, child_fsize, child_npiv
 
-  allocate(marker(n), row_set(n))
+  ! ---- Build permuted CSC: for each permuted column pj, list of rows pi ----
+  allocate(csc_count(n))
+  csc_count = 0
 
+  ! Count entries per permuted column (lower triangle: pi > pj stored in col pj)
+  do r = 1, n
+    pi = invperm(r)
+    do k = row_ptr(r)+1, row_ptr(r+1)
+      c = col_ind(k)
+      if (r == c) cycle
+      pj = invperm(c)
+      if (pi > pj) then
+        csc_count(pj) = csc_count(pj) + 1
+      else
+        csc_count(pi) = csc_count(pi) + 1
+      end if
+    end do
+  end do
+
+  allocate(csc_ptr(n+1))
+  csc_ptr(1) = 1
+  do k = 2, n+1
+    csc_ptr(k) = csc_ptr(k-1) + csc_count(k-1)
+  end do
+  nadj = csc_ptr(n+1) - 1
+
+  allocate(csc_row(max(nadj, 1)))
+  csc_count = 0
+
+  do r = 1, n
+    pi = invperm(r)
+    do k = row_ptr(r)+1, row_ptr(r+1)
+      c = col_ind(k)
+      if (r == c) cycle
+      pj = invperm(c)
+      if (pi > pj) then
+        csc_count(pj) = csc_count(pj) + 1
+        csc_row(csc_ptr(pj) + csc_count(pj) - 1) = pi
+      else
+        csc_count(pi) = csc_count(pi) + 1
+        csc_row(csc_ptr(pi) + csc_count(pi) - 1) = pj
+      end if
+    end do
+  end do
+
+  deallocate(csc_count)
+
+  ! ---- Compute frontal sizes using CSC: O(nz) total ----
+  ! marker(pi) = s means pi is already counted for supernode s (avoids O(n) reset)
+  allocate(marker(n))
+  marker = 0
+
+  ! Process supernodes bottom-up (leaves first) to propagate CB indices
+  ! Simple approach: process in order 1..nsuper (postorder approximation for chains)
   do s = 1, nsuper
     first_col = sstart(s)
     last_col  = sstart(s) + ssize(s) - 1
-    marker = .false.
     cnt = 0
 
-    ! Mark all row indices from original matrix entries
-    ! that fall into columns [first_col .. last_col] in permuted order
-    do r = 1, n
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        pi = invperm(r)
-        pj = invperm(c)
-
-        ! Check if pj is in this supernode's columns
-        if (pj >= first_col .and. pj <= last_col) then
-          if (pi > last_col .and. .not. marker(pi)) then
-            marker(pi) = .true.
-            cnt = cnt + 1
-          end if
-        end if
-        ! Symmetric: also check transpose
-        if (pi >= first_col .and. pi <= last_col) then
-          if (pj > last_col .and. .not. marker(pj)) then
-            marker(pj) = .true.
-            cnt = cnt + 1
-          end if
+    ! Scan CSC entries for columns in [first_col..last_col]
+    do col = first_col, last_col
+      do pos = csc_ptr(col), csc_ptr(col+1) - 1
+        pi = csc_row(pos)
+        if (pi > last_col .and. marker(pi) /= s) then
+          marker(pi) = s
+          cnt = cnt + 1
         end if
       end do
     end do
 
-    ! Also include indices from children's contribution blocks
-    ! (indices that survive from child into parent)
-    do child = 1, nsuper
-      if (sparent(child) == s) then
-        ! The contribution block of child has indices > last pivot of child
-        ! that also appear in parent. We approximate this: all indices
-        ! of child's frontal beyond its pivots propagate upward.
-        ! (Precise computation would require the child's index set, but
-        !  at this stage we use the original matrix structure.)
-      end if
-    end do
-
     sfsize(s) = ssize(s) + cnt
-    ! At minimum, frontal size = pivot count
     if (sfsize(s) < ssize(s)) sfsize(s) = ssize(s)
   end do
 
-  deallocate(marker, row_set)
+  deallocate(marker, csc_ptr, csc_row)
 end subroutine
 
 !==============================================================================
 ! Build child-sibling representation for the supernode tree
+! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
 !==============================================================================
 subroutine build_frontal_tree(mat, lu)
   type(matrix_data), intent(in) :: mat
   type(monolis_mat_lu), intent(inout) :: lu
 
-  integer(kint) :: nsuper, s, p, cur
+  integer(kint) :: nsuper, s, p
 
   nsuper = lu%nsuper
   allocate(lu%sfils(nsuper), lu%sfrere(nsuper))
@@ -440,18 +482,13 @@ subroutine build_frontal_tree(mat, lu)
 
   associate(sparent => lu%snode_parent, sfils => lu%sfils, sfrere => lu%sfrere)
 
-  do s = 1, nsuper
+  ! Head-prepend: O(1) per supernode, O(nsuper) total
+  ! Each child is inserted at the head of its parent's child list
+  do s = nsuper, 1, -1
     p = sparent(s)
     if (p > 0 .and. p <= nsuper) then
-      if (sfils(p) == 0) then
-        sfils(p) = s
-      else
-        cur = sfils(p)
-        do while (sfrere(cur) /= 0)
-          cur = sfrere(cur)
-        end do
-        sfrere(cur) = s
-      end if
+      sfrere(s) = sfils(p)   ! current child becomes sibling of new head
+      sfils(p) = s            ! new child becomes head
     end if
   end do
 
@@ -462,12 +499,12 @@ end subroutine
 ! Multifrontal lu factorization
 !
 ! Process supernodes in postorder (leaves first, root last).
-! For each supernode:
-!   1. Allocate frontal matrix
-!   2. Assemble original entries (arrowhead)
-!   3. Extend-add contribution blocks from children
-!   4. Partial pivot lu on the fully-assembled pivots
-!   5. Store L, U factors and contribution block
+! Optimized with:
+!   - Pre-built permuted CSC for O(nnz_local) index set construction
+!   - MUMPS-style imap for O(1) position lookup
+!   - CSC-based assembly (only scan relevant columns)
+!   - Column-wise extend-add with DAXPY
+!   - Quicksort for index sorting
 !==============================================================================
 subroutine multifrontal_factorize(mat, lu)
   type(matrix_data), intent(in) :: mat
@@ -477,12 +514,14 @@ subroutine multifrontal_factorize(mat, lu)
   integer(kint), allocatable :: postorder(:)
   integer(kint) :: s, ip, nfront, npiv, k, i, j
   integer(kint) :: first_col, last_col
-  integer(kint) :: pi, pj, cnt, r, c
+  integer(kint) :: pi, pj, cnt, r, c, col, pos
   integer(kint), allocatable :: idx_set(:)
-  logical, allocatable :: marker(:)
   integer(kint) :: child
   ! ---- MUMPS-style: global index map for O(1) position lookup ----
-  integer(kint), allocatable :: imap(:)   ! imap(global_idx) -> position in frontal
+  integer(kint), allocatable :: imap(:)
+
+  ! ---- Pre-built permuted CSC for O(nnz_local) assembly ----
+  integer(kint), allocatable :: csc_ptr(:), csc_row(:), csc_origk(:)
 
   n = mat%n; nz = mat%nz; nsuper = lu%nsuper; ndof = mat%ndof
   info = 0
@@ -496,7 +535,13 @@ subroutine multifrontal_factorize(mat, lu)
             sfils => lu%sfils, sfrere => lu%sfrere, factors => lu%factors)
 
   call build_postorder(nsuper, sfils, sfrere, sparent, postorder)
-  allocate(marker(n), imap(n))
+
+  ! ---- Pre-build permuted CSC: for each permuted column, list (row, orig_k) ----
+  ! This allows O(nnz_local) assembly per supernode instead of O(n*nz)
+  call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
+                          csc_ptr, csc_row, csc_origk)
+
+  allocate(imap(n))
   imap = 0
 
   ! ================================================================
@@ -508,33 +553,29 @@ subroutine multifrontal_factorize(mat, lu)
     first_col = sstart(s)
     last_col  = first_col + npiv - 1
 
-    ! ---- Determine index set of the frontal matrix ----
-    marker = .false.
+    ! ---- Determine index set using CSC (O(nnz_local)) ----
     cnt = 0
     allocate(idx_set(n))
 
-    ! Pivot columns
+    ! Pivot columns - mark via imap as temporary flag (use negative values)
     do i = first_col, last_col
-      marker(i) = .true.
+      imap(i) = -1   ! temporary flag: "in pivot set"
     end do
     cnt = npiv
     idx_set(1:npiv) = (/ (i, i = first_col, last_col) /)
 
-    ! Row indices from original matrix (only update indices > last_col)
-    do r = 1, n
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        pi = invperm(r)
-        pj = invperm(c)
-        if (pj >= first_col .and. pj <= last_col) then
-          if (pi > last_col .and. .not. marker(pi)) then
-            cnt = cnt + 1; idx_set(cnt) = pi; marker(pi) = .true.
-          end if
+    ! Row indices from CSC columns in [first_col..last_col]
+    do col = first_col, last_col
+      do pos = csc_ptr(col), csc_ptr(col+1) - 1
+        ! csc_row stores packed (pi, pj) pairs; get the "other" index (larger one)
+        pi = csc_row(2*pos-1)
+        pj = csc_row(2*pos)
+        ! Check both indices: the one > last_col needs to be in the index set
+        if (pi > last_col .and. imap(pi) == 0) then
+          cnt = cnt + 1; idx_set(cnt) = pi; imap(pi) = -1
         end if
-        if (pi >= first_col .and. pi <= last_col) then
-          if (pj > last_col .and. .not. marker(pj)) then
-            cnt = cnt + 1; idx_set(cnt) = pj; marker(pj) = .true.
-          end if
+        if (pj > last_col .and. imap(pj) == 0) then
+          cnt = cnt + 1; idx_set(cnt) = pj; imap(pj) = -1
         end if
       end do
     end do
@@ -544,18 +585,19 @@ subroutine multifrontal_factorize(mat, lu)
     do while (child /= 0)
       do i = factors(child)%npiv + 1, factors(child)%nfront
         j = factors(child)%indices(i)
-        if (j >= first_col .and. .not. marker(j)) then
-          cnt = cnt + 1; idx_set(cnt) = j; marker(j) = .true.
+        if (j >= first_col .and. imap(j) == 0) then
+          cnt = cnt + 1; idx_set(cnt) = j; imap(j) = -1
         end if
       end do
       child = sfrere(child)
     end do
 
     nfront = cnt
-    call sort_index_set(idx_set, nfront, npiv, first_col, last_col)
-    do i = 1, nfront
-      marker(idx_set(i)) = .false.
-    end do
+
+    ! Sort: pivots first (already in place), then others by quicksort
+    if (nfront - npiv > 1) then
+      call quicksort(idx_set(npiv+1:nfront), nfront - npiv)
+    end if
 
     ! ---- Build global index map (MUMPS-style O(1) lookup) ----
     do i = 1, nfront
@@ -573,24 +615,22 @@ subroutine multifrontal_factorize(mat, lu)
     factors(s)%pivorder = (/ (i, i = 1, npiv) /)
     deallocate(idx_set)
 
-    ! ---- Assemble original entries using imap (O(1) per entry) ----
-    call assemble_original_mapped(n, nz, ndof, row_ptr, col_ind, a_elt, invperm, &
-                                  nfront, factors(s)%front, &
-                                  first_col, last_col, imap)
+    ! ---- Assemble original entries using CSC + imap (O(nnz_local)) ----
+    call assemble_original_csc(n, ndof, csc_ptr, csc_row, csc_origk, a_elt, &
+                               nfront, factors(s)%front, &
+                               first_col, last_col, imap)
 
     ! ---- Extend-add from children using imap (O(1) per element) ----
     child = sfils(s)
     do while (child /= 0)
       call extend_add_mapped(factors(child), factors(s), imap, ndof)
-      ! Free child's contribution block (L/U factors still needed for solve)
-      ! We keep front because solve reads from it.
       child = sfrere(child)
     end do
 
     ! ---- BLAS Level-3 blocked lu factorization (MUMPS FAC_H/P style) ----
     call frontal_lu_factor_blas(factors(s)%front, nfront*ndof, npiv*ndof, info)
     if (info /= 0) then
-      info = 0  ! continue with small pivot
+      info = 0
     end if
 
     ! ---- Clear imap entries for this frontal ----
@@ -599,8 +639,204 @@ subroutine multifrontal_factorize(mat, lu)
     end do
   end do
 
-  deallocate(marker, imap, postorder)
+  deallocate(imap, postorder, csc_ptr, csc_row, csc_origk)
   end associate
+end subroutine
+
+!==============================================================================
+! Build permuted CSC: for each permuted column min(pi,pj), store (pi, pj, orig_k)
+! Stores both original permuted indices to preserve assembly direction.
+!==============================================================================
+subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
+                              csc_ptr, csc_row, csc_origk)
+  integer(kint), intent(in) :: n, nz
+  integer(kint), intent(in) :: row_ptr(n+1), col_ind(nz)
+  integer(kint), intent(in) :: invperm(n)
+  integer(kint), allocatable, intent(out) :: csc_ptr(:), csc_row(:), csc_origk(:)
+
+  integer(kint), allocatable :: csc_count(:), csc_col2(:)
+  integer(kint) :: r, k, c, pi, pj, nadj, mn
+
+  allocate(csc_count(n))
+  csc_count = 0
+
+  ! Count: store each edge in the column with smaller permuted index
+  do r = 1, n
+    pi = invperm(r)
+    do k = row_ptr(r)+1, row_ptr(r+1)
+      c = col_ind(k)
+      pj = invperm(c)
+      mn = min(pi, pj)
+      csc_count(mn) = csc_count(mn) + 1
+    end do
+  end do
+
+  allocate(csc_ptr(n+1))
+  csc_ptr(1) = 1
+  do k = 2, n+1
+    csc_ptr(k) = csc_ptr(k-1) + csc_count(k-1)
+  end do
+  nadj = csc_ptr(n+1) - 1
+
+  ! csc_row stores the original pi (invperm(r)), csc_origk stores both orig k
+  ! and we add csc_col2 for original pj (invperm(c))
+  allocate(csc_row(nadj), csc_origk(nadj), csc_col2(nadj))
+  csc_count = 0
+
+  do r = 1, n
+    pi = invperm(r)
+    do k = row_ptr(r)+1, row_ptr(r+1)
+      c = col_ind(k)
+      pj = invperm(c)
+      mn = min(pi, pj)
+      csc_count(mn) = csc_count(mn) + 1
+      ! Store original (pi, pj) so assembly direction is preserved
+      csc_row(csc_ptr(mn) + csc_count(mn) - 1) = pi
+      csc_col2(csc_ptr(mn) + csc_count(mn) - 1) = pj
+      csc_origk(csc_ptr(mn) + csc_count(mn) - 1) = k
+    end do
+  end do
+
+  ! Pack csc_col2 into csc_row by interleaving: store as (pi, pj) pairs
+  ! Use separate arrays — csc_row = pi, csc_origk encodes k, extend with csc_col2
+  ! For simplicity, store pj in a separate allocatable that we'll pass around.
+  ! Actually, we'll encode differently: csc_row(pos) = pi, we need pj too.
+  ! Solution: double the array and pack (pi, pj) pairs.
+
+  ! Re-allocate csc_row to hold both pi and pj
+  ! We'll use: csc_row(pos) = pi * (n+1) + pj as packed encoding won't work for large n
+  ! Instead, simply reallocate csc_row to size 2*nadj: odd=pi, even=pj
+  block
+    integer(kint), allocatable :: temp(:)
+    allocate(temp(2*nadj))
+    do k = 1, nadj
+      temp(2*k-1) = csc_row(k)    ! pi
+      temp(2*k)   = csc_col2(k)   ! pj
+    end do
+    deallocate(csc_row)
+    allocate(csc_row(2*nadj))
+    csc_row = temp
+    deallocate(temp)
+  end block
+
+  deallocate(csc_count, csc_col2)
+end subroutine
+
+!==============================================================================
+! Assemble original entries using pre-built CSC (O(nnz_local) per supernode)
+! Preserves original (pi, pj) direction for correct non-symmetric assembly.
+!==============================================================================
+subroutine assemble_original_csc(n, ndof, csc_ptr, csc_row, csc_origk, a_elt, &
+                                  nfront, front, first_col, last_col, imap)
+  integer(kint), intent(in) :: n, ndof
+  integer(kint), intent(in) :: csc_ptr(n+1), csc_row(*), csc_origk(*)
+  real(kdouble), intent(in) :: a_elt(*)
+  integer(kint), intent(in) :: nfront
+  real(kdouble), intent(inout) :: front(nfront*ndof, nfront*ndof)
+  integer(kint), intent(in) :: first_col, last_col
+  integer(kint), intent(in) :: imap(n)
+
+  integer(kint) :: col, pos, pi, pj, ii, jj, id, jd, base, origk
+
+  ! Scan only columns [first_col..last_col] in permuted CSC
+  do col = first_col, last_col
+    do pos = csc_ptr(col), csc_ptr(col+1) - 1
+      ! Retrieve original (pi, pj) from packed storage
+      pi = csc_row(2*pos-1)
+      pj = csc_row(2*pos)
+      ii = imap(pi)
+      jj = imap(pj)
+      if (ii > 0 .and. jj > 0) then
+        origk = csc_origk(pos)
+        base = (origk-1)*ndof*ndof
+        do jd = 1, ndof
+          do id = 1, ndof
+            front((ii-1)*ndof+id, (jj-1)*ndof+jd) = &
+              front((ii-1)*ndof+id, (jj-1)*ndof+jd) + a_elt(base + (id-1)*ndof + jd)
+          end do
+        end do
+      end if
+    end do
+  end do
+end subroutine
+
+!==============================================================================
+! Quicksort for integer arrays (replaces O(n^2) insertion sort)
+!==============================================================================
+subroutine quicksort(arr, n)
+  integer(kint), intent(inout) :: arr(n)
+  integer(kint), intent(in) :: n
+
+  integer(kint) :: stack(2, 64)  ! log2(max_n) levels suffice
+  integer(kint) :: sp, lo, hi, i, j, pivot, tmp, mid
+
+  if (n <= 1) return
+
+  ! Fall back to insertion sort for small arrays
+  if (n <= 32) then
+    call isort(arr, n)
+    return
+  end if
+
+  sp = 1
+  stack(1, 1) = 1
+  stack(2, 1) = n
+
+  do while (sp > 0)
+    lo = stack(1, sp)
+    hi = stack(2, sp)
+    sp = sp - 1
+
+    if (hi - lo < 16) then
+      ! Insertion sort for small partitions
+      do i = lo + 1, hi
+        tmp = arr(i)
+        j = i - 1
+        do while (j >= lo)
+          if (arr(j) <= tmp) exit
+          arr(j+1) = arr(j)
+          j = j - 1
+        end do
+        arr(j+1) = tmp
+      end do
+      cycle
+    end if
+
+    ! Median-of-three pivot selection
+    mid = (lo + hi) / 2
+    if (arr(lo) > arr(mid)) then; tmp = arr(lo); arr(lo) = arr(mid); arr(mid) = tmp; end if
+    if (arr(lo) > arr(hi))  then; tmp = arr(lo); arr(lo) = arr(hi);  arr(hi)  = tmp; end if
+    if (arr(mid) > arr(hi)) then; tmp = arr(mid); arr(mid) = arr(hi); arr(hi) = tmp; end if
+    pivot = arr(mid)
+    arr(mid) = arr(hi - 1)
+    arr(hi - 1) = pivot
+
+    i = lo
+    j = hi - 1
+    do
+      do
+        i = i + 1
+        if (arr(i) >= pivot) exit
+      end do
+      do
+        j = j - 1
+        if (arr(j) <= pivot) exit
+      end do
+      if (i >= j) exit
+      tmp = arr(i); arr(i) = arr(j); arr(j) = tmp
+    end do
+    arr(hi - 1) = arr(i)
+    arr(i) = pivot
+
+    ! Push larger partition first (ensures O(log n) stack depth)
+    if (i - lo > hi - i) then
+      if (lo < i - 1) then; sp = sp + 1; stack(1, sp) = lo; stack(2, sp) = i - 1; end if
+      if (i + 1 < hi) then; sp = sp + 1; stack(1, sp) = i + 1; stack(2, sp) = hi; end if
+    else
+      if (i + 1 < hi) then; sp = sp + 1; stack(1, sp) = i + 1; stack(2, sp) = hi; end if
+      if (lo < i - 1) then; sp = sp + 1; stack(1, sp) = lo; stack(2, sp) = i - 1; end if
+    end if
+  end do
 end subroutine
 
 !==============================================================================
@@ -660,43 +896,7 @@ subroutine build_postorder(nsuper, sfils, sfrere, sparent, postorder)
 end subroutine
 
 !==============================================================================
-! Sort index set: pivots in [first_col..last_col] first (in order),
-! then remaining indices in ascending order
-!==============================================================================
-subroutine sort_index_set(idx, n, npiv, first_col, last_col)
-  integer(kint), intent(inout) :: idx(n)
-  integer(kint), intent(in) :: n, npiv, first_col, last_col
-
-  integer(kint), allocatable :: pivots(:), others(:)
-  integer(kint) :: i, np, no, j, tmp
-
-  allocate(pivots(npiv), others(n))
-  np = 0; no = 0
-
-  do i = 1, n
-    if (idx(i) >= first_col .and. idx(i) <= last_col) then
-      np = np + 1
-      pivots(np) = idx(i)
-    else
-      no = no + 1
-      others(no) = idx(i)
-    end if
-  end do
-
-  ! Sort pivots
-  call isort(pivots, np)
-  ! Sort others
-  call isort(others, no)
-
-  ! Reassemble
-  idx(1:np) = pivots(1:np)
-  idx(np+1:np+no) = others(1:no)
-
-  deallocate(pivots, others)
-end subroutine
-
-!==============================================================================
-! Simple insertion sort for small integer(kint) arrays
+! Simple insertion sort for small integer(kint) arrays (used by quicksort)
 !==============================================================================
 subroutine isort(arr, n)
   integer(kint), intent(inout) :: arr(n)
@@ -716,48 +916,6 @@ subroutine isort(arr, n)
 end subroutine
 
 !==============================================================================
-! Assemble original matrix entries into frontal matrix
-!==============================================================================
-!==============================================================================
-! Assemble original matrix entries using precomputed imap (O(1) lookup)
-! MUMPS-style: imap(global_idx) gives position in frontal matrix directly
-!==============================================================================
-subroutine assemble_original_mapped(n, nz, ndof, row_ptr, col_ind, a_elt, invperm, &
-                                     nfront, front, first_col, last_col, imap)
-  integer(kint), intent(in) :: n, nz, ndof
-  integer(kint), intent(in) :: row_ptr(n+1), col_ind(nz)
-  real(kdouble), intent(in) :: a_elt(ndof*ndof*nz)
-  integer(kint), intent(in) :: invperm(n)
-  integer(kint), intent(in) :: nfront
-  real(kdouble), intent(inout) :: front(nfront*ndof, nfront*ndof)
-  integer(kint), intent(in) :: first_col, last_col
-  integer(kint), intent(in) :: imap(n)
-
-  integer(kint) :: k, pi, pj, ii, jj, mn, r, c, id, jd, base
-
-  do r = 1, n
-    do k = row_ptr(r)+1, row_ptr(r+1)
-      c = col_ind(k)
-      pi = invperm(r)
-      pj = invperm(c)
-      mn = min(pi, pj)
-      if (mn < first_col .or. mn > last_col) cycle
-      ii = imap(pi)
-      jj = imap(pj)
-      if (ii > 0 .and. jj > 0) then
-        base = (k-1)*ndof*ndof  ! k is already 1-based here
-        do jd = 1, ndof
-          do id = 1, ndof
-            front((ii-1)*ndof+id, (jj-1)*ndof+jd) = &
-              front((ii-1)*ndof+id, (jj-1)*ndof+jd) + a_elt(base + (id-1)*ndof + jd)
-          end do
-        end do
-      end if
-    end do
-  end do
-end subroutine
-
-!==============================================================================
 ! Extend-add: add child's contribution block into parent's frontal matrix
 !
 ! The contribution block is the Schur complement of the child's frontal
@@ -765,9 +923,9 @@ end subroutine
 ! after lu elimination of the pivot rows/columns.
 !==============================================================================
 !==============================================================================
-! Extend-add using precomputed imap (O(1) per element)
-! MUMPS-style: parent's imap is already set, so we map child's CB indices
-! directly to parent positions without linear search.
+! Extend-add using precomputed imap + column-wise DAXPY (MUMPS-style)
+! Parent's imap maps child's CB indices directly to parent positions.
+! Column-wise traversal for cache-friendly access + DAXPY for inner loop.
 !==============================================================================
 subroutine extend_add_mapped(child_fac, parent_fac, imap, ndof)
   type(monolis_mat_frontal), intent(in)    :: child_fac
@@ -776,36 +934,50 @@ subroutine extend_add_mapped(child_fac, parent_fac, imap, ndof)
   integer(kint), intent(in) :: ndof
 
   integer(kint) :: ic, jc, ip, jp, id, jd
-  integer(kint) :: npiv_c, nfront_c, ncb
+  integer(kint) :: npiv_c, nfront_c, ncb, nf_p
   integer(kint), allocatable :: cb_map(:)
+  integer(kint) :: ncb_valid, iv
+  integer(kint), allocatable :: valid_ic(:), valid_ip(:)
 
   npiv_c  = child_fac%npiv
   nfront_c = child_fac%nfront
   ncb = nfront_c - npiv_c
+  nf_p = parent_fac%nfront
   if (ncb <= 0) return
 
-  allocate(cb_map(ncb))
+  ! Pre-compute CB index mapping and filter valid entries
+  allocate(cb_map(ncb), valid_ic(ncb), valid_ip(ncb))
+  ncb_valid = 0
   do ic = 1, ncb
     cb_map(ic) = imap(child_fac%indices(npiv_c + ic))
+    if (cb_map(ic) > 0) then
+      ncb_valid = ncb_valid + 1
+      valid_ic(ncb_valid) = ic
+      valid_ip(ncb_valid) = cb_map(ic)
+    end if
   end do
+  if (ncb_valid == 0) then
+    deallocate(cb_map, valid_ic, valid_ip)
+    return
+  end if
 
+  ! Column-wise scatter-add (cache-friendly: access parent_fac%front by columns)
   do jc = 1, ncb
     jp = cb_map(jc)
     if (jp == 0) cycle
-    do ic = 1, ncb
-      ip = cb_map(ic)
-      if (ip == 0) cycle
-      do jd = 1, ndof
-        do id = 1, ndof
-          parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) = &
-            parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) + &
-            child_fac%front((npiv_c+ic-1)*ndof+id, (npiv_c+jc-1)*ndof+jd)
-        end do
+    do jd = 1, ndof
+      do iv = 1, ncb_valid
+        ic = valid_ic(iv)
+        ip = valid_ip(iv)
+        ! DAXPY-style: add child CB column segment to parent
+        call daxpy(ndof, 1.0d0, &
+                   child_fac%front((npiv_c+ic-1)*ndof+1, (npiv_c+jc-1)*ndof+jd), 1, &
+                   parent_fac%front((ip-1)*ndof+1, (jp-1)*ndof+jd), 1)
       end do
     end do
   end do
 
-  deallocate(cb_map)
+  deallocate(cb_map, valid_ic, valid_ip)
 end subroutine
 
 !==============================================================================
