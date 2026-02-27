@@ -10,16 +10,6 @@ module mod_monolis_fact_LU_nn
 
   implicit none
 
-  integer(kint) :: n_fact_array
-  integer(kint) :: n_super_node
-  integer(kint), allocatable :: super_node_id(:)
-  integer(kint), allocatable :: super_node_size(:)
-  integer(kint), allocatable :: super_node_parent_id(:)
-  integer(kint), allocatable :: front_size(:)
-  integer(kint), allocatable :: fact_array_index(:)
-  integer(kint), allocatable :: add_location(:)
-  real(kdouble), allocatable :: fact_array(:)
-
 contains
 
   !> @ingroup prec
@@ -31,8 +21,6 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoLU
     type(monolis_mat) :: monoMAT_reorder
-    logical :: is_asym = .false.
-    logical :: is_fillin = .true.
     real(kdouble) :: t(20)
 
     t(1) = monolis_get_time()
@@ -43,52 +31,9 @@ contains
     t(2) = monolis_get_time()
     write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
 
-    call monolis_matrix_get_fillin(monoMAT_reorder, monoLU, is_asym, is_fillin)
+    !monoMAT%REORDER%perm
+    !monoMAT%REORDER%iperm
 
-    t(3) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_fillin                  ", t(3) - t(2)
-
-    call monolis_matrix_get_super_node_information(monoLU, n_super_node, &
-      & super_node_id, super_node_size, super_node_parent_id)
-
-    t(4) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_super_node_information  ", t(4) - t(3)
-
-    call monolis_matrix_alloc_with_fillin(monoLU, is_asym)
-
-    t(5) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_alloc_with_fillin           ", t(5) - t(4)
-
-    call monolis_matrix_get_factorize_array(monoLU, n_super_node, super_node_id, &
-      & n_fact_array, fact_array, fact_array_index, front_size)
-
-    t(7) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_factorize_array         ", t(7) - t(5)
-
-    call monolis_matrix_set_value_of_factorize_array(monoMAT_reorder, monoLU, &
-      & n_super_node, super_node_id, super_node_size, fact_array, fact_array_index)
-
-    t(8) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_set_value_of_factorize_array", t(8) - t(7)
-
-    call monolis_matrix_get_add_location(monoLU, n_super_node, super_node_id, super_node_size, &
-      & super_node_parent_id, fact_array_index, front_size, add_location)
-
-    t(9) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_get_add_location            ", t(9) - t(8)
-
-    !> factorization phase
-    call monolis_matrix_factorize_mf(monoLU, n_super_node, super_node_id, super_node_size, &
-      & fact_array, fact_array_index, front_size, add_location)
-
-    t(10) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_factorize_mf                ", t(10) - t(9)
-
-    call monolis_matrix_copy_lu_factor(monoLU, n_super_node, super_node_id, super_node_size, &
-      & fact_array, fact_array_index)
-
-    t(11) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_copy_lu_factor              ", t(11) - t(10)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -111,62 +56,7 @@ contains
     !> [in] 前処理構造体
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
-    integer(kint) :: N, NDOF
-    integer(kint) :: i, j, k, in, jS, jE, kn
-    real(kdouble) :: X1, A1
-    real(kdouble), allocatable :: S(:)
-    integer(kint), pointer :: idxU(:), itemU(:)
-    real(kdouble), pointer :: A(:)
 
-    N  = monoLU%N
-    NDOF = 1
-    allocate(S(N), source = 0.0d0)
-
-    S = Y(1:N)
-    call monolis_reorder_vector_fw(monoMAT, N, NDOF, S, X)
-
-    idxU => monoLU%SCSR%indexU
-    itemU => monoLU%SCSR%itemU
-    A => monoLU%R%A
-    S = 0.0d0
-
-    !L
-    do i = 1, N
-      A1 = S(i)
-      in = idxU(i) + 1
-      X(i) = A(in)*(X(i) - A1)
-      X1 = X(i)
-      jS = idxU(i) + 2
-      jE = idxU(i + 1)
-      do j = jS, jE
-        in = itemU(j)
-        S(in) = S(in) + A(j)*X1
-      enddo
-    enddo
-
-    !D
-    do i = 1, N
-      in = idxU(i) + 1
-      X(i) = X(i)/A(in)
-    enddo
-
-    !U
-    do i = N, 1, -1
-      A1 = 0.0d0
-      jS = idxU(i) + 2
-      jE = idxU(i + 1)
-      do j = jE, jS, -1
-        in = itemU(j)
-        X1 = X(in)
-        A1 = A1 + A(j)*X1
-      enddo
-      in = idxU(i) + 1
-      X(i) = A(in)*(X(i) - A1)
-    enddo
-
-    S = X(1:N)
-    call monolis_reorder_back_vector_bk(monoMAT, N, NDOF, S, X)
-    deallocate(S)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
