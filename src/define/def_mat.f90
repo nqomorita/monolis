@@ -77,6 +77,58 @@ module mod_monolis_def_mat
     complex(kdouble), pointer :: cperm(:) => null()
   end type monolis_mat_reorder
   
+  type :: matrix_data
+    ! ---- CSR sparse matrix ----
+    integer :: N     ! matrix dimension
+    integer :: NDOF  ! matrix dimension
+    integer :: NZ    ! number of non-zeros
+    integer, allocatable :: ROW_PTR(:), COL_IND(:)
+    ! NDOF*NDOF*NZ
+    double precision, allocatable :: A_elt(:)
+
+    ! ---- Ordering ----
+    integer, allocatable :: PERM(:)     ! fill-reducing permutation
+    integer, allocatable :: INVPERM(:)  ! inverse permutation
+  end type
+
+  !>
+  type monolis_mat_frontal
+    !>
+    integer :: nfront
+    !>
+    integer :: npiv
+    !>
+    integer, allocatable :: indices(:)
+    !>
+    double precision, allocatable :: front(:,:)
+    !>
+    integer, allocatable :: pivorder(:)
+  end type monolis_mat_frontal
+
+  !>
+  type monolis_mat_lu
+    !>
+    type(monolis_mat_frontal), allocatable :: factors(:)
+    !>
+    integer, allocatable :: PARENT(:)
+    !>
+    integer :: NSUPER
+    !>
+    integer, allocatable :: SNODE_BELONG(:)
+    !>
+    integer, allocatable :: SNODE_START(:)
+    !>
+    integer, allocatable :: SNODE_SIZE(:)
+    !>
+    integer, allocatable :: SNODE_PARENT(:)
+    !>
+    integer, allocatable :: SNODE_FSIZE(:)
+    !>
+    integer, allocatable :: SFILS(:)
+    !>
+    integer, allocatable :: SFRERE(:)
+  end type monolis_mat_lu
+
   !> 行列構造体
   type monolis_mat
     !> 内部自由度数

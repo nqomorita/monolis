@@ -3,12 +3,14 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
-  use mod_monolis_fact_fillin
   use mod_monolis_fact_analysis
   use mod_monolis_fact_factorize
   use mod_monolis_spmat_reorder
 
   implicit none
+
+  type(matrix_data) :: MAT
+  type(monolis_mat_lu) :: LU
 
 contains
 
@@ -23,17 +25,40 @@ contains
     type(monolis_mat) :: monoMAT_reorder
     real(kdouble) :: t(20)
 
+    if(monoMAT%NDOF == -1)then
+      stop "monolis_fact_LU_nn_setup_R"
+    endif
+
     t(1) = monolis_get_time()
 
     !> analysis phase
     call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
 
     t(2) = monolis_get_time()
-    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
+!    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
 
     !monoMAT%REORDER%perm
     !monoMAT%REORDER%iperm
 
+    call build_elimination_tree(MAT, LU)
+
+    t(3) = monolis_get_time()
+!    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
+
+    call identify_supernodes(MAT, LU)
+
+    t(4) = monolis_get_time()
+!    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
+
+    call build_frontal_tree(MAT, LU)
+
+    t(5) = monolis_get_time()
+!    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
+
+    call multifrontal_factorize(MAT, LU)
+
+    t(6) = monolis_get_time()
+!    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -57,6 +82,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
+    call multifrontal_solve(MAT, LU, Y, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
