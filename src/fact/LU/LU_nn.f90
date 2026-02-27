@@ -54,6 +54,8 @@ contains
     LU_MAT%col_ind = monoMAT%CSR%item
     LU_MAT%a_elt = monoMAT%R%A
 
+    !call reverse_cuthill_mckee_ordering(mat, lu)
+
     call build_elimination_tree(LU_MAT, LU)
 
     t(3) = monolis_get_time()

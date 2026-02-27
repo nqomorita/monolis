@@ -498,13 +498,16 @@ end subroutine
 !==============================================================================
 ! Multifrontal lu factorization
 !
-! Process supernodes in postorder (leaves first, root last).
+! Two-pass approach for minimal overhead:
+!   Pass 1 (Symbolic): compute index sets, pre-allocate all frontal matrices
+!   Pass 2 (Numeric):  assemble + extend-add + factor (ZERO allocations)
+!
 ! Optimized with:
-!   - Pre-built permuted CSC for O(nnz_local) index set construction
-!   - MUMPS-style imap for O(1) position lookup
-!   - CSC-based assembly (only scan relevant columns)
-!   - Column-wise extend-add with DAXPY
-!   - Quicksort for index sorting
+!   - Pre-built permuted CSC with 3 separate arrays (cache-friendly)
+!   - All-at-once memory allocation (batch, not per-supernode)
+!   - Pre-allocated workspaces for index sets and CB maps
+!   - Inline extend-add (no DAXPY overhead for small ndof)
+!   - Adaptive LU kernel with small-front inlining
 !==============================================================================
 subroutine multifrontal_factorize(mat, lu)
   type(matrix_data), intent(in) :: mat
@@ -514,14 +517,13 @@ subroutine multifrontal_factorize(mat, lu)
   integer(kint), allocatable :: postorder(:)
   integer(kint) :: s, ip, nfront, npiv, k, i, j
   integer(kint) :: first_col, last_col
-  integer(kint) :: pi, pj, cnt, r, c, col, pos
-  integer(kint), allocatable :: idx_set(:)
+  integer(kint) :: pi, pj, cnt, col, pos
+  integer(kint), allocatable :: idx_work(:)   ! reusable workspace
   integer(kint) :: child
-  ! ---- MUMPS-style: global index map for O(1) position lookup ----
   integer(kint), allocatable :: imap(:)
-
-  ! ---- Pre-built permuted CSC for O(nnz_local) assembly ----
-  integer(kint), allocatable :: csc_ptr(:), csc_row(:), csc_origk(:)
+  integer(kint), allocatable :: csc_ptr(:), csc_pi(:), csc_pj(:), csc_origk(:)
+  integer(kint), allocatable :: cb_work(:)    ! reusable CB map workspace
+  integer(kint) :: max_cb
 
   n = mat%n; nz = mat%nz; nsuper = lu%nsuper; ndof = mat%ndof
   info = 0
@@ -534,133 +536,154 @@ subroutine multifrontal_factorize(mat, lu)
             sparent => lu%snode_parent, sfsize => lu%snode_fsize, &
             sfils => lu%sfils, sfrere => lu%sfrere, factors => lu%factors)
 
+  ! ================================================================
+  ! Phase 1: Build permuted CSC (3 separate arrays, cache-friendly)
+  ! ================================================================
+  call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
+                          csc_ptr, csc_pi, csc_pj, csc_origk)
   call build_postorder(nsuper, sfils, sfrere, sparent, postorder)
 
-  ! ---- Pre-build permuted CSC: for each permuted column, list (row, orig_k) ----
-  ! This allows O(nnz_local) assembly per supernode instead of O(n*nz)
-  call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
-                          csc_ptr, csc_row, csc_origk)
-
-  allocate(imap(n))
+  ! ================================================================
+  ! Phase 2: Symbolic factorization — compute exact index sets
+  ! Pre-allocate idx_work ONCE (eliminates N per-supernode allocations)
+  ! ================================================================
+  allocate(imap(n), idx_work(n))
   imap = 0
 
-  ! ================================================================
-  ! Process each supernode in postorder (leaves first, root last)
-  ! ================================================================
   do ip = 1, nsuper
     s = postorder(ip)
     npiv = ssize(s)
     first_col = sstart(s)
     last_col  = first_col + npiv - 1
 
-    ! ---- Determine index set using CSC (O(nnz_local)) ----
-    cnt = 0
-    allocate(idx_set(n))
-
-    ! Pivot columns - mark via imap as temporary flag (use negative values)
+    ! Pivot columns — mark via imap as temporary flag
     do i = first_col, last_col
-      imap(i) = -1   ! temporary flag: "in pivot set"
+      imap(i) = -1
     end do
     cnt = npiv
-    idx_set(1:npiv) = (/ (i, i = first_col, last_col) /)
+    do i = 1, npiv
+      idx_work(i) = first_col + i - 1
+    end do
 
-    ! Row indices from CSC columns in [first_col..last_col]
+    ! Row indices from CSC columns [first_col..last_col]
     do col = first_col, last_col
       do pos = csc_ptr(col), csc_ptr(col+1) - 1
-        ! csc_row stores packed (pi, pj) pairs; get the "other" index (larger one)
-        pi = csc_row(2*pos-1)
-        pj = csc_row(2*pos)
-        ! Check both indices: the one > last_col needs to be in the index set
+        pi = csc_pi(pos)
+        pj = csc_pj(pos)
         if (pi > last_col .and. imap(pi) == 0) then
-          cnt = cnt + 1; idx_set(cnt) = pi; imap(pi) = -1
+          cnt = cnt + 1; idx_work(cnt) = pi; imap(pi) = -1
         end if
         if (pj > last_col .and. imap(pj) == 0) then
-          cnt = cnt + 1; idx_set(cnt) = pj; imap(pj) = -1
+          cnt = cnt + 1; idx_work(cnt) = pj; imap(pj) = -1
         end if
       end do
     end do
 
-    ! Indices from children's contribution blocks
+    ! Children's CB indices
     child = sfils(s)
     do while (child /= 0)
       do i = factors(child)%npiv + 1, factors(child)%nfront
         j = factors(child)%indices(i)
         if (j >= first_col .and. imap(j) == 0) then
-          cnt = cnt + 1; idx_set(cnt) = j; imap(j) = -1
+          cnt = cnt + 1; idx_work(cnt) = j; imap(j) = -1
         end if
       end do
       child = sfrere(child)
     end do
 
     nfront = cnt
+    if (nfront - npiv > 1) call quicksort(idx_work(npiv+1:nfront), nfront - npiv)
 
-    ! Sort: pivots first (already in place), then others by quicksort
-    if (nfront - npiv > 1) then
-      call quicksort(idx_set(npiv+1:nfront), nfront - npiv)
-    end if
-
-    ! ---- Build global index map (MUMPS-style O(1) lookup) ----
-    do i = 1, nfront
-      imap(idx_set(i)) = i
-    end do
-
-    ! ---- Allocate frontal matrix ----
+    ! Store symbolic structure
     factors(s)%nfront = nfront
     factors(s)%npiv   = npiv
     allocate(factors(s)%indices(nfront))
+    factors(s)%indices(1:nfront) = idx_work(1:nfront)
+
+    ! Clear imap
+    do i = 1, nfront
+      imap(idx_work(i)) = 0
+    end do
+  end do
+
+  ! ================================================================
+  ! Phase 3: Batch-allocate all frontal matrices + CB workspace
+  ! ================================================================
+  max_cb = 0
+  do s = 1, nsuper
+    nfront = factors(s)%nfront
+    npiv   = factors(s)%npiv
     allocate(factors(s)%front(nfront*ndof, nfront*ndof))
     allocate(factors(s)%pivorder(npiv))
-    factors(s)%indices = idx_set(1:nfront)
-    factors(s)%front   = 0.0d0
-    factors(s)%pivorder = (/ (i, i = 1, npiv) /)
-    deallocate(idx_set)
+    do i = 1, npiv
+      factors(s)%pivorder(i) = i
+    end do
+    if (nfront - npiv > max_cb) max_cb = nfront - npiv
+  end do
+  allocate(cb_work(max(max_cb, 1)))
 
-    ! ---- Assemble original entries using CSC + imap (O(nnz_local)) ----
-    call assemble_original_csc(n, ndof, csc_ptr, csc_row, csc_origk, a_elt, &
-                               nfront, factors(s)%front, &
-                               first_col, last_col, imap)
+  ! ================================================================
+  ! Phase 4: Numeric factorization (ZERO allocations in this loop)
+  ! ================================================================
+  do ip = 1, nsuper
+    s = postorder(ip)
+    nfront = factors(s)%nfront
+    npiv   = factors(s)%npiv
+    first_col = sstart(s)
+    last_col  = first_col + npiv - 1
 
-    ! ---- Extend-add from children using imap (O(1) per element) ----
+    ! Build imap
+    do i = 1, nfront
+      imap(factors(s)%indices(i)) = i
+    end do
+
+    ! Zero front
+    factors(s)%front = 0.0d0
+
+    ! Assemble original entries from CSC
+    call assemble_original_csc(n, ndof, csc_ptr, csc_pi, csc_pj, csc_origk, a_elt, &
+                               nfront, factors(s)%front, first_col, last_col, imap)
+
+    ! Extend-add from children (allocation-free using cb_work)
     child = sfils(s)
     do while (child /= 0)
-      call extend_add_mapped(factors(child), factors(s), imap, ndof)
+      call extend_add_fast(factors(child), factors(s), imap, ndof, cb_work)
       child = sfrere(child)
     end do
 
-    ! ---- BLAS Level-3 blocked lu factorization (MUMPS FAC_H/P style) ----
-    call frontal_lu_factor_blas(factors(s)%front, nfront*ndof, npiv*ndof, info)
-    if (info /= 0) then
-      info = 0
-    end if
+    ! LU factorization with adaptive kernel
+    call frontal_lu_factor_opt(factors(s)%front, nfront*ndof, npiv*ndof, info)
+    if (info /= 0) info = 0
 
-    ! ---- Clear imap entries for this frontal ----
+    ! Clear imap
     do i = 1, nfront
       imap(factors(s)%indices(i)) = 0
     end do
   end do
 
-  deallocate(imap, postorder, csc_ptr, csc_row, csc_origk)
+  deallocate(imap, idx_work, cb_work, postorder)
+  deallocate(csc_ptr, csc_pi, csc_pj, csc_origk)
   end associate
 end subroutine
 
 !==============================================================================
-! Build permuted CSC: for each permuted column min(pi,pj), store (pi, pj, orig_k)
-! Stores both original permuted indices to preserve assembly direction.
+! Build permuted CSC: 3 separate arrays (csc_pi, csc_pj, csc_origk)
+! For each CSR entry, store in column min(pi,pj) with original direction.
+! Cache-friendly: no interleaving, stride-1 access per array.
 !==============================================================================
 subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
-                              csc_ptr, csc_row, csc_origk)
+                              csc_ptr, csc_pi, csc_pj, csc_origk)
   integer(kint), intent(in) :: n, nz
   integer(kint), intent(in) :: row_ptr(n+1), col_ind(nz)
   integer(kint), intent(in) :: invperm(n)
-  integer(kint), allocatable, intent(out) :: csc_ptr(:), csc_row(:), csc_origk(:)
+  integer(kint), allocatable, intent(out) :: csc_ptr(:), csc_pi(:), csc_pj(:), csc_origk(:)
 
-  integer(kint), allocatable :: csc_count(:), csc_col2(:)
+  integer(kint), allocatable :: csc_count(:)
   integer(kint) :: r, k, c, pi, pj, nadj, mn
 
   allocate(csc_count(n))
   csc_count = 0
 
-  ! Count: store each edge in the column with smaller permuted index
   do r = 1, n
     pi = invperm(r)
     do k = row_ptr(r)+1, row_ptr(r+1)
@@ -678,9 +701,7 @@ subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
   end do
   nadj = csc_ptr(n+1) - 1
 
-  ! csc_row stores the original pi (invperm(r)), csc_origk stores both orig k
-  ! and we add csc_col2 for original pj (invperm(c))
-  allocate(csc_row(nadj), csc_origk(nadj), csc_col2(nadj))
+  allocate(csc_pi(nadj), csc_pj(nadj), csc_origk(nadj))
   csc_count = 0
 
   do r = 1, n
@@ -690,46 +711,23 @@ subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
       pj = invperm(c)
       mn = min(pi, pj)
       csc_count(mn) = csc_count(mn) + 1
-      ! Store original (pi, pj) so assembly direction is preserved
-      csc_row(csc_ptr(mn) + csc_count(mn) - 1) = pi
-      csc_col2(csc_ptr(mn) + csc_count(mn) - 1) = pj
+      csc_pi(csc_ptr(mn) + csc_count(mn) - 1) = pi
+      csc_pj(csc_ptr(mn) + csc_count(mn) - 1) = pj
       csc_origk(csc_ptr(mn) + csc_count(mn) - 1) = k
     end do
   end do
 
-  ! Pack csc_col2 into csc_row by interleaving: store as (pi, pj) pairs
-  ! Use separate arrays — csc_row = pi, csc_origk encodes k, extend with csc_col2
-  ! For simplicity, store pj in a separate allocatable that we'll pass around.
-  ! Actually, we'll encode differently: csc_row(pos) = pi, we need pj too.
-  ! Solution: double the array and pack (pi, pj) pairs.
-
-  ! Re-allocate csc_row to hold both pi and pj
-  ! We'll use: csc_row(pos) = pi * (n+1) + pj as packed encoding won't work for large n
-  ! Instead, simply reallocate csc_row to size 2*nadj: odd=pi, even=pj
-  block
-    integer(kint), allocatable :: temp(:)
-    allocate(temp(2*nadj))
-    do k = 1, nadj
-      temp(2*k-1) = csc_row(k)    ! pi
-      temp(2*k)   = csc_col2(k)   ! pj
-    end do
-    deallocate(csc_row)
-    allocate(csc_row(2*nadj))
-    csc_row = temp
-    deallocate(temp)
-  end block
-
-  deallocate(csc_count, csc_col2)
+  deallocate(csc_count)
 end subroutine
 
 !==============================================================================
-! Assemble original entries using pre-built CSC (O(nnz_local) per supernode)
-! Preserves original (pi, pj) direction for correct non-symmetric assembly.
+! Assemble original entries from 3-array CSC (O(nnz_local) per supernode)
 !==============================================================================
-subroutine assemble_original_csc(n, ndof, csc_ptr, csc_row, csc_origk, a_elt, &
+subroutine assemble_original_csc(n, ndof, csc_ptr, csc_pi, csc_pj, csc_origk, a_elt, &
                                   nfront, front, first_col, last_col, imap)
   integer(kint), intent(in) :: n, ndof
-  integer(kint), intent(in) :: csc_ptr(n+1), csc_row(*), csc_origk(*)
+  integer(kint), intent(in) :: csc_ptr(n+1)
+  integer(kint), intent(in) :: csc_pi(*), csc_pj(*), csc_origk(*)
   real(kdouble), intent(in) :: a_elt(*)
   integer(kint), intent(in) :: nfront
   real(kdouble), intent(inout) :: front(nfront*ndof, nfront*ndof)
@@ -738,12 +736,10 @@ subroutine assemble_original_csc(n, ndof, csc_ptr, csc_row, csc_origk, a_elt, &
 
   integer(kint) :: col, pos, pi, pj, ii, jj, id, jd, base, origk
 
-  ! Scan only columns [first_col..last_col] in permuted CSC
   do col = first_col, last_col
     do pos = csc_ptr(col), csc_ptr(col+1) - 1
-      ! Retrieve original (pi, pj) from packed storage
-      pi = csc_row(2*pos-1)
-      pj = csc_row(2*pos)
+      pi = csc_pi(pos)
+      pj = csc_pj(pos)
       ii = imap(pi)
       jj = imap(pj)
       if (ii > 0 .and. jj > 0) then
@@ -916,119 +912,111 @@ subroutine isort(arr, n)
 end subroutine
 
 !==============================================================================
-! Extend-add: add child's contribution block into parent's frontal matrix
-!
-! The contribution block is the Schur complement of the child's frontal
-! matrix, i.e., the (nfront-npiv) x (nfront-npiv) lower-right block
-! after lu elimination of the pivot rows/columns.
+! Extend-add: allocation-free, using pre-allocated cb_work workspace.
+! Inline scatter-add (no DAXPY call overhead for small ndof).
 !==============================================================================
-!==============================================================================
-! Extend-add using precomputed imap + column-wise DAXPY (MUMPS-style)
-! Parent's imap maps child's CB indices directly to parent positions.
-! Column-wise traversal for cache-friendly access + DAXPY for inner loop.
-!==============================================================================
-subroutine extend_add_mapped(child_fac, parent_fac, imap, ndof)
+subroutine extend_add_fast(child_fac, parent_fac, imap, ndof, cb_work)
   type(monolis_mat_frontal), intent(in)    :: child_fac
   type(monolis_mat_frontal), intent(inout) :: parent_fac
   integer(kint), intent(in) :: imap(*)
   integer(kint), intent(in) :: ndof
+  integer(kint), intent(inout) :: cb_work(*)
 
   integer(kint) :: ic, jc, ip, jp, id, jd
-  integer(kint) :: npiv_c, nfront_c, ncb, nf_p
-  integer(kint), allocatable :: cb_map(:)
-  integer(kint) :: ncb_valid, iv
-  integer(kint), allocatable :: valid_ic(:), valid_ip(:)
+  integer(kint) :: npiv_c, nfront_c, ncb
 
   npiv_c  = child_fac%npiv
   nfront_c = child_fac%nfront
   ncb = nfront_c - npiv_c
-  nf_p = parent_fac%nfront
   if (ncb <= 0) return
 
-  ! Pre-compute CB index mapping and filter valid entries
-  allocate(cb_map(ncb), valid_ic(ncb), valid_ip(ncb))
-  ncb_valid = 0
+  ! Build CB map using pre-allocated workspace (ZERO allocation)
   do ic = 1, ncb
-    cb_map(ic) = imap(child_fac%indices(npiv_c + ic))
-    if (cb_map(ic) > 0) then
-      ncb_valid = ncb_valid + 1
-      valid_ic(ncb_valid) = ic
-      valid_ip(ncb_valid) = cb_map(ic)
-    end if
+    cb_work(ic) = imap(child_fac%indices(npiv_c + ic))
   end do
-  if (ncb_valid == 0) then
-    deallocate(cb_map, valid_ic, valid_ip)
-    return
-  end if
 
-  ! Column-wise scatter-add (cache-friendly: access parent_fac%front by columns)
+  ! Inline scatter-add (avoids DAXPY function call overhead for small ndof)
   do jc = 1, ncb
-    jp = cb_map(jc)
+    jp = cb_work(jc)
     if (jp == 0) cycle
-    do jd = 1, ndof
-      do iv = 1, ncb_valid
-        ic = valid_ic(iv)
-        ip = valid_ip(iv)
-        ! DAXPY-style: add child CB column segment to parent
-        call daxpy(ndof, 1.0d0, &
-                   child_fac%front((npiv_c+ic-1)*ndof+1, (npiv_c+jc-1)*ndof+jd), 1, &
-                   parent_fac%front((ip-1)*ndof+1, (jp-1)*ndof+jd), 1)
+    do ic = 1, ncb
+      ip = cb_work(ic)
+      if (ip == 0) cycle
+      do jd = 1, ndof
+        do id = 1, ndof
+          parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) = &
+            parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) + &
+            child_fac%front((npiv_c+ic-1)*ndof+id, (npiv_c+jc-1)*ndof+jd)
+        end do
       end do
     end do
   end do
-
-  deallocate(cb_map, valid_ic, valid_ip)
 end subroutine
 
 !==============================================================================
-! Frontal lu factorization with partial pivoting
+! Adaptive LU factorization (MUMPS FAC_H / FAC_P style)
 !
-! Performs lu decomposition on the first npiv columns of the nfront x nfront
-! frontal matrix, leaving the Schur complement in the lower-right block.
-!
-! After this routine:
-!   front(1:npiv, 1:npiv) contains U in the upper triangle and L below
-!   front(npiv+1:nfront, 1:npiv) contains the remaining L entries
-!   front(1:npiv, npiv+1:nfront) contains the remaining U entries
-!   front(npiv+1:nfront, npiv+1:nfront) is the Schur complement (contribution block)
+! Small fronts (<=24): inline LU without BLAS (avoids function call overhead)
+! Medium fronts: single panel (DSCAL + DGER only)
+! Large fronts: panel-based DGER + DTRSM + DGEMM (Level-3 BLAS)
 !==============================================================================
-!==============================================================================
-! BLAS Level-3 blocked lu factorization (MUMPS FAC_H / FAC_P style)
-!
-! Uses a panel-based approach:
-!   1. Factor a panel of lkjib columns with Level-2 BLAS (DGER)
-!   2. Apply panel to remaining columns with DTRSM + DGEMM (Level-3)
-!
-! After this routine, front(1:npiv, 1:npiv) stores L\U,
-! front(npiv+1:nfront, 1:npiv) stores L below pivots,
-! front(1:npiv, npiv+1:nfront) stores U to the right,
-! front(npiv+1:nfront, npiv+1:nfront) is the Schur complement (CB).
-!==============================================================================
-subroutine frontal_lu_factor_blas(front, nfront, npiv, info)
+subroutine frontal_lu_factor_opt(front, nfront, npiv, info)
   real(kdouble), intent(inout) :: front(nfront, nfront)
   integer(kint), intent(in)    :: nfront, npiv
   integer(kint), intent(inout) :: info
 
-  integer(kint) :: k, i, j, kb, ke, nb, nel, nupd
-  real(kdouble) :: pivot
+  integer(kint) :: k, i, j, kb, ke, nb, nel, nupd, lkjib
+  real(kdouble) :: pivot, inv_pivot
   real(kdouble), parameter :: eps = 1.0d-14
   real(kdouble), parameter :: one = 1.0d0, alpha = -1.0d0
-  ! MUMPS-style blocking factor (lkjib)
-  integer(kint), parameter :: lkjib = 64
 
   info = 0
+  if (npiv <= 0) return
 
   ! ================================================================
-  ! Panel-based blocked factorization
-  ! Process NPIV columns in blocks of size lkjib
+  ! Small-front fast path: inline LU without BLAS calls
+  ! Avoids DSCAL/DGER function call overhead for tiny matrices
+  ! ================================================================
+  if (nfront <= 24) then
+    do k = 1, npiv
+      pivot = front(k, k)
+      if (abs(pivot) < eps) then
+        front(k, k) = sign(eps, pivot + eps)
+        pivot = front(k, k)
+        info = k
+      end if
+      inv_pivot = one / pivot
+      do i = k + 1, nfront
+        front(i, k) = front(i, k) * inv_pivot
+      end do
+      do j = k + 1, nfront
+        do i = k + 1, nfront
+          front(i, j) = front(i, j) - front(i, k) * front(k, j)
+        end do
+      end do
+    end do
+    return
+  end if
+
+  ! ================================================================
+  ! Adaptive panel size (MUMPS KEEP(4)/KEEP(5)/KEEP(6) style)
+  ! ================================================================
+  if (nfront < 128) then
+    lkjib = nfront
+  else if (nfront < 512) then
+    lkjib = 48
+  else
+    lkjib = 64
+  end if
+
+  ! ================================================================
+  ! Panel-based blocked factorization with Level-3 BLAS
   ! ================================================================
   kb = 1
   do while (kb <= npiv)
-    ke = min(kb + lkjib - 1, npiv)   ! end of this panel
-    nb = ke - kb + 1                  ! panel width
+    ke = min(kb + lkjib - 1, npiv)
+    nb = ke - kb + 1
 
-    ! ---- Factor this panel with Level-2 operations ----
-    ! (MUMPS FAC_H / FAC_M / FAC_N style: column-by-column with DGER)
     do k = kb, ke
       pivot = front(k, k)
       if (abs(pivot) < eps) then
@@ -1037,36 +1025,24 @@ subroutine frontal_lu_factor_blas(front, nfront, npiv, info)
         info = k
       end if
 
-      ! Scale L column k: front(k+1:nfront, k) /= pivot
       nel = nfront - k
       if (nel > 0) then
         call dscal(nel, one/pivot, front(k+1, k), 1)
       end if
 
-      ! Rank-1 update within the panel: columns k+1..ke only
-      ! front(k+1:nfront, k+1:ke) -= L(:,k) * U(k, k+1:ke)
-      nupd = ke - k   ! number of remaining columns in panel
+      nupd = ke - k
       if (nupd > 0 .and. nel > 0) then
         call dger(nel, nupd, alpha, front(k+1, k), 1, &
                   front(k, k+1), nfront, front(k+1, k+1), nfront)
       end if
     end do
 
-    ! ---- Apply panel to trailing columns with Level-3 BLAS ----
-    ! (MUMPS FAC_P style: DTRSM + DGEMM)
-    nupd = nfront - ke   ! remaining columns/rows to update
+    nupd = nfront - ke
     if (nupd > 0 .and. nb > 0) then
-      nel = nfront - ke
-
-      ! Step 1: Solve for U block using panel's L factor
-      ! L(kb:ke, kb:ke) * U_new(kb:ke, ke+1:nfront) = front(kb:ke, ke+1:nfront)
-      ! L is unit-lower-triangular (diagonal of L = 1), stored below diagonal
-      call dtrsm('L', 'L', 'N', 'U', nb, nel, one, &
+      call dtrsm('L', 'L', 'N', 'U', nb, nupd, one, &
                  front(kb, kb), nfront, front(kb, ke+1), nfront)
 
-      ! Step 2: Schur complement update
-      ! front(ke+1:nfront, ke+1:nfront) -= L(ke+1:nfront, kb:ke) * U(kb:ke, ke+1:nfront)
-      call dgemm('N', 'N', nel, nel, nb, alpha, &
+      call dgemm('N', 'N', nupd, nupd, nb, alpha, &
                  front(ke+1, kb), nfront, &
                  front(kb, ke+1), nfront, &
                  one, front(ke+1, ke+1), nfront)
