@@ -76,58 +76,47 @@ module mod_monolis_def_mat
     !> cperm 配列
     complex(kdouble), pointer :: cperm(:) => null()
   end type monolis_mat_reorder
-  
-  type :: matrix_data
-    ! ---- CSR sparse matrix ----
-    integer :: N     ! matrix dimension
-    integer :: NDOF  ! matrix dimension
-    integer :: NZ    ! number of non-zeros
-    integer, allocatable :: ROW_PTR(:), COL_IND(:)
-    ! NDOF*NDOF*NZ
-    double precision, allocatable :: A_elt(:)
 
-    ! ---- Ordering ----
-    integer, allocatable :: PERM(:)     ! fill-reducing permutation
-    integer, allocatable :: INVPERM(:)  ! inverse permutation
+  type :: monolis_mat_frontal
+    integer(kint) :: nfront   ! frontal size
+    integer(kint) :: npiv     ! pivot count
+    integer(kint), allocatable :: indices(:)  ! column/row indices in global (permuted) numbering
+    real(kdouble), allocatable :: front(:,:)  ! dense frontal matrix (nfront x nfront)
+    integer(kint), allocatable :: pivorder(:) ! pivoting permutation within front
   end type
 
-  !>
-  type monolis_mat_frontal
-    !>
-    integer :: nfront
-    !>
-    integer :: npiv
-    !>
-    integer, allocatable :: indices(:)
-    !>
-    double precision, allocatable :: front(:,:)
-    !>
-    integer, allocatable :: pivorder(:)
-  end type monolis_mat_frontal
+  type :: matrix_data
+    ! ---- CSR sparse matrix ----
+    integer(kint) :: n     ! matrix dimension
+    integer(kint) :: ndof  ! matrix dimension
+    integer(kint) :: nz    ! number of non-zeros
+    integer(kint), allocatable :: row_ptr(:), col_ind(:)
+    ! ndof*ndof*nz
+    real(kdouble), allocatable :: a_elt(:)
 
-  !>
-  type monolis_mat_lu
-    !>
+    ! ---- Ordering ----
+    integer(kint), allocatable :: perm(:)     ! fill-reducing permutation
+    integer(kint), allocatable :: invperm(:)  ! inverse permutation
+  end type
+
+  type :: monolis_mat_lu
     type(monolis_mat_frontal), allocatable :: factors(:)
-    !>
-    integer, allocatable :: PARENT(:)
-    !>
-    integer :: NSUPER
-    !>
-    integer, allocatable :: SNODE_BELONG(:)
-    !>
-    integer, allocatable :: SNODE_START(:)
-    !>
-    integer, allocatable :: SNODE_SIZE(:)
-    !>
-    integer, allocatable :: SNODE_PARENT(:)
-    !>
-    integer, allocatable :: SNODE_FSIZE(:)
-    !>
-    integer, allocatable :: SFILS(:)
-    !>
-    integer, allocatable :: SFRERE(:)
-  end type monolis_mat_lu
+
+    ! ---- Elimination tree ----
+    integer(kint), allocatable :: parent(:)   ! parent(i) in elimination tree
+
+    ! ---- Supernode description ----
+    integer(kint) :: nsuper                     ! number of supernodes
+    integer(kint), allocatable :: snode_belong(:)  ! snode_belong(i)=s : variable i belongs to supernode s
+    integer(kint), allocatable :: snode_start(:)   ! first variable of supernode s (in permuted order)
+    integer(kint), allocatable :: snode_size(:)    ! pivot count of supernode s
+    integer(kint), allocatable :: snode_parent(:)  ! parent supernode
+    integer(kint), allocatable :: snode_fsize(:)   ! frontal matrix size of supernode s
+
+    ! ---- Frontal tree (child-sibling) ----
+    integer(kint), allocatable :: sfils(:)    ! first child supernode
+    integer(kint), allocatable :: sfrere(:)   ! next sibling supernode
+  end type
 
   !> 行列構造体
   type monolis_mat

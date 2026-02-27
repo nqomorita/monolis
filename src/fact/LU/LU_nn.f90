@@ -22,7 +22,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoLU
-    type(monolis_mat) :: monoMAT_reorder
+    !type(monolis_mat) :: monoMAT_reorder
     real(kdouble) :: t(20)
 
     if(monoMAT%NDOF == -1)then
@@ -32,7 +32,7 @@ contains
     t(1) = monolis_get_time()
 
     !> analysis phase
-    call monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
+    call monolis_matrix_reordering_fw_R(monoMAT)
 
     t(2) = monolis_get_time()
 !    write(*,"(a,1pe10.3)")"monolis_matrix_reordering_fw_R             ", t(2) - t(1)
