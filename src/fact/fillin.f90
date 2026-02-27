@@ -113,43 +113,6 @@ contains
       enddo
     enddo
 
-!    if(is_asym)then
-!      !> lower part
-!      allocate(count(N))
-!      allocate(monoTREE%SCSR%indexL(0:N))
-!      count = 0
-!      monoTREE%SCSR%indexL(0) = 0
-!
-!      do i = 1, monoTREE%SCSR%indexU(N)
-!        in = monoTREE%SCSR%itemU(i)
-!        count(in) = count(in) + 1
-!      enddo
-!
-!      do i = 1, N
-!        monoTREE%SCSR%indexL(i) = monoTREE%SCSR%indexL(i-1) + count(i)
-!      enddo
-!
-!      NPL = NPU
-!      c = 1
-!      allocate(monoTREE%SCSR%itemL(NPL))
-!      do i = 1, N
-!        aa:do k = 1, i
-!          jS = monoTREE%SCSR%indexU(k-1) + 1
-!          jE = monoTREE%SCSR%indexU(k)
-!          do j = jS, jE
-!            in = monoTREE%SCSR%itemU(j)
-!            if(i < in) cycle aa
-!            if(i == in)then
-!              monoTREE%SCSR%itemL(c) = k
-!              c = c + 1
-!              cycle aa
-!            endif
-!          enddo
-!        enddo aa
-!      enddo
-!      deallocate(count)
-!    endif
-
     deallocate(child_mask )
     deallocate(parent_mask)
     deallocate(fillin_mask)
