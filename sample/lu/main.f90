@@ -81,8 +81,10 @@ program main
   a = 0.0d0
   b = c
 
+  write(*,*)mat%mat%NP
+
   call monolis_set_method(mat, monolis_iter_CG)
-  call monolis_set_precond(mat, monolis_prec_LU)
+  call monolis_set_precond(mat, monolis_prec_MUMPS)
 
   call monolis_solve_R(mat, com, b, a)
 

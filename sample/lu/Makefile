@@ -9,12 +9,10 @@ OBJS2 = main.o
 all: $(TARGET) $(TARGET2)
 
 $(TARGET): $(OBJS)
-	$(FC) -o $@ $(OBJS)  -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis 
-#-ldmumps -lmumps_common -lpord -lscalapack -lopenbals
+	$(FC) -o $@ $(OBJS)  -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -ldmumps -lmumps_common -lpord -lscalapack -lopenblas
 
 $(TARGET2): $(OBJS2)
-	$(FC) -o $@ $(OBJS2) -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis 
-#-ldmumps -lmumps_common -lpord -lscalapack -lopenbals
+	$(FC) -o $@ $(OBJS2) -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis -ldmumps -lmumps_common -lpord -lscalapack -lopenblas
 
 %.o: %.f90
 	$(FC) $(FFLAGS) -I../../include -o $@ -c $<
