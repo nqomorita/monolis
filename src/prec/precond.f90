@@ -5,6 +5,7 @@ module mod_monolis_precond
   use mod_monolis_def_struc
   use mod_monolis_precond_diag
   use mod_monolis_precond_SOR
+  use mod_monolis_precond_LU
 
   implicit none
 
@@ -81,6 +82,8 @@ contains
     !  call monolis_precond_Jacobi_setup(monoPRM, monoCOM, monoMAT)
     elseif(precond == monolis_prec_SOR)then
       call monolis_precond_SOR_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
+    elseif(precond == monolis_prec_LU)then
+      call monolis_precond_LU_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     !elseif(precond == monolis_prec_MUMPS)then
     !  call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_MUMPS_LOCAL)then
@@ -170,6 +173,8 @@ contains
     !  call monolis_precond_Jacobi_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(precond == monolis_prec_SOR)then
       call monolis_precond_SOR_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
+    elseif(precond == monolis_prec_LU)then
+      call monolis_precond_LU_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     !elseif(precond == monolis_prec_MUMPS)then
     !  call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, X, Y)
     !elseif(precond == monolis_prec_MUMPS_LOCAL)then
@@ -275,6 +280,8 @@ contains
     !  call monolis_precond_Jacobi_clear(monoPRM, monoCOM, monoMAT)
     elseif(precond == monolis_prec_SOR)then
       call monolis_precond_SOR_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
+    elseif(precond == monolis_prec_LU)then
+      call monolis_precond_LU_clear_R(monoPRM, monoCOM, monoMAT, monoPREC)
     !elseif(precond == monolis_prec_MUMPS)then
     !  call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT)
     !elseif(precond == monolis_prec_MUMPS_LOCAL)then

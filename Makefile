@@ -82,6 +82,7 @@ SRC_MAT = \
 spmat_copy.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
+spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90 \
 spmat_convert_sym.f90
@@ -100,6 +101,12 @@ mat_converge.f90
 SRC_WRAP = \
 wrapper_lapack.f90 \
 wrapper_scalapack.f90
+
+SRC_FACT = \
+fillin.f90 \
+analysis.f90 \
+factorize.f90 \
+LU/LU_nn.f90
 
 SRC_OPT = \
 nnls.f90 
@@ -123,6 +130,7 @@ sor/sor_nn.f90 \
 sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
+LU.f90 \
 precond.f90
 
 #MUMPS.f90 \

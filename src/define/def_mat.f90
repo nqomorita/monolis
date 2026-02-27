@@ -65,6 +65,18 @@ module mod_monolis_def_mat
     integer(kint), pointer, contiguous :: perm(:) => null()
   end type monolis_mat_CSC
 
+  !> 行列構造体（reordering 構造）
+  type monolis_mat_reorder
+    !> perm 配列
+    integer(kint), pointer :: perm(:) => null()
+    !> iperm 配列
+    integer(kint), pointer :: iperm(:) => null()
+    !> rperm 配列
+    real(kdouble), pointer :: rperm(:) => null()
+    !> cperm 配列
+    complex(kdouble), pointer :: cperm(:) => null()
+  end type monolis_mat_reorder
+  
   !> 行列構造体
   type monolis_mat
     !> 内部自由度数
@@ -89,6 +101,8 @@ module mod_monolis_def_mat
     type(monolis_mat_CSR) :: CSR
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
+    !> 行列構造体（reordering 構造）
+    type(monolis_mat_reorder) :: REORDER
   end type monolis_mat
 
 contains
