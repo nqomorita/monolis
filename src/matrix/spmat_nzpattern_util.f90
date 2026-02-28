@@ -298,4 +298,5 @@ contains
     enddo bb
     enddo
   end subroutine monolis_get_nonzero_pattern_from_dense
+
 end module mod_monolis_spmat_nonzero_pattern_util

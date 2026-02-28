@@ -132,6 +132,11 @@ wrapper_scalapack.f90 \
 monolis_wrapper_ml.c \
 monolis_wrapper_blopex.c 
 
+SRC_FACT = \
+analysis.f90 \
+factorize.f90 \
+LU/LU_nn.f90
+
 SRC_OPT = \
 nnls.f90 
 

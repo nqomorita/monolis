@@ -9,10 +9,9 @@ module mod_monolis_spmat_reorder
 
 contains
 
-  subroutine monolis_matrix_reordering_fw_R(monoMAT, monoMAT_reorder)
+  subroutine monolis_matrix_reordering_fw_R(monoMAT)
     implicit none
     type(monolis_mat) :: monoMAT
-    type(monolis_mat) :: monoMAT_reorder
     real(kdouble) :: t1, t2, t3
     integer(kint) :: N, i
     integer(kint), allocatable :: index(:)
@@ -27,14 +26,14 @@ contains
 
     call gedatsu_part_graph_metis_reordering(N, index, item, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
 
-    t2 = monolis_get_time()
+    !t2 = monolis_get_time()
 
-    call monolis_restruct_matrix(monoMAT, monoMAT_reorder, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
+    !call monolis_restruct_matrix(monoMAT, monoMAT_reorder, monoMAT%REORDER%perm, monoMAT%REORDER%iperm)
 
-    t3 = monolis_get_time()
+    !t3 = monolis_get_time()
     !monoPRM%tprep = monoPRM%tprep + t2 - t1
-    write(*,"(a,1pe10.3)")"-- gedatsu_part_graph_metis_reordering  ", t2 - t1
-    write(*,"(a,1pe10.3)")"-- monolis_restruct_matrix              ", t3 - t2
+    !write(*,"(a,1pe10.3)")"-- gedatsu_part_graph_metis_reordering  ", t2 - t1
+    !write(*,"(a,1pe10.3)")"-- monolis_restruct_matrix              ", t3 - t2
   end subroutine monolis_matrix_reordering_fw_R
 
   subroutine monolis_matrix_reordering_bk_R(monoMAT)

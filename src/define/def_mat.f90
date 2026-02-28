@@ -72,13 +72,13 @@ module mod_monolis_def_mat
   !> 行列構造体（reordering 構造）
   type monolis_mat_reorder
     !> perm 配列
-    integer(kint), pointer :: perm(:) => null()
+    integer(kint), pointer, contiguous :: perm(:) => null()
     !> iperm 配列
-    integer(kint), pointer :: iperm(:) => null()
+    integer(kint), pointer, contiguous :: iperm(:) => null()
     !> rperm 配列
-    real(kdouble), pointer :: rperm(:) => null()
+    real(kdouble), pointer, contiguous :: rperm(:) => null()
     !> cperm 配列
-    complex(kdouble), pointer :: cperm(:) => null()
+    complex(kdouble), pointer, contiguous :: cperm(:) => null()
   end type monolis_mat_reorder
 
   type monolis_mat_DMUMPS
@@ -90,6 +90,46 @@ module mod_monolis_def_mat
     type (dmumps_struc), allocatable :: mumps(:)
 #endif
   end type monolis_mat_DMUMPS
+
+  !> 行列構造体（フロンタル行列構造）
+  type :: monolis_mat_frontal
+    !> フロント行列のサイズ
+    integer(kint) :: nfront
+    !> ピボット数
+    integer(kint) :: npiv
+    !> フロント行列のインデックス配列
+    integer(kint), allocatable :: indices(:)
+    !> フロント行列
+    real(kdouble), allocatable :: front(:,:)
+    !> ピボット順序配列
+    integer(kint), allocatable :: pivorder(:)
+  end type
+
+  !> 行列構造体（LU 分解構造）
+  type :: monolis_mat_lu
+    !> フロンタル行列の配列数
+    integer(kint) :: nfactor
+    !> フロンタル行列の配列
+    type(monolis_mat_frontal), allocatable :: factors(:)
+    !> 親ノード配列
+    integer(kint), allocatable :: parent(:)
+    !> スーパーノード数
+    integer(kint) :: nsuper
+    !> スーパーノード所属配列
+    integer(kint), allocatable :: snode_belong(:)
+    !> スーパーノード開始位置配列
+    integer(kint), allocatable :: snode_start(:)
+    !> スーパーノードサイズ配列
+    integer(kint), allocatable :: snode_size(:)
+    !> スーパーノード親配列
+    integer(kint), allocatable :: snode_parent(:)
+    !> スーパーノードフロントサイズ配列
+    integer(kint), allocatable :: snode_fsize(:)
+    !> 子ノード配列
+    integer(kint), allocatable :: sfils(:)
+    !> 兄弟ノード配列
+    integer(kint), allocatable :: sfrere(:)
+  end type
 
   !> 行列構造体
   type monolis_mat
@@ -119,6 +159,8 @@ module mod_monolis_def_mat
     type(monolis_mat_reorder) :: REORDER
     !> 行列構造体（DMUMPS 構造）
     type(monolis_mat_DMUMPS) :: DMUMPS
+    !> 行列構造体（LU 分解構造）
+    type(monolis_mat_lu) :: LU
   end type monolis_mat
 
 contains
@@ -144,6 +186,8 @@ contains
     call monolis_mat_initialize_CSR(monoMAT%CSR)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
     call monolis_mat_initialize_REORDER(monoMAT%REORDER)
+    call monolis_mat_initialize_reorder(monoMAT%REORDER)
+    call monolis_mat_initialize_LU(monoMAT%LU)
   end subroutine monolis_mat_initialize
 
   !> @ingroup def_mat_init
@@ -226,6 +270,43 @@ contains
   end subroutine monolis_mat_initialize_REORDER
 
   !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（フロンタル行列構造）
+  subroutine monolis_mat_initialize_frontal(FRONTAL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_frontal), intent(inout) :: FRONTAL
+
+    FRONTAL%nfront = 0
+    FRONTAL%npiv = 0
+    call monolis_dealloc_I_1d(FRONTAL%indices)
+    call monolis_dealloc_I_1d(FRONTAL%pivorder)
+    call monolis_dealloc_R_2d(FRONTAL%front)
+  end subroutine monolis_mat_initialize_frontal
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（LU 分解構造）
+  subroutine monolis_mat_initialize_LU(LU)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_lu), intent(inout) :: LU
+    integer(kint) :: i
+
+    LU%nfactor = 0
+    LU%nsuper = 0
+    
+    deallocate(LU%factors)
+
+    call monolis_dealloc_I_1d(LU%parent)
+    call monolis_dealloc_I_1d(LU%snode_belong)
+    call monolis_dealloc_I_1d(LU%snode_start)
+    call monolis_dealloc_I_1d(LU%snode_size)
+    call monolis_dealloc_I_1d(LU%snode_parent)
+    call monolis_dealloc_I_1d(LU%snode_fsize)
+    call monolis_dealloc_I_1d(LU%sfils)
+    call monolis_dealloc_I_1d(LU%sfrere)
+  end subroutine monolis_mat_initialize_LU
+  
+  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
@@ -247,6 +328,7 @@ contains
     call monolis_mat_finalize_CSC(monoMAT%CSC)
     call monolis_mat_finalize_REORDER(monoMAT%REORDER)
     call monolis_mat_finalize_MUMPS(monoMAT%DMUMPS)
+    call monolis_mat_finalize_LU(monoMAT%LU)
   end subroutine monolis_mat_finalize
 
   !> @ingroup def_mat_init
@@ -345,6 +427,47 @@ contains
     endif
 #endif
   end subroutine monolis_mat_finalize_MUMPS
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（フロンタル行列構造）
+  subroutine monolis_mat_finalize_frontal(FRONTAL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_frontal), intent(inout) :: FRONTAL
+
+    FRONTAL%nfront = 0
+    FRONTAL%npiv = 0
+    call monolis_dealloc_I_1d(FRONTAL%indices)
+    call monolis_dealloc_I_1d(FRONTAL%pivorder)
+    call monolis_dealloc_R_2d(FRONTAL%front)
+  end subroutine monolis_mat_finalize_frontal
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（LU 分解構造）
+  subroutine monolis_mat_finalize_LU(LU)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_lu), intent(inout) :: LU
+    integer(kint) :: i
+
+    do i = 1, LU%nfactor
+      call monolis_mat_finalize_frontal(LU%factors(i))
+    enddo
+
+    LU%nfactor = 0
+    LU%nsuper = 0
+
+    deallocate(LU%factors)
+
+    call monolis_dealloc_I_1d(LU%parent)
+    call monolis_dealloc_I_1d(LU%snode_belong)
+    call monolis_dealloc_I_1d(LU%snode_start)
+    call monolis_dealloc_I_1d(LU%snode_size)
+    call monolis_dealloc_I_1d(LU%snode_parent)
+    call monolis_dealloc_I_1d(LU%snode_fsize)
+    call monolis_dealloc_I_1d(LU%sfils)
+    call monolis_dealloc_I_1d(LU%sfrere)
+  end subroutine monolis_mat_finalize_LU
 
   !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（実数型）

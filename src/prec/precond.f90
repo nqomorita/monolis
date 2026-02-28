@@ -93,8 +93,6 @@ contains
       call monolis_precond_MUMPS_setup(monoPRM, monoCOM, monoMAT, monoPREC)
     elseif(precond == monolis_prec_AMG)then
       call monolis_precond_ML_setup_R(monoPRM, monoCOM, monoMAT)
-    !elseif(precond == monolis_prec_MF)then
-    !  call monolis_precond_MF_setup(monoPRM, monoCOM, monoMAT)
     endif
 
     t2 = monolis_get_time()
@@ -185,8 +183,6 @@ contains
       call monolis_precond_MUMPS_apply(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
     elseif(precond == monolis_prec_AMG)then
       call monolis_precond_ML_apply_R(monoPRM, monoCOM, monoMAT, X, Y)
-    !elseif(precond == monolis_prec_MF)then
-    !  call monolis_precond_MF_apply(monoPRM, monoCOM, monoMAT, X, Y)
     elseif(precond == monolis_prec_NONE)then
       call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
         monoMAT%n_dof_index, NNDOF, NPNDOF)
@@ -294,8 +290,6 @@ contains
       call monolis_precond_MUMPS_clear(monoPRM, monoCOM, monoMAT, monoPREC)
     elseif(precond == monolis_prec_AMG)then
       call monolis_precond_ML_clear_R(monoPRM, monoCOM, monoMAT)
-    !elseif(precond == monolis_prec_MF)then
-    !  call monolis_precond_MF_clear(monoPRM, monoCOM, monoMAT)
     endif
 
     t2 = monolis_get_time()
