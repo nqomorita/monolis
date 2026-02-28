@@ -15,10 +15,9 @@ contains
 !
 ! This requires building a CSR adjacency list from COO first.
 !==============================================================================
-  subroutine build_elimination_tree(mat, lu)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
+  subroutine build_elimination_tree(lu)
+    !> [in,out] LU分解構造体
+    type(monolis_mat_lu), intent(inout) :: lu
 
     integer(kint) :: n, nz
     integer(kint), allocatable :: ancestor(:)
@@ -27,12 +26,12 @@ contains
     integer(kint), allocatable :: flag(:)       ! MUMPS ANA_K-style O(1) dedup
     integer(kint) :: k, pi, pj, tmp, r, c, pos, i, nadj
 
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
-    allocate(lu%lu%parent(n))
+    n = lu%N
+    nz = lu%index(n + 1)
+    allocate(lu%parent(n))
 
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
+    associate(row_ptr => lu%index, col_ind => lu%item, &
+              invperm => lu%iperm, perm => lu%perm, parent => lu%parent)
 
     ! ---- Step 1: Build CSC adjacency for the permuted lower triangle ----
     ! Single-pass counting + FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
@@ -142,10 +141,9 @@ contains
 !
 ! We also apply relaxed merging (nemin) to allow a small amount of fill.
 !==============================================================================
-  subroutine identify_supernodes(mat, lu)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
+  subroutine identify_supernodes(lu)
+    !> [in,out] LU分解構造体
+    type(monolis_mat_lu), intent(inout) :: lu
 
     integer(kint) :: n, nz, nsuper
     integer(kint), allocatable :: sbelong(:), sstart(:), ssize(:), sparent(:), sfsize(:)
@@ -156,8 +154,8 @@ contains
     integer(kint) :: nemin
     logical :: can_merge
 
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
+    n = lu%N
+    nz = lu%index(n + 1)
     nemin = 16  ! relaxation parameter
 
     allocate(col_count(n), children_count(n), sbelong(n), flag(n))
@@ -165,8 +163,8 @@ contains
     children_count = 0
     flag = 0
 
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
+    associate(row_ptr => lu%index, col_ind => lu%item, &
+              invperm => lu%iperm, perm => lu%perm, parent => lu%parent)
 
     ! ---- Step 1: Estimate column counts of L ----
     ! FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
@@ -260,12 +258,12 @@ contains
 
     end associate
 
-    lu%lu%nsuper = nsuper
-    lu%lu%snode_belong = sbelong
-    lu%lu%snode_start = sstart
-    lu%lu%snode_size = ssize
-    lu%lu%snode_parent = sparent
-    lu%lu%snode_fsize = sfsize
+    lu%nsuper = nsuper
+    lu%snode_belong = sbelong
+    lu%snode_start = sstart
+    lu%snode_size = ssize
+    lu%snode_parent = sparent
+    lu%snode_fsize = sfsize
 
     deallocate(col_count, children_count, flag)
   end subroutine
@@ -475,16 +473,16 @@ contains
 ! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
 !==============================================================================
   subroutine build_frontal_tree(lu)
-    type(monolis_mat), intent(inout) :: lu
+    type(monolis_mat_lu), intent(inout) :: lu
 
     integer(kint) :: nsuper, s, p
 
-    nsuper = lu%lu%nsuper
-    allocate(lu%lu%sfils(nsuper), lu%lu%sfrere(nsuper))
-    lu%lu%sfils  = 0
-    lu%lu%sfrere = 0
+    nsuper = lu%nsuper
+    allocate(lu%sfils(nsuper), lu%sfrere(nsuper))
+    lu%sfils  = 0
+    lu%sfrere = 0
 
-    associate(sparent => lu%lu%snode_parent, sfils => lu%lu%sfils, sfrere => lu%lu%sfrere)
+    associate(sparent => lu%snode_parent, sfils => lu%sfils, sfrere => lu%sfrere)
 
     ! Head-prepend: O(1) per supernode, O(nsuper) total
     ! Each child is inserted at the head of its parent's child list

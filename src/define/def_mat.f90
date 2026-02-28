@@ -93,6 +93,20 @@ module mod_monolis_def_mat
 
   !> 行列構造体（LU 分解構造）
   type :: monolis_mat_lu
+    !>
+    integer(kint) :: N
+    !>
+    integer(kint) :: NDOF
+    !>
+    integer(kint), allocatable :: index(:)
+    !>
+    integer(kint), allocatable :: item(:)
+    !>
+    integer(kint), allocatable :: perm(:)
+    !>
+    integer(kint), allocatable :: iperm(:)
+    !>
+    real(kdouble), allocatable :: A_org(:)
     !> フロンタル行列の配列数
     integer(kint) :: nfactor
     !> フロンタル行列の配列
@@ -391,10 +405,17 @@ contains
     type(monolis_mat_lu), intent(inout) :: LU
     integer(kint) :: i
 
+    LU%N = 0
+    LU%NDOF = 0
     LU%nfactor = 0
     LU%nsuper = 0
 
     if(allocated(LU%factors)) deallocate(LU%factors)
+    if(allocated(LU%A_org)) deallocate(LU%A_org)
+    if(allocated(LU%index)) deallocate(LU%index)
+    if(allocated(LU%item)) deallocate(LU%item)
+    if(allocated(LU%perm)) deallocate(LU%perm)
+    if(allocated(LU%iperm)) deallocate(LU%iperm)
 
     call monolis_dealloc_I_1d(LU%parent)
     call monolis_dealloc_I_1d(LU%snode_belong)
@@ -420,7 +441,14 @@ contains
       enddo
       deallocate(LU%factors)
     endif
+    if(allocated(LU%A_org)) deallocate(LU%A_org)
+    if(allocated(LU%index)) deallocate(LU%index)
+    if(allocated(LU%item)) deallocate(LU%item)
+    if(allocated(LU%perm)) deallocate(LU%perm)
+    if(allocated(LU%iperm)) deallocate(LU%iperm)
 
+    LU%N = 0
+    LU%NDOF = 0
     LU%nfactor = 0
     LU%nsuper = 0
 

@@ -21,10 +21,9 @@ contains
 !   - Inline extend-add (no DAXPY overhead for small ndof)
 !   - Adaptive LU kernel with small-front inlining
 !==============================================================================
-  subroutine multifrontal_factorize(mat, lu)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
+  subroutine multifrontal_factorize(lu)
+    !> [in,out] LU分解構造体
+    type(monolis_mat_lu), intent(inout) :: lu
 
     integer(kint) :: n, nz, nsuper, ndof, info
     integer(kint), allocatable :: postorder(:)
@@ -38,20 +37,20 @@ contains
     integer(kint), allocatable :: cb_work(:)    ! reusable CB map workspace
     integer(kint) :: max_cb
 
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
-    ndof = mat%NDOF
-    nsuper = lu%lu%nsuper
+    n = lu%N
+    nz = lu%index(n + 1)
+    ndof = lu%NDOF
+    nsuper = lu%nsuper
     info = 0
 
-    allocate(lu%lu%factors(nsuper))
+    allocate(lu%factors(nsuper))
 
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              a_elt => lu%R%A, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
-              sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
-              sparent => lu%lu%snode_parent, sfsize => lu%lu%snode_fsize, &
-              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, factors => lu%lu%factors)
+    associate(row_ptr => lu%index, col_ind => lu%item, &
+              a_elt => lu%A_org, &
+              invperm => lu%iperm, perm => lu%perm, &
+              sstart => lu%snode_start, ssize => lu%snode_size, &
+              sparent => lu%snode_parent, sfsize => lu%snode_fsize, &
+              sfils => lu%sfils, sfrere => lu%sfrere, factors => lu%factors)
 
     ! Phase 1: Build permuted CSC (3 separate arrays, cache-friendly)
     call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
@@ -461,10 +460,9 @@ contains
 ! Phase 1: Forward substitution  (L y = P b)  — bottom-up through tree
 ! Phase 2: Backward substitution (U x = y)    — top-down through tree
 !==============================================================================
-  subroutine multifrontal_solve(mat, lu, rhs, x)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(in) :: lu
+  subroutine multifrontal_solve(lu, rhs, x)
+    !> [in] LU分解構造体
+    type(monolis_mat_lu), intent(in) :: lu
     real(kdouble), intent(in)  :: rhs(:)
     real(kdouble), intent(out) :: x(:)
 
@@ -476,16 +474,16 @@ contains
     integer(kint) :: nf_dof, np_dof
     real(kdouble) :: sum_val
 
-    n = mat%N
-    ndof = mat%NDOF
-    nsuper = lu%lu%nsuper
+    n = lu%N
+    ndof = lu%NDOF
+    nsuper = lu%nsuper
     ntot = n * ndof
 
-    associate(sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
-              sfsize => lu%lu%snode_fsize, sparent => lu%lu%snode_parent, &
-              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
-              factors => lu%lu%factors)
+    associate(sstart => lu%snode_start, ssize => lu%snode_size, &
+              sfsize => lu%snode_fsize, sparent => lu%snode_parent, &
+              sfils => lu%sfils, sfrere => lu%sfrere, &
+              invperm => lu%iperm, perm => lu%perm, &
+              factors => lu%factors)
 
     allocate(work(ntot), postorder(nsuper))
 
