@@ -27,13 +27,10 @@ contains
       stop "monolis_fact_LU_nn_setup_R"
     endif
 
-    t(1) = monolis_get_time()
+    !t(1) = monolis_get_time()
 
     !> analysis phase
     call monolis_matrix_reordering_fw_R(monoMAT)
-
-    !t(2) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"monolis_matrix_reorderi", t(2) - t(1)
 
     nz = monoMAT%CSR%index(monoMAT%NP + 1)
     call monolis_palloc_R_1d(monoLU%R%A, monoMAT%NDOF*monoMAT%NDOF*nz)
@@ -41,25 +38,17 @@ contains
 
     call build_elimination_tree(monoMAT, monoLU)
 
-    !t(3) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"build_elimination_tree", t(3) - t(2)
-
     call identify_supernodes(monoMAT, monoLU)
-
-    !t(4) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"identify_supernodes   ", t(4) - t(3)
 
     call build_frontal_tree(monoLU)
 
-    t(5) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"build_frontal_tree    ", t(5) - t(4)
-    write(*,"(a,1pe10.3)")"analysis", t(5) - t(1)
+    !t(5) = monolis_get_time()
+    !write(*,"(a,1pe10.3)")"analysis", t(5) - t(1)
 
     call multifrontal_factorize(monoMAT, monoLU)
 
-    t(6) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"multifrontal_factorize", t(6) - t(5)
-    write(*,"(a,1pe10.3)")"factrize", t(6) - t(5)
+    !t(6) = monolis_get_time()
+    !write(*,"(a,1pe10.3)")"factrize", t(6) - t(5)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
