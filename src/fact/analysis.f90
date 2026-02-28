@@ -7,14 +7,14 @@ module mod_monolis_fact_analysis
 
 contains
 
-  !==============================================================================
-  ! Build elimination tree using Liu's algorithm (column-by-column)
-  !
-  ! For each column k (in permuted order 1..N), find all edges to columns j < k
-  ! and set parent(root_of_subtree(j)) = k using Union-Find with path compression.
-  !
-  ! This requires building a CSR adjacency list from COO first.
-  !==============================================================================
+!==============================================================================
+! Build elimination tree using Liu's algorithm (column-by-column)
+!
+! For each column k (in permuted order 1..N), find all edges to columns j < k
+! and set parent(root_of_subtree(j)) = k using Union-Find with path compression.
+!
+! This requires building a CSR adjacency list from COO first.
+!==============================================================================
   subroutine build_elimination_tree(mat, lu)
     !> [in] 行列構造体
     type(monolis_mat), intent(in) :: mat
@@ -132,15 +132,16 @@ contains
     deallocate(ancestor, adj_ptr, adj_list, adj_count)
     end associate
   end subroutine
-  !
-  ! A supernode is a maximal set of contiguous columns in the factor
-  ! with the same sparsity structure (fundamental supernode).
-  !
-  ! Detection rule:  column j can be merged with column j-1 if
-  !   parent(j-1) == j   AND   nonzero-count(j) == nonzero-count(j-1) - 1
-  !
-  ! We also apply relaxed merging (nemin) to allow a small amount of fill.
-  !==============================================================================
+
+!==============================================================================
+! A supernode is a maximal set of contiguous columns in the factor
+! with the same sparsity structure (fundamental supernode).
+!
+! Detection rule:  column j can be merged with column j-1 if
+!   parent(j-1) == j   AND   nonzero-count(j) == nonzero-count(j-1) - 1
+!
+! We also apply relaxed merging (nemin) to allow a small amount of fill.
+!==============================================================================
   subroutine identify_supernodes(mat, lu)
     !> [in] 行列構造体
     type(monolis_mat), intent(in) :: mat
@@ -269,10 +270,10 @@ contains
     deallocate(col_count, children_count, flag)
   end subroutine
 
-  !==============================================================================
-  ! Relaxed supernode merging: merge parent-child pairs when both are small
-  ! Optimized: O(n) sbelong update using sstart/ssize ranges instead of O(n*nsuper)
-  !==============================================================================
+!==============================================================================
+! Relaxed supernode merging: merge parent-child pairs when both are small
+! Optimized: O(n) sbelong update using sstart/ssize ranges instead of O(n*nsuper)
+!==============================================================================
   subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, &
                               parent, col_count, nemin)
     integer(kint), intent(in)    :: n, nemin
@@ -366,13 +367,13 @@ contains
     deallocate(merged, map, new_sstart, new_ssize, new_sparent, new_sfsize)
   end subroutine
 
-  !==============================================================================
-  ! Compute frontal sizes for each supernode
-  !
-  ! Optimized O(nz) approach: build permuted CSC, then scan only columns
-  ! belonging to each supernode. Uses marker array with supernode-based
-  ! timestamp to avoid O(n) resets per supernode.
-  !==============================================================================
+!==============================================================================
+! Compute frontal sizes for each supernode
+!
+! Optimized O(nz) approach: build permuted CSC, then scan only columns
+! belonging to each supernode. Uses marker array with supernode-based
+! timestamp to avoid O(n) resets per supernode.
+!==============================================================================
   subroutine compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
                                    nsuper, sstart, ssize, sparent, sbelong, sfsize)
     integer(kint), intent(in) :: n, nz
@@ -469,10 +470,10 @@ contains
     deallocate(marker, csc_ptr, csc_row)
   end subroutine
 
-  !==============================================================================
-  ! Build child-sibling representation for the supernode tree
-  ! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
-  !==============================================================================
+!==============================================================================
+! Build child-sibling representation for the supernode tree
+! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
+!==============================================================================
   subroutine build_frontal_tree(lu)
     type(monolis_mat), intent(inout) :: lu
 

@@ -7,20 +7,20 @@ module mod_monolis_fact_factorize
 
 contains
 
-  !==============================================================================
-  ! Multifrontal lu factorization
-  !
-  ! Two-pass approach for minimal overhead:
-  !   Pass 1 (Symbolic): compute index sets, pre-allocate all frontal matrices
-  !   Pass 2 (Numeric):  assemble + extend-add + factor (ZERO allocations)
-  !
-  ! Optimized with:
-  !   - Pre-built permuted CSC with 3 separate arrays (cache-friendly)
-  !   - All-at-once memory allocation (batch, not per-supernode)
-  !   - Pre-allocated workspaces for index sets and CB maps
-  !   - Inline extend-add (no DAXPY overhead for small ndof)
-  !   - Adaptive LU kernel with small-front inlining
-  !==============================================================================
+!==============================================================================
+! Multifrontal lu factorization
+!
+! Two-pass approach for minimal overhead:
+!   Pass 1 (Symbolic): compute index sets, pre-allocate all frontal matrices
+!   Pass 2 (Numeric):  assemble + extend-add + factor (ZERO allocations)
+!
+! Optimized with:
+!   - Pre-built permuted CSC with 3 separate arrays (cache-friendly)
+!   - All-at-once memory allocation (batch, not per-supernode)
+!   - Pre-allocated workspaces for index sets and CB maps
+!   - Inline extend-add (no DAXPY overhead for small ndof)
+!   - Adaptive LU kernel with small-front inlining
+!==============================================================================
   subroutine multifrontal_factorize(mat, lu)
     !> [in] 行列構造体
     type(monolis_mat), intent(in) :: mat
@@ -53,17 +53,13 @@ contains
               sparent => lu%lu%snode_parent, sfsize => lu%lu%snode_fsize, &
               sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, factors => lu%lu%factors)
 
-    ! ================================================================
     ! Phase 1: Build permuted CSC (3 separate arrays, cache-friendly)
-    ! ================================================================
     call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
                             csc_ptr, csc_pi, csc_pj, csc_origk)
     call build_postorder(nsuper, sfils, sfrere, sparent, postorder)
 
-    ! ================================================================
     ! Phase 2: Symbolic factorization — compute exact index sets
     ! Pre-allocate idx_work ONCE (eliminates N per-supernode allocations)
-    ! ================================================================
     allocate(imap(n), idx_work(n))
     imap = 0
 
@@ -125,9 +121,7 @@ contains
       end do
     end do
 
-    ! ================================================================
     ! Phase 3: Batch-allocate all frontal matrices + CB workspace
-    ! ================================================================
     max_cb = 0
     do s = 1, nsuper
       nfront = factors(s)%nfront
@@ -141,9 +135,7 @@ contains
     end do
     allocate(cb_work(max(max_cb, 1)))
 
-    ! ================================================================
     ! Phase 4: Numeric factorization (ZERO allocations in this loop)
-    ! ================================================================
     do ip = 1, nsuper
       s = postorder(ip)
       nfront = factors(s)%nfront
@@ -185,11 +177,9 @@ contains
     end associate
   end subroutine
 
-  !==============================================================================
   ! Build permuted CSC: 3 separate arrays (csc_pi, csc_pj, csc_origk)
   ! For each CSR entry, store in column min(pi,pj) with original direction.
   ! Cache-friendly: no interleaving, stride-1 access per array.
-  !==============================================================================
   subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
                                 csc_ptr, csc_pi, csc_pj, csc_origk)
     integer(kint), intent(in) :: n, nz
@@ -239,9 +229,9 @@ contains
     deallocate(csc_count)
   end subroutine
 
-  !==============================================================================
-  ! Assemble original entries from 3-array CSC (O(nnz_local) per supernode)
-  !==============================================================================
+!==============================================================================
+! Assemble original entries from 3-array CSC (O(nnz_local) per supernode)
+!==============================================================================
   subroutine assemble_original_csc(n, ndof, csc_ptr, csc_pi, csc_pj, csc_origk, a_elt, &
                                     nfront, front, first_col, last_col, imap)
     integer(kint), intent(in) :: n, ndof
@@ -275,9 +265,9 @@ contains
     end do
   end subroutine
 
-  !==============================================================================
-  ! Build postorder traversal of the supernode tree
-  !==============================================================================
+!==============================================================================
+! Build postorder traversal of the supernode tree
+!==============================================================================
   subroutine build_postorder(nsuper, sfils, sfrere, sparent, postorder)
     integer(kint), intent(in)  :: nsuper
     integer(kint), intent(in)  :: sfils(nsuper), sfrere(nsuper), sparent(nsuper)
@@ -331,10 +321,10 @@ contains
     deallocate(stack, visited)
   end subroutine
 
-  !==============================================================================
-  ! Extend-add: allocation-free, using pre-allocated cb_work workspace.
-  ! Inline scatter-add (no DAXPY call overhead for small ndof).
-  !==============================================================================
+!==============================================================================
+! Extend-add: allocation-free, using pre-allocated cb_work workspace.
+! Inline scatter-add (no DAXPY call overhead for small ndof).
+!==============================================================================
   subroutine extend_add_fast(child_fac, parent_fac, imap, ndof, cb_work)
     type(monolis_mat_frontal), intent(in)    :: child_fac
     type(monolis_mat_frontal), intent(inout) :: parent_fac
@@ -373,13 +363,13 @@ contains
     end do
   end subroutine
 
-  !==============================================================================
-  ! Adaptive LU factorization (MUMPS FAC_H / FAC_P style)
-  !
-  ! Small fronts (<=24): inline LU without BLAS (avoids function call overhead)
-  ! Medium fronts: single panel (DSCAL + DGER only)
-  ! Large fronts: panel-based DGER + DTRSM + DGEMM (Level-3 BLAS)
-  !==============================================================================
+!==============================================================================
+! Adaptive LU factorization (MUMPS FAC_H / FAC_P style)
+!
+! Small fronts (<=24): inline LU without BLAS (avoids function call overhead)
+! Medium fronts: single panel (DSCAL + DGER only)
+! Large fronts: panel-based DGER + DTRSM + DGEMM (Level-3 BLAS)
+!==============================================================================
   subroutine frontal_lu_factor_opt(front, nfront, npiv, info)
     real(kdouble), intent(inout) :: front(nfront, nfront)
     integer(kint), intent(in)    :: nfront, npiv
@@ -392,10 +382,8 @@ contains
     info = 0
     if (npiv <= 0) return
 
-    ! ================================================================
     ! Small-front fast path: inline LU without BLAS calls
     ! Avoids DSCAL/DGER function call overhead for tiny matrices
-    ! ================================================================
     if (nfront <= 24) then
       do k = 1, npiv
         pivot = front(k, k)
@@ -417,9 +405,7 @@ contains
       return
     end if
 
-    ! ================================================================
     ! Adaptive panel size (MUMPS KEEP(4)/KEEP(5)/KEEP(6) style)
-    ! ================================================================
     if (nfront < 128) then
       lkjib = nfront
     else if (nfront < 512) then
@@ -428,9 +414,7 @@ contains
       lkjib = 64
     end if
 
-    ! ================================================================
     ! Panel-based blocked factorization with Level-3 BLAS
-    ! ================================================================
     kb = 1
     do while (kb <= npiv)
       ke = min(kb + lkjib - 1, npiv)
@@ -471,12 +455,12 @@ contains
     end do
   end subroutine
 
-  !==============================================================================
-  ! Multifrontal solve: L U x = P b
-  !
-  ! Phase 1: Forward substitution  (L y = P b)  — bottom-up through tree
-  ! Phase 2: Backward substitution (U x = y)    — top-down through tree
-  !==============================================================================
+!==============================================================================
+! Multifrontal solve: L U x = P b
+!
+! Phase 1: Forward substitution  (L y = P b)  — bottom-up through tree
+! Phase 2: Backward substitution (U x = y)    — top-down through tree
+!==============================================================================
   subroutine multifrontal_solve(mat, lu, rhs, x)
     !> [in] 行列構造体
     type(monolis_mat), intent(in) :: mat
@@ -569,9 +553,9 @@ contains
     end associate
   end subroutine
 
-  !==============================================================================
-  ! Build postorder array (simpler version for solve phase)
-  !==============================================================================
+!==============================================================================
+! Build postorder array (simpler version for solve phase)
+!==============================================================================
   subroutine build_postorder_array(nsuper, sfils, sfrere, sparent, postorder)
     integer(kint), intent(in)  :: nsuper
     integer(kint), intent(in)  :: sfils(nsuper), sfrere(nsuper), sparent(nsuper)
