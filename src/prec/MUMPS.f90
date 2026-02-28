@@ -29,6 +29,7 @@ contains
     integer(kint) :: NDOF, NZ
 #ifdef WITH_MUMPS
     type (dmumps_struc), pointer :: mumps
+    integer(kint) :: comm_copy
     real(kdouble) :: t1, t2, t3, t4, t5
 
     if(monoPREC%DMUMPS%is_factored) return
@@ -41,8 +42,14 @@ contains
 
     !> initialize
     mumps%JOB = -1
-    mumps%COMM = monoCOM%comm
-    if(monoPREC%DMUMPS%is_self) mumps%COMM = mpi_comm_self
+
+    if(monoPREC%DMUMPS%is_self)then
+      call monolis_mpi_copy_comm(mpi_comm_self, comm_copy)
+    else
+      call monolis_mpi_copy_comm(monoCOM%comm, comm_copy)
+    endif
+    mumps%COMM = comm_copy
+
     !mumps%SYM = mumps_mat_spd
     mumps%SYM = mumps_mat_asym
     !> parallel fatorization, 0:serial, 1:parallel
