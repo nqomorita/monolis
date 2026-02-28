@@ -85,16 +85,6 @@ module mod_monolis_def_mat
     integer(kint), allocatable :: pivorder(:) ! pivoting permutation within front
   end type
 
-  type :: matrix_data
-    integer(kint) :: n     ! matrix dimension
-    integer(kint) :: ndof  ! matrix dimension
-    integer(kint) :: nz    ! number of non-zeros
-    integer(kint), allocatable :: row_ptr(:), col_ind(:)
-    real(kdouble), allocatable :: a_elt(:)
-    integer(kint), allocatable :: perm(:)     ! fill-reducing permutation
-    integer(kint), allocatable :: invperm(:)  ! inverse permutation
-  end type
-
   type :: monolis_mat_lu
     type(monolis_mat_frontal), allocatable :: factors(:)
     integer(kint), allocatable :: parent(:)   ! parent(i) in elimination tree
@@ -134,6 +124,8 @@ module mod_monolis_def_mat
     type(monolis_mat_CSC) :: CSC
     !> 行列構造体（reordering 構造）
     type(monolis_mat_reorder) :: REORDER
+    !> 行列構造体（LU 分解構造）
+    type(monolis_mat_lu) :: LU
   end type monolis_mat
 
 contains

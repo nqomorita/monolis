@@ -16,8 +16,9 @@ contains
   ! This requires building a CSR adjacency list from COO first.
   !==============================================================================
   subroutine build_elimination_tree(mat, lu)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(inout) :: lu
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: mat
+    type(monolis_mat), intent(inout) :: lu
 
     integer(kint) :: n, nz
     integer(kint), allocatable :: ancestor(:)
@@ -26,11 +27,12 @@ contains
     integer(kint), allocatable :: flag(:)       ! MUMPS ANA_K-style O(1) dedup
     integer(kint) :: k, pi, pj, tmp, r, c, pos, i, nadj
 
-    n = mat%n; nz = mat%nz
-    allocate(lu%parent(n))
+    n = mat%N
+    nz = mat%CSR%index(mat%NP + 1)
+    allocate(lu%lu%parent(n))
 
-    associate(row_ptr => mat%row_ptr, col_ind => mat%col_ind, &
-              invperm => mat%invperm, perm => mat%perm, parent => lu%parent)
+    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
+              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
 
     ! ---- Step 1: Build CSC adjacency for the permuted lower triangle ----
     ! Single-pass counting + FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
@@ -140,8 +142,9 @@ contains
   ! We also apply relaxed merging (nemin) to allow a small amount of fill.
   !==============================================================================
   subroutine identify_supernodes(mat, lu)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(inout) :: lu
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: mat
+    type(monolis_mat), intent(inout) :: lu
 
     integer(kint) :: n, nz, nsuper
     integer(kint), allocatable :: sbelong(:), sstart(:), ssize(:), sparent(:), sfsize(:)
@@ -152,7 +155,8 @@ contains
     integer(kint) :: nemin
     logical :: can_merge
 
-    n = mat%n; nz = mat%nz
+    n = mat%N
+    nz = mat%CSR%index(mat%NP + 1)
     nemin = 16  ! relaxation parameter
 
     allocate(col_count(n), children_count(n), sbelong(n), flag(n))
@@ -160,8 +164,8 @@ contains
     children_count = 0
     flag = 0
 
-    associate(row_ptr => mat%row_ptr, col_ind => mat%col_ind, &
-              perm => mat%perm, invperm => mat%invperm, parent => lu%parent)
+    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
+              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
 
     ! ---- Step 1: Estimate column counts of L ----
     ! FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
@@ -255,12 +259,12 @@ contains
 
     end associate
 
-    lu%nsuper = nsuper
-    lu%snode_belong = sbelong
-    lu%snode_start = sstart
-    lu%snode_size = ssize
-    lu%snode_parent = sparent
-    lu%snode_fsize = sfsize
+    lu%lu%nsuper = nsuper
+    lu%lu%snode_belong = sbelong
+    lu%lu%snode_start = sstart
+    lu%lu%snode_size = ssize
+    lu%lu%snode_parent = sparent
+    lu%lu%snode_fsize = sfsize
 
     deallocate(col_count, children_count, flag)
   end subroutine
@@ -469,18 +473,17 @@ contains
   ! Build child-sibling representation for the supernode tree
   ! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
   !==============================================================================
-  subroutine build_frontal_tree(mat, lu)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(inout) :: lu
+  subroutine build_frontal_tree(lu)
+    type(monolis_mat), intent(inout) :: lu
 
     integer(kint) :: nsuper, s, p
 
-    nsuper = lu%nsuper
-    allocate(lu%sfils(nsuper), lu%sfrere(nsuper))
-    lu%sfils  = 0
-    lu%sfrere = 0
+    nsuper = lu%lu%nsuper
+    allocate(lu%lu%sfils(nsuper), lu%lu%sfrere(nsuper))
+    lu%lu%sfils  = 0
+    lu%lu%sfrere = 0
 
-    associate(sparent => lu%snode_parent, sfils => lu%sfils, sfrere => lu%sfrere)
+    associate(sparent => lu%lu%snode_parent, sfils => lu%lu%sfils, sfrere => lu%lu%sfrere)
 
     ! Head-prepend: O(1) per supernode, O(nsuper) total
     ! Each child is inserted at the head of its parent's child list
@@ -493,130 +496,6 @@ contains
     end do
 
     end associate
-  end subroutine
-
-  !==============================================================================
-  ! Reverse Cuthill-McKee ordering
-  ! O(N + nz*logN) — much better fill-reduction for FEM matrices
-  ! than the simple greedy degree ordering.
-  !
-  ! 1. Find pseudo-peripheral starting node (2-round BFS refinement)
-  ! 2. BFS with degree-ordered neighbor insertion
-  ! 3. Reverse the resulting ordering
-  !==============================================================================
-  subroutine reverse_cuthill_mckee_ordering(mat, lu)
-    type(matrix_data), intent(inout) :: mat
-    type(monolis_mat_lu), intent(inout) :: lu
-
-    integer(kint) :: n, i, k, j, r, c
-    integer(kint), allocatable :: degree(:), queue(:), nbr_buf(:)
-    logical, allocatable :: visited(:)
-    integer(kint) :: head, tail, node, nbr, start
-    integer(kint) :: min_deg, nbr_count, tmp
-
-    n = mat%n
-    allocate(mat%perm(n), mat%invperm(n))
-    allocate(degree(n), visited(n), queue(n), nbr_buf(n))
-
-    ! Compute degrees (off-diagonal only)
-    degree = 0
-    do r = 1, n
-      do k = mat%row_ptr(r)+1, mat%row_ptr(r+1)
-        c = mat%col_ind(k)
-        if (r /= c) degree(r) = degree(r) + 1
-      end do
-    end do
-
-    ! Find pseudo-peripheral starting node
-    ! Start with minimum degree node, then refine with 2 BFS rounds
-    min_deg = n + 1
-    start = 1
-    do i = 1, n
-      if (degree(i) < min_deg .and. degree(i) > 0) then
-        min_deg = degree(i)
-        start = i
-      end if
-    end do
-
-    ! Refine: 2 rounds of BFS; last node of BFS is pseudo-peripheral
-    do j = 1, 2
-      visited = .false.
-      head = 1; tail = 1
-      queue(1) = start
-      visited(start) = .true.
-
-      do while (head <= tail)
-        node = queue(head); head = head + 1
-        do k = mat%row_ptr(node)+1, mat%row_ptr(node+1)
-          nbr = mat%col_ind(k)
-          if (nbr /= node .and. .not. visited(nbr)) then
-            visited(nbr) = .true.
-            tail = tail + 1
-            queue(tail) = nbr
-          end if
-        end do
-      end do
-
-      start = queue(tail)   ! last node = pseudo-peripheral
-    end do
-
-    ! Main BFS with degree-sorted neighbor insertion (Cuthill-McKee)
-    visited = .false.
-    head = 1; tail = 1
-    queue(1) = start
-    visited(start) = .true.
-
-    do while (head <= tail)
-      node = queue(head); head = head + 1
-
-      ! Collect unvisited neighbors
-      nbr_count = 0
-      do k = mat%row_ptr(node)+1, mat%row_ptr(node+1)
-        nbr = mat%col_ind(k)
-        if (nbr /= node .and. .not. visited(nbr)) then
-          nbr_count = nbr_count + 1
-          nbr_buf(nbr_count) = nbr
-        end if
-      end do
-
-      ! Sort neighbors by non-decreasing degree (insertion sort — small lists)
-      do i = 2, nbr_count
-        tmp = nbr_buf(i)
-        j = i - 1
-        do while (j >= 1)
-          if (degree(nbr_buf(j)) <= degree(tmp)) exit
-          nbr_buf(j+1) = nbr_buf(j)
-          j = j - 1
-        end do
-        nbr_buf(j+1) = tmp
-      end do
-
-      ! Add sorted neighbors to queue
-      do i = 1, nbr_count
-        nbr = nbr_buf(i)
-        if (.not. visited(nbr)) then
-          visited(nbr) = .true.
-          tail = tail + 1
-          queue(tail) = nbr
-        end if
-      end do
-    end do
-
-    ! Handle disconnected components
-    do i = 1, n
-      if (.not. visited(i)) then
-        tail = tail + 1
-        queue(tail) = i
-      end if
-    end do
-
-    ! Reverse: RCM = reverse of CM ordering
-    do i = 1, n
-      mat%perm(n - i + 1) = queue(i)
-      mat%invperm(queue(i)) = n - i + 1
-    end do
-
-    deallocate(degree, visited, queue, nbr_buf)
   end subroutine
 
 end module mod_monolis_fact_analysis

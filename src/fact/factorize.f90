@@ -22,8 +22,9 @@ contains
   !   - Adaptive LU kernel with small-front inlining
   !==============================================================================
   subroutine multifrontal_factorize(mat, lu)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(inout) :: lu
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: mat
+    type(monolis_mat), intent(inout) :: lu
 
     integer(kint) :: n, nz, nsuper, ndof, info
     integer(kint), allocatable :: postorder(:)
@@ -37,16 +38,20 @@ contains
     integer(kint), allocatable :: cb_work(:)    ! reusable CB map workspace
     integer(kint) :: max_cb
 
-    n = mat%n; nz = mat%nz; nsuper = lu%nsuper; ndof = mat%ndof
+    n = mat%N
+    nz = mat%CSR%index(mat%NP + 1)
+    ndof = mat%NDOF
+    nsuper = lu%lu%nsuper
     info = 0
 
-    allocate(lu%factors(nsuper))
+    allocate(lu%lu%factors(nsuper))
 
-    associate(row_ptr => mat%row_ptr, col_ind => mat%col_ind, a_elt => mat%a_elt, &
-              perm => mat%perm, invperm => mat%invperm, &
-              sstart => lu%snode_start, ssize => lu%snode_size, &
-              sparent => lu%snode_parent, sfsize => lu%snode_fsize, &
-              sfils => lu%sfils, sfrere => lu%sfrere, factors => lu%factors)
+    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
+              a_elt => lu%R%A, &
+              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
+              sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
+              sparent => lu%lu%snode_parent, sfsize => lu%lu%snode_fsize, &
+              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, factors => lu%lu%factors)
 
     ! ================================================================
     ! Phase 1: Build permuted CSC (3 separate arrays, cache-friendly)
@@ -104,7 +109,9 @@ contains
       end do
 
       nfront = cnt
-      if (nfront - npiv > 1) call quicksort(idx_work(npiv+1:nfront), nfront - npiv)
+      if (nfront - npiv > 1)then
+        call monolis_qsort_I_1d(idx_work, npiv + 1, nfront)
+      endif
 
       ! Store symbolic structure
       factors(s)%nfront = nfront
@@ -269,85 +276,6 @@ contains
   end subroutine
 
   !==============================================================================
-  ! Quicksort for integer arrays (replaces O(n^2) insertion sort)
-  !==============================================================================
-  subroutine quicksort(arr, n)
-    integer(kint), intent(inout) :: arr(n)
-    integer(kint), intent(in) :: n
-
-    integer(kint) :: stack(2, 64)  ! log2(max_n) levels suffice
-    integer(kint) :: sp, lo, hi, i, j, pivot, tmp, mid
-
-    if (n <= 1) return
-
-    ! Fall back to insertion sort for small arrays
-    if (n <= 32) then
-      call isort(arr, n)
-      return
-    end if
-
-    sp = 1
-    stack(1, 1) = 1
-    stack(2, 1) = n
-
-    do while (sp > 0)
-      lo = stack(1, sp)
-      hi = stack(2, sp)
-      sp = sp - 1
-
-      if (hi - lo < 16) then
-        ! Insertion sort for small partitions
-        do i = lo + 1, hi
-          tmp = arr(i)
-          j = i - 1
-          do while (j >= lo)
-            if (arr(j) <= tmp) exit
-            arr(j+1) = arr(j)
-            j = j - 1
-          end do
-          arr(j+1) = tmp
-        end do
-        cycle
-      end if
-
-      ! Median-of-three pivot selection
-      mid = (lo + hi) / 2
-      if (arr(lo) > arr(mid)) then; tmp = arr(lo); arr(lo) = arr(mid); arr(mid) = tmp; end if
-      if (arr(lo) > arr(hi))  then; tmp = arr(lo); arr(lo) = arr(hi);  arr(hi)  = tmp; end if
-      if (arr(mid) > arr(hi)) then; tmp = arr(mid); arr(mid) = arr(hi); arr(hi) = tmp; end if
-      pivot = arr(mid)
-      arr(mid) = arr(hi - 1)
-      arr(hi - 1) = pivot
-
-      i = lo
-      j = hi - 1
-      do
-        do
-          i = i + 1
-          if (arr(i) >= pivot) exit
-        end do
-        do
-          j = j - 1
-          if (arr(j) <= pivot) exit
-        end do
-        if (i >= j) exit
-        tmp = arr(i); arr(i) = arr(j); arr(j) = tmp
-      end do
-      arr(hi - 1) = arr(i)
-      arr(i) = pivot
-
-      ! Push larger partition first (ensures O(log n) stack depth)
-      if (i - lo > hi - i) then
-        if (lo < i - 1) then; sp = sp + 1; stack(1, sp) = lo; stack(2, sp) = i - 1; end if
-        if (i + 1 < hi) then; sp = sp + 1; stack(1, sp) = i + 1; stack(2, sp) = hi; end if
-      else
-        if (i + 1 < hi) then; sp = sp + 1; stack(1, sp) = i + 1; stack(2, sp) = hi; end if
-        if (lo < i - 1) then; sp = sp + 1; stack(1, sp) = lo; stack(2, sp) = i - 1; end if
-      end if
-    end do
-  end subroutine
-
-  !==============================================================================
   ! Build postorder traversal of the supernode tree
   !==============================================================================
   subroutine build_postorder(nsuper, sfils, sfrere, sparent, postorder)
@@ -404,26 +332,6 @@ contains
   end subroutine
 
   !==============================================================================
-  ! Simple insertion sort for small integer(kint) arrays (used by quicksort)
-  !==============================================================================
-  subroutine isort(arr, n)
-    integer(kint), intent(inout) :: arr(n)
-    integer(kint), intent(in) :: n
-    integer(kint) :: i, j, key
-
-    do i = 2, n
-      key = arr(i)
-      j = i - 1
-      do while (j >= 1)
-        if (arr(j) <= key) exit
-        arr(j+1) = arr(j)
-        j = j - 1
-      end do
-      arr(j+1) = key
-    end do
-  end subroutine
-
-  !==============================================================================
   ! Extend-add: allocation-free, using pre-allocated cb_work workspace.
   ! Inline scatter-add (no DAXPY call overhead for small ndof).
   !==============================================================================
@@ -476,7 +384,6 @@ contains
     real(kdouble), intent(inout) :: front(nfront, nfront)
     integer(kint), intent(in)    :: nfront, npiv
     integer(kint), intent(inout) :: info
-
     integer(kint) :: k, i, j, kb, ke, nb, nel, nupd, lkjib
     real(kdouble) :: pivot, inv_pivot
     real(kdouble), parameter :: eps = 1.0d-14
@@ -565,40 +472,17 @@ contains
   end subroutine
 
   !==============================================================================
-  ! Generate right-hand side: b = A * [1, 1, ..., 1]
-  !==============================================================================
-  subroutine generate_rhs(mat, lu, rhs)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(in) :: lu
-    real(kdouble), intent(out) :: rhs(mat%ndof*mat%n)
-
-    integer(kint) :: r, k, n, ndof, id, jd, base
-
-    n = mat%n; ndof = mat%ndof
-    rhs = 0.0d0
-    do r = 1, n
-      do k = mat%row_ptr(r)+1, mat%row_ptr(r+1)
-        base = (k-1)*ndof*ndof
-        do id = 1, ndof
-          do jd = 1, ndof
-            rhs((r-1)*ndof+id) = rhs((r-1)*ndof+id) + mat%a_elt(base + (id-1)*ndof + jd)
-          end do
-        end do
-      end do
-    end do
-  end subroutine
-
-  !==============================================================================
   ! Multifrontal solve: L U x = P b
   !
   ! Phase 1: Forward substitution  (L y = P b)  — bottom-up through tree
   ! Phase 2: Backward substitution (U x = y)    — top-down through tree
   !==============================================================================
   subroutine multifrontal_solve(mat, lu, rhs, x)
-    type(matrix_data), intent(in) :: mat
-    type(monolis_mat_lu), intent(in) :: lu
-    real(kdouble), intent(in)  :: rhs(mat%ndof*mat%n)
-    real(kdouble), intent(out) :: x(mat%ndof*mat%n)
+    !> [in] 行列構造体
+    type(monolis_mat), intent(in) :: mat
+    type(monolis_mat), intent(in) :: lu
+    real(kdouble), intent(in)  :: rhs(:)
+    real(kdouble), intent(out) :: x(:)
 
     integer(kint) :: n, ndof, ntot, nsuper
     integer(kint), allocatable :: postorder(:)
@@ -608,14 +492,16 @@ contains
     integer(kint) :: nf_dof, np_dof
     real(kdouble) :: sum_val
 
-    n = mat%n; ndof = mat%ndof; nsuper = lu%nsuper
+    n = mat%N
+    ndof = mat%NDOF
+    nsuper = lu%lu%nsuper
     ntot = n * ndof
 
-    associate(sstart => lu%snode_start, ssize => lu%snode_size, &
-              sfsize => lu%snode_fsize, sparent => lu%snode_parent, &
-              sfils => lu%sfils, sfrere => lu%sfrere, &
-              perm => mat%perm, invperm => mat%invperm, &
-              factors => lu%factors)
+    associate(sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
+              sfsize => lu%lu%snode_fsize, sparent => lu%lu%snode_parent, &
+              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, &
+              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
+              factors => lu%lu%factors)
 
     allocate(work(ntot), postorder(nsuper))
 

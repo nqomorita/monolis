@@ -9,9 +9,6 @@ module mod_monolis_fact_LU_nn
 
   implicit none
 
-  type(matrix_data) :: LU_MAT
-  type(monolis_mat_lu) :: LU
-
 contains
 
   !> @ingroup prec
@@ -23,6 +20,7 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoLU
     !type(monolis_mat) :: monoMAT_reorder
+    integer(kint) :: nz
     real(kdouble) :: t(20)
 
     if(monoMAT%NDOF == -1)then
@@ -37,42 +35,27 @@ contains
     !t(2) = monolis_get_time()
     !write(*,"(a,1pe10.3)")"monolis_matrix_reorderi", t(2) - t(1)
 
-    LU_MAT%N = monoMAT%N
-    LU_MAT%NDOF = 1
-    LU_MAT%NZ = monoMAT%CSR%index(monoMAT%N + 1)
+    nz = monoMAT%CSR%index(monoMAT%NP + 1)
+    call monolis_palloc_R_1d(monoLU%R%A, monoMAT%NDOF*monoMAT%NDOF*nz)
+    monoLU%R%A = monoMAT%R%A
 
-    allocate(LU_MAT%perm(monoMAT%NP))
-    allocate(LU_MAT%invperm(monoMAT%NP))
-    LU_MAT%perm = monoMAT%REORDER%perm
-    LU_MAT%invperm = monoMAT%REORDER%iperm
-
-    allocate(LU_MAT%row_ptr(LU_MAT%N + 1))
-    allocate(LU_MAT%col_ind(LU_MAT%NZ))
-    allocate(LU_MAT%a_elt(LU_MAT%NZ))
-
-    LU_MAT%row_ptr = monoMAT%CSR%index
-    LU_MAT%col_ind = monoMAT%CSR%item
-    LU_MAT%a_elt = monoMAT%R%A
-
-    !call reverse_cuthill_mckee_ordering(mat, lu)
-
-    call build_elimination_tree(LU_MAT, LU)
+    call build_elimination_tree(monoMAT, monoLU)
 
     !t(3) = monolis_get_time()
     !write(*,"(a,1pe10.3)")"build_elimination_tree", t(3) - t(2)
 
-    call identify_supernodes(LU_MAT, LU)
+    call identify_supernodes(monoMAT, monoLU)
 
     !t(4) = monolis_get_time()
     !write(*,"(a,1pe10.3)")"identify_supernodes   ", t(4) - t(3)
 
-    call build_frontal_tree(LU_MAT, LU)
+    call build_frontal_tree(monoLU)
 
     t(5) = monolis_get_time()
     !write(*,"(a,1pe10.3)")"build_frontal_tree    ", t(5) - t(4)
     write(*,"(a,1pe10.3)")"analysis", t(5) - t(1)
 
-    call multifrontal_factorize(LU_MAT, LU)
+    call multifrontal_factorize(monoMAT, monoLU)
 
     t(6) = monolis_get_time()
     !write(*,"(a,1pe10.3)")"multifrontal_factorize", t(6) - t(5)
@@ -100,7 +83,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
-    call multifrontal_solve(LU_MAT, LU, Y, X)
+    call multifrontal_solve(monoMAT, monoLU, Y, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
