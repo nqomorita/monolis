@@ -186,7 +186,6 @@ contains
     call monolis_mat_initialize_CSR(monoMAT%CSR)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
     call monolis_mat_initialize_REORDER(monoMAT%REORDER)
-    call monolis_mat_initialize_reorder(monoMAT%REORDER)
     call monolis_mat_initialize_LU(monoMAT%LU)
   end subroutine monolis_mat_initialize
 
@@ -450,14 +449,15 @@ contains
     type(monolis_mat_lu), intent(inout) :: LU
     integer(kint) :: i
 
-    do i = 1, LU%nfactor
-      call monolis_mat_finalize_frontal(LU%factors(i))
-    enddo
+    if(allocated(LU%factors))then
+      do i = 1, LU%nfactor
+        call monolis_mat_finalize_frontal(LU%factors(i))
+      enddo
+      deallocate(LU%factors)
+    endif
 
     LU%nfactor = 0
     LU%nsuper = 0
-
-    if(allocated(LU%factors)) deallocate(LU%factors)
 
     call monolis_dealloc_I_1d(LU%parent)
     call monolis_dealloc_I_1d(LU%snode_belong)
