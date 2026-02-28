@@ -294,7 +294,7 @@ contains
     LU%nfactor = 0
     LU%nsuper = 0
     
-    deallocate(LU%factors)
+    if(allocated(LU%factors)) deallocate(LU%factors)
 
     call monolis_dealloc_I_1d(LU%parent)
     call monolis_dealloc_I_1d(LU%snode_belong)
@@ -457,7 +457,7 @@ contains
     LU%nfactor = 0
     LU%nsuper = 0
 
-    deallocate(LU%factors)
+    if(allocated(LU%factors)) deallocate(LU%factors)
 
     call monolis_dealloc_I_1d(LU%parent)
     call monolis_dealloc_I_1d(LU%snode_belong)
