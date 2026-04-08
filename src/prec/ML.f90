@@ -8,13 +8,16 @@ module mod_monolis_precond_ML
 
   type(monolis_mat), pointer, save :: monoMAT_save
   type(monolis_com), pointer, save :: monoCOM_save
+  real(kdouble), allocatable, save :: coord_save(:)
 
   interface
-    subroutine monolis_precond_ml_setup(sym, ndof, ierr) &
+    subroutine monolis_precond_ml_setup(sym, ndof, nnode, coord, ierr) &
         bind(c, name="monolis_ML_wrapper_setup")
       use iso_c_binding
       integer(c_int), target :: sym
       integer(c_int), target :: ndof
+      integer(c_int), target :: nnode
+      real(c_double), target :: coord(*)
       integer(c_int), target :: ierr
     end subroutine
 
@@ -35,6 +38,28 @@ module mod_monolis_precond_ML
 contains
 
   !> @ingroup prec
+  !> 節点座標の設定（ML 前処理用、剛体モード null space 計算に使用）
+  subroutine monolis_precond_ml_set_coordinate(nnode, ndof, coord)
+    implicit none
+    !> [in] 節点数
+    integer(kint), intent(in) :: nnode
+    !> [in] 空間次元数
+    integer(kint), intent(in) :: ndof
+    !> [in] ndof * nnode）
+    real(kdouble), intent(in) :: coord(:,:)
+    integer(kint) :: i, j
+
+    call monolis_dealloc_R_1d(coord_save)
+    call monolis_alloc_R_1d(coord_save, ndof * nnode)
+
+    do i = 1, nnode
+      do j = 1, ndof
+        coord_save(ndof*(i-1) + j) = coord(j,i)
+      enddo
+    enddo
+  end subroutine monolis_precond_ml_set_coordinate
+
+  !> @ingroup prec
   !> 前処理生成：ML 前処理（実数型）
   subroutine monolis_precond_ml_setup_R(monoPRM, monoCOM, monoMAT)
     implicit none
@@ -44,7 +69,7 @@ contains
     type(monolis_com), intent(in), target :: monoCOM
     !> [in] 行列構造体
     type(monolis_mat), intent(in), target :: monoMAT
-    integer(kint) :: sym, ndof, ierr
+    integer(kint) :: sym, ndof, nnode, ierr
 
     monoCOM_save => monoCOM
     monoMAT_save => monoMAT
@@ -52,11 +77,17 @@ contains
     call monolis_std_debug_log_header("monolis_precond_ml_setup_R")
     sym = 0
     ndof = monoMAT%ndof
-    call monolis_precond_ml_setup(sym, ndof, ierr);
+    nnode = monoMAT%N
+
+    if(.not. allocated(coord_save))then
+      call monolis_alloc_R_1d(coord_save, ndof * nnode)
+    endif
+
+    call monolis_precond_ml_setup(sym, ndof, nnode, coord_save, ierr)
   end subroutine monolis_precond_ml_setup_R
 
   !> @ingroup prec
-  !> 前処理適用：SOR 前処理（実数型）
+  !> 前処理適用：ML 前処理（実数型）
   subroutine monolis_precond_ml_apply_R(monoPRM, monoCOM, monoMAT, X, Y)
     implicit none
     !> [in,out] パラメータ構造体
@@ -78,7 +109,7 @@ contains
   end subroutine monolis_precond_ml_apply_R
 
   !> @ingroup prec
-  !> 前処理初期化：SOR 前処理（実数型）
+  !> 前処理初期化：ML 前処理（実数型）
   subroutine monolis_precond_ml_clear_R(monoPRM, monoCOM, monoMAT)
     implicit none
     !> [in,out] パラメータ構造体
@@ -92,6 +123,8 @@ contains
     call monolis_std_debug_log_header("monolis_precond_ml_clear_R")
 
     call monolis_precond_ml_clear(ierr)
+
+    if(allocated(coord_save)) deallocate(coord_save)
   end subroutine monolis_precond_ml_clear_R
 end module mod_monolis_precond_ML
 
@@ -137,7 +170,7 @@ end module mod_monolis_precond_ML
       idof = row - (inod-1)*ndof
       
       n = ndof*(monoMAT_save%CSR%index(inod + 1) - monoMAT_save%CSR%index(inod))
-      if (allocated_space < m + n) return
+      if (allocated_space < m + n - 1) return
 
       start = m
       js = monoMAT_save%CSR%index(inod) + 1

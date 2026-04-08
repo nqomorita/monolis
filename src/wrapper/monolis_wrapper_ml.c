@@ -38,7 +38,6 @@ int monolis_ML_matvec(
   monolis_ml_matvec_nn_c(&in_length, p, &out_length, ap, &ierr);
   return ierr;
 }
-#endif
 
 int monolis_ML_comm(
   double x[], 
@@ -49,24 +48,83 @@ int monolis_ML_comm(
   return ierr;
 }
 
-#ifdef WITH_ML
 struct ml_info {
   ML*           ml_object;
   ML_Aggregate* agg_object;
 };
 
 static struct ml_info MLInfo;
+
+void monolis_ML_compute_rigid_body_modes(
+  int    ndof,
+  int    nnode,
+  double coord[],
+  int    null_dim,
+  int    leng,
+  double null_vect[])
+{
+  int i, base;
+  double x, y, z;
+
+  for (i = 0; i < leng * null_dim; i++) {
+    null_vect[i] = 0.0;
+  }
+
+  if (ndof == 1) {
+    for (i = 0; i < nnode; i++) {
+      null_vect[i] = 1.0;
+    }
+  } else if (ndof == 2) {
+    for (i = 0; i < nnode; i++) {
+      base = i * 2;
+      x = coord[i * 2 + 0];
+      y = coord[i * 2 + 1];
+      /* translation x */
+      null_vect[0 * leng + base + 0] = 1.0;
+      /* translation y */
+      null_vect[1 * leng + base + 1] = 1.0;
+      /* rotation z */
+      null_vect[2 * leng + base + 0] = -y;
+      null_vect[2 * leng + base + 1] =  x;
+    }
+  } else if (ndof == 3) {
+    for (i = 0; i < nnode; i++) {
+      base = i * 3;
+      x = coord[i * 3 + 0];
+      y = coord[i * 3 + 1];
+      z = coord[i * 3 + 2];
+      /* translation x */
+      null_vect[0 * leng + base + 0] = 1.0;
+      /* translation y */
+      null_vect[1 * leng + base + 1] = 1.0;
+      /* translation z */
+      null_vect[2 * leng + base + 2] = 1.0;
+      /* rotation around x */
+      null_vect[3 * leng + base + 1] =  z;
+      null_vect[3 * leng + base + 2] = -y;
+      /* rotation around y */
+      null_vect[4 * leng + base + 0] = -z;
+      null_vect[4 * leng + base + 2] =  x;
+      /* rotation around z */
+      null_vect[5 * leng + base + 0] =  y;
+      null_vect[5 * leng + base + 1] = -x;
+    }
+  }
+}
 #endif
 
 void monolis_ML_wrapper_setup(
-  int* sym, 
-  int* ndof, 
-  int* ierr)
+  int*    sym, 
+  int*    ndof, 
+  int*    nnode,
+  double  coord[],
+  int*    ierr)
 {
   int loglevel, myrank, nglobal;
   int N_grids, N_levels;
   int nlocal, nlocal_allcolumns;
-  int *id;
+  int null_dim;
+  double *null_vect;
 
 #ifdef WITH_ML
   ML *ml_object;
@@ -87,7 +145,7 @@ void monolis_ML_wrapper_setup(
   ML_Set_Amatrix_Getrow(ml_object, 0, monolis_ML_getrow, monolis_ML_comm, nlocal_allcolumns);
   ML_Set_Amatrix_Matvec(ml_object, 0, monolis_ML_matvec);
 
-  /** aggrigate definition **/
+  /** aggregate definition **/
   ML_Aggregate_Create(&agg_object);
 
   nglobal = nlocal;
@@ -100,7 +158,21 @@ void monolis_ML_wrapper_setup(
   //ML_Aggregate_Set_CoarsenScheme_UncoupledMIS(agg_object);
   //ML_Aggregate_Set_CoarsenScheme_Zoltan(agg_object);
 
+  /** null space definition (rigid body modes) **/
+  if (*ndof == 1) {
+    null_dim = 1;
+  } else if (*ndof == 2) {
+    null_dim = 3;
+  } else {
+    null_dim = 6;
+  }
+
   ML_Aggregate_Set_Dimensions(agg_object, *ndof);
+
+  null_vect = (double*)calloc(nlocal * null_dim, sizeof(double));
+  monolis_ML_compute_rigid_body_modes(*ndof, *nnode, coord, null_dim, nlocal, null_vect);
+  ML_Aggregate_Set_NullSpace(agg_object, *ndof, null_dim, null_vect, nlocal);
+  free(null_vect);
 
   //N_levels = ML_Gen_MGHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
   N_levels = ML_Gen_MultiLevelHierarchy_UsingAggregation(ml_object, 0, ML_INCREASING, agg_object); 
