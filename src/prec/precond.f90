@@ -179,9 +179,18 @@ contains
     elseif(precond == monolis_prec_NONE)then
       call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
         monoMAT%n_dof_index, NNDOF, NPNDOF)
+!$omp parallel default(none) &
+!$omp & shared(X, Y) &
+!$omp & firstprivate(NNDOF) &
+!$omp & private(i)
+!$omp do
+!$acc parallel loop
       do i = 1, NNDOF
         Y(i) = X(i)
       enddo
+!$acc end parallel loop
+!$omp end do
+!$omp end parallel
     else
       write(*,*) "precond", precond
       stop "The preconditioner is not implemented in monolis_precond_apply_R"
