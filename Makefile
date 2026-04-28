@@ -25,7 +25,7 @@ CPPFLAG =
 
 USE_LIB_CORE = -L./lib -lmonolis_solver -lgedatsu -lmonolis_utils -lmetis
 #USE_LIB_OPT  = -L/Users/morita/opt/lib -lscalapack -lopenblas -lc++
-USE_LIB_OPT  = -L./lib -lscalapack -lblacs -llapack -lblas
+USE_LIB_OPT  = -L./lib -lscalapack -llapack -lblas
 
 ##> compiler option setting
 ifdef FLAGS
