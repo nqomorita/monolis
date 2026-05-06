@@ -32,11 +32,17 @@ contains
     logical :: is_converge
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:)
     real(kdouble), pointer, contiguous :: B(:), X(:)
+    real(kdouble), pointer, contiguous :: matA(:), precD(:)
+    integer(kint), pointer, contiguous :: matIndex(:), matItem(:)
 
     call monolis_std_debug_log_header("monolis_solver_CG")
 
     X => monoMAT%R%X
     B => monoMAT%R%B
+    matA     => monoMAT%R%A
+    matIndex => monoMAT%CSR%index
+    matItem  => monoMAT%CSR%item
+    precD    => monoPREC%R%D
     iter_RR = 200
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
@@ -56,9 +62,25 @@ contains
     call monolis_alloc_R_1d(Q, NPNDOF)
     call monolis_alloc_R_1d(P, NPNDOF)
 
+    !# OpenACC: 行列・前処理・ベクトル一式をデバイスに常駐させる
+    !$acc enter data copyin(X(1:NPNDOF), B(1:NNDOF))
+    !$acc enter data copyin(matA, matIndex, matItem)
+    !$acc enter data copyin(precD)
+    !$acc enter data create(R(1:NPNDOF), Z(1:NPNDOF), Q(1:NPNDOF), P(1:NPNDOF))
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+    if(is_converge)then
+      !$acc update self(X(1:NPNDOF))
+      !$acc exit data delete(R, Z, Q, P)
+      !$acc exit data delete(matA, matIndex, matItem, precD)
+      !$acc exit data delete(X(1:NPNDOF), B(1:NNDOF))
+      call monolis_dealloc_R_1d(R)
+      call monolis_dealloc_R_1d(Z)
+      call monolis_dealloc_R_1d(Q)
+      call monolis_dealloc_R_1d(P)
+      return
+    endif
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
@@ -89,12 +111,19 @@ contains
       rho1 = rho
     enddo
 
+    !$acc update self(X(1:NPNDOF))
+
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
     monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
+
+    !# OpenACC: デバイス常駐データを破棄
+    !$acc exit data delete(R, Z, Q, P)
+    !$acc exit data delete(matA, matIndex, matItem, precD)
+    !$acc exit data delete(X(1:NPNDOF), B(1:NNDOF))
 
     call monolis_dealloc_R_1d(R)
     call monolis_dealloc_R_1d(Z)

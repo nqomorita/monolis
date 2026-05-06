@@ -170,7 +170,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-!$acc parallel loop reduction(+:sum)
+!$acc parallel loop present(X, Y) reduction(+:sum)
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo

@@ -184,7 +184,7 @@ contains
 !$omp & firstprivate(NNDOF) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop present(X, Y)
       do i = 1, NNDOF
         Y(i) = X(i)
       enddo

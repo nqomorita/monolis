@@ -53,7 +53,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop present(X, Y)
     do i = 1, m
       Y(i) = X(i)
     enddo
@@ -149,7 +149,7 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop present(X, Y, Z)
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo

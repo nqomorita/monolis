@@ -115,7 +115,7 @@ contains
 !$omp & shared(monoMAT, ALU, X, Y) &
 !$omp & private(i, X1, X2, X3)
 !$omp do
-!$acc parallel loop private(X1, X2, X3)
+!$acc parallel loop present(ALU, X, Y) private(X1, X2, X3)
     do i = 1, N
       X1 = X(3*i-2)
       X2 = X(3*i-1)

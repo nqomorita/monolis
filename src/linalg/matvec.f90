@@ -72,7 +72,10 @@ contains
 
     t1 = monolis_get_time()
 
+    !# OpenACC: MPI 通信は host メモリで行うため X を host に同期
+    !$acc update self(X)
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
+    !$acc update device(X)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
@@ -466,7 +469,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
-!$acc parallel loop private(Y1, Y2, Y3, X1, X2, X3)
+!$acc parallel loop present(A, X, Y, index, item) private(Y1, Y2, Y3, X1, X2, X3)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
