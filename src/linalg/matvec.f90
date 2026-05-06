@@ -175,12 +175,14 @@ contains
     call monolis_alloc_R_1d(XT, max_dof)
     call monolis_alloc_R_1d(YT, max_dof)
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-!$acc parallel loop private(YT, XT)
+#endif
+!$acc parallel loop present(A, X, Y, index, item, n_dof_list, n_dof_index, n_dof_index2) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -206,8 +208,10 @@ contains
       enddo
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_V_R
 
   !> @ingroup dev_linalg
@@ -239,12 +243,14 @@ contains
     call monolis_alloc_C_1d(XT, max_dof)
     call monolis_alloc_C_1d(YT, max_dof)
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-!$acc parallel loop private(YT, XT)
+#endif
+!$acc parallel loop present(A, X, Y, index, item, n_dof_list, n_dof_index, n_dof_index2) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -270,8 +276,10 @@ contains
       enddo
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_V_C
 
   !> @ingroup dev_linalg
@@ -297,12 +305,14 @@ contains
 
     NDOF2 = NDOF*NDOF
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-!$acc parallel loop private(YT, XT)
+#endif
+!$acc parallel loop present(A, X, Y, index, item) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -323,8 +333,10 @@ contains
       enddo
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_nn_R
 
   !> @ingroup dev_linalg
@@ -350,12 +362,14 @@ contains
 
     NDOF2 = NDOF*NDOF
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-!$acc parallel loop private(YT, XT)
+#endif
+!$acc parallel loop present(A, X, Y, index, item) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -376,8 +390,10 @@ contains
       enddo
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_nn_C
 
   !> @ingroup dev_linalg
@@ -399,12 +415,14 @@ contains
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: Y1
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
-!$acc parallel loop private(Y1)
+#endif
+!$acc parallel loop present(A, X, Y, index, item) private(Y1)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
@@ -416,8 +434,10 @@ contains
       Y(i) = Y1
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_11_R
 
   !> @ingroup dev_linalg
@@ -439,12 +459,14 @@ contains
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: Y1
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
-!$acc parallel loop private(Y1)
+#endif
+!$acc parallel loop present(A, X, Y, index, item) private(Y1)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
@@ -456,8 +478,10 @@ contains
       Y(i) = Y1
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_11_C
 
   !> @ingroup dev_linalg
@@ -532,12 +556,14 @@ contains
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
-!$acc parallel loop private(Y1, Y2, Y3, X1, X2, X3)
+#endif
+!$acc parallel loop present(A, X, Y, index, item) private(Y1, Y2, Y3, X1, X2, X3)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
@@ -558,8 +584,10 @@ contains
       Y(3*i  ) = Y3
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_33_C
 
   !> @ingroup dev_linalg
