@@ -21,12 +21,30 @@ contains
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
     real(kdouble) :: tspmv, tcomm
+    real(kdouble), pointer, contiguous :: matA(:)
+    integer(kint), pointer, contiguous :: matIndex(:), matItem(:)
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
+    matA     => monolis%MAT%R%A
+    matIndex => monolis%MAT%CSR%index
+    matItem  => monolis%MAT%CSR%item
+
+    !# OpenACC: 単発呼び出し用に行列・X をデバイスに転送し、Y は create
+    !$acc enter data copyin(X)
+    !$acc enter data copyin(matA, matIndex, matItem)
+    !$acc enter data create(Y)
+
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
 
+    !# OpenACC: Y を host に取り出し（後続の MPI 通信は host で実施）
+    !$acc update self(Y)
+
     call monolis_mpi_update_R_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
+
+    !$acc exit data delete(Y)
+    !$acc exit data delete(matA, matIndex, matItem)
+    !$acc exit data delete(X)
   end subroutine monolis_matvec_product_R
 
   !> @ingroup linalg
@@ -72,10 +90,7 @@ contains
 
     t1 = monolis_get_time()
 
-    !# OpenACC: MPI 通信は host メモリで行うため X を host に同期
-    !$acc update self(X)
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
-    !$acc update device(X)
 
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
@@ -464,11 +479,13 @@ contains
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
+#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
+#endif
 !$acc parallel loop present(A, X, Y, index, item) private(Y1, Y2, Y3, X1, X2, X3)
     do i = 1, N
       Y1 = 0.0d0
@@ -490,8 +507,10 @@ contains
       Y(3*i  ) = Y3
     enddo
 !$acc end parallel loop
+#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
+#endif
   end subroutine monolis_matvec_33_R
 
   !> @ingroup dev_linalg
