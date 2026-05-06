@@ -56,6 +56,24 @@ ifdef FLAGS
 		BLAS_LIB= 
 		INCLUDE = -I ./include -I ./submodule/gedatsu/include -I ./submodule/monolis_utils/include
 	endif
+
+	ifeq ($(findstring GPU_GNU, $(DFLAGS)), GPU_GNU)
+		FC       = mpif90
+		FFLAGS   = -fPIC -O3 -acc -gpu=managed -Minfo=accel
+		CC       = mpicc
+		CFLAGS   = -fPIC -O3
+		MOD_DIR  = -J ./include
+		LINK     = $(FC) -acc -gpu=managed
+	endif
+
+	ifeq ($(findstring GPU_INTEL, $(DFLAGS)), GPU_INTEL)
+		FC       = mpif90
+		FFLAGS   = -fPIC -O3 -acc -gpu=managed -Minfo=accel
+		CC       = mpicc
+		CFLAGS   = -fPIC -O3
+		MOD_DIR  = -module ./include
+		LINK     = $(FC) -acc -gpu=managed
+	endif
 endif
 
 USE_LIB = $(USE_LIB1) $(BLAS_LIB)

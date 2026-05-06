@@ -80,9 +80,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
+!$acc parallel loop reduction(+:sum)
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -168,9 +170,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
+!$acc parallel loop reduction(+:sum)
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -475,9 +479,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
+!$acc parallel loop reduction(+:sum)
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -509,9 +515,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
+!$acc parallel loop reduction(+:sum)
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_inner_product_main_R_no_comm

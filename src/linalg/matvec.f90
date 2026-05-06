@@ -162,6 +162,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
+!$acc parallel loop private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -186,6 +187,7 @@ contains
         Y(kn+k) = YT(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_V_R
@@ -224,6 +226,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
+!$acc parallel loop private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -248,6 +251,7 @@ contains
         Y(kn+k) = YT(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_V_C
@@ -280,6 +284,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
+!$acc parallel loop private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -299,6 +304,7 @@ contains
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_nn_R
@@ -331,6 +337,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
+!$acc parallel loop private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -350,6 +357,7 @@ contains
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_nn_C
@@ -378,6 +386,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
+!$acc parallel loop private(Y1)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
@@ -388,6 +397,7 @@ contains
       enddo
       Y(i) = Y1
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_11_R
@@ -416,6 +426,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
+!$acc parallel loop private(Y1)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
@@ -426,6 +437,7 @@ contains
       enddo
       Y(i) = Y1
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_11_C
@@ -454,6 +466,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
+!$acc parallel loop private(Y1, Y2, Y3, X1, X2, X3)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
@@ -473,6 +486,7 @@ contains
       Y(3*i-1) = Y2
       Y(3*i  ) = Y3
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_33_R
@@ -501,6 +515,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
+!$acc parallel loop private(Y1, Y2, Y3, X1, X2, X3)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
@@ -520,6 +535,7 @@ contains
       Y(3*i-1) = Y2
       Y(3*i  ) = Y3
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_matvec_33_C
