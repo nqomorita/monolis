@@ -59,11 +59,12 @@ ifdef FLAGS
 
 	ifeq ($(findstring GPU_GNU, $(DFLAGS)), GPU_GNU)
 		FC       = mpif90
-		FFLAGS   = -fPIC -O3 -acc -gpu=managed -Minfo=accel
+		FFLAGS   = -fPIC -O3 -acc -gpu=mem:separate -Minfo=accel -Mscalapack
 		CC       = mpicc
 		CFLAGS   = -fPIC -O3
-		MOD_DIR  = -J ./include
-		LINK     = $(FC) -acc -gpu=managed
+		MOD_DIR  = -module ./include
+                LINK     = $(FC) -acc -gpu=mem:separate -Mnomain
+		BLAS_LIB =
 	endif
 
 	ifeq ($(findstring GPU_INTEL, $(DFLAGS)), GPU_INTEL)
@@ -359,7 +360,7 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(LINK) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
 	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
