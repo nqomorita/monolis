@@ -422,11 +422,12 @@ contains
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
 #endif
-!$acc parallel loop present(A, X, Y, index, item) private(Y1)
+!$acc parallel loop gang present(A, X, Y, index, item) private(Y1, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+!$acc loop vector reduction(+:Y1) private(in)
       do j = jS, jE
         in = item(j)
         Y1 = Y1 + A(j)*X(in)
@@ -466,11 +467,12 @@ contains
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
 #endif
-!$acc parallel loop present(A, X, Y, index, item) private(Y1)
+!$acc parallel loop gang present(A, X, Y, index, item) private(Y1, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+!$acc loop vector reduction(+:Y1) private(in)
       do j = jS, jE
         in = item(j)
         Y1 = Y1 + A(j)*X(in)
@@ -510,13 +512,15 @@ contains
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
 #endif
-!$acc parallel loop present(A, X, Y, index, item) private(Y1, Y2, Y3, X1, X2, X3)
+!$acc parallel loop gang present(A, X, Y, index, item) &
+!$acc & private(Y1, Y2, Y3, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
       Y3 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+!$acc loop vector reduction(+:Y1, Y2, Y3) private(in, X1, X2, X3)
       do j = jS, jE
         in = item(j)
         X1 = X(3*in-2)
@@ -563,13 +567,15 @@ contains
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
 #endif
-!$acc parallel loop present(A, X, Y, index, item) private(Y1, Y2, Y3, X1, X2, X3)
+!$acc parallel loop gang present(A, X, Y, index, item) &
+!$acc & private(Y1, Y2, Y3, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
       Y3 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
+!$acc loop vector reduction(+:Y1, Y2, Y3) private(in, X1, X2, X3)
       do j = jS, jE
         in = item(j)
         X1 = X(3*in-2)
