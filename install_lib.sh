@@ -7,9 +7,14 @@ BASE_DIR=$(pwd)
 cd submodule/scalapack
 mkdir build
 cd build
+# NOTE: scalapack の CMAKE/FortranMangling.cmake が内部で BLACS/INSTALL に対し
+# 子 cmake を EXECUTE_PROCESS 起動するため、-D では伝搬しない。
+# CMake >= 3.x では環境変数 CMAKE_POLICY_VERSION_MINIMUM が子プロセスにも伝わる。
+export CMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
 make -j
 make install
+unset CMAKE_POLICY_VERSION_MINIMUM
 cd ../../..
 
 #> METIS
