@@ -1,6 +1,26 @@
 #!/bin/bash
+set -e
 
-git submodule update --init --recursive
+# 必要な submodule のみを非再帰で init する。
+# (--recursive を使うと gedatsu/submodule/monolis_utils などが多重クローン
+#  されるため、本プロジェクトで必要なパスを明示的に列挙する)
+PATHS=(
+  submodule/monolis_utils
+  submodule/ggtools
+  submodule/gedatsu
+  submodule/METIS
+  submodule/ParMETIS
+  submodule/mumps
+  submodule/scalapack
+)
+
+for p in "${PATHS[@]}"; do
+  git submodule update --init "$p"
+done
+
+# METIS のネスト submodule (GKlib) は METIS リポジトリ内で init する
+( cd submodule/METIS && git submodule update --init GKlib )
+
 BASE_DIR=$(pwd)
 
 #> scalapack
