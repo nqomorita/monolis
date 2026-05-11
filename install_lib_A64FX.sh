@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 #should be loaded
 #module load fj
@@ -6,7 +7,21 @@
 #module load metis
 #module load parmetis
 
-git submodule update --init --recursive
+# 必要な submodule のみを非再帰で init する。
+# (--recursive を使うと gedatsu/submodule/monolis_utils などが多重クローン
+#  されるため、本プロジェクトで必要なパスを明示的に列挙する)
+# A64FX 環境では METIS/ParMETIS/MUMPS/scalapack は module load を想定し、
+# サブモジュールとしては取得しない。
+PATHS=(
+  submodule/monolis_utils
+  submodule/ggtools
+  submodule/gedatsu
+)
+
+for p in "${PATHS[@]}"; do
+  git submodule update --init "$p"
+done
+
 BASE_DIR=$(pwd)
 
 #> METIS
@@ -26,8 +41,9 @@ BASE_DIR=$(pwd)
 #cd submodule/mumps
 #mkdir build
 #cd build
-#cmake ..
-#make -DCMAKE_INSTALL_PREFIX=$BASE_DIR -j
+#cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
+#make -j
+#make install
 #cd ../../..
 
 #> monolis_utils
@@ -42,7 +58,7 @@ make clean
 make FLAGS=A64FX,SUBMODULE
 cd ../..
 
-#> gedatsu
+#> ggtools
 cd submodule/ggtools/
 make clean
 make FLAGS=A64FX,SUBMODULE
