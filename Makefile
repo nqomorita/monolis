@@ -121,7 +121,8 @@ wrapper_lapack.f90 \
 wrapper_scalapack.f90
 
 SRC_OPT = \
-nnls.f90 
+nnls.f90 \
+vae.f90 
 
 #matmat.f90 \
 
