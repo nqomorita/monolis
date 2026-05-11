@@ -266,7 +266,5 @@ contains
 
     call monolis_palloc_R_1d(C%R%B, A%NP * NDOF)
     call monolis_palloc_R_1d(C%R%X, A%NP * NDOF)
-
-    call monolis_dealloc_R_2d(temp)
   end subroutine monolis_matmat_value_nn
 end module mod_monolis_matmat
