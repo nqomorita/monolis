@@ -58,6 +58,25 @@ ifdef FLAGS
 		USE_LIB_OPT =
 		LINK    = mpiFCCpx --linkfortran -SSL2
 	endif
+
+	ifeq ($(findstring GPU_GNU, $(DFLAGS)), GPU_GNU)
+		FC       = mpif90
+		FFLAGS   = -fPIC -O3 -acc -gpu=mem:separate -Minfo=accel -Mscalapack
+		CC       = mpicc
+		CFLAGS   = -fPIC -O3
+		MOD_DIR  = -module ./include
+                LINK     = $(FC) -acc -gpu=mem:separate -Mnomain
+		BLAS_LIB =
+	endif
+
+	ifeq ($(findstring GPU_INTEL, $(DFLAGS)), GPU_INTEL)
+		FC       = mpif90
+		FFLAGS   = -fPIC -O3 -acc -gpu=managed -Minfo=accel
+		CC       = mpicc
+		CFLAGS   = -fPIC -O3
+		MOD_DIR  = -module ./include
+		LINK     = $(FC) -acc -gpu=managed
+	endif
 endif
 
 ##> liblary option setting
@@ -69,20 +88,20 @@ ifdef FLAGS
 
 	ifeq ($(findstring ML, $(DFLAGS)), ML)
 		CPPFLAG += -DWITH_ML
-		#INCLUDE_ML = 
+		#INCLUDE_ML =
 		USE_LIB_ML = -L./lib -lml -lzoltan -lmetis
 	endif
 
 	ifeq ($(findstring MUMPS, $(DFLAGS)), MUMPS)
 		CPPFLAG += -DWITH_MUMPS
-		#INCLUDE_MUMPS = 
+		#INCLUDE_MUMPS =
 		USE_LIB_MUMPS = -L./lib -ldmumps -lmumps_common -lpord
 	endif
 
 	ifeq ($(findstring BLOPEX, $(DFLAGS)), BLOPEX)
-		#INCLUDE_BLOPEX = 
+		#INCLUDE_BLOPEX =
 		CPPFLAG += -DWITH_BLOPEX
-		USE_LIB_BLOPEX = -L./lib 
+		USE_LIB_BLOPEX = -L./lib
 	endif
 endif
 
@@ -130,7 +149,7 @@ wrapper_lapack.f90
 SRC_WRAP2 = \
 wrapper_scalapack.f90 \
 monolis_wrapper_ml.c \
-monolis_wrapper_blopex.c 
+monolis_wrapper_blopex.c
 
 SRC_FACT = \
 analysis.f90 \
@@ -138,7 +157,8 @@ factorize.f90 \
 LU/LU_nn.f90
 
 SRC_OPT = \
-nnls.f90 
+nnls.f90 \
+vae.f90
 
 SRC_FACT = \
 fillin.f90 \
@@ -374,7 +394,7 @@ $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
 $(TEST_TARGET): $(TST_OBJS)
-	$(LINK) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
+	$(FC) $(FFLAGS) $(CPP) $(CPPFLAG) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
 $(TEST_C_TARGET): $(TST_C_OBJS)
 	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)

@@ -200,7 +200,7 @@ contains
     integer(kint), intent(in) :: NDOF
     integer(kint) :: i, jC, jA, jB, jS, jE, col_A, col_B, NP, nz, NDOF2
     integer(kint) :: k, l, m, kn_A, kn_B, kn_C
-    real(kdouble), allocatable :: temp(:,:)
+    real(kdouble) :: temp(NDOF, NDOF)
 
 #ifdef DEBUG
     call monolis_std_debug_log_header("monolis_matmat_value_nn")
@@ -210,12 +210,16 @@ contains
     NDOF2 = NDOF * NDOF
     nz = C%CSR%index(NP + 1)
     call monolis_palloc_R_1d(C%R%A, NDOF2 * nz)
-    call monolis_alloc_R_2d(temp, NDOF, NDOF)
 
+!$omp parallel do default(none) &
+!$omp & shared(A, B, C) &
+!$omp & firstprivate(NP, NDOF, NDOF2) &
+!$omp & private(i, jC, jA, jB, jS, jE, col_A, col_B, k, l, m, kn_A, kn_B, kn_C, temp)
+!$acc parallel loop private(temp, jC, jA, jB, jS, jE, col_A, col_B, k, l, m, kn_A, kn_B, kn_C)
     do i = 1, NP
       jS = C%CSR%index(i) + 1
       jE = C%CSR%index(i + 1)
-      
+
       do jC = jS, jE
         col_B = C%CSR%item(jC)
         temp = 0.0d0
@@ -257,6 +261,8 @@ contains
         enddo
       enddo
     enddo
+!$acc end parallel loop
+!$omp end parallel do
 
     call monolis_palloc_R_1d(C%R%B, A%NP * NDOF)
     call monolis_palloc_R_1d(C%R%X, A%NP * NDOF)
