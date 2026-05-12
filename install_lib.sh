@@ -31,7 +31,10 @@ cd build
 # 子 cmake を EXECUTE_PROCESS 起動するため、-D では伝搬しない。
 # CMake >= 3.x では環境変数 CMAKE_POLICY_VERSION_MINIMUM が子プロセスにも伝わる。
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
-cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DSCALAPACK_BUILD_TESTS=OFF ..
+# NOTE: scalapack の REDIST/SRC 等に K&R 形式の C コードがあり、Apple Clang の
+# デフォルト (C23) では implicit-int でビルドエラーになるため、
+# -std=gnu89 で K&R を許容する。
+cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DSCALAPACK_BUILD_TESTS=OFF ..
 make -j 4
 make install
 unset CMAKE_POLICY_VERSION_MINIMUM
