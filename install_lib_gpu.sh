@@ -28,7 +28,7 @@ BASE_DIR=$(pwd)
 #mkdir build
 #cd build
 #export CMAKE_POLICY_VERSION_MINIMUM=3.5
-#cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
+#cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DSCALAPACK_BUILD_TESTS=OFF ..
 #make -j
 #make install
 #unset CMAKE_POLICY_VERSION_MINIMUM

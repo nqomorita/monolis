@@ -31,7 +31,7 @@ cd build
 # 子 cmake を EXECUTE_PROCESS 起動するため、-D では伝搬しない。
 # CMake >= 3.x では環境変数 CMAKE_POLICY_VERSION_MINIMUM が子プロセスにも伝わる。
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
-cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
+cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DSCALAPACK_BUILD_TESTS=OFF ..
 make -j
 make install
 unset CMAKE_POLICY_VERSION_MINIMUM
