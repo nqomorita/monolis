@@ -32,7 +32,7 @@ cd build
 # CMake >= 3.x では環境変数 CMAKE_POLICY_VERSION_MINIMUM が子プロセスにも伝わる。
 export CMAKE_POLICY_VERSION_MINIMUM=3.5
 cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DSCALAPACK_BUILD_TESTS=OFF ..
-make -j
+make -j 4
 make install
 unset CMAKE_POLICY_VERSION_MINIMUM
 cd ../../..
@@ -56,7 +56,7 @@ cd submodule/mumps
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR ..
-make -j 
+make -j 4
 make install
 cd ../../..
 
