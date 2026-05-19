@@ -4,22 +4,17 @@ git submodule update --init --recursive
 BASE_DIR=$(pwd)
 
 #> scalapack
-cd submodule/scalapack
-mkdir build
-cd build
-# NOTE: scalapack の CMAKE/FortranMangling.cmake が内部で BLACS/INSTALL に対し
-# 子 cmake を EXECUTE_PROCESS 起動するため、-D では伝搬しない。
-# CMake >= 3.x では環境変数 CMAKE_POLICY_VERSION_MINIMUM が子プロセスにも伝わる。
-export CMAKE_POLICY_VERSION_MINIMUM=3.5
-cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
-make -j
-make install
-unset CMAKE_POLICY_VERSION_MINIMUM
-cd ../../..
+#cd submodule/scalapack
+#mkdir build
+#cd build
+#cmake -DCMAKE_INSTALL_PREFIX=$BASE_DIR -DCMAKE_C_FLAGS="-Wno-implicit-function-declaration" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
+#make -j
+#make install
+#cd ../../..
 
 #> METIS
 cd submodule/METIS
-make config prefix=$BASE_DIR
+make config prefix=$BASE_DIR cc=nvc
 make install
 cd ../..
 #make config i64=1 prefix=$BASE_DIR
@@ -43,7 +38,7 @@ cd ../../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make
+make FLAGS=GPU_GNU
 cd ../..
 
 #> gedatsu

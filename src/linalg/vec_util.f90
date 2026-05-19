@@ -25,9 +25,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop
     do i = 1, m
       Y(i) = X(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_copy_I
@@ -51,9 +53,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop present(X, Y)
     do i = 1, m
       Y(i) = X(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_copy_R
@@ -77,9 +81,11 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop
     do i = 1, m
       Y(i) = X(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_copy_C
@@ -109,9 +115,11 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_I
@@ -141,9 +149,11 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop present(X, Y, Z)
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_R
@@ -173,9 +183,11 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
+!$acc parallel loop
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_vec_AXPBY_C
@@ -199,9 +211,11 @@ contains
 
     do i = 1, n_vec
       call monolis_inner_product_main_R(monoCOM, m, p, q(:,i), norm, tdotp, tcomm_dotp)
+!$acc parallel loop
       do j = 1, m
         p(j) = p(j) - norm*q(j,i)
       enddo
+!$acc end parallel loop
     enddo
   end subroutine monolis_gram_schmidt_R
 end module mod_monolis_vec_util

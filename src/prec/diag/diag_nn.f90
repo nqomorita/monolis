@@ -39,6 +39,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
 !$omp do
+!$acc parallel loop private(T, LU, ii, j, k, l, jS, jE, in)
     do i = 1, N
       jS = index(i) + 1
       jE = index(i + 1)
@@ -73,6 +74,7 @@ contains
         endif
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -111,6 +113,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
 !$omp do
+!$acc parallel loop private(T, LU, ii, j, k, l, jS, jE, in)
     do i = 1, N
       jS = index(i) + 1
       jE = index(i + 1)
@@ -144,6 +147,7 @@ contains
         endif
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -176,6 +180,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
 !$omp do
+!$acc parallel loop private(T, j, k)
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)
@@ -195,6 +200,7 @@ contains
         Y(NDOF*(i-1) + k) = T(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 
@@ -226,6 +232,7 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
 !$omp do
+!$acc parallel loop private(T, j, k)
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)
@@ -245,6 +252,7 @@ contains
         Y(NDOF*(i-1) + k) = T(k)
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
 

@@ -253,6 +253,10 @@ contains
 
     call monolis_std_debug_log_header("monolis_timer_finalize")
 
+    !> ローカル配列 time を device 上に確保 (GPU ビルド時の monolis_allreduce_R の
+    !>  present 句要件を満たすため。CPU ビルドでは無視される)
+    !$acc enter data create(time)
+
     call monolis_mpi_local_barrier(monoCOM%comm)
 
     t1 = monolis_get_time()
@@ -277,7 +281,9 @@ contains
       time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
       time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
+      !$acc update device(time)
       call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
+      !$acc update self(time)
 
       time = time/dble(monolis_mpi_get_global_comm_size())
 
@@ -327,7 +333,10 @@ contains
     time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
     time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
+    !$acc update device(time)
     call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
+    !$acc update self(time)
+
     time = time/dble(monolis_mpi_get_global_comm_size())
 
     monoPRM%Rarray(monolis_R_time_prep) = time(1)
@@ -336,6 +345,8 @@ contains
     monoPRM%Rarray(monolis_R_time_prec) = time(4)
     monoPRM%Rarray(monolis_R_time_comm_dotp) = time(5)
     monoPRM%Rarray(monolis_R_time_comm_spmv) = time(6)
+
+    !$acc exit data delete(time)
   end subroutine monolis_timer_finalize
 
   !> @ingroup def_init

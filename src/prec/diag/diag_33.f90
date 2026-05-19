@@ -34,6 +34,7 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(T, P, i, j, k, jS, jE, in)
 !$omp do
+!$acc parallel loop private(jS, jE, j, in)
     do i = 1, N
       jS = index(i) + 1
       jE = index(i + 1)
@@ -52,8 +53,10 @@ contains
         endif
       enddo
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp do
+!$acc parallel loop private(T, P, i, j, k)
     do l = 1, N
       T(1,1) = ALU(9*l-8)
       T(1,2) = ALU(9*l-7)
@@ -87,6 +90,7 @@ contains
       ALU(9*l-1) = T(3,2)
       ALU(9*l  ) = T(3,3)
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_precond_diag_33_setup_R
@@ -111,6 +115,7 @@ contains
 !$omp & shared(monoMAT, ALU, X, Y) &
 !$omp & private(i, X1, X2, X3)
 !$omp do
+!$acc parallel loop present(ALU, X, Y) private(X1, X2, X3)
     do i = 1, N
       X1 = X(3*i-2)
       X2 = X(3*i-1)
@@ -124,6 +129,7 @@ contains
       Y(3*i-1) = X2
       Y(3*i  ) = X3
     enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
   end subroutine monolis_precond_diag_33_apply_R
