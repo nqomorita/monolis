@@ -84,8 +84,8 @@ module mod_monolis_opt_vae
     real(kdouble) :: lr = 1.0d-3
     !> [in] KL 損失の最終スケール (beta)
     real(kdouble) :: r_loss_factor = 1.0d0
-    !> [in] KL ウォームアップエポック数 (0 -> r_loss_factor へ線形)
-    integer(kint) :: kl_warmup_epochs = 5
+    !> [in] KL ウォームアップエポック数 (0 -> r_loss_factor へ線形、0 で無効)
+    integer(kint) :: kl_warmup_epochs = 0
     !> [in] EarlyStopping の patience。負値で max(1, epochs/10)
     integer(kint) :: early_stop_patience = -1
     !> [in] 何バッチごとに進捗をログするか (0 で抑制)
@@ -309,11 +309,12 @@ contains
     real(kdouble), allocatable :: dh1(:,:), dh1pre(:,:)
     real(kdouble), allocatable :: gW1(:,:), gWmu(:,:), gWlv(:,:), gW2(:,:), gW3(:,:)
     real(kdouble), allocatable :: gb1(:),  gbmu(:),  gblv(:),  gb2(:),  gb3(:)
-    real(kdouble) :: invB, kl_w
+    real(kdouble) :: invB, invBD, kl_w
 
     D = net%D; H = net%H; Z = net%Z; B = size(X, 2)
-    invB = 1.0d0 / real(B, kdouble)
-    kl_w = beta * invB
+    invB  = 1.0d0 / real(B, kdouble)
+    invBD = 1.0d0 / real(B*D, kdouble)
+    kl_w  = beta * invB
 
     !> エンコーダ順伝播
     call monolis_alloc_R_2d(h1pre, H, B)
@@ -357,15 +358,15 @@ contains
     end do
     xhat = 1.0d0 / (1.0d0 + exp(-logits))
 
-    !> 損失
-    recon_avg = sum((X - xhat)**2) * invB
+    !> 損失 (再構成は特徴次元 D 方向にも平均: Keras mse 互換)
+    recon_avg = sum((X - xhat)**2) * invBD
     kl_avg    = -0.5d0 * sum(1.0d0 + logvar - mu*mu - exp(logvar)) * invB
     loss_avg  = recon_avg + beta * kl_avg
 
     !> 逆伝播
     call monolis_alloc_R_2d(dxhat,   D, B)
     call monolis_alloc_R_2d(dlogits, D, B)
-    dxhat   = 2.0d0 * (xhat - X) * invB
+    dxhat   = 2.0d0 * (xhat - X) * invBD
     dlogits = dxhat * xhat * (1.0d0 - xhat)
 
     call monolis_alloc_R_2d(gW3, H, D)
