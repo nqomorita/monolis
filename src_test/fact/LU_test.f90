@@ -43,17 +43,34 @@ contains
     call monolis_alloc_R_1d(x_true, n_node)
     call monolis_alloc_R_1d(b, n_node)
     call monolis_alloc_R_1d(x, n_node)
+
+    call monolis_fact_LU_nn_setup_R(mat%MAT, prec%MAT)
+
+    !> 1 回目: x_true = [1, 2, 3, 4, 5]
     do i = 1, n_node
       x_true(i) = dble(i)
     end do
-
     call monolis_matvec_product_R(mat, com, x_true, b)
-
-    call monolis_fact_LU_nn_setup_R(mat%MAT, prec%MAT)
     call monolis_fact_LU_nn_apply_R(mat%MAT, prec%MAT, b, x)
-    call monolis_fact_LU_nn_clear_R(prec%MAT)
+    call monolis_test_check_eq_R("monolis_precond_LU_nn_test 1", x, x_true)
 
-    call monolis_test_check_eq_R("monolis_precond_LU_nn_test", x, x_true)
+    !> 2 回目: 右辺を変えて、同じ LU データで解けることを確認
+    do i = 1, n_node
+      x_true(i) = dble(n_node - i + 1)
+    end do
+    call monolis_matvec_product_R(mat, com, x_true, b)
+    call monolis_fact_LU_nn_apply_R(mat%MAT, prec%MAT, b, x)
+    call monolis_test_check_eq_R("monolis_precond_LU_nn_test 2", x, x_true)
+
+    !> 3 回目: さらに別の右辺
+    do i = 1, n_node
+      x_true(i) = sin(dble(i))
+    end do
+    call monolis_matvec_product_R(mat, com, x_true, b)
+    call monolis_fact_LU_nn_apply_R(mat%MAT, prec%MAT, b, x)
+    call monolis_test_check_eq_R("monolis_precond_LU_nn_test 3", x, x_true)
+
+    call monolis_fact_LU_nn_clear_R(prec%MAT)
 
     call monolis_dealloc_R_1d(x_true)
     call monolis_dealloc_R_1d(b)

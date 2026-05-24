@@ -194,9 +194,12 @@ contains
     integer(kint),      intent(out) :: perm(nvtx)
 
     integer(kint), allocatable :: perm0(:)
+    integer(kint) :: i
     allocate(perm0(0:nvtx-1))
     call permFromElimTree(T, perm0)
-    perm(1:nvtx) = perm0(0:nvtx-1)
+    do i = 1, nvtx
+      perm(i) = perm0(i - 1) + 1
+    end do
     deallocate(perm0)
   end subroutine monolis_pord_perm_from_elimtree
 
