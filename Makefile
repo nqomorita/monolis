@@ -101,6 +101,7 @@ SRC_MAT = \
 spmat_copy.f90 \
 spmat_handler_util.f90 \
 spmat_nzpattern_util.f90 \
+spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90 \
 spmat_convert_sym.f90
@@ -119,6 +120,18 @@ mat_converge.f90
 SRC_WRAP = \
 wrapper_lapack.f90 \
 wrapper_scalapack.f90
+
+SRC_FACT = \
+pord/monolis_pord_core.f90 \
+pord/monolis_pord_graph.f90 \
+pord/monolis_pord_bisect.f90 \
+pord/monolis_pord_decomp.f90 \
+pord/monolis_pord_order.f90 \
+pord/monolis_pord_ordering.f90 \
+analysis.f90 \
+factorize.f90 \
+solve.f90 \
+LU.f90
 
 SRC_OPT = \
 nnls.f90 \
@@ -143,6 +156,7 @@ sor/sor_nn.f90 \
 sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
+LU.f90 \
 precond.f90
 
 #MUMPS.f90 \
@@ -355,6 +369,7 @@ all: \
 lib: \
 	cp_header \
 	cp_header_lib \
+	cp_bin_lib \
 	$(LIB_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)

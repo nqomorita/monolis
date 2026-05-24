@@ -65,6 +65,94 @@ module mod_monolis_def_mat
     integer(kint), pointer, contiguous :: perm(:) => null()
   end type monolis_mat_CSC
 
+  !> 行列構造体（reordering 構造）
+  type monolis_mat_reorder
+    !> perm 配列
+    integer(kint), pointer, contiguous :: perm(:) => null()
+    !> iperm 配列
+    integer(kint), pointer, contiguous :: iperm(:) => null()
+    !> rperm 配列
+    real(kdouble), pointer, contiguous :: rperm(:) => null()
+    !> cperm 配列
+    complex(kdouble), pointer, contiguous :: cperm(:) => null()
+  end type monolis_mat_reorder
+
+  !> 行列構造体（フロンタル行列構造）
+  type :: monolis_mat_frontal
+    !> フロント行列の全サイズ（ピボット + 更新）
+    integer(kint) :: front_size = 0
+    !> ピボット数
+    integer(kint) :: pivot_size = 0
+    !> 更新ブロックの行/列数
+    integer(kint) :: update_size = 0
+    !> ピボット列の LU 因子（front_size × pivot_size）
+    real(kdouble), allocatable :: factor(:,:)
+    !> ピボット行 × 更新列の U ブロック（pivot_size × update_size）
+    real(kdouble), allocatable :: upper_update(:,:)
+    !> 親フロントへの寄与（update_size × update_size、数値分解中の一時領域）
+    real(kdouble), allocatable :: contribution(:,:)
+  end type
+
+  !> 行列構造体（LU 分解構造）
+  type :: monolis_mat_lu
+    !> 行列次元
+    integer(kint) :: N = 0
+    !> 置換配列（元 → 新、1-based）
+    integer(kint), allocatable :: perm(:)
+    !> 逆置換配列（新 → 元、1-based）
+    integer(kint), allocatable :: iperm(:)
+    !> フロント数
+    integer(kint) :: nfronts = 0
+    !> 最大フロントサイズ
+    integer(kint) :: max_front_size = 0
+    !> 各フロント先頭の置換後列番号
+    integer(kint), allocatable :: super_start(:)
+    !> フロント変数列 CSR の index（nfronts+1、1-based）
+    integer(kint), allocatable :: front_ptr(:)
+    !> フロント変数列（置換後の列番号、front_ptr で区切る）
+    integer(kint), allocatable :: front_ind(:)
+    !> フロント親
+    integer(kint), allocatable :: front_parent(:)
+    !> フロント第一子
+    integer(kint), allocatable :: front_first_child(:)
+    !> フロント次兄弟
+    integer(kint), allocatable :: front_next_sibling(:)
+    !> フロント後順序
+    integer(kint), allocatable :: front_postorder(:)
+    !> フロント全サイズ
+    integer(kint), allocatable :: front_size(:)
+    !> フロントごとのピボット数
+    integer(kint), allocatable :: front_pivot_size(:)
+    !> フロントごとの更新サイズ
+    integer(kint), allocatable :: front_update_size(:)
+    !> 元行列非ゼロ → フロント対応の index（nfronts+1、1-based）
+    integer(kint), allocatable :: orig_ptr(:)
+    !> 元行列非ゼロのフロント内行位置
+    integer(kint), allocatable :: orig_row_pos(:)
+    !> 元行列非ゼロのフロント内列位置
+    integer(kint), allocatable :: orig_col_pos(:)
+    !> 元行列非ゼロの A 配列内位置
+    integer(kint), allocatable :: orig_entry(:)
+    !> 子フロント寄与 → 親位置対応の index（nfronts+1、1-based）
+    integer(kint), allocatable :: contrib_pos_ptr(:)
+    !> 子の更新列が親で占める位置
+    integer(kint), allocatable :: contrib_parent_pos(:)
+    !> 子フロント連続区間 run の index（nfronts+1、1-based）
+    integer(kint), allocatable :: contrib_run_ptr(:)
+    !> run の子側開始位置
+    integer(kint), allocatable :: contrib_run_first(:)
+    !> run の長さ
+    integer(kint), allocatable :: contrib_run_len(:)
+    !> run の親側開始位置
+    integer(kint), allocatable :: contrib_run_parent_first(:)
+    !> 数値フロント配列
+    type(monolis_mat_frontal), allocatable :: factors(:)
+    !> 解析フェーズ完了フラグ
+    logical :: analyzed = .false.
+    !> 数値分解フェーズ完了フラグ
+    logical :: factorized = .false.
+  end type
+
   !> 行列構造体
   type monolis_mat
     !> 内部自由度数
@@ -89,6 +177,10 @@ module mod_monolis_def_mat
     type(monolis_mat_CSR) :: CSR
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
+    !> 行列構造体（reordering 構造）
+    type(monolis_mat_reorder) :: REORDER
+    !> 行列構造体（LU 分解構造）
+    type(monolis_mat_lu) :: LU
   end type monolis_mat
 
 contains
@@ -113,6 +205,8 @@ contains
     call monolis_mat_initialize_SCSR(monoMAT%SCSR)
     call monolis_mat_initialize_CSR(monoMAT%CSR)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
+    call monolis_mat_initialize_REORDER(monoMAT%REORDER)
+    call monolis_mat_initialize_LU(monoMAT%LU)
   end subroutine monolis_mat_initialize
 
   !> @ingroup def_mat_init
@@ -201,6 +295,8 @@ contains
     call monolis_mat_finalize_SCSR(monoMAT%SCSR)
     call monolis_mat_finalize_CSR(monoMAT%CSR)
     call monolis_mat_finalize_CSC(monoMAT%CSC)
+    call monolis_mat_finalize_REORDER(monoMAT%REORDER)
+    call monolis_mat_finalize_LU(monoMAT%LU)
   end subroutine monolis_mat_finalize
 
   !> @ingroup def_mat_init
@@ -268,6 +364,123 @@ contains
     call monolis_pdealloc_I_1d(CSC%item)
     call monolis_pdealloc_I_1d(CSC%perm)
   end subroutine monolis_mat_finalize_CSC
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（reordering 構造）
+  subroutine monolis_mat_initialize_reorder(REORDER)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_reorder), intent(inout) :: REORDER
+
+    call monolis_pdealloc_I_1d(REORDER%perm)
+    call monolis_pdealloc_I_1d(REORDER%iperm)
+    call monolis_pdealloc_R_1d(REORDER%rperm)
+    call monolis_pdealloc_C_1d(REORDER%cperm)
+  end subroutine monolis_mat_initialize_reorder
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（reordering 構造）
+  subroutine monolis_mat_finalize_reorder(REORDER)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_reorder), intent(inout) :: REORDER
+
+    call monolis_pdealloc_I_1d(REORDER%perm)
+    call monolis_pdealloc_I_1d(REORDER%iperm)
+    call monolis_pdealloc_R_1d(REORDER%rperm)
+    call monolis_pdealloc_C_1d(REORDER%cperm)
+  end subroutine monolis_mat_finalize_reorder
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（フロンタル行列構造）
+  subroutine monolis_mat_initialize_frontal(FRONTAL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_frontal), intent(inout) :: FRONTAL
+
+    FRONTAL%front_size = 0
+    FRONTAL%pivot_size = 0
+    FRONTAL%update_size = 0
+    call monolis_dealloc_R_2d(FRONTAL%factor)
+    call monolis_dealloc_R_2d(FRONTAL%upper_update)
+    call monolis_dealloc_R_2d(FRONTAL%contribution)
+  end subroutine monolis_mat_initialize_frontal
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（フロンタル行列構造）
+  subroutine monolis_mat_finalize_frontal(FRONTAL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_frontal), intent(inout) :: FRONTAL
+
+    FRONTAL%front_size = 0
+    FRONTAL%pivot_size = 0
+    FRONTAL%update_size = 0
+    call monolis_dealloc_R_2d(FRONTAL%factor)
+    call monolis_dealloc_R_2d(FRONTAL%upper_update)
+    call monolis_dealloc_R_2d(FRONTAL%contribution)
+  end subroutine monolis_mat_finalize_frontal
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（LU 分解構造）
+  subroutine monolis_mat_initialize_LU(LU)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_lu), intent(inout) :: LU
+
+    LU%N = 0
+    LU%nfronts = 0
+    LU%max_front_size = 0
+    LU%analyzed = .false.
+    LU%factorized = .false.
+
+    call monolis_mat_finalize_LU(LU)
+  end subroutine monolis_mat_initialize_LU
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（LU 分解構造）
+  subroutine monolis_mat_finalize_LU(LU)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_lu), intent(inout) :: LU
+    integer(kint) :: i
+
+    if(allocated(LU%factors))then
+      do i = 1, size(LU%factors)
+        call monolis_mat_finalize_frontal(LU%factors(i))
+      enddo
+      deallocate(LU%factors)
+    endif
+
+    call monolis_dealloc_I_1d(LU%perm)
+    call monolis_dealloc_I_1d(LU%iperm)
+    call monolis_dealloc_I_1d(LU%super_start)
+    call monolis_dealloc_I_1d(LU%front_ptr)
+    call monolis_dealloc_I_1d(LU%front_ind)
+    call monolis_dealloc_I_1d(LU%front_parent)
+    call monolis_dealloc_I_1d(LU%front_first_child)
+    call monolis_dealloc_I_1d(LU%front_next_sibling)
+    call monolis_dealloc_I_1d(LU%front_postorder)
+    call monolis_dealloc_I_1d(LU%front_size)
+    call monolis_dealloc_I_1d(LU%front_pivot_size)
+    call monolis_dealloc_I_1d(LU%front_update_size)
+    call monolis_dealloc_I_1d(LU%orig_ptr)
+    call monolis_dealloc_I_1d(LU%orig_row_pos)
+    call monolis_dealloc_I_1d(LU%orig_col_pos)
+    call monolis_dealloc_I_1d(LU%orig_entry)
+    call monolis_dealloc_I_1d(LU%contrib_pos_ptr)
+    call monolis_dealloc_I_1d(LU%contrib_parent_pos)
+    call monolis_dealloc_I_1d(LU%contrib_run_ptr)
+    call monolis_dealloc_I_1d(LU%contrib_run_first)
+    call monolis_dealloc_I_1d(LU%contrib_run_len)
+    call monolis_dealloc_I_1d(LU%contrib_run_parent_first)
+
+    LU%analyzed = .false.
+    LU%factorized = .false.
+    LU%nfronts = 0
+    LU%max_front_size = 0
+    LU%N = 0
+  end subroutine monolis_mat_finalize_LU
 
   !> @ingroup def_mat_init
   !> 右辺ベクトルの設定（実数型）
