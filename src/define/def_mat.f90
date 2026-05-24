@@ -79,56 +79,104 @@ module mod_monolis_def_mat
 
   !> 行列構造体（フロンタル行列構造）
   type :: monolis_mat_frontal
-    !> フロント行列のサイズ
-    integer(kint) :: nfront
+    !> フロント行列の全サイズ（ピボット + 更新）
+    integer(kint) :: front_size = 0
     !> ピボット数
-    integer(kint) :: npiv
-    !> フロント行列のインデックス配列
-    integer(kint), allocatable :: indices(:)
-    !> フロント行列
-    real(kdouble), allocatable :: front(:,:)
-    !> ピボット順序配列
-    integer(kint), allocatable :: pivorder(:)
+    integer(kint) :: pivot_size = 0
+    !> 更新ブロックの行/列数
+    integer(kint) :: update_size = 0
+    !> ピボット列の LU 因子（front_size × pivot_size）
+    real(kdouble), allocatable :: factor(:,:)
+    !> ピボット行 × 更新列の U ブロック（pivot_size × update_size）
+    real(kdouble), allocatable :: upper_update(:,:)
+    !> 親フロントへの寄与（update_size × update_size、数値分解中の一時領域）
+    real(kdouble), allocatable :: contribution(:,:)
   end type
 
   !> 行列構造体（LU 分解構造）
   type :: monolis_mat_lu
-    !>
-    integer(kint) :: N
-    !>
-    integer(kint) :: NDOF
-    !>
+    !> 行列次元
+    integer(kint) :: N = 0
+    !> ブロック自由度
+    integer(kint) :: NDOF = 0
+    !> 元 CSR の index 配列（コピー、1-based）
     integer(kint), allocatable :: index(:)
-    !>
+    !> 元 CSR の item 配列（コピー、1-based）
     integer(kint), allocatable :: item(:)
-    !>
-    integer(kint), allocatable :: perm(:)
-    !>
-    integer(kint), allocatable :: iperm(:)
-    !>
+    !> 元行列値のコピー
     real(kdouble), allocatable :: A_org(:)
-    !> フロンタル行列の配列数
-    integer(kint) :: nfactor
-    !> フロンタル行列の配列
-    type(monolis_mat_frontal), allocatable :: factors(:)
-    !> 親ノード配列
-    integer(kint), allocatable :: parent(:)
+    !> 置換配列（元 → 新、1-based）
+    integer(kint), allocatable :: perm(:)
+    !> 逆置換配列（新 → 元、1-based）
+    integer(kint), allocatable :: iperm(:)
+    !> 対称化パターンの非ゼロ数
+    integer(kint) :: sym_nnz = 0
+    !> 対称化パターン CSR（1-based、N+1）
+    integer(kint), allocatable :: sym_row_ptr(:)
+    !> 対称化パターン CSR（1-based、sym_nnz）
+    integer(kint), allocatable :: sym_col_ind(:)
     !> スーパーノード数
-    integer(kint) :: nsuper
-    !> スーパーノード所属配列
-    integer(kint), allocatable :: snode_belong(:)
-    !> スーパーノード開始位置配列
-    integer(kint), allocatable :: snode_start(:)
-    !> スーパーノードサイズ配列
-    integer(kint), allocatable :: snode_size(:)
-    !> スーパーノード親配列
-    integer(kint), allocatable :: snode_parent(:)
-    !> スーパーノードフロントサイズ配列
-    integer(kint), allocatable :: snode_fsize(:)
-    !> 子ノード配列
-    integer(kint), allocatable :: sfils(:)
-    !> 兄弟ノード配列
-    integer(kint), allocatable :: sfrere(:)
+    integer(kint) :: nsuper = 0
+    !> フロント数（= nsuper）
+    integer(kint) :: nfronts = 0
+    !> 最大フロントサイズ
+    integer(kint) :: max_front_size = 0
+    !> L パターンの非ゼロ数（推定）
+    integer(kint) :: l_pattern_nnz = 0
+    !> 元頂点 → 所属フロント
+    integer(kint), allocatable :: vertex_front(:)
+    !> 各フロント先頭の置換後列番号
+    integer(kint), allocatable :: super_start(:)
+    !> 各フロント末尾の置換後列番号
+    integer(kint), allocatable :: super_end(:)
+    !> 置換後列 → フロント
+    integer(kint), allocatable :: column_to_super(:)
+    !> スーパーノード親
+    integer(kint), allocatable :: super_parent(:)
+    !> フロント変数列 CSR の index（nfronts+1、1-based）
+    integer(kint), allocatable :: front_ptr(:)
+    !> フロント変数列（置換後の列番号、front_ptr で区切る）
+    integer(kint), allocatable :: front_ind(:)
+    !> フロント親
+    integer(kint), allocatable :: front_parent(:)
+    !> フロント第一子
+    integer(kint), allocatable :: front_first_child(:)
+    !> フロント次兄弟
+    integer(kint), allocatable :: front_next_sibling(:)
+    !> フロント後順序
+    integer(kint), allocatable :: front_postorder(:)
+    !> フロント全サイズ
+    integer(kint), allocatable :: front_size(:)
+    !> フロントごとのピボット数
+    integer(kint), allocatable :: front_pivot_size(:)
+    !> フロントごとの更新サイズ
+    integer(kint), allocatable :: front_update_size(:)
+    !> 元行列非ゼロ → フロント対応の index（nfronts+1、1-based）
+    integer(kint), allocatable :: orig_ptr(:)
+    !> 元行列非ゼロのフロント内行位置
+    integer(kint), allocatable :: orig_row_pos(:)
+    !> 元行列非ゼロのフロント内列位置
+    integer(kint), allocatable :: orig_col_pos(:)
+    !> 元行列非ゼロの A 配列内位置
+    integer(kint), allocatable :: orig_entry(:)
+    !> 子フロント寄与 → 親位置対応の index（nfronts+1、1-based）
+    integer(kint), allocatable :: contrib_pos_ptr(:)
+    !> 子の更新列が親で占める位置
+    integer(kint), allocatable :: contrib_parent_pos(:)
+    !> 子フロント連続区間 run の index（nfronts+1、1-based）
+    integer(kint), allocatable :: contrib_run_ptr(:)
+    !> run の子側開始位置
+    integer(kint), allocatable :: contrib_run_first(:)
+    !> run の長さ
+    integer(kint), allocatable :: contrib_run_len(:)
+    !> run の親側開始位置
+    integer(kint), allocatable :: contrib_run_parent_first(:)
+    !> 数値フロント配列
+    type(monolis_mat_frontal), allocatable :: factors(:)
+    !> 解析フェーズ完了フラグ
+    logical :: analyzed = .false.
+    !> 数値分解フェーズ完了フラグ
+    logical :: factorized = .false.
   end type
 
   !> 行列構造体
@@ -376,11 +424,12 @@ contains
     !> [in,out] 行列構造体
     type(monolis_mat_frontal), intent(inout) :: FRONTAL
 
-    FRONTAL%nfront = 0
-    FRONTAL%npiv = 0
-    call monolis_dealloc_I_1d(FRONTAL%indices)
-    call monolis_dealloc_I_1d(FRONTAL%pivorder)
-    call monolis_dealloc_R_2d(FRONTAL%front)
+    FRONTAL%front_size = 0
+    FRONTAL%pivot_size = 0
+    FRONTAL%update_size = 0
+    call monolis_dealloc_R_2d(FRONTAL%factor)
+    call monolis_dealloc_R_2d(FRONTAL%upper_update)
+    call monolis_dealloc_R_2d(FRONTAL%contribution)
   end subroutine monolis_mat_initialize_frontal
 
   !> @ingroup def_mat_init
@@ -390,11 +439,12 @@ contains
     !> [in,out] 行列構造体
     type(monolis_mat_frontal), intent(inout) :: FRONTAL
 
-    FRONTAL%nfront = 0
-    FRONTAL%npiv = 0
-    call monolis_dealloc_I_1d(FRONTAL%indices)
-    call monolis_dealloc_I_1d(FRONTAL%pivorder)
-    call monolis_dealloc_R_2d(FRONTAL%front)
+    FRONTAL%front_size = 0
+    FRONTAL%pivot_size = 0
+    FRONTAL%update_size = 0
+    call monolis_dealloc_R_2d(FRONTAL%factor)
+    call monolis_dealloc_R_2d(FRONTAL%upper_update)
+    call monolis_dealloc_R_2d(FRONTAL%contribution)
   end subroutine monolis_mat_finalize_frontal
 
   !> @ingroup def_mat_init
@@ -403,28 +453,18 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat_lu), intent(inout) :: LU
-    integer(kint) :: i
 
     LU%N = 0
     LU%NDOF = 0
-    LU%nfactor = 0
+    LU%sym_nnz = 0
     LU%nsuper = 0
+    LU%nfronts = 0
+    LU%max_front_size = 0
+    LU%l_pattern_nnz = 0
+    LU%analyzed = .false.
+    LU%factorized = .false.
 
-    if(allocated(LU%factors)) deallocate(LU%factors)
-    if(allocated(LU%A_org)) deallocate(LU%A_org)
-    if(allocated(LU%index)) deallocate(LU%index)
-    if(allocated(LU%item)) deallocate(LU%item)
-    if(allocated(LU%perm)) deallocate(LU%perm)
-    if(allocated(LU%iperm)) deallocate(LU%iperm)
-
-    call monolis_dealloc_I_1d(LU%parent)
-    call monolis_dealloc_I_1d(LU%snode_belong)
-    call monolis_dealloc_I_1d(LU%snode_start)
-    call monolis_dealloc_I_1d(LU%snode_size)
-    call monolis_dealloc_I_1d(LU%snode_parent)
-    call monolis_dealloc_I_1d(LU%snode_fsize)
-    call monolis_dealloc_I_1d(LU%sfils)
-    call monolis_dealloc_I_1d(LU%sfrere)
+    call monolis_mat_finalize_LU(LU)
   end subroutine monolis_mat_initialize_LU
 
   !> @ingroup def_mat_init
@@ -436,30 +476,53 @@ contains
     integer(kint) :: i
 
     if(allocated(LU%factors))then
-      do i = 1, LU%nfactor
+      do i = 1, size(LU%factors)
         call monolis_mat_finalize_frontal(LU%factors(i))
       enddo
       deallocate(LU%factors)
     endif
-    if(allocated(LU%A_org)) deallocate(LU%A_org)
-    if(allocated(LU%index)) deallocate(LU%index)
-    if(allocated(LU%item)) deallocate(LU%item)
-    if(allocated(LU%perm)) deallocate(LU%perm)
-    if(allocated(LU%iperm)) deallocate(LU%iperm)
 
+    call monolis_dealloc_I_1d(LU%index)
+    call monolis_dealloc_I_1d(LU%item)
+    call monolis_dealloc_R_1d(LU%A_org)
+    call monolis_dealloc_I_1d(LU%perm)
+    call monolis_dealloc_I_1d(LU%iperm)
+    call monolis_dealloc_I_1d(LU%sym_row_ptr)
+    call monolis_dealloc_I_1d(LU%sym_col_ind)
+    call monolis_dealloc_I_1d(LU%vertex_front)
+    call monolis_dealloc_I_1d(LU%super_start)
+    call monolis_dealloc_I_1d(LU%super_end)
+    call monolis_dealloc_I_1d(LU%column_to_super)
+    call monolis_dealloc_I_1d(LU%super_parent)
+    call monolis_dealloc_I_1d(LU%front_ptr)
+    call monolis_dealloc_I_1d(LU%front_ind)
+    call monolis_dealloc_I_1d(LU%front_parent)
+    call monolis_dealloc_I_1d(LU%front_first_child)
+    call monolis_dealloc_I_1d(LU%front_next_sibling)
+    call monolis_dealloc_I_1d(LU%front_postorder)
+    call monolis_dealloc_I_1d(LU%front_size)
+    call monolis_dealloc_I_1d(LU%front_pivot_size)
+    call monolis_dealloc_I_1d(LU%front_update_size)
+    call monolis_dealloc_I_1d(LU%orig_ptr)
+    call monolis_dealloc_I_1d(LU%orig_row_pos)
+    call monolis_dealloc_I_1d(LU%orig_col_pos)
+    call monolis_dealloc_I_1d(LU%orig_entry)
+    call monolis_dealloc_I_1d(LU%contrib_pos_ptr)
+    call monolis_dealloc_I_1d(LU%contrib_parent_pos)
+    call monolis_dealloc_I_1d(LU%contrib_run_ptr)
+    call monolis_dealloc_I_1d(LU%contrib_run_first)
+    call monolis_dealloc_I_1d(LU%contrib_run_len)
+    call monolis_dealloc_I_1d(LU%contrib_run_parent_first)
+
+    LU%analyzed = .false.
+    LU%factorized = .false.
+    LU%sym_nnz = 0
+    LU%nsuper = 0
+    LU%nfronts = 0
+    LU%max_front_size = 0
+    LU%l_pattern_nnz = 0
     LU%N = 0
     LU%NDOF = 0
-    LU%nfactor = 0
-    LU%nsuper = 0
-
-    call monolis_dealloc_I_1d(LU%parent)
-    call monolis_dealloc_I_1d(LU%snode_belong)
-    call monolis_dealloc_I_1d(LU%snode_start)
-    call monolis_dealloc_I_1d(LU%snode_size)
-    call monolis_dealloc_I_1d(LU%snode_parent)
-    call monolis_dealloc_I_1d(LU%snode_fsize)
-    call monolis_dealloc_I_1d(LU%sfils)
-    call monolis_dealloc_I_1d(LU%sfrere)
   end subroutine monolis_mat_finalize_LU
 
   !> @ingroup def_mat_init

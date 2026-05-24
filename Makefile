@@ -128,8 +128,10 @@ pord/monolis_pord_bisect.f90 \
 pord/monolis_pord_decomp.f90 \
 pord/monolis_pord_order.f90 \
 pord/monolis_pord_ordering.f90 \
+blas.f90 \
 analysis.f90 \
 factorize.f90 \
+solve.f90 \
 LU.f90
 
 SRC_OPT = \

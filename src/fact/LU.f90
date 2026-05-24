@@ -5,6 +5,7 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_def_struc
   use mod_monolis_fact_analysis
   use mod_monolis_fact_factorize
+  use mod_monolis_fact_solve
 
   implicit none
 
@@ -18,15 +19,13 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoLU
-    real(kdouble) :: t(20)
 
     if(monoMAT%NDOF == -1)then
       stop "monolis_fact_LU_nn_setup_R"
     endif
 
     call monolis_fact_analysis(monoMAT, monoLU%LU)
-
-    !call monolis_fact_LU_factorize()
+    call monolis_fact_factorize(monoMAT, monoLU%LU)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -50,7 +49,12 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
-    !call monolis_fact_LU_solve(monoLU%LU, Y, X)
+    integer(kint) :: n
+
+    n = monoLU%LU%N
+    if (n <= 0) return
+    X(1:n) = Y(1:n)
+    call monolis_fact_solve(monoLU%LU, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
@@ -71,6 +75,7 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoLU
 
+    call monolis_mat_finalize_LU(monoLU%LU)
     call monolis_pdealloc_R_1d(monoLU%R%D)
   end subroutine monolis_fact_LU_nn_clear_R
 
