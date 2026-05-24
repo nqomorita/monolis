@@ -211,10 +211,14 @@ contains
 
     call monolis_alloc_I_1d(lu%perm,  n)
     call monolis_alloc_I_1d(lu%iperm, n)
-    !> permFromElimTree は new -> old を返す。iperm として保存し、perm はその逆。
-    call monolis_pord_perm_from_elimtree(T, n, lu%iperm)
+    !> permFromElimTree は old -> new を 0-based で返す。
+    !> 1-based に直して perm として保存し、iperm はその逆。
+    call monolis_pord_perm_from_elimtree(T, n, lu%perm)
     do i = 1, n
-      lu%perm(lu%iperm(i)) = i
+      lu%perm(i) = lu%perm(i) + 1
+    end do
+    do i = 1, n
+      lu%iperm(lu%perm(i)) = i
     end do
 
     call monolis_alloc_I_1d(lu%vertex_front,        n)

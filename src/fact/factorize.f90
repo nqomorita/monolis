@@ -3,7 +3,7 @@ module mod_monolis_fact_factorize
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
-  use mod_monolis_fact_blas
+  use mod_monolis_lapack
 
   implicit none
 
