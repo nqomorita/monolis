@@ -130,7 +130,7 @@ pord/monolis_pord_order.f90 \
 pord/monolis_pord_ordering.f90 \
 analysis.f90 \
 factorize.f90 \
-LU/LU_nn.f90
+LU.f90
 
 SRC_OPT = \
 nnls.f90 \
