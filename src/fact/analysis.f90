@@ -29,9 +29,11 @@ contains
     !> [in,out] LU 分解構造体
     type(monolis_mat_lu), intent(inout) :: lu
 
-    integer(kint) :: n
+    integer(kint) :: n, ndof
     integer(kint), allocatable :: row_ptr(:)
     integer(kint), allocatable :: col_ind(:)
+    !> スカラー化 CSR の各非ゼロ → monoMAT%R%A の位置（1-based）
+    integer(kint), allocatable :: val_pos(:)
     !> 対称化パターン CSR（1-based、N+1）
     integer(kint), allocatable :: sym_row_ptr(:)
     !> 対称化パターン CSR（1-based、sym_nnz）
@@ -43,22 +45,25 @@ contains
 
     call monolis_mat_finalize_LU(lu)
 
-    n = monoMAT%N
+    ndof = monoMAT%NDOF
+    if (ndof <= 0) ndof = 1
+    n = monoMAT%N * ndof
     lu%N = n
     if (n <= 0) return
 
-    call build_local_csr(monoMAT, n, row_ptr, col_ind)
+    call build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
 
     call build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
 
     call build_pord_front_structure(lu, sym_row_ptr, sym_col_ind, column_to_super)
 
-    call build_original_front_entries(lu, n, row_ptr, col_ind, column_to_super)
+    call build_original_front_entries(lu, n, row_ptr, col_ind, val_pos, column_to_super)
 
     call build_child_contribution_maps(lu)
 
     call monolis_dealloc_I_1d(row_ptr)
     call monolis_dealloc_I_1d(col_ind)
+    call monolis_dealloc_I_1d(val_pos)
     call monolis_dealloc_I_1d(sym_row_ptr)
     call monolis_dealloc_I_1d(sym_col_ind)
     call monolis_dealloc_I_1d(column_to_super)
@@ -67,24 +72,55 @@ contains
     lu%factorized = .false.
   end subroutine monolis_fact_analysis
 
-  !> monoMAT の CSR から 1-based の row_ptr/col_ind を作る
-  subroutine build_local_csr(monoMAT, n, row_ptr, col_ind)
+  !> monoMAT のブロック CSR を NDOF 倍に展開したスカラー CSR を作る
+  !>
+  !> 各 NDOF×NDOF ブロックを NDOF^2 個のスカラー非ゼロに展開し、
+  !> スカラー行 NDOF*(bi-1)+r、スカラー列 NDOF*(bj-1)+c の順で並べる。
+  !> val_pos(scalar_entry) = NDOF^2*(block_entry-1) + NDOF*(r-1) + c
+  !> （monoMAT%R%A 内での 1-based 位置）。
+  subroutine build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
     implicit none
     type(monolis_mat), intent(in) :: monoMAT
+    integer(kint),     intent(in) :: ndof
     integer(kint),     intent(in) :: n
     integer(kint), allocatable, intent(out) :: row_ptr(:)
     integer(kint), allocatable, intent(out) :: col_ind(:)
-    integer(kint) :: i, nz
+    integer(kint), allocatable, intent(out) :: val_pos(:)
 
-    nz = monoMAT%CSR%index(n + 1)
+    integer(kint) :: nb, nz_block, ndof2, bi, bj, ii, jS, jE, r, c
+    integer(kint) :: sr, pos, nb_in_row
+
+    nb = monoMAT%N
+    nz_block = monoMAT%CSR%index(nb + 1)
+    ndof2 = ndof * ndof
+
     call monolis_alloc_I_1d(row_ptr, n + 1)
-    call monolis_alloc_I_1d(col_ind, max(1, nz))
+    call monolis_alloc_I_1d(col_ind, max(1, nz_block * ndof2))
+    call monolis_alloc_I_1d(val_pos, max(1, nz_block * ndof2))
 
-    do i = 1, n + 1
-      row_ptr(i) = monoMAT%CSR%index(i) + 1
+    row_ptr(1) = 1
+    do bi = 1, nb
+      nb_in_row = monoMAT%CSR%index(bi + 1) - monoMAT%CSR%index(bi)
+      do r = 1, ndof
+        sr = (bi - 1) * ndof + r
+        row_ptr(sr + 1) = row_ptr(sr) + nb_in_row * ndof
+      end do
     end do
-    do i = 1, nz
-      col_ind(i) = monoMAT%CSR%item(i)
+
+    pos = 1
+    do bi = 1, nb
+      jS = monoMAT%CSR%index(bi) + 1
+      jE = monoMAT%CSR%index(bi + 1)
+      do r = 1, ndof
+        do ii = jS, jE
+          bj = monoMAT%CSR%item(ii)
+          do c = 1, ndof
+            col_ind(pos) = (bj - 1) * ndof + c
+            val_pos(pos) = ndof2 * (ii - 1) + ndof * (r - 1) + c
+            pos = pos + 1
+          end do
+        end do
+      end do
     end do
   end subroutine build_local_csr
 
@@ -352,12 +388,13 @@ contains
   end subroutine build_pord_front_structure
 
   !> 各非ゼロ要素を所属フロントに対応付け、orig_* を構築
-  subroutine build_original_front_entries(lu, n, row_ptr, col_ind, column_to_super)
+  subroutine build_original_front_entries(lu, n, row_ptr, col_ind, val_pos, column_to_super)
     implicit none
     type(monolis_mat_lu), intent(inout) :: lu
     integer(kint), intent(in) :: n
     integer(kint), intent(in) :: row_ptr(:)
     integer(kint), intent(in) :: col_ind(:)
+    integer(kint), intent(in) :: val_pos(:)
     integer(kint), intent(in) :: column_to_super(:)
 
     integer(kint) :: nfronts, row, entry, col, new_row, new_col, first_col
@@ -403,7 +440,7 @@ contains
 
         lu%orig_row_pos(pos) = new_row
         lu%orig_col_pos(pos) = new_col
-        lu%orig_entry(pos)   = entry
+        lu%orig_entry(pos)   = val_pos(entry)
         next_pos(front) = pos + 1
       end do
     end do
