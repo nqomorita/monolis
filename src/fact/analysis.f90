@@ -1,502 +1,668 @@
+!> LU 解析フェーズ
+!>
+!> 元 CSR 行列から、フィル削減順序付け（PORD）→ フロント木構築
+!> → 元非ゼロ要素のフロント割当 → 子フロント寄与の親への対応表
+!> までを行い、すべての結果を [[monolis_mat_lu]] に書き込む。
 module mod_monolis_fact_analysis
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_pord_const
+  use mod_monolis_pord_types
+  use mod_monolis_pord_graph
+  use mod_monolis_pord_tree
+  use mod_monolis_pord_ordering
 
   implicit none
 
+  private
+  public :: monolis_fact_analysis
+
 contains
 
-!==============================================================================
-! Build elimination tree using Liu's algorithm (column-by-column)
-!
-! For each column k (in permuted order 1..N), find all edges to columns j < k
-! and set parent(root_of_subtree(j)) = k using Union-Find with path compression.
-!
-! This requires building a CSR adjacency list from COO first.
-!==============================================================================
-  subroutine build_elimination_tree(mat, lu)
+  !> @ingroup fact
+  !> 解析フェーズのエントリ
+  subroutine monolis_fact_analysis(monoMAT, lu)
+    implicit none
     !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
+    type(monolis_mat),    intent(in)    :: monoMAT
+    !> [in,out] LU 分解構造体
+    type(monolis_mat_lu), intent(inout) :: lu
 
-    integer(kint) :: n, nz
-    integer(kint), allocatable :: ancestor(:)
-    integer(kint), allocatable :: adj_ptr(:), adj_list(:)
-    integer(kint), allocatable :: adj_count(:)
-    integer(kint), allocatable :: flag(:)       ! MUMPS ANA_K-style O(1) dedup
-    integer(kint) :: k, pi, pj, tmp, r, c, pos, i, nadj
+    integer(kint) :: n, ndof
+    integer(kint), allocatable :: row_ptr(:)
+    integer(kint), allocatable :: col_ind(:)
+    !> スカラー化 CSR の各非ゼロ → monoMAT%R%A の位置（1-based）
+    integer(kint), allocatable :: val_pos(:)
+    !> 対称化パターン CSR（1-based、N+1）
+    integer(kint), allocatable :: sym_row_ptr(:)
+    !> 対称化パターン CSR（1-based、sym_nnz）
+    integer(kint), allocatable :: sym_col_ind(:)
+    !> 置換後列 → フロント
+    integer(kint), allocatable :: column_to_super(:)
 
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
-    allocate(lu%lu%parent(n))
+    call monolis_std_debug_log_header("monolis_fact_analysis")
 
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
+    call monolis_mat_finalize_LU(lu)
 
-    ! ---- Step 1: Build CSC adjacency for the permuted lower triangle ----
-    ! Single-pass counting + FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
-    allocate(adj_count(n), flag(n))
-    adj_count = 0
-    flag = 0
+    ndof = monoMAT%NDOF
+    if (ndof <= 0) ndof = 1
+    n = monoMAT%N * ndof
+    lu%N = n
+    if (n <= 0) return
 
-    ! Count phase with deduplication: for each column pj, count distinct pi < pj
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        if (r == c) cycle
-        pj = invperm(c)
-        ! Ensure pi_local < pj_local (lower triangle in permuted order)
-        if (pi < pj) then
-          if (flag(pi) /= pj) then   ! O(1) duplicate check
-            flag(pi) = pj
-            adj_count(pj) = adj_count(pj) + 1
-          end if
-        else
-          if (flag(pj) /= pi) then
-            flag(pj) = pi
-            adj_count(pi) = adj_count(pi) + 1
-          end if
-        end if
+    call build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
+
+    call build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
+
+    call build_pord_front_structure(lu, sym_row_ptr, sym_col_ind, column_to_super)
+
+    call build_original_front_entries(lu, n, row_ptr, col_ind, val_pos, column_to_super)
+
+    call build_child_contribution_maps(lu)
+
+    call monolis_dealloc_I_1d(row_ptr)
+    call monolis_dealloc_I_1d(col_ind)
+    call monolis_dealloc_I_1d(val_pos)
+    call monolis_dealloc_I_1d(sym_row_ptr)
+    call monolis_dealloc_I_1d(sym_col_ind)
+    call monolis_dealloc_I_1d(column_to_super)
+
+    lu%analyzed = .true.
+    lu%factorized = .false.
+  end subroutine monolis_fact_analysis
+
+  !> monoMAT のブロック CSR を NDOF 倍に展開したスカラー CSR を作る
+  !>
+  !> 各 NDOF×NDOF ブロックを NDOF^2 個のスカラー非ゼロに展開し、
+  !> スカラー行 NDOF*(bi-1)+r、スカラー列 NDOF*(bj-1)+c の順で並べる。
+  !> val_pos(scalar_entry) = NDOF^2*(block_entry-1) + NDOF*(r-1) + c
+  !> （monoMAT%R%A 内での 1-based 位置）。
+  subroutine build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
+    implicit none
+    type(monolis_mat), intent(in) :: monoMAT
+    integer(kint),     intent(in) :: ndof
+    integer(kint),     intent(in) :: n
+    integer(kint), allocatable, intent(out) :: row_ptr(:)
+    integer(kint), allocatable, intent(out) :: col_ind(:)
+    integer(kint), allocatable, intent(out) :: val_pos(:)
+
+    integer(kint) :: nb, nz_block, ndof2, bi, bj, ii, jS, jE, r, c
+    integer(kint) :: sr, pos, nb_in_row
+
+    nb = monoMAT%N
+    nz_block = monoMAT%CSR%index(nb + 1)
+    ndof2 = ndof * ndof
+
+    call monolis_alloc_I_1d(row_ptr, n + 1)
+    call monolis_alloc_I_1d(col_ind, max(1, nz_block * ndof2))
+    call monolis_alloc_I_1d(val_pos, max(1, nz_block * ndof2))
+
+    row_ptr(1) = 1
+    do bi = 1, nb
+      nb_in_row = monoMAT%CSR%index(bi + 1) - monoMAT%CSR%index(bi)
+      do r = 1, ndof
+        sr = (bi - 1) * ndof + r
+        row_ptr(sr + 1) = row_ptr(sr) + nb_in_row * ndof
       end do
     end do
 
-    ! Build pointer array
-    allocate(adj_ptr(n+1))
-    adj_ptr(1) = 1
-    do k = 2, n+1
-      adj_ptr(k) = adj_ptr(k-1) + adj_count(k-1)
-    end do
-    nadj = adj_ptr(n+1) - 1
-
-    ! Fill phase with deduplication
-    allocate(adj_list(max(nadj, 1)))
-    adj_count = 0
-    flag = 0
-
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        if (r == c) cycle
-        pj = invperm(c)
-        if (pi < pj) then
-          if (flag(pi) /= pj) then
-            flag(pi) = pj
-            adj_count(pj) = adj_count(pj) + 1
-            adj_list(adj_ptr(pj) + adj_count(pj) - 1) = pi
-          end if
-        else
-          if (flag(pj) /= pi) then
-            flag(pj) = pi
-            adj_count(pi) = adj_count(pi) + 1
-            adj_list(adj_ptr(pi) + adj_count(pi) - 1) = pj
-          end if
-        end if
-      end do
-    end do
-
-    deallocate(flag)
-
-    ! ---- Step 2: Liu's elimination tree algorithm with path compression ----
-    allocate(ancestor(n))
-    parent = 0
-
-    do k = 1, n
-      ancestor(k) = k
-
-      do pos = adj_ptr(k), adj_ptr(k+1) - 1
-        pj = adj_list(pos)   ! pj < k
-
-        ! Find root with path halving (faster than full path compression)
-        r = pj
-        do while (ancestor(r) /= r)
-          ancestor(r) = ancestor(ancestor(r))  ! path halving
-          r = ancestor(r)
-        end do
-
-        if (r /= k) then
-          parent(r) = k
-          ancestor(r) = k
-        end if
-      end do
-    end do
-
-    ! Ensure connected tree: orphans connect up
-    do k = 1, n - 1
-      if (parent(k) == 0) parent(k) = k + 1
-    end do
-    parent(n) = 0
-
-    deallocate(ancestor, adj_ptr, adj_list, adj_count)
-    end associate
-  end subroutine
-
-!==============================================================================
-! A supernode is a maximal set of contiguous columns in the factor
-! with the same sparsity structure (fundamental supernode).
-!
-! Detection rule:  column j can be merged with column j-1 if
-!   parent(j-1) == j   AND   nonzero-count(j) == nonzero-count(j-1) - 1
-!
-! We also apply relaxed merging (nemin) to allow a small amount of fill.
-!==============================================================================
-  subroutine identify_supernodes(mat, lu)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
-
-    integer(kint) :: n, nz, nsuper
-    integer(kint), allocatable :: sbelong(:), sstart(:), ssize(:), sparent(:), sfsize(:)
-    integer(kint), allocatable :: col_count(:)  ! nonzero count in each column of L (permuted)
-    integer(kint), allocatable :: children_count(:)
-    integer(kint), allocatable :: flag(:)       ! FLAG array for O(1) dedup (MUMPS ANA_K style)
-    integer(kint) :: i, k, r, c, pi, pj
-    integer(kint) :: nemin
-    logical :: can_merge
-
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
-    nemin = 16  ! relaxation parameter
-
-    allocate(col_count(n), children_count(n), sbelong(n), flag(n))
-    col_count = 1   ! diagonal always present
-    children_count = 0
-    flag = 0
-
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, parent => lu%lu%parent)
-
-    ! ---- Step 1: Estimate column counts of L ----
-    ! FLAG-based O(1) duplicate elimination (MUMPS ANA_K style)
-    ! For each off-diagonal entry, the column with the smaller permuted index gets +1.
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        if (r == c) cycle
-        pj = invperm(c)
-        if (pi < pj) then
-          if (flag(pi) /= pj) then  ! O(1) dedup: avoid counting same (pi,pj) twice
-            flag(pi) = pj
-            col_count(pi) = col_count(pi) + 1
-          end if
-        else
-          if (flag(pj) /= pi) then
-            flag(pj) = pi
-            col_count(pj) = col_count(pj) + 1
-          end if
-        end if
-      end do
-    end do
-
-    ! Propagate fill through the tree (MUMPS ANA_LNEW style):
-    ! col_count(parent(i)) gets contribution from child i
-    do i = 1, n
-      if (parent(i) > 0 .and. parent(i) <= n) then
-        if (col_count(i) > 1) then
-          col_count(parent(i)) = max(col_count(parent(i)), col_count(i) - 1)
-        end if
-      end if
-    end do
-
-    ! Count children
-    do i = 1, n
-      if (parent(i) > 0 .and. parent(i) <= n) then
-        children_count(parent(i)) = children_count(parent(i)) + 1
-      end if
-    end do
-
-    ! ---- Step 2: Fundamental supernode detection ----
-    sbelong(1) = 1
-    nsuper = 1
-    do i = 2, n
-      can_merge = .true.
-      if (parent(i-1) /= i) can_merge = .false.
-      if (children_count(i) > 1) can_merge = .false.
-      if (can_merge .and. col_count(i) > 0 .and. col_count(i-1) > 0) then
-        if (col_count(i) /= col_count(i-1) - 1) then
-          if (col_count(i-1) > nemin .and. col_count(i) > nemin) then
-            can_merge = .false.
-          end if
-        end if
-      end if
-
-      if (can_merge) then
-        sbelong(i) = nsuper
-      else
-        nsuper = nsuper + 1
-        sbelong(i) = nsuper
-      end if
-    end do
-
-    ! ---- Step 3: Build supernode arrays ----
-    allocate(sstart(nsuper), ssize(nsuper), sparent(nsuper), sfsize(nsuper))
-    sstart = 0; ssize = 0; sparent = 0; sfsize = 0
-
-    do i = 1, n
-      k = sbelong(i)
-      ssize(k) = ssize(k) + 1
-      if (sstart(k) == 0) sstart(k) = i
-    end do
-
-    do i = 1, nsuper
-      k = sstart(i) + ssize(i) - 1
-      if (parent(k) > 0 .and. parent(k) <= n) then
-        sparent(i) = sbelong(parent(k))
-      else
-        sparent(i) = 0
-      end if
-    end do
-
-    ! ---- Step 4: Relaxed merging of small supernodes (nemin) ----
-    call relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, &
-                          parent, col_count, nemin)
-
-    ! ---- Step 5: Compute frontal sizes (O(nz) CSC-based approach) ----
-    call compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
-                               nsuper, sstart, ssize, sparent, sbelong, sfsize)
-
-    end associate
-
-    lu%lu%nsuper = nsuper
-    lu%lu%snode_belong = sbelong
-    lu%lu%snode_start = sstart
-    lu%lu%snode_size = ssize
-    lu%lu%snode_parent = sparent
-    lu%lu%snode_fsize = sfsize
-
-    deallocate(col_count, children_count, flag)
-  end subroutine
-
-!==============================================================================
-! Relaxed supernode merging: merge parent-child pairs when both are small
-! Optimized: O(n) sbelong update using sstart/ssize ranges instead of O(n*nsuper)
-!==============================================================================
-  subroutine relax_supernodes(n, nsuper, sbelong, sstart, ssize, sparent, sfsize, &
-                              parent, col_count, nemin)
-    integer(kint), intent(in)    :: n, nemin
-    integer(kint), intent(inout) :: nsuper
-    integer(kint), intent(inout) :: sbelong(n)
-    integer(kint), intent(inout), allocatable :: sstart(:), ssize(:), sparent(:), sfsize(:)
-    integer(kint), intent(in)    :: parent(n), col_count(n)
-
-    logical, allocatable :: merged(:)
-    integer(kint) :: i, s, sp, new_nsuper, j
-    integer(kint), allocatable :: new_sstart(:), new_ssize(:), new_sparent(:), new_sfsize(:)
-    integer(kint), allocatable :: map(:)
-
-    allocate(merged(nsuper))
-    merged = .false.
-
-    ! Mark child supernodes for merging into parent when both are small
-    do s = 1, nsuper
-      sp = sparent(s)
-      if (sp > 0 .and. sp <= nsuper .and. sp /= s) then
-        if (ssize(s) <= nemin .and. ssize(sp) <= nemin) then
-          if (sstart(sp) == sstart(s) + ssize(s)) then
-            merged(s) = .true.
-          end if
-        end if
-      end if
-    end do
-
-    ! Apply merges using direct range update (O(total_merged_size) instead of O(n*nmerged))
-    do s = 1, nsuper
-      if (merged(s)) then
-        sp = sparent(s)
-        sstart(sp) = min(sstart(sp), sstart(s))
-        ssize(sp) = ssize(sp) + ssize(s)
-        ! Direct range update: only touch variables belonging to supernode s
-        do j = sstart(s), sstart(s) + ssize(s) - 1
-          if (j >= 1 .and. j <= n) sbelong(j) = sp
-        end do
-      end if
-    end do
-
-    ! Renumber supernodes contiguously
-    allocate(map(nsuper))
-    map = 0
-    new_nsuper = 0
-    do s = 1, nsuper
-      if (.not. merged(s)) then
-        new_nsuper = new_nsuper + 1
-        map(s) = new_nsuper
-      end if
-    end do
-
-    allocate(new_sstart(new_nsuper), new_ssize(new_nsuper))
-    allocate(new_sparent(new_nsuper), new_sfsize(new_nsuper))
-
-    do s = 1, nsuper
-      if (.not. merged(s)) then
-        i = map(s)
-        new_sstart(i) = sstart(s)
-        new_ssize(i) = ssize(s)
-        new_sfsize(i) = sfsize(s)
-        if (sparent(s) > 0 .and. sparent(s) <= nsuper) then
-          sp = sparent(s)
-          do while (merged(sp) .and. sp > 0 .and. sp <= nsuper)
-            sp = sparent(sp)
+    pos = 1
+    do bi = 1, nb
+      jS = monoMAT%CSR%index(bi) + 1
+      jE = monoMAT%CSR%index(bi + 1)
+      do r = 1, ndof
+        do ii = jS, jE
+          bj = monoMAT%CSR%item(ii)
+          do c = 1, ndof
+            col_ind(pos) = (bj - 1) * ndof + c
+            val_pos(pos) = ndof2 * (ii - 1) + ndof * (r - 1) + c
+            pos = pos + 1
           end do
-          if (sp > 0 .and. sp <= nsuper) then
-            new_sparent(i) = map(sp)
-          else
-            new_sparent(i) = 0
-          end if
-        else
-          new_sparent(i) = 0
+        end do
+      end do
+    end do
+  end subroutine build_local_csr
+
+  !> 対称化パターンを CSR で構築（1-based）
+  subroutine build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
+    implicit none
+    integer(kint), intent(in) :: n
+    integer(kint), intent(in) :: row_ptr(:)
+    integer(kint), intent(in) :: col_ind(:)
+    integer(kint), allocatable, intent(out) :: sym_row_ptr(:)
+    integer(kint), allocatable, intent(out) :: sym_col_ind(:)
+
+    integer(kint) :: row, entry, col, pos, write_pos, cnt, prev, raw_nnz, sym_nnz
+    integer(kint), allocatable :: counts(:), raw_ptr(:), next_pos(:), raw_cols(:)
+    integer(kint), allocatable :: compact_cols(:)
+
+    call monolis_alloc_I_1d(counts, n)
+
+    do row = 1, n
+      do entry = row_ptr(row), row_ptr(row + 1) - 1
+        col = col_ind(entry)
+        counts(row) = counts(row) + 1
+        if (col /= row) counts(col) = counts(col) + 1
+      end do
+    end do
+
+    call monolis_alloc_I_1d(raw_ptr, n + 1)
+    call monolis_alloc_I_1d(next_pos, n)
+
+    raw_ptr(1) = 1
+    do row = 1, n
+      raw_ptr(row + 1) = raw_ptr(row) + counts(row)
+    end do
+    raw_nnz = raw_ptr(n + 1) - 1
+
+    call monolis_alloc_I_1d(raw_cols, max(1, raw_nnz))
+
+    next_pos(1:n) = raw_ptr(1:n)
+    do row = 1, n
+      do entry = row_ptr(row), row_ptr(row + 1) - 1
+        col = col_ind(entry)
+        pos = next_pos(row)
+        raw_cols(pos) = col
+        next_pos(row) = pos + 1
+
+        if (col /= row) then
+          pos = next_pos(col)
+          raw_cols(pos) = row
+          next_pos(col) = pos + 1
         end if
+      end do
+    end do
+
+    call monolis_alloc_I_1d(sym_row_ptr, n + 1)
+    call monolis_alloc_I_1d(sym_col_ind, max(1, raw_nnz))
+
+    write_pos = 1
+    sym_row_ptr(1) = 1
+    do row = 1, n
+      call sort_int_range(raw_cols, raw_ptr(row), raw_ptr(row + 1) - 1)
+      prev = 0
+      cnt = 0
+      do entry = raw_ptr(row), raw_ptr(row + 1) - 1
+        if (cnt == 0 .or. raw_cols(entry) /= prev) then
+          sym_col_ind(write_pos) = raw_cols(entry)
+          write_pos = write_pos + 1
+          cnt = cnt + 1
+          prev = raw_cols(entry)
+        end if
+      end do
+      sym_row_ptr(row + 1) = write_pos
+    end do
+
+    sym_nnz = write_pos - 1
+    call monolis_alloc_I_1d(compact_cols, sym_nnz)
+    compact_cols(1:sym_nnz) = sym_col_ind(1:sym_nnz)
+    call move_alloc(compact_cols, sym_col_ind)
+
+    call monolis_dealloc_I_1d(counts)
+    call monolis_dealloc_I_1d(raw_ptr)
+    call monolis_dealloc_I_1d(next_pos)
+    call monolis_dealloc_I_1d(raw_cols)
+  end subroutine build_symmetric_pattern
+
+  !> PORD を呼び出し、perm/iperm/front_*/super_* を構築
+  subroutine build_pord_front_structure(lu, sym_row_ptr, sym_col_ind, column_to_super)
+    implicit none
+    type(monolis_mat_lu), intent(inout) :: lu
+    integer(kint), intent(in) :: sym_row_ptr(:)
+    integer(kint), intent(in) :: sym_col_ind(:)
+    integer(kint), allocatable, intent(out) :: column_to_super(:)
+
+    type(graph_t)    :: G
+    type(elimtree_t) :: T
+    integer(kint) :: opts_dummy(1)
+    integer(kint) :: n, nfronts, nz_off, row, entry, col, cnt, pos
+    integer(kint) :: front, child, total_front_vars, pivot, first_col
+    integer(kint) :: post_pos, new_col, i
+    integer(kint), allocatable :: marker(:), work(:)
+    integer(kint), allocatable :: vertex_front(:)
+
+    n = lu%N
+
+    nz_off = 0
+    do row = 1, n
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        if (sym_col_ind(entry) /= row) nz_off = nz_off + 1
+      end do
+    end do
+
+    call newGraph(G, n, nz_off)
+    G%xadj(0) = 0
+    do row = 1, n
+      cnt = 0
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        if (sym_col_ind(entry) /= row) cnt = cnt + 1
+      end do
+      G%xadj(row) = G%xadj(row - 1) + cnt
+    end do
+    do row = 1, n
+      pos = G%xadj(row - 1)
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        col = sym_col_ind(entry)
+        if (col /= row) then
+          G%adjncy(pos) = col - 1
+          pos = pos + 1
+        end if
+      end do
+    end do
+
+    opts_dummy = 0
+    call monolis_pord_ordering(G, opts_dummy, .true., T)
+
+    nfronts = T%nfronts
+    lu%nfronts = nfronts
+
+    call monolis_alloc_I_1d(lu%perm,  n)
+    call monolis_alloc_I_1d(lu%iperm, n)
+    !> permFromElimTree は old -> new を返す（1-based）。
+    !> perm として保存し、iperm はその逆。
+    call monolis_pord_perm_from_elimtree(T, n, lu%perm)
+    do i = 1, n
+      lu%iperm(lu%perm(i)) = i
+    end do
+
+    call monolis_alloc_I_1d(vertex_front,             n)
+    call monolis_alloc_I_1d(column_to_super,          n)
+    call monolis_alloc_I_1d(lu%super_start,           nfronts)
+    call monolis_alloc_I_1d(lu%front_parent,          nfronts)
+    call monolis_alloc_I_1d(lu%front_first_child,     nfronts)
+    call monolis_alloc_I_1d(lu%front_next_sibling,    nfronts)
+    call monolis_alloc_I_1d(lu%front_postorder,       nfronts)
+    call monolis_alloc_I_1d(lu%front_size,            nfronts)
+    call monolis_alloc_I_1d(lu%front_pivot_size,      nfronts)
+    call monolis_alloc_I_1d(lu%front_update_size,     nfronts)
+    call monolis_alloc_I_1d(lu%front_ptr,             nfronts + 1)
+
+    do row = 1, n
+      vertex_front(row) = T%vtx2front(row - 1) + 1
+    end do
+
+    lu%super_start(:) = n + 1
+    column_to_super(:) = 0
+    lu%front_first_child(:) = 0
+    lu%front_next_sibling(:) = 0
+    lu%front_postorder(:) = 0
+    lu%max_front_size = 0
+
+    lu%front_ptr(1) = 1
+    total_front_vars = 0
+    do front = 1, nfronts
+      lu%front_pivot_size(front)  = T%ncolfactor(front - 1)
+      lu%front_update_size(front) = T%ncolupdate(front - 1)
+      lu%front_size(front) = lu%front_pivot_size(front) + lu%front_update_size(front)
+      lu%max_front_size = max(lu%max_front_size, lu%front_size(front))
+      total_front_vars = total_front_vars + lu%front_size(front)
+      lu%front_ptr(front + 1) = lu%front_ptr(front) + lu%front_size(front)
+
+      if (T%parent(front - 1) == -1) then
+        lu%front_parent(front) = 0
+      else
+        lu%front_parent(front) = T%parent(front - 1) + 1
       end if
     end do
 
-    ! Update sbelong with map
-    do i = 1, n
-      sbelong(i) = map(sbelong(i))
+    call monolis_alloc_I_1d(lu%front_ind, max(1, total_front_vars))
+
+    do row = 1, n
+      new_col = lu%perm(row)
+      front = vertex_front(row)
+      column_to_super(new_col) = front
+      lu%super_start(front) = min(lu%super_start(front), new_col)
     end do
 
-    deallocate(sstart, ssize, sparent, sfsize)
-    nsuper = new_nsuper
-    allocate(sstart(nsuper), ssize(nsuper), sparent(nsuper), sfsize(nsuper))
-    sstart  = new_sstart
-    ssize   = new_ssize
-    sparent = new_sparent
-    sfsize  = new_sfsize
-
-    deallocate(merged, map, new_sstart, new_ssize, new_sparent, new_sfsize)
-  end subroutine
-
-!==============================================================================
-! Compute frontal sizes for each supernode
-!
-! Optimized O(nz) approach: build permuted CSC, then scan only columns
-! belonging to each supernode. Uses marker array with supernode-based
-! timestamp to avoid O(n) resets per supernode.
-!==============================================================================
-  subroutine compute_frontal_sizes(n, nz, row_ptr, col_ind, invperm, &
-                                   nsuper, sstart, ssize, sparent, sbelong, sfsize)
-    integer(kint), intent(in) :: n, nz
-    integer(kint), intent(in) :: row_ptr(n+1), col_ind(nz)
-    integer(kint), intent(in) :: invperm(n)
-    integer(kint), intent(in) :: nsuper
-    integer(kint), intent(in) :: sstart(nsuper), ssize(nsuper)
-    integer(kint), intent(in) :: sparent(nsuper), sbelong(n)
-    integer(kint), intent(inout) :: sfsize(nsuper)
-
-    ! Permuted CSC representation
-    integer(kint), allocatable :: csc_ptr(:), csc_row(:)
-    integer(kint), allocatable :: csc_count(:)
-    ! Marker with supernode-id timestamp (avoids reset)
-    integer(kint), allocatable :: marker(:)
-    integer(kint) :: s, k, pi, pj, r, c, cnt, nadj
-    integer(kint) :: first_col, last_col, col, pos
-    integer(kint) :: child_cnt, child_fsize, child_npiv
-
-    ! ---- Build permuted CSC: for each permuted column pj, list of rows pi ----
-    allocate(csc_count(n))
-    csc_count = 0
-
-    ! Count entries per permuted column (lower triangle: pi > pj stored in col pj)
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        if (r == c) cycle
-        pj = invperm(c)
-        if (pi > pj) then
-          csc_count(pj) = csc_count(pj) + 1
-        else
-          csc_count(pi) = csc_count(pi) + 1
-        end if
-      end do
+    !> firstchild / next_sibling
+    do front = nfronts, 1, -1
+      child = lu%front_parent(front)
+      if (child > 0) then
+        lu%front_next_sibling(front) = lu%front_first_child(child)
+        lu%front_first_child(child) = front
+      end if
     end do
 
-    allocate(csc_ptr(n+1))
-    csc_ptr(1) = 1
-    do k = 2, n+1
-      csc_ptr(k) = csc_ptr(k-1) + csc_count(k-1)
-    end do
-    nadj = csc_ptr(n+1) - 1
+    !> postorder
+    call build_front_postorder(lu, post_pos)
+    if (post_pos /= nfronts) then
+      call monolis_std_error_string("monolis_fact_analysis: postorder count mismatch")
+      call monolis_std_error_stop()
+    end if
 
-    allocate(csc_row(max(nadj, 1)))
-    csc_count = 0
-
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        if (r == c) cycle
-        pj = invperm(c)
-        if (pi > pj) then
-          csc_count(pj) = csc_count(pj) + 1
-          csc_row(csc_ptr(pj) + csc_count(pj) - 1) = pi
-        else
-          csc_count(pi) = csc_count(pi) + 1
-          csc_row(csc_ptr(pi) + csc_count(pi) - 1) = pj
-        end if
-      end do
-    end do
-
-    deallocate(csc_count)
-
-    ! ---- Compute frontal sizes using CSC: O(nz) total ----
-    ! marker(pi) = s means pi is already counted for supernode s (avoids O(n) reset)
-    allocate(marker(n))
-    marker = 0
-
-    ! Process supernodes bottom-up (leaves first) to propagate CB indices
-    ! Simple approach: process in order 1..nsuper (postorder approximation for chains)
-    do s = 1, nsuper
-      first_col = sstart(s)
-      last_col  = sstart(s) + ssize(s) - 1
+    !> front_ind を埋める
+    call monolis_alloc_I_1d(marker, n)
+    call monolis_alloc_I_1d(work, n)
+    do post_pos = 1, nfronts
+      front = lu%front_postorder(post_pos)
       cnt = 0
+      first_col = lu%super_start(front)
 
-      ! Scan CSC entries for columns in [first_col..last_col]
-      do col = first_col, last_col
-        do pos = csc_ptr(col), csc_ptr(col+1) - 1
-          pi = csc_row(pos)
-          if (pi > last_col .and. marker(pi) /= s) then
-            marker(pi) = s
+      do pivot = 0, lu%front_pivot_size(front) - 1
+        cnt = cnt + 1
+        work(cnt) = first_col + pivot
+        marker(first_col + pivot) = front
+      end do
+
+      child = lu%front_first_child(front)
+      do while (child /= 0)
+        do pos = lu%front_ptr(child), lu%front_ptr(child + 1) - 1
+          col = lu%front_ind(pos)
+          if (col > first_col .and. marker(col) /= front) then
             cnt = cnt + 1
+            work(cnt) = col
+            marker(col) = front
+          end if
+        end do
+        child = lu%front_next_sibling(child)
+      end do
+
+      do pivot = 0, lu%front_pivot_size(front) - 1
+        row = lu%iperm(first_col + pivot)
+        do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+          col = lu%perm(sym_col_ind(entry))
+          if (col > first_col .and. marker(col) /= front) then
+            cnt = cnt + 1
+            work(cnt) = col
+            marker(col) = front
           end if
         end do
       end do
 
-      sfsize(s) = ssize(s) + cnt
-      if (sfsize(s) < ssize(s)) sfsize(s) = ssize(s)
+      if (cnt /= lu%front_size(front)) then
+        call monolis_std_error_string("monolis_fact_analysis: front size mismatch")
+        call monolis_std_error_stop()
+      end if
+
+      call sort_int_range(work, 1, cnt)
+      pos = lu%front_ptr(front)
+      lu%front_ind(pos:pos + cnt - 1) = work(1:cnt)
     end do
 
-    deallocate(marker, csc_ptr, csc_row)
-  end subroutine
+    call monolis_dealloc_I_1d(marker)
+    call monolis_dealloc_I_1d(work)
+    call monolis_dealloc_I_1d(vertex_front)
+    call freeElimTree(T)
+    call freeGraph(G)
+  end subroutine build_pord_front_structure
 
-!==============================================================================
-! Build child-sibling representation for the supernode tree
-! Optimized: O(nsuper) head-prepend instead of O(nsuper^2) tail-append
-!==============================================================================
-  subroutine build_frontal_tree(lu)
-    type(monolis_mat), intent(inout) :: lu
+  !> 各非ゼロ要素を所属フロントに対応付け、orig_* を構築
+  subroutine build_original_front_entries(lu, n, row_ptr, col_ind, val_pos, column_to_super)
+    implicit none
+    type(monolis_mat_lu), intent(inout) :: lu
+    integer(kint), intent(in) :: n
+    integer(kint), intent(in) :: row_ptr(:)
+    integer(kint), intent(in) :: col_ind(:)
+    integer(kint), intent(in) :: val_pos(:)
+    integer(kint), intent(in) :: column_to_super(:)
 
-    integer(kint) :: nsuper, s, p
+    integer(kint) :: nfronts, row, entry, col, new_row, new_col, first_col
+    integer(kint) :: front, pos, first_pos, last_pos, row_local, col_local
+    integer(kint) :: total_nnz
+    integer(kint), allocatable :: counts(:), next_pos(:), local_pos(:)
 
-    nsuper = lu%lu%nsuper
-    allocate(lu%lu%sfils(nsuper), lu%lu%sfrere(nsuper))
-    lu%lu%sfils  = 0
-    lu%lu%sfrere = 0
+    nfronts = lu%nfronts
+    total_nnz = row_ptr(n + 1) - 1
 
-    associate(sparent => lu%lu%snode_parent, sfils => lu%lu%sfils, sfrere => lu%lu%sfrere)
+    call monolis_alloc_I_1d(counts, nfronts)
+    call monolis_alloc_I_1d(lu%orig_ptr, nfronts + 1)
 
-    ! Head-prepend: O(1) per supernode, O(nsuper) total
-    ! Each child is inserted at the head of its parent's child list
-    do s = nsuper, 1, -1
-      p = sparent(s)
-      if (p > 0 .and. p <= nsuper) then
-        sfrere(s) = sfils(p)   ! current child becomes sibling of new head
-        sfils(p) = s            ! new child becomes head
+    do row = 1, n
+      new_row = lu%perm(row)
+      do entry = row_ptr(row), row_ptr(row + 1) - 1
+        new_col = lu%perm(col_ind(entry))
+        first_col = min(new_row, new_col)
+        front = column_to_super(first_col)
+        counts(front) = counts(front) + 1
+      end do
+    end do
+
+    lu%orig_ptr(1) = 1
+    do front = 1, nfronts
+      lu%orig_ptr(front + 1) = lu%orig_ptr(front) + counts(front)
+    end do
+
+    call monolis_alloc_I_1d(lu%orig_row_pos, max(1, total_nnz))
+    call monolis_alloc_I_1d(lu%orig_col_pos, max(1, total_nnz))
+    call monolis_alloc_I_1d(lu%orig_entry,   max(1, total_nnz))
+    call monolis_alloc_I_1d(next_pos, nfronts)
+
+    next_pos(1:nfronts) = lu%orig_ptr(1:nfronts)
+    do row = 1, n
+      new_row = lu%perm(row)
+      do entry = row_ptr(row), row_ptr(row + 1) - 1
+        col = col_ind(entry)
+        new_col = lu%perm(col)
+        first_col = min(new_row, new_col)
+        front = column_to_super(first_col)
+        pos = next_pos(front)
+
+        lu%orig_row_pos(pos) = new_row
+        lu%orig_col_pos(pos) = new_col
+        lu%orig_entry(pos)   = val_pos(entry)
+        next_pos(front) = pos + 1
+      end do
+    end do
+
+    !> グローバル列番号 → フロント内ローカル位置に変換
+    call monolis_alloc_I_1d(local_pos, n)
+    do front = 1, nfronts
+      first_pos = lu%front_ptr(front)
+      last_pos  = lu%front_ptr(front + 1) - 1
+      do pos = first_pos, last_pos
+        local_pos(lu%front_ind(pos)) = pos - first_pos + 1
+      end do
+
+      do pos = lu%orig_ptr(front), lu%orig_ptr(front + 1) - 1
+        row_local = local_pos(lu%orig_row_pos(pos))
+        col_local = local_pos(lu%orig_col_pos(pos))
+        if (row_local <= 0 .or. col_local <= 0) then
+          call monolis_std_error_string("monolis_fact_analysis: local position not found")
+          call monolis_std_error_stop()
+        end if
+        lu%orig_row_pos(pos) = row_local
+        lu%orig_col_pos(pos) = col_local
+      end do
+
+      do pos = first_pos, last_pos
+        local_pos(lu%front_ind(pos)) = 0
+      end do
+    end do
+
+    call monolis_dealloc_I_1d(counts)
+    call monolis_dealloc_I_1d(next_pos)
+    call monolis_dealloc_I_1d(local_pos)
+  end subroutine build_original_front_entries
+
+  !> 子フロント寄与の親への対応表を構築
+  subroutine build_child_contribution_maps(lu)
+    implicit none
+    type(monolis_mat_lu), intent(inout) :: lu
+
+    integer(kint) :: nfronts, front, parent, npiv, nupd, i, run, pos
+    integer(kint) :: child_pos, run_count, max_update_size
+    integer(kint) :: total_update, total_runs
+    integer(kint), allocatable :: parent_pos(:)
+
+    nfronts = lu%nfronts
+    total_update = 0
+    total_runs = 0
+    max_update_size = 0
+
+    do front = 1, nfronts
+      nupd = lu%front_update_size(front)
+      max_update_size = max(max_update_size, nupd)
+      total_update = total_update + nupd
+    end do
+
+    call monolis_alloc_I_1d(lu%contrib_pos_ptr, nfronts + 1)
+    call monolis_alloc_I_1d(lu%contrib_run_ptr, nfronts + 1)
+    call monolis_alloc_I_1d(parent_pos, max(1, max_update_size))
+
+    lu%contrib_pos_ptr(1) = 1
+    lu%contrib_run_ptr(1) = 1
+    do front = 1, nfronts
+      parent = lu%front_parent(front)
+      npiv = lu%front_pivot_size(front)
+      nupd = lu%front_update_size(front)
+      lu%contrib_pos_ptr(front + 1) = lu%contrib_pos_ptr(front) + nupd
+
+      run_count = 0
+      if (parent > 0 .and. nupd > 0) then
+        do i = 1, nupd
+          child_pos = lu%front_ptr(front) + npiv + i - 1
+          parent_pos(i) = front_local_position(lu, parent, lu%front_ind(child_pos))
+          if (parent_pos(i) <= 0) then
+            call monolis_std_error_string("monolis_fact_analysis: parent_pos not found")
+            call monolis_std_error_stop()
+          end if
+        end do
+
+        i = 1
+        do while (i <= nupd)
+          run_count = run_count + 1
+          do while (i < nupd)
+            if (parent_pos(i + 1) /= parent_pos(i) + 1) exit
+            i = i + 1
+          end do
+          i = i + 1
+        end do
+      end if
+
+      total_runs = total_runs + run_count
+      lu%contrib_run_ptr(front + 1) = lu%contrib_run_ptr(front) + run_count
+    end do
+
+    call monolis_alloc_I_1d(lu%contrib_parent_pos,       max(1, total_update))
+    call monolis_alloc_I_1d(lu%contrib_run_first,        max(1, total_runs))
+    call monolis_alloc_I_1d(lu%contrib_run_len,          max(1, total_runs))
+    call monolis_alloc_I_1d(lu%contrib_run_parent_first, max(1, total_runs))
+
+    do front = 1, nfronts
+      parent = lu%front_parent(front)
+      npiv = lu%front_pivot_size(front)
+      nupd = lu%front_update_size(front)
+      pos = lu%contrib_pos_ptr(front)
+      run = lu%contrib_run_ptr(front)
+
+      if (parent > 0 .and. nupd > 0) then
+        do i = 1, nupd
+          child_pos = lu%front_ptr(front) + npiv + i - 1
+          parent_pos(i) = front_local_position(lu, parent, lu%front_ind(child_pos))
+          lu%contrib_parent_pos(pos + i - 1) = parent_pos(i)
+        end do
+
+        i = 1
+        do while (i <= nupd)
+          lu%contrib_run_first(run) = i
+          lu%contrib_run_parent_first(run) = parent_pos(i)
+          do while (i < nupd)
+            if (parent_pos(i + 1) /= parent_pos(i) + 1) exit
+            i = i + 1
+          end do
+          lu%contrib_run_len(run) = i - lu%contrib_run_first(run) + 1
+          run = run + 1
+          i = i + 1
+        end do
       end if
     end do
 
-    end associate
-  end subroutine
+    call monolis_dealloc_I_1d(parent_pos)
+  end subroutine build_child_contribution_maps
+
+  !> フロント木の後順走査
+  subroutine build_front_postorder(lu, post_count)
+    implicit none
+    type(monolis_mat_lu), intent(inout) :: lu
+    integer(kint), intent(out) :: post_count
+
+    integer(kint) :: nfronts, root, top, child
+    integer(kint), allocatable :: stack_node(:), stack_next_child(:)
+
+    nfronts = lu%nfronts
+    post_count = 0
+    if (nfronts <= 0) return
+
+    call monolis_alloc_I_1d(stack_node, nfronts)
+    call monolis_alloc_I_1d(stack_next_child, nfronts)
+
+    do root = 1, nfronts
+      if (lu%front_parent(root) /= 0) cycle
+
+      top = 1
+      stack_node(top) = root
+      stack_next_child(top) = lu%front_first_child(root)
+      do while (top > 0)
+        child = stack_next_child(top)
+        if (child /= 0) then
+          stack_next_child(top) = lu%front_next_sibling(child)
+          top = top + 1
+          stack_node(top) = child
+          stack_next_child(top) = lu%front_first_child(child)
+        else
+          post_count = post_count + 1
+          lu%front_postorder(post_count) = stack_node(top)
+          top = top - 1
+        end if
+      end do
+    end do
+
+    call monolis_dealloc_I_1d(stack_node)
+    call monolis_dealloc_I_1d(stack_next_child)
+  end subroutine build_front_postorder
+
+  !> フロント内の global col → local position（1-based）を二分探索で求める
+  integer(kint) function front_local_position(lu, front, col) result(local_pos)
+    implicit none
+    type(monolis_mat_lu), intent(in) :: lu
+    integer(kint), intent(in) :: front, col
+
+    integer(kint) :: left, right, mid, base, val
+
+    local_pos = 0
+    left  = lu%front_ptr(front)
+    right = lu%front_ptr(front + 1) - 1
+    base = left - 1
+    do while (left <= right)
+      mid = (left + right) / 2
+      val = lu%front_ind(mid)
+      if (val == col) then
+        local_pos = mid - base
+        return
+      else if (val < col) then
+        left = mid + 1
+      else
+        right = mid - 1
+      end if
+    end do
+  end function front_local_position
+
+  !> Shell sort（整数昇順）
+  subroutine sort_int_range(values, first, last)
+    implicit none
+    integer(kint), intent(inout) :: values(:)
+    integer(kint), intent(in) :: first, last
+
+    integer(kint) :: gap, i, j, temp, len
+
+    len = last - first + 1
+    if (len <= 1) return
+
+    gap = len / 2
+    do while (gap > 0)
+      do i = first + gap, last
+        temp = values(i)
+        j = i
+        do while (j - gap >= first)
+          if (values(j - gap) <= temp) exit
+          values(j) = values(j - gap)
+          j = j - gap
+        end do
+        values(j) = temp
+      end do
+      gap = gap / 2
+    end do
+  end subroutine sort_int_range
 
 end module mod_monolis_fact_analysis

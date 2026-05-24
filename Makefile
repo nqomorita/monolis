@@ -152,9 +152,16 @@ monolis_wrapper_ml.c \
 monolis_wrapper_blopex.c
 
 SRC_FACT = \
+pord/monolis_pord_core.f90 \
+pord/monolis_pord_graph.f90 \
+pord/monolis_pord_bisect.f90 \
+pord/monolis_pord_decomp.f90 \
+pord/monolis_pord_order.f90 \
+pord/monolis_pord_ordering.f90 \
 analysis.f90 \
 factorize.f90 \
-LU/LU_nn.f90
+solve.f90 \
+LU.f90
 
 SRC_OPT = \
 nnls.f90 \
@@ -388,6 +395,7 @@ all: \
 lib: \
 	cp_header \
 	cp_header_lib \
+	cp_bin_lib \
 	$(LIB_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)

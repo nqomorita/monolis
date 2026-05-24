@@ -34,6 +34,10 @@ program monolis_test
   use mod_monolis_scalapack_test
   use mod_monolis_eigen_lanczos_util_test
   use mod_monolis_eigen_solver_test
+  use mod_monolis_fact_analysis_test
+  use mod_monolis_fact_factorize_test
+  use mod_monolis_fact_solve_test
+  use mod_monolis_precond_LU_nn_test
   use mod_monolis_precond_test
   use mod_monolis_solve_test
   use mod_monolis_opt_nnls_test
@@ -63,6 +67,11 @@ program monolis_test
 
   call monolis_precond_test()
   call monolis_solve_test()
+
+  call monolis_fact_analysis_test()
+  call monolis_fact_factorize_test()
+  call monolis_fact_solve_test()
+  call monolis_precond_LU_nn_test()
 
   call monolis_lapack_test()
   call monolis_scalapack_test()

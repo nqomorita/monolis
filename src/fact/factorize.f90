@@ -1,607 +1,285 @@
+!> 多重フロント法 LU 数値分解
 module mod_monolis_fact_factorize
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_lapack
 
   implicit none
 
+  !> パネルサイズ（フロント内 LU の右側ブロック更新の単位列数）
+  integer(kint), parameter :: front_block_size = 128
+
+  private
+  public :: monolis_fact_factorize
+  public :: front_block_size
+
 contains
 
-!==============================================================================
-! Multifrontal lu factorization
-!
-! Two-pass approach for minimal overhead:
-!   Pass 1 (Symbolic): compute index sets, pre-allocate all frontal matrices
-!   Pass 2 (Numeric):  assemble + extend-add + factor (ZERO allocations)
-!
-! Optimized with:
-!   - Pre-built permuted CSC with 3 separate arrays (cache-friendly)
-!   - All-at-once memory allocation (batch, not per-supernode)
-!   - Pre-allocated workspaces for index sets and CB maps
-!   - Inline extend-add (no DAXPY overhead for small ndof)
-!   - Adaptive LU kernel with small-front inlining
-!==============================================================================
-  subroutine multifrontal_factorize(mat, lu)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(inout) :: lu
+  !> @ingroup fact
+  !> 数値分解フェーズ
+  subroutine monolis_fact_factorize(monoMAT, lu)
+    implicit none
+    !> [in] 行列構造体（値配列を参照）
+    type(monolis_mat),    intent(in)    :: monoMAT
+    !> [in,out] LU 分解構造体
+    type(monolis_mat_lu), intent(inout) :: lu
 
-    integer(kint) :: n, nz, nsuper, ndof, info
-    integer(kint), allocatable :: postorder(:)
-    integer(kint) :: s, ip, nfront, npiv, k, i, j
-    integer(kint) :: first_col, last_col
-    integer(kint) :: pi, pj, cnt, col, pos
-    integer(kint), allocatable :: idx_work(:)   ! reusable workspace
-    integer(kint) :: child
-    integer(kint), allocatable :: imap(:)
-    integer(kint), allocatable :: csc_ptr(:), csc_pi(:), csc_pj(:), csc_origk(:)
-    integer(kint), allocatable :: cb_work(:)    ! reusable CB map workspace
-    integer(kint) :: max_cb
+    integer(kint) :: nfronts, order_pos, front, child
+    integer(kint) :: fs, npiv, nupd, entry_pos, ierr_front
 
-    n = mat%N
-    nz = mat%CSR%index(mat%NP + 1)
-    ndof = mat%NDOF
-    nsuper = lu%lu%nsuper
-    info = 0
+    call monolis_std_debug_log_header("monolis_fact_factorize")
 
-    allocate(lu%lu%factors(nsuper))
+    if (.not. lu%analyzed) then
+      call monolis_std_error_string("monolis_fact_factorize: analysis not done")
+      call monolis_std_error_stop()
+    end if
 
-    associate(row_ptr => mat%CSR%index, col_ind => mat%CSR%item, &
-              a_elt => lu%R%A, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
-              sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
-              sparent => lu%lu%snode_parent, sfsize => lu%lu%snode_fsize, &
-              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, factors => lu%lu%factors)
+    nfronts = lu%nfronts
+    if (allocated(lu%factors)) deallocate(lu%factors)
+    allocate(lu%factors(max(1, nfronts)))
 
-    ! Phase 1: Build permuted CSC (3 separate arrays, cache-friendly)
-    call build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
-                            csc_ptr, csc_pi, csc_pj, csc_origk)
-    call build_postorder(nsuper, sfils, sfrere, sparent, postorder)
+    do order_pos = 1, nfronts
+      front = lu%front_postorder(order_pos)
+      fs   = lu%front_size(front)
+      npiv = lu%front_pivot_size(front)
+      nupd = lu%front_update_size(front)
 
-    ! Phase 2: Symbolic factorization — compute exact index sets
-    ! Pre-allocate idx_work ONCE (eliminates N per-supernode allocations)
-    allocate(imap(n), idx_work(n))
-    imap = 0
+      call allocate_front_storage(lu%factors(front), fs, npiv, nupd)
 
-    do ip = 1, nsuper
-      s = postorder(ip)
-      npiv = ssize(s)
-      first_col = sstart(s)
-      last_col  = first_col + npiv - 1
-
-      ! Pivot columns — mark via imap as temporary flag
-      do i = first_col, last_col
-        imap(i) = -1
-      end do
-      cnt = npiv
-      do i = 1, npiv
-        idx_work(i) = first_col + i - 1
-      end do
-
-      ! Row indices from CSC columns [first_col..last_col]
-      do col = first_col, last_col
-        do pos = csc_ptr(col), csc_ptr(col+1) - 1
-          pi = csc_pi(pos)
-          pj = csc_pj(pos)
-          if (pi > last_col .and. imap(pi) == 0) then
-            cnt = cnt + 1; idx_work(cnt) = pi; imap(pi) = -1
-          end if
-          if (pj > last_col .and. imap(pj) == 0) then
-            cnt = cnt + 1; idx_work(cnt) = pj; imap(pj) = -1
-          end if
-        end do
-      end do
-
-      ! Children's CB indices
-      child = sfils(s)
+      child = lu%front_first_child(front)
       do while (child /= 0)
-        do i = factors(child)%npiv + 1, factors(child)%nfront
-          j = factors(child)%indices(i)
-          if (j >= first_col .and. imap(j) == 0) then
-            cnt = cnt + 1; idx_work(cnt) = j; imap(j) = -1
-          end if
-        end do
-        child = sfrere(child)
+        call assemble_child_contribution(lu, child, front, lu%factors(front))
+        child = lu%front_next_sibling(child)
       end do
 
-      nfront = cnt
-      if (nfront - npiv > 1)then
-        call monolis_qsort_I_1d(idx_work, npiv + 1, nfront)
-      endif
-
-      ! Store symbolic structure
-      factors(s)%nfront = nfront
-      factors(s)%npiv   = npiv
-      allocate(factors(s)%indices(nfront))
-      factors(s)%indices(1:nfront) = idx_work(1:nfront)
-
-      ! Clear imap
-      do i = 1, nfront
-        imap(idx_work(i)) = 0
-      end do
-    end do
-
-    ! Phase 3: Batch-allocate all frontal matrices + CB workspace
-    max_cb = 0
-    do s = 1, nsuper
-      nfront = factors(s)%nfront
-      npiv   = factors(s)%npiv
-      allocate(factors(s)%front(nfront*ndof, nfront*ndof))
-      allocate(factors(s)%pivorder(npiv))
-      do i = 1, npiv
-        factors(s)%pivorder(i) = i
-      end do
-      if (nfront - npiv > max_cb) max_cb = nfront - npiv
-    end do
-    allocate(cb_work(max(max_cb, 1)))
-
-    ! Phase 4: Numeric factorization (ZERO allocations in this loop)
-    do ip = 1, nsuper
-      s = postorder(ip)
-      nfront = factors(s)%nfront
-      npiv   = factors(s)%npiv
-      first_col = sstart(s)
-      last_col  = first_col + npiv - 1
-
-      ! Build imap
-      do i = 1, nfront
-        imap(factors(s)%indices(i)) = i
+      do entry_pos = lu%orig_ptr(front), lu%orig_ptr(front + 1) - 1
+        call add_front_entry(lu%factors(front), &
+            lu%orig_row_pos(entry_pos), lu%orig_col_pos(entry_pos), &
+            monoMAT%R%A(lu%orig_entry(entry_pos)))
       end do
 
-      ! Zero front
-      factors(s)%front = 0.0d0
-
-      ! Assemble original entries from CSC
-      call assemble_original_csc(n, ndof, csc_ptr, csc_pi, csc_pj, csc_origk, a_elt, &
-                                 nfront, factors(s)%front, first_col, last_col, imap)
-
-      ! Extend-add from children (allocation-free using cb_work)
-      child = sfils(s)
-      do while (child /= 0)
-        call extend_add_fast(factors(child), factors(s), imap, ndof, cb_work)
-        child = sfrere(child)
-      end do
-
-      ! LU factorization with adaptive kernel
-      call frontal_lu_factor_opt(factors(s)%front, nfront*ndof, npiv*ndof, info)
-      if (info /= 0) info = 0
-
-      ! Clear imap
-      do i = 1, nfront
-        imap(factors(s)%indices(i)) = 0
-      end do
-    end do
-
-    deallocate(imap, idx_work, cb_work, postorder)
-    deallocate(csc_ptr, csc_pi, csc_pj, csc_origk)
-    end associate
-  end subroutine
-
-  ! Build permuted CSC: 3 separate arrays (csc_pi, csc_pj, csc_origk)
-  ! For each CSR entry, store in column min(pi,pj) with original direction.
-  ! Cache-friendly: no interleaving, stride-1 access per array.
-  subroutine build_permuted_csc(n, nz, row_ptr, col_ind, invperm, &
-                                csc_ptr, csc_pi, csc_pj, csc_origk)
-    integer(kint), intent(in) :: n, nz
-    integer(kint), intent(in) :: row_ptr(n+1), col_ind(nz)
-    integer(kint), intent(in) :: invperm(n)
-    integer(kint), allocatable, intent(out) :: csc_ptr(:), csc_pi(:), csc_pj(:), csc_origk(:)
-
-    integer(kint), allocatable :: csc_count(:)
-    integer(kint) :: r, k, c, pi, pj, nadj, mn
-
-    allocate(csc_count(n))
-    csc_count = 0
-
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        pj = invperm(c)
-        mn = min(pi, pj)
-        csc_count(mn) = csc_count(mn) + 1
-      end do
-    end do
-
-    allocate(csc_ptr(n+1))
-    csc_ptr(1) = 1
-    do k = 2, n+1
-      csc_ptr(k) = csc_ptr(k-1) + csc_count(k-1)
-    end do
-    nadj = csc_ptr(n+1) - 1
-
-    allocate(csc_pi(nadj), csc_pj(nadj), csc_origk(nadj))
-    csc_count = 0
-
-    do r = 1, n
-      pi = invperm(r)
-      do k = row_ptr(r)+1, row_ptr(r+1)
-        c = col_ind(k)
-        pj = invperm(c)
-        mn = min(pi, pj)
-        csc_count(mn) = csc_count(mn) + 1
-        csc_pi(csc_ptr(mn) + csc_count(mn) - 1) = pi
-        csc_pj(csc_ptr(mn) + csc_count(mn) - 1) = pj
-        csc_origk(csc_ptr(mn) + csc_count(mn) - 1) = k
-      end do
-    end do
-
-    deallocate(csc_count)
-  end subroutine
-
-!==============================================================================
-! Assemble original entries from 3-array CSC (O(nnz_local) per supernode)
-!==============================================================================
-  subroutine assemble_original_csc(n, ndof, csc_ptr, csc_pi, csc_pj, csc_origk, a_elt, &
-                                    nfront, front, first_col, last_col, imap)
-    integer(kint), intent(in) :: n, ndof
-    integer(kint), intent(in) :: csc_ptr(n+1)
-    integer(kint), intent(in) :: csc_pi(*), csc_pj(*), csc_origk(*)
-    real(kdouble), intent(in) :: a_elt(*)
-    integer(kint), intent(in) :: nfront
-    real(kdouble), intent(inout) :: front(nfront*ndof, nfront*ndof)
-    integer(kint), intent(in) :: first_col, last_col
-    integer(kint), intent(in) :: imap(n)
-
-    integer(kint) :: col, pos, pi, pj, ii, jj, id, jd, base, origk
-
-    do col = first_col, last_col
-      do pos = csc_ptr(col), csc_ptr(col+1) - 1
-        pi = csc_pi(pos)
-        pj = csc_pj(pos)
-        ii = imap(pi)
-        jj = imap(pj)
-        if (ii > 0 .and. jj > 0) then
-          origk = csc_origk(pos)
-          base = (origk-1)*ndof*ndof
-          do jd = 1, ndof
-            do id = 1, ndof
-              front((ii-1)*ndof+id, (jj-1)*ndof+jd) = &
-                front((ii-1)*ndof+id, (jj-1)*ndof+jd) + a_elt(base + (id-1)*ndof + jd)
-            end do
-          end do
-        end if
-      end do
-    end do
-  end subroutine
-
-!==============================================================================
-! Build postorder traversal of the supernode tree
-!==============================================================================
-  subroutine build_postorder(nsuper, sfils, sfrere, sparent, postorder)
-    integer(kint), intent(in)  :: nsuper
-    integer(kint), intent(in)  :: sfils(nsuper), sfrere(nsuper), sparent(nsuper)
-    integer(kint), allocatable, intent(out) :: postorder(:)
-
-    integer(kint), allocatable :: stack(:)
-    integer(kint) :: sp, s, cnt, child
-    logical, allocatable :: visited(:)
-
-    allocate(postorder(nsuper), stack(nsuper), visited(nsuper))
-    visited = .false.
-    cnt = 0
-    sp = 0
-
-    ! Push all roots
-    do s = 1, nsuper
-      if (sparent(s) == 0) then
-        sp = sp + 1
-        stack(sp) = s
+      call factor_one_front(lu%factors(front), front, ierr_front)
+      if (ierr_front /= 0) then
+        call monolis_std_error_string("monolis_fact_factorize: zero pivot")
+        call monolis_std_error_stop()
       end if
     end do
 
-    do while (sp > 0)
-      s = stack(sp)
-
-      ! Check if all children are visited
-      child = sfils(s)
-      if (child /= 0) then
-        if (.not. visited(child)) then
-          ! Push unvisited children
-          do while (child /= 0)
-            if (.not. visited(child)) then
-              sp = sp + 1
-              stack(sp) = child
-            end if
-            child = sfrere(child)
-          end do
-          cycle
-        end if
-      end if
-
-      ! All children visited (or leaf): pop and record
-      sp = sp - 1
-      if (.not. visited(s)) then
-        visited(s) = .true.
-        cnt = cnt + 1
-        postorder(cnt) = s
+    !> contribution は親に展開済みなので解放
+    do front = 1, nfronts
+      if (allocated(lu%factors(front)%contribution)) then
+        deallocate(lu%factors(front)%contribution)
       end if
     end do
 
-    deallocate(stack, visited)
-  end subroutine
+    lu%factorized = .true.
+  end subroutine monolis_fact_factorize
 
-!==============================================================================
-! Extend-add: allocation-free, using pre-allocated cb_work workspace.
-! Inline scatter-add (no DAXPY call overhead for small ndof).
-!==============================================================================
-  subroutine extend_add_fast(child_fac, parent_fac, imap, ndof, cb_work)
-    type(monolis_mat_frontal), intent(in)    :: child_fac
-    type(monolis_mat_frontal), intent(inout) :: parent_fac
-    integer(kint), intent(in) :: imap(*)
-    integer(kint), intent(in) :: ndof
-    integer(kint), intent(inout) :: cb_work(*)
+  !> 子フロントの contribution を親フロントに加算
+  subroutine assemble_child_contribution(lu, child, parent, parent_data)
+    implicit none
+    type(monolis_mat_lu),     intent(inout) :: lu
+    integer(kint),            intent(in)    :: child, parent
+    type(monolis_mat_frontal), intent(inout) :: parent_data
 
-    integer(kint) :: ic, jc, ip, jp, id, jd
-    integer(kint) :: npiv_c, nfront_c, ncb
+    integer(kint) :: child_nupd, j, parent_j, run, pos_base, run_first, run_last
 
-    npiv_c  = child_fac%npiv
-    nfront_c = child_fac%nfront
-    ncb = nfront_c - npiv_c
-    if (ncb <= 0) return
+    child_nupd = lu%front_update_size(child)
+    if (child_nupd <= 0) return
+    if (lu%front_parent(child) /= parent) then
+      call monolis_std_error_string("assemble_child_contribution: parent mismatch")
+      call monolis_std_error_stop()
+    end if
+    if (.not. allocated(lu%factors(child)%contribution)) then
+      call monolis_std_error_string("assemble_child_contribution: missing contribution")
+      call monolis_std_error_stop()
+    end if
 
-    ! Build CB map using pre-allocated workspace (ZERO allocation)
-    do ic = 1, ncb
-      cb_work(ic) = imap(child_fac%indices(npiv_c + ic))
-    end do
-
-    ! Inline scatter-add (avoids DAXPY function call overhead for small ndof)
-    do jc = 1, ncb
-      jp = cb_work(jc)
-      if (jp == 0) cycle
-      do ic = 1, ncb
-        ip = cb_work(ic)
-        if (ip == 0) cycle
-        do jd = 1, ndof
-          do id = 1, ndof
-            parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) = &
-              parent_fac%front((ip-1)*ndof+id, (jp-1)*ndof+jd) + &
-              child_fac%front((npiv_c+ic-1)*ndof+id, (npiv_c+jc-1)*ndof+jd)
-          end do
-        end do
+    pos_base  = lu%contrib_pos_ptr(child) - 1
+    run_first = lu%contrib_run_ptr(child)
+    run_last  = lu%contrib_run_ptr(child + 1) - 1
+    do j = 1, child_nupd
+      parent_j = lu%contrib_parent_pos(pos_base + j)
+      do run = run_first, run_last
+        call add_front_column_run(parent_data, &
+            lu%contrib_run_parent_first(run), parent_j, &
+            lu%contrib_run_len(run), &
+            lu%factors(child)%contribution(lu%contrib_run_first(run), j))
       end do
     end do
-  end subroutine
 
-!==============================================================================
-! Adaptive LU factorization (MUMPS FAC_H / FAC_P style)
-!
-! Small fronts (<=24): inline LU without BLAS (avoids function call overhead)
-! Medium fronts: single panel (DSCAL + DGER only)
-! Large fronts: panel-based DGER + DTRSM + DGEMM (Level-3 BLAS)
-!==============================================================================
-  subroutine frontal_lu_factor_opt(front, nfront, npiv, info)
-    real(kdouble), intent(inout) :: front(nfront, nfront)
-    integer(kint), intent(in)    :: nfront, npiv
-    integer(kint), intent(inout) :: info
-    integer(kint) :: k, i, j, kb, ke, nb, nel, nupd, lkjib
-    real(kdouble) :: pivot, inv_pivot
-    real(kdouble), parameter :: eps = 1.0d-14
-    real(kdouble), parameter :: one = 1.0d0, alpha = -1.0d0
+    deallocate(lu%factors(child)%contribution)
+  end subroutine assemble_child_contribution
 
-    info = 0
-    if (npiv <= 0) return
+  !> フロントの数値格納領域を確保しゼロ初期化
+  subroutine allocate_front_storage(front_data, fs, npiv, nupd)
+    implicit none
+    type(monolis_mat_frontal), intent(inout) :: front_data
+    integer(kint), intent(in) :: fs, npiv, nupd
 
-    ! Small-front fast path: inline LU without BLAS calls
-    ! Avoids DSCAL/DGER function call overhead for tiny matrices
-    if (nfront <= 24) then
-      do k = 1, npiv
-        pivot = front(k, k)
-        if (abs(pivot) < eps) then
-          front(k, k) = sign(eps, pivot + eps)
-          pivot = front(k, k)
-          info = k
-        end if
-        inv_pivot = one / pivot
-        do i = k + 1, nfront
-          front(i, k) = front(i, k) * inv_pivot
-        end do
-        do j = k + 1, nfront
-          do i = k + 1, nfront
-            front(i, j) = front(i, j) - front(i, k) * front(k, j)
-          end do
-        end do
-      end do
+    front_data%front_size  = fs
+    front_data%pivot_size  = npiv
+    front_data%update_size = nupd
+
+    allocate(front_data%factor(max(1, fs), max(1, npiv)))
+    call dlaset('A', max(1, fs), max(1, npiv), 0.0d0, 0.0d0, &
+        front_data%factor, max(1, fs))
+
+    if (nupd > 0) then
+      allocate(front_data%upper_update(max(1, npiv), nupd))
+      allocate(front_data%contribution(nupd, nupd))
+      call dlaset('A', max(1, npiv), nupd, 0.0d0, 0.0d0, &
+          front_data%upper_update, max(1, npiv))
+      call dlaset('A', nupd, nupd, 0.0d0, 0.0d0, &
+          front_data%contribution, max(1, nupd))
+    end if
+  end subroutine allocate_front_storage
+
+  !> 単一の値をフロントの該当ブロック（factor / upper_update / contribution）に加算
+  subroutine add_front_entry(front_data, row_pos, col_pos, value)
+    implicit none
+    type(monolis_mat_frontal), intent(inout) :: front_data
+    integer(kint),  intent(in) :: row_pos, col_pos
+    real(kdouble),  intent(in) :: value
+
+    integer(kint) :: npiv
+
+    npiv = front_data%pivot_size
+    if (col_pos <= npiv) then
+      front_data%factor(row_pos, col_pos) = &
+          front_data%factor(row_pos, col_pos) + value
+    else if (row_pos <= npiv) then
+      front_data%upper_update(row_pos, col_pos - npiv) = &
+          front_data%upper_update(row_pos, col_pos - npiv) + value
+    else
+      front_data%contribution(row_pos - npiv, col_pos - npiv) = &
+          front_data%contribution(row_pos - npiv, col_pos - npiv) + value
+    end if
+  end subroutine add_front_entry
+
+  !> 連続した行の値（source(1:len)）を、親フロントの該当列に加算
+  subroutine add_front_column_run(front_data, row_first, col_pos, len, source)
+    implicit none
+    type(monolis_mat_frontal), intent(inout) :: front_data
+    integer(kint),  intent(in) :: row_first, col_pos, len
+    real(kdouble),  intent(in) :: source(*)
+
+    integer(kint) :: npiv, pivot_len, update_len, update_row, update_col
+
+    if (len <= 0) return
+    npiv = front_data%pivot_size
+    if (col_pos <= npiv) then
+      call daxpy(len, 1.0d0, source, 1, &
+          front_data%factor(row_first, col_pos), 1)
       return
     end if
 
-    ! Adaptive panel size (MUMPS KEEP(4)/KEEP(5)/KEEP(6) style)
-    if (nfront < 128) then
-      lkjib = nfront
-    else if (nfront < 512) then
-      lkjib = 48
-    else
-      lkjib = 64
+    update_col = col_pos - npiv
+    pivot_len = 0
+    if (row_first <= npiv) pivot_len = min(len, npiv - row_first + 1)
+    if (pivot_len > 0) then
+      call daxpy(pivot_len, 1.0d0, source, 1, &
+          front_data%upper_update(row_first, update_col), 1)
     end if
 
-    ! Panel-based blocked factorization with Level-3 BLAS
-    kb = 1
-    do while (kb <= npiv)
-      ke = min(kb + lkjib - 1, npiv)
-      nb = ke - kb + 1
+    update_len = len - pivot_len
+    if (update_len > 0) then
+      update_row = row_first + pivot_len - npiv
+      call daxpy(update_len, 1.0d0, source(1 + pivot_len), 1, &
+          front_data%contribution(update_row, update_col), 1)
+    end if
+  end subroutine add_front_column_run
 
-      do k = kb, ke
-        pivot = front(k, k)
-        if (abs(pivot) < eps) then
-          front(k, k) = sign(eps, pivot + eps)
-          pivot = front(k, k)
-          info = k
+  !> 単一フロントの LU 分解（パネル化、対角ピボット）
+  subroutine factor_one_front(front_data, front, ierr)
+    implicit none
+    type(monolis_mat_frontal), intent(inout) :: front_data
+    integer(kint), intent(in)  :: front
+    integer(kint), intent(out) :: ierr
+
+    integer(kint) :: fs, npiv, nupd, ldf, ldu, k, j
+    integer(kint) :: panel_end, block_cols, len, trailing_pivots, update_pivot_rows
+    real(kdouble) :: pivot
+
+    ierr = 0
+    fs   = front_data%front_size
+    npiv = front_data%pivot_size
+    nupd = front_data%update_size
+    ldf  = max(1, fs)
+    ldu  = max(1, npiv)
+    if (npiv <= 0) return
+
+    k = 1
+    do while (k <= npiv)
+      panel_end  = min(npiv, k + front_block_size - 1)
+      block_cols = panel_end - k + 1
+
+      do j = k, panel_end
+        pivot = front_data%factor(j, j)
+        if (abs(pivot) <= 100.0d0 * epsilon(1.0d0)) then
+          ierr = front
+          return
         end if
 
-        nel = nfront - k
-        if (nel > 0) then
-          call dscal(nel, one/pivot, front(k+1, k), 1)
-        end if
-
-        nupd = ke - k
-        if (nupd > 0 .and. nel > 0) then
-          call dger(nel, nupd, alpha, front(k+1, k), 1, &
-                    front(k, k+1), nfront, front(k+1, k+1), nfront)
+        len = fs - j
+        if (len > 0) then
+          call dscal(len, 1.0d0 / pivot, front_data%factor(j + 1, j), 1)
+          if (j < panel_end) then
+            call panel_column_update(front_data, j, j + 1, panel_end, len)
+          end if
         end if
       end do
 
-      nupd = nfront - ke
-      if (nupd > 0 .and. nb > 0) then
-        call dtrsm('L', 'L', 'N', 'U', nb, nupd, one, &
-                   front(kb, kb), nfront, front(kb, ke+1), nfront)
-
-        call dgemm('N', 'N', nupd, nupd, nb, alpha, &
-                   front(ke+1, kb), nfront, &
-                   front(kb, ke+1), nfront, &
-                   one, front(ke+1, ke+1), nfront)
+      trailing_pivots = npiv - panel_end
+      if (trailing_pivots > 0) then
+        call dtrsm('L', 'L', 'N', 'U', block_cols, trailing_pivots, 1.0d0, &
+            front_data%factor(k, k), ldf, front_data%factor(k, panel_end + 1), ldf)
+      end if
+      if (nupd > 0) then
+        call dtrsm('L', 'L', 'N', 'U', block_cols, nupd, 1.0d0, &
+            front_data%factor(k, k), ldf, front_data%upper_update(k, 1), ldu)
       end if
 
-      kb = ke + 1
-    end do
-  end subroutine
-
-!==============================================================================
-! Multifrontal solve: L U x = P b
-!
-! Phase 1: Forward substitution  (L y = P b)  — bottom-up through tree
-! Phase 2: Backward substitution (U x = y)    — top-down through tree
-!==============================================================================
-  subroutine multifrontal_solve(mat, lu, rhs, x)
-    !> [in] 行列構造体
-    type(monolis_mat), intent(in) :: mat
-    type(monolis_mat), intent(in) :: lu
-    real(kdouble), intent(in)  :: rhs(:)
-    real(kdouble), intent(out) :: x(:)
-
-    integer(kint) :: n, ndof, ntot, nsuper
-    integer(kint), allocatable :: postorder(:)
-    real(kdouble), allocatable :: work(:)
-    integer(kint) :: ip, s, k, i, j, nfront, npiv
-    integer(kint) :: kblk, kdof, iblk, idof, gi, gj
-    integer(kint) :: nf_dof, np_dof
-    real(kdouble) :: sum_val
-
-    n = mat%N
-    ndof = mat%NDOF
-    nsuper = lu%lu%nsuper
-    ntot = n * ndof
-
-    associate(sstart => lu%lu%snode_start, ssize => lu%lu%snode_size, &
-              sfsize => lu%lu%snode_fsize, sparent => lu%lu%snode_parent, &
-              sfils => lu%lu%sfils, sfrere => lu%lu%sfrere, &
-              invperm => mat%REORDER%iperm, perm => mat%REORDER%perm, &
-              factors => lu%lu%factors)
-
-    allocate(work(ntot), postorder(nsuper))
-
-    ! Apply block permutation to rhs
-    do i = 1, n
-      do k = 1, ndof
-        work((invperm(i)-1)*ndof + k) = rhs((i-1)*ndof + k)
-      end do
-    end do
-
-    call build_postorder_array(nsuper, sfils, sfrere, sparent, postorder)
-
-    ! ==== Forward substitution (L y = Pb) in postorder ====
-    do ip = 1, nsuper
-      s = postorder(ip)
-      nfront = factors(s)%nfront
-      npiv   = factors(s)%npiv
-      nf_dof = nfront * ndof
-      np_dof = npiv * ndof
-
-      do k = 1, np_dof
-        kblk = (k-1)/ndof + 1
-        kdof = mod(k-1, ndof) + 1
-        gi = (factors(s)%indices(kblk) - 1)*ndof + kdof
-        do i = k + 1, nf_dof
-          iblk = (i-1)/ndof + 1
-          idof = mod(i-1, ndof) + 1
-          gj = (factors(s)%indices(iblk) - 1)*ndof + idof
-          work(gj) = work(gj) - factors(s)%front(i, k) * work(gi)
-        end do
-      end do
-    end do
-
-    ! ==== Backward substitution (U x = y) in reverse postorder ====
-    do ip = nsuper, 1, -1
-      s = postorder(ip)
-      nfront = factors(s)%nfront
-      npiv   = factors(s)%npiv
-      nf_dof = nfront * ndof
-      np_dof = npiv * ndof
-
-      do k = np_dof, 1, -1
-        kblk = (k-1)/ndof + 1
-        kdof = mod(k-1, ndof) + 1
-        gi = (factors(s)%indices(kblk) - 1)*ndof + kdof
-        sum_val = 0.0d0
-        do j = k + 1, nf_dof
-          iblk = (j-1)/ndof + 1
-          idof = mod(j-1, ndof) + 1
-          gj = (factors(s)%indices(iblk) - 1)*ndof + idof
-          sum_val = sum_val + factors(s)%front(k, j) * work(gj)
-        end do
-        work(gi) = (work(gi) - sum_val) / factors(s)%front(k, k)
-      end do
-    end do
-
-    ! Apply inverse permutation to get solution
-    do i = 1, n
-      do k = 1, ndof
-        x((i-1)*ndof + k) = work((invperm(i)-1)*ndof + k)
-      end do
-    end do
-
-    deallocate(work, postorder)
-    end associate
-  end subroutine
-
-!==============================================================================
-! Build postorder array (simpler version for solve phase)
-!==============================================================================
-  subroutine build_postorder_array(nsuper, sfils, sfrere, sparent, postorder)
-    integer(kint), intent(in)  :: nsuper
-    integer(kint), intent(in)  :: sfils(nsuper), sfrere(nsuper), sparent(nsuper)
-    integer(kint), intent(out) :: postorder(nsuper)
-
-    integer(kint) :: stack(nsuper)
-    integer(kint) :: sp, s, cnt, child
-    logical :: visited(nsuper)
-
-    visited = .false.
-    cnt = 0
-    sp = 0
-
-    ! Push roots
-    do s = 1, nsuper
-      if (sparent(s) == 0) then
-        sp = sp + 1
-        stack(sp) = s
+      if (trailing_pivots > 0) then
+        call dgemm('N', 'N', fs - panel_end, trailing_pivots, block_cols, &
+            -1.0d0, front_data%factor(panel_end + 1, k), ldf, &
+            front_data%factor(k, panel_end + 1), ldf, 1.0d0, &
+            front_data%factor(panel_end + 1, panel_end + 1), ldf)
       end if
-    end do
-
-    do while (sp > 0)
-      s = stack(sp)
-      child = sfils(s)
-
-      if (child /= 0) then
-        if (.not. visited(child)) then
-          ! Push children
-          do while (child /= 0)
-            if (.not. visited(child)) then
-              sp = sp + 1
-              stack(sp) = child
-            end if
-            child = sfrere(child)
-          end do
-          cycle
+      if (nupd > 0) then
+        update_pivot_rows = npiv - panel_end
+        if (update_pivot_rows > 0) then
+          call dgemm('N', 'N', update_pivot_rows, nupd, block_cols, &
+              -1.0d0, front_data%factor(panel_end + 1, k), ldf, &
+              front_data%upper_update(k, 1), ldu, 1.0d0, &
+              front_data%upper_update(panel_end + 1, 1), ldu)
         end if
+        call dgemm('N', 'N', nupd, nupd, block_cols, -1.0d0, &
+            front_data%factor(npiv + 1, k), ldf, &
+            front_data%upper_update(k, 1), ldu, &
+            1.0d0, front_data%contribution, max(1, nupd))
       end if
 
-      sp = sp - 1
-      if (.not. visited(s)) then
-        visited(s) = .true.
-        cnt = cnt + 1
-        postorder(cnt) = s
+      k = panel_end + 1
+    end do
+  end subroutine factor_one_front
+
+  !> パネル内の右側列を pivot 列で更新
+  subroutine panel_column_update(front_data, pivot_col, first_col, last_col, len)
+    implicit none
+    type(monolis_mat_frontal), intent(inout) :: front_data
+    integer(kint), intent(in) :: pivot_col, first_col, last_col, len
+
+    integer(kint) :: col
+
+    do col = first_col, last_col
+      if (front_data%factor(pivot_col, col) /= 0.0d0) then
+        call daxpy(len, -front_data%factor(pivot_col, col), &
+            front_data%factor(pivot_col + 1, pivot_col), 1, &
+            front_data%factor(pivot_col + 1, col), 1)
       end if
     end do
-  end subroutine
+  end subroutine panel_column_update
 
 end module mod_monolis_fact_factorize

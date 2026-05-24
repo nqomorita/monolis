@@ -5,7 +5,7 @@ module mod_monolis_fact_LU_nn
   use mod_monolis_def_struc
   use mod_monolis_fact_analysis
   use mod_monolis_fact_factorize
-  use mod_monolis_spmat_reorder
+  use mod_monolis_fact_solve
 
   implicit none
 
@@ -20,36 +20,13 @@ contains
     !> [in,out] 前処理構造体
 
     type(monolis_mat), target, intent(inout) :: monoLU
-    !type(monolis_mat) :: monoMAT_reorder
-    integer(kint) :: nz
-    real(kdouble) :: t(20)
 
     if(monoMAT%NDOF == -1)then
       stop "monolis_fact_LU_nn_setup_R"
     endif
 
-    !t(1) = monolis_get_time()
-
-    !> analysis phase
-    call monolis_matrix_reordering_fw_R(monoMAT)
-
-    nz = monoMAT%CSR%index(monoMAT%NP + 1)
-    call monolis_palloc_R_1d(monoLU%R%A, monoMAT%NDOF*monoMAT%NDOF*nz)
-    monoLU%R%A = monoMAT%R%A
-
-    call build_elimination_tree(monoMAT, monoLU)
-
-    call identify_supernodes(monoMAT, monoLU)
-
-    call build_frontal_tree(monoLU)
-
-    !t(5) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"analysis", t(5) - t(1)
-
-    call multifrontal_factorize(monoMAT, monoLU)
-
-    !t(6) = monolis_get_time()
-    !write(*,"(a,1pe10.3)")"factrize", t(6) - t(5)
+    call monolis_fact_analysis(monoMAT, monoLU%LU)
+    call monolis_fact_factorize(monoMAT, monoLU%LU)
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -73,7 +50,12 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
-    call multifrontal_solve(monoMAT, monoLU, Y, X)
+    integer(kint) :: n
+
+    n = monoLU%LU%N
+    if (n <= 0) return
+    X(1:n) = Y(1:n)
+    call monolis_fact_solve(monoLU%LU, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
@@ -94,6 +76,7 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoLU
 
+    call monolis_mat_finalize_LU(monoLU%LU)
     call monolis_pdealloc_R_1d(monoLU%R%D)
   end subroutine monolis_fact_LU_nn_clear_R
 

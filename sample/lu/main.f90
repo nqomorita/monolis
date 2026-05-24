@@ -9,6 +9,7 @@ program main
   integer(kint) :: i, j, iter_conv
   integer(kint) :: n_get_eigen
   real(kdouble) :: val, res_conv
+  real(kdouble) :: t0, t1, err_max
   character(monolis_charlen) :: fname
   integer(kint), allocatable :: elem(:,:), global_eid(:)
   real(kdouble), allocatable :: coef(:), node(:,:)
@@ -72,10 +73,10 @@ program main
 
   call monolis_matvec_product_R(mat, com, a, c)
 
-  call monolis_set_maxiter(mat, 1000)
+  call monolis_set_maxiter(mat, 20000)
   call monolis_set_tolerance(mat, 1.0d-10)
   call monolis_show_timelog(mat, .true.)
-  call monolis_show_iterlog(mat, .true.)
+  call monolis_show_iterlog(mat, .false.)
   call monolis_show_summary(mat, .true.)
 
   a = 0.0d0
@@ -84,8 +85,12 @@ program main
   call monolis_set_method(mat, monolis_iter_CG)
   call monolis_set_precond(mat, monolis_prec_LU)
 
+  t0 = monolis_get_time()
   call monolis_solve_R(mat, com, b, a)
-  !write(*,"(1p10e12.4)")a
+  t1 = monolis_get_time()
+  err_max = maxval(abs(a - 1.0d0))
+  write(*,"(a,1pe12.4,a)")"[CG+LU]    elapsed = ", t1 - t0, " sec"
+  write(*,"(a,1pe12.4)")  "[CG+LU]    max|x - 1| = ", err_max
 
   a = 0.0d0
   b = c
@@ -93,8 +98,12 @@ program main
   call monolis_set_method(mat, monolis_iter_CG)
   call monolis_set_precond(mat, monolis_prec_MUMPS)
 
+  t0 = monolis_get_time()
   call monolis_solve_R(mat, com, b, a)
-  !write(*,"(1p10e12.4)")a
+  t1 = monolis_get_time()
+  err_max = maxval(abs(a - 1.0d0))
+  write(*,"(a,1pe12.4,a)")"[CG+DIAG]  elapsed = ", t1 - t0, " sec"
+  write(*,"(a,1pe12.4)")  "[CG+DIAG]  max|x - 1| = ", err_max
 
   call monolis_finalize(mat)
 
