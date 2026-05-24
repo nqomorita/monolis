@@ -42,10 +42,10 @@ module mod_monolis_pord_const
   integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION2 = MONOLIS_PORD_AMMF
   integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION3 = MONOLIS_PORD_QMRDV
   integer(kint), parameter :: MONOLIS_PORD_SPACE_DOMAIN_SIZE     = 200
-  integer(kint), parameter :: MONOLIS_PORD_SPACE_MSGLVL          = 2
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_MSGLVL          = 0
   integer(kint), parameter :: MONOLIS_PORD_SPACE_ETREE_NONZ      = 256
   integer(kint), parameter :: MONOLIS_PORD_SPACE_ETREE_BAL       = 5
-  integer(kint), parameter :: MONOLIS_PORD_SPACE_MASK_OFFSET      = 2
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_MASK_OFFSET     = 2
 
   ! --- misc ---
   integer(kint), parameter :: MONOLIS_PORD_PORD_TRUE  = 1
@@ -53,8 +53,8 @@ module mod_monolis_pord_const
   integer(kint), parameter :: MONOLIS_PORD_PORD_ERR   = -1
   integer(kint), parameter :: MONOLIS_PORD_PORD_NOERR = 0
   integer(kint), parameter :: MONOLIS_PORD_MAX_INT    = 2**30 - 1
-  real(kdouble),    parameter :: MONOLIS_PORD_MAX_FLOAT  = 1.0e31_kdouble
-  real(kdouble),    parameter :: MONOLIS_PORD_EPS        = 0.001_kdouble
+  real(kdouble), parameter :: MONOLIS_PORD_MAX_FLOAT  = 1.0e31_kdouble
+  real(kdouble), parameter :: MONOLIS_PORD_EPS        = 0.001_kdouble
 
   ! --- color constants (also used as array indices, 0-based) ---
   integer(kint), parameter :: MONOLIS_PORD_GRAY  = 0
@@ -75,9 +75,9 @@ module mod_monolis_pord_const
   integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION1 = 1
   integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION2 = 2
   integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION3 = 3
-  integer(kint), parameter :: MONOLIS_PORD_OPTION_DOMAIN_SIZE      = 4
-  integer(kint), parameter :: MONOLIS_PORD_OPTION_MSGLVL           = 5
-  integer(kint), parameter :: MONOLIS_PORD_OPTION_ETREE_NONZ       = 6
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_DOMAIN_SIZE     = 4
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_MSGLVL          = 5
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_ETREE_NONZ      = 6
 
   ! --- timing array indices (0-based) ---
   integer(kint), parameter :: MONOLIS_PORD_ORD_TIME_SLOTS    = 12
@@ -96,7 +96,7 @@ module mod_monolis_pord_const
 
   ! --- params.h ---
   integer(kint), parameter :: MONOLIS_PORD_MAX_BAD_FLIPS        = 100
-  real(kdouble),    parameter :: MONOLIS_PORD_COMPRESS_FRACTION     = 0.75_kdouble
+  real(kdouble), parameter :: MONOLIS_PORD_COMPRESS_FRACTION    = 0.75_kdouble
   integer(kint), parameter :: MONOLIS_PORD_MIN_NODES            = 100
   integer(kint), parameter :: MONOLIS_PORD_DEFAULT_SEPS         = 31
   integer(kint), parameter :: MONOLIS_PORD_MAX_SEPS             = 255
