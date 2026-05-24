@@ -23,7 +23,7 @@ contains
 
     G%nvtx     = nvtx
     G%nedges   = nedges
-    G%gtype    = UNWEIGHTED
+    G%gtype    = MONOLIS_PORD_UNWEIGHTED
     G%totvwght = nvtx
     allocate(G%xadj(0:nvtx))
     allocate(G%adjncy(0:max(nedges-1, 0)))
@@ -110,7 +110,7 @@ contains
     nvtx = G%nvtx
     call indNodes(G, vtxmap, nvtxGc)
 
-    if (real(nvtxGc, kdouble) > COMPRESS_FRACTION * real(nvtx, kdouble)) then
+    if (real(nvtxGc, kdouble) > MONOLIS_PORD_COMPRESS_FRACTION * real(nvtx, kdouble)) then
       compressed = .false.
       return
     end if
@@ -158,7 +158,7 @@ contains
       vtxmap(u) = perm(vtxmap(u))
       Gc%vwght(vtxmap(u)) = Gc%vwght(vtxmap(u)) + G%vwght(u)
     end do
-    Gc%gtype    = WEIGHTED
+    Gc%gtype    = MONOLIS_PORD_WEIGHTED
     Gc%totvwght = G%totvwght
 
     deallocate(perm)
@@ -225,8 +225,8 @@ contains
   end subroutine indNodes
 
   !===========================================================================
-  ! setupGridGraph: creates an unweighted grid (GRID), mesh (MESH), or
-  ! torus (TORUS) graph of dimensions dimX x dimY.
+  ! setupGridGraph: creates an unweighted grid (MONOLIS_PORD_GRID), mesh (MONOLIS_PORD_MESH), or
+  ! torus (MONOLIS_PORD_TORUS) graph of dimensions dimX x dimY.
   !===========================================================================
   subroutine setupGridGraph(G, dimX, dimY, gtype_in)
     type(graph_t), intent(out) :: G
@@ -238,7 +238,7 @@ contains
 
     select case (gtype_in)
 
-      case (GRID)
+      case (MONOLIS_PORD_GRID)
         nedges = 8 &
                + 6 * (dimX-2 + dimY-2) &
                + 4 * (dimX-2) * (dimY-2)
@@ -261,7 +261,7 @@ contains
         end do
         G%xadj(nvtx) = knz
 
-      case (MESH)
+      case (MONOLIS_PORD_MESH)
         nedges = 8 &
                + 6 * (dimX-2 + dimY-2) &
                + 4 * (dimX-2) * (dimY-2) &
@@ -297,7 +297,7 @@ contains
         end do
         G%xadj(nvtx) = knz
 
-      case (TORUS)
+      case (MONOLIS_PORD_TORUS)
         nedges = 4 * nvtx
         call newGraph(G, nvtx, nedges)
         knz = 0

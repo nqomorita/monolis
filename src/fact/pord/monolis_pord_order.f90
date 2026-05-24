@@ -87,9 +87,9 @@ contains
       Gelim%score(u)  = -1
 
       select case (Gelim%G%gtype)
-        case (UNWEIGHTED)
+        case (MONOLIS_PORD_UNWEIGHTED)
           deg = Gelim%len(u)
-        case (WEIGHTED)
+        case (MONOLIS_PORD_WEIGHTED)
           deg = 0
           do i = istart, istop-1
             deg = deg + G%vwght(G%adjncy(i))
@@ -615,16 +615,16 @@ contains
 
             if ((deg > 40000) .or. (degme > 40000)) then
               select case (stype)
-                case (AMD)
+                case (MONOLIS_PORD_AMD)
                   scr_dbl = real(deg, kdouble)
-                case (AMF)
+                case (MONOLIS_PORD_AMF)
                   scr_dbl = real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
                           - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble
-                case (AMMF)
+                case (MONOLIS_PORD_AMMF)
                   scr_dbl = (real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
                            - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble) &
                            / real(vwghtv, kdouble)
-                case (AMIND)
+                case (MONOLIS_PORD_AMIND)
                   scr_dbl = max(0.0_kdouble, &
                     real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
                   - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble &
@@ -632,16 +632,16 @@ contains
                 case default
                   scr_dbl = real(deg, kdouble)
               end select
-              Gelim%score(v) = int(min(scr_dbl, real(MAX_INT - Gelim%G%nvtx, kdouble)))
+              Gelim%score(v) = int(min(scr_dbl, real(MONOLIS_PORD_MAX_INT - Gelim%G%nvtx, kdouble)))
             else
               select case (stype)
-                case (AMD)
+                case (MONOLIS_PORD_AMD)
                   Gelim%score(v) = deg
-                case (AMF)
+                case (MONOLIS_PORD_AMF)
                   Gelim%score(v) = deg*(deg-1)/2 - degme*(degme-1)/2
-                case (AMMF)
+                case (MONOLIS_PORD_AMMF)
                   Gelim%score(v) = (deg*(deg-1)/2 - degme*(degme-1)/2) / vwghtv
-                case (AMIND)
+                case (MONOLIS_PORD_AMIND)
                   Gelim%score(v) = max(0, (deg*(deg-1)/2 - degme*(degme-1)/2) &
                                         - deg*vwghtv)
                 case default
@@ -825,8 +825,8 @@ contains
     integer(kint) :: nstages, istage, scoretype, ordtype
 
     nstages   = minprior%ms%nstages
-    ordtype   = options(OPTION_ORDTYPE)
-    scoretype = options(OPTION_NODE_SELECTION1)  ! first stage
+    ordtype   = options(MONOLIS_PORD_OPTION_ORDTYPE)
+    scoretype = options(MONOLIS_PORD_OPTION_NODE_SELECTION1)  ! first stage
 
     if ((nstages < 1) .or. (nstages > minprior%Gelim%G%nvtx)) then
       write(*,'(A,I0)') "Error in orderMinPriority: invalid nstages = ", nstages
@@ -837,17 +837,17 @@ contains
     call eliminateStage(minprior, 0, scoretype, cpus)
 
     ! remaining stages
-    scoretype = options(OPTION_NODE_SELECTION2)
+    scoretype = options(MONOLIS_PORD_OPTION_NODE_SELECTION2)
     select case (ordtype)
-      case (MINIMUM_PRIORITY)
+      case (MONOLIS_PORD_MINIMUM_PRIORITY)
         ! nothing more to do
-      case (INCOMPLETE_ND)
+      case (MONOLIS_PORD_INCOMPLETE_ND)
         do istage = 1, nstages-1
           call eliminateStage(minprior, istage, scoretype, cpus)
         end do
-      case (MULTISECTION)
+      case (MONOLIS_PORD_MULTISECTION)
         call eliminateStage(minprior, nstages-1, scoretype, cpus)
-      case (TRISTAGE_MULTISECTION)
+      case (MONOLIS_PORD_TRISTAGE_MULTISECTION)
         do istage = 1, nstages-1
           call eliminateStage(minprior, istage, scoretype, cpus)
         end do
@@ -856,7 +856,7 @@ contains
         stop
     end select
 
-    if ((ordtype /= MINIMUM_PRIORITY) .and. (options(OPTION_MSGLVL) > 1)) then
+    if ((ordtype /= MONOLIS_PORD_MINIMUM_PRIORITY) .and. (options(MONOLIS_PORD_OPTION_MSGLVL) > 1)) then
       do istage = 0, nstages-1
         write(*,'(I4,A,I6,A,I6,A,I8,A,ES12.4)') &
           istage, '. stage: #steps ', minprior%stageinfo(istage)%nstep, &
@@ -893,10 +893,10 @@ contains
     end do
 
     ! initial update
-    call pord_starttimer(cpus(TIME_UPDSCORE))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_UPDSCORE))
     call updateDegree(minprior%Gelim, minprior%reachset, nreach, minprior%auxbin)
     call updateScore(minprior%Gelim, minprior%reachset, nreach, scoretype, minprior%auxbin)
-    call pord_stoptimer(cpus(TIME_UPDSCORE))
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_UPDSCORE))
 
     do i = 0, nreach-1
       u = minprior%reachset(i)
@@ -908,15 +908,15 @@ contains
       if (eliminateStep(minprior, istage, scoretype) == 0) exit
       nreach = minprior%nreach
 
-      call pord_starttimer(cpus(TIME_UPDADJNCY))
+      call pord_starttimer(cpus(MONOLIS_PORD_TIME_UPDADJNCY))
       call updateAdjncy(minprior%Gelim, minprior%reachset, nreach, &
                         minprior%auxtmp, minprior%flag)
-      call pord_stoptimer(cpus(TIME_UPDADJNCY))
+      call pord_stoptimer(cpus(MONOLIS_PORD_TIME_UPDADJNCY))
 
-      call pord_starttimer(cpus(TIME_FINDINODES))
+      call pord_starttimer(cpus(MONOLIS_PORD_TIME_FINDINODES))
       call findIndNodes(minprior%Gelim, minprior%reachset, nreach, &
                         minprior%auxbin, minprior%auxaux, minprior%auxtmp, minprior%flag)
-      call pord_stoptimer(cpus(TIME_FINDINODES))
+      call pord_stoptimer(cpus(MONOLIS_PORD_TIME_FINDINODES))
 
       ! remove nonprincipal from reachset
       r = 0
@@ -928,10 +928,10 @@ contains
       end do
       nreach = r
 
-      call pord_starttimer(cpus(TIME_UPDSCORE))
+      call pord_starttimer(cpus(MONOLIS_PORD_TIME_UPDSCORE))
       call updateDegree(minprior%Gelim, minprior%reachset, nreach, minprior%auxbin)
       call updateScore(minprior%Gelim, minprior%reachset, nreach, scoretype, minprior%auxbin)
-      call pord_stoptimer(cpus(TIME_UPDSCORE))
+      call pord_stoptimer(cpus(MONOLIS_PORD_TIME_UPDSCORE))
 
       do i = 0, nreach-1
         u = minprior%reachset(i)

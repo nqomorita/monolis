@@ -26,7 +26,7 @@ contains
 
     call monolis_fact_analysis(monoMAT, monoLU%LU)
 
-    call monolis_fact_LU_factorize()
+    !call monolis_fact_LU_factorize()
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -50,7 +50,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
-    call monolis_fact_LU_solve(monoLU%LU, Y, X)
+    !call monolis_fact_LU_solve(monoLU%LU, Y, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）

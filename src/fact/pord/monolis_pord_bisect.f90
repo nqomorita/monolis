@@ -120,7 +120,7 @@ contains
         end if
       end do
 
-      top = 0; max_level = MAX_INT
+      top = 0; max_level = MONOLIS_PORD_MAX_INT
       do while (qhead /= qtail)
         x = queue(qhead); qhead = qhead + 1
         if (level(x) >= max_level) cycle
@@ -303,16 +303,16 @@ contains
     qhead = 0; qtail = 0
     do x = 0, nX-1
       if (matching(x) == -1) then
-        queue(qtail) = x; qtail = qtail + 1; dmflag(x) = SI
+        queue(qtail) = x; qtail = qtail + 1; dmflag(x) = MONOLIS_PORD_SI
       else
-        dmflag(x) = SR
+        dmflag(x) = MONOLIS_PORD_SR
       end if
     end do
     do y = nX, nXY-1
       if (matching(y) == -1) then
-        queue(qtail) = y; qtail = qtail + 1; dmflag(y) = BI
+        queue(qtail) = y; qtail = qtail + 1; dmflag(y) = MONOLIS_PORD_BI
       else
-        dmflag(y) = BR
+        dmflag(y) = MONOLIS_PORD_BR
       end if
     end do
 
@@ -320,29 +320,29 @@ contains
       u = queue(qhead); qhead = qhead + 1
       istart = Gbipart%G%xadj(u); istop = Gbipart%G%xadj(u+1)
       select case (dmflag(u))
-        case (SI)
+        case (MONOLIS_PORD_SI)
           do i = istart, istop-1
             y = Gbipart%G%adjncy(i)
-            if (dmflag(y) == BR) then
-              dmflag(y) = BX; queue(qtail) = y; qtail = qtail + 1
+            if (dmflag(y) == MONOLIS_PORD_BR) then
+              dmflag(y) = MONOLIS_PORD_BX; queue(qtail) = y; qtail = qtail + 1
             end if
           end do
-        case (BX)
+        case (MONOLIS_PORD_BX)
           x = matching(u)
-          if (dmflag(x) /= SI) then
-            dmflag(x) = SI; queue(qtail) = x; qtail = qtail + 1
+          if (dmflag(x) /= MONOLIS_PORD_SI) then
+            dmflag(x) = MONOLIS_PORD_SI; queue(qtail) = x; qtail = qtail + 1
           end if
-        case (BI)
+        case (MONOLIS_PORD_BI)
           do i = istart, istop-1
             x = Gbipart%G%adjncy(i)
-            if (dmflag(x) == SR) then
-              dmflag(x) = SX; queue(qtail) = x; qtail = qtail + 1
+            if (dmflag(x) == MONOLIS_PORD_SR) then
+              dmflag(x) = MONOLIS_PORD_SX; queue(qtail) = x; qtail = qtail + 1
             end if
           end do
-        case (SX)
+        case (MONOLIS_PORD_SX)
           y = matching(u)
-          if (dmflag(y) /= BI) then
-            dmflag(y) = BI; queue(qtail) = y; qtail = qtail + 1
+          if (dmflag(y) /= MONOLIS_PORD_BI) then
+            dmflag(y) = MONOLIS_PORD_BI; queue(qtail) = y; qtail = qtail + 1
           end if
       end select
     end do
@@ -358,7 +358,7 @@ contains
   ! DMviaFlow
   ! Direct Fortran translation of gbipart.c's DMviaFlow.
   ! Internally uses C's SOURCE/SINK/FREE sentinels (-2/-3/-1) and only at the
-  ! end converts to the Dulmage-Mendelsohn labels SI/SX/SR/BI/BX/BR.
+  ! end converts to the Dulmage-Mendelsohn labels MONOLIS_PORD_SI/MONOLIS_PORD_SX/MONOLIS_PORD_SR/MONOLIS_PORD_BI/MONOLIS_PORD_BX/MONOLIS_PORD_BR.
   !===========================================================================
   subroutine DMviaFlow(Gbipart, flow, rc, dmflag, dmwght)
     type(gbipart_t), intent(in)  :: Gbipart
@@ -430,16 +430,16 @@ contains
     dmwght = 0
     do x = 0, nX-1
       select case (dmflag(x))
-        case (TAG_SOURCE); dmflag(x) = SI; dmwght(SI) = dmwght(SI) + Gbipart%G%vwght(x)
-        case (TAG_SINK);   dmflag(x) = SX; dmwght(SX) = dmwght(SX) + Gbipart%G%vwght(x)
-        case default;      dmflag(x) = SR; dmwght(SR) = dmwght(SR) + Gbipart%G%vwght(x)
+        case (TAG_SOURCE); dmflag(x) = MONOLIS_PORD_SI; dmwght(MONOLIS_PORD_SI) = dmwght(MONOLIS_PORD_SI) + Gbipart%G%vwght(x)
+        case (TAG_SINK);   dmflag(x) = MONOLIS_PORD_SX; dmwght(MONOLIS_PORD_SX) = dmwght(MONOLIS_PORD_SX) + Gbipart%G%vwght(x)
+        case default;      dmflag(x) = MONOLIS_PORD_SR; dmwght(MONOLIS_PORD_SR) = dmwght(MONOLIS_PORD_SR) + Gbipart%G%vwght(x)
       end select
     end do
     do y = nX, nXY-1
       select case (dmflag(y))
-        case (TAG_SOURCE); dmflag(y) = BX; dmwght(BX) = dmwght(BX) + Gbipart%G%vwght(y)
-        case (TAG_SINK);   dmflag(y) = BI; dmwght(BI) = dmwght(BI) + Gbipart%G%vwght(y)
-        case default;      dmflag(y) = BR; dmwght(BR) = dmwght(BR) + Gbipart%G%vwght(y)
+        case (TAG_SOURCE); dmflag(y) = MONOLIS_PORD_BX; dmwght(MONOLIS_PORD_BX) = dmwght(MONOLIS_PORD_BX) + Gbipart%G%vwght(y)
+        case (TAG_SINK);   dmflag(y) = MONOLIS_PORD_BI; dmwght(MONOLIS_PORD_BI) = dmwght(MONOLIS_PORD_BI) + Gbipart%G%vwght(y)
+        case default;      dmflag(y) = MONOLIS_PORD_BR; dmwght(MONOLIS_PORD_BR) = dmwght(MONOLIS_PORD_BR) + Gbipart%G%vwght(y)
       end select
     end do
 
@@ -531,8 +531,8 @@ contains
     qhead = 0; qtail = 1; queue(0) = domain
     dd%vtype(domain) = -1
 
-    do while ((dd%cwght(BLACK) < dd%cwght(WHITE)) .and. (qhead /= qtail))
-      qopt = qhead; bestvalue = MAX_INT
+    do while ((dd%cwght(MONOLIS_PORD_BLACK) < dd%cwght(MONOLIS_PORD_WHITE)) .and. (qhead /= qtail))
+      qopt = qhead; bestvalue = MONOLIS_PORD_MAX_INT
 
       do q = qhead, qtail-1
         u = queue(q)
@@ -542,7 +542,7 @@ contains
           do i = istart, istop-1
             v = dd%G%adjncy(i)
             weight = dd%G%vwght(v)
-            if (dd%color(v) == WHITE) then
+            if (dd%color(v) == MONOLIS_PORD_WHITE) then
               dW = dW - weight; dS = dS + weight
             else if (deltaW(v) == 1) then
               dB = dB + weight; dS = dS - weight
@@ -551,8 +551,8 @@ contains
           deltaS(u) = dS; deltaB(u) = dB; deltaW(u) = dW
           dd%vtype(u) = -2
         end if
-        if (dd%cwght(GRAY) + deltaS(u) < bestvalue) then
-          bestvalue = dd%cwght(GRAY) + deltaS(u); qopt = q
+        if (dd%cwght(MONOLIS_PORD_GRAY) + deltaS(u) < bestvalue) then
+          bestvalue = dd%cwght(MONOLIS_PORD_GRAY) + deltaS(u); qopt = q
         end if
       end do
 
@@ -561,10 +561,10 @@ contains
       queue(qopt) = queue(qhead); queue(qhead) = u
       qhead = qhead + 1
 
-      dd%color(u) = BLACK
-      dd%cwght(GRAY)  = dd%cwght(GRAY)  + deltaS(u)
-      dd%cwght(BLACK) = dd%cwght(BLACK) + deltaB(u)
-      dd%cwght(WHITE) = dd%cwght(WHITE) + deltaW(u)
+      dd%color(u) = MONOLIS_PORD_BLACK
+      dd%cwght(MONOLIS_PORD_GRAY)  = dd%cwght(MONOLIS_PORD_GRAY)  + deltaS(u)
+      dd%cwght(MONOLIS_PORD_BLACK) = dd%cwght(MONOLIS_PORD_BLACK) + deltaB(u)
+      dd%cwght(MONOLIS_PORD_WHITE) = dd%cwght(MONOLIS_PORD_WHITE) + deltaW(u)
       dd%vtype(u) = -3
 
       istart = dd%G%xadj(u); istop = dd%G%xadj(u+1)
@@ -573,9 +573,9 @@ contains
         deltaB(v) = deltaB(v) + 1
         deltaW(v) = deltaW(v) - 1
         if (deltaW(v) == 0) then
-          dd%color(v) = BLACK
+          dd%color(v) = MONOLIS_PORD_BLACK
         else if (deltaB(v) == 1) then
-          dd%color(v) = GRAY
+          dd%color(v) = MONOLIS_PORD_GRAY
           jstart = dd%G%xadj(v); jstop = dd%G%xadj(v+1)
           do j = jstart, jstop-1
             w = dd%G%adjncy(j)
@@ -612,18 +612,18 @@ contains
     nvtx     = dd%G%nvtx
     totvwght = dd%G%totvwght
 
-    dd%cwght(GRAY)  = 0
-    dd%cwght(BLACK) = 0
-    dd%cwght(WHITE) = totvwght
+    dd%cwght(MONOLIS_PORD_GRAY)  = 0
+    dd%cwght(MONOLIS_PORD_BLACK) = 0
+    dd%cwght(MONOLIS_PORD_WHITE) = totvwght
     do u = 0, nvtx-1
-      dd%color(u) = WHITE
+      dd%color(u) = MONOLIS_PORD_WHITE
     end do
 
     do u = 0, nvtx-1
-      if ((dd%vtype(u) == 1) .and. (dd%color(u) == WHITE)) then
+      if ((dd%vtype(u) == 1) .and. (dd%color(u) == MONOLIS_PORD_WHITE)) then
         domain = findPseudoPeripheralDomain(dd, u)
         call constructLevelSep(dd, domain)
-        if (dd%cwght(BLACK) >= dd%cwght(WHITE)) exit
+        if (dd%cwght(MONOLIS_PORD_BLACK) >= dd%cwght(MONOLIS_PORD_WHITE)) exit
       end if
     end do
   end subroutine initialDDSep
@@ -654,7 +654,7 @@ contains
         call insertBucket(w_bucket, deltaS(v), v)
       end if
       if (deltaW(u) == 0) then
-        tmp_color(u) = GRAY
+        tmp_color(u) = MONOLIS_PORD_GRAY
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
           if (dd%vtype(v) == 1) then
@@ -669,7 +669,7 @@ contains
       if (deltaB(u) == 1) then
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
-          if ((tmp_color(v) == BLACK) .and. (dd%vtype(v) == 1)) then
+          if ((tmp_color(v) == MONOLIS_PORD_BLACK) .and. (dd%vtype(v) == 1)) then
             call removeBucket(b_bucket, v)
             deltaW(v) = deltaW(v) + weight; deltaS(v) = deltaS(v) - weight
             deltaB(u) = -(v+1)
@@ -678,7 +678,7 @@ contains
         end do
       end if
       if (deltaB(u) == 0) then
-        tmp_color(u) = WHITE
+        tmp_color(u) = MONOLIS_PORD_WHITE
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
           if (dd%vtype(v) == 1) then
@@ -714,7 +714,7 @@ contains
         call insertBucket(b_bucket, deltaS(v), v)
       end if
       if (deltaB(u) == 0) then
-        tmp_color(u) = GRAY
+        tmp_color(u) = MONOLIS_PORD_GRAY
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
           if (dd%vtype(v) == 1) then
@@ -729,7 +729,7 @@ contains
       if (deltaW(u) == 1) then
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
-          if ((tmp_color(v) == WHITE) .and. (dd%vtype(v) == 1)) then
+          if ((tmp_color(v) == MONOLIS_PORD_WHITE) .and. (dd%vtype(v) == 1)) then
             call removeBucket(w_bucket, v)
             deltaB(v) = deltaB(v) + weight; deltaS(v) = deltaS(v) - weight
             deltaW(u) = -(v+1)
@@ -738,7 +738,7 @@ contains
         end do
       end if
       if (deltaW(u) == 0) then
-        tmp_color(u) = BLACK
+        tmp_color(u) = MONOLIS_PORD_BLACK
         do j = jstart, jstop-1
           v = dd%G%adjncy(j)
           if (dd%vtype(v) == 1) then
@@ -769,7 +769,7 @@ contains
 
     outer_loop: do
 
-      tmp_S = dd%cwght(GRAY); tmp_B = dd%cwght(BLACK); tmp_W = dd%cwght(WHITE)
+      tmp_S = dd%cwght(MONOLIS_PORD_GRAY); tmp_B = dd%cwght(MONOLIS_PORD_BLACK); tmp_W = dd%cwght(MONOLIS_PORD_WHITE)
       bestglobalpos = 0; badflips = 0
       bestglobalvalue = eval_sep(tmp_S, tmp_B, tmp_W)
 
@@ -785,18 +785,18 @@ contains
           istart = dd%G%xadj(u); istop = dd%G%xadj(u+1)
           do i = istart, istop-1
             v = dd%G%adjncy(i)
-            if (dd%color(v) == BLACK) then
+            if (dd%color(v) == MONOLIS_PORD_BLACK) then
               deltaB(u) = deltaB(u) + 1
             else
               deltaW(u) = deltaW(u) + 1
             end if
           end do
           if ((deltaB(u) > 0) .and. (deltaW(u) > 0)) then
-            tmp_color(u) = GRAY
+            tmp_color(u) = MONOLIS_PORD_GRAY
           else if (deltaB(u) > 0) then
-            tmp_color(u) = BLACK
+            tmp_color(u) = MONOLIS_PORD_BLACK
           else
-            tmp_color(u) = WHITE
+            tmp_color(u) = MONOLIS_PORD_WHITE
           end if
           dd%color(u) = tmp_color(u)
         end if
@@ -806,12 +806,12 @@ contains
       do u = 0, nvtx-1
         if (dd%vtype(u) == 1) then
           tmp_color(u) = dd%color(u)
-          if (tmp_color(u) == BLACK) then
+          if (tmp_color(u) == MONOLIS_PORD_BLACK) then
             deltaW(u) = dd%G%vwght(u); deltaB(u) = -deltaW(u); deltaS(u) = 0
             istart = dd%G%xadj(u); istop = dd%G%xadj(u+1)
             do i = istart, istop-1
               v = dd%G%adjncy(i); weight = dd%G%vwght(v)
-              if (tmp_color(v) == BLACK) then
+              if (tmp_color(v) == MONOLIS_PORD_BLACK) then
                 deltaB(u) = deltaB(u) - weight; deltaS(u) = deltaS(u) + weight
               else if (deltaB(v) == 1) then
                 deltaW(u) = deltaW(u) + weight; deltaS(u) = deltaS(u) - weight
@@ -820,12 +820,12 @@ contains
             end do
             call insertBucket(b_bucket, deltaS(u), u)
           end if
-          if (tmp_color(u) == WHITE) then
+          if (tmp_color(u) == MONOLIS_PORD_WHITE) then
             deltaB(u) = dd%G%vwght(u); deltaW(u) = -deltaB(u); deltaS(u) = 0
             istart = dd%G%xadj(u); istop = dd%G%xadj(u+1)
             do i = istart, istop-1
               v = dd%G%adjncy(i); weight = dd%G%vwght(v)
-              if (tmp_color(v) == WHITE) then
+              if (tmp_color(v) == MONOLIS_PORD_WHITE) then
                 deltaW(u) = deltaW(u) - weight; deltaS(u) = deltaS(u) + weight
               else if (deltaW(v) == 1) then
                 deltaB(u) = deltaB(u) + weight; deltaS(u) = deltaS(u) - weight
@@ -839,7 +839,7 @@ contains
 
       inner_loop: do
 
-        b_value = MAX_FLOAT; w_value = MAX_FLOAT
+        b_value = MONOLIS_PORD_MAX_FLOAT; w_value = MONOLIS_PORD_MAX_FLOAT
         b_domain = minBucket(b_bucket)
         if (b_domain /= -1) &
           b_value = eval_sep(tmp_S+deltaS(b_domain), tmp_B+deltaB(b_domain), tmp_W+deltaW(b_domain))
@@ -849,7 +849,7 @@ contains
 
         if ((b_domain == -1) .and. (w_domain == -1)) exit inner_loop
 
-        if (b_value + EPS < w_value) then
+        if (b_value + MONOLIS_PORD_EPS < w_value) then
           domain = b_domain; value = b_value
           call removeBucket(b_bucket, domain)
         else
@@ -864,11 +864,11 @@ contains
         end if
         dd%vtype(domain) = 0; ftail = domain
 
-        if (tmp_color(domain) == BLACK) then
-          tmp_color(domain) = WHITE
+        if (tmp_color(domain) == MONOLIS_PORD_BLACK) then
+          tmp_color(domain) = MONOLIS_PORD_WHITE
           call updateB2W(w_bucket, b_bucket, dd, domain, tmp_color, deltaW, deltaB, deltaS)
         else
-          tmp_color(domain) = BLACK
+          tmp_color(domain) = MONOLIS_PORD_BLACK
           call updateW2B(w_bucket, b_bucket, dd, domain, tmp_color, deltaW, deltaB, deltaS)
         end if
         tmp_S = tmp_S + deltaS(domain)
@@ -876,12 +876,12 @@ contains
         tmp_W = tmp_W + deltaW(domain)
 
         pos = pos + 1
-        if (value + EPS < bestglobalvalue) then
+        if (value + MONOLIS_PORD_EPS < bestglobalvalue) then
           bestglobalvalue = value; bestglobalpos = pos; badflips = 0
         else
           badflips = badflips + 1
         end if
-        if (badflips >= MAX_BAD_FLIPS) exit inner_loop
+        if (badflips >= MONOLIS_PORD_MAX_BAD_FLIPS) exit inner_loop
 
       end do inner_loop
 
@@ -890,14 +890,14 @@ contains
       do while (nxtdomain /= 0)
         domain = -nxtdomain - 1
         if (pos < bestglobalpos) then
-          if (dd%color(domain) == BLACK) then
-            dd%color(domain) = WHITE
+          if (dd%color(domain) == MONOLIS_PORD_BLACK) then
+            dd%color(domain) = MONOLIS_PORD_WHITE
           else
-            dd%color(domain) = BLACK
+            dd%color(domain) = MONOLIS_PORD_BLACK
           end if
-          dd%cwght(GRAY)  = dd%cwght(GRAY)  + deltaS(domain)
-          dd%cwght(BLACK) = dd%cwght(BLACK) + deltaB(domain)
-          dd%cwght(WHITE) = dd%cwght(WHITE) + deltaW(domain)
+          dd%cwght(MONOLIS_PORD_GRAY)  = dd%cwght(MONOLIS_PORD_GRAY)  + deltaS(domain)
+          dd%cwght(MONOLIS_PORD_BLACK) = dd%cwght(MONOLIS_PORD_BLACK) + deltaB(domain)
+          dd%cwght(MONOLIS_PORD_WHITE) = dd%cwght(MONOLIS_PORD_WHITE) + deltaW(domain)
           pos = pos + 1
         end if
         nxtdomain = dd%vtype(domain)
@@ -1132,7 +1132,7 @@ contains
     dd_out%G%xadj(nvtxdd) = nedgesdd
     dd_out%G%nvtx   = nvtxdd
     dd_out%G%nedges = nedgesdd
-    dd_out%G%gtype  = WEIGHTED
+    dd_out%G%gtype  = MONOLIS_PORD_WEIGHTED
     dd_out%G%totvwght = G%totvwght
     do i = 0, nedgesdd-1
       dd_out%G%adjncy(i) = map_(dd_out%G%adjncy(i))
@@ -1163,9 +1163,9 @@ contains
       vtxlist(u) = u
       istart = G%xadj(u); istop = G%xadj(u+1)
       select case (G%gtype)
-        case (UNWEIGHTED)
+        case (MONOLIS_PORD_UNWEIGHTED)
           deg = istop - istart
-        case (WEIGHTED)
+        case (MONOLIS_PORD_WEIGHTED)
           deg = 0
           do i = istart, istop-1
             deg = deg + G%vwght(G%adjncy(i))
@@ -1206,7 +1206,7 @@ contains
     allocate(marker(0:nvtx-1))
 
     select case (scoretype)
-      case (QMRDV)
+      case (MONOLIS_PORD_QMRDV)
         do k = 0, nlist-1
           u = msvtxlist(k)
           weight = dd%G%vwght(u)
@@ -1217,7 +1217,7 @@ contains
           key(u) = weight / max(1, dd%G%vwght(u))
         end do
 
-      case (QMD)
+      case (MONOLIS_PORD_QMD)
         marker = -1
         do k = 0, nlist-1; marker(msvtxlist(k)) = msvtxlist(k); end do
         do k = 0, nlist-1
@@ -1237,7 +1237,7 @@ contains
           key(u) = deg
         end do
 
-      case (QRAND)
+      case (MONOLIS_PORD_QRAND)
         do k = 0, nlist-1
           u = msvtxlist(k)
           call random_number_int(key(u), nvtx)
@@ -1455,7 +1455,7 @@ contains
     dd2_out%G%xadj(nvtxdd2) = nedgesdd2
     dd2_out%G%nvtx    = nvtxdd2
     dd2_out%G%nedges  = nedgesdd2
-    dd2_out%G%gtype   = WEIGHTED
+    dd2_out%G%gtype   = MONOLIS_PORD_WEIGHTED
     dd2_out%G%totvwght = dd1%G%totvwght
     dd2_out%ndom      = ndom
     dd2_out%domwght   = domwght
@@ -1557,7 +1557,7 @@ contains
     Gbisect%G => G
     Gbisect%cwght = 0
     allocate(Gbisect%color(0:G%nvtx-1))
-    Gbisect%color = WHITE
+    Gbisect%color = MONOLIS_PORD_WHITE
   end subroutine newGbisect
 
   !===========================================================================
@@ -1583,46 +1583,46 @@ contains
     nvtx = Gbisect%G%nvtx
     allocate(map_(0:nvtx-1))
 
-    call pord_starttimer(cpus(TIME_INITDOMDEC))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_INITDOMDEC))
     allocate(dd_init)
     call constructDomainDecomposition(dd_init, Gbisect%G, map_)
     dd => dd_init
-    call pord_stoptimer(cpus(TIME_INITDOMDEC))
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_INITDOMDEC))
 
-    call pord_starttimer(cpus(TIME_COARSEDOMDEC))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_COARSEDOMDEC))
     nstep = 0
-    do while ((dd%ndom > MIN_DOMAINS) .and. (nstep < MAX_COARSENING_STEPS) .and. &
+    do while ((dd%ndom > MONOLIS_PORD_MIN_DOMAINS) .and. (nstep < MONOLIS_PORD_MAX_COARSENING_STEPS) .and. &
               ((dd%G%nedges/2) > dd%G%nvtx))
-      call shrinkDomainDecomposition(dd, options(OPTION_NODE_SELECTION3))
+      call shrinkDomainDecomposition(dd, options(MONOLIS_PORD_OPTION_NODE_SELECTION3))
       dd => dd%next_ptr
       nstep = nstep + 1
     end do
-    call pord_stoptimer(cpus(TIME_COARSEDOMDEC))
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_COARSEDOMDEC))
 
-    call pord_starttimer(cpus(TIME_INITSEP))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_INITSEP))
     call initialDDSep(dd)
-    if (dd%cwght(GRAY) > 0) call improveDDSep(dd)
-    call pord_stoptimer(cpus(TIME_INITSEP))
+    if (dd%cwght(MONOLIS_PORD_GRAY) > 0) call improveDDSep(dd)
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_INITSEP))
 
-    call pord_starttimer(cpus(TIME_REFINESEP))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_REFINESEP))
     do while (associated(dd%prev))
       dd2 => dd%prev
-      dd2%cwght(GRAY)  = dd%cwght(GRAY)
-      dd2%cwght(BLACK) = dd%cwght(BLACK)
-      dd2%cwght(WHITE) = dd%cwght(WHITE)
+      dd2%cwght(MONOLIS_PORD_GRAY)  = dd%cwght(MONOLIS_PORD_GRAY)
+      dd2%cwght(MONOLIS_PORD_BLACK) = dd%cwght(MONOLIS_PORD_BLACK)
+      dd2%cwght(MONOLIS_PORD_WHITE) = dd%cwght(MONOLIS_PORD_WHITE)
       do u = 0, dd2%G%nvtx-1
         dd2%color(u) = dd%color(dd2%map_(u))
       end do
       call freeDomainDecomposition(dd)
-      if (dd2%cwght(GRAY) > 0) call improveDDSep(dd2)
+      if (dd2%cwght(MONOLIS_PORD_GRAY) > 0) call improveDDSep(dd2)
       dd => dd2
     end do
-    call pord_stoptimer(cpus(TIME_REFINESEP))
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_REFINESEP))
 
     ! copy coloring back to Gbisect
-    Gbisect%cwght(GRAY)  = dd%cwght(GRAY)
-    Gbisect%cwght(BLACK) = dd%cwght(BLACK)
-    Gbisect%cwght(WHITE) = dd%cwght(WHITE)
+    Gbisect%cwght(MONOLIS_PORD_GRAY)  = dd%cwght(MONOLIS_PORD_GRAY)
+    Gbisect%cwght(MONOLIS_PORD_BLACK) = dd%cwght(MONOLIS_PORD_BLACK)
+    Gbisect%cwght(MONOLIS_PORD_WHITE) = dd%cwght(MONOLIS_PORD_WHITE)
     do u = 0, nvtx-1
       Gbisect%color(u) = dd%color(map_(u))
     end do
@@ -1659,7 +1659,7 @@ contains
         y = Gbisect%G%adjncy(j)
         if (Gbisect%color(y) == black) then
           bipartvertex(nX+nY) = y; nY = nY + 1
-          Gbisect%color(y) = GRAY
+          Gbisect%color(y) = MONOLIS_PORD_GRAY
         end if
       end do
     end do
@@ -1673,57 +1673,57 @@ contains
     smoothBy2Layers = .false.
 
     select case (Gbipart%G%gtype)
-      case (UNWEIGHTED)
+      case (MONOLIS_PORD_UNWEIGHTED)
         allocate(matching(0:nX+nY-1))
         call maximumMatching(Gbipart, matching)
         call DMviaMatching(Gbipart, matching, dmflag, dmwght)
         deallocate(matching)
-      case (WEIGHTED)
+      case (MONOLIS_PORD_WEIGHTED)
         allocate(flow(0:Gbipart%G%nedges-1), rc(0:nX+nY-1))
         call maximumFlow(Gbipart, flow, rc)
         call DMviaFlow(Gbipart, flow, rc, dmflag, dmwght)
         deallocate(flow, rc)
     end select
 
-    ! test 1: exchange SI with BX
-    if (eval_sep(Gbisect%cwght(GRAY)-dmwght(SI)+dmwght(BX), &
-                 Gbisect%cwght(black)-dmwght(BX), &
-                 Gbisect%cwght(white)+dmwght(SI)) + EPS &
-        < eval_sep(Gbisect%cwght(GRAY), Gbisect%cwght(black), Gbisect%cwght(white))) then
+    ! test 1: exchange MONOLIS_PORD_SI with MONOLIS_PORD_BX
+    if (eval_sep(Gbisect%cwght(MONOLIS_PORD_GRAY)-dmwght(MONOLIS_PORD_SI)+dmwght(MONOLIS_PORD_BX), &
+                 Gbisect%cwght(black)-dmwght(MONOLIS_PORD_BX), &
+                 Gbisect%cwght(white)+dmwght(MONOLIS_PORD_SI)) + MONOLIS_PORD_EPS &
+        < eval_sep(Gbisect%cwght(MONOLIS_PORD_GRAY), Gbisect%cwght(black), Gbisect%cwght(white))) then
       smoothBy2Layers = .true.
-      Gbisect%cwght(white) = Gbisect%cwght(white) + dmwght(SI)
-      Gbisect%cwght(GRAY)  = Gbisect%cwght(GRAY)  - dmwght(SI)
-      Gbisect%cwght(black) = Gbisect%cwght(black) - dmwght(BX)
-      Gbisect%cwght(GRAY)  = Gbisect%cwght(GRAY)  + dmwght(BX)
+      Gbisect%cwght(white) = Gbisect%cwght(white) + dmwght(MONOLIS_PORD_SI)
+      Gbisect%cwght(MONOLIS_PORD_GRAY)  = Gbisect%cwght(MONOLIS_PORD_GRAY)  - dmwght(MONOLIS_PORD_SI)
+      Gbisect%cwght(black) = Gbisect%cwght(black) - dmwght(MONOLIS_PORD_BX)
+      Gbisect%cwght(MONOLIS_PORD_GRAY)  = Gbisect%cwght(MONOLIS_PORD_GRAY)  + dmwght(MONOLIS_PORD_BX)
       do i = 0, nX+nY-1
         u = bipartvertex(i)
-        if (dmflag(map_(u)) == SI) Gbisect%color(u) = white
-        if (dmflag(map_(u)) == BX) Gbisect%color(u) = GRAY
+        if (dmflag(map_(u)) == MONOLIS_PORD_SI) Gbisect%color(u) = white
+        if (dmflag(map_(u)) == MONOLIS_PORD_BX) Gbisect%color(u) = MONOLIS_PORD_GRAY
       end do
     end if
 
-    ! test 2: exchange SR with BR (allowed if smoothed or SI==0)
-    if ((eval_sep(Gbisect%cwght(GRAY)-dmwght(SR)+dmwght(BR), &
-                  Gbisect%cwght(black)-dmwght(BR), &
-                  Gbisect%cwght(white)+dmwght(SR)) + EPS &
-        < eval_sep(Gbisect%cwght(GRAY), Gbisect%cwght(black), Gbisect%cwght(white))) &
-        .and. (smoothBy2Layers .or. (dmwght(SI) == 0))) then
+    ! test 2: exchange MONOLIS_PORD_SR with MONOLIS_PORD_BR (allowed if smoothed or MONOLIS_PORD_SI==0)
+    if ((eval_sep(Gbisect%cwght(MONOLIS_PORD_GRAY)-dmwght(MONOLIS_PORD_SR)+dmwght(MONOLIS_PORD_BR), &
+                  Gbisect%cwght(black)-dmwght(MONOLIS_PORD_BR), &
+                  Gbisect%cwght(white)+dmwght(MONOLIS_PORD_SR)) + MONOLIS_PORD_EPS &
+        < eval_sep(Gbisect%cwght(MONOLIS_PORD_GRAY), Gbisect%cwght(black), Gbisect%cwght(white))) &
+        .and. (smoothBy2Layers .or. (dmwght(MONOLIS_PORD_SI) == 0))) then
       smoothBy2Layers = .true.
-      Gbisect%cwght(white) = Gbisect%cwght(white) + dmwght(SR)
-      Gbisect%cwght(GRAY)  = Gbisect%cwght(GRAY)  - dmwght(SR)
-      Gbisect%cwght(black) = Gbisect%cwght(black) - dmwght(BR)
-      Gbisect%cwght(GRAY)  = Gbisect%cwght(GRAY)  + dmwght(BR)
+      Gbisect%cwght(white) = Gbisect%cwght(white) + dmwght(MONOLIS_PORD_SR)
+      Gbisect%cwght(MONOLIS_PORD_GRAY)  = Gbisect%cwght(MONOLIS_PORD_GRAY)  - dmwght(MONOLIS_PORD_SR)
+      Gbisect%cwght(black) = Gbisect%cwght(black) - dmwght(MONOLIS_PORD_BR)
+      Gbisect%cwght(MONOLIS_PORD_GRAY)  = Gbisect%cwght(MONOLIS_PORD_GRAY)  + dmwght(MONOLIS_PORD_BR)
       do i = 0, nX+nY-1
         u = bipartvertex(i)
-        if (dmflag(map_(u)) == SR) Gbisect%color(u) = white
-        if (dmflag(map_(u)) == BR) Gbisect%color(u) = GRAY
+        if (dmflag(map_(u)) == MONOLIS_PORD_SR) Gbisect%color(u) = white
+        if (dmflag(map_(u)) == MONOLIS_PORD_BR) Gbisect%color(u) = MONOLIS_PORD_GRAY
       end do
     end if
 
     nX2 = 0
     do i = 0, nX+nY-1
       u = bipartvertex(i)
-      if (Gbisect%color(u) == GRAY) then
+      if (Gbisect%color(u) == MONOLIS_PORD_GRAY) then
         bipartvertex(nX2) = u; nX2 = nX2 + 1
       end if
     end do
@@ -1751,7 +1751,7 @@ contains
 
     nX = 0
     do x = 0, nvtx-1
-      if (Gbisect%color(x) == GRAY) then
+      if (Gbisect%color(x) == MONOLIS_PORD_GRAY) then
         bipartvertex(nX) = x; nX = nX + 1
       end if
     end do
@@ -1759,35 +1759,35 @@ contains
     kept_on = .true.
     do while (kept_on)
       ! minimise separator
-      Gbisect%cwght(GRAY) = 0; nX2 = 0
+      Gbisect%cwght(MONOLIS_PORD_GRAY) = 0; nX2 = 0
       do i = 0, nX-1
         x = bipartvertex(i); a = 0; b = 0
         jstart = Gbisect%G%xadj(x); jstop = Gbisect%G%xadj(x+1)
         do j = jstart, jstop-1
           y = Gbisect%G%adjncy(j)
-          if (Gbisect%color(y) == WHITE) a = 1
-          if (Gbisect%color(y) == BLACK) b = 1
+          if (Gbisect%color(y) == MONOLIS_PORD_WHITE) a = 1
+          if (Gbisect%color(y) == MONOLIS_PORD_BLACK) b = 1
         end do
         if ((a == 1) .and. (b == 0)) then
-          Gbisect%color(x) = WHITE
-          Gbisect%cwght(WHITE) = Gbisect%cwght(WHITE) + Gbisect%G%vwght(x)
+          Gbisect%color(x) = MONOLIS_PORD_WHITE
+          Gbisect%cwght(MONOLIS_PORD_WHITE) = Gbisect%cwght(MONOLIS_PORD_WHITE) + Gbisect%G%vwght(x)
         else if ((a == 0) .and. (b == 1)) then
-          Gbisect%color(x) = BLACK
-          Gbisect%cwght(BLACK) = Gbisect%cwght(BLACK) + Gbisect%G%vwght(x)
+          Gbisect%color(x) = MONOLIS_PORD_BLACK
+          Gbisect%cwght(MONOLIS_PORD_BLACK) = Gbisect%cwght(MONOLIS_PORD_BLACK) + Gbisect%G%vwght(x)
         else
           bipartvertex(nX2) = x; nX2 = nX2 + 1
-          Gbisect%cwght(GRAY) = Gbisect%cwght(GRAY) + Gbisect%G%vwght(x)
+          Gbisect%cwght(MONOLIS_PORD_GRAY) = Gbisect%cwght(MONOLIS_PORD_GRAY) + Gbisect%G%vwght(x)
         end if
       end do
       nX = nX2
 
       ! smooth via bipartite matching/flow
-      if (Gbisect%cwght(BLACK) >= Gbisect%cwght(WHITE)) then
-        tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, BLACK, WHITE)
-        if (.not. tmp_a) tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, WHITE, BLACK)
+      if (Gbisect%cwght(MONOLIS_PORD_BLACK) >= Gbisect%cwght(MONOLIS_PORD_WHITE)) then
+        tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, MONOLIS_PORD_BLACK, MONOLIS_PORD_WHITE)
+        if (.not. tmp_a) tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, MONOLIS_PORD_WHITE, MONOLIS_PORD_BLACK)
       else
-        tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, WHITE, BLACK)
-        if (.not. tmp_a) tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, BLACK, WHITE)
+        tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, MONOLIS_PORD_WHITE, MONOLIS_PORD_BLACK)
+        if (.not. tmp_a) tmp_a = smoothBy2Layers(Gbisect, bipartvertex, nX, MONOLIS_PORD_BLACK, MONOLIS_PORD_WHITE)
       end if
       kept_on = tmp_a
     end do

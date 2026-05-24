@@ -10,102 +10,102 @@ module mod_monolis_pord_const
   implicit none
 
   ! --- matrix/graph topology types (from const.h) ---
-  integer(kint), parameter :: GRID  = 0
-  integer(kint), parameter :: MESH  = 1
-  integer(kint), parameter :: TORUS = 2
-  integer(kint), parameter :: HB    = 3
+  integer(kint), parameter :: MONOLIS_PORD_GRID  = 0
+  integer(kint), parameter :: MONOLIS_PORD_MESH  = 1
+  integer(kint), parameter :: MONOLIS_PORD_TORUS = 2
+  integer(kint), parameter :: MONOLIS_PORD_HB    = 3
 
   ! --- graph types ---
-  integer(kint), parameter :: UNWEIGHTED      = 0
-  integer(kint), parameter :: WEIGHTED        = 1
+  integer(kint), parameter :: MONOLIS_PORD_UNWEIGHTED      = 0
+  integer(kint), parameter :: MONOLIS_PORD_WEIGHTED        = 1
 
   ! --- ordering types ---
-  integer(kint), parameter :: MINIMUM_PRIORITY      = 0
-  integer(kint), parameter :: INCOMPLETE_ND         = 1
-  integer(kint), parameter :: MULTISECTION          = 2
-  integer(kint), parameter :: TRISTAGE_MULTISECTION = 3
+  integer(kint), parameter :: MONOLIS_PORD_MINIMUM_PRIORITY      = 0
+  integer(kint), parameter :: MONOLIS_PORD_INCOMPLETE_ND         = 1
+  integer(kint), parameter :: MONOLIS_PORD_MULTISECTION          = 2
+  integer(kint), parameter :: MONOLIS_PORD_TRISTAGE_MULTISECTION = 3
 
   ! --- node selection strategies (interior ordering) ---
-  integer(kint), parameter :: AMD   = 0
-  integer(kint), parameter :: AMF   = 1
-  integer(kint), parameter :: AMMF  = 2
-  integer(kint), parameter :: AMIND = 3
+  integer(kint), parameter :: MONOLIS_PORD_AMD   = 0
+  integer(kint), parameter :: MONOLIS_PORD_AMF   = 1
+  integer(kint), parameter :: MONOLIS_PORD_AMMF  = 2
+  integer(kint), parameter :: MONOLIS_PORD_AMIND = 3
 
   ! --- node selection strategies (domain decomposition) ---
-  integer(kint), parameter :: QMD   = 0
-  integer(kint), parameter :: QMRDV = 1
-  integer(kint), parameter :: QRAND = 2
+  integer(kint), parameter :: MONOLIS_PORD_QMD   = 0
+  integer(kint), parameter :: MONOLIS_PORD_QMRDV = 1
+  integer(kint), parameter :: MONOLIS_PORD_QRAND = 2
 
   ! --- default options ---
-  integer(kint), parameter :: SPACE_ORDTYPE         = MULTISECTION
-  integer(kint), parameter :: SPACE_NODE_SELECTION1 = AMMF
-  integer(kint), parameter :: SPACE_NODE_SELECTION2 = AMMF
-  integer(kint), parameter :: SPACE_NODE_SELECTION3 = QMRDV
-  integer(kint), parameter :: SPACE_DOMAIN_SIZE     = 200
-  integer(kint), parameter :: SPACE_MSGLVL          = 2
-  integer(kint), parameter :: SPACE_ETREE_NONZ      = 256
-  integer(kint), parameter :: SPACE_ETREE_BAL       = 5
-  integer(kint), parameter :: SPACE_MASK_OFFSET      = 2
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_ORDTYPE         = MONOLIS_PORD_MULTISECTION
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION1 = MONOLIS_PORD_AMMF
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION2 = MONOLIS_PORD_AMMF
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION3 = MONOLIS_PORD_QMRDV
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_DOMAIN_SIZE     = 200
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_MSGLVL          = 2
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_ETREE_NONZ      = 256
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_ETREE_BAL       = 5
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_MASK_OFFSET      = 2
 
   ! --- misc ---
-  integer(kint), parameter :: PORD_TRUE  = 1
-  integer(kint), parameter :: PORD_FALSE = 0
-  integer(kint), parameter :: PORD_ERR   = -1
-  integer(kint), parameter :: PORD_NOERR = 0
-  integer(kint), parameter :: MAX_INT    = 2**30 - 1
-  real(kdouble),    parameter :: MAX_FLOAT  = 1.0e31_kdouble
-  real(kdouble),    parameter :: EPS        = 0.001_kdouble
+  integer(kint), parameter :: MONOLIS_PORD_PORD_TRUE  = 1
+  integer(kint), parameter :: MONOLIS_PORD_PORD_FALSE = 0
+  integer(kint), parameter :: MONOLIS_PORD_PORD_ERR   = -1
+  integer(kint), parameter :: MONOLIS_PORD_PORD_NOERR = 0
+  integer(kint), parameter :: MONOLIS_PORD_MAX_INT    = 2**30 - 1
+  real(kdouble),    parameter :: MONOLIS_PORD_MAX_FLOAT  = 1.0e31_kdouble
+  real(kdouble),    parameter :: MONOLIS_PORD_EPS        = 0.001_kdouble
 
   ! --- color constants (also used as array indices, 0-based) ---
-  integer(kint), parameter :: GRAY  = 0
-  integer(kint), parameter :: BLACK = 1
-  integer(kint), parameter :: WHITE = 2
+  integer(kint), parameter :: MONOLIS_PORD_GRAY  = 0
+  integer(kint), parameter :: MONOLIS_PORD_BLACK = 1
+  integer(kint), parameter :: MONOLIS_PORD_WHITE = 2
 
   ! --- Dulmage-Mendelsohn flags ---
-  integer(kint), parameter :: SI = 0
-  integer(kint), parameter :: SX = 1
-  integer(kint), parameter :: SR = 2
-  integer(kint), parameter :: BI = 3
-  integer(kint), parameter :: BX = 4
-  integer(kint), parameter :: BR = 5
+  integer(kint), parameter :: MONOLIS_PORD_SI = 0
+  integer(kint), parameter :: MONOLIS_PORD_SX = 1
+  integer(kint), parameter :: MONOLIS_PORD_SR = 2
+  integer(kint), parameter :: MONOLIS_PORD_BI = 3
+  integer(kint), parameter :: MONOLIS_PORD_BX = 4
+  integer(kint), parameter :: MONOLIS_PORD_BR = 5
 
   ! --- option array indices (0-based) ---
-  integer(kint), parameter :: ORD_OPTION_SLOTS       = 7
-  integer(kint), parameter :: OPTION_ORDTYPE         = 0
-  integer(kint), parameter :: OPTION_NODE_SELECTION1 = 1
-  integer(kint), parameter :: OPTION_NODE_SELECTION2 = 2
-  integer(kint), parameter :: OPTION_NODE_SELECTION3 = 3
-  integer(kint), parameter :: OPTION_DOMAIN_SIZE      = 4
-  integer(kint), parameter :: OPTION_MSGLVL           = 5
-  integer(kint), parameter :: OPTION_ETREE_NONZ       = 6
+  integer(kint), parameter :: MONOLIS_PORD_ORD_OPTION_SLOTS       = 7
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_ORDTYPE         = 0
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION1 = 1
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION2 = 2
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_NODE_SELECTION3 = 3
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_DOMAIN_SIZE      = 4
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_MSGLVL           = 5
+  integer(kint), parameter :: MONOLIS_PORD_OPTION_ETREE_NONZ       = 6
 
   ! --- timing array indices (0-based) ---
-  integer(kint), parameter :: ORD_TIME_SLOTS    = 12
-  integer(kint), parameter :: TIME_COMPRESS     = 0
-  integer(kint), parameter :: TIME_MS           = 1
-  integer(kint), parameter :: TIME_MULTILEVEL   = 2
-  integer(kint), parameter :: TIME_INITDOMDEC   = 3
-  integer(kint), parameter :: TIME_COARSEDOMDEC = 4
-  integer(kint), parameter :: TIME_INITSEP      = 5
-  integer(kint), parameter :: TIME_REFINESEP    = 6
-  integer(kint), parameter :: TIME_SMOOTH       = 7
-  integer(kint), parameter :: TIME_BOTTOMUP     = 8
-  integer(kint), parameter :: TIME_UPDADJNCY    = 9
-  integer(kint), parameter :: TIME_FINDINODES   = 10
-  integer(kint), parameter :: TIME_UPDSCORE     = 11
+  integer(kint), parameter :: MONOLIS_PORD_ORD_TIME_SLOTS    = 12
+  integer(kint), parameter :: MONOLIS_PORD_TIME_COMPRESS     = 0
+  integer(kint), parameter :: MONOLIS_PORD_TIME_MS           = 1
+  integer(kint), parameter :: MONOLIS_PORD_TIME_MULTILEVEL   = 2
+  integer(kint), parameter :: MONOLIS_PORD_TIME_INITDOMDEC   = 3
+  integer(kint), parameter :: MONOLIS_PORD_TIME_COARSEDOMDEC = 4
+  integer(kint), parameter :: MONOLIS_PORD_TIME_INITSEP      = 5
+  integer(kint), parameter :: MONOLIS_PORD_TIME_REFINESEP    = 6
+  integer(kint), parameter :: MONOLIS_PORD_TIME_SMOOTH       = 7
+  integer(kint), parameter :: MONOLIS_PORD_TIME_BOTTOMUP     = 8
+  integer(kint), parameter :: MONOLIS_PORD_TIME_UPDADJNCY    = 9
+  integer(kint), parameter :: MONOLIS_PORD_TIME_FINDINODES   = 10
+  integer(kint), parameter :: MONOLIS_PORD_TIME_UPDSCORE     = 11
 
   ! --- params.h ---
-  integer(kint), parameter :: MAX_BAD_FLIPS        = 100
-  real(kdouble),    parameter :: COMPRESS_FRACTION     = 0.75_kdouble
-  integer(kint), parameter :: MIN_NODES            = 100
-  integer(kint), parameter :: DEFAULT_SEPS         = 31
-  integer(kint), parameter :: MAX_SEPS             = 255
-  integer(kint), parameter :: MIN_DOMAINS          = 100
-  integer(kint), parameter :: MAX_COARSENING_STEPS = 10
+  integer(kint), parameter :: MONOLIS_PORD_MAX_BAD_FLIPS        = 100
+  real(kdouble),    parameter :: MONOLIS_PORD_COMPRESS_FRACTION     = 0.75_kdouble
+  integer(kint), parameter :: MONOLIS_PORD_MIN_NODES            = 100
+  integer(kint), parameter :: MONOLIS_PORD_DEFAULT_SEPS         = 31
+  integer(kint), parameter :: MONOLIS_PORD_MAX_SEPS             = 255
+  integer(kint), parameter :: MONOLIS_PORD_MIN_DOMAINS          = 100
+  integer(kint), parameter :: MONOLIS_PORD_MAX_COARSENING_STEPS = 10
 
   ! --- eval.h constants (eval1 function) ---
-  real(kdouble), parameter :: TOL1 = 0.50_kdouble
-  real(kdouble), parameter :: PEN1 = 100.0_kdouble
+  real(kdouble), parameter :: MONOLIS_PORD_TOL1 = 0.50_kdouble
+  real(kdouble), parameter :: MONOLIS_PORD_PEN1 = 100.0_kdouble
 
 contains
 
@@ -116,10 +116,10 @@ contains
     integer(kint) :: bmax, bmin
     bmax = max(B, W)
     bmin = min(B, W)
-    ! Match C eval1 exactly: S + PEN1*max(0, max(W,B)*(1-TOL1) - min(W,B))
+    ! Match C eval1 exactly: S + MONOLIS_PORD_PEN1*max(0, max(W,B)*(1-MONOLIS_PORD_TOL1) - min(W,B))
     !                          + (max-min)/max   (all done in floating point)
     eval_sep = real(S, kdouble) &
-             + PEN1 * max(0.0_kdouble, real(bmax, kdouble) * (1.0_kdouble - TOL1) - real(bmin, kdouble)) &
+             + MONOLIS_PORD_PEN1 * max(0.0_kdouble, real(bmax, kdouble) * (1.0_kdouble - MONOLIS_PORD_TOL1) - real(bmin, kdouble)) &
              + real(bmax - bmin, kdouble) / real(max(1_kint, bmax), kdouble)
   end function eval_sep
 
@@ -161,7 +161,7 @@ module mod_monolis_pord_types
   type :: graph_t
     integer(kint) :: nvtx     = 0
     integer(kint) :: nedges   = 0
-    integer(kint) :: gtype    = UNWEIGHTED   ! "type" is reserved in some compilers
+    integer(kint) :: gtype    = MONOLIS_PORD_UNWEIGHTED   ! "type" is reserved in some compilers
     integer(kint) :: totvwght = 0
     integer(kint), allocatable :: xadj(:)    ! 0:nvtx
     integer(kint), allocatable :: adjncy(:)  ! 0:nedges-1  (may grow in gelim)
@@ -191,7 +191,7 @@ module mod_monolis_pord_types
     integer(kint) :: maxitem = 0
     integer(kint) :: offset  = 0
     integer(kint) :: nobj    = 0
-    integer(kint) :: minbin  = 0    ! = MAX_INT when empty
+    integer(kint) :: minbin  = 0    ! = MONOLIS_PORD_MAX_INT when empty
     integer(kint), allocatable :: bin(:)    ! 0:maxbin
     integer(kint), allocatable :: nextp(:)  ! 0:maxitem  (C: next)
     integer(kint), allocatable :: lastp(:)  ! 0:maxitem  (C: last)
@@ -336,7 +336,7 @@ contains
     if (n <= 0) return
 
     ! determine key range
-    minkey = MAX_INT; maxkey = 0
+    minkey = MONOLIS_PORD_MAX_INT; maxkey = 0
     do i = 0, n-1
       u = node(i)
       if (key(u) > maxkey) maxkey = key(u)
@@ -500,7 +500,7 @@ contains
     bucket%maxitem = maxitem
     bucket%offset  = offset
     bucket%nobj    = 0
-    bucket%minbin  = MAX_INT
+    bucket%minbin  = MONOLIS_PORD_MAX_INT
 
     allocate(bucket%bin(0:maxbin))
     allocate(bucket%nextp(0:maxitem))
@@ -513,7 +513,7 @@ contains
     do i = 0, maxitem
       bucket%nextp(i) = -1
       bucket%lastp(i) = -1
-      bucket%key(i)   = MAX_INT
+      bucket%key(i)   = MONOLIS_PORD_MAX_INT
     end do
   end subroutine setupBucket
 
@@ -524,7 +524,7 @@ contains
     if (allocated(bucket%nextp)) deallocate(bucket%nextp)
     if (allocated(bucket%lastp)) deallocate(bucket%lastp)
     if (allocated(bucket%key))   deallocate(bucket%key)
-    bucket%nobj = 0; bucket%minbin = MAX_INT
+    bucket%nobj = 0; bucket%minbin = MONOLIS_PORD_MAX_INT
   end subroutine freeBucket
 
   !===========================================================================
@@ -598,7 +598,7 @@ contains
 
     integer(kint) :: s, previtem, nextitem
 
-    if (bucket%key(item) == MAX_INT) return  ! already not in bucket
+    if (bucket%key(item) == MONOLIS_PORD_MAX_INT) return  ! already not in bucket
 
     s = max(0, bucket%key(item) + bucket%offset)
     s = min(s, bucket%maxbin)
@@ -615,7 +615,7 @@ contains
 
     bucket%nextp(item) = -1
     bucket%lastp(item) = -1
-    bucket%key(item)   = MAX_INT
+    bucket%key(item)   = MONOLIS_PORD_MAX_INT
     bucket%nobj        = bucket%nobj - 1
   end subroutine removeBucket
 

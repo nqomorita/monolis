@@ -124,26 +124,26 @@ contains
 
     call newGbisect(Gbisect, Gptr)
 
-    call pord_starttimer(cpus(TIME_MULTILEVEL))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_MULTILEVEL))
     call constructSeparator(Gbisect, options, cpus)
-    call pord_stoptimer(cpus(TIME_MULTILEVEL))
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_MULTILEVEL))
 
-    call pord_starttimer(cpus(TIME_SMOOTH))
-    if (Gbisect%cwght(GRAY) > 0) call smoothSeparator(Gbisect, options)
-    call pord_stoptimer(cpus(TIME_SMOOTH))
+    call pord_starttimer(cpus(MONOLIS_PORD_TIME_SMOOTH))
+    if (Gbisect%cwght(MONOLIS_PORD_GRAY) > 0) call smoothSeparator(Gbisect, options)
+    call pord_stoptimer(cpus(MONOLIS_PORD_TIME_SMOOTH))
 
     ! copy bisection back
-    nd%cwght(GRAY)  = Gbisect%cwght(GRAY)
-    nd%cwght(BLACK) = Gbisect%cwght(BLACK)
-    nd%cwght(WHITE) = Gbisect%cwght(WHITE)
+    nd%cwght(MONOLIS_PORD_GRAY)  = Gbisect%cwght(MONOLIS_PORD_GRAY)
+    nd%cwght(MONOLIS_PORD_BLACK) = Gbisect%cwght(MONOLIS_PORD_BLACK)
+    nd%cwght(MONOLIS_PORD_WHITE) = Gbisect%cwght(MONOLIS_PORD_WHITE)
 
     b_nvint = 0; w_nvint = 0
     do i = 0, nvint-1
       u = nd%intvertex(i)
       nd%intcolor(i) = Gbisect%color(map_arr(u))
       select case (nd%intcolor(i))
-        case (BLACK); b_nvint = b_nvint + 1
-        case (WHITE); w_nvint = w_nvint + 1
+        case (MONOLIS_PORD_BLACK); b_nvint = b_nvint + 1
+        case (MONOLIS_PORD_WHITE); w_nvint = w_nvint + 1
       end select
     end do
 
@@ -152,9 +152,9 @@ contains
     b_nvint = 0; w_nvint = 0
     do i = 0, nvint-1
       u = nd%intvertex(i)
-      if (nd%intcolor(i) == BLACK) then
+      if (nd%intcolor(i) == MONOLIS_PORD_BLACK) then
         b_intv(b_nvint) = u; b_nvint = b_nvint + 1
-      else if (nd%intcolor(i) == WHITE) then
+      else if (nd%intcolor(i) == MONOLIS_PORD_WHITE) then
         w_intv(w_nvint) = u; w_nvint = w_nvint + 1
       end if
     end do
@@ -195,11 +195,11 @@ contains
     type(nestdiss_t), pointer   :: nd
     integer(kint) :: maxseps, seps, domainsize, qhead, qtail, qsize
 
-    maxseps    = MAX_SEPS
-    domainsize = options(OPTION_DOMAIN_SIZE)
-    if (domainsize == 1) maxseps = DEFAULT_SEPS
+    maxseps    = MONOLIS_PORD_MAX_SEPS
+    domainsize = options(MONOLIS_PORD_OPTION_DOMAIN_SIZE)
+    if (domainsize == 1) maxseps = MONOLIS_PORD_DEFAULT_SEPS
 
-    qsize = 2*MAX_SEPS + 2
+    qsize = 2*MONOLIS_PORD_MAX_SEPS + 2
     allocate(queue(0:qsize-1))
     queue(0)%p => ndroot
     qhead = 0; qtail = 1; seps = 0
@@ -210,18 +210,18 @@ contains
 
       call splitNDnode(nd, map_arr, options, cpus)
 
-      if (options(OPTION_MSGLVL) > 1) then
+      if (options(MONOLIS_PORD_OPTION_MSGLVL) > 1) then
         write(*,'(I4,A,I6,A,I6,A,I6)') &
-          seps, '. S ', nd%cwght(GRAY), ', B ', nd%cwght(BLACK), &
-          ', W ', nd%cwght(WHITE)
+          seps, '. S ', nd%cwght(MONOLIS_PORD_GRAY), ', B ', nd%cwght(MONOLIS_PORD_BLACK), &
+          ', W ', nd%cwght(MONOLIS_PORD_WHITE)
       end if
 
-      if ((nd%childB%nvint > MIN_NODES) .and. &
-          ((nd%cwght(BLACK) > domainsize) .or. (qtail < DEFAULT_SEPS))) then
+      if ((nd%childB%nvint > MONOLIS_PORD_MIN_NODES) .and. &
+          ((nd%cwght(MONOLIS_PORD_BLACK) > domainsize) .or. (qtail < MONOLIS_PORD_DEFAULT_SEPS))) then
         queue(qtail)%p => nd%childB; qtail = qtail + 1
       end if
-      if ((nd%childW%nvint > MIN_NODES) .and. &
-          ((nd%cwght(WHITE) > domainsize) .or. (qtail < DEFAULT_SEPS))) then
+      if ((nd%childW%nvint > MONOLIS_PORD_MIN_NODES) .and. &
+          ((nd%cwght(MONOLIS_PORD_WHITE) > domainsize) .or. (qtail < MONOLIS_PORD_DEFAULT_SEPS))) then
         queue(qtail)%p => nd%childW; qtail = qtail + 1
       end if
     end do
@@ -294,25 +294,25 @@ contains
 
     nvtx = G%nvtx
 
-    if ((nvtx <= MIN_NODES) .and. (options(OPTION_ORDTYPE) /= MINIMUM_PRIORITY) &
-        .and. (options(OPTION_MSGLVL) > 0)) then
+    if ((nvtx <= MONOLIS_PORD_MIN_NODES) .and. (options(MONOLIS_PORD_OPTION_ORDTYPE) /= MONOLIS_PORD_MINIMUM_PRIORITY) &
+        .and. (options(MONOLIS_PORD_OPTION_MSGLVL) > 0)) then
       write(*,'(A,I0,A)') &
-        "Warning in constructMultisector: graph has less than ", MIN_NODES, &
-        " nodes, using MINIMUM_PRIORITY"
-      options(OPTION_ORDTYPE) = MINIMUM_PRIORITY
+        "Warning in constructMultisector: graph has less than ", MONOLIS_PORD_MIN_NODES, &
+        " nodes, using MONOLIS_PORD_MINIMUM_PRIORITY"
+      options(MONOLIS_PORD_OPTION_ORDTYPE) = MONOLIS_PORD_MINIMUM_PRIORITY
     end if
 
-    ordtype = options(OPTION_ORDTYPE)
+    ordtype = options(MONOLIS_PORD_OPTION_ORDTYPE)
 
     select case (ordtype)
-      case (MINIMUM_PRIORITY)
+      case (MONOLIS_PORD_MINIMUM_PRIORITY)
         call trivialMultisector(ms, G)
 
-      case (INCOMPLETE_ND, MULTISECTION, TRISTAGE_MULTISECTION)
+      case (MONOLIS_PORD_INCOMPLETE_ND, MONOLIS_PORD_MULTISECTION, MONOLIS_PORD_TRISTAGE_MULTISECTION)
         allocate(map_arr(0:nvtx-1))
         call setupNDroot(ndroot, G, map_arr, nvtx)
         call buildNDtree(ndroot, map_arr, options, cpus)
-        if (ordtype == MULTISECTION) then
+        if (ordtype == MONOLIS_PORD_MULTISECTION) then
           call extractMS2stage(ms, ndroot, G)
         else
           call extractMSmultistage(ms, ndroot, G)
@@ -355,10 +355,10 @@ contains
       else
         ! right subtree visited; move up to parent and process its separator
         nd => parent_nd
-        totmswght = totmswght + nd%cwght(GRAY)
+        totmswght = totmswght + nd%cwght(MONOLIS_PORD_GRAY)
         nvint = nd%nvint
         do i = 0, nvint-1
-          if (nd%intcolor(i) == GRAY) then
+          if (nd%intcolor(i) == MONOLIS_PORD_GRAY) then
             nnodes = nnodes + 1
             ms%stage(nd%intvertex(i)) = 1
           end if
@@ -398,10 +398,10 @@ contains
         nd => parent_nd
         istage = nd%depth + 1
         if (istage > maxstage) maxstage = istage
-        totmswght = totmswght + nd%cwght(GRAY)
+        totmswght = totmswght + nd%cwght(MONOLIS_PORD_GRAY)
         nvint = nd%nvint
         do i = 0, nvint-1
-          if (nd%intcolor(i) == GRAY) then
+          if (nd%intcolor(i) == MONOLIS_PORD_GRAY) then
             nnodes = nnodes + 1
             ms%stage(nd%intvertex(i)) = istage
           end if

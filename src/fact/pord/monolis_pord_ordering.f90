@@ -10,9 +10,9 @@
 !   monolis_pord_ordering(G_in, options, use_defaults, T)
 !     Computes an ordering for graph G_in and returns an elimination tree T.
 !     options(1..6) maps to internal opts(0..5):
-!       options(1)=OPTION_ORDTYPE, (2)=OPTION_NODE_SELECTION1,
-!       (3)=OPTION_NODE_SELECTION2, (4)=OPTION_NODE_SELECTION3,
-!       (5)=OPTION_DOMAIN_SIZE, (6)=OPTION_MSGLVL
+!       options(1)=MONOLIS_PORD_OPTION_ORDTYPE, (2)=MONOLIS_PORD_OPTION_NODE_SELECTION1,
+!       (3)=MONOLIS_PORD_OPTION_NODE_SELECTION2, (4)=MONOLIS_PORD_OPTION_NODE_SELECTION3,
+!       (5)=MONOLIS_PORD_OPTION_DOMAIN_SIZE, (6)=MONOLIS_PORD_OPTION_MSGLVL
 !     use_defaults: if .true., options(:) is ignored.
 !     T: caller must call freeElimTree when done.
 !
@@ -46,8 +46,8 @@ contains
     ! -----------------------------------------------------------------------
     ! Local variables
     ! -----------------------------------------------------------------------
-    integer(kint) :: opts(0:ORD_OPTION_SLOTS-1)
-    real(kdouble)    :: cpusOrd(0:ORD_TIME_SLOTS-1)
+    integer(kint) :: opts(0:MONOLIS_PORD_ORD_OPTION_SLOTS-1)
+    real(kdouble)    :: cpusOrd(0:MONOLIS_PORD_ORD_TIME_SLOTS-1)
 
     ! Gwork is the graph used for ordering (either Gc or a copy of G_in).
     ! We keep it heap-allocated so that ms%G and minprior%ms%G remain valid.
@@ -71,21 +71,21 @@ contains
     ! 1. Set options
     ! -----------------------------------------------------------------------
     if (use_defaults) then
-      opts(OPTION_ORDTYPE)         = SPACE_ORDTYPE
-      opts(OPTION_NODE_SELECTION1) = SPACE_NODE_SELECTION1
-      opts(OPTION_NODE_SELECTION2) = SPACE_NODE_SELECTION2
-      opts(OPTION_NODE_SELECTION3) = SPACE_NODE_SELECTION3
-      opts(OPTION_DOMAIN_SIZE)     = SPACE_DOMAIN_SIZE
-      opts(OPTION_MSGLVL)          = SPACE_MSGLVL
+      opts(MONOLIS_PORD_OPTION_ORDTYPE)         = MONOLIS_PORD_SPACE_ORDTYPE
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION1) = MONOLIS_PORD_SPACE_NODE_SELECTION1
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION2) = MONOLIS_PORD_SPACE_NODE_SELECTION2
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION3) = MONOLIS_PORD_SPACE_NODE_SELECTION3
+      opts(MONOLIS_PORD_OPTION_DOMAIN_SIZE)     = MONOLIS_PORD_SPACE_DOMAIN_SIZE
+      opts(MONOLIS_PORD_OPTION_MSGLVL)          = MONOLIS_PORD_SPACE_MSGLVL
     else
-      opts(OPTION_ORDTYPE)         = options(1)
-      opts(OPTION_NODE_SELECTION1) = options(2)
-      opts(OPTION_NODE_SELECTION2) = options(3)
-      opts(OPTION_NODE_SELECTION3) = options(4)
-      opts(OPTION_DOMAIN_SIZE)     = options(5)
-      opts(OPTION_MSGLVL)          = options(6)
+      opts(MONOLIS_PORD_OPTION_ORDTYPE)         = options(1)
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION1) = options(2)
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION2) = options(3)
+      opts(MONOLIS_PORD_OPTION_NODE_SELECTION3) = options(4)
+      opts(MONOLIS_PORD_OPTION_DOMAIN_SIZE)     = options(5)
+      opts(MONOLIS_PORD_OPTION_MSGLVL)          = options(6)
     end if
-    msglvl = opts(OPTION_MSGLVL)
+    msglvl = opts(MONOLIS_PORD_OPTION_MSGLVL)
     cpusOrd = 0.0_kdouble
 
     ! -----------------------------------------------------------------------
@@ -97,9 +97,9 @@ contains
     allocate(vtxmap(0:nvtx_G-1))
     allocate(Gwork)
 
-    call pord_starttimer(cpusOrd(TIME_COMPRESS))
+    call pord_starttimer(cpusOrd(MONOLIS_PORD_TIME_COMPRESS))
     call compressGraph(Gwork, G_in, vtxmap, compressed)
-    call pord_stoptimer(cpusOrd(TIME_COMPRESS))
+    call pord_stoptimer(cpusOrd(MONOLIS_PORD_TIME_COMPRESS))
 
     if (.not. compressed) then
       ! compressGraph left Gwork uninitialised; fill it with a copy of G_in
@@ -118,9 +118,9 @@ contains
     ! 3. Compute multisector
     !    opts may be modified (ORDTYPE downgrade) inside constructMultisector.
     ! -----------------------------------------------------------------------
-    call pord_starttimer(cpusOrd(TIME_MS))
+    call pord_starttimer(cpusOrd(MONOLIS_PORD_TIME_MS))
     call constructMultisector(ms, Gwork, opts, cpusOrd)
-    call pord_stoptimer(cpusOrd(TIME_MS))
+    call pord_stoptimer(cpusOrd(MONOLIS_PORD_TIME_MS))
 
     if (msglvl > 0) then
       write(*,'(A,I0,A,I0,A,I0)') &
@@ -133,10 +133,10 @@ contains
     ! 4. Minimum-priority ordering
     !    ms is declared TARGET so minprior%ms remains valid after the call.
     ! -----------------------------------------------------------------------
-    call pord_starttimer(cpusOrd(TIME_BOTTOMUP))
+    call pord_starttimer(cpusOrd(MONOLIS_PORD_TIME_BOTTOMUP))
     call setupMinPriority(minprior, ms)
     call orderMinPriority(T_inner, minprior, opts, cpusOrd)
-    call pord_stoptimer(cpusOrd(TIME_BOTTOMUP))
+    call pord_stoptimer(cpusOrd(MONOLIS_PORD_TIME_BOTTOMUP))
 
     if (msglvl > 0) then
       call stageinfo_sum(minprior, ms%nstages, totnstep, totnzf, totops)
