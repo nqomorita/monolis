@@ -28,11 +28,11 @@ contains
   subroutine setupBipartiteGraph(Gbipart, G, bipartvertex, nX, nY, vtxmap)
     type(gbipart_t), intent(out)   :: Gbipart
     type(graph_t),   intent(in)    :: G
-    integer(ip),     intent(in)    :: nX, nY
-    integer(ip),     intent(inout) :: bipartvertex(0:nX+nY-1)
-    integer(ip),     intent(inout) :: vtxmap(0:G%nvtx-1)
+    integer(kint),     intent(in)    :: nX, nY
+    integer(kint),     intent(inout) :: bipartvertex(0:nX+nY-1)
+    integer(kint),     intent(inout) :: vtxmap(0:G%nvtx-1)
 
-    integer(ip) :: nedgesGb, totvwght, u, x, y, i, j, jstart, jstop, ptr
+    integer(kint) :: nedgesGb, totvwght, u, x, y, i, j, jstart, jstop, ptr
 
     nedgesGb = 0
     do i = 0, nX+nY-1
@@ -88,11 +88,11 @@ contains
   !===========================================================================
   subroutine maximumMatching(Gbipart, matching)
     type(gbipart_t), intent(in)  :: Gbipart
-    integer(ip),     intent(out) :: matching(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: matching(0:Gbipart%nX+Gbipart%nY-1)
 
-    integer(ip) :: nX, nY, nXY, x, x2, y, y2, i, istart, istop
-    integer(ip) :: qhead, qtail, max_level, top, top2
-    integer(ip), allocatable :: level(:), marker(:), queue(:), stack(:)
+    integer(kint) :: nX, nY, nXY, x, x2, y, y2, i, istart, istop
+    integer(kint) :: qhead, qtail, max_level, top, top2
+    integer(kint), allocatable :: level(:), marker(:), queue(:), stack(:)
 
     nX = Gbipart%nX; nY = Gbipart%nY; nXY = nX + nY
     allocate(level(0:nXY-1), marker(0:nXY-1))
@@ -187,13 +187,13 @@ contains
   !===========================================================================
   subroutine maximumFlow(Gbipart, flow, rc)
     type(gbipart_t), intent(in)  :: Gbipart
-    integer(ip),     intent(out) :: flow(0:Gbipart%G%nedges-1)
-    integer(ip),     intent(out) :: rc(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: flow(0:Gbipart%G%nedges-1)
+    integer(kint),     intent(out) :: rc(0:Gbipart%nX+Gbipart%nY-1)
 
-    integer(ip) :: nedges, nX, nY, nXY
-    integer(ip) :: u, v, x, y, j, jj, i, istart, istop
-    integer(ip) :: qhead, qtail, capacity
-    integer(ip), allocatable :: parent(:), marker(:), queue(:)
+    integer(kint) :: nedges, nX, nY, nXY
+    integer(kint) :: u, v, x, y, j, jj, i, istart, istop
+    integer(kint) :: qhead, qtail, capacity
+    integer(kint), allocatable :: parent(:), marker(:), queue(:)
 
     nedges = Gbipart%G%nedges
     nX = Gbipart%nX; nY = Gbipart%nY; nXY = nX + nY
@@ -289,13 +289,13 @@ contains
   !===========================================================================
   subroutine DMviaMatching(Gbipart, matching, dmflag, dmwght)
     type(gbipart_t), intent(in)  :: Gbipart
-    integer(ip),     intent(in)  :: matching(0:Gbipart%nX+Gbipart%nY-1)
-    integer(ip),     intent(out) :: dmflag(0:Gbipart%nX+Gbipart%nY-1)
-    integer(ip),     intent(out) :: dmwght(0:5)
+    integer(kint),     intent(in)  :: matching(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: dmflag(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: dmwght(0:5)
 
-    integer(ip) :: nX, nY, nXY, u, x, y, i, istart, istop
-    integer(ip) :: qhead, qtail
-    integer(ip), allocatable :: queue(:)
+    integer(kint) :: nX, nY, nXY, u, x, y, i, istart, istop
+    integer(kint) :: qhead, qtail
+    integer(kint), allocatable :: queue(:)
 
     nX = Gbipart%nX; nY = Gbipart%nY; nXY = nX + nY
     allocate(queue(0:nXY-1))
@@ -362,18 +362,18 @@ contains
   !===========================================================================
   subroutine DMviaFlow(Gbipart, flow, rc, dmflag, dmwght)
     type(gbipart_t), intent(in)  :: Gbipart
-    integer(ip),     intent(in)  :: flow(0:Gbipart%G%nedges-1)
-    integer(ip),     intent(in)  :: rc(0:Gbipart%nX+Gbipart%nY-1)
-    integer(ip),     intent(out) :: dmflag(0:Gbipart%nX+Gbipart%nY-1)
-    integer(ip),     intent(out) :: dmwght(0:5)
+    integer(kint),     intent(in)  :: flow(0:Gbipart%G%nedges-1)
+    integer(kint),     intent(in)  :: rc(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: dmflag(0:Gbipart%nX+Gbipart%nY-1)
+    integer(kint),     intent(out) :: dmwght(0:5)
 
-    integer(ip), parameter :: TAG_FREE   = -1
-    integer(ip), parameter :: TAG_SOURCE = -2
-    integer(ip), parameter :: TAG_SINK   = -3
+    integer(kint), parameter :: TAG_FREE   = -1
+    integer(kint), parameter :: TAG_SOURCE = -2
+    integer(kint), parameter :: TAG_SINK   = -3
 
-    integer(ip) :: nX, nY, nXY, u, v, x, y, i, istart, istop
-    integer(ip) :: qhead, qtail
-    integer(ip), allocatable :: queue(:)
+    integer(kint) :: nX, nY, nXY, u, v, x, y, i, istart, istop
+    integer(kint) :: qhead, qtail
+    integer(kint), allocatable :: queue(:)
 
     nX = Gbipart%nX; nY = Gbipart%nY; nXY = nX + nY
     allocate(queue(0:nXY-1))
@@ -468,13 +468,13 @@ contains
   !===========================================================================
   ! findPseudoPeripheralDomain
   !===========================================================================
-  integer(ip) function findPseudoPeripheralDomain(dd, domain_in)
+  integer(kint) function findPseudoPeripheralDomain(dd, domain_in)
     type(domdec_t), intent(in)  :: dd
-    integer(ip),    intent(in)  :: domain_in
+    integer(kint),    intent(in)  :: domain_in
 
-    integer(ip) :: nvtx, qhead, qtail, nlev, lastdomain, u, v, i, istart, istop
-    integer(ip) :: domain
-    integer(ip), allocatable :: level(:), queue(:)
+    integer(kint) :: nvtx, qhead, qtail, nlev, lastdomain, u, v, i, istart, istop
+    integer(kint) :: domain
+    integer(kint), allocatable :: level(:), queue(:)
 
     nvtx = dd%G%nvtx
     allocate(level(0:nvtx-1), queue(0:nvtx-1))
@@ -513,12 +513,12 @@ contains
   !===========================================================================
   subroutine constructLevelSep(dd, domain)
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: domain
+    integer(kint),    intent(in)    :: domain
 
-    integer(ip) :: nvtx, bestvalue, weight, dS, dB, dW
-    integer(ip) :: qhead, qtail, qopt, q, u, v, w
-    integer(ip) :: i, istart, istop, j, jstart, jstop
-    integer(ip), allocatable :: queue(:), deltaS(:), deltaB(:), deltaW(:)
+    integer(kint) :: nvtx, bestvalue, weight, dS, dB, dW
+    integer(kint) :: qhead, qtail, qopt, q, u, v, w
+    integer(kint) :: i, istart, istop, j, jstart, jstop
+    integer(kint), allocatable :: queue(:), deltaS(:), deltaB(:), deltaW(:)
 
     nvtx = dd%G%nvtx
     allocate(queue(0:nvtx-1), deltaS(0:nvtx-1), deltaB(0:nvtx-1), deltaW(0:nvtx-1))
@@ -607,7 +607,7 @@ contains
   subroutine initialDDSep(dd)
     type(domdec_t), intent(inout) :: dd
 
-    integer(ip) :: nvtx, totvwght, domain, u
+    integer(kint) :: nvtx, totvwght, domain, u
 
     nvtx     = dd%G%nvtx
     totvwght = dd%G%totvwght
@@ -634,13 +634,13 @@ contains
   subroutine updateB2W(w_bucket, b_bucket, dd, domain, tmp_color, deltaW, deltaB, deltaS)
     type(bucket_t), intent(inout) :: w_bucket, b_bucket
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: domain
-    integer(ip),    intent(inout) :: tmp_color(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaW(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaB(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaS(0:dd%G%nvtx-1)
+    integer(kint),    intent(in)    :: domain
+    integer(kint),    intent(inout) :: tmp_color(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaW(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaB(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaS(0:dd%G%nvtx-1)
 
-    integer(ip) :: weight, u, v, i, istart, istop, j, jstart, jstop
+    integer(kint) :: weight, u, v, i, istart, istop, j, jstart, jstop
 
     istart = dd%G%xadj(domain); istop = dd%G%xadj(domain+1)
     do i = istart, istop-1
@@ -694,13 +694,13 @@ contains
   subroutine updateW2B(w_bucket, b_bucket, dd, domain, tmp_color, deltaW, deltaB, deltaS)
     type(bucket_t), intent(inout) :: w_bucket, b_bucket
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: domain
-    integer(ip),    intent(inout) :: tmp_color(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaW(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaB(0:dd%G%nvtx-1)
-    integer(ip),    intent(inout) :: deltaS(0:dd%G%nvtx-1)
+    integer(kint),    intent(in)    :: domain
+    integer(kint),    intent(inout) :: tmp_color(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaW(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaB(0:dd%G%nvtx-1)
+    integer(kint),    intent(inout) :: deltaS(0:dd%G%nvtx-1)
 
-    integer(ip) :: weight, u, v, i, istart, istop, j, jstart, jstop
+    integer(kint) :: weight, u, v, i, istart, istop, j, jstart, jstop
 
     istart = dd%G%xadj(domain); istop = dd%G%xadj(domain+1)
     do i = istart, istop-1
@@ -758,11 +758,11 @@ contains
     type(domdec_t), intent(inout) :: dd
 
     type(bucket_t) :: b_bucket, w_bucket
-    integer(ip) :: nvtx, weight, tmp_S, tmp_B, tmp_W
-    integer(ip) :: pos, bestglobalpos, badflips, b_domain, w_domain, domain, nxtdomain
-    integer(ip) :: fhead, ftail, u, v, i, istart, istop
-    real(dp)    :: bestglobalvalue, b_value, w_value, value
-    integer(ip), allocatable :: tmp_color(:), deltaS(:), deltaB(:), deltaW(:)
+    integer(kint) :: nvtx, weight, tmp_S, tmp_B, tmp_W
+    integer(kint) :: pos, bestglobalpos, badflips, b_domain, w_domain, domain, nxtdomain
+    integer(kint) :: fhead, ftail, u, v, i, istart, istop
+    real(kdouble)    :: bestglobalvalue, b_value, w_value, value
+    integer(kint), allocatable :: tmp_color(:), deltaS(:), deltaB(:), deltaW(:)
 
     nvtx = dd%G%nvtx
     allocate(tmp_color(0:nvtx-1), deltaS(0:nvtx-1), deltaB(0:nvtx-1), deltaW(0:nvtx-1))
@@ -939,7 +939,7 @@ contains
   !===========================================================================
   subroutine newDomainDecomposition(dd, nvtx, nedges)
     type(domdec_t), pointer, intent(inout) :: dd
-    integer(ip),    intent(in)  :: nvtx, nedges
+    integer(kint),    intent(in)  :: nvtx, nedges
 
     call newGraph(dd%G, nvtx, nedges)
     dd%ndom = 0; dd%domwght = 0
@@ -965,11 +965,11 @@ contains
   !===========================================================================
   subroutine buildInitialDomains(G, vtxlist, vtype, rep)
     type(graph_t), intent(in)    :: G
-    integer(ip),   intent(in)    :: vtxlist(0:G%nvtx-1)
-    integer(ip),   intent(inout) :: vtype(0:G%nvtx-1)
-    integer(ip),   intent(inout) :: rep(0:G%nvtx-1)
+    integer(kint),   intent(in)    :: vtxlist(0:G%nvtx-1)
+    integer(kint),   intent(inout) :: vtype(0:G%nvtx-1)
+    integer(kint),   intent(inout) :: rep(0:G%nvtx-1)
 
-    integer(ip) :: nvtx, u, v, w, i, j, jstart, jstop
+    integer(kint) :: nvtx, u, v, w, i, j, jstart, jstop
 
     nvtx = G%nvtx
 
@@ -1010,12 +1010,12 @@ contains
   !===========================================================================
   subroutine mergeMultisecs(G, vtype, rep)
     type(graph_t), intent(in)    :: G
-    integer(ip),   intent(inout) :: vtype(0:G%nvtx-1)
-    integer(ip),   intent(inout) :: rep(0:G%nvtx-1)
+    integer(kint),   intent(inout) :: vtype(0:G%nvtx-1)
+    integer(kint),   intent(inout) :: rep(0:G%nvtx-1)
 
-    integer(ip) :: nvtx, u, v, w, x, flag, keepon
-    integer(ip) :: qhead, qtail, i, istart, istop, j, jstart, jstop
-    integer(ip), allocatable :: tmp(:), queue(:)
+    integer(kint) :: nvtx, u, v, w, x, flag, keepon
+    integer(kint) :: qhead, qtail, i, istart, istop, j, jstart, jstop
+    integer(kint), allocatable :: tmp(:), queue(:)
 
     nvtx = G%nvtx
     allocate(tmp(0:nvtx-1), queue(0:nvtx-1))
@@ -1071,14 +1071,14 @@ contains
   subroutine initialDomainDecomposition(dd_out, G, map_, vtype, rep)
     type(domdec_t), pointer, intent(inout) :: dd_out
     type(graph_t),  intent(in)  :: G
-    integer(ip),    intent(out) :: map_(0:G%nvtx-1)
-    integer(ip),    intent(in)  :: vtype(0:G%nvtx-1)
-    integer(ip),    intent(in)  :: rep(0:G%nvtx-1)
+    integer(kint),    intent(out) :: map_(0:G%nvtx-1)
+    integer(kint),    intent(in)  :: vtype(0:G%nvtx-1)
+    integer(kint),    intent(in)  :: rep(0:G%nvtx-1)
 
-    integer(ip) :: nvtx, nedges, u, v, w
-    integer(ip) :: nvtxdd, nedgesdd, ndom, domwght, flag
-    integer(ip) :: i, j, jstart, jstop
-    integer(ip), allocatable :: tmp(:), bin(:)
+    integer(kint) :: nvtx, nedges, u, v, w
+    integer(kint) :: nvtxdd, nedgesdd, ndom, domwght, flag
+    integer(kint) :: i, j, jstart, jstop
+    integer(kint), allocatable :: tmp(:), bin(:)
 
     nvtx   = G%nvtx
     nedges = G%nedges
@@ -1150,10 +1150,10 @@ contains
   subroutine constructDomainDecomposition(dd_out, G, map_)
     type(domdec_t), pointer, intent(inout) :: dd_out
     type(graph_t),  intent(in)  :: G
-    integer(ip),    intent(out) :: map_(0:G%nvtx-1)
+    integer(kint),    intent(out) :: map_(0:G%nvtx-1)
 
-    integer(ip) :: nvtx, deg, u, i, istart, istop
-    integer(ip), allocatable :: vtxlist(:), key(:), vtype(:), rep(:)
+    integer(kint) :: nvtx, deg, u, i, istart, istop
+    integer(kint), allocatable :: vtxlist(:), key(:), vtype(:), rep(:)
 
     nvtx = G%nvtx
     allocate(vtxlist(0:nvtx-1), key(0:nvtx-1))
@@ -1193,13 +1193,13 @@ contains
   !===========================================================================
   subroutine computePriorities(dd, msvtxlist, key, scoretype)
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: msvtxlist(0:*)
-    integer(ip),    intent(out)   :: key(0:dd%G%nvtx-1)
-    integer(ip),    intent(in)    :: scoretype
+    integer(kint),    intent(in)    :: msvtxlist(0:*)
+    integer(kint),    intent(out)   :: key(0:dd%G%nvtx-1)
+    integer(kint),    intent(in)    :: scoretype
 
-    integer(ip) :: nvtx, nlist, k, weight, deg, u, v, w
-    integer(ip) :: i, istart, istop, j, jstart, jstop
-    integer(ip), allocatable :: marker(:)
+    integer(kint) :: nvtx, nlist, k, weight, deg, u, v, w
+    integer(kint) :: i, istart, istop, j, jstart, jstop
+    integer(kint), allocatable :: marker(:)
 
     nvtx  = dd%G%nvtx
     nlist = nvtx - dd%ndom
@@ -1250,8 +1250,8 @@ contains
   end subroutine computePriorities
 
   subroutine random_number_int(k, range)
-    integer(ip), intent(out) :: k
-    integer(ip), intent(in)  :: range
+    integer(kint), intent(out) :: k
+    integer(kint), intent(in)  :: range
     real :: r
     call random_number(r)
     k = int(r * real(range))
@@ -1262,10 +1262,10 @@ contains
   !===========================================================================
   subroutine eliminateMultisecs(dd, msvtxlist, rep)
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: msvtxlist(0:*)
-    integer(ip),    intent(inout) :: rep(0:dd%G%nvtx-1)
+    integer(kint),    intent(in)    :: msvtxlist(0:*)
+    integer(kint),    intent(inout) :: rep(0:dd%G%nvtx-1)
 
-    integer(ip) :: nvtx, nlist, keepon, u, v, w, k, i, istart, istop
+    integer(kint) :: nvtx, nlist, keepon, u, v, w, k, i, istart, istop
 
     nvtx  = dd%G%nvtx
     nlist = nvtx - dd%ndom
@@ -1310,13 +1310,13 @@ contains
   !===========================================================================
   subroutine findIndMultisecs(dd, msvtxlist, rep)
     type(domdec_t), intent(inout) :: dd
-    integer(ip),    intent(in)    :: msvtxlist(0:*)
-    integer(ip),    intent(inout) :: rep(0:dd%G%nvtx-1)
+    integer(kint),    intent(in)    :: msvtxlist(0:*)
+    integer(kint),    intent(inout) :: rep(0:dd%G%nvtx-1)
 
-    integer(ip) :: nvtx, nlist, flag, keepon, deg, chk, u, v, k
-    integer(ip) :: ulast, i, istart, istop
-    integer(ip), allocatable :: tmp(:), bin(:), nextn(:), key(:)
-    integer(ip), allocatable :: checksum(:)
+    integer(kint) :: nvtx, nlist, flag, keepon, deg, chk, u, v, k
+    integer(kint) :: ulast, i, istart, istop
+    integer(kint), allocatable :: tmp(:), bin(:), nextn(:), key(:)
+    integer(kint), allocatable :: checksum(:)
 
     nvtx  = dd%G%nvtx
     nlist = nvtx - dd%ndom
@@ -1382,11 +1382,11 @@ contains
   subroutine coarserDomainDecomposition(dd2_out, dd1, rep)
     type(domdec_t), pointer, intent(out)   :: dd2_out
     type(domdec_t), pointer, intent(inout) :: dd1
-    integer(ip),    intent(in)             :: rep(0:dd1%G%nvtx-1)
+    integer(kint),    intent(in)             :: rep(0:dd1%G%nvtx-1)
 
-    integer(ip) :: nvtxdd1, nedgesdd1, nvtxdd2, nedgesdd2
-    integer(ip) :: ndom, domwght, flag, u, v, w, i, istart, istop
-    integer(ip), allocatable :: tmp(:), bin(:)
+    integer(kint) :: nvtxdd1, nedgesdd1, nvtxdd2, nedgesdd2
+    integer(kint) :: ndom, domwght, flag, u, v, w, i, istart, istop
+    integer(kint), allocatable :: tmp(:), bin(:)
 
     nvtxdd1   = dd1%G%nvtx
     nedgesdd1 = dd1%G%nedges
@@ -1473,10 +1473,10 @@ contains
   !===========================================================================
   subroutine shrinkDomainDecomposition(dd, scoretype)
     type(domdec_t), pointer, intent(inout) :: dd
-    integer(ip),             intent(in)    :: scoretype
+    integer(kint),             intent(in)    :: scoretype
 
-    integer(ip) :: nvtx, nlist, k, u
-    integer(ip), allocatable :: msvtxlist(:), key(:), rep(:)
+    integer(kint) :: nvtx, nlist, k, u
+    integer(kint), allocatable :: msvtxlist(:), key(:), rep(:)
     type(domdec_t), pointer  :: dd2
 
     nvtx  = dd%G%nvtx
@@ -1511,10 +1511,10 @@ contains
 
   ! Simple insertion sort of msvtxlist(0:n-1) ascending by key(msvtxlist(i))
   subroutine sort_by_key(arr, key, n)
-    integer(ip), intent(inout) :: arr(0:n-1)
-    integer(ip), intent(in)    :: key(0:*)
-    integer(ip), intent(in)    :: n
-    integer(ip) :: i, j, e, ke
+    integer(kint), intent(inout) :: arr(0:n-1)
+    integer(kint), intent(in)    :: key(0:*)
+    integer(kint), intent(in)    :: n
+    integer(kint) :: i, j, e, ke
 
     do i = 1, n-1
       e = arr(i); ke = key(e); j = i
@@ -1572,13 +1572,13 @@ contains
   !===========================================================================
   subroutine constructSeparator(Gbisect, options, cpus)
     type(gbisect_t), intent(inout) :: Gbisect
-    integer(ip),     intent(in)    :: options(0:*)
-    real(dp),        intent(inout) :: cpus(0:*)
+    integer(kint),     intent(in)    :: options(0:*)
+    real(kdouble),        intent(inout) :: cpus(0:*)
 
     type(domdec_t), pointer :: dd_init
     type(domdec_t), pointer :: dd, dd2
-    integer(ip), allocatable :: map_(:)
-    integer(ip) :: nvtx, nstep, u
+    integer(kint), allocatable :: map_(:)
+    integer(kint) :: nvtx, nstep, u
 
     nvtx = Gbisect%G%nvtx
     allocate(map_(0:nvtx-1))
@@ -1637,14 +1637,14 @@ contains
   !===========================================================================
   logical function smoothBy2Layers(Gbisect, bipartvertex, pnX, black, white)
     type(gbisect_t), intent(inout) :: Gbisect
-    integer(ip),     intent(inout) :: bipartvertex(0:*)
-    integer(ip),     intent(inout) :: pnX
-    integer(ip),     intent(in)    :: black, white
+    integer(kint),     intent(inout) :: bipartvertex(0:*)
+    integer(kint),     intent(inout) :: pnX
+    integer(kint),     intent(in)    :: black, white
 
     type(gbipart_t) :: Gbipart
-    integer(ip), allocatable :: map_(:), dmflag(:), matching(:), flow(:), rc(:)
-    integer(ip) :: dmwght(0:5)
-    integer(ip) :: nvtx, nX, nX2, nY, x, y, u, i, j, jstart, jstop
+    integer(kint), allocatable :: map_(:), dmflag(:), matching(:), flow(:), rc(:)
+    integer(kint) :: dmwght(0:5)
+    integer(kint) :: nvtx, nX, nX2, nY, x, y, u, i, j, jstart, jstop
 
     nvtx = Gbisect%G%nvtx
     nX   = pnX
@@ -1738,11 +1738,11 @@ contains
   !===========================================================================
   subroutine smoothSeparator(Gbisect, options)
     type(gbisect_t), intent(inout) :: Gbisect
-    integer(ip),     intent(in)    :: options(0:*)
+    integer(kint),     intent(in)    :: options(0:*)
 
-    integer(ip) :: dummy_opt
-    integer(ip) :: nvtx, nX, nX2, x, y, a, b, i, j, jstart, jstop
-    integer(ip), allocatable :: bipartvertex(:)
+    integer(kint) :: dummy_opt
+    integer(kint) :: nvtx, nX, nX2, x, y, a, b, i, j, jstart, jstop
+    integer(kint), allocatable :: bipartvertex(:)
     logical :: kept_on, tmp_a
 
     dummy_opt = options(0)  ! suppress unused-argument warning

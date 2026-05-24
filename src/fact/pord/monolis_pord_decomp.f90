@@ -22,10 +22,10 @@ contains
   subroutine newNDnode(nd, G, map_arr, nvint)
     type(nestdiss_t), pointer,  intent(out) :: nd
     type(graph_t),    target,   intent(in)  :: G
-    integer(ip),                intent(in)  :: map_arr(0:*)
-    integer(ip),                intent(in)  :: nvint
+    integer(kint),                intent(in)  :: map_arr(0:*)
+    integer(kint),                intent(in)  :: nvint
 
-    integer(ip) :: dummy_map
+    integer(kint) :: dummy_map
 
     allocate(nd)
     dummy_map = map_arr(0)  ! suppress unused-argument warning
@@ -79,10 +79,10 @@ contains
   subroutine setupNDroot(ndroot, G, map_arr, nvtx)
     type(nestdiss_t), pointer, intent(out) :: ndroot
     type(graph_t),    target,  intent(in)  :: G
-    integer(ip),               intent(out) :: map_arr(0:nvtx-1)
-    integer(ip),               intent(in)  :: nvtx
+    integer(kint),               intent(out) :: map_arr(0:nvtx-1)
+    integer(kint),               intent(in)  :: nvtx
 
-    integer(ip) :: i
+    integer(kint) :: i
 
     call newNDnode(ndroot, G, map_arr, nvtx)
     do i = 0, nvtx-1
@@ -96,16 +96,16 @@ contains
   !===========================================================================
   subroutine splitNDnode(nd, map_arr, options, cpus)
     type(nestdiss_t), pointer, intent(inout) :: nd
-    integer(ip),               intent(inout) :: map_arr(0:nd%G%nvtx-1)
-    integer(ip),               intent(in)    :: options(0:*)
-    real(dp),                  intent(inout) :: cpus(0:*)
+    integer(kint),               intent(inout) :: map_arr(0:nd%G%nvtx-1)
+    integer(kint),               intent(in)    :: options(0:*)
+    real(kdouble),                  intent(inout) :: cpus(0:*)
 
     type(graph_t), target  :: Gsub_local
     type(graph_t), pointer :: Gptr
     type(gbisect_t) :: Gbisect
     type(nestdiss_t), pointer :: b_nd, w_nd
-    integer(ip), allocatable :: b_intv(:), w_intv(:)
-    integer(ip) :: nvint, b_nvint, w_nvint, u, i
+    integer(kint), allocatable :: b_intv(:), w_intv(:)
+    integer(kint) :: nvint, b_nvint, w_nvint, u, i
     logical :: built_sub
 
     nvint     = nd%nvint
@@ -181,9 +181,9 @@ contains
   !===========================================================================
   subroutine buildNDtree(ndroot, map_arr, options, cpus)
     type(nestdiss_t), pointer, intent(inout) :: ndroot
-    integer(ip),               intent(inout) :: map_arr(0:ndroot%G%nvtx-1)
-    integer(ip),               intent(in)    :: options(0:*)
-    real(dp),                  intent(inout) :: cpus(0:*)
+    integer(kint),               intent(inout) :: map_arr(0:ndroot%G%nvtx-1)
+    integer(kint),               intent(in)    :: options(0:*)
+    real(kdouble),                  intent(inout) :: cpus(0:*)
 
     ! Use an allocatable array of pointers (Fortran has no pointer arrays directly,
     ! so we use an auxiliary derived type for the queue).
@@ -193,7 +193,7 @@ contains
 
     type(nd_ptr_t), allocatable :: queue(:)
     type(nestdiss_t), pointer   :: nd
-    integer(ip) :: maxseps, seps, domainsize, qhead, qtail, qsize
+    integer(kint) :: maxseps, seps, domainsize, qhead, qtail, qsize
 
     maxseps    = MAX_SEPS
     domainsize = options(OPTION_DOMAIN_SIZE)
@@ -285,12 +285,12 @@ contains
   subroutine constructMultisector(ms, G, options, cpus)
     type(multisector_t), intent(out) :: ms
     type(graph_t),       target, intent(inout) :: G
-    integer(ip),         intent(inout) :: options(0:*)
-    real(dp),            intent(inout) :: cpus(0:*)
+    integer(kint),         intent(inout) :: options(0:*)
+    real(kdouble),            intent(inout) :: cpus(0:*)
 
     type(nestdiss_t), pointer :: ndroot
-    integer(ip), allocatable, target :: map_arr(:)
-    integer(ip) :: nvtx, ordtype
+    integer(kint), allocatable, target :: map_arr(:)
+    integer(kint) :: nvtx, ordtype
 
     nvtx = G%nvtx
 
@@ -334,7 +334,7 @@ contains
     type(graph_t),       target, intent(inout) :: G
 
     type(nestdiss_t), pointer :: nd, parent_nd
-    integer(ip) :: nvint, totmswght, nnodes, i
+    integer(kint) :: nvint, totmswght, nnodes, i
 
     call trivialMultisector(ms, G)
 
@@ -379,7 +379,7 @@ contains
     type(graph_t),       target, intent(inout) :: G
 
     type(nestdiss_t), pointer :: nd, parent_nd
-    integer(ip) :: nvtx, nvint, maxstage, istage, nnodes, totmswght, i, u
+    integer(kint) :: nvtx, nvint, maxstage, istage, nnodes, totmswght, i, u
 
     call trivialMultisector(ms, G)
     nvtx = G%nvtx; maxstage = 0; nnodes = 0; totmswght = 0

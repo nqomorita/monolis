@@ -24,9 +24,7 @@ contains
     type(graph_t)    :: G
     type(elimtree_t) :: T
     integer(kint) :: n, nz_off, i, j, k, jS, jE, cnt, pos
-    integer(ip)   :: nvtx_ip
-    integer(ip), allocatable :: perm_ip(:)
-    integer(ip)   :: opts_dummy(1)
+    integer(kint) :: opts_dummy(1)
 
     n = monoMAT%N
     lu%N = n
@@ -49,8 +47,7 @@ contains
     ! -----------------------------------------------------------------------
     ! 2. PORD グラフ構築（0-based の xadj/adjncy）
     ! -----------------------------------------------------------------------
-    nvtx_ip = int(n, ip)
-    call newGraph(G, nvtx_ip, int(nz_off, ip))
+    call newGraph(G, n, nz_off)
 
     G%xadj(0) = 0
     do i = 1, n
@@ -60,17 +57,17 @@ contains
       do k = jS, jE
         if (monoMAT%CSR%item(k) /= i) cnt = cnt + 1
       end do
-      G%xadj(i) = G%xadj(i - 1) + int(cnt, ip)
+      G%xadj(i) = G%xadj(i - 1) + cnt
     end do
 
     do i = 1, n
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
-      pos = int(G%xadj(i - 1), kint)
+      pos = G%xadj(i - 1)
       do k = jS, jE
         j = monoMAT%CSR%item(k)
         if (j /= i) then
-          G%adjncy(pos) = int(j - 1, ip)   ! 0-based
+          G%adjncy(pos) = j - 1   ! 0-based
           pos = pos + 1
         end if
       end do
@@ -90,12 +87,7 @@ contains
     call monolis_alloc_I_1d(lu%perm,  n)
     call monolis_alloc_I_1d(lu%iperm, n)
 
-    allocate(perm_ip(n))
-    call monolis_pord_perm_from_elimtree(T, nvtx_ip, perm_ip)
-    do i = 1, n
-      lu%perm(i) = int(perm_ip(i), kint)
-    end do
-    deallocate(perm_ip)
+    call monolis_pord_perm_from_elimtree(T, n, lu%perm)
 
     do i = 1, n
       lu%iperm(lu%perm(i)) = i

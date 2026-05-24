@@ -23,7 +23,7 @@ module mod_monolis_pord_gelim
   public :: extractElimTree
 
   ! Grow factor for adjncy array reallocation
-  integer(ip), parameter :: GROW_FACTOR = 2
+  integer(kint), parameter :: GROW_FACTOR = 2
 
 contains
 
@@ -44,7 +44,7 @@ contains
     type(gelim_t), intent(out) :: Gelim
     type(graph_t), intent(in)  :: G
 
-    integer(ip) :: nvtx, nedges, deg, u, i, istart, istop
+    integer(kint) :: nvtx, nedges, deg, u, i, istart, istop
 
     nvtx   = G%nvtx
     nedges = G%nedges
@@ -110,7 +110,7 @@ contains
   logical function crunchElimGraph(Gelim)
     type(gelim_t), intent(inout) :: Gelim
 
-    integer(ip) :: nvtx, nedges_old, u, i, isrc, idest
+    integer(kint) :: nvtx, nedges_old, u, i, isrc, idest
 
     nvtx      = Gelim%G%nvtx
     nedges_old = Gelim%G%nedges
@@ -150,10 +150,10 @@ contains
   !===========================================================================
   subroutine buildElement(Gelim, me)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip),   intent(in)    :: me
+    integer(kint),   intent(in)    :: me
 
-    integer(ip) :: degme, elenme, vlenme, mesrcptr, medeststart, medeststart2
-    integer(ip) :: medestptr, ln, p, i, j, v, e
+    integer(kint) :: degme, elenme, vlenme, mesrcptr, medeststart, medeststart2
+    integer(kint) :: medestptr, ln, p, i, j, v, e
     logical :: ok
 
     degme   = 0
@@ -273,8 +273,8 @@ contains
   !===========================================================================
   subroutine grow_adjncy(Gelim)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip), allocatable :: tmp(:)
-    integer(ip) :: new_size, old_size
+    integer(kint), allocatable :: tmp(:)
+    integer(kint) :: new_size, old_size
 
     old_size = Gelim%maxedges
     new_size = old_size * GROW_FACTOR
@@ -289,15 +289,15 @@ contains
   !===========================================================================
   subroutine updateAdjncy(Gelim, reachset, nreach, tmp, pflag)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip),   intent(in)    :: nreach
-    integer(ip),   intent(in)    :: reachset(0:nreach-1)
-    integer(ip),   intent(inout) :: tmp(0:Gelim%G%nvtx-1)
-    integer(ip),   intent(inout) :: pflag
+    integer(kint),   intent(in)    :: nreach
+    integer(kint),   intent(in)    :: reachset(0:nreach-1)
+    integer(kint),   intent(inout) :: tmp(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(inout) :: pflag
 
-    integer(ip) :: u, v, e, me
-    integer(ip) :: i, j, jdest, jfirstolde, jfirstv, jstart, jstop
-    integer(ip) :: covered, marku
-    integer(ip) :: jj
+    integer(kint) :: u, v, e, me
+    integer(kint) :: i, j, jdest, jfirstolde, jfirstv, jstart, jstop
+    integer(kint) :: covered, marku
+    integer(kint) :: jj
 
     ! mark all variables in reachset
     do i = 0, nreach-1
@@ -408,15 +408,15 @@ contains
   !===========================================================================
   subroutine findIndNodes(Gelim, reachset, nreach, bin, nextn, tmp, pflag)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip),   intent(in)    :: nreach
-    integer(ip),   intent(in)    :: reachset(0:nreach-1)
-    integer(ip),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
-    integer(ip),   intent(inout) :: nextn(0:Gelim%G%nvtx-1)
-    integer(ip),   intent(inout) :: tmp(0:Gelim%G%nvtx-1)
-    integer(ip),   intent(inout) :: pflag
+    integer(kint),   intent(in)    :: nreach
+    integer(kint),   intent(in)    :: reachset(0:nreach-1)
+    integer(kint),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(inout) :: nextn(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(inout) :: tmp(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(inout) :: pflag
 
-    integer(ip) :: nvtx, chk, u, v, w, wlast, i, j, jstart, jstop
-    integer(ip) :: jstep, jj, jjstop
+    integer(kint) :: nvtx, chk, u, v, w, wlast, i, j, jstart, jstop
+    integer(kint) :: jstep, jj, jjstop
     logical     :: keepon
 
     nvtx = Gelim%G%nvtx
@@ -500,12 +500,12 @@ contains
   !===========================================================================
   subroutine updateDegree(Gelim, reachset, nreach, bin)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip),   intent(in)    :: nreach
-    integer(ip),   intent(in)    :: reachset(0:nreach-1)
-    integer(ip),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(in)    :: nreach
+    integer(kint),   intent(in)    :: reachset(0:nreach-1)
+    integer(kint),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
 
-    integer(ip) :: totvwght, deg, vwghtv, u, v, w, e, me, r
-    integer(ip) :: i, istart, istop, j, jstart, jstop
+    integer(kint) :: totvwght, deg, vwghtv, u, v, w, e, me, r
+    integer(kint) :: i, istart, istop, j, jstart, jstop
 
     totvwght = Gelim%G%totvwght
 
@@ -557,7 +557,7 @@ contains
               deg = deg + Gelim%G%vwght(w)
             end do
             deg = min(Gelim%degree(v), deg)
-            Gelim%degree(v) = max(1_ip, min(deg + Gelim%degree(me) - vwghtv, &
+            Gelim%degree(v) = max(1_kint, min(deg + Gelim%degree(me) - vwghtv, &
                                             totvwght - vwghtv))
             bin(v) = -1
           end if
@@ -583,13 +583,13 @@ contains
   !===========================================================================
   subroutine updateScore(Gelim, reachset, nreach, scoretype, bin)
     type(gelim_t), intent(inout) :: Gelim
-    integer(ip),   intent(in)    :: nreach, scoretype
-    integer(ip),   intent(in)    :: reachset(0:nreach-1)
-    integer(ip),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
+    integer(kint),   intent(in)    :: nreach, scoretype
+    integer(kint),   intent(in)    :: reachset(0:nreach-1)
+    integer(kint),   intent(inout) :: bin(0:Gelim%G%nvtx-1)
 
-    integer(ip) :: vwghtv, deg, degme, u, v, me, r, i, istart, istop
-    integer(ip) :: stype
-    real(dp)    :: scr_dbl
+    integer(kint) :: vwghtv, deg, degme, u, v, me, r, i, istart, istop
+    integer(kint) :: stype
+    real(kdouble)    :: scr_dbl
 
     ! mark vertices adjacent to any element
     do r = 0, nreach-1
@@ -616,23 +616,23 @@ contains
             if ((deg > 40000) .or. (degme > 40000)) then
               select case (stype)
                 case (AMD)
-                  scr_dbl = real(deg, dp)
+                  scr_dbl = real(deg, kdouble)
                 case (AMF)
-                  scr_dbl = real(deg,dp)*real(deg-1,dp)/2.0_dp &
-                          - real(degme,dp)*real(degme-1,dp)/2.0_dp
+                  scr_dbl = real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
+                          - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble
                 case (AMMF)
-                  scr_dbl = (real(deg,dp)*real(deg-1,dp)/2.0_dp &
-                           - real(degme,dp)*real(degme-1,dp)/2.0_dp) &
-                           / real(vwghtv, dp)
+                  scr_dbl = (real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
+                           - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble) &
+                           / real(vwghtv, kdouble)
                 case (AMIND)
-                  scr_dbl = max(0.0_dp, &
-                    real(deg,dp)*real(deg-1,dp)/2.0_dp &
-                  - real(degme,dp)*real(degme-1,dp)/2.0_dp &
-                  - real(deg,dp)*real(vwghtv,dp))
+                  scr_dbl = max(0.0_kdouble, &
+                    real(deg,kdouble)*real(deg-1,kdouble)/2.0_kdouble &
+                  - real(degme,kdouble)*real(degme-1,kdouble)/2.0_kdouble &
+                  - real(deg,kdouble)*real(vwghtv,kdouble))
                 case default
-                  scr_dbl = real(deg, dp)
+                  scr_dbl = real(deg, kdouble)
               end select
-              Gelim%score(v) = int(min(scr_dbl, real(MAX_INT - Gelim%G%nvtx, dp)))
+              Gelim%score(v) = int(min(scr_dbl, real(MAX_INT - Gelim%G%nvtx, kdouble)))
             else
               select case (stype)
                 case (AMD)
@@ -663,9 +663,9 @@ contains
     type(elimtree_t), intent(out) :: T
     type(gelim_t),    intent(in)  :: Gelim
 
-    integer(ip) :: nvtx, nfronts, root, u, v, front
-    integer(ip), allocatable :: sib(:), fch(:)
-    integer(ip), allocatable :: par(:)
+    integer(kint) :: nvtx, nfronts, root, u, v, front
+    integer(kint), allocatable :: sib(:), fch(:)
+    integer(kint), allocatable :: par(:)
 
     nvtx = Gelim%G%nvtx
     allocate(sib(0:nvtx-1), fch(0:nvtx-1), par(0:nvtx-1))
@@ -785,7 +785,7 @@ contains
     type(minprior_t),    intent(out) :: minprior
     type(multisector_t), target, intent(inout) :: ms
 
-    integer(ip) :: nvtx, nstages, u
+    integer(kint) :: nvtx, nstages, u
 
     nvtx    = ms%G%nvtx
     nstages = ms%nstages
@@ -810,7 +810,7 @@ contains
     minprior%stageinfo%nstep = 0
     minprior%stageinfo%welim = 0
     minprior%stageinfo%nzf   = 0
-    minprior%stageinfo%ops   = 0.0_dp
+    minprior%stageinfo%ops   = 0.0_kdouble
     minprior%nreach = 0
     minprior%flag   = 1
   end subroutine setupMinPriority
@@ -819,10 +819,10 @@ contains
   subroutine orderMinPriority(T, minprior, options, cpus)
     type(elimtree_t), intent(out)   :: T
     type(minprior_t), intent(inout) :: minprior
-    integer(ip),      intent(in)    :: options(0:*)
-    real(dp),         intent(inout) :: cpus(0:*)
+    integer(kint),      intent(in)    :: options(0:*)
+    real(kdouble),         intent(inout) :: cpus(0:*)
 
-    integer(ip) :: nstages, istage, scoretype, ordtype
+    integer(kint) :: nstages, istage, scoretype, ordtype
 
     nstages   = minprior%ms%nstages
     ordtype   = options(OPTION_ORDTYPE)
@@ -872,11 +872,11 @@ contains
   !===========================================================================
   subroutine eliminateStage(minprior, istage, scoretype, cpus)
     type(minprior_t), intent(inout) :: minprior
-    integer(ip),      intent(in)    :: istage, scoretype
-    real(dp),         intent(inout) :: cpus(0:*)
+    integer(kint),      intent(in)    :: istage, scoretype
+    real(kdouble),         intent(inout) :: cpus(0:*)
 
-    integer(ip) :: nvtx, nreach, r, u, i
-    integer(ip), pointer :: score(:), degree(:)
+    integer(kint) :: nvtx, nreach, r, u, i
+    integer(kint), pointer :: score(:), degree(:)
 
     nvtx   = minprior%Gelim%G%nvtx
     score  => minprior%Gelim%score
@@ -943,14 +943,14 @@ contains
   end subroutine eliminateStage
 
   !===========================================================================
-  integer(ip) function eliminateStep(minprior, istage, scoretype)
+  integer(kint) function eliminateStep(minprior, istage, scoretype)
     type(minprior_t), intent(inout) :: minprior
-    integer(ip),      intent(in)    :: istage, scoretype
+    integer(kint),      intent(in)    :: istage, scoretype
 
-    integer(ip) :: nelim, minscr, vwghtu, u, v, i, istart, istop
-    real(dp)    :: tri, rec
-    integer(ip), pointer :: xadj(:), adjncy(:), vwght(:), len(:), degree(:), score(:)
-    integer(ip), pointer :: stage(:)
+    integer(kint) :: nelim, minscr, vwghtu, u, v, i, istart, istop
+    real(kdouble)    :: tri, rec
+    integer(kint), pointer :: xadj(:), adjncy(:), vwght(:), len(:), degree(:), score(:)
+    integer(kint), pointer :: stage(:)
 
     xadj   => minprior%Gelim%G%xadj
     adjncy => minprior%Gelim%G%adjncy
@@ -986,13 +986,13 @@ contains
       end do
 
       ! update statistics
-      tri = real(vwghtu, dp)
-      rec = real(degree(u), dp)
+      tri = real(vwghtu, kdouble)
+      rec = real(degree(u), kdouble)
       minprior%stageinfo(istage)%nzf = minprior%stageinfo(istage)%nzf + &
-        int(tri * (tri + 1.0_dp) / 2.0_dp) + int(tri * rec)
+        int(tri * (tri + 1.0_kdouble) / 2.0_kdouble) + int(tri * rec)
       minprior%stageinfo(istage)%ops = minprior%stageinfo(istage)%ops + &
-        (tri**3) / 3.0_dp + (tri**2) / 2.0_dp - 5.0_dp*tri / 6.0_dp + &
-        tri**2 * rec + rec * (rec + 1.0_dp) * tri
+        (tri**3) / 3.0_kdouble + (tri**2) / 2.0_kdouble - 5.0_kdouble*tri / 6.0_kdouble + &
+        tri**2 * rec + rec * (rec + 1.0_kdouble) * tri
 
       ! check for multiple elimination
       ! C uses integer division: (scoretype / 10 == 0) i.e. scoretype < 10
@@ -1011,12 +1011,12 @@ contains
   !===========================================================================
   subroutine stageinfo_sum(minprior, nstages, totnstep, totnzf, totops)
     type(minprior_t), intent(in)  :: minprior
-    integer(ip),      intent(in)  :: nstages
-    integer(ip),      intent(out) :: totnstep, totnzf
-    real(dp),         intent(out) :: totops
+    integer(kint),      intent(in)  :: nstages
+    integer(kint),      intent(out) :: totnstep, totnzf
+    real(kdouble),         intent(out) :: totops
 
-    integer(ip) :: i
-    totnstep = 0; totnzf = 0; totops = 0.0_dp
+    integer(kint) :: i
+    totnstep = 0; totnzf = 0; totops = 0.0_kdouble
     do i = 0, nstages-1
       totnstep = totnstep + minprior%stageinfo(i)%nstep
       totnzf   = totnzf   + minprior%stageinfo(i)%nzf

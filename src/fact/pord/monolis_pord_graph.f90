@@ -18,8 +18,8 @@ contains
   !===========================================================================
   subroutine newGraph(G, nvtx, nedges)
     type(graph_t), intent(out) :: G
-    integer(ip),   intent(in)  :: nvtx, nedges
-    integer(ip) :: i
+    integer(kint),   intent(in)  :: nvtx, nedges
+    integer(kint) :: i
 
     G%nvtx     = nvtx
     G%nedges   = nedges
@@ -49,11 +49,11 @@ contains
   subroutine setupSubgraph(Gsub, G, intvertex, nvint, vtxmap)
     type(graph_t), intent(out) :: Gsub
     type(graph_t), intent(in)  :: G
-    integer(ip),   intent(in)  :: nvint
-    integer(ip),   intent(in)  :: intvertex(0:nvint-1)
-    integer(ip),   intent(out) :: vtxmap(0:G%nvtx-1)
+    integer(kint),   intent(in)  :: nvint
+    integer(kint),   intent(in)  :: intvertex(0:nvint-1)
+    integer(kint),   intent(out) :: vtxmap(0:G%nvtx-1)
 
-    integer(ip) :: nedgesGsub, totvwght, u, v, i, j, jstart, jstop, ptr
+    integer(kint) :: nedgesGsub, totvwght, u, v, i, j, jstart, jstop, ptr
 
     ! --- count edges and set up local indices ---
     nedgesGsub = 0
@@ -100,17 +100,17 @@ contains
   subroutine compressGraph(Gc, G, vtxmap, compressed)
     type(graph_t), intent(out) :: Gc
     type(graph_t), intent(in)  :: G
-    integer(ip),   intent(out) :: vtxmap(0:G%nvtx-1)
+    integer(kint),   intent(out) :: vtxmap(0:G%nvtx-1)
     logical,       intent(out) :: compressed
 
-    integer(ip) :: nvtx, nvtxGc, nedgesGc
-    integer(ip), allocatable :: perm(:)
-    integer(ip) :: u, v, i, istart, istop
+    integer(kint) :: nvtx, nvtxGc, nedgesGc
+    integer(kint), allocatable :: perm(:)
+    integer(kint) :: u, v, i, istart, istop
 
     nvtx = G%nvtx
     call indNodes(G, vtxmap, nvtxGc)
 
-    if (real(nvtxGc, dp) > COMPRESS_FRACTION * real(nvtx, dp)) then
+    if (real(nvtxGc, kdouble) > COMPRESS_FRACTION * real(nvtx, kdouble)) then
       compressed = .false.
       return
     end if
@@ -170,12 +170,12 @@ contains
   !===========================================================================
   subroutine indNodes(G, vtxmap, cnvtx)
     type(graph_t), intent(in)  :: G
-    integer(ip),   intent(out) :: vtxmap(0:G%nvtx-1)
-    integer(ip),   intent(out) :: cnvtx
+    integer(kint),   intent(out) :: vtxmap(0:G%nvtx-1)
+    integer(kint),   intent(out) :: cnvtx
 
-    integer(ip) :: nvtx
-    integer(ip), allocatable :: deg(:), checksum(:), tmp(:)
-    integer(ip) :: u, v, i, j, istart, istop, jstart, jstop
+    integer(kint) :: nvtx
+    integer(kint), allocatable :: deg(:), checksum(:), tmp(:)
+    integer(kint) :: u, v, i, j, istart, istop, jstart, jstop
     logical :: fail
 
     nvtx = G%nvtx
@@ -230,9 +230,9 @@ contains
   !===========================================================================
   subroutine setupGridGraph(G, dimX, dimY, gtype_in)
     type(graph_t), intent(out) :: G
-    integer(ip),   intent(in)  :: dimX, dimY, gtype_in
+    integer(kint),   intent(in)  :: dimX, dimY, gtype_in
 
-    integer(ip) :: nvtx, nedges, knz, k
+    integer(kint) :: nvtx, nedges, knz, k
 
     nvtx = dimX * dimY
 
@@ -355,7 +355,7 @@ contains
   !===========================================================================
   subroutine newElimTree(T, nvtx, nfronts)
     type(elimtree_t), intent(out) :: T
-    integer(ip),      intent(in)  :: nvtx, nfronts
+    integer(kint),      intent(in)  :: nvtx, nfronts
 
     T%nvtx    = nvtx
     T%nfronts = nfronts
@@ -392,7 +392,7 @@ contains
   subroutine initFchSilbRoot(T)
     type(elimtree_t), intent(inout) :: T
 
-    integer(ip) :: nfronts, J, pJ
+    integer(kint) :: nfronts, J, pJ
 
     nfronts = T%nfronts
     T%firstchild = -1
@@ -414,9 +414,9 @@ contains
   !===========================================================================
   ! firstPostorder: returns the leftmost leaf in a post-order traversal.
   !===========================================================================
-  integer(ip) function firstPostorder(T)
+  integer(kint) function firstPostorder(T)
     type(elimtree_t), intent(in) :: T
-    integer(ip) :: J
+    integer(kint) :: J
 
     J = T%root
     if (J /= -1) then
@@ -430,10 +430,10 @@ contains
   !===========================================================================
   ! nextPostorder: returns next node after J in post-order, or -1.
   !===========================================================================
-  integer(ip) function nextPostorder(T, J_in)
+  integer(kint) function nextPostorder(T, J_in)
     type(elimtree_t), intent(in) :: T
-    integer(ip),      intent(in) :: J_in
-    integer(ip) :: J
+    integer(kint),      intent(in) :: J_in
+    integer(kint) :: J
 
     J = J_in
     if (T%silbings(J) /= -1) then
@@ -452,10 +452,10 @@ contains
   !===========================================================================
   subroutine permFromElimTree(T, perm)
     type(elimtree_t), intent(in)  :: T
-    integer(ip),      intent(out) :: perm(0:T%nvtx-1)
+    integer(kint),      intent(out) :: perm(0:T%nvtx-1)
 
-    integer(ip) :: nvtx, nfronts, K, u, count
-    integer(ip), allocatable :: first(:), link(:)
+    integer(kint) :: nvtx, nfronts, K, u, count
+    integer(kint), allocatable :: first(:), link(:)
 
     nvtx   = T%nvtx
     nfronts = T%nfronts
@@ -491,10 +491,10 @@ contains
   subroutine expandElimTree(T2, T, vtxmap, nvtxorg)
     type(elimtree_t), intent(out) :: T2
     type(elimtree_t), intent(in)  :: T
-    integer(ip),      intent(in)  :: nvtxorg
-    integer(ip),      intent(in)  :: vtxmap(0:nvtxorg-1)
+    integer(kint),      intent(in)  :: nvtxorg
+    integer(kint),      intent(in)  :: vtxmap(0:nvtxorg-1)
 
-    integer(ip) :: nfronts, J, u
+    integer(kint) :: nfronts, J, u
 
     nfronts = T%nfronts
     call newElimTree(T2, nvtxorg, nfronts)

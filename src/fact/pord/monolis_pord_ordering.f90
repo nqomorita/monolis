@@ -39,22 +39,22 @@ contains
   !===========================================================================
   subroutine monolis_pord_ordering(G_in, options, use_defaults, T)
     type(graph_t),    intent(in)    :: G_in
-    integer(ip),      intent(in)    :: options(:)
+    integer(kint),      intent(in)    :: options(:)
     logical,          intent(in)    :: use_defaults
     type(elimtree_t), intent(out)   :: T
 
     ! -----------------------------------------------------------------------
     ! Local variables
     ! -----------------------------------------------------------------------
-    integer(ip) :: opts(0:ORD_OPTION_SLOTS-1)
-    real(dp)    :: cpusOrd(0:ORD_TIME_SLOTS-1)
+    integer(kint) :: opts(0:ORD_OPTION_SLOTS-1)
+    real(kdouble)    :: cpusOrd(0:ORD_TIME_SLOTS-1)
 
     ! Gwork is the graph used for ordering (either Gc or a copy of G_in).
     ! We keep it heap-allocated so that ms%G and minprior%ms%G remain valid.
     type(graph_t), pointer :: Gwork => null()
 
     ! vtxmap: maps original vertices to compressed vertices (allocated here)
-    integer(ip), allocatable, target :: vtxmap(:)
+    integer(kint), allocatable, target :: vtxmap(:)
 
     ! Multisector and minimum-priority objects. Both declared with TARGET so
     ! that internal pointer components remain valid after the calls return.
@@ -62,9 +62,9 @@ contains
     type(minprior_t)            :: minprior
     type(elimtree_t)            :: T_inner
 
-    integer(ip) :: nvtx_G, msglvl
-    integer(ip) :: totnstep, totnzf
-    real(dp)    :: totops
+    integer(kint) :: nvtx_G, msglvl
+    integer(kint) :: totnstep, totnzf
+    real(kdouble)    :: totops
     logical     :: compressed
 
     ! -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ contains
       opts(OPTION_MSGLVL)          = options(6)
     end if
     msglvl = opts(OPTION_MSGLVL)
-    cpusOrd = 0.0_dp
+    cpusOrd = 0.0_kdouble
 
     ! -----------------------------------------------------------------------
     ! 2. Compress graph
@@ -171,7 +171,7 @@ contains
     subroutine copy_graph(dst, src)
       type(graph_t), intent(out) :: dst
       type(graph_t), intent(in)  :: src
-      integer(ip) :: n, ne
+      integer(kint) :: n, ne
       n  = src%nvtx
       ne = src%nedges
       call newGraph(dst, n, max(ne, 0))
@@ -190,10 +190,10 @@ contains
   !===========================================================================
   subroutine monolis_pord_perm_from_elimtree(T, nvtx, perm)
     type(elimtree_t), intent(in)  :: T
-    integer(ip),      intent(in)  :: nvtx
-    integer(ip),      intent(out) :: perm(nvtx)
+    integer(kint),      intent(in)  :: nvtx
+    integer(kint),      intent(out) :: perm(nvtx)
 
-    integer(ip), allocatable :: perm0(:)
+    integer(kint), allocatable :: perm0(:)
     allocate(perm0(0:nvtx-1))
     call permFromElimTree(T, perm0)
     perm(1:nvtx) = perm0(0:nvtx-1)

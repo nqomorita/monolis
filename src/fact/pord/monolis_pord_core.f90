@@ -6,144 +6,141 @@
 !*****************************************************************************
 
 module mod_monolis_pord_const
-  use iso_c_binding, only: c_int, c_double
+  use mod_monolis_utils
   implicit none
 
-  integer, parameter :: dp = c_double
-  integer, parameter :: ip = c_int
-
   ! --- matrix/graph topology types (from const.h) ---
-  integer(ip), parameter :: GRID  = 0
-  integer(ip), parameter :: MESH  = 1
-  integer(ip), parameter :: TORUS = 2
-  integer(ip), parameter :: HB    = 3
+  integer(kint), parameter :: GRID  = 0
+  integer(kint), parameter :: MESH  = 1
+  integer(kint), parameter :: TORUS = 2
+  integer(kint), parameter :: HB    = 3
 
   ! --- graph types ---
-  integer(ip), parameter :: UNWEIGHTED      = 0
-  integer(ip), parameter :: WEIGHTED        = 1
+  integer(kint), parameter :: UNWEIGHTED      = 0
+  integer(kint), parameter :: WEIGHTED        = 1
 
   ! --- ordering types ---
-  integer(ip), parameter :: MINIMUM_PRIORITY      = 0
-  integer(ip), parameter :: INCOMPLETE_ND         = 1
-  integer(ip), parameter :: MULTISECTION          = 2
-  integer(ip), parameter :: TRISTAGE_MULTISECTION = 3
+  integer(kint), parameter :: MINIMUM_PRIORITY      = 0
+  integer(kint), parameter :: INCOMPLETE_ND         = 1
+  integer(kint), parameter :: MULTISECTION          = 2
+  integer(kint), parameter :: TRISTAGE_MULTISECTION = 3
 
   ! --- node selection strategies (interior ordering) ---
-  integer(ip), parameter :: AMD   = 0
-  integer(ip), parameter :: AMF   = 1
-  integer(ip), parameter :: AMMF  = 2
-  integer(ip), parameter :: AMIND = 3
+  integer(kint), parameter :: AMD   = 0
+  integer(kint), parameter :: AMF   = 1
+  integer(kint), parameter :: AMMF  = 2
+  integer(kint), parameter :: AMIND = 3
 
   ! --- node selection strategies (domain decomposition) ---
-  integer(ip), parameter :: QMD   = 0
-  integer(ip), parameter :: QMRDV = 1
-  integer(ip), parameter :: QRAND = 2
+  integer(kint), parameter :: QMD   = 0
+  integer(kint), parameter :: QMRDV = 1
+  integer(kint), parameter :: QRAND = 2
 
   ! --- default options ---
-  integer(ip), parameter :: SPACE_ORDTYPE         = MULTISECTION
-  integer(ip), parameter :: SPACE_NODE_SELECTION1 = AMMF
-  integer(ip), parameter :: SPACE_NODE_SELECTION2 = AMMF
-  integer(ip), parameter :: SPACE_NODE_SELECTION3 = QMRDV
-  integer(ip), parameter :: SPACE_DOMAIN_SIZE     = 200
-  integer(ip), parameter :: SPACE_MSGLVL          = 2
-  integer(ip), parameter :: SPACE_ETREE_NONZ      = 256
-  integer(ip), parameter :: SPACE_ETREE_BAL       = 5
-  integer(ip), parameter :: SPACE_MASK_OFFSET      = 2
+  integer(kint), parameter :: SPACE_ORDTYPE         = MULTISECTION
+  integer(kint), parameter :: SPACE_NODE_SELECTION1 = AMMF
+  integer(kint), parameter :: SPACE_NODE_SELECTION2 = AMMF
+  integer(kint), parameter :: SPACE_NODE_SELECTION3 = QMRDV
+  integer(kint), parameter :: SPACE_DOMAIN_SIZE     = 200
+  integer(kint), parameter :: SPACE_MSGLVL          = 2
+  integer(kint), parameter :: SPACE_ETREE_NONZ      = 256
+  integer(kint), parameter :: SPACE_ETREE_BAL       = 5
+  integer(kint), parameter :: SPACE_MASK_OFFSET      = 2
 
   ! --- misc ---
-  integer(ip), parameter :: PORD_TRUE  = 1
-  integer(ip), parameter :: PORD_FALSE = 0
-  integer(ip), parameter :: PORD_ERR   = -1
-  integer(ip), parameter :: PORD_NOERR = 0
-  integer(ip), parameter :: MAX_INT    = 2**30 - 1
-  real(dp),    parameter :: MAX_FLOAT  = 1.0e31_dp
-  real(dp),    parameter :: EPS        = 0.001_dp
+  integer(kint), parameter :: PORD_TRUE  = 1
+  integer(kint), parameter :: PORD_FALSE = 0
+  integer(kint), parameter :: PORD_ERR   = -1
+  integer(kint), parameter :: PORD_NOERR = 0
+  integer(kint), parameter :: MAX_INT    = 2**30 - 1
+  real(kdouble),    parameter :: MAX_FLOAT  = 1.0e31_kdouble
+  real(kdouble),    parameter :: EPS        = 0.001_kdouble
 
   ! --- color constants (also used as array indices, 0-based) ---
-  integer(ip), parameter :: GRAY  = 0
-  integer(ip), parameter :: BLACK = 1
-  integer(ip), parameter :: WHITE = 2
+  integer(kint), parameter :: GRAY  = 0
+  integer(kint), parameter :: BLACK = 1
+  integer(kint), parameter :: WHITE = 2
 
   ! --- Dulmage-Mendelsohn flags ---
-  integer(ip), parameter :: SI = 0
-  integer(ip), parameter :: SX = 1
-  integer(ip), parameter :: SR = 2
-  integer(ip), parameter :: BI = 3
-  integer(ip), parameter :: BX = 4
-  integer(ip), parameter :: BR = 5
+  integer(kint), parameter :: SI = 0
+  integer(kint), parameter :: SX = 1
+  integer(kint), parameter :: SR = 2
+  integer(kint), parameter :: BI = 3
+  integer(kint), parameter :: BX = 4
+  integer(kint), parameter :: BR = 5
 
   ! --- option array indices (0-based) ---
-  integer(ip), parameter :: ORD_OPTION_SLOTS       = 7
-  integer(ip), parameter :: OPTION_ORDTYPE         = 0
-  integer(ip), parameter :: OPTION_NODE_SELECTION1 = 1
-  integer(ip), parameter :: OPTION_NODE_SELECTION2 = 2
-  integer(ip), parameter :: OPTION_NODE_SELECTION3 = 3
-  integer(ip), parameter :: OPTION_DOMAIN_SIZE      = 4
-  integer(ip), parameter :: OPTION_MSGLVL           = 5
-  integer(ip), parameter :: OPTION_ETREE_NONZ       = 6
+  integer(kint), parameter :: ORD_OPTION_SLOTS       = 7
+  integer(kint), parameter :: OPTION_ORDTYPE         = 0
+  integer(kint), parameter :: OPTION_NODE_SELECTION1 = 1
+  integer(kint), parameter :: OPTION_NODE_SELECTION2 = 2
+  integer(kint), parameter :: OPTION_NODE_SELECTION3 = 3
+  integer(kint), parameter :: OPTION_DOMAIN_SIZE      = 4
+  integer(kint), parameter :: OPTION_MSGLVL           = 5
+  integer(kint), parameter :: OPTION_ETREE_NONZ       = 6
 
   ! --- timing array indices (0-based) ---
-  integer(ip), parameter :: ORD_TIME_SLOTS    = 12
-  integer(ip), parameter :: TIME_COMPRESS     = 0
-  integer(ip), parameter :: TIME_MS           = 1
-  integer(ip), parameter :: TIME_MULTILEVEL   = 2
-  integer(ip), parameter :: TIME_INITDOMDEC   = 3
-  integer(ip), parameter :: TIME_COARSEDOMDEC = 4
-  integer(ip), parameter :: TIME_INITSEP      = 5
-  integer(ip), parameter :: TIME_REFINESEP    = 6
-  integer(ip), parameter :: TIME_SMOOTH       = 7
-  integer(ip), parameter :: TIME_BOTTOMUP     = 8
-  integer(ip), parameter :: TIME_UPDADJNCY    = 9
-  integer(ip), parameter :: TIME_FINDINODES   = 10
-  integer(ip), parameter :: TIME_UPDSCORE     = 11
+  integer(kint), parameter :: ORD_TIME_SLOTS    = 12
+  integer(kint), parameter :: TIME_COMPRESS     = 0
+  integer(kint), parameter :: TIME_MS           = 1
+  integer(kint), parameter :: TIME_MULTILEVEL   = 2
+  integer(kint), parameter :: TIME_INITDOMDEC   = 3
+  integer(kint), parameter :: TIME_COARSEDOMDEC = 4
+  integer(kint), parameter :: TIME_INITSEP      = 5
+  integer(kint), parameter :: TIME_REFINESEP    = 6
+  integer(kint), parameter :: TIME_SMOOTH       = 7
+  integer(kint), parameter :: TIME_BOTTOMUP     = 8
+  integer(kint), parameter :: TIME_UPDADJNCY    = 9
+  integer(kint), parameter :: TIME_FINDINODES   = 10
+  integer(kint), parameter :: TIME_UPDSCORE     = 11
 
   ! --- params.h ---
-  integer(ip), parameter :: MAX_BAD_FLIPS        = 100
-  real(dp),    parameter :: COMPRESS_FRACTION     = 0.75_dp
-  integer(ip), parameter :: MIN_NODES            = 100
-  integer(ip), parameter :: DEFAULT_SEPS         = 31
-  integer(ip), parameter :: MAX_SEPS             = 255
-  integer(ip), parameter :: MIN_DOMAINS          = 100
-  integer(ip), parameter :: MAX_COARSENING_STEPS = 10
+  integer(kint), parameter :: MAX_BAD_FLIPS        = 100
+  real(kdouble),    parameter :: COMPRESS_FRACTION     = 0.75_kdouble
+  integer(kint), parameter :: MIN_NODES            = 100
+  integer(kint), parameter :: DEFAULT_SEPS         = 31
+  integer(kint), parameter :: MAX_SEPS             = 255
+  integer(kint), parameter :: MIN_DOMAINS          = 100
+  integer(kint), parameter :: MAX_COARSENING_STEPS = 10
 
   ! --- eval.h constants (eval1 function) ---
-  real(dp), parameter :: TOL1 = 0.50_dp
-  real(dp), parameter :: PEN1 = 100.0_dp
+  real(kdouble), parameter :: TOL1 = 0.50_kdouble
+  real(kdouble), parameter :: PEN1 = 100.0_kdouble
 
 contains
 
   ! Separator evaluation function F(S, B, W) = eval1(S, B, W)
   ! (from eval.h, the default separator cost function)
-  pure real(dp) function eval_sep(S, B, W)
-    integer(ip), intent(in) :: S, B, W
-    integer(ip) :: bmax, bmin
+  pure real(kdouble) function eval_sep(S, B, W)
+    integer(kint), intent(in) :: S, B, W
+    integer(kint) :: bmax, bmin
     bmax = max(B, W)
     bmin = min(B, W)
     ! Match C eval1 exactly: S + PEN1*max(0, max(W,B)*(1-TOL1) - min(W,B))
     !                          + (max-min)/max   (all done in floating point)
-    eval_sep = real(S, dp) &
-             + PEN1 * max(0.0_dp, real(bmax, dp) * (1.0_dp - TOL1) - real(bmin, dp)) &
-             + real(bmax - bmin, dp) / real(max(1_ip, bmax), dp)
+    eval_sep = real(S, kdouble) &
+             + PEN1 * max(0.0_kdouble, real(bmax, kdouble) * (1.0_kdouble - TOL1) - real(bmin, kdouble)) &
+             + real(bmax - bmin, kdouble) / real(max(1_kint, bmax), kdouble)
   end function eval_sep
 
   ! Timer helpers (using cpu_time)
   subroutine pord_resettimer(t)
-    real(dp), intent(out) :: t
-    t = 0.0_dp
+    real(kdouble), intent(out) :: t
+    t = 0.0_kdouble
   end subroutine pord_resettimer
 
   subroutine pord_starttimer(t)
-    real(dp), intent(inout) :: t
+    real(kdouble), intent(inout) :: t
     real :: tc
     call cpu_time(tc)
-    t = t - real(tc, dp)
+    t = t - real(tc, kdouble)
   end subroutine pord_starttimer
 
   subroutine pord_stoptimer(t)
-    real(dp), intent(inout) :: t
+    real(kdouble), intent(inout) :: t
     real :: tc
     call cpu_time(tc)
-    t = t + real(tc, dp)
+    t = t + real(tc, kdouble)
   end subroutine pord_stoptimer
 
 end module mod_monolis_pord_const
@@ -162,43 +159,43 @@ module mod_monolis_pord_types
   ! graph_t  (owns all data)
   !---------------------------------------------------------------------------
   type :: graph_t
-    integer(ip) :: nvtx     = 0
-    integer(ip) :: nedges   = 0
-    integer(ip) :: gtype    = UNWEIGHTED   ! "type" is reserved in some compilers
-    integer(ip) :: totvwght = 0
-    integer(ip), allocatable :: xadj(:)    ! 0:nvtx
-    integer(ip), allocatable :: adjncy(:)  ! 0:nedges-1  (may grow in gelim)
-    integer(ip), allocatable :: vwght(:)   ! 0:nvtx-1
+    integer(kint) :: nvtx     = 0
+    integer(kint) :: nedges   = 0
+    integer(kint) :: gtype    = UNWEIGHTED   ! "type" is reserved in some compilers
+    integer(kint) :: totvwght = 0
+    integer(kint), allocatable :: xadj(:)    ! 0:nvtx
+    integer(kint), allocatable :: adjncy(:)  ! 0:nedges-1  (may grow in gelim)
+    integer(kint), allocatable :: vwght(:)   ! 0:nvtx-1
   end type graph_t
 
   !---------------------------------------------------------------------------
   ! elimtree_t  (owns all data)
   !---------------------------------------------------------------------------
   type :: elimtree_t
-    integer(ip) :: nvtx    = 0
-    integer(ip) :: nfronts = 0
-    integer(ip) :: root    = -1
-    integer(ip), allocatable :: ncolfactor(:)  ! 0:nfronts-1
-    integer(ip), allocatable :: ncolupdate(:)  ! 0:nfronts-1
-    integer(ip), allocatable :: parent(:)      ! 0:nfronts-1
-    integer(ip), allocatable :: firstchild(:)  ! 0:nfronts-1
-    integer(ip), allocatable :: silbings(:)    ! 0:nfronts-1
-    integer(ip), allocatable :: vtx2front(:)   ! 0:nvtx-1
+    integer(kint) :: nvtx    = 0
+    integer(kint) :: nfronts = 0
+    integer(kint) :: root    = -1
+    integer(kint), allocatable :: ncolfactor(:)  ! 0:nfronts-1
+    integer(kint), allocatable :: ncolupdate(:)  ! 0:nfronts-1
+    integer(kint), allocatable :: parent(:)      ! 0:nfronts-1
+    integer(kint), allocatable :: firstchild(:)  ! 0:nfronts-1
+    integer(kint), allocatable :: silbings(:)    ! 0:nfronts-1
+    integer(kint), allocatable :: vtx2front(:)   ! 0:nvtx-1
   end type elimtree_t
 
   !---------------------------------------------------------------------------
   ! bucket_t  (owns all data)
   !---------------------------------------------------------------------------
   type :: bucket_t
-    integer(ip) :: maxbin  = 0
-    integer(ip) :: maxitem = 0
-    integer(ip) :: offset  = 0
-    integer(ip) :: nobj    = 0
-    integer(ip) :: minbin  = 0    ! = MAX_INT when empty
-    integer(ip), allocatable :: bin(:)    ! 0:maxbin
-    integer(ip), allocatable :: nextp(:)  ! 0:maxitem  (C: next)
-    integer(ip), allocatable :: lastp(:)  ! 0:maxitem  (C: last)
-    integer(ip), allocatable :: key(:)    ! 0:maxitem
+    integer(kint) :: maxbin  = 0
+    integer(kint) :: maxitem = 0
+    integer(kint) :: offset  = 0
+    integer(kint) :: nobj    = 0
+    integer(kint) :: minbin  = 0    ! = MAX_INT when empty
+    integer(kint), allocatable :: bin(:)    ! 0:maxbin
+    integer(kint), allocatable :: nextp(:)  ! 0:maxitem  (C: next)
+    integer(kint), allocatable :: lastp(:)  ! 0:maxitem  (C: last)
+    integer(kint), allocatable :: key(:)    ! 0:maxitem
   end type bucket_t
 
   !---------------------------------------------------------------------------
@@ -206,22 +203,22 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: gelim_t
     type(graph_t) :: G
-    integer(ip) :: maxedges = 0
-    integer(ip), allocatable :: len(:)    ! 0:nvtx-1
-    integer(ip), allocatable :: elen(:)   ! 0:nvtx-1
-    integer(ip), allocatable :: parent(:) ! 0:nvtx-1
-    integer(ip), allocatable :: degree(:) ! 0:nvtx-1
-    integer(ip), allocatable :: score(:)  ! 0:nvtx-1
+    integer(kint) :: maxedges = 0
+    integer(kint), allocatable :: len(:)    ! 0:nvtx-1
+    integer(kint), allocatable :: elen(:)   ! 0:nvtx-1
+    integer(kint), allocatable :: parent(:) ! 0:nvtx-1
+    integer(kint), allocatable :: degree(:) ! 0:nvtx-1
+    integer(kint), allocatable :: score(:)  ! 0:nvtx-1
   end type gelim_t
 
   !---------------------------------------------------------------------------
   ! stageinfo_t
   !---------------------------------------------------------------------------
   type :: stageinfo_t
-    integer(ip) :: nstep = 0
-    integer(ip) :: welim = 0
-    integer(ip) :: nzf   = 0
-    real(dp)    :: ops   = 0.0_dp
+    integer(kint) :: nstep = 0
+    integer(kint) :: welim = 0
+    integer(kint) :: nzf   = 0
+    real(kdouble)    :: ops   = 0.0_kdouble
   end type stageinfo_t
 
   !---------------------------------------------------------------------------
@@ -230,10 +227,10 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: multisector_t
     type(graph_t), pointer :: G => null()   ! not owned
-    integer(ip), allocatable :: stage(:)    ! 0:nvtx-1
-    integer(ip) :: nstages   = 0
-    integer(ip) :: nnodes    = 0
-    integer(ip) :: totmswght = 0
+    integer(kint), allocatable :: stage(:)    ! 0:nvtx-1
+    integer(kint) :: nstages   = 0
+    integer(kint) :: nnodes    = 0
+    integer(kint) :: totmswght = 0
   end type multisector_t
 
   !---------------------------------------------------------------------------
@@ -244,12 +241,12 @@ module mod_monolis_pord_types
     type(multisector_t), pointer :: ms     => null()
     type(bucket_t),      pointer :: bucket => null()
     type(stageinfo_t), allocatable :: stageinfo(:)  ! 0:nstages-1
-    integer(ip), allocatable :: reachset(:)  ! 0:nvtx-1
-    integer(ip), allocatable :: auxaux(:)    ! 0:nvtx-1
-    integer(ip), allocatable :: auxbin(:)    ! 0:nvtx-1
-    integer(ip), allocatable :: auxtmp(:)    ! 0:nvtx-1
-    integer(ip) :: nreach = 0
-    integer(ip) :: flag   = 1
+    integer(kint), allocatable :: reachset(:)  ! 0:nvtx-1
+    integer(kint), allocatable :: auxaux(:)    ! 0:nvtx-1
+    integer(kint), allocatable :: auxbin(:)    ! 0:nvtx-1
+    integer(kint), allocatable :: auxtmp(:)    ! 0:nvtx-1
+    integer(kint) :: nreach = 0
+    integer(kint) :: flag   = 1
   end type minprior_t
 
   !---------------------------------------------------------------------------
@@ -257,12 +254,12 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: domdec_t
     type(graph_t) :: G
-    integer(ip) :: ndom    = 0
-    integer(ip) :: domwght = 0
-    integer(ip) :: cwght(0:2) = 0
-    integer(ip), allocatable :: vtype(:)   ! 0:nvtx-1
-    integer(ip), allocatable :: color(:)   ! 0:nvtx-1
-    integer(ip), allocatable :: map_(:)    ! 0:nvtx-1  (C: map)
+    integer(kint) :: ndom    = 0
+    integer(kint) :: domwght = 0
+    integer(kint) :: cwght(0:2) = 0
+    integer(kint), allocatable :: vtype(:)   ! 0:nvtx-1
+    integer(kint), allocatable :: color(:)   ! 0:nvtx-1
+    integer(kint), allocatable :: map_(:)    ! 0:nvtx-1  (C: map)
     type(domdec_t), pointer  :: prev => null()
     type(domdec_t), pointer  :: next_ptr => null()
   end type domdec_t
@@ -273,8 +270,8 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: gbisect_t
     type(graph_t), pointer :: G => null()  ! not owned
-    integer(ip), allocatable :: color(:)   ! 0:nvtx-1
-    integer(ip) :: cwght(0:2) = 0
+    integer(kint), allocatable :: color(:)   ! 0:nvtx-1
+    integer(kint) :: cwght(0:2) = 0
   end type gbisect_t
 
   !---------------------------------------------------------------------------
@@ -282,8 +279,8 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: gbipart_t
     type(graph_t) :: G
-    integer(ip) :: nX = 0
-    integer(ip) :: nY = 0
+    integer(kint) :: nX = 0
+    integer(kint) :: nY = 0
   end type gbipart_t
 
   !---------------------------------------------------------------------------
@@ -291,12 +288,12 @@ module mod_monolis_pord_types
   !---------------------------------------------------------------------------
   type :: nestdiss_t
     type(graph_t), pointer   :: G       => null()   ! not owned
-    integer(ip),   pointer   :: map_arr(:) => null()  ! not owned (0:nvtx-1)
-    integer(ip) :: depth = 0
-    integer(ip) :: nvint = 0
-    integer(ip), allocatable :: intvertex(:)  ! 0:nvint-1
-    integer(ip), allocatable :: intcolor(:)   ! 0:nvint-1
-    integer(ip) :: cwght(0:2) = 0
+    integer(kint),   pointer   :: map_arr(:) => null()  ! not owned (0:nvtx-1)
+    integer(kint) :: depth = 0
+    integer(kint) :: nvint = 0
+    integer(kint), allocatable :: intvertex(:)  ! 0:nvint-1
+    integer(kint), allocatable :: intcolor(:)   ! 0:nvint-1
+    integer(kint) :: cwght(0:2) = 0
     type(nestdiss_t), pointer :: parent => null()
     type(nestdiss_t), pointer :: childB => null()
     type(nestdiss_t), pointer :: childW => null()
@@ -321,7 +318,7 @@ module mod_monolis_pord_sort
   public :: insertUpIntsWithStaticIntKeys
   public :: qsortUpInts
 
-  integer(ip), parameter :: THRES = 10
+  integer(kint), parameter :: THRES = 10
 
 contains
 
@@ -329,12 +326,12 @@ contains
   ! distributionCounting: sorts node(0:n-1) ascending by key(node(i)).
   !===========================================================================
   subroutine distributionCounting(n, node, key)
-    integer(ip), intent(in)    :: n
-    integer(ip), intent(inout) :: node(0:n-1)
-    integer(ip), intent(in)    :: key(0:*)   ! key(u) for any u in node
+    integer(kint), intent(in)    :: n
+    integer(kint), intent(inout) :: node(0:n-1)
+    integer(kint), intent(in)    :: key(0:*)   ! key(u) for any u in node
 
-    integer(ip), allocatable :: tmp(:), count(:)
-    integer(ip) :: minkey, maxkey, l, i, u, vk
+    integer(kint), allocatable :: tmp(:), count(:)
+    integer(kint) :: minkey, maxkey, l, i, u, vk
 
     if (n <= 0) return
 
@@ -379,8 +376,8 @@ contains
   !===========================================================================
   ! myrandom: returns a pseudo-random integer in [0, range-1]
   !===========================================================================
-  integer(ip) function pord_random(range)
-    integer(ip), intent(in) :: range
+  integer(kint) function pord_random(range)
+    integer(kint), intent(in) :: range
     real :: r
     call random_number(r)
     pord_random = int(r * real(range))
@@ -392,9 +389,9 @@ contains
   ! insertUpInts: insertion sort upwards (without keys).
   !===========================================================================
   subroutine insertUpInts(n, array)
-    integer(ip), intent(in)    :: n
-    integer(ip), intent(inout) :: array(0:n-1)
-    integer(ip) :: i, j, v
+    integer(kint), intent(in)    :: n
+    integer(kint), intent(inout) :: array(0:n-1)
+    integer(kint) :: i, j, v
     do i = 1, n-1
       v = array(i); j = i
       do while (j > 0)
@@ -410,10 +407,10 @@ contains
   ! insertUpIntsWithStaticIntKeys: insertion sort upwards keyed by key(array(i)).
   !===========================================================================
   subroutine insertUpIntsWithStaticIntKeys(n, array, key)
-    integer(ip), intent(in)    :: n
-    integer(ip), intent(inout) :: array(0:n-1)
-    integer(ip), intent(in)    :: key(0:*)
-    integer(ip) :: i, j, e, ke
+    integer(kint), intent(in)    :: n
+    integer(kint), intent(inout) :: array(0:n-1)
+    integer(kint), intent(in)    :: key(0:*)
+    integer(kint) :: i, j, e, ke
     do i = 1, n-1
       e = array(i); ke = key(e); j = i
       do while (j > 0)
@@ -431,11 +428,11 @@ contains
   ! the C signature transparent.
   !===========================================================================
   subroutine qsortUpInts(n, array, stack)
-    integer(ip), intent(in)    :: n
-    integer(ip), intent(inout) :: array(0:n-1)
-    integer(ip), intent(inout) :: stack(0:*)
+    integer(kint), intent(in)    :: n
+    integer(kint), intent(inout) :: array(0:n-1)
+    integer(kint), intent(inout) :: stack(0:*)
 
-    integer(ip) :: i, j, t, l, m, r, p, mv
+    integer(kint) :: i, j, t, l, m, r, p, mv
 
     l = 0; r = n-1; p = 2
     do while (p > 0)
@@ -495,9 +492,9 @@ contains
   !===========================================================================
   subroutine setupBucket(bucket, maxbin, maxitem, offset)
     type(bucket_t), intent(out) :: bucket
-    integer(ip),    intent(in)  :: maxbin, maxitem, offset
+    integer(kint),    intent(in)  :: maxbin, maxitem, offset
 
-    integer(ip) :: i
+    integer(kint) :: i
 
     bucket%maxbin  = maxbin
     bucket%maxitem = maxitem
@@ -533,11 +530,11 @@ contains
   !===========================================================================
   ! minBucket: returns the item with minimum key, or -1 if empty.
   !===========================================================================
-  integer(ip) function minBucket(bucket)
+  integer(kint) function minBucket(bucket)
     type(bucket_t), intent(inout) :: bucket
 
-    integer(ip) :: maxbin, minbin, nobj
-    integer(ip) :: item, bestitem, bestkey
+    integer(kint) :: maxbin, minbin, nobj
+    integer(kint) :: item, bestitem, bestkey
 
     maxbin = bucket%maxbin
     nobj   = bucket%nobj
@@ -575,9 +572,9 @@ contains
   !===========================================================================
   subroutine insertBucket(bucket, k, item)
     type(bucket_t), intent(inout) :: bucket
-    integer(ip),    intent(in)    :: k, item
+    integer(kint),    intent(in)    :: k, item
 
-    integer(ip) :: s, nextitem
+    integer(kint) :: s, nextitem
 
     s = max(0, k + bucket%offset)
     s = min(s, bucket%maxbin)
@@ -597,9 +594,9 @@ contains
   !===========================================================================
   subroutine removeBucket(bucket, item)
     type(bucket_t), intent(inout) :: bucket
-    integer(ip),    intent(in)    :: item
+    integer(kint),    intent(in)    :: item
 
-    integer(ip) :: s, previtem, nextitem
+    integer(kint) :: s, previtem, nextitem
 
     if (bucket%key(item) == MAX_INT) return  ! already not in bucket
 
