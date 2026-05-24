@@ -368,6 +368,7 @@ all: \
 lib: \
 	cp_header \
 	cp_header_lib \
+	cp_bin_lib \
 	$(LIB_TARGET)
 
 $(LIB_TARGET): $(LIB_OBJS)
