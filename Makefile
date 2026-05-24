@@ -122,6 +122,12 @@ wrapper_lapack.f90 \
 wrapper_scalapack.f90
 
 SRC_FACT = \
+pord/monolis_pord_core.f90 \
+pord/monolis_pord_graph.f90 \
+pord/monolis_pord_bisect.f90 \
+pord/monolis_pord_decomp.f90 \
+pord/monolis_pord_order.f90 \
+pord/monolis_pord_ordering.f90 \
 analysis.f90 \
 factorize.f90 \
 LU/LU_nn.f90
