@@ -18,14 +18,15 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), target, intent(inout) :: monoLU
-    !type(monolis_mat) :: monoMAT_reorder
-    integer(kint) :: nz
     real(kdouble) :: t(20)
 
     if(monoMAT%NDOF == -1)then
       stop "monolis_fact_LU_nn_setup_R"
     endif
 
+    call monolis_fact_analysis(monoMAT, monoLU%LU)
+
+    call monolis_fact_LU_factorize()
   end subroutine monolis_fact_LU_nn_setup_R
 
   !> @ingroup prec
@@ -49,6 +50,7 @@ contains
     type(monolis_mat), target, intent(in) :: monoLU
     real(kdouble) :: X(:), Y(:)
 
+    call monolis_fact_LU_solve(monoLU%LU, Y, X)
   end subroutine monolis_fact_LU_nn_apply_R
 
   !> 前処理適用：LU 前処理（nxn ブロック、複素数型）
