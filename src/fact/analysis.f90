@@ -32,6 +32,12 @@ contains
     integer(kint) :: n
     integer(kint), allocatable :: row_ptr(:)
     integer(kint), allocatable :: col_ind(:)
+    !> 対称化パターン CSR（1-based、N+1）
+    integer(kint), allocatable :: sym_row_ptr(:)
+    !> 対称化パターン CSR（1-based、sym_nnz）
+    integer(kint), allocatable :: sym_col_ind(:)
+    !> 置換後列 → フロント
+    integer(kint), allocatable :: column_to_super(:)
 
     call monolis_std_debug_log_header("monolis_fact_analysis")
 
@@ -39,21 +45,23 @@ contains
 
     n = monoMAT%N
     lu%N = n
-    lu%NDOF = monoMAT%NDOF
     if (n <= 0) return
 
     call build_local_csr(monoMAT, n, row_ptr, col_ind)
 
-    call build_symmetric_pattern(lu, n, row_ptr, col_ind)
+    call build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
 
-    call build_pord_front_structure(lu)
+    call build_pord_front_structure(lu, sym_row_ptr, sym_col_ind, column_to_super)
 
-    call build_original_front_entries(lu, n, row_ptr, col_ind)
+    call build_original_front_entries(lu, n, row_ptr, col_ind, column_to_super)
 
     call build_child_contribution_maps(lu)
 
     call monolis_dealloc_I_1d(row_ptr)
     call monolis_dealloc_I_1d(col_ind)
+    call monolis_dealloc_I_1d(sym_row_ptr)
+    call monolis_dealloc_I_1d(sym_col_ind)
+    call monolis_dealloc_I_1d(column_to_super)
 
     lu%analyzed = .true.
     lu%factorized = .false.
@@ -81,14 +89,15 @@ contains
   end subroutine build_local_csr
 
   !> 対称化パターンを CSR で構築（1-based）
-  subroutine build_symmetric_pattern(lu, n, row_ptr, col_ind)
+  subroutine build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
     implicit none
-    type(monolis_mat_lu), intent(inout) :: lu
     integer(kint), intent(in) :: n
     integer(kint), intent(in) :: row_ptr(:)
     integer(kint), intent(in) :: col_ind(:)
+    integer(kint), allocatable, intent(out) :: sym_row_ptr(:)
+    integer(kint), allocatable, intent(out) :: sym_col_ind(:)
 
-    integer(kint) :: row, entry, col, pos, write_pos, cnt, prev, raw_nnz
+    integer(kint) :: row, entry, col, pos, write_pos, cnt, prev, raw_nnz, sym_nnz
     integer(kint), allocatable :: counts(:), raw_ptr(:), next_pos(:), raw_cols(:)
     integer(kint), allocatable :: compact_cols(:)
 
@@ -129,30 +138,30 @@ contains
       end do
     end do
 
-    call monolis_alloc_I_1d(lu%sym_row_ptr, n + 1)
-    call monolis_alloc_I_1d(lu%sym_col_ind, max(1, raw_nnz))
+    call monolis_alloc_I_1d(sym_row_ptr, n + 1)
+    call monolis_alloc_I_1d(sym_col_ind, max(1, raw_nnz))
 
     write_pos = 1
-    lu%sym_row_ptr(1) = 1
+    sym_row_ptr(1) = 1
     do row = 1, n
       call sort_int_range(raw_cols, raw_ptr(row), raw_ptr(row + 1) - 1)
       prev = 0
       cnt = 0
       do entry = raw_ptr(row), raw_ptr(row + 1) - 1
         if (cnt == 0 .or. raw_cols(entry) /= prev) then
-          lu%sym_col_ind(write_pos) = raw_cols(entry)
+          sym_col_ind(write_pos) = raw_cols(entry)
           write_pos = write_pos + 1
           cnt = cnt + 1
           prev = raw_cols(entry)
         end if
       end do
-      lu%sym_row_ptr(row + 1) = write_pos
+      sym_row_ptr(row + 1) = write_pos
     end do
 
-    lu%sym_nnz = write_pos - 1
-    call monolis_alloc_I_1d(compact_cols, lu%sym_nnz)
-    compact_cols(1:lu%sym_nnz) = lu%sym_col_ind(1:lu%sym_nnz)
-    call move_alloc(compact_cols, lu%sym_col_ind)
+    sym_nnz = write_pos - 1
+    call monolis_alloc_I_1d(compact_cols, sym_nnz)
+    compact_cols(1:sym_nnz) = sym_col_ind(1:sym_nnz)
+    call move_alloc(compact_cols, sym_col_ind)
 
     call monolis_dealloc_I_1d(counts)
     call monolis_dealloc_I_1d(raw_ptr)
@@ -161,9 +170,12 @@ contains
   end subroutine build_symmetric_pattern
 
   !> PORD を呼び出し、perm/iperm/front_*/super_* を構築
-  subroutine build_pord_front_structure(lu)
+  subroutine build_pord_front_structure(lu, sym_row_ptr, sym_col_ind, column_to_super)
     implicit none
     type(monolis_mat_lu), intent(inout) :: lu
+    integer(kint), intent(in) :: sym_row_ptr(:)
+    integer(kint), intent(in) :: sym_col_ind(:)
+    integer(kint), allocatable, intent(out) :: column_to_super(:)
 
     type(graph_t)    :: G
     type(elimtree_t) :: T
@@ -172,13 +184,14 @@ contains
     integer(kint) :: front, child, total_front_vars, pivot, first_col
     integer(kint) :: post_pos, new_col, i
     integer(kint), allocatable :: marker(:), work(:)
+    integer(kint), allocatable :: vertex_front(:)
 
     n = lu%N
 
     nz_off = 0
     do row = 1, n
-      do entry = lu%sym_row_ptr(row), lu%sym_row_ptr(row + 1) - 1
-        if (lu%sym_col_ind(entry) /= row) nz_off = nz_off + 1
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        if (sym_col_ind(entry) /= row) nz_off = nz_off + 1
       end do
     end do
 
@@ -186,15 +199,15 @@ contains
     G%xadj(0) = 0
     do row = 1, n
       cnt = 0
-      do entry = lu%sym_row_ptr(row), lu%sym_row_ptr(row + 1) - 1
-        if (lu%sym_col_ind(entry) /= row) cnt = cnt + 1
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        if (sym_col_ind(entry) /= row) cnt = cnt + 1
       end do
       G%xadj(row) = G%xadj(row - 1) + cnt
     end do
     do row = 1, n
       pos = G%xadj(row - 1)
-      do entry = lu%sym_row_ptr(row), lu%sym_row_ptr(row + 1) - 1
-        col = lu%sym_col_ind(entry)
+      do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+        col = sym_col_ind(entry)
         if (col /= row) then
           G%adjncy(pos) = col - 1
           pos = pos + 1
@@ -206,7 +219,6 @@ contains
     call monolis_pord_ordering(G, opts_dummy, .true., T)
 
     nfronts = T%nfronts
-    lu%nsuper = nfronts
     lu%nfronts = nfronts
 
     call monolis_alloc_I_1d(lu%perm,  n)
@@ -218,31 +230,27 @@ contains
       lu%iperm(lu%perm(i)) = i
     end do
 
-    call monolis_alloc_I_1d(lu%vertex_front,        n)
-    call monolis_alloc_I_1d(lu%column_to_super,     n)
-    call monolis_alloc_I_1d(lu%super_start,         nfronts)
-    call monolis_alloc_I_1d(lu%super_end,           nfronts)
-    call monolis_alloc_I_1d(lu%super_parent,        nfronts)
-    call monolis_alloc_I_1d(lu%front_parent,        nfronts)
-    call monolis_alloc_I_1d(lu%front_first_child,   nfronts)
-    call monolis_alloc_I_1d(lu%front_next_sibling,  nfronts)
-    call monolis_alloc_I_1d(lu%front_postorder,     nfronts)
-    call monolis_alloc_I_1d(lu%front_size,          nfronts)
-    call monolis_alloc_I_1d(lu%front_pivot_size,    nfronts)
-    call monolis_alloc_I_1d(lu%front_update_size,   nfronts)
-    call monolis_alloc_I_1d(lu%front_ptr,           nfronts + 1)
+    call monolis_alloc_I_1d(vertex_front,             n)
+    call monolis_alloc_I_1d(column_to_super,          n)
+    call monolis_alloc_I_1d(lu%super_start,           nfronts)
+    call monolis_alloc_I_1d(lu%front_parent,          nfronts)
+    call monolis_alloc_I_1d(lu%front_first_child,     nfronts)
+    call monolis_alloc_I_1d(lu%front_next_sibling,    nfronts)
+    call monolis_alloc_I_1d(lu%front_postorder,       nfronts)
+    call monolis_alloc_I_1d(lu%front_size,            nfronts)
+    call monolis_alloc_I_1d(lu%front_pivot_size,      nfronts)
+    call monolis_alloc_I_1d(lu%front_update_size,     nfronts)
+    call monolis_alloc_I_1d(lu%front_ptr,             nfronts + 1)
 
     do row = 1, n
-      lu%vertex_front(row) = T%vtx2front(row - 1) + 1
+      vertex_front(row) = T%vtx2front(row - 1) + 1
     end do
 
     lu%super_start(:) = n + 1
-    lu%super_end(:) = 0
-    lu%column_to_super(:) = 0
+    column_to_super(:) = 0
     lu%front_first_child(:) = 0
     lu%front_next_sibling(:) = 0
     lu%front_postorder(:) = 0
-    lu%l_pattern_nnz = 0
     lu%max_front_size = 0
 
     lu%front_ptr(1) = 1
@@ -252,8 +260,6 @@ contains
       lu%front_update_size(front) = T%ncolupdate(front - 1)
       lu%front_size(front) = lu%front_pivot_size(front) + lu%front_update_size(front)
       lu%max_front_size = max(lu%max_front_size, lu%front_size(front))
-      lu%l_pattern_nnz = lu%l_pattern_nnz + &
-          lu%front_pivot_size(front) * lu%front_size(front)
       total_front_vars = total_front_vars + lu%front_size(front)
       lu%front_ptr(front + 1) = lu%front_ptr(front) + lu%front_size(front)
 
@@ -262,17 +268,15 @@ contains
       else
         lu%front_parent(front) = T%parent(front - 1) + 1
       end if
-      lu%super_parent(front) = lu%front_parent(front)
     end do
 
     call monolis_alloc_I_1d(lu%front_ind, max(1, total_front_vars))
 
     do row = 1, n
       new_col = lu%perm(row)
-      front = lu%vertex_front(row)
-      lu%column_to_super(new_col) = front
+      front = vertex_front(row)
+      column_to_super(new_col) = front
       lu%super_start(front) = min(lu%super_start(front), new_col)
-      lu%super_end(front)   = max(lu%super_end(front),   new_col)
     end do
 
     !> firstchild / next_sibling
@@ -320,8 +324,8 @@ contains
 
       do pivot = 0, lu%front_pivot_size(front) - 1
         row = lu%iperm(first_col + pivot)
-        do entry = lu%sym_row_ptr(row), lu%sym_row_ptr(row + 1) - 1
-          col = lu%perm(lu%sym_col_ind(entry))
+        do entry = sym_row_ptr(row), sym_row_ptr(row + 1) - 1
+          col = lu%perm(sym_col_ind(entry))
           if (col > first_col .and. marker(col) /= front) then
             cnt = cnt + 1
             work(cnt) = col
@@ -342,17 +346,19 @@ contains
 
     call monolis_dealloc_I_1d(marker)
     call monolis_dealloc_I_1d(work)
+    call monolis_dealloc_I_1d(vertex_front)
     call freeElimTree(T)
     call freeGraph(G)
   end subroutine build_pord_front_structure
 
   !> 各非ゼロ要素を所属フロントに対応付け、orig_* を構築
-  subroutine build_original_front_entries(lu, n, row_ptr, col_ind)
+  subroutine build_original_front_entries(lu, n, row_ptr, col_ind, column_to_super)
     implicit none
     type(monolis_mat_lu), intent(inout) :: lu
     integer(kint), intent(in) :: n
     integer(kint), intent(in) :: row_ptr(:)
     integer(kint), intent(in) :: col_ind(:)
+    integer(kint), intent(in) :: column_to_super(:)
 
     integer(kint) :: nfronts, row, entry, col, new_row, new_col, first_col
     integer(kint) :: front, pos, first_pos, last_pos, row_local, col_local
@@ -370,7 +376,7 @@ contains
       do entry = row_ptr(row), row_ptr(row + 1) - 1
         new_col = lu%perm(col_ind(entry))
         first_col = min(new_row, new_col)
-        front = lu%column_to_super(first_col)
+        front = column_to_super(first_col)
         counts(front) = counts(front) + 1
       end do
     end do
@@ -392,7 +398,7 @@ contains
         col = col_ind(entry)
         new_col = lu%perm(col)
         first_col = min(new_row, new_col)
-        front = lu%column_to_super(first_col)
+        front = column_to_super(first_col)
         pos = next_pos(front)
 
         lu%orig_row_pos(pos) = new_row

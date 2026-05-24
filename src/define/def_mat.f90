@@ -97,42 +97,16 @@ module mod_monolis_def_mat
   type :: monolis_mat_lu
     !> 行列次元
     integer(kint) :: N = 0
-    !> ブロック自由度
-    integer(kint) :: NDOF = 0
-    !> 元 CSR の index 配列（コピー、1-based）
-    integer(kint), allocatable :: index(:)
-    !> 元 CSR の item 配列（コピー、1-based）
-    integer(kint), allocatable :: item(:)
-    !> 元行列値のコピー
-    real(kdouble), allocatable :: A_org(:)
     !> 置換配列（元 → 新、1-based）
     integer(kint), allocatable :: perm(:)
     !> 逆置換配列（新 → 元、1-based）
     integer(kint), allocatable :: iperm(:)
-    !> 対称化パターンの非ゼロ数
-    integer(kint) :: sym_nnz = 0
-    !> 対称化パターン CSR（1-based、N+1）
-    integer(kint), allocatable :: sym_row_ptr(:)
-    !> 対称化パターン CSR（1-based、sym_nnz）
-    integer(kint), allocatable :: sym_col_ind(:)
-    !> スーパーノード数
-    integer(kint) :: nsuper = 0
-    !> フロント数（= nsuper）
+    !> フロント数
     integer(kint) :: nfronts = 0
     !> 最大フロントサイズ
     integer(kint) :: max_front_size = 0
-    !> L パターンの非ゼロ数（推定）
-    integer(kint) :: l_pattern_nnz = 0
-    !> 元頂点 → 所属フロント
-    integer(kint), allocatable :: vertex_front(:)
     !> 各フロント先頭の置換後列番号
     integer(kint), allocatable :: super_start(:)
-    !> 各フロント末尾の置換後列番号
-    integer(kint), allocatable :: super_end(:)
-    !> 置換後列 → フロント
-    integer(kint), allocatable :: column_to_super(:)
-    !> スーパーノード親
-    integer(kint), allocatable :: super_parent(:)
     !> フロント変数列 CSR の index（nfronts+1、1-based）
     integer(kint), allocatable :: front_ptr(:)
     !> フロント変数列（置換後の列番号、front_ptr で区切る）
@@ -455,12 +429,8 @@ contains
     type(monolis_mat_lu), intent(inout) :: LU
 
     LU%N = 0
-    LU%NDOF = 0
-    LU%sym_nnz = 0
-    LU%nsuper = 0
     LU%nfronts = 0
     LU%max_front_size = 0
-    LU%l_pattern_nnz = 0
     LU%analyzed = .false.
     LU%factorized = .false.
 
@@ -482,18 +452,9 @@ contains
       deallocate(LU%factors)
     endif
 
-    call monolis_dealloc_I_1d(LU%index)
-    call monolis_dealloc_I_1d(LU%item)
-    call monolis_dealloc_R_1d(LU%A_org)
     call monolis_dealloc_I_1d(LU%perm)
     call monolis_dealloc_I_1d(LU%iperm)
-    call monolis_dealloc_I_1d(LU%sym_row_ptr)
-    call monolis_dealloc_I_1d(LU%sym_col_ind)
-    call monolis_dealloc_I_1d(LU%vertex_front)
     call monolis_dealloc_I_1d(LU%super_start)
-    call monolis_dealloc_I_1d(LU%super_end)
-    call monolis_dealloc_I_1d(LU%column_to_super)
-    call monolis_dealloc_I_1d(LU%super_parent)
     call monolis_dealloc_I_1d(LU%front_ptr)
     call monolis_dealloc_I_1d(LU%front_ind)
     call monolis_dealloc_I_1d(LU%front_parent)
@@ -516,13 +477,9 @@ contains
 
     LU%analyzed = .false.
     LU%factorized = .false.
-    LU%sym_nnz = 0
-    LU%nsuper = 0
     LU%nfronts = 0
     LU%max_front_size = 0
-    LU%l_pattern_nnz = 0
     LU%N = 0
-    LU%NDOF = 0
   end subroutine monolis_mat_finalize_LU
 
   !> @ingroup def_mat_init
