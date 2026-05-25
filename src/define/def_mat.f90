@@ -305,43 +305,6 @@ contains
   end subroutine monolis_mat_initialize_REORDER
 
   !> @ingroup def_mat_init
-  !> 行列構造体の初期化処理関数（フロンタル行列構造）
-  subroutine monolis_mat_initialize_frontal(FRONTAL)
-    implicit none
-    !> [in,out] 行列構造体
-    type(monolis_mat_frontal), intent(inout) :: FRONTAL
-
-    FRONTAL%nfront = 0
-    FRONTAL%npiv = 0
-    call monolis_dealloc_I_1d(FRONTAL%indices)
-    call monolis_dealloc_I_1d(FRONTAL%pivorder)
-    call monolis_dealloc_R_2d(FRONTAL%front)
-  end subroutine monolis_mat_initialize_frontal
-
-  !> @ingroup def_mat_init
-  !> 行列構造体の初期化処理関数（LU 分解構造）
-  subroutine monolis_mat_initialize_LU(LU)
-    implicit none
-    !> [in,out] 行列構造体
-    type(monolis_mat_lu), intent(inout) :: LU
-    integer(kint) :: i
-
-    LU%nfactor = 0
-    LU%nsuper = 0
-
-    if(allocated(LU%factors)) deallocate(LU%factors)
-
-    call monolis_dealloc_I_1d(LU%parent)
-    call monolis_dealloc_I_1d(LU%snode_belong)
-    call monolis_dealloc_I_1d(LU%snode_start)
-    call monolis_dealloc_I_1d(LU%snode_size)
-    call monolis_dealloc_I_1d(LU%snode_parent)
-    call monolis_dealloc_I_1d(LU%snode_fsize)
-    call monolis_dealloc_I_1d(LU%sfils)
-    call monolis_dealloc_I_1d(LU%sfrere)
-  end subroutine monolis_mat_initialize_LU
-
-  !> @ingroup def_mat_init
   !> 行列構造体の終了処理関数
   subroutine monolis_mat_finalize(monoMAT)
     implicit none
