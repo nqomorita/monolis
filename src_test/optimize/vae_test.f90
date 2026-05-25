@@ -19,6 +19,9 @@ contains
 
     !> cover_check 用に対象サブルーチン名を全て登録
     call monolis_std_global_log_string("monolis_opt_vae_init")
+    call monolis_std_global_log_string("monolis_opt_vae_init_layers")
+    call monolis_std_global_log_string("monolis_opt_vae_layer_init")
+    call monolis_std_global_log_string("monolis_opt_vae_layer_free")
     call monolis_std_global_log_string("monolis_opt_vae_finalize")
     call monolis_std_global_log_string("monolis_opt_vae_adam_init")
     call monolis_std_global_log_string("monolis_opt_vae_adam_free")
@@ -26,10 +29,19 @@ contains
     call monolis_std_global_log_string("monolis_opt_vae_glorot_uniform")
     call monolis_std_global_log_string("monolis_opt_vae_fill_randn")
     call monolis_std_global_log_string("monolis_opt_vae_shuffle")
+    call monolis_std_global_log_string("monolis_opt_vae_layer_forward")
+    call monolis_std_global_log_string("monolis_opt_vae_forward_stack")
+    call monolis_std_global_log_string("monolis_opt_vae_top_post")
+    call monolis_std_global_log_string("monolis_opt_vae_layer_backward")
+    call monolis_std_global_log_string("monolis_opt_vae_backward_stack")
+    call monolis_std_global_log_string("monolis_opt_vae_cache_free")
+    call monolis_std_global_log_string("monolis_opt_vae_grads_free")
     call monolis_std_global_log_string("monolis_opt_vae_train_step")
     call monolis_std_global_log_string("monolis_opt_vae_fit")
+    call monolis_std_global_log_string("monolis_opt_vae_encode_mu_lv")
     call monolis_std_global_log_string("monolis_opt_vae_reconstruct")
     call monolis_std_global_log_string("monolis_opt_vae_encode")
+    call monolis_std_global_log_string("monolis_opt_vae_decode_alloc")
     call monolis_std_global_log_string("monolis_opt_vae_decode")
     call monolis_std_global_log_string("monolis_opt_vae_sample_prior")
     call monolis_std_global_log_string("monolis_opt_vae_spx_child")
@@ -100,6 +112,22 @@ contains
     !> 後始末
     call monolis_opt_vae_finalize(net)
     call monolis_test_check_eq_I1("vae_test finalize D", net%D, 0)
+
+    !> 任意層数 (隠れ 2 層 enc / 2 層 dec) の初期化と 1 ステップ学習
+    call monolis_opt_vae_test_seed_rng(456)
+    call monolis_opt_vae_init_layers(net, D, (/ 6, 4 /), Z, (/ 5, 7 /))
+    call monolis_test_check_eq_I1("vae_test deep enc layers", size(net%enc), 2)
+    call monolis_test_check_eq_I1("vae_test deep dec layers", size(net%dec), 3)
+    call monolis_test_check_eq_I1("vae_test deep H (last enc)", net%H, 4)
+    call monolis_test_check_eq_I1("vae_test deep enc(1) out", net%enc(1)%out_dim, 6)
+    call monolis_test_check_eq_I1("vae_test deep dec(last) out", net%dec(3)%out_dim, D)
+    call monolis_opt_vae_train_step(net, X, 1.0d-3, 1.0d0, loss, recon, kl)
+    call monolis_test_check_eq_L1("vae_test deep loss finite", &
+      loss == loss .and. abs(loss) < huge(0.0d0), .true.)
+    call monolis_opt_vae_reconstruct(net, X, xhat)
+    call monolis_test_check_eq_L1("vae_test deep xhat in [0,1]", &
+      all(xhat >= 0.0d0) .and. all(xhat <= 1.0d0), .true.)
+    call monolis_opt_vae_finalize(net)
   end subroutine monolis_optimize_vae_test
 
   !> 再現性確保のための乱数シード
