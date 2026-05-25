@@ -167,12 +167,6 @@ SRC_OPT = \
 nnls.f90 \
 vae.f90
 
-SRC_FACT = \
-fillin.f90 \
-analysis.f90 \
-factorize.f90 \
-LU/LU_nn.f90
-
 SRC_PREC = \
 diag/diag_33.f90 \
 diag/diag_nn.f90 \
