@@ -17,6 +17,8 @@ module mod_monolis_def_mat
     real(kdouble), pointer, contiguous :: X(:) => null()
     !> 右辺ベクトル
     real(kdouble), pointer, contiguous :: B(:) => null()
+    !> 行列値（DIA 形式、column-major で (N, Ndiag) を 1 次元化）
+    real(kdouble), pointer, contiguous :: Adia(:) => null()
   end type monolis_mat_val_R
 
   !> 行列構造体（複素数型）
@@ -33,6 +35,8 @@ module mod_monolis_def_mat
     complex(kdouble), pointer, contiguous :: X(:) => null()
     !> 右辺ベクトル
     complex(kdouble), pointer, contiguous :: B(:) => null()
+    !> 行列値（DIA 形式、column-major で (N, Ndiag) を 1 次元化）
+    complex(kdouble), pointer, contiguous :: Adia(:) => null()
   end type monolis_mat_val_C
 
   !> 行列構造体（セパレート CSR 構造）
@@ -54,6 +58,14 @@ module mod_monolis_def_mat
     !> item 配列
     integer(kint), pointer, contiguous :: item(:) => null()
   end type monolis_mat_CSR
+
+  !> 行列構造体（DIA 構造、整数情報）
+  type monolis_mat_DIA
+    !> 対角線本数
+    integer(kint) :: Ndiag = 0
+    !> 各対角の主対角からのオフセット（負=下三角、正=上三角）
+    integer(kint), pointer, contiguous :: offset(:) => null()
+  end type monolis_mat_DIA
 
   !> 行列構造体（CSC 構造）
   type monolis_mat_CSC
@@ -175,6 +187,8 @@ module mod_monolis_def_mat
     type(monolis_mat_separated_CSR) :: SCSR
     !> 行列構造体（CSR 構造）
     type(monolis_mat_CSR) :: CSR
+    !> 行列構造体（DIA 構造、整数情報）
+    type(monolis_mat_DIA) :: DIA
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
     !> 行列構造体（reordering 構造）
@@ -204,6 +218,7 @@ contains
     call monolis_mat_initialize_val_C(monoMAT%C)
     call monolis_mat_initialize_SCSR(monoMAT%SCSR)
     call monolis_mat_initialize_CSR(monoMAT%CSR)
+    call monolis_mat_initialize_DIA(monoMAT%DIA)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
     call monolis_mat_initialize_REORDER(monoMAT%REORDER)
     call monolis_mat_initialize_LU(monoMAT%LU)
@@ -222,6 +237,7 @@ contains
     call monolis_pdealloc_R_1d(R%L)
     call monolis_pdealloc_R_1d(R%X)
     call monolis_pdealloc_R_1d(R%B)
+    call monolis_pdealloc_R_1d(R%Adia)
   end subroutine monolis_mat_initialize_val_R
 
   !> @ingroup def_mat_init
@@ -237,6 +253,7 @@ contains
     call monolis_pdealloc_C_1d(C%L)
     call monolis_pdealloc_C_1d(C%X)
     call monolis_pdealloc_C_1d(C%B)
+    call monolis_pdealloc_C_1d(C%Adia)
   end subroutine monolis_mat_initialize_val_C
 
   !> @ingroup def_mat_init
@@ -262,6 +279,28 @@ contains
     call monolis_pdealloc_I_1d(CSR%index)
     call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_initialize_CSR
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（DIA 構造）
+  subroutine monolis_mat_initialize_DIA(DIA)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_DIA), intent(inout) :: DIA
+
+    DIA%Ndiag = 0
+    call monolis_pdealloc_I_1d(DIA%offset)
+  end subroutine monolis_mat_initialize_DIA
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（DIA 構造）
+  subroutine monolis_mat_finalize_DIA(DIA)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_DIA), intent(inout) :: DIA
+
+    DIA%Ndiag = 0
+    call monolis_pdealloc_I_1d(DIA%offset)
+  end subroutine monolis_mat_finalize_DIA
 
   !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（CSC 構造）
@@ -294,6 +333,7 @@ contains
     call monolis_mat_finalize_val_C(monoMAT%C)
     call monolis_mat_finalize_SCSR(monoMAT%SCSR)
     call monolis_mat_finalize_CSR(monoMAT%CSR)
+    call monolis_mat_finalize_DIA(monoMAT%DIA)
     call monolis_mat_finalize_CSC(monoMAT%CSC)
     call monolis_mat_finalize_REORDER(monoMAT%REORDER)
     call monolis_mat_finalize_LU(monoMAT%LU)
@@ -312,6 +352,7 @@ contains
     call monolis_pdealloc_R_1d(R%L)
     call monolis_pdealloc_R_1d(R%X)
     call monolis_pdealloc_R_1d(R%B)
+    call monolis_pdealloc_R_1d(R%Adia)
   end subroutine monolis_mat_finalize_val_R
 
   !> @ingroup def_mat_init
@@ -327,6 +368,7 @@ contains
     call monolis_pdealloc_C_1d(C%L)
     call monolis_pdealloc_C_1d(C%X)
     call monolis_pdealloc_C_1d(C%B)
+    call monolis_pdealloc_C_1d(C%Adia)
   end subroutine monolis_mat_finalize_val_C
 
   !> @ingroup def_mat_init
