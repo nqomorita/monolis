@@ -17,6 +17,7 @@ module mod_monolis_solve
   use mod_monolis_solver_IDRS
   use mod_monolis_solver_COCG
   use mod_monolis_precond
+  use mod_monolis_spmat_convert_dia
 
   implicit none
 
@@ -91,7 +92,18 @@ contains
 
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
+#ifdef _OPENACC
+    !# CSR 形式から DIA 形式へ変換し、行列をデバイスに常駐させる
+    call monolis_convert_CSR_to_DIA_R(monoMAT)
+    !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
+#endif
+
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
+
+#ifdef _OPENACC
+    !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
+    call monolis_dealloc_DIA_R(monoMAT)
+#endif
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)
 

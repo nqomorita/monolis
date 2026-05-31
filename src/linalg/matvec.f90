@@ -4,6 +4,7 @@ module mod_monolis_matvec
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   use mod_monolis_vec_util
+  use mod_monolis_spmat_convert_dia
   implicit none
 
 contains
@@ -29,6 +30,9 @@ contains
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
 #ifdef _OPENACC
+    !# 単発呼び出し経路では CSR から DIA への変換がまだ行われていないため、ここで変換する
+    call monolis_convert_CSR_to_DIA_R(monolis%MAT)
+
     matAdia   => monolis%MAT%R%Adia
     matOffset => monolis%MAT%DIA%offset
 
@@ -51,6 +55,8 @@ contains
     !$acc exit data delete(Y)
     !$acc exit data delete(matAdia, matOffset)
     !$acc exit data delete(X)
+
+    call monolis_dealloc_DIA_R(monolis%MAT)
 #endif
   end subroutine monolis_matvec_product_R
 

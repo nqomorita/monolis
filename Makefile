@@ -104,7 +104,8 @@ spmat_nzpattern_util.f90 \
 spmat_reordering.f90 \
 spmat_nzpattern.f90 \
 spmat_handler.f90 \
-spmat_convert_sym.f90
+spmat_convert_sym.f90 \
+spmat_convert_dia.f90
 
 #spmat_fillin.f90 \
 #spmat_reorder.f90 \
