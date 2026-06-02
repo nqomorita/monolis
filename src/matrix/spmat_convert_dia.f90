@@ -16,7 +16,8 @@ contains
   !> CSR 形式から DIA 形式への変換（実数型、nxn ブロック）
   !> @details 各非ゼロブロック (i, item(j)) のブロック列オフセット item(j) - i を
   !>          全行から収集・ソート・一意化して対角線本数 Ndiag と offset(:) を確定する。
-  !>          値は Adia(NDOF2*((d-1)*N + (i-1)) + NDOF*(k-1) + l) の column-major 配置で詰める。
+  !>          値は Adia((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) の配置で詰める。
+  !>          行 i を最内（ストライド1）にし、GPU スレッド間のメモリアクセスをコアレッシングさせる。
   subroutine monolis_convert_CSR_to_DIA_R(monoMAT)
     implicit none
     !> [in,out] 行列構造体
@@ -84,7 +85,7 @@ contains
         d = diag_of_offset(in - i + NP)
         do k = 1, NDOF
           do l = 1, NDOF
-            monoMAT%R%Adia(NDOF2*((d-1)*N + (i-1)) + NDOF*(k-1) + l) = &
+            monoMAT%R%Adia((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
               monoMAT%R%A(NDOF2*(j-1) + NDOF*(k-1) + l)
           enddo
         enddo

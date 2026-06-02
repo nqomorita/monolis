@@ -11,10 +11,11 @@ N=${1:-10}
 NDOF=${2:-1}
 NLOOP=${3:-1}
 
-mpif90 -I../../include \
-  -std=legacy \
+mpif90 -I../../include -acc \
   -o solver main.f90 \
   -L../../lib -lmonolis_solver -lgedatsu -lmonolis_utils \
-  -lmetis -llapack -lblas
+  -lmetis 
 
 mpirun -np 1 ./solver -n ${N} -ndof ${NDOF} -nloop ${NLOOP}
+
+

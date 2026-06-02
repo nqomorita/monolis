@@ -372,7 +372,7 @@ contains
 !$omp & private(YT, XT, i, k, l, d, jcol, kn)
 !$omp do
 #endif
-!$acc parallel loop gang present(Adia, offset, X, Y) private(YT, XT)
+!$acc parallel loop gang vector present(Adia, offset, X, Y) private(YT, XT)
     do i = 1, N
       do k = 1, NDOF
         YT(k) = 0.0d0
@@ -381,13 +381,13 @@ contains
       do d = 1, Ndiag
         jcol = i + offset(d)
         if(jcol >= 1 .and. jcol <= NP)then
-          kn = NDOF2*((d-1)*N + (i-1))
+          kn = (d-1)*NDOF2*N + i
           do l = 1, NDOF
             XT(l) = X(NDOF*(jcol-1)+l)
           enddo
           do k = 1, NDOF
             do l = 1, NDOF
-              YT(k) = YT(k) + Adia(kn+NDOF*(k-1)+l) * XT(l)
+              YT(k) = YT(k) + Adia(kn + ((k-1)*NDOF + (l-1))*N) * XT(l)
             enddo
           enddo
         endif
