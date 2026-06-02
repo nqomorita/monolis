@@ -63,7 +63,7 @@ contains
     call monolis_alloc_R_1d(P, NPNDOF)
 
     !# OpenACC: 行列・前処理・ベクトル一式をデバイスに常駐させる
-    !$acc enter data copyin(X(1:NPNDOF), B(1:NNDOF))
+    !$acc enter data copyin(X(1:NPNDOF), B(1:NPNDOF))
     !$acc enter data copyin(matA, matIndex, matItem)
     !$acc enter data copyin(precD)
     !$acc enter data create(R(1:NPNDOF), Z(1:NPNDOF), Q(1:NPNDOF), P(1:NPNDOF))
@@ -74,7 +74,7 @@ contains
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, Z, Q, P)
       !$acc exit data delete(matA, matIndex, matItem, precD)
-      !$acc exit data delete(X(1:NPNDOF), B(1:NNDOF))
+      !$acc exit data delete(X(1:NPNDOF), B(1:NPNDOF))
       call monolis_dealloc_R_1d(R)
       call monolis_dealloc_R_1d(Z)
       call monolis_dealloc_R_1d(Q)
@@ -123,7 +123,7 @@ contains
     !# OpenACC: デバイス常駐データを破棄
     !$acc exit data delete(R, Z, Q, P)
     !$acc exit data delete(matA, matIndex, matItem, precD)
-    !$acc exit data delete(X(1:NPNDOF), B(1:NNDOF))
+    !$acc exit data delete(X(1:NPNDOF), B(1:NPNDOF))
 
     call monolis_dealloc_R_1d(R)
     call monolis_dealloc_R_1d(Z)

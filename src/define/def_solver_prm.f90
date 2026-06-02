@@ -250,12 +250,9 @@ contains
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
+    integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_timer_finalize")
-
-    !> ローカル配列 time を device 上に確保 (GPU ビルド時の monolis_allreduce_R の
-    !>  present 句要件を満たすため。CPU ビルドでは無視される)
-    !$acc enter data create(time)
 
     call monolis_mpi_local_barrier(monoCOM%comm)
 
@@ -281,9 +278,9 @@ contains
       time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
       time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
-      !$acc update device(time)
-      call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-      !$acc update self(time)
+      do i = 1, 6
+        call monolis_allreduce_R1(time(i), monolis_mpi_sum, monoCOM%comm)
+      enddo
 
       time = time/dble(monolis_mpi_get_global_comm_size())
 
@@ -333,9 +330,9 @@ contains
     time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
     time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
-    !$acc update device(time)
-    call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-    !$acc update self(time)
+    do i = 1, 6
+      call monolis_allreduce_R1(time(i), monolis_mpi_sum, monoCOM%comm)
+    enddo
 
     time = time/dble(monolis_mpi_get_global_comm_size())
 
@@ -346,7 +343,6 @@ contains
     monoPRM%Rarray(monolis_R_time_comm_dotp) = time(5)
     monoPRM%Rarray(monolis_R_time_comm_spmv) = time(6)
 
-    !$acc exit data delete(time)
   end subroutine monolis_timer_finalize
 
   !> @ingroup def_init

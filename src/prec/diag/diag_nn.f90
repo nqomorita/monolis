@@ -163,24 +163,45 @@ contains
     type(monolis_mat), target, intent(in) :: monoMAT
     !> [in] 前処理構造体
     type(monolis_mat), target, intent(in) :: monoPREC
-    integer(kint) :: i, j, k, N, NDOF, NDOF2
+    integer(kint) :: N, NDOF
     real(kdouble) :: X(:), Y(:)
     real(kdouble), pointer :: ALU(:)
-    real(kdouble), allocatable :: T(:)
 
     N =  monoMAT%N
     NDOF  = monoMAT%NDOF
-    NDOF2 = NDOF*NDOF
     ALU => monoPREC%R%D
 
-    call monolis_alloc_R_1d(T, NDOF)
+    !# 作業配列 T を仮引数 NDOF からの自動配列（スレッドプライベートのスタック）として
+    !#  扱うため、計算カーネルを内部ルーチンに分離する。これにより GPU 上でカーネル毎の
+    !#  allocatable 動的確保が不要になり、前処理適用が大幅に高速化される。
+    call monolis_precond_diag_nn_apply_kernel_R(N, NDOF, ALU, X, Y)
+  end subroutine monolis_precond_diag_nn_apply_R
+
+  !> @ingroup dev_prec
+  !> 前処理適用カーネル：対角スケーリング前処理（nxn ブロック、実数型）
+  subroutine monolis_precond_diag_nn_apply_kernel_R(N, NDOF, ALU, X, Y)
+    implicit none
+    !> [in] ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
+    !> [in] 前処理（LU 分解済み対角ブロック）
+    real(kdouble), intent(in) :: ALU(:)
+    !> [in] 入力ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 出力ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, j, k, NDOF2
+    real(kdouble) :: T(NDOF)
+
+    NDOF2 = NDOF*NDOF
 
 !$omp parallel default(none) &
 !$omp & shared(ALU, X, Y) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
 !$omp do
-!$acc parallel loop private(T, j, k)
+!$acc parallel loop gang vector private(T, j, k) present(ALU, X, Y)
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)
@@ -203,9 +224,7 @@ contains
 !$acc end parallel loop
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
-  end subroutine monolis_precond_diag_nn_apply_R
+  end subroutine monolis_precond_diag_nn_apply_kernel_R
 
   !> @ingroup prec
   !> 前処理適用：対角スケーリング前処理（nxn ブロック、複素数型）
