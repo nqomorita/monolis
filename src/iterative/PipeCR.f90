@@ -64,6 +64,10 @@ contains
     call monolis_alloc_R_1d(M, NPNDOF)
     call monolis_alloc_R_1d(S, NPNDOF)
 
+    !# OpenACC: ソルバ固有のワーク配列のみデバイスに確保（X/B/precD は外側で常駐）
+    !$acc enter data create(R(1:NPNDOF), U(1:NPNDOF), V(1:NPNDOF), Q(1:NPNDOF), P(1:NPNDOF), &
+    !$acc                   Z(1:NPNDOF), L(1:NPNDOF), M(1:NPNDOF), S(1:NPNDOF))
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, B2, tdotp, tcomm_dotp)
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
@@ -118,12 +122,17 @@ contains
       alpha1 = 1.0d0/alpha
     enddo
 
+    !$acc update self(X(1:NPNDOF))
+
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
     monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
+
+    !# OpenACC: ワーク配列のみ破棄（X/B/precD の破棄は外側で実施）
+    !$acc exit data delete(R, U, V, Q, P, Z, L, M, S)
 
     call monolis_dealloc_R_1d(R)
     call monolis_dealloc_R_1d(U)

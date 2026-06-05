@@ -62,15 +62,32 @@ contains
     call monolis_alloc_R_1d(T , NPNDOF)
     call monolis_alloc_R_1d(V , NPNDOF)
 
+    !# OpenACC: ソルバ固有のワーク配列のみデバイスに確保（X/B/precD は外側で常駐）
+    !$acc enter data create(R(1:NPNDOF), RT(1:NPNDOF), P(1:NPNDOF), PT(1:NPNDOF), &
+    !$acc                   S(1:NPNDOF), ST(1:NPNDOF), T(1:NPNDOF), V(1:NPNDOF))
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+    if(is_converge)then
+      !$acc update self(X(1:NPNDOF))
+      !$acc exit data delete(R, RT, P, PT, S, ST, T, V)
+      call monolis_dealloc_R_1d(R )
+      call monolis_dealloc_R_1d(RT)
+      call monolis_dealloc_R_1d(P )
+      call monolis_dealloc_R_1d(PT)
+      call monolis_dealloc_R_1d(S )
+      call monolis_dealloc_R_1d(ST)
+      call monolis_dealloc_R_1d(T )
+      call monolis_dealloc_R_1d(V )
+      return
+    endif
 
     call monolis_vec_copy_R(NNDOF, R, RT)
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, RT, rho, tdotp, tcomm_dotp)
       if(dabs(rho) == 0.0d0)then
+        !$acc update self(R(1:NNDOF), RT(1:NNDOF))
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, R, RT, rho, tdotp, tcomm_dotp)
       endif
@@ -82,7 +99,7 @@ contains
 !$omp & firstprivate(NNDOF, beta, omega) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop present(P, R, V)
         do i = 1, NNDOF
           P(i) = R(i) + beta * (P(i) - omega * V(i))
         enddo
@@ -97,6 +114,7 @@ contains
       call monolis_matvec_product_main_R(monoCOM, monoMAT, PT, V, tspmv, tcomm_spmv)
       call monolis_inner_product_main_R(monoCOM, NNDOF, RT, V, c2, tdotp, tcomm_dotp)
       if(dabs(c2) == 0.0d0)then
+        !$acc update self(RT(1:NNDOF), V(1:NNDOF))
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, RT, V, c2, tdotp, tcomm_dotp)
       endif
@@ -109,8 +127,11 @@ contains
 
       call monolis_inner_product_main_R_no_comm(NNDOF, T, S, CG(1))
       call monolis_inner_product_main_R_no_comm(NNDOF, T, T, CG(2))
+      !$acc data copy(CG)
       call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
+      !$acc end data
       if(dabs(CG(2)) == 0.0d0)then
+        !$acc update self(T(1:NNDOF))
         call monolis_global_sorted_inner_product_main_R(monoCOM, &
           NNDOF, T, T, CG(2), tdotp, tcomm_dotp)
       endif
@@ -122,7 +143,7 @@ contains
 !$omp & firstprivate(NNDOF, alpha, omega) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop present(X, PT, ST)
       do i = 1, NNDOF
         X(i) = X(i) + alpha*PT(i) + omega*ST(i)
       enddo
@@ -142,12 +163,17 @@ contains
       rho1 = rho
     enddo
 
+    !$acc update self(X(1:NPNDOF))
+
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
     monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
+
+    !# OpenACC: ワーク配列のみ破棄（X/B/precD の破棄は外側で実施）
+    !$acc exit data delete(R, RT, P, PT, S, ST, T, V)
 
     call monolis_dealloc_R_1d(R )
     call monolis_dealloc_R_1d(RT)

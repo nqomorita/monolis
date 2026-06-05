@@ -5,6 +5,8 @@ module mod_monolis_matvec
   use mod_monolis_def_struc
   use mod_monolis_lapack
   use mod_monolis_vec_util
+  use mod_monolis_spmat_convert_dia
+  use mod_monolis_spmat_convert_ell
   implicit none
 
 contains
@@ -13,8 +15,8 @@ contains
   !> 疎行列ベクトル積（実数型）
   subroutine monolis_matvec_product_R(monolis, monoCOM, X, Y)
     implicit none
-    !> [in] monolis 構造体
-    type(monolis_structure), intent(in) :: monolis
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
     !> [in,out] 右辺ベクトル
@@ -22,30 +24,42 @@ contains
     !> [out] 結果ベクトル
     real(kdouble), intent(out) :: Y(:)
     real(kdouble) :: tspmv, tcomm
-    real(kdouble), pointer, contiguous :: matA(:)
-    integer(kint), pointer, contiguous :: matIndex(:), matItem(:)
+#ifdef _OPENACC
+    real(kdouble), pointer, contiguous :: matAdia(:)
+    integer(kint), pointer, contiguous :: matOffset(:)
+#endif
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
-    matA     => monolis%MAT%R%A
-    matIndex => monolis%MAT%CSR%index
-    matItem  => monolis%MAT%CSR%item
+#ifdef _OPENACC
+    !# 単発呼び出し経路では CSR から DIA への変換がまだ行われていないため、ここで変換する
+    call monolis_convert_CSR_to_DIA_R(monolis%MAT)
 
-    !# OpenACC: 単発呼び出し用に行列・X をデバイスに転送し、Y は create
+    matAdia   => monolis%MAT%R%Adia
+    matOffset => monolis%MAT%DIA%offset
+
+    !# OpenACC: 単発呼び出し用に DIA 行列・X をデバイスに転送し、Y は create
     !$acc enter data copyin(X)
-    !$acc enter data copyin(matA, matIndex, matItem)
+    !$acc enter data copyin(matAdia, matOffset)
     !$acc enter data create(Y)
+#endif
 
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
 
+#ifdef _OPENACC
     !# OpenACC: Y を host に取り出し（後続の MPI 通信は host で実施）
     !$acc update self(Y)
+#endif
 
     call monolis_mpi_update_R_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
 
+#ifdef _OPENACC
     !$acc exit data delete(Y)
-    !$acc exit data delete(matA, matIndex, matItem)
+    !$acc exit data delete(matAdia, matOffset)
     !$acc exit data delete(X)
+
+    call monolis_dealloc_DIA_R(monolis%MAT)
+#endif
   end subroutine monolis_matvec_product_R
 
   !> @ingroup linalg
@@ -93,6 +107,16 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
 
+#ifdef _OPENACC
+    !# OpenACC 有効時は DIA / ELL 形式の SpMV を呼ぶ（変換済みの形式で分岐）
+    if(associated(monoMAT%R%Aell))then
+      call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
+        monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
+    else
+      call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
+        monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
+    endif
+#else
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
     elseif(monoMAT%NDOF == 1)then
@@ -103,6 +127,7 @@ contains
     else
       call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
     endif
+#endif
 
     t2 = monolis_get_time()
     tspmv = tspmv + t2 - t1
@@ -214,14 +239,11 @@ contains
     call monolis_alloc_R_1d(XT, max_dof)
     call monolis_alloc_R_1d(YT, max_dof)
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop present(A, X, Y, index, item, n_dof_list, n_dof_index, n_dof_index2) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -246,11 +268,8 @@ contains
         Y(kn+k) = YT(k)
       enddo
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_V_R
 
   !> @ingroup dev_linalg
@@ -282,14 +301,11 @@ contains
     call monolis_alloc_C_1d(XT, max_dof)
     call monolis_alloc_C_1d(YT, max_dof)
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop present(A, X, Y, index, item, n_dof_list, n_dof_index, n_dof_index2) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -314,11 +330,8 @@ contains
         Y(kn+k) = YT(k)
       enddo
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_V_C
 
   !> @ingroup dev_linalg
@@ -344,14 +357,11 @@ contains
 
     NDOF2 = NDOF*NDOF
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, ZT, TMP, i, j, k, l, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop present(A, X, Y, index, item) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -377,12 +387,135 @@ contains
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
+  end subroutine monolis_matvec_nn_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、DIA 形式、nxn ブロック）
+  subroutine monolis_matvec_DIA_nn_R(N, NP, Ndiag, offset, Adia, X, Y, NDOF)
+    implicit none
+    !> [in] 内部ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] 全ブロック列数（X の有効範囲、ブロック単位）
+    integer(kint), intent(in) :: NP
+    !> [in] 対角線本数
+    integer(kint), intent(in) :: Ndiag
+    !> [in] 対角オフセット配列（ブロック単位）
+    integer(kint), intent(in) :: offset(:)
+    !> [in] 行列成分（DIA 形式、column-major）
+    real(kdouble), intent(in) :: Adia(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
+    integer(kint) :: i, k, l, d, jcol, kn, NDOF2
+    real(kdouble) :: XT(NDOF), YT(NDOF)
+
+    NDOF2 = NDOF*NDOF
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Adia, Y, X, offset) &
+!$omp & firstprivate(N, NP, Ndiag, NDOF, NDOF2) &
+!$omp & private(YT, XT, i, k, l, d, jcol, kn)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Adia, offset, X, Y) private(YT, XT)
+    do i = 1, N
+      do k = 1, NDOF
+        YT(k) = 0.0d0
+      enddo
+!$acc loop seq
+      do d = 1, Ndiag
+        jcol = i + offset(d)
+        if(jcol >= 1 .and. jcol <= NP)then
+          kn = (d-1)*NDOF2*N + i
+          do l = 1, NDOF
+            XT(l) = X(NDOF*(jcol-1)+l)
+          enddo
+          do k = 1, NDOF
+            do l = 1, NDOF
+              YT(k) = YT(k) + Adia(kn + ((k-1)*NDOF + (l-1))*N) * XT(l)
+            enddo
+          enddo
+        endif
+      enddo
+      do k = 1, NDOF
+        Y(NDOF*(i-1)+k) = YT(k)
+      enddo
+    enddo
 !$acc end parallel loop
 #ifndef _OPENACC
 !$omp end do
 !$omp end parallel
 #endif
-  end subroutine monolis_matvec_nn_R
+  end subroutine monolis_matvec_DIA_nn_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、ELL 形式、nxn ブロック）
+  subroutine monolis_matvec_ELL_nn_R(N, NP, Nmaxcol, col, Aell, X, Y, NDOF)
+    implicit none
+    !> [in] 内部ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] 全ブロック列数（X の有効範囲、ブロック単位）
+    integer(kint), intent(in) :: NP
+    !> [in] 1 行あたりの最大非ゼロブロック数
+    integer(kint), intent(in) :: Nmaxcol
+    !> [in] ブロック列番号配列（column-major、0=パディング）
+    integer(kint), intent(in) :: col(:)
+    !> [in] 行列成分（ELL 形式、column-major）
+    real(kdouble), intent(in) :: Aell(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
+    integer(kint) :: i, k, l, j, jcol, kn, NDOF2
+    real(kdouble) :: XT(NDOF), YT(NDOF)
+
+    NDOF2 = NDOF*NDOF
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Aell, Y, X, col) &
+!$omp & firstprivate(N, NP, Nmaxcol, NDOF, NDOF2) &
+!$omp & private(YT, XT, i, k, l, j, jcol, kn)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Aell, col, X, Y) private(YT, XT)
+    do i = 1, N
+      do k = 1, NDOF
+        YT(k) = 0.0d0
+      enddo
+!$acc loop seq
+      do j = 1, Nmaxcol
+        jcol = col((j-1)*N + i)
+        if(jcol >= 1 .and. jcol <= NP)then
+          kn = (j-1)*NDOF2*N + i
+          do l = 1, NDOF
+            XT(l) = X(NDOF*(jcol-1)+l)
+          enddo
+          do k = 1, NDOF
+            do l = 1, NDOF
+              YT(k) = YT(k) + Aell(kn + ((k-1)*NDOF + (l-1))*N) * XT(l)
+            enddo
+          enddo
+        endif
+      enddo
+      do k = 1, NDOF
+        Y(NDOF*(i-1)+k) = YT(k)
+      enddo
+    enddo
+!$acc end parallel loop
+#ifndef _OPENACC
+!$omp end do
+!$omp end parallel
+#endif
+  end subroutine monolis_matvec_ELL_nn_R
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数、nxn ブロック）
@@ -407,14 +540,11 @@ contains
 
     NDOF2 = NDOF*NDOF
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop present(A, X, Y, index, item) private(YT, XT)
     do i = 1, N
       YT = 0.0d0
       jS = index(i) + 1
@@ -440,11 +570,8 @@ contains
         Y(NDOF*(i-1)+k) = YT(k)
       enddo
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_nn_C
 
   !> @ingroup dev_linalg
@@ -466,30 +593,23 @@ contains
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: Y1
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop gang present(A, X, Y, index, item) private(Y1, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
-!$acc loop vector reduction(+:Y1) private(in)
       do j = jS, jE
         in = item(j)
         Y1 = Y1 + A(j)*X(in)
       enddo
       Y(i) = Y1
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_11_R
 
   !> @ingroup dev_linalg
@@ -511,30 +631,23 @@ contains
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: Y1
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, i, j, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop gang present(A, X, Y, index, item) private(Y1, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
-!$acc loop vector reduction(+:Y1) private(in)
       do j = jS, jE
         in = item(j)
         Y1 = Y1 + A(j)*X(in)
       enddo
       Y(i) = Y1
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_11_C
 
   !> @ingroup dev_linalg
@@ -556,22 +669,17 @@ contains
     integer(kint) :: i, j, in, jS, jE
     real(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop gang present(A, X, Y, index, item) &
-!$acc & private(Y1, Y2, Y3, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
       Y3 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
-!$acc loop vector reduction(+:Y1, Y2, Y3) private(in, X1, X2, X3)
       do j = jS, jE
         in = item(j)
         X1 = X(3*in-2)
@@ -585,11 +693,8 @@ contains
       Y(3*i-1) = Y2
       Y(3*i  ) = Y3
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_33_R
 
   !> @ingroup dev_linalg
@@ -611,22 +716,17 @@ contains
     integer(kint) :: i, j, in, jS, jE
     complex(kdouble) :: X1, X2, X3, Y1, Y2, Y3
 
-#ifndef _OPENACC
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item) &
 !$omp & firstprivate(N) &
 !$omp & private(Y1, Y2, Y3, X1, X2, X3, i, j, jS, jE, in)
 !$omp do
-#endif
-!$acc parallel loop gang present(A, X, Y, index, item) &
-!$acc & private(Y1, Y2, Y3, jS, jE)
     do i = 1, N
       Y1 = 0.0d0
       Y2 = 0.0d0
       Y3 = 0.0d0
       jS = index(i) + 1
       jE = index(i + 1)
-!$acc loop vector reduction(+:Y1, Y2, Y3) private(in, X1, X2, X3)
       do j = jS, jE
         in = item(j)
         X1 = X(3*in-2)
@@ -640,11 +740,8 @@ contains
       Y(3*i-1) = Y2
       Y(3*i  ) = Y3
     enddo
-!$acc end parallel loop
-#ifndef _OPENACC
 !$omp end do
 !$omp end parallel
-#endif
   end subroutine monolis_matvec_33_C
 
   !> @ingroup dev_linalg

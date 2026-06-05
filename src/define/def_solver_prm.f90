@@ -165,6 +165,14 @@ module mod_monolis_def_solver
   !> Chebyshev 反復法の次数
   integer(kint), parameter :: monolis_prm_I_CHEBYSHEV_degree = 36
 
+  !> パラメータ：GPU 疎行列ベクトル積の行列格納形式（monolis_spmv_ELL, monolis_spmv_DIA）
+  integer(kint), parameter :: monolis_prm_I_spmv_format = 25
+
+  !> パラメータ：SpMV 格納形式（ELL 形式、GPU 既定）
+  integer(kint), parameter :: monolis_spmv_ELL = 0
+  !> パラメータ：SpMV 格納形式（DIA 形式）
+  integer(kint), parameter :: monolis_spmv_DIA = 1
+
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
   !> パラメータ：現在の残差
@@ -242,6 +250,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_DCG_inner_method) = 1
     monoPRM%Iarray(monolis_prm_I_DCG_inner_prec) = 1
     monoPRM%Iarray(monolis_prm_I_DCG_inner_max_iter) = 10000
+    monoPRM%Iarray(monolis_prm_I_spmv_format) = monolis_spmv_ELL
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0
@@ -294,12 +303,9 @@ contains
     !> [in] 通信テーブル構造体
     type(monolis_com), intent(in) :: monoCOM
     real(kdouble) :: t1, time(6), t_max, t_min, t_avg, t_sd
+    integer(kint) :: i
 
     call monolis_std_debug_log_header("monolis_timer_finalize")
-
-    !> ローカル配列 time を device 上に確保 (GPU ビルド時の monolis_allreduce_R の
-    !>  present 句要件を満たすため。CPU ビルドでは無視される)
-    !$acc enter data create(time)
 
     call monolis_mpi_local_barrier(monoCOM%comm)
 
@@ -325,9 +331,9 @@ contains
       time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
       time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
-      !$acc update device(time)
-      call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-      !$acc update self(time)
+      do i = 1, 6
+        call monolis_allreduce_R1(time(i), monolis_mpi_sum, monoCOM%comm)
+      enddo
 
       time = time/dble(monolis_mpi_get_global_comm_size())
 
@@ -377,9 +383,9 @@ contains
     time(5) = monoPRM%Rarray(monolis_R_time_comm_dotp)
     time(6) = monoPRM%Rarray(monolis_R_time_comm_spmv)
 
-    !$acc update device(time)
-    call monolis_allreduce_R(6, time, monolis_mpi_sum, monoCOM%comm)
-    !$acc update self(time)
+    do i = 1, 6
+      call monolis_allreduce_R1(time(i), monolis_mpi_sum, monoCOM%comm)
+    enddo
 
     time = time/dble(monolis_mpi_get_global_comm_size())
 
@@ -390,7 +396,6 @@ contains
     monoPRM%Rarray(monolis_R_time_comm_dotp) = time(5)
     monoPRM%Rarray(monolis_R_time_comm_spmv) = time(6)
 
-    !$acc exit data delete(time)
   end subroutine monolis_timer_finalize
 
   !> @ingroup def_init

@@ -130,6 +130,13 @@ static const int MONOLIS_PRM_I_DCG_INNER_PREC = 34;
 
 static const int MONOLIS_PRM_I_DCG_INNER_MAX_ITER = 35;
 
+static const int MONOLIS_PRM_I_SPMV_FORMAT = 25;
+
+
+static const int MONOLIS_SPMV_ELL = 0;
+
+static const int MONOLIS_SPMV_DIA = 1;
+
 
 static const int MONOLIS_PRM_R_TOL = 1;
 

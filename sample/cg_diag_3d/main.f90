@@ -95,7 +95,7 @@ program main
   !>   全節点で対角優位 → SPD を保証
   do i = 1, n_node
     do idof = 1, NDOF
-      call monolis_add_scalar_to_sparse_matrix_R(mat, i, i, idof, idof, 7.0d0)
+      call monolis_add_scalar_to_sparse_matrix_R(mat, i, i, idof, idof, 5.95d0)
     enddo
   enddo
 

@@ -30,6 +30,16 @@ void monolis_set_precond(
   int      param);
 
 /**
+ * @brief GPU 疎行列ベクトル積の行列格納形式の設定（MONOLIS_SPMV_ELL, MONOLIS_SPMV_DIA）
+ * @param[inout] mat monolis 構造体
+ * @param[in] param パラメータ
+ * @ingroup param
+ */
+void monolis_set_spmv_format(
+  MONOLIS* mat,
+  int      param);
+
+/**
  * @brief 最大反復回数の設定
  * @param[inout] mat monolis 構造体
  * @param[in] prm パラメータ
@@ -128,6 +138,16 @@ void monolis_set_prec_stored(
 void monolis_set_error_abort(
   MONOLIS* mat,
   bool     param);
+
+/**
+ * @brief IDR(s) 法の基底数の設定
+ * @param[inout] mat monolis 構造体
+ * @param[in] param パラメータ
+ * @ingroup param
+ */
+void monolis_set_solver_IDRS_num_basis(
+  MONOLIS* mat,
+  int      param);
 
 /**
  * @brief 反復回数と残差履歴の表示の設定

@@ -10,6 +10,8 @@ program monolis_test
   use mod_monolis_spmat_handler_util_test
   use mod_monolis_spmat_handler_test
   use mod_monolis_spmat_convert_sym_test
+  use mod_monolis_spmat_convert_dia_test
+  use mod_monolis_spmat_convert_ell_test
   use mod_monolis_vec_util_test
   use mod_monolis_linalg_test
   use mod_monolis_matalg_dense_test
@@ -57,6 +59,8 @@ program monolis_test
   call monolis_spmat_handler_util_test()
   call monolis_spmat_handler_test()
   call monolis_spmat_convert_sym_test()
+  call monolis_spmat_convert_dia_test()
+  call monolis_spmat_convert_ell_test()
 
   call monolis_vec_util_test()
   call monolis_linalg_test()

@@ -135,4 +135,14 @@ void monolis_def_solver_util_c_test(){
   mat.prm.Rarray[MONOLIS_R_TIME_COMM_SPMV] = 9.0;
   monolis_get_time_comm_spmv(&mat, &r_param);
   monolis_test_check_eq_R1("monolis_def_solver_util_c_test 24", r_param, 9.0);
+
+  clear_Iarray(&mat);
+  i_param = MONOLIS_SPMV_DIA;
+  monolis_set_spmv_format(&mat, i_param);
+  monolis_test_check_eq_I1("monolis_def_solver_util_c_test 25", mat.prm.Iarray[MONOLIS_PRM_I_SPMV_FORMAT], MONOLIS_SPMV_DIA);
+
+  clear_Iarray(&mat);
+  i_param = 8;
+  monolis_set_solver_IDRS_num_basis(&mat, i_param);
+  monolis_test_check_eq_I1("monolis_def_solver_util_c_test 26", mat.prm.Iarray[MONOLIS_PRM_I_IDRS_DIM], 8);
 }

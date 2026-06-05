@@ -58,6 +58,17 @@ contains
   end subroutine monolis_set_precond
 
   !> @ingroup param
+  !> GPU 疎行列ベクトル積の行列格納形式の設定（monolis_spmv_ELL, monolis_spmv_DIA）
+  subroutine monolis_set_spmv_format(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer(kint), intent(in) :: param
+    monolis%PRM%Iarray(monolis_prm_I_spmv_format) = param
+  end subroutine monolis_set_spmv_format
+
+  !> @ingroup param
   !> 最大反復回数の設定
   subroutine monolis_set_maxiter(monolis, param)
     implicit none
