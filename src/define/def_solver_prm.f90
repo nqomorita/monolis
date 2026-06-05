@@ -135,6 +135,14 @@ module mod_monolis_def_solver
   !> パラメータ：IDR(S) 法の基底数
   integer(kint), parameter :: monolis_prm_I_IDRS_DIM = 24
 
+  !> パラメータ：GPU 疎行列ベクトル積の行列格納形式（monolis_spmv_ELL, monolis_spmv_DIA）
+  integer(kint), parameter :: monolis_prm_I_spmv_format = 25
+
+  !> パラメータ：SpMV 格納形式（ELL 形式、GPU 既定）
+  integer(kint), parameter :: monolis_spmv_ELL = 0
+  !> パラメータ：SpMV 格納形式（DIA 形式）
+  integer(kint), parameter :: monolis_spmv_DIA = 1
+
   !> パラメータ：収束判定閾値
   integer(kint), parameter :: monolis_prm_R_tol = 1
   !> パラメータ：現在の残差
@@ -200,6 +208,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_show_summary) = monolis_I_true
     monoPRM%Iarray(monolis_prm_I_show_time_statistics) = monolis_I_false
     monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
+    monoPRM%Iarray(monolis_prm_I_spmv_format) = monolis_spmv_ELL
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0

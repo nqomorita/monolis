@@ -19,6 +19,8 @@ module mod_monolis_def_mat
     real(kdouble), pointer, contiguous :: B(:) => null()
     !> 行列値（DIA 形式、column-major で (N, Ndiag) を 1 次元化）
     real(kdouble), pointer, contiguous :: Adia(:) => null()
+    !> 行列値（ELL 形式、column-major で (N, Nmaxcol) を 1 次元化）
+    real(kdouble), pointer, contiguous :: Aell(:) => null()
   end type monolis_mat_val_R
 
   !> 行列構造体（複素数型）
@@ -37,6 +39,8 @@ module mod_monolis_def_mat
     complex(kdouble), pointer, contiguous :: B(:) => null()
     !> 行列値（DIA 形式、column-major で (N, Ndiag) を 1 次元化）
     complex(kdouble), pointer, contiguous :: Adia(:) => null()
+    !> 行列値（ELL 形式、column-major で (N, Nmaxcol) を 1 次元化）
+    complex(kdouble), pointer, contiguous :: Aell(:) => null()
   end type monolis_mat_val_C
 
   !> 行列構造体（セパレート CSR 構造）
@@ -66,6 +70,14 @@ module mod_monolis_def_mat
     !> 各対角の主対角からのオフセット（負=下三角、正=上三角）
     integer(kint), pointer, contiguous :: offset(:) => null()
   end type monolis_mat_DIA
+
+  !> 行列構造体（ELL 構造、整数情報）
+  type monolis_mat_ELL
+    !> 1 行あたりの最大非ゼロブロック数
+    integer(kint) :: Nmaxcol = 0
+    !> 各スロットのブロック列番号（column-major で (N, Nmaxcol) を 1 次元化、0=パディング）
+    integer(kint), pointer, contiguous :: col(:) => null()
+  end type monolis_mat_ELL
 
   !> 行列構造体（CSC 構造）
   type monolis_mat_CSC
@@ -189,6 +201,8 @@ module mod_monolis_def_mat
     type(monolis_mat_CSR) :: CSR
     !> 行列構造体（DIA 構造、整数情報）
     type(monolis_mat_DIA) :: DIA
+    !> 行列構造体（ELL 構造、整数情報）
+    type(monolis_mat_ELL) :: ELL
     !> 行列構造体（CSC 構造）
     type(monolis_mat_CSC) :: CSC
     !> 行列構造体（reordering 構造）
@@ -219,6 +233,7 @@ contains
     call monolis_mat_initialize_SCSR(monoMAT%SCSR)
     call monolis_mat_initialize_CSR(monoMAT%CSR)
     call monolis_mat_initialize_DIA(monoMAT%DIA)
+    call monolis_mat_initialize_ELL(monoMAT%ELL)
     call monolis_mat_initialize_CSC(monoMAT%CSC)
     call monolis_mat_initialize_REORDER(monoMAT%REORDER)
     call monolis_mat_initialize_LU(monoMAT%LU)
@@ -238,6 +253,7 @@ contains
     call monolis_pdealloc_R_1d(R%X)
     call monolis_pdealloc_R_1d(R%B)
     call monolis_pdealloc_R_1d(R%Adia)
+    call monolis_pdealloc_R_1d(R%Aell)
   end subroutine monolis_mat_initialize_val_R
 
   !> @ingroup def_mat_init
@@ -254,6 +270,7 @@ contains
     call monolis_pdealloc_C_1d(C%X)
     call monolis_pdealloc_C_1d(C%B)
     call monolis_pdealloc_C_1d(C%Adia)
+    call monolis_pdealloc_C_1d(C%Aell)
   end subroutine monolis_mat_initialize_val_C
 
   !> @ingroup def_mat_init
@@ -303,6 +320,28 @@ contains
   end subroutine monolis_mat_finalize_DIA
 
   !> @ingroup def_mat_init
+  !> 行列構造体の初期化処理関数（ELL 構造）
+  subroutine monolis_mat_initialize_ELL(ELL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_ELL), intent(inout) :: ELL
+
+    ELL%Nmaxcol = 0
+    call monolis_pdealloc_I_1d(ELL%col)
+  end subroutine monolis_mat_initialize_ELL
+
+  !> @ingroup def_mat_init
+  !> 行列構造体の終了処理関数（ELL 構造）
+  subroutine monolis_mat_finalize_ELL(ELL)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat_ELL), intent(inout) :: ELL
+
+    ELL%Nmaxcol = 0
+    call monolis_pdealloc_I_1d(ELL%col)
+  end subroutine monolis_mat_finalize_ELL
+
+  !> @ingroup def_mat_init
   !> 行列構造体の初期化処理関数（CSC 構造）
   subroutine monolis_mat_initialize_CSC(CSC)
     implicit none
@@ -334,6 +373,7 @@ contains
     call monolis_mat_finalize_SCSR(monoMAT%SCSR)
     call monolis_mat_finalize_CSR(monoMAT%CSR)
     call monolis_mat_finalize_DIA(monoMAT%DIA)
+    call monolis_mat_finalize_ELL(monoMAT%ELL)
     call monolis_mat_finalize_CSC(monoMAT%CSC)
     call monolis_mat_finalize_REORDER(monoMAT%REORDER)
     call monolis_mat_finalize_LU(monoMAT%LU)
@@ -353,6 +393,7 @@ contains
     call monolis_pdealloc_R_1d(R%X)
     call monolis_pdealloc_R_1d(R%B)
     call monolis_pdealloc_R_1d(R%Adia)
+    call monolis_pdealloc_R_1d(R%Aell)
   end subroutine monolis_mat_finalize_val_R
 
   !> @ingroup def_mat_init
@@ -369,6 +410,7 @@ contains
     call monolis_pdealloc_C_1d(C%X)
     call monolis_pdealloc_C_1d(C%B)
     call monolis_pdealloc_C_1d(C%Adia)
+    call monolis_pdealloc_C_1d(C%Aell)
   end subroutine monolis_mat_finalize_val_C
 
   !> @ingroup def_mat_init

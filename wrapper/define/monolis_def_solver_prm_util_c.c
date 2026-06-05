@@ -18,6 +18,13 @@ void monolis_set_precond(
   mat->prm.Iarray[MONOLIS_PRM_I_PRECOND] = param;
 }
 
+void monolis_set_spmv_format(
+  MONOLIS* mat,
+  int      param)
+{
+  mat->prm.Iarray[MONOLIS_PRM_I_SPMV_FORMAT] = param;
+}
+
 void monolis_set_maxiter(
   MONOLIS* mat,
   int      param)
@@ -86,6 +93,13 @@ void monolis_set_error_abort(
   bool     param)
 {
   mat->prm.Iarray[MONOLIS_PRM_I_IS_ERROR_ABORT] = param;
+}
+
+void monolis_set_solver_IDRS_num_basis(
+  MONOLIS* mat,
+  int      param)
+{
+  mat->prm.Iarray[MONOLIS_PRM_I_IDRS_DIM] = param;
 }
 
 void monolis_show_iterlog(

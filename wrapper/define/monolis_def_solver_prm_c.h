@@ -107,6 +107,13 @@ static const int MONOLIS_PRM_I_SHOW_TIME_STATISTICS = 23;
 
 static const int MONOLIS_PRM_I_IDRS_DIM = 24;
 
+static const int MONOLIS_PRM_I_SPMV_FORMAT = 25;
+
+
+static const int MONOLIS_SPMV_ELL = 0;
+
+static const int MONOLIS_SPMV_DIA = 1;
+
 
 static const int MONOLIS_PRM_R_TOL = 1;
 

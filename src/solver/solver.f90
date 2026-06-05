@@ -18,6 +18,7 @@ module mod_monolis_solve
   use mod_monolis_solver_COCG
   use mod_monolis_precond
   use mod_monolis_spmat_convert_dia
+  use mod_monolis_spmat_convert_ell
 
   implicit none
 
@@ -86,6 +87,7 @@ contains
 #ifdef _OPENACC
     integer(kint) :: NNDOF, NPNDOF
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
+    logical :: is_ell
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
@@ -97,16 +99,25 @@ contains
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
-    !# CSR 形式から DIA 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
-    call monolis_convert_CSR_to_DIA_R(monoMAT)
+    !# CSR 形式から DIA / ELL 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
+    is_ell = (monoPRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
+    if(is_ell)then
+      call monolis_convert_CSR_to_ELL_R(monoMAT)
+    else
+      call monolis_convert_CSR_to_DIA_R(monoMAT)
+    endif
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
     X     => monoMAT%R%X
     B     => monoMAT%R%B
     precD => monoPREC%R%D
-    !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
     !$acc enter data copyin(X(1:NPNDOF), B(1:NPNDOF))
     !$acc enter data copyin(precD)
+    if(is_ell)then
+      !$acc enter data copyin(monoMAT%R%Aell, monoMAT%ELL%col)
+    else
+      !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
+    endif
 #endif
 
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
@@ -114,8 +125,13 @@ contains
 #ifdef _OPENACC
     !$acc exit data delete(precD)
     !$acc exit data delete(X(1:NPNDOF), B(1:NPNDOF))
-    !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
-    call monolis_dealloc_DIA_R(monoMAT)
+    if(is_ell)then
+      !$acc exit data delete(monoMAT%R%Aell, monoMAT%ELL%col)
+      call monolis_dealloc_ELL_R(monoMAT)
+    else
+      !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
+      call monolis_dealloc_DIA_R(monoMAT)
+    endif
 #endif
 
     call monolis_precond_clear(monoPRM, monoCOM, monoMAT, monoPREC)

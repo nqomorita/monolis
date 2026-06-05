@@ -5,6 +5,7 @@ module mod_monolis_matvec
   use mod_monolis_def_struc
   use mod_monolis_vec_util
   use mod_monolis_spmat_convert_dia
+  use mod_monolis_spmat_convert_ell
   implicit none
 
 contains
@@ -13,8 +14,8 @@ contains
   !> 疎行列ベクトル積（実数型）
   subroutine monolis_matvec_product_R(monolis, monoCOM, X, Y)
     implicit none
-    !> [in] monolis 構造体
-    type(monolis_structure), intent(in) :: monolis
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
     !> [in] COM 構造体
     type(monolis_COM), intent(in) :: monoCOM
     !> [in,out] 右辺ベクトル
@@ -106,9 +107,14 @@ contains
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
 
 #ifdef _OPENACC
-    !# OpenACC 有効時は DIA 形式の SpMV を呼ぶ
-    call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
-      monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
+    !# OpenACC 有効時は DIA / ELL 形式の SpMV を呼ぶ（変換済みの形式で分岐）
+    if(associated(monoMAT%R%Aell))then
+      call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
+        monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
+    else
+      call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
+        monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
+    endif
 #else
     if(monoMAT%NDOF == 3)then
       call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
@@ -402,6 +408,69 @@ contains
 !$omp end parallel
 #endif
   end subroutine monolis_matvec_DIA_nn_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、ELL 形式、nxn ブロック）
+  subroutine monolis_matvec_ELL_nn_R(N, NP, Nmaxcol, col, Aell, X, Y, NDOF)
+    implicit none
+    !> [in] 内部ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] 全ブロック列数（X の有効範囲、ブロック単位）
+    integer(kint), intent(in) :: NP
+    !> [in] 1 行あたりの最大非ゼロブロック数
+    integer(kint), intent(in) :: Nmaxcol
+    !> [in] ブロック列番号配列（column-major、0=パディング）
+    integer(kint), intent(in) :: col(:)
+    !> [in] 行列成分（ELL 形式、column-major）
+    real(kdouble), intent(in) :: Aell(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    !> [in] ブロックサイズ
+    integer(kint), intent(in) :: NDOF
+    integer(kint) :: i, k, l, j, jcol, kn, NDOF2
+    real(kdouble) :: XT(NDOF), YT(NDOF)
+
+    NDOF2 = NDOF*NDOF
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Aell, Y, X, col) &
+!$omp & firstprivate(N, NP, Nmaxcol, NDOF, NDOF2) &
+!$omp & private(YT, XT, i, k, l, j, jcol, kn)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Aell, col, X, Y) private(YT, XT)
+    do i = 1, N
+      do k = 1, NDOF
+        YT(k) = 0.0d0
+      enddo
+!$acc loop seq
+      do j = 1, Nmaxcol
+        jcol = col((j-1)*N + i)
+        if(jcol >= 1 .and. jcol <= NP)then
+          kn = (j-1)*NDOF2*N + i
+          do l = 1, NDOF
+            XT(l) = X(NDOF*(jcol-1)+l)
+          enddo
+          do k = 1, NDOF
+            do l = 1, NDOF
+              YT(k) = YT(k) + Aell(kn + ((k-1)*NDOF + (l-1))*N) * XT(l)
+            enddo
+          enddo
+        endif
+      enddo
+      do k = 1, NDOF
+        Y(NDOF*(i-1)+k) = YT(k)
+      enddo
+    enddo
+!$acc end parallel loop
+#ifndef _OPENACC
+!$omp end do
+!$omp end parallel
+#endif
+  end subroutine monolis_matvec_ELL_nn_R
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数、nxn ブロック）
