@@ -127,7 +127,9 @@ contains
 
       call monolis_inner_product_main_R_no_comm(NNDOF, T, S, CG(1))
       call monolis_inner_product_main_R_no_comm(NNDOF, T, T, CG(2))
+      !$acc data copy(CG)
       call monolis_allreduce_R(2, CG, monolis_mpi_sum, monoCOM%comm)
+      !$acc end data
       if(dabs(CG(2)) == 0.0d0)then
         !$acc update self(T(1:NNDOF))
         call monolis_global_sorted_inner_product_main_R(monoCOM, &

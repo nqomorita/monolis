@@ -49,7 +49,9 @@ contains
     real(kdouble) :: tdotp, tcomm
 
     monoCOM%comm = comm
+    !$acc data copyin(x, y)
     call monolis_inner_product_main_R(monoCOM, m, X, Y, sum, tdotp, tcomm)
+    !$acc end data
   end subroutine monolis_inner_product_R_c
 
   !> @ingroup dev_linalg
