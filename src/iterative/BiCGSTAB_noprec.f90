@@ -60,9 +60,22 @@ contains
     call monolis_alloc_R_1d(T , NPNDOF)
     call monolis_alloc_R_1d(V , NPNDOF)
 
+    !# OpenACC: ソルバ固有のワーク配列のみデバイスに確保（X/B/precD は外側で常駐）
+    !$acc enter data create(R(1:NPNDOF), RT(1:NPNDOF), P(1:NPNDOF), S(1:NPNDOF), T(1:NPNDOF), V(1:NPNDOF))
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+    if(is_converge)then
+      !$acc update self(X(1:NPNDOF))
+      !$acc exit data delete(R, RT, P, S, T, V)
+      call monolis_dealloc_R_1d(R )
+      call monolis_dealloc_R_1d(RT)
+      call monolis_dealloc_R_1d(P )
+      call monolis_dealloc_R_1d(S )
+      call monolis_dealloc_R_1d(T )
+      call monolis_dealloc_R_1d(V )
+      return
+    endif
 
     call monolis_vec_copy_R(NNDOF, R, RT)
 
@@ -71,9 +84,11 @@ contains
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
+!$acc parallel loop present(P, R, V)
         do i = 1, NNDOF
           P(i) = R(i) + beta * (P(i) - omega * V(i))
         enddo
+!$acc end parallel loop
       else
         call monolis_vec_copy_R(NNDOF, R, P)
       endif
@@ -92,9 +107,11 @@ contains
 
       omega = CG(1) / CG(2)
 
+!$acc parallel loop present(X, P, S)
       do i = 1, NNDOF
         X(i) = X(i) + alpha*P(i) + omega*S(i)
       enddo
+!$acc end parallel loop
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
@@ -108,12 +125,17 @@ contains
       rho1 = rho
     enddo
 
+    !$acc update self(X(1:NPNDOF))
+
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
     monoPRM%Rarray(monolis_R_time_comm_dotp) = tcomm_dotp
+
+    !# OpenACC: ワーク配列のみ破棄（X/B/precD の破棄は外側で実施）
+    !$acc exit data delete(R, RT, P, S, T, V)
 
     call monolis_dealloc_R_1d(R )
     call monolis_dealloc_R_1d(RT)

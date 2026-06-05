@@ -83,6 +83,10 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
+#ifdef _OPENACC
+    integer(kint) :: NNDOF, NPNDOF
+    real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
+#endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
 
@@ -93,14 +97,23 @@ contains
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
-    !# CSR 形式から DIA 形式へ変換し、行列をデバイスに常駐させる
+    !# CSR 形式から DIA 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
     call monolis_convert_CSR_to_DIA_R(monoMAT)
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+    X     => monoMAT%R%X
+    B     => monoMAT%R%B
+    precD => monoPREC%R%D
     !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
+    !$acc enter data copyin(X(1:NPNDOF), B(1:NPNDOF))
+    !$acc enter data copyin(precD)
 #endif
 
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
+    !$acc exit data delete(precD)
+    !$acc exit data delete(X(1:NPNDOF), B(1:NPNDOF))
     !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
     call monolis_dealloc_DIA_R(monoMAT)
 #endif
