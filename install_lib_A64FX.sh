@@ -26,17 +26,17 @@ BASE_DIR=$(pwd)
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make FLAGS=A64FX
+make FLAGS=A64FX lib
 cd ../..
 
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=A64FX,SUBMODULE
+make FLAGS=A64FX,SUBMODULE lib
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=A64FX,SUBMODULE
+make FLAGS=A64FX,SUBMODULE lib
 cd ../..

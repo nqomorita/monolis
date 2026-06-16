@@ -43,17 +43,17 @@ cd ../../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make
+make lib
 cd ../..
 
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=SUBMODULE
+make FLAGS=SUBMODULE lib
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=SUBMODULE
+make FLAGS=SUBMODULE lib
 cd ../..

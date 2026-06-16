@@ -38,17 +38,17 @@ cd ../../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make FLAGS=GPU_GNU
+make FLAGS=GPU_GNU lib
 cd ../..
 
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=SUBMODULE,GPU_GNU
+make FLAGS=SUBMODULE,GPU_GNU lib
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=SUBMODULE,GPU_GNU
+make FLAGS=SUBMODULE,GPU_GNU lib
 cd ../..
