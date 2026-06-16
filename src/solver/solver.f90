@@ -200,7 +200,11 @@ contains
         call monolis_solver_CG(monoPRM, monoCOM, monoMAT, monoPREC)
 
       case (monolis_iter_BiCGSTAB)
+#ifdef _OPENACC
+        call monolis_solver_BiCGSTAB_GPU(monoPRM, monoCOM, monoMAT, monoPREC)
+#else
         call monolis_solver_BiCGSTAB(monoPRM, monoCOM, monoMAT, monoPREC)
+#endif
 
       case (monolis_iter_BiCGSTAB_noprec)
         call monolis_solver_BiCGSTAB_noprec(monoPRM, monoCOM, monoMAT, monoPREC)

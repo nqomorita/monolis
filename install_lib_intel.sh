@@ -50,17 +50,17 @@ cd ../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make FLAGS=INTEL
+make FLAGS=INTEL lib
 cd ../..
 
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=INTEL,SUBMODULE
+make FLAGS=INTEL,SUBMODULE lib
 cd ../..
 
 #> ggtools
 cd submodule/ggtools/
 make clean
-make FLAGS=INTEL,SUBMODULE
+make FLAGS=INTEL,SUBMODULE lib
 cd ../..
