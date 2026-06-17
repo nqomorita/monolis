@@ -32,11 +32,11 @@ cd ../..
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=A64FX,SUBMODULE lib
+make FLAGS=A64FX,SUBMODULE
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=A64FX,SUBMODULE lib
+make FLAGS=A64FX,SUBMODULE
 cd ../..

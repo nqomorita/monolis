@@ -44,11 +44,11 @@ cd ../..
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=SUBMODULE,GPU_GNU lib
+make FLAGS=SUBMODULE,GPU_GNU
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=SUBMODULE,GPU_GNU lib
+make FLAGS=SUBMODULE,GPU_GNU
 cd ../..

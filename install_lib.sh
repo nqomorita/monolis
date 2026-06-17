@@ -49,11 +49,11 @@ cd ../..
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=SUBMODULE lib
+make FLAGS=SUBMODULE
 cd ../..
 
 #> gedatsu
 cd submodule/ggtools/
 make clean
-make FLAGS=SUBMODULE lib
+make FLAGS=SUBMODULE
 cd ../..
