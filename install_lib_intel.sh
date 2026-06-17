@@ -56,11 +56,11 @@ cd ../..
 #> gedatsu
 cd submodule/gedatsu/
 make clean
-make FLAGS=INTEL,SUBMODULE lib
+make FLAGS=INTEL,SUBMODULE
 cd ../..
 
 #> ggtools
 cd submodule/ggtools/
 make clean
-make FLAGS=INTEL,SUBMODULE lib
+make FLAGS=INTEL,SUBMODULE
 cd ../..
