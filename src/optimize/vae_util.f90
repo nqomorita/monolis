@@ -20,6 +20,8 @@ module mod_monolis_opt_vae_util
   public :: monolis_opt_vae_layer_free
   public :: monolis_opt_vae_fill_randn
   public :: monolis_opt_vae_shuffle
+  public :: monolis_opt_vae_layer_forward
+  public :: monolis_opt_vae_layer_backward
   public :: monolis_opt_vae_forward_stack
   public :: monolis_opt_vae_top_post
   public :: monolis_opt_vae_backward_stack
