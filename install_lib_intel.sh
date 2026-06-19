@@ -29,7 +29,7 @@ cd ../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make FLAGS=INTEL lib
+make FLAGS=INTEL
 cd ../..
 
 #> gedatsu

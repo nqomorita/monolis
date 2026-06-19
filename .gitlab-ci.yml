@@ -10,7 +10,7 @@ build_monolis:
   stage: lib_build
   script:
     - ./install_lib.sh
-    - make FLAGS=DEBUG
+    - make all FLAGS=DEBUG
   artifacts:
     paths:
       - bin

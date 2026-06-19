@@ -363,20 +363,29 @@ $(SRC_EIGEN_SOLV_C:.c=.h) \
 monolis_solver.h \
 monolis.h
 
+##> **********
+##> driver target (4) - auto detect driver/*.f90
+DRV_SOURCES = $(wildcard $(DRV_DIR)/*.f90)
+DRV_BASENAMES = $(notdir $(basename $(DRV_SOURCES)))
+DRV_TARGETS = $(addprefix $(BIN_DIR)/, $(DRV_BASENAMES))
+DRV_OBJS = $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(DRV_BASENAMES)))
+
 ##> target
+default: \
+	cp_header \
+	cp_header_lib \
+	cp_bin_lib \
+	$(LIB_TARGET) \
+	$(DRV_TARGETS)
+
 all: \
 	cp_header \
 	cp_header_lib \
 	cp_bin_lib \
 	$(LIB_TARGET) \
 	$(TEST_TARGET) \
-	$(TEST_C_TARGET)
-
-lib: \
-	cp_header \
-	cp_header_lib \
-	cp_bin_lib \
-	$(LIB_TARGET)
+	$(TEST_C_TARGET) \
+	$(DRV_TARGETS)
 
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
@@ -393,6 +402,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 $(OBJ_DIR)/%.o: $(TST_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
+$(OBJ_DIR)/%.o: $(DRV_DIR)/%.f90
+	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
+
 $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.f90
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
 
@@ -401,6 +413,10 @@ $(OBJ_DIR)/%.o: $(WRAP_DIR)/%.c
 
 $(OBJ_DIR)/%.o: $(TST_WRAP_DIR)/%.c
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+
+##> driver auto build rule
+$(BIN_DIR)/%: $(OBJ_DIR)/%.o $(LIB_TARGET)
+	$(FC) $(FFLAGS) -o $@ $< $(USE_LIB)
 
 cp_header:
 	$(CP) $(addprefix $(WRAP_DIR)/, $(C_HEADER)) ./include/
@@ -422,11 +438,13 @@ clean:
 	$(RM) $(LIB_OBJS) \
 	$(RM) $(TST_OBJS) \
 	$(RM) $(TST_C_OBJS) \
+	$(RM) $(DRV_OBJS) \
 	$(RM) $(LIB_TARGET) \
 	$(RM) $(TEST_TARGET) \
 	$(RM) $(TEST_C_TARGET) \
+	$(RM) $(DRV_TARGETS) \
 	$(RM) ./include/*.mod \
 	$(RM) $(addprefix ./include/, $(C_HEADER_FILES)) \
 	$(RM) ./bin/*
 
-.PHONY: clean
+.PHONY: default all cp_header cp_header_lib cp_bin_lib clean

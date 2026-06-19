@@ -43,7 +43,7 @@ cd ../../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make lib
+make
 cd ../..
 
 #> gedatsu
