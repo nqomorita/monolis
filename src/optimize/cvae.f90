@@ -1,15 +1,15 @@
-!> 変分オートエンコーダ (VAE) ライブラリ
-!> @details 任意層数 MLP のエンコーダ・デコーダをサポート。
-!>          encoder : D -> H_enc(1) -> ... -> H_enc(L) (ReLU)
+!> 条件付き変分オートエンコーダ (Conditional VAE) ライブラリ
+!> @details 条件ベクトル c を入力・潜在変数に連結する CVAE。
+!>          encoder : [x; c] (D+C) -> H_enc(1) -> ... -> H_enc(L) (ReLU)
 !>                    -> head_mu / head_lv (linear, Z)
 !>          z       = mu + exp(0.5*logvar) * eps,  eps ~ N(0,1)
-!>          decoder : Z -> H_dec(1) -> ... -> H_dec(M) (ReLU) -> D (sigmoid)
+!>          decoder : [z; c] (Z+C) -> H_dec(1) -> ... -> H_dec(M) (ReLU) -> D (sigmoid)
 !>          loss    = mean_batch_dim( (x - xhat)^2 )
 !>                  + beta * mean_batch( -0.5 * sum (1 + lv - mu^2 - exp(lv)) )
 !>          層構造・Adam・順逆伝播などの共通処理は mod_monolis_opt_vae_util /
 !>          mod_monolis_opt_adam に切り出している。
 !>          機械学習に関わる実数は 32bit 浮動小数点 (kdouble_ml) で計算する。
-module mod_monolis_opt_vae
+module mod_monolis_opt_cvae
   use mod_monolis_utils
   use mod_monolis_def_opt
   use mod_monolis_opt_adam
@@ -17,67 +17,90 @@ module mod_monolis_opt_vae
   implicit none
 
   private
-  public :: monolis_opt_vae_t
-  public :: monolis_opt_vae_init
-  public :: monolis_opt_vae_init_layers
-  public :: monolis_opt_vae_finalize
-  public :: monolis_opt_vae_train_step
-  public :: monolis_opt_vae_fit
-  public :: monolis_opt_vae_reconstruct
-  public :: monolis_opt_vae_encode
-  public :: monolis_opt_vae_decode
-  public :: monolis_opt_vae_sample_prior
-  public :: monolis_opt_vae_generate_spx
+  public :: monolis_opt_cvae_t
+  public :: monolis_opt_cvae_init
+  public :: monolis_opt_cvae_init_layers
+  public :: monolis_opt_cvae_finalize
+  public :: monolis_opt_cvae_train_step
+  public :: monolis_opt_cvae_fit
+  public :: monolis_opt_cvae_reconstruct
+  public :: monolis_opt_cvae_encode
+  public :: monolis_opt_cvae_decode
+  public :: monolis_opt_cvae_sample_prior
 
   !> @ingroup optimize
-  !> VAE モデル (任意層数のエンコーダ・デコーダを保持)
-  type :: monolis_opt_vae_t
+  !> Conditional VAE モデル (任意層数のエンコーダ・デコーダを保持)
+  type :: monolis_opt_cvae_t
     !> [in] 入力次元数
     integer(kint) :: D = 0
-    !> [in] 互換用: 最終エンコーダ隠れ層次元 (旧 API との互換)
+    !> [in] 条件次元数
+    integer(kint) :: C = 0
+    !> [in] 互換用: 最終エンコーダ隠れ層次元
     integer(kint) :: H = 0
     !> [in] 潜在次元数
     integer(kint) :: Z = 0
     !> [in,out] Adam のステップ数
     integer(kint) :: t = 0
-    !> [in,out] エンコーダ層列 (D -> H_enc(1) -> ... -> H_enc(L))
+    !> [in,out] エンコーダ層列 ([x; c] (D+C) -> H_enc(1) -> ... -> H_enc(L))
     type(monolis_opt_vae_layer_t), allocatable :: enc(:)
     !> [in,out] mu 出力ヘッド (linear)
     type(monolis_opt_vae_layer_t) :: head_mu
     !> [in,out] logvar 出力ヘッド (linear)
     type(monolis_opt_vae_layer_t) :: head_lv
-    !> [in,out] デコーダ層列 (Z -> H_dec(1) -> ... -> H_dec(M) -> D)
+    !> [in,out] デコーダ層列 ([z; c] (Z+C) -> H_dec(1) -> ... -> H_dec(M) -> D)
     type(monolis_opt_vae_layer_t), allocatable :: dec(:)
-  end type monolis_opt_vae_t
+  end type monolis_opt_cvae_t
 
 contains
 
   !> @ingroup optimize
-  !> VAE モデルを初期化する (旧 API。隠れ層 1 層 H で構成)
-  subroutine monolis_opt_vae_init(net, D, H, Z)
+  !> 条件次元を連結して 2 次元配列を縦方向に結合する ([A; B])
+  subroutine monolis_opt_cvae_concat_rows(A, Bm, AB)
     implicit none
-    !> [out] 初期化対象の VAE モデル
-    type(monolis_opt_vae_t), intent(out) :: net
+    !> [in] 上段配列 (nA x ncol)
+    real(kdouble_ml), intent(in) :: A(:,:)
+    !> [in] 下段配列 (nB x ncol)
+    real(kdouble_ml), intent(in) :: Bm(:,:)
+    !> [out] 結合配列 ((nA+nB) x ncol)
+    real(kdouble_ml), allocatable, intent(out) :: AB(:,:)
+    integer(kint) :: nA, nB, ncol
+
+    nA = size(A, 1); nB = size(Bm, 1); ncol = size(A, 2)
+    call monolis_alloc_F_2d(AB, nA + nB, ncol)
+    AB(1:nA, :)            = A
+    AB(nA+1:nA+nB, :)      = Bm
+  end subroutine monolis_opt_cvae_concat_rows
+
+  !> @ingroup optimize
+  !> CVAE モデルを初期化する (隠れ層 1 層 H で構成)
+  subroutine monolis_opt_cvae_init(net, D, C, H, Z)
+    implicit none
+    !> [out] 初期化対象の CVAE モデル
+    type(monolis_opt_cvae_t), intent(out) :: net
     !> [in] 入力次元数
     integer(kint), intent(in) :: D
+    !> [in] 条件次元数
+    integer(kint), intent(in) :: C
     !> [in] 隠れ層次元数
     integer(kint), intent(in) :: H
     !> [in] 潜在次元数
     integer(kint), intent(in) :: Z
 
-    call monolis_opt_vae_init_layers(net, D, (/ H /), Z, (/ H /))
-  end subroutine monolis_opt_vae_init
+    call monolis_opt_cvae_init_layers(net, D, C, (/ H /), Z, (/ H /))
+  end subroutine monolis_opt_cvae_init
 
   !> @ingroup optimize
-  !> 任意層数の VAE モデルを初期化する
+  !> 任意層数の CVAE モデルを初期化する
   !> @details 重みは Glorot 一様分布、バイアスは 0 で初期化する。
-  !>          乱数消費順 (旧 API 互換): enc(1)..enc(L), head_mu, head_lv, dec(1)..dec(M+1)
-  subroutine monolis_opt_vae_init_layers(net, D, H_enc, Z, H_dec)
+  !>          エンコーダ入力は D+C、デコーダ入力は Z+C 次元。
+  subroutine monolis_opt_cvae_init_layers(net, D, C, H_enc, Z, H_dec)
     implicit none
-    !> [out] 初期化対象の VAE モデル
-    type(monolis_opt_vae_t), intent(out) :: net
+    !> [out] 初期化対象の CVAE モデル
+    type(monolis_opt_cvae_t), intent(out) :: net
     !> [in] 入力次元数
     integer(kint), intent(in) :: D
+    !> [in] 条件次元数
+    integer(kint), intent(in) :: C
     !> [in] エンコーダ隠れ層次元の列 (size>=1、ReLU 層)
     integer(kint), intent(in) :: H_enc(:)
     !> [in] 潜在次元数
@@ -89,18 +112,19 @@ contains
     Le = size(H_enc)
     Ld = size(H_dec)
     if(Le < 1 .or. Ld < 1)then
-      call monolis_std_error_string("monolis_opt_vae_init_layers: hidden size must be >= 1")
+      call monolis_std_error_string("monolis_opt_cvae_init_layers: hidden size must be >= 1")
       call monolis_std_error_stop()
     endif
 
     net%D = D
+    net%C = C
     net%H = H_enc(Le)
     net%Z = Z
     net%t = 0
 
-    !> エンコーダ層列
+    !> エンコーダ層列 (入力 D+C)
     allocate(net%enc(Le))
-    in_dim = D
+    in_dim = D + C
     do l = 1, Le
       call monolis_opt_vae_layer_init(net%enc(l), in_dim, H_enc(l), monolis_opt_vae_act_relu)
       in_dim = H_enc(l)
@@ -110,22 +134,22 @@ contains
     call monolis_opt_vae_layer_init(net%head_mu, in_dim, Z, monolis_opt_vae_act_linear)
     call monolis_opt_vae_layer_init(net%head_lv, in_dim, Z, monolis_opt_vae_act_linear)
 
-    !> デコーダ層列 (最終層のみ sigmoid)
+    !> デコーダ層列 (入力 Z+C、最終層のみ sigmoid)
     allocate(net%dec(Ld + 1))
-    in_dim = Z
+    in_dim = Z + C
     do l = 1, Ld
       call monolis_opt_vae_layer_init(net%dec(l), in_dim, H_dec(l), monolis_opt_vae_act_relu)
       in_dim = H_dec(l)
     end do
     call monolis_opt_vae_layer_init(net%dec(Ld + 1), in_dim, D, monolis_opt_vae_act_sigmoid)
-  end subroutine monolis_opt_vae_init_layers
+  end subroutine monolis_opt_cvae_init_layers
 
   !> @ingroup optimize
-  !> VAE モデルが保持するメモリを解放する
-  subroutine monolis_opt_vae_finalize(net)
+  !> CVAE モデルが保持するメモリを解放する
+  subroutine monolis_opt_cvae_finalize(net)
     implicit none
-    !> [in,out] 解放対象の VAE モデル
-    type(monolis_opt_vae_t), intent(inout) :: net
+    !> [in,out] 解放対象の CVAE モデル
+    type(monolis_opt_cvae_t), intent(inout) :: net
     integer(kint) :: l
 
     if(allocated(net%enc))then
@@ -142,17 +166,19 @@ contains
       end do
       deallocate(net%dec)
     endif
-    net%D = 0; net%H = 0; net%Z = 0; net%t = 0
-  end subroutine monolis_opt_vae_finalize
+    net%D = 0; net%C = 0; net%H = 0; net%Z = 0; net%t = 0
+  end subroutine monolis_opt_cvae_finalize
 
   !> @ingroup optimize
   !> 1 ミニバッチに対する順伝播・逆伝播・Adam 更新を実行
-  subroutine monolis_opt_vae_train_step(net, X, lr, beta, loss_avg, recon_avg, kl_avg)
+  subroutine monolis_opt_cvae_train_step(net, X, Cnd, lr, beta, loss_avg, recon_avg, kl_avg)
     implicit none
-    !> [in,out] VAE モデル
-    type(monolis_opt_vae_t), intent(inout) :: net
+    !> [in,out] CVAE モデル
+    type(monolis_opt_cvae_t), intent(inout) :: net
     !> [in] 入力ミニバッチ (D x B)
     real(kdouble_ml), intent(in) :: X(:,:)
+    !> [in] 条件ミニバッチ (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [in] 学習率
     real(kdouble_ml), intent(in) :: lr
     !> [in] KL 重み (beta)
@@ -163,25 +189,26 @@ contains
     real(kdouble_ml), intent(out) :: recon_avg
     !> [out] バッチ平均 KL 損失
     real(kdouble_ml), intent(out) :: kl_avg
-    integer(kint) :: D, Z, B, j, l, Le, Ld
+    integer(kint) :: D, C, Z, B, j, l, Le, Ld
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:), dec_cache(:)
     type(monolis_opt_vae_grad_t),  allocatable :: enc_grads(:), dec_grads(:)
-    real(kdouble_ml), allocatable :: h_last(:,:)
+    real(kdouble_ml), allocatable :: enc_in(:,:), dec_in(:,:), h_last(:,:)
     real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), eps(:,:), zlat(:,:), xhat(:,:)
-    real(kdouble_ml), allocatable :: dxhat(:,:), dz_dec(:,:)
+    real(kdouble_ml), allocatable :: dxhat(:,:), dzc_dec(:,:), dz_dec(:,:)
     real(kdouble_ml), allocatable :: dmu(:,:), dlv(:,:)
     real(kdouble_ml), allocatable :: gWmu(:,:), gWlv(:,:), gbmu(:), gblv(:)
     real(kdouble_ml), allocatable :: dh1_mu(:,:), dh1_lv(:,:), dh_last(:,:), dX_dummy(:,:)
     real(kdouble_ml) :: invB, invBD, kl_w
 
-    D = net%D; Z = net%Z; B = size(X, 2)
+    D = net%D; C = net%C; Z = net%Z; B = size(X, 2)
     Le = size(net%enc); Ld = size(net%dec)
     invB  = 1.0_kdouble_ml / real(B, kdouble_ml)
     invBD = 1.0_kdouble_ml / real(B*D, kdouble_ml)
     kl_w  = beta * invB
 
-    !> エンコーダ順伝播
-    call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
+    !> エンコーダ順伝播 (入力 [x; c])
+    call monolis_opt_cvae_concat_rows(X, Cnd, enc_in)
+    call monolis_opt_vae_forward_stack(net%enc, enc_in, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
 
     !> mu / logvar (線形ヘッド: out_dim x B)
@@ -202,8 +229,9 @@ contains
     call monolis_opt_vae_fill_randn(eps)
     zlat = mu + exp(0.5_kdouble_ml*logvar) * eps
 
-    !> デコーダ順伝播
-    call monolis_opt_vae_forward_stack(net%dec, zlat, dec_cache)
+    !> デコーダ順伝播 (入力 [z; c])
+    call monolis_opt_cvae_concat_rows(zlat, Cnd, dec_in)
+    call monolis_opt_vae_forward_stack(net%dec, dec_in, dec_cache)
     xhat = monolis_opt_vae_top_post(dec_cache)
 
     !> 損失
@@ -214,7 +242,11 @@ contains
     !> デコーダ逆伝播: 出力 post=xhat に対する勾配 (sigmoid は層内で処理)
     call monolis_alloc_F_2d(dxhat, D, B)
     dxhat = 2.0_kdouble_ml * (xhat - X) * invBD
-    call monolis_opt_vae_backward_stack(net%dec, zlat, dec_cache, dxhat, dec_grads, dz_dec)
+    call monolis_opt_vae_backward_stack(net%dec, dec_in, dec_cache, dxhat, dec_grads, dzc_dec)
+
+    !> デコーダ入力勾配のうち潜在変数 z に対応する部分のみ使用 (条件 c は入力)
+    call monolis_alloc_F_2d(dz_dec, Z, B)
+    dz_dec = dzc_dec(1:Z, :)
 
     !> dmu / dlv
     call monolis_alloc_F_2d(dmu, Z, B)
@@ -239,7 +271,7 @@ contains
     dh_last = dh1_mu + dh1_lv
 
     !> エンコーダ逆伝播
-    call monolis_opt_vae_backward_stack(net%enc, X, enc_cache, dh_last, enc_grads, dX_dummy)
+    call monolis_opt_vae_backward_stack(net%enc, enc_in, enc_cache, dh_last, enc_grads, dX_dummy)
 
     !> Adam 更新
     net%t = net%t + 1
@@ -261,34 +293,41 @@ contains
     call monolis_opt_vae_cache_free(dec_cache)
     call monolis_opt_vae_grads_free(enc_grads)
     call monolis_opt_vae_grads_free(dec_grads)
-  end subroutine monolis_opt_vae_train_step
+  end subroutine monolis_opt_cvae_train_step
 
   !> @ingroup optimize
   !> ミニバッチ学習ループ (KL ウォームアップと EarlyStopping 付き)
-  subroutine monolis_opt_vae_fit(net, X, opts)
+  subroutine monolis_opt_cvae_fit(net, X, Cnd, opts)
     implicit none
-    !> [in,out] 学習対象の VAE モデル
-    type(monolis_opt_vae_t), intent(inout) :: net
+    !> [in,out] 学習対象の CVAE モデル
+    type(monolis_opt_cvae_t), intent(inout) :: net
     !> [in] 学習データ (D x N)
     real(kdouble_ml), intent(in) :: X(:,:)
+    !> [in] 条件データ (C x N)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [in] 学習オプション
     type(monolis_opt_vae_train_opts), intent(in) :: opts
-    integer(kint) :: D, N, e, b, k, no_improve, nbatches, patience
+    integer(kint) :: D, C, N, e, b, k, no_improve, nbatches, patience
     integer(kint), allocatable :: perm(:)
-    real(kdouble_ml), allocatable :: Xb(:,:)
+    real(kdouble_ml), allocatable :: Xb(:,:), Cb(:,:)
     real(kdouble_ml) :: loss, recon, kl, sum_loss, sum_recon, sum_kl
     real(kdouble_ml) :: best_loss, epoch_loss, beta
 
     D = size(X, 1)
+    C = size(Cnd, 1)
     N = size(X, 2)
     if(D /= net%D)then
-      call monolis_std_error_string("monolis_opt_vae_fit: data dim mismatch")
+      call monolis_std_error_string("monolis_opt_cvae_fit: data dim mismatch")
+      call monolis_std_error_stop()
+    endif
+    if(C /= net%C)then
+      call monolis_std_error_string("monolis_opt_cvae_fit: condition dim mismatch")
       call monolis_std_error_stop()
     endif
 
     nbatches = N / opts%batch_size
     if(nbatches < 1)then
-      call monolis_std_error_string("monolis_opt_vae_fit: not enough samples for one batch")
+      call monolis_std_error_string("monolis_opt_cvae_fit: not enough samples for one batch")
       call monolis_std_error_stop()
     endif
     patience = opts%early_stop_patience
@@ -296,6 +335,7 @@ contains
 
     call monolis_alloc_I_1d(perm, N)
     call monolis_alloc_F_2d(Xb, D, opts%batch_size)
+    call monolis_alloc_F_2d(Cb, C, opts%batch_size)
     do k = 1, N
       perm(k) = k
     end do
@@ -315,9 +355,10 @@ contains
       sum_loss = 0.0_kdouble_ml; sum_recon = 0.0_kdouble_ml; sum_kl = 0.0_kdouble_ml
       do b = 1, nbatches
         do k = 1, opts%batch_size
-          Xb(:, k) = X(:, perm((b-1)*opts%batch_size + k))
+          Xb(:, k) = X(:,   perm((b-1)*opts%batch_size + k))
+          Cb(:, k) = Cnd(:, perm((b-1)*opts%batch_size + k))
         end do
-        call monolis_opt_vae_train_step(net, Xb, opts%lr, beta, loss, recon, kl)
+        call monolis_opt_cvae_train_step(net, Xb, Cb, opts%lr, beta, loss, recon, kl)
         sum_loss  = sum_loss  + loss
         sum_recon = sum_recon + recon
         sum_kl    = sum_kl    + kl
@@ -355,16 +396,18 @@ contains
         endif
       endif
     end do
-  end subroutine monolis_opt_vae_fit
+  end subroutine monolis_opt_cvae_fit
 
   !> @ingroup optimize
-  !> 共通の順伝播: X -> (enc + heads) -> mu/logvar/h_last
-  subroutine monolis_opt_vae_encode_mu_lv(net, X, mu, logvar, enc_cache, h_last)
+  !> 共通の順伝播: [x; c] -> (enc + heads) -> mu/logvar/h_last
+  subroutine monolis_opt_cvae_encode_mu_lv(net, X, Cnd, mu, logvar, enc_cache, h_last)
     implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
     !> [in] 入力 (D x B)
     real(kdouble_ml), intent(in) :: X(:,:)
+    !> [in] 条件 (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [out] mu (Z x B)
     real(kdouble_ml), allocatable, intent(out) :: mu(:,:)
     !> [out] logvar (Z x B、[-10,10] でクリップ)
@@ -373,10 +416,12 @@ contains
     type(monolis_opt_vae_cache_t), allocatable, intent(out) :: enc_cache(:)
     !> [out] 最終エンコーダ隠れ層出力
     real(kdouble_ml), allocatable, intent(out) :: h_last(:,:)
+    real(kdouble_ml), allocatable :: enc_in(:,:)
     integer(kint) :: j, B
 
     B = size(X, 2)
-    call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
+    call monolis_opt_cvae_concat_rows(X, Cnd, enc_in)
+    call monolis_opt_vae_forward_stack(net%enc, enc_in, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
     call monolis_alloc_F_2d(mu,     net%Z, B)
     call monolis_alloc_F_2d(logvar, net%Z, B)
@@ -388,129 +433,107 @@ contains
     end do
     where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
-  end subroutine monolis_opt_vae_encode_mu_lv
+  end subroutine monolis_opt_cvae_encode_mu_lv
+
+  !> @ingroup optimize
+  !> デコード本体 (戻り値は allocatable、入力 [z; c])
+  subroutine monolis_opt_cvae_decode_alloc(net, zlat, Cnd, xhat)
+    implicit none
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
+    !> [in] 潜在ベクトル (Z x B)
+    real(kdouble_ml), intent(in) :: zlat(:,:)
+    !> [in] 条件 (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
+    !> [out] 出力 (D x B)
+    real(kdouble_ml), allocatable, intent(out) :: xhat(:,:)
+    real(kdouble_ml), allocatable :: dec_in(:,:)
+    type(monolis_opt_vae_cache_t), allocatable :: dec_cache(:)
+
+    call monolis_opt_cvae_concat_rows(zlat, Cnd, dec_in)
+    call monolis_opt_vae_forward_stack(net%dec, dec_in, dec_cache)
+    xhat = monolis_opt_vae_top_post(dec_cache)
+    call monolis_opt_vae_cache_free(dec_cache)
+  end subroutine monolis_opt_cvae_decode_alloc
 
   !> @ingroup optimize
   !> 決定論的 (z = mu) な順伝播による再構成
-  subroutine monolis_opt_vae_reconstruct(net, X, xhat)
+  subroutine monolis_opt_cvae_reconstruct(net, X, Cnd, xhat)
     implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
     !> [in] 入力データ (D x B)
     real(kdouble_ml), intent(in) :: X(:,:)
+    !> [in] 条件 (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [out] 再構成出力 (D x B)
     real(kdouble_ml), intent(out) :: xhat(:,:)
     real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), h_last(:,:), xhat_loc(:,:)
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:)
 
-    call monolis_opt_vae_encode_mu_lv(net, X, mu, logvar, enc_cache, h_last)
-    call monolis_opt_vae_decode_alloc(net, mu, xhat_loc)
+    call monolis_opt_cvae_encode_mu_lv(net, X, Cnd, mu, logvar, enc_cache, h_last)
+    call monolis_opt_cvae_decode_alloc(net, mu, Cnd, xhat_loc)
     xhat = xhat_loc
     call monolis_opt_vae_cache_free(enc_cache)
-  end subroutine monolis_opt_vae_reconstruct
+  end subroutine monolis_opt_cvae_reconstruct
 
   !> @ingroup optimize
   !> 入力をエンコードし、再パラメータ化サンプル z を返す
-  subroutine monolis_opt_vae_encode(net, X, zlat)
+  subroutine monolis_opt_cvae_encode(net, X, Cnd, zlat)
     implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
     !> [in] 入力データ (D x B)
     real(kdouble_ml), intent(in) :: X(:,:)
+    !> [in] 条件 (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [out] サンプリングされた潜在ベクトル (Z x B)
     real(kdouble_ml), intent(out) :: zlat(:,:)
     real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), eps(:,:), h_last(:,:)
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:)
 
-    call monolis_opt_vae_encode_mu_lv(net, X, mu, logvar, enc_cache, h_last)
+    call monolis_opt_cvae_encode_mu_lv(net, X, Cnd, mu, logvar, enc_cache, h_last)
     call monolis_alloc_F_2d(eps, net%Z, size(X, 2))
     call monolis_opt_vae_fill_randn(eps)
     zlat = mu + exp(0.5_kdouble_ml*logvar) * eps
     call monolis_opt_vae_cache_free(enc_cache)
-  end subroutine monolis_opt_vae_encode
+  end subroutine monolis_opt_cvae_encode
 
   !> @ingroup optimize
-  !> デコード本体 (戻り値は allocatable)
-  subroutine monolis_opt_vae_decode_alloc(net, zlat, xhat)
+  !> 潜在ベクトルと条件をデコードして出力 (sigmoid) を得る
+  subroutine monolis_opt_cvae_decode(net, zlat, Cnd, xhat)
     implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
     !> [in] 潜在ベクトル (Z x B)
     real(kdouble_ml), intent(in) :: zlat(:,:)
-    !> [out] 出力 (D x B)
-    real(kdouble_ml), allocatable, intent(out) :: xhat(:,:)
-    type(monolis_opt_vae_cache_t), allocatable :: dec_cache(:)
-
-    call monolis_opt_vae_forward_stack(net%dec, zlat, dec_cache)
-    xhat = monolis_opt_vae_top_post(dec_cache)
-    call monolis_opt_vae_cache_free(dec_cache)
-  end subroutine monolis_opt_vae_decode_alloc
-
-  !> @ingroup optimize
-  !> 潜在ベクトルをデコードして出力 (sigmoid) を得る
-  subroutine monolis_opt_vae_decode(net, zlat, xhat)
-    implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
-    !> [in] 潜在ベクトル (Z x B)
-    real(kdouble_ml), intent(in) :: zlat(:,:)
+    !> [in] 条件 (C x B)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [out] 出力 (D x B)
     real(kdouble_ml), intent(out) :: xhat(:,:)
     real(kdouble_ml), allocatable :: xhat_loc(:,:)
 
-    call monolis_opt_vae_decode_alloc(net, zlat, xhat_loc)
+    call monolis_opt_cvae_decode_alloc(net, zlat, Cnd, xhat_loc)
     xhat = xhat_loc
-  end subroutine monolis_opt_vae_decode
+  end subroutine monolis_opt_cvae_decode
 
   !> @ingroup optimize
-  !> 標準正規分布から n 個サンプリングしてデコードする
-  subroutine monolis_opt_vae_sample_prior(net, n, xhat)
+  !> 与えた条件ごとに標準正規分布から z をサンプリングしてデコードする
+  subroutine monolis_opt_cvae_sample_prior(net, Cnd, xhat)
     implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
-    !> [in] サンプル数
-    integer(kint), intent(in) :: n
+    !> [in] CVAE モデル
+    type(monolis_opt_cvae_t), intent(in) :: net
+    !> [in] 条件 (C x n)
+    real(kdouble_ml), intent(in) :: Cnd(:,:)
     !> [out] 出力 (D x n)
     real(kdouble_ml), intent(out) :: xhat(:,:)
     real(kdouble_ml), allocatable :: zlat(:,:)
+    integer(kint) :: n
 
+    n = size(Cnd, 2)
     call monolis_alloc_F_2d(zlat, net%Z, n)
     call monolis_opt_vae_fill_randn(zlat)
-    call monolis_opt_vae_decode(net, zlat, xhat)
-  end subroutine monolis_opt_vae_sample_prior
+    call monolis_opt_cvae_decode(net, zlat, Cnd, xhat)
+  end subroutine monolis_opt_cvae_sample_prior
 
-  !> @ingroup optimize
-  !> 学習データを潜在空間にエンコードしたうえで SPX 交叉により n 個生成・デコード
-  subroutine monolis_opt_vae_generate_spx(net, Xtrain, n, xhat)
-    implicit none
-    !> [in] VAE モデル
-    type(monolis_opt_vae_t), intent(in) :: net
-    !> [in] 学習データ (D x Ntr)
-    real(kdouble_ml), intent(in) :: Xtrain(:,:)
-    !> [in] 生成サンプル数
-    integer(kint), intent(in) :: n
-    !> [out] 出力 (D x n)
-    real(kdouble_ml), intent(out) :: xhat(:,:)
-    integer(kint) :: Ntr, Np, i, k, idx
-    real(kdouble_ml) :: r
-    real(kdouble_ml), allocatable :: zall(:,:), parents(:,:), zchild(:,:)
-
-    Ntr = size(Xtrain, 2)
-    Np  = net%Z + 1
-    call monolis_alloc_F_2d(zall, net%Z, Ntr)
-    call monolis_opt_vae_encode(net, Xtrain, zall)
-    call monolis_alloc_F_2d(parents, net%Z, Np)
-    call monolis_alloc_F_2d(zchild,  net%Z, n)
-    do i = 1, n
-      do k = 1, Np
-        call random_number(r)
-        idx = 1 + int(r * Ntr, kint)
-        if(idx > Ntr) idx = Ntr
-        parents(:, k) = zall(:, idx)
-      end do
-      call monolis_opt_vae_spx_child(parents, net%Z, zchild(:, i))
-    end do
-    call monolis_opt_vae_decode(net, zchild, xhat)
-  end subroutine monolis_opt_vae_generate_spx
-
-end module mod_monolis_opt_vae
+end module mod_monolis_opt_cvae

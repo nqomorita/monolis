@@ -12,30 +12,15 @@ contains
     type(monolis_opt_vae_t) :: net
     type(monolis_opt_vae_train_opts) :: opts
     integer(kint), parameter :: D = 4, H = 8, Z = 2, N = 32
-    real(kdouble) :: X(D, N), xhat(D, N), zlat(Z, N), samples(D, 4)
-    real(kdouble) :: parents(Z, Z+1), child(Z)
-    real(kdouble) :: loss, recon, kl, loss0
+    real(kdouble_ml) :: X(D, N), xhat(D, N), zlat(Z, N), samples(D, 4)
+    real(kdouble_ml) :: parents(Z, Z+1), child(Z)
+    real(kdouble_ml) :: loss, recon, kl, loss0
     integer(kint) :: i, j
 
     !> cover_check 用に対象サブルーチン名を全て登録
     call monolis_std_global_log_string("monolis_opt_vae_init")
     call monolis_std_global_log_string("monolis_opt_vae_init_layers")
-    call monolis_std_global_log_string("monolis_opt_vae_layer_init")
-    call monolis_std_global_log_string("monolis_opt_vae_layer_free")
     call monolis_std_global_log_string("monolis_opt_vae_finalize")
-    call monolis_std_global_log_string("monolis_opt_vae_adam_init")
-    call monolis_std_global_log_string("monolis_opt_vae_adam_free")
-    call monolis_std_global_log_string("monolis_opt_vae_adam_apply")
-    call monolis_std_global_log_string("monolis_opt_vae_glorot_uniform")
-    call monolis_std_global_log_string("monolis_opt_vae_fill_randn")
-    call monolis_std_global_log_string("monolis_opt_vae_shuffle")
-    call monolis_std_global_log_string("monolis_opt_vae_layer_forward")
-    call monolis_std_global_log_string("monolis_opt_vae_forward_stack")
-    call monolis_std_global_log_string("monolis_opt_vae_top_post")
-    call monolis_std_global_log_string("monolis_opt_vae_layer_backward")
-    call monolis_std_global_log_string("monolis_opt_vae_backward_stack")
-    call monolis_std_global_log_string("monolis_opt_vae_cache_free")
-    call monolis_std_global_log_string("monolis_opt_vae_grads_free")
     call monolis_std_global_log_string("monolis_opt_vae_train_step")
     call monolis_std_global_log_string("monolis_opt_vae_fit")
     call monolis_std_global_log_string("monolis_opt_vae_encode_mu_lv")
@@ -44,7 +29,6 @@ contains
     call monolis_std_global_log_string("monolis_opt_vae_decode_alloc")
     call monolis_std_global_log_string("monolis_opt_vae_decode")
     call monolis_std_global_log_string("monolis_opt_vae_sample_prior")
-    call monolis_std_global_log_string("monolis_opt_vae_spx_child")
     call monolis_std_global_log_string("monolis_opt_vae_generate_spx")
 
     !> 再現性のため Fortran 標準乱数を固定
@@ -64,20 +48,20 @@ contains
     end do
 
     !> 1 ステップ学習で損失が有限値であること
-    call monolis_opt_vae_train_step(net, X, 1.0d-3, 1.0d0, loss0, recon, kl)
+    call monolis_opt_vae_train_step(net, X, 1.0e-3_kdouble_ml, 1.0_kdouble_ml, loss0, recon, kl)
     call monolis_test_check_eq_L1("vae_test loss finite", loss0 == loss0 .and. abs(loss0) < huge(0.0d0), .true.)
 
     !> 短い fit 呼び出し: 損失が初期 1 ステップより悪化しないこと
     opts%batch_size = 8
     opts%epochs = 5
-    opts%lr = 1.0d-2
-    opts%r_loss_factor = 1.0d0
+    opts%lr = 1.0e-2_kdouble_ml
+    opts%r_loss_factor = 1.0_kdouble_ml
     opts%kl_warmup_epochs = 2
     opts%early_stop_patience = 100
     opts%log_every_batches = 0
     opts%verbose = .false.
     call monolis_opt_vae_fit(net, X, opts)
-    call monolis_opt_vae_train_step(net, X, 0.0d0, 1.0d0, loss, recon, kl)
+    call monolis_opt_vae_train_step(net, X, 0.0_kdouble_ml, 1.0_kdouble_ml, loss, recon, kl)
     call monolis_test_check_eq_L1("vae_test loss decreased", loss <= loss0 + 1.0d-6, .true.)
 
     !> 再構成と次元
@@ -101,8 +85,8 @@ contains
       parents(:, j) = (/ 1.0d0, -1.0d0 /)
     end do
     call monolis_opt_vae_spx_child(parents, Z, child)
-    call monolis_test_check_eq_R1("vae_test spx degenerate 1", child(1), 1.0d0)
-    call monolis_test_check_eq_R1("vae_test spx degenerate 2", child(2), -1.0d0)
+    call monolis_test_check_eq_R1("vae_test spx degenerate 1", real(child(1), kdouble), 1.0d0)
+    call monolis_test_check_eq_R1("vae_test spx degenerate 2", real(child(2), kdouble), -1.0d0)
 
     !> SPX 経由の生成
     call monolis_opt_vae_generate_spx(net, X, 4, samples)
@@ -121,7 +105,7 @@ contains
     call monolis_test_check_eq_I1("vae_test deep H (last enc)", net%H, 4)
     call monolis_test_check_eq_I1("vae_test deep enc(1) out", net%enc(1)%out_dim, 6)
     call monolis_test_check_eq_I1("vae_test deep dec(last) out", net%dec(3)%out_dim, D)
-    call monolis_opt_vae_train_step(net, X, 1.0d-3, 1.0d0, loss, recon, kl)
+    call monolis_opt_vae_train_step(net, X, 1.0e-3_kdouble_ml, 1.0_kdouble_ml, loss, recon, kl)
     call monolis_test_check_eq_L1("vae_test deep loss finite", &
       loss == loss .and. abs(loss) < huge(0.0d0), .true.)
     call monolis_opt_vae_reconstruct(net, X, xhat)

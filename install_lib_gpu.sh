@@ -60,7 +60,7 @@ cd ../../..
 #> monolis_utils
 cd submodule/monolis_utils/
 make clean
-make FLAGS=GPU_GNU lib
+make FLAGS=GPU_GNU
 cd ../..
 
 #> gedatsu

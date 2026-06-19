@@ -4,6 +4,7 @@ program monolis_test
   use mod_monolis_def_solver_test
   use mod_monolis_def_solver_util_test
   use mod_monolis_def_struc_test
+  use mod_monolis_def_opt_test
   use mod_monolis_spmat_copy_test
   use mod_monolis_spmat_nonzero_pattern_util_test
   use mod_monolis_spmat_nonzero_pattern_test
@@ -43,7 +44,11 @@ program monolis_test
   use mod_monolis_precond_test
   use mod_monolis_solve_test
   use mod_monolis_opt_nnls_test
+  use mod_monolis_opt_adam_test
+  use mod_monolis_opt_vae_util_test
   use mod_monolis_opt_vae_test
+  use mod_monolis_opt_cvae_test
+  use mod_monolis_opt_hvae_test
   implicit none
 
   call monolis_global_initialize()
@@ -52,6 +57,7 @@ program monolis_test
   call monolis_def_solver_test()
   call monolis_def_solver_util_test()
   call monolis_def_struc_test()
+  call monolis_def_opt_test()
 
   call monolis_spmat_copy_test()
   call monolis_spmat_nonzero_pattern_util_test()
@@ -81,7 +87,11 @@ program monolis_test
   call monolis_scalapack_test()
 
   call monolis_optimize_nnls_test()
+  call monolis_optimize_adam_test()
+  call monolis_optimize_vae_util_test()
   call monolis_optimize_vae_test()
+  call monolis_optimize_cvae_test()
+  call monolis_optimize_hvae_test()
 
   if(monolis_mpi_get_global_comm_size() == 1)then
     call monolis_solver_CG_test()

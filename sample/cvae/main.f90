@@ -1,9 +1,10 @@
-!> VAE サンプル
+!> CVAE (Conditional VAE) サンプル
 !>
 !> 概要:
-!>   2 つの 1 次元周期パターン (sin/cos) からなる合成データを学習し、
-!>   再構成・潜在エンコード・事前分布サンプリング・SPX 交叉サンプリング
-!>   を実行する。結果は標準出力に再構成 RMSE を表示する。
+!>   2 つの 1 次元周期パターン (sin/cos) からなる合成データを、
+!>   クラスラベルを条件ベクトル (one-hot) として与えて学習する。
+!>   学習後は条件付き再構成と、条件を指定した事前分布サンプリング
+!>   (条件付き生成) を実行し、再構成 RMSE を標準出力に表示する。
 !>
 !> 使い方:
 !>   ./run.sh
@@ -13,11 +14,12 @@ program main
   use mod_monolis_def_opt
   implicit none
 
-  integer(kint), parameter :: D = 16, H = 32, Z = 4, N = 256
+  integer(kint), parameter :: D = 16, C = 2, H = 32, Z = 4, N = 256
   real(kdouble), parameter :: PI = 3.141592653589793d0
-  type(monolis_opt_vae_t) :: net
+  type(monolis_opt_cvae_t) :: net
   type(monolis_opt_vae_train_opts) :: opts
-  real(kdouble_ml) :: X(D, N), xhat(D, N), samples(D, 8)
+  real(kdouble_ml) :: X(D, N), Cnd(C, N), xhat(D, N)
+  real(kdouble_ml) :: Cgen(C, 8), gen(D, 8)
   real(kdouble_ml) :: rmse
   integer(kint) :: i, j, label, seed_size
   integer(kint), allocatable :: seed_arr(:)
@@ -27,8 +29,8 @@ program main
 
   if(monolis_mpi_get_global_my_rank() == 0)then
     write(*,'(a)') "================================================"
-    write(*,'(a)') " VAE sample : synthetic 1D wave dataset"
-    write(*,'(a,i0,a,i0,a,i0,a,i0)') "  D=", D, " H=", H, " Z=", Z, " N=", N
+    write(*,'(a)') " CVAE sample : conditioned 1D wave dataset"
+    write(*,'(a,i0,a,i0,a,i0,a,i0,a,i0)') "  D=", D, " C=", C, " H=", H, " Z=", Z, " N=", N
     write(*,'(a)') "================================================"
   endif
 
@@ -42,10 +44,13 @@ program main
   deallocate(seed_arr)
 
   !> データ生成: ラベル 0 (sin 波) とラベル 1 (cos 波) をランダムに混在
+  !> 条件 Cnd はラベルの one-hot ベクトル (C=2)
   do j = 1, N
     call random_number(r)
     label = 0
     if(r > 0.5d0) label = 1
+    Cnd(:, j) = 0.0_kdouble_ml
+    Cnd(label + 1, j) = 1.0_kdouble_ml
     do i = 1, D
       if(label == 0)then
         val = 0.5d0 + 0.4d0 * sin(2.0d0*PI*real(i, kdouble)/real(D, kdouble))
@@ -57,7 +62,7 @@ program main
   end do
 
   !> モデル構築と学習
-  call monolis_opt_vae_init(net, D, H, Z)
+  call monolis_opt_cvae_init(net, D, C, H, Z)
 
   opts%batch_size = 32
   opts%epochs = 50
@@ -68,33 +73,36 @@ program main
   opts%log_every_batches = 0
   opts%verbose = .true.
 
-  call monolis_opt_vae_fit(net, X, opts)
+  call monolis_opt_cvae_fit(net, X, Cnd, opts)
 
-  !> 再構成
-  call monolis_opt_vae_reconstruct(net, X, xhat)
+  !> 条件付き再構成
+  call monolis_opt_cvae_reconstruct(net, X, Cnd, xhat)
   rmse = sqrt(sum((X - xhat)**2) / real(D*N, kdouble_ml))
   if(monolis_mpi_get_global_my_rank() == 0)then
     write(*,'(a,es12.4)') " reconstruction RMSE = ", rmse
   endif
 
-  !> 事前分布から 8 個サンプリング
-  call monolis_opt_vae_sample_prior(net, 8, samples)
+  !> 条件付き生成: ラベル 0 (sin) を 4 個、ラベル 1 (cos) を 4 個
+  do j = 1, 8
+    Cgen(:, j) = 0.0_kdouble_ml
+    if(j <= 4)then
+      Cgen(1, j) = 1.0_kdouble_ml
+    else
+      Cgen(2, j) = 1.0_kdouble_ml
+    endif
+  end do
+  call monolis_opt_cvae_sample_prior(net, Cgen, gen)
   if(monolis_mpi_get_global_my_rank() == 0)then
-    write(*,'(a)') " --- prior samples (first 4 dims of each sample) ---"
+    write(*,'(a)') " --- conditioned prior samples (first 4 dims of each sample) ---"
     do j = 1, 8
-      write(*,'(a,i0,a,4f8.4)') "  sample ", j, " : ", samples(1:4, j)
+      if(j <= 4)then
+        write(*,'(a,i0,a,4f8.4)') "  label 0 (sin) sample ", j, " : ", gen(1:4, j)
+      else
+        write(*,'(a,i0,a,4f8.4)') "  label 1 (cos) sample ", j-4, " : ", gen(1:4, j)
+      endif
     end do
   endif
 
-  !> SPX 交叉サンプリング
-  call monolis_opt_vae_generate_spx(net, X, 8, samples)
-  if(monolis_mpi_get_global_my_rank() == 0)then
-    write(*,'(a)') " --- SPX-crossover samples (first 4 dims) ---"
-    do j = 1, 8
-      write(*,'(a,i0,a,4f8.4)') "  sample ", j, " : ", samples(1:4, j)
-    end do
-  endif
-
-  call monolis_opt_vae_finalize(net)
+  call monolis_opt_cvae_finalize(net)
   call monolis_global_finalize()
 end program main
