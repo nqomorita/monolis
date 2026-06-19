@@ -15,17 +15,16 @@ contains
 
   !> @ingroup matrix
   !> CSR 形式から DIA 形式への変換（実数型、nxn ブロック）
-  !> @details 各非ゼロブロック (i, item(j)) のブロック列オフセット item(j) - i を
-  !>          全行から収集・ソート・一意化して対角線本数 Ndiag と offset(:) を確定する。
+  !> @details 各非ゼロブロック (i, item(j)) のブロック列オフセット item(j) - i に存在フラグを
+  !>          立て、フラグ配列を昇順に走査して対角線本数 Ndiag と offset(:) を確定する。
   !>          値は Adia((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) の配置で詰める。
   !>          行 i を最内（ストライド1）にし、GPU スレッド間のメモリアクセスをコアレッシングさせる。
   subroutine monolis_convert_CSR_to_DIA_R(monoMAT)
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat), intent(inout) :: monoMAT
-    integer(kint) :: N, NP, NDOF, NDOF2, nz, Ndiag
-    integer(kint) :: i, j, k, l, in, jS, jE, d, idx, newlen
-    integer(kint), allocatable :: off_all(:)
+    integer(kint) :: N, NP, NDOF, NDOF2, Ndiag
+    integer(kint) :: i, j, k, l, in, jS, jE, d, idx
     integer(kint), allocatable :: diag_of_offset(:)
 
     call monolis_std_debug_log_header("monolis_convert_CSR_to_DIA_R")
@@ -35,41 +34,34 @@ contains
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
 
-    nz = monoMAT%CSR%index(N + 1)
-
-    !# 全非ゼロのブロック列オフセットを収集
-    call monolis_alloc_I_1d(off_all, nz)
-    idx = 0
+    !# 各オフセットの存在フラグを立てる（オフセット値域は -(NP-1)..(NP-1)）
+    call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
         in = monoMAT%CSR%item(j)
-        idx = idx + 1
-        off_all(idx) = in - i
+        diag_of_offset(in - i + NP) = 1
       enddo
     enddo
 
-    !# ソート・一意化して対角線本数と offset を確定
-    if(nz > 0)then
-      call monolis_qsort_I_1d(off_all, 1, nz)
-      call monolis_get_uniq_array_I(off_all, nz, newlen)
-    else
-      newlen = 0
-    endif
-    Ndiag = newlen
+    !# フラグ配列を昇順に走査して対角線本数と offset を確定
+    Ndiag = 0
+    do idx = 1, 2*NP - 1
+      if(diag_of_offset(idx) /= 0) Ndiag = Ndiag + 1
+    enddo
 
     monoMAT%DIA%Ndiag = Ndiag
     call monolis_pdealloc_I_1d(monoMAT%DIA%offset)
     call monolis_palloc_I_1d(monoMAT%DIA%offset, Ndiag)
-    do d = 1, Ndiag
-      monoMAT%DIA%offset(d) = off_all(d)
-    enddo
 
-    !# 各オフセットの対角番号を引く逆引き表（オフセット値域は -(NP-1)..(NP-1)）
-    call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
-    do d = 1, Ndiag
-      diag_of_offset(monoMAT%DIA%offset(d) + NP) = d
+    d = 0
+    do idx = 1, 2*NP - 1
+      if(diag_of_offset(idx) /= 0)then
+        d = d + 1
+        monoMAT%DIA%offset(d) = idx - NP
+        diag_of_offset(idx) = d
+      endif
     enddo
 
     !# 値配列の確保（パディング込みで 0 初期化）
@@ -92,7 +84,6 @@ contains
       enddo
     enddo
 
-    call monolis_dealloc_I_1d(off_all)
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_R
 
@@ -108,9 +99,8 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat), intent(inout) :: monoMAT
-    integer(kint) :: N, NP, nz, Ndiag
-    integer(kint) :: i, j, m, in, jS, jE, d, idx, newlen, p, jcol, n1, n2, kn, aoff, total
-    integer(kint), allocatable :: off_all(:)
+    integer(kint) :: N, NP, Ndiag
+    integer(kint) :: i, j, m, in, jS, jE, d, idx, p, jcol, n1, n2, kn, aoff, total
     integer(kint), allocatable :: diag_of_offset(:)
 
     call monolis_std_debug_log_header("monolis_convert_CSR_to_DIA_V_R")
@@ -118,41 +108,35 @@ contains
     N  = monoMAT%N
     NP = monoMAT%NP
 
-    nz = monoMAT%CSR%index(N + 1)
-
-    !# 全非ゼロのブロック列オフセットを収集
-    call monolis_alloc_I_1d(off_all, nz)
-    idx = 0
+    !# 各オフセットの存在フラグを立てる（オフセット値域は -(NP-1)..(NP-1)）
+    call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
       do j = jS, jE
         in = monoMAT%CSR%item(j)
-        idx = idx + 1
-        off_all(idx) = in - i
+        diag_of_offset(in - i + NP) = 1
       enddo
     enddo
 
-    !# ソート・一意化して対角線本数と offset を確定
-    if(nz > 0)then
-      call monolis_qsort_I_1d(off_all, 1, nz)
-      call monolis_get_uniq_array_I(off_all, nz, newlen)
-    else
-      newlen = 0
-    endif
-    Ndiag = newlen
+    !# フラグ配列を昇順に走査して対角線本数と offset を確定
+    Ndiag = 0
+    do idx = 1, 2*NP - 1
+      if(diag_of_offset(idx) /= 0) Ndiag = Ndiag + 1
+    enddo
 
     monoMAT%DIA%Ndiag = Ndiag
     call monolis_pdealloc_I_1d(monoMAT%DIA%offset)
     call monolis_palloc_I_1d(monoMAT%DIA%offset, Ndiag)
-    do d = 1, Ndiag
-      monoMAT%DIA%offset(d) = off_all(d)
-    enddo
 
-    !# 各オフセットの対角番号を引く逆引き表（オフセット値域は -(NP-1)..(NP-1)）
-    call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
-    do d = 1, Ndiag
-      diag_of_offset(monoMAT%DIA%offset(d) + NP) = d
+    !# offset を確定し、同じ配列を対角番号の逆引き表として再利用
+    d = 0
+    do idx = 1, 2*NP - 1
+      if(diag_of_offset(idx) /= 0)then
+        d = d + 1
+        monoMAT%DIA%offset(d) = idx - NP
+        diag_of_offset(idx) = d
+      endif
     enddo
 
     !# 各 (対角, 行) ブロックの値配列内開始オフセットを prefix sum で確定
@@ -195,7 +179,6 @@ contains
       enddo
     enddo
 
-    call monolis_dealloc_I_1d(off_all)
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_V_R
 
