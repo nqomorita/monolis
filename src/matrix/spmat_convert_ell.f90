@@ -45,12 +45,10 @@ contains
     !# 列番号配列の確保（パディング込みで 0 初期化）
     call monolis_pdealloc_I_1d(monoMAT%ELL%col)
     call monolis_palloc_I_1d(monoMAT%ELL%col, N*Nmaxcol)
-    monoMAT%ELL%col = 0
 
     !# 値配列の確保（パディング込みで 0 初期化）
     call monolis_pdealloc_R_1d(monoMAT%R%Aell)
     call monolis_palloc_R_1d(monoMAT%R%Aell, NDOF2*N*Nmaxcol)
-    monoMAT%R%Aell = 0.0d0
 
     !# CSR 値を ELL 配置に詰める
     do i = 1, N
@@ -102,7 +100,6 @@ contains
     !# 列番号配列の確保（パディング込みで 0 初期化）
     call monolis_pdealloc_I_1d(monoMAT%ELL%col)
     call monolis_palloc_I_1d(monoMAT%ELL%col, N*Nmaxcol)
-    monoMAT%ELL%col = 0
 
     !# 列番号を ELL 配置に詰める
     do i = 1, N
@@ -119,7 +116,7 @@ contains
     !# 各 (スロット, 行) ブロックの値配列内開始オフセットを prefix sum で確定
     call monolis_pdealloc_I_1d(monoMAT%ELL%Vptr)
     call monolis_palloc_I_1d(monoMAT%ELL%Vptr, N*Nmaxcol + 1)
-    monoMAT%ELL%Vptr = 0
+
     do slot = 1, Nmaxcol
       do i = 1, N
         p = (slot-1)*N + i
@@ -137,7 +134,6 @@ contains
     !# 値配列の確保（パディング込みで 0 初期化）
     call monolis_pdealloc_R_1d(monoMAT%R%Aell)
     call monolis_palloc_R_1d(monoMAT%R%Aell, total)
-    monoMAT%R%Aell = 0.0d0
 
     !# CSR 値を ELL 配置（ブロック連続）に詰める
     do i = 1, N
