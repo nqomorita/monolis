@@ -1,8 +1,10 @@
 !> VAE / Conditional VAE 共通ユーティリティライブラリ
 !> @details MLP の層構造・順伝播・逆伝播・初期化・乱数など、
 !>          VAE と Conditional VAE で共有するデータ構造と処理をまとめる。
+!>          機械学習に関わる実数は 32bit 浮動小数点 (kdouble_ml) で計算する。
 module mod_monolis_opt_vae_util
   use mod_monolis_utils
+  use mod_monolis_def_opt
   use mod_monolis_opt_adam
   implicit none
 
@@ -40,9 +42,9 @@ module mod_monolis_opt_vae_util
     !> [in] 活性関数種別 (monolis_opt_vae_act_*)
     integer(kint) :: act     = 0
     !> [in,out] 重み行列 (in_dim x out_dim)
-    real(kdouble), allocatable :: W(:,:)
+    real(kdouble_ml), allocatable :: W(:,:)
     !> [in,out] バイアス (out_dim)
-    real(kdouble), allocatable :: b(:)
+    real(kdouble_ml), allocatable :: b(:)
     !> [in,out] Adam 状態
     type(monolis_opt_adam_state) :: a
   end type monolis_opt_vae_layer_t
@@ -50,17 +52,17 @@ module mod_monolis_opt_vae_util
   !> 順伝播時のキャッシュ (層ごと)
   type :: monolis_opt_vae_cache_t
     !> 活性化前 (out_dim x B)
-    real(kdouble), allocatable :: pre(:,:)
+    real(kdouble_ml), allocatable :: pre(:,:)
     !> 活性化後 (out_dim x B)
-    real(kdouble), allocatable :: post(:,:)
+    real(kdouble_ml), allocatable :: post(:,:)
   end type monolis_opt_vae_cache_t
 
   !> 1 層の勾配 (逆伝播時に動的に確保)
   type :: monolis_opt_vae_grad_t
     !> 重み勾配 (in_dim x out_dim)
-    real(kdouble), allocatable :: gW(:,:)
+    real(kdouble_ml), allocatable :: gW(:,:)
     !> バイアス勾配 (out_dim)
-    real(kdouble), allocatable :: gb(:)
+    real(kdouble_ml), allocatable :: gb(:)
   end type monolis_opt_vae_grad_t
 
   !> @ingroup optimize
@@ -71,9 +73,9 @@ module mod_monolis_opt_vae_util
     !> [in] エポック数
     integer(kint) :: epochs = 10
     !> [in] 学習率
-    real(kdouble) :: lr = 1.0d-3
+    real(kdouble_ml) :: lr = 1.0e-3_kdouble_ml
     !> [in] KL 損失の最終スケール (beta)
-    real(kdouble) :: r_loss_factor = 1.0d0
+    real(kdouble_ml) :: r_loss_factor = 1.0_kdouble_ml
     !> [in] KL ウォームアップエポック数 (0 -> r_loss_factor へ線形、0 で無効)
     integer(kint) :: kl_warmup_epochs = 0
     !> [in] EarlyStopping の patience。負値で max(1, epochs/10)
@@ -102,8 +104,8 @@ contains
     layer%in_dim  = in_dim
     layer%out_dim = out_dim
     layer%act     = act
-    call monolis_alloc_R_2d(layer%W, in_dim, out_dim)
-    call monolis_alloc_R_1d(layer%b, out_dim)
+    allocate(layer%W(in_dim, out_dim), source = 0.0_kdouble_ml)
+    allocate(layer%b(out_dim),         source = 0.0_kdouble_ml)
     call monolis_opt_vae_glorot_uniform(layer%W)
     call monolis_opt_adam_init(layer%a, in_dim, out_dim)
   end subroutine monolis_opt_vae_layer_init
@@ -126,17 +128,17 @@ contains
   subroutine monolis_opt_vae_glorot_uniform(W)
     implicit none
     !> [out] 初期化対象の重み行列 (fan_in x fan_out)
-    real(kdouble), intent(out) :: W(:,:)
-    real(kdouble) :: limit, r
+    real(kdouble_ml), intent(out) :: W(:,:)
+    real(kdouble_ml) :: limit, r
     integer(kint) :: i, j, fan_in, fan_out
 
     fan_in  = size(W, 1)
     fan_out = size(W, 2)
-    limit = sqrt(6.0d0 / real(fan_in + fan_out, kdouble))
+    limit = sqrt(6.0_kdouble_ml / real(fan_in + fan_out, kdouble_ml))
     do j = 1, size(W, 2)
       do i = 1, size(W, 1)
         call random_number(r)
-        W(i,j) = (2.0d0*r - 1.0d0) * limit
+        W(i,j) = (2.0_kdouble_ml*r - 1.0_kdouble_ml) * limit
       end do
     end do
   end subroutine monolis_opt_vae_glorot_uniform
@@ -146,17 +148,17 @@ contains
   subroutine monolis_opt_vae_fill_randn(a)
     implicit none
     !> [out] 充填対象の 2 次元配列
-    real(kdouble), intent(out) :: a(:,:)
-    real(kdouble), parameter :: pi = 3.141592653589793d0
-    real(kdouble) :: u1, u2
+    real(kdouble_ml), intent(out) :: a(:,:)
+    real(kdouble_ml), parameter :: pi = 3.141592653589793_kdouble_ml
+    real(kdouble_ml) :: u1, u2
     integer(kint) :: i, j
 
     do j = 1, size(a, 2)
       do i = 1, size(a, 1)
         call random_number(u1)
         call random_number(u2)
-        if(u1 < 1.0d-12) u1 = 1.0d-12
-        a(i,j) = sqrt(-2.0d0*log(u1)) * cos(2.0d0*pi*u2)
+        if(u1 < 1.0e-12_kdouble_ml) u1 = 1.0e-12_kdouble_ml
+        a(i,j) = sqrt(-2.0_kdouble_ml*log(u1)) * cos(2.0_kdouble_ml*pi*u2)
       end do
     end do
   end subroutine monolis_opt_vae_fill_randn
@@ -168,7 +170,7 @@ contains
     !> [in,out] シャッフル対象の整数配列
     integer(kint), intent(inout) :: a(:)
     integer(kint) :: i, j, tmp, n
-    real(kdouble) :: r
+    real(kdouble_ml) :: r
 
     n = size(a)
     do i = n, 2, -1
@@ -186,23 +188,23 @@ contains
     !> [in] 対象の層
     type(monolis_opt_vae_layer_t), intent(in) :: layer
     !> [in] 入力活性 (in_dim x B)
-    real(kdouble), intent(in) :: a_in(:,:)
+    real(kdouble_ml), intent(in) :: a_in(:,:)
     !> [out] 活性化前/後をキャッシュ
     type(monolis_opt_vae_cache_t), intent(out) :: cache
     integer(kint) :: j, B
 
     B = size(a_in, 2)
-    call monolis_alloc_R_2d(cache%pre,  layer%out_dim, B)
-    call monolis_alloc_R_2d(cache%post, layer%out_dim, B)
+    allocate(cache%pre(layer%out_dim, B),  source = 0.0_kdouble_ml)
+    allocate(cache%post(layer%out_dim, B), source = 0.0_kdouble_ml)
     cache%pre = matmul(transpose(layer%W), a_in)
     do j = 1, B
       cache%pre(:,j) = cache%pre(:,j) + layer%b
     end do
     select case(layer%act)
     case(monolis_opt_vae_act_relu)
-      cache%post = max(0.0d0, cache%pre)
+      cache%post = max(0.0_kdouble_ml, cache%pre)
     case(monolis_opt_vae_act_sigmoid)
-      cache%post = 1.0d0 / (1.0d0 + exp(-cache%pre))
+      cache%post = 1.0_kdouble_ml / (1.0_kdouble_ml + exp(-cache%pre))
     case default
       cache%post = cache%pre
     end select
@@ -215,7 +217,7 @@ contains
     !> [in] 層列
     type(monolis_opt_vae_layer_t), intent(in) :: layers(:)
     !> [in] 入力 (in_dim x B)
-    real(kdouble), intent(in) :: X(:,:)
+    real(kdouble_ml), intent(in) :: X(:,:)
     !> [out] 層ごとのキャッシュ (size(layers))
     type(monolis_opt_vae_cache_t), allocatable, intent(out) :: cache(:)
     integer(kint) :: l, nL
@@ -235,7 +237,7 @@ contains
     !> [in] 層列キャッシュ
     type(monolis_opt_vae_cache_t), intent(in), target :: cache(:)
     !> 最終層の post への配列コピー
-    real(kdouble), allocatable :: p(:,:)
+    real(kdouble_ml), allocatable :: p(:,:)
     integer(kint) :: nL
 
     nL = size(cache)
@@ -250,39 +252,39 @@ contains
     !> [in] 対象の層
     type(monolis_opt_vae_layer_t), intent(in) :: layer
     !> [in] 入力活性 (in_dim x B)
-    real(kdouble), intent(in) :: a_in(:,:)
+    real(kdouble_ml), intent(in) :: a_in(:,:)
     !> [in] 順伝播キャッシュ
     type(monolis_opt_vae_cache_t), intent(in) :: cache
     !> [in] 上流からの勾配 (out_dim x B、post に対する勾配)
-    real(kdouble), intent(in) :: dY(:,:)
+    real(kdouble_ml), intent(in) :: dY(:,:)
     !> [out] 重み勾配 (in_dim x out_dim)
-    real(kdouble), allocatable, intent(out) :: gW(:,:)
+    real(kdouble_ml), allocatable, intent(out) :: gW(:,:)
     !> [out] バイアス勾配 (out_dim)
-    real(kdouble), allocatable, intent(out) :: gb(:)
+    real(kdouble_ml), allocatable, intent(out) :: gb(:)
     !> [out] 入力側勾配 (in_dim x B)
-    real(kdouble), allocatable, intent(out) :: dX_in(:,:)
-    real(kdouble), allocatable :: dpre(:,:)
+    real(kdouble_ml), allocatable, intent(out) :: dX_in(:,:)
+    real(kdouble_ml), allocatable :: dpre(:,:)
     integer(kint) :: B
 
     B = size(a_in, 2)
-    call monolis_alloc_R_2d(dpre, layer%out_dim, B)
+    allocate(dpre(layer%out_dim, B), source = 0.0_kdouble_ml)
     select case(layer%act)
     case(monolis_opt_vae_act_relu)
-      where(cache%pre > 0.0d0)
+      where(cache%pre > 0.0_kdouble_ml)
         dpre = dY
       elsewhere
-        dpre = 0.0d0
+        dpre = 0.0_kdouble_ml
       end where
     case(monolis_opt_vae_act_sigmoid)
-      dpre = dY * cache%post * (1.0d0 - cache%post)
+      dpre = dY * cache%post * (1.0_kdouble_ml - cache%post)
     case default
       dpre = dY
     end select
-    call monolis_alloc_R_2d(gW, layer%in_dim, layer%out_dim)
-    call monolis_alloc_R_1d(gb, layer%out_dim)
+    allocate(gW(layer%in_dim, layer%out_dim), source = 0.0_kdouble_ml)
+    allocate(gb(layer%out_dim),               source = 0.0_kdouble_ml)
     gW = matmul(a_in, transpose(dpre))
     gb = sum(dpre, dim=2)
-    call monolis_alloc_R_2d(dX_in, layer%in_dim, B)
+    allocate(dX_in(layer%in_dim, B), source = 0.0_kdouble_ml)
     dX_in = matmul(layer%W, dpre)
     deallocate(dpre)
   end subroutine monolis_opt_vae_layer_backward
@@ -294,16 +296,16 @@ contains
     !> [in] 層列
     type(monolis_opt_vae_layer_t), intent(in) :: layers(:)
     !> [in] 入力 (in_dim x B)
-    real(kdouble), intent(in) :: X(:,:)
+    real(kdouble_ml), intent(in) :: X(:,:)
     !> [in] 順伝播キャッシュ
     type(monolis_opt_vae_cache_t), intent(in) :: cache(:)
     !> [in] 最終層 post への勾配
-    real(kdouble), intent(in) :: dY_top(:,:)
+    real(kdouble_ml), intent(in) :: dY_top(:,:)
     !> [out] 層ごとの勾配
     type(monolis_opt_vae_grad_t), allocatable, intent(out) :: grads(:)
     !> [out] 入力側勾配
-    real(kdouble), allocatable, intent(out) :: dX_in(:,:)
-    real(kdouble), allocatable :: dY(:,:), dX(:,:)
+    real(kdouble_ml), allocatable, intent(out) :: dX_in(:,:)
+    real(kdouble_ml), allocatable :: dY(:,:), dX(:,:)
     integer(kint) :: l, nL
 
     nL = size(layers)
@@ -361,29 +363,29 @@ contains
   subroutine monolis_opt_vae_spx_child(parents, Zdim, child)
     implicit none
     !> [in] 親ベクトル (Zdim x (Zdim+1))
-    real(kdouble), intent(in) :: parents(:,:)
+    real(kdouble_ml), intent(in) :: parents(:,:)
     !> [in] 潜在次元数
     integer(kint), intent(in) :: Zdim
     !> [out] 子ベクトル (Zdim)
-    real(kdouble), intent(out) :: child(:)
+    real(kdouble_ml), intent(out) :: child(:)
     integer(kint) :: i, Np
-    real(kdouble) :: epsilon_, r
-    real(kdouble), allocatable :: center(:), x(:,:), c(:,:)
+    real(kdouble_ml) :: epsilon_, r
+    real(kdouble_ml), allocatable :: center(:), x(:,:), c(:,:)
 
     Np = Zdim + 1
-    epsilon_ = sqrt(real(Zdim + 2, kdouble))
-    call monolis_alloc_R_1d(center, Zdim)
-    call monolis_alloc_R_2d(x,      Zdim, Np)
-    call monolis_alloc_R_2d(c,      Zdim, Np)
-    center = sum(parents, dim=2) / real(Np, kdouble)
+    epsilon_ = sqrt(real(Zdim + 2, kdouble_ml))
+    allocate(center(Zdim),  source = 0.0_kdouble_ml)
+    allocate(x(Zdim, Np),   source = 0.0_kdouble_ml)
+    allocate(c(Zdim, Np),   source = 0.0_kdouble_ml)
+    center = sum(parents, dim=2) / real(Np, kdouble_ml)
     do i = 1, Np
       x(:, i) = center + epsilon_ * (parents(:, i) - center)
     end do
-    c(:, 1) = 0.0d0
+    c(:, 1) = 0.0_kdouble_ml
     do i = 2, Np
       call random_number(r)
-      if(r < 1.0d-300) r = 1.0d-300
-      r = r ** (1.0d0 / real(i - 1, kdouble))
+      if(r < 1.0e-30_kdouble_ml) r = 1.0e-30_kdouble_ml
+      r = r ** (1.0_kdouble_ml / real(i - 1, kdouble_ml))
       c(:, i) = r * (x(:, i-1) - x(:, i) + c(:, i-1))
     end do
     child = x(:, Np) + c(:, Np)

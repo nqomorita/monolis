@@ -1,8 +1,10 @@
 !> Adam オプティマイザライブラリ
 !> @details VAE / Conditional VAE など MLP 学習で共有する Adam の状態と更新処理。
 !>          1 つの重み行列 (in_dim x out_dim) とバイアス (out_dim) を対象とする。
+!>          機械学習に関わる実数は 32bit 浮動小数点 (kdouble_ml) で計算する。
 module mod_monolis_opt_adam
   use mod_monolis_utils
+  use mod_monolis_def_opt
   implicit none
 
   private
@@ -15,13 +17,13 @@ module mod_monolis_opt_adam
   !> Adam オプティマイザの状態 (1 つの重み行列 + バイアスに対応)
   type :: monolis_opt_adam_state
     !> [in,out] 重み行列の 1 次モーメント
-    real(kdouble), allocatable :: m(:,:)
+    real(kdouble_ml), allocatable :: m(:,:)
     !> [in,out] 重み行列の 2 次モーメント
-    real(kdouble), allocatable :: v(:,:)
+    real(kdouble_ml), allocatable :: v(:,:)
     !> [in,out] バイアスの 1 次モーメント
-    real(kdouble), allocatable :: mb(:)
+    real(kdouble_ml), allocatable :: mb(:)
     !> [in,out] バイアスの 2 次モーメント
-    real(kdouble), allocatable :: vb(:)
+    real(kdouble_ml), allocatable :: vb(:)
   end type monolis_opt_adam_state
 
 contains
@@ -37,10 +39,10 @@ contains
     !> [in] 重み行列の列数 (バイアス次元)
     integer(kint), intent(in) :: n2
 
-    call monolis_alloc_R_2d(st%m,  n1, n2)
-    call monolis_alloc_R_2d(st%v,  n1, n2)
-    call monolis_alloc_R_1d(st%mb, n2)
-    call monolis_alloc_R_1d(st%vb, n2)
+    allocate(st%m(n1, n2),  source = 0.0_kdouble_ml)
+    allocate(st%v(n1, n2),  source = 0.0_kdouble_ml)
+    allocate(st%mb(n2),     source = 0.0_kdouble_ml)
+    allocate(st%vb(n2),     source = 0.0_kdouble_ml)
   end subroutine monolis_opt_adam_init
 
   !> @ingroup optimize
@@ -61,28 +63,28 @@ contains
   subroutine monolis_opt_adam_apply(W, b, gW, gb, st, t, lr)
     implicit none
     !> [in,out] 重み行列
-    real(kdouble), intent(inout) :: W(:,:)
+    real(kdouble_ml), intent(inout) :: W(:,:)
     !> [in,out] バイアス
-    real(kdouble), intent(inout) :: b(:)
+    real(kdouble_ml), intent(inout) :: b(:)
     !> [in] 重み勾配
-    real(kdouble), intent(in) :: gW(:,:)
+    real(kdouble_ml), intent(in) :: gW(:,:)
     !> [in] バイアス勾配
-    real(kdouble), intent(in) :: gb(:)
+    real(kdouble_ml), intent(in) :: gb(:)
     !> [in,out] Adam 状態
     type(monolis_opt_adam_state), intent(inout) :: st
     !> [in] グローバルステップ数 (1 始まり)
     integer(kint), intent(in) :: t
     !> [in] 学習率
-    real(kdouble), intent(in) :: lr
-    real(kdouble), parameter :: b1 = 0.9d0, b2 = 0.999d0, eps = 1.0d-7
-    real(kdouble) :: bc1, bc2
+    real(kdouble_ml), intent(in) :: lr
+    real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml, eps = 1.0e-7_kdouble_ml
+    real(kdouble_ml) :: bc1, bc2
 
-    st%m  = b1*st%m  + (1.0d0 - b1)*gW
-    st%v  = b2*st%v  + (1.0d0 - b2)*gW*gW
-    st%mb = b1*st%mb + (1.0d0 - b1)*gb
-    st%vb = b2*st%vb + (1.0d0 - b2)*gb*gb
-    bc1 = 1.0d0 - b1**t
-    bc2 = 1.0d0 - b2**t
+    st%m  = b1*st%m  + (1.0_kdouble_ml - b1)*gW
+    st%v  = b2*st%v  + (1.0_kdouble_ml - b2)*gW*gW
+    st%mb = b1*st%mb + (1.0_kdouble_ml - b1)*gb
+    st%vb = b2*st%vb + (1.0_kdouble_ml - b2)*gb*gb
+    bc1 = 1.0_kdouble_ml - b1**t
+    bc2 = 1.0_kdouble_ml - b2**t
     W = W - lr * (st%m / bc1) / (sqrt(st%v / bc2) + eps)
     b = b - lr * (st%mb/ bc1) / (sqrt(st%vb/ bc2) + eps)
   end subroutine monolis_opt_adam_apply

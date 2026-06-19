@@ -12,9 +12,9 @@ contains
     type(monolis_opt_cvae_t) :: net
     type(monolis_opt_vae_train_opts) :: opts
     integer(kint), parameter :: D = 4, C = 2, H = 8, Z = 2, N = 32
-    real(kdouble) :: X(D, N), Cnd(C, N), xhat(D, N), zlat(Z, N)
-    real(kdouble) :: Cgen(C, 4), samples(D, 4)
-    real(kdouble) :: loss, recon, kl, loss0
+    real(kdouble_ml) :: X(D, N), Cnd(C, N), xhat(D, N), zlat(Z, N)
+    real(kdouble_ml) :: Cgen(C, 4), samples(D, 4)
+    real(kdouble_ml) :: loss, recon, kl, loss0
     integer(kint) :: i, j
 
     !> cover_check 用に対象サブルーチン名を全て登録
@@ -53,21 +53,21 @@ contains
     end do
 
     !> 1 ステップ学習で損失が有限値であること
-    call monolis_opt_cvae_train_step(net, X, Cnd, 1.0d-3, 1.0d0, loss0, recon, kl)
+    call monolis_opt_cvae_train_step(net, X, Cnd, 1.0e-3_kdouble_ml, 1.0_kdouble_ml, loss0, recon, kl)
     call monolis_test_check_eq_L1("cvae_test loss finite", &
       loss0 == loss0 .and. abs(loss0) < huge(0.0d0), .true.)
 
     !> 短い fit 呼び出し: 損失が初期 1 ステップより悪化しないこと
     opts%batch_size = 8
     opts%epochs = 5
-    opts%lr = 1.0d-2
-    opts%r_loss_factor = 1.0d0
+    opts%lr = 1.0e-2_kdouble_ml
+    opts%r_loss_factor = 1.0_kdouble_ml
     opts%kl_warmup_epochs = 2
     opts%early_stop_patience = 100
     opts%log_every_batches = 0
     opts%verbose = .false.
     call monolis_opt_cvae_fit(net, X, Cnd, opts)
-    call monolis_opt_cvae_train_step(net, X, Cnd, 0.0d0, 1.0d0, loss, recon, kl)
+    call monolis_opt_cvae_train_step(net, X, Cnd, 0.0_kdouble_ml, 1.0_kdouble_ml, loss, recon, kl)
     call monolis_test_check_eq_L1("cvae_test loss decreased", loss <= loss0 + 1.0d-6, .true.)
 
     !> 再構成と次元
@@ -103,7 +103,7 @@ contains
     call monolis_test_check_eq_I1("cvae_test deep enc(1) in", net%enc(1)%in_dim, D + C)
     call monolis_test_check_eq_I1("cvae_test deep dec(1) in", net%dec(1)%in_dim, Z + C)
     call monolis_test_check_eq_I1("cvae_test deep dec(last) out", net%dec(3)%out_dim, D)
-    call monolis_opt_cvae_train_step(net, X, Cnd, 1.0d-3, 1.0d0, loss, recon, kl)
+    call monolis_opt_cvae_train_step(net, X, Cnd, 1.0e-3_kdouble_ml, 1.0_kdouble_ml, loss, recon, kl)
     call monolis_test_check_eq_L1("cvae_test deep loss finite", &
       loss == loss .and. abs(loss) < huge(0.0d0), .true.)
     call monolis_opt_cvae_reconstruct(net, X, Cnd, xhat)

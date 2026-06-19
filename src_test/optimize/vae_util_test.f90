@@ -12,9 +12,9 @@ contains
     type(monolis_opt_vae_layer_t) :: layers(2)
     type(monolis_opt_vae_cache_t), allocatable :: cache(:)
     type(monolis_opt_vae_grad_t),  allocatable :: grads(:)
-    real(kdouble) :: X(3, 5), dY(2, 5), randn(4, 4)
-    real(kdouble) :: parents(2, 3), child(2)
-    real(kdouble), allocatable :: top(:,:), dX_in(:,:)
+    real(kdouble_ml) :: X(3, 5), dY(2, 5), randn(4, 4)
+    real(kdouble_ml) :: parents(2, 3), child(2)
+    real(kdouble_ml), allocatable :: top(:,:), dX_in(:,:)
     integer(kint) :: perm(6), i, j, cnt
 
     !> cover_check 用に対象サブルーチン名を全て登録
@@ -91,8 +91,8 @@ contains
       parents(:, j) = (/ 2.0d0, -3.0d0 /)
     end do
     call monolis_opt_vae_spx_child(parents, 2, child)
-    call monolis_test_check_eq_R1("vae_util spx degenerate 1", child(1), 2.0d0)
-    call monolis_test_check_eq_R1("vae_util spx degenerate 2", child(2), -3.0d0)
+    call monolis_test_check_eq_R1("vae_util spx degenerate 1", real(child(1), kdouble), 2.0d0)
+    call monolis_test_check_eq_R1("vae_util spx degenerate 2", real(child(2), kdouble), -3.0d0)
   end subroutine monolis_optimize_vae_util_test
 
 end module mod_monolis_opt_vae_util_test

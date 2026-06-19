@@ -95,7 +95,8 @@ SRC_DEFINE = \
 def_solver_prm.f90 \
 def_mat.f90 \
 def_struc.f90 \
-def_solver_prm_util.f90
+def_solver_prm_util.f90 \
+def_opt.f90
 
 SRC_MAT = \
 spmat_copy.f90 \

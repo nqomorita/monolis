@@ -10,7 +10,7 @@ contains
   subroutine monolis_optimize_adam_test()
     implicit none
     type(monolis_opt_adam_state) :: st
-    real(kdouble) :: W(2, 3), b(3), gW(2, 3), gb(3)
+    real(kdouble_ml) :: W(2, 3), b(3), gW(2, 3), gb(3)
     integer(kint) :: t
 
     !> cover_check 用に対象サブルーチン名を全て登録
@@ -28,7 +28,7 @@ contains
     call monolis_test_check_eq_L1("adam_test vb allocated", allocated(st%vb), .true.)
 
     do t = 1, 5
-      call monolis_opt_adam_apply(W, b, gW, gb, st, t, 1.0d-2)
+      call monolis_opt_adam_apply(W, b, gW, gb, st, t, 1.0e-2_kdouble_ml)
     end do
 
     !> 勾配 gW > 0 のため W は減少、gb < 0 のため b は増加する

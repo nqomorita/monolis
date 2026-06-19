@@ -25,6 +25,7 @@ module mod_monolis_solver
   use mod_monolis_eigen_solver
   use mod_monolis_eigen_lanczos
   use mod_monolis_eigen_lanczos_util
+  use mod_monolis_def_opt
   use mod_monolis_opt_nnls
   use mod_monolis_opt_adam
   use mod_monolis_opt_vae_util
