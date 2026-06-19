@@ -47,6 +47,22 @@ module mod_monolis_lapack
       real(kdouble), intent(inout) :: b(ldb, *)
     end subroutine
 
+    subroutine dtrsv(uplo, trans, diag, n, a, lda, x, incx)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: uplo, trans, diag
+      integer(kint), intent(in) :: n, lda, incx
+      real(kdouble), intent(in) :: a(lda, *)
+      real(kdouble), intent(inout) :: x(*)
+    end subroutine
+
+    subroutine dger(m, n, alpha, x, incx, y, incy, a, lda)
+      import :: kint, kdouble
+      integer(kint), intent(in) :: m, n, incx, incy, lda
+      real(kdouble), intent(in) :: alpha
+      real(kdouble), intent(in) :: x(*), y(*)
+      real(kdouble), intent(inout) :: a(lda, *)
+    end subroutine
+
     subroutine dlaset(uplo, m, n, alpha, beta, a, lda)
       import :: kint, kdouble
       character(len=1), intent(in) :: uplo

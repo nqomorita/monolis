@@ -31,6 +31,7 @@ module mod_monolis_solver
   use mod_monolis_opt_vae_util
   use mod_monolis_opt_vae
   use mod_monolis_opt_cvae
+  use mod_monolis_opt_hvae
 
   !> @defgroup def_init 全体初期化・終了処理関数群
   !> 初期化・終了処理に関連する関数グループ
