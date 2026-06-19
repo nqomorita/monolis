@@ -185,8 +185,8 @@ contains
     h_last = monolis_opt_vae_top_post(enc_cache)
 
     !> mu / logvar (線形ヘッド: out_dim x B)
-    allocate(mu(Z, B),     source = 0.0_kdouble_ml)
-    allocate(logvar(Z, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(mu,     Z, B)
+    call monolis_alloc_F_2d(logvar, Z, B)
     mu     = matmul(transpose(net%head_mu%W), h_last)
     logvar = matmul(transpose(net%head_lv%W), h_last)
     do j = 1, B
@@ -197,8 +197,8 @@ contains
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
 
     !> 再パラメータ化
-    allocate(eps(Z, B),  source = 0.0_kdouble_ml)
-    allocate(zlat(Z, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(eps,  Z, B)
+    call monolis_alloc_F_2d(zlat, Z, B)
     call monolis_opt_vae_fill_randn(eps)
     zlat = mu + exp(0.5_kdouble_ml*logvar) * eps
 
@@ -212,30 +212,30 @@ contains
     loss_avg  = recon_avg + beta * kl_avg
 
     !> デコーダ逆伝播: 出力 post=xhat に対する勾配 (sigmoid は層内で処理)
-    allocate(dxhat(D, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dxhat, D, B)
     dxhat = 2.0_kdouble_ml * (xhat - X) * invBD
     call monolis_opt_vae_backward_stack(net%dec, zlat, dec_cache, dxhat, dec_grads, dz_dec)
 
     !> dmu / dlv
-    allocate(dmu(Z, B), source = 0.0_kdouble_ml)
-    allocate(dlv(Z, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dmu, Z, B)
+    call monolis_alloc_F_2d(dlv, Z, B)
     dmu = dz_dec + kl_w * mu
     dlv = dz_dec * eps * 0.5_kdouble_ml * exp(0.5_kdouble_ml*logvar) + kl_w * 0.5_kdouble_ml*(exp(logvar) - 1.0_kdouble_ml)
 
     !> ヘッド (線形) の勾配と h_last への逆伝播
-    allocate(gWmu(net%head_mu%in_dim, Z), source = 0.0_kdouble_ml)
-    allocate(gbmu(Z),                     source = 0.0_kdouble_ml)
-    allocate(gWlv(net%head_lv%in_dim, Z), source = 0.0_kdouble_ml)
-    allocate(gblv(Z),                     source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(gWmu, net%head_mu%in_dim, Z)
+    call monolis_alloc_F_1d(gbmu, Z)
+    call monolis_alloc_F_2d(gWlv, net%head_lv%in_dim, Z)
+    call monolis_alloc_F_1d(gblv, Z)
     gWmu = matmul(h_last, transpose(dmu))
     gbmu = sum(dmu, dim=2)
     gWlv = matmul(h_last, transpose(dlv))
     gblv = sum(dlv, dim=2)
-    allocate(dh1_mu(net%head_mu%in_dim, B), source = 0.0_kdouble_ml)
-    allocate(dh1_lv(net%head_lv%in_dim, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dh1_mu, net%head_mu%in_dim, B)
+    call monolis_alloc_F_2d(dh1_lv, net%head_lv%in_dim, B)
     dh1_mu = matmul(net%head_mu%W, dmu)
     dh1_lv = matmul(net%head_lv%W, dlv)
-    allocate(dh_last(net%head_mu%in_dim, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dh_last, net%head_mu%in_dim, B)
     dh_last = dh1_mu + dh1_lv
 
     !> エンコーダ逆伝播
@@ -295,7 +295,7 @@ contains
     if(patience < 0) patience = max(1, opts%epochs / 10)
 
     call monolis_alloc_I_1d(perm, N)
-    allocate(Xb(D, opts%batch_size), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(Xb, D, opts%batch_size)
     do k = 1, N
       perm(k) = k
     end do
@@ -378,8 +378,8 @@ contains
     B = size(X, 2)
     call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
-    allocate(mu(net%Z, B),     source = 0.0_kdouble_ml)
-    allocate(logvar(net%Z, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(mu,     net%Z, B)
+    call monolis_alloc_F_2d(logvar, net%Z, B)
     mu     = matmul(transpose(net%head_mu%W), h_last)
     logvar = matmul(transpose(net%head_lv%W), h_last)
     do j = 1, B
@@ -423,7 +423,7 @@ contains
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:)
 
     call monolis_opt_vae_encode_mu_lv(net, X, mu, logvar, enc_cache, h_last)
-    allocate(eps(net%Z, size(X, 2)), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(eps, net%Z, size(X, 2))
     call monolis_opt_vae_fill_randn(eps)
     zlat = mu + exp(0.5_kdouble_ml*logvar) * eps
     call monolis_opt_vae_cache_free(enc_cache)
@@ -474,7 +474,7 @@ contains
     real(kdouble_ml), intent(out) :: xhat(:,:)
     real(kdouble_ml), allocatable :: zlat(:,:)
 
-    allocate(zlat(net%Z, n), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(zlat, net%Z, n)
     call monolis_opt_vae_fill_randn(zlat)
     call monolis_opt_vae_decode(net, zlat, xhat)
   end subroutine monolis_opt_vae_sample_prior
@@ -497,10 +497,10 @@ contains
 
     Ntr = size(Xtrain, 2)
     Np  = net%Z + 1
-    allocate(zall(net%Z, Ntr),   source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(zall, net%Z, Ntr)
     call monolis_opt_vae_encode(net, Xtrain, zall)
-    allocate(parents(net%Z, Np), source = 0.0_kdouble_ml)
-    allocate(zchild(net%Z, n),   source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(parents, net%Z, Np)
+    call monolis_alloc_F_2d(zchild,  net%Z, n)
     do i = 1, n
       do k = 1, Np
         call random_number(r)

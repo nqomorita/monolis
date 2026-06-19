@@ -104,8 +104,8 @@ contains
     layer%in_dim  = in_dim
     layer%out_dim = out_dim
     layer%act     = act
-    allocate(layer%W(in_dim, out_dim), source = 0.0_kdouble_ml)
-    allocate(layer%b(out_dim),         source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(layer%W, in_dim, out_dim)
+    call monolis_alloc_F_1d(layer%b, out_dim)
     call monolis_opt_vae_glorot_uniform(layer%W)
     call monolis_opt_adam_init(layer%a, in_dim, out_dim)
   end subroutine monolis_opt_vae_layer_init
@@ -117,8 +117,8 @@ contains
     !> [in,out] 解放対象の層
     type(monolis_opt_vae_layer_t), intent(inout) :: layer
 
-    if(allocated(layer%W)) deallocate(layer%W)
-    if(allocated(layer%b)) deallocate(layer%b)
+    call monolis_dealloc_F_2d(layer%W)
+    call monolis_dealloc_F_1d(layer%b)
     call monolis_opt_adam_free(layer%a)
     layer%in_dim = 0; layer%out_dim = 0; layer%act = 0
   end subroutine monolis_opt_vae_layer_free
@@ -194,8 +194,8 @@ contains
     integer(kint) :: j, B
 
     B = size(a_in, 2)
-    allocate(cache%pre(layer%out_dim, B),  source = 0.0_kdouble_ml)
-    allocate(cache%post(layer%out_dim, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(cache%pre,  layer%out_dim, B)
+    call monolis_alloc_F_2d(cache%post, layer%out_dim, B)
     cache%pre = matmul(transpose(layer%W), a_in)
     do j = 1, B
       cache%pre(:,j) = cache%pre(:,j) + layer%b
@@ -241,7 +241,7 @@ contains
     integer(kint) :: nL
 
     nL = size(cache)
-    allocate(p(size(cache(nL)%post,1), size(cache(nL)%post,2)))
+    call monolis_alloc_F_2d(p, size(cache(nL)%post,1), size(cache(nL)%post,2))
     p = cache(nL)%post
   end function monolis_opt_vae_top_post
 
@@ -267,7 +267,7 @@ contains
     integer(kint) :: B
 
     B = size(a_in, 2)
-    allocate(dpre(layer%out_dim, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dpre, layer%out_dim, B)
     select case(layer%act)
     case(monolis_opt_vae_act_relu)
       where(cache%pre > 0.0_kdouble_ml)
@@ -280,13 +280,13 @@ contains
     case default
       dpre = dY
     end select
-    allocate(gW(layer%in_dim, layer%out_dim), source = 0.0_kdouble_ml)
-    allocate(gb(layer%out_dim),               source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(gW, layer%in_dim, layer%out_dim)
+    call monolis_alloc_F_1d(gb, layer%out_dim)
     gW = matmul(a_in, transpose(dpre))
     gb = sum(dpre, dim=2)
-    allocate(dX_in(layer%in_dim, B), source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(dX_in, layer%in_dim, B)
     dX_in = matmul(layer%W, dpre)
-    deallocate(dpre)
+    call monolis_dealloc_F_2d(dpre)
   end subroutine monolis_opt_vae_layer_backward
 
   !> @ingroup optimize
@@ -310,7 +310,7 @@ contains
 
     nL = size(layers)
     allocate(grads(nL))
-    allocate(dY(size(dY_top,1), size(dY_top,2)))
+    call monolis_alloc_F_2d(dY, size(dY_top,1), size(dY_top,2))
     dY = dY_top
     do l = nL, 1, -1
       if(l == 1)then
@@ -320,7 +320,7 @@ contains
         call monolis_opt_vae_layer_backward(layers(l), cache(l-1)%post, cache(l), dY, &
           grads(l)%gW, grads(l)%gb, dX)
       endif
-      deallocate(dY)
+      call monolis_dealloc_F_2d(dY)
       call move_alloc(dX, dY)
     end do
     call move_alloc(dY, dX_in)
@@ -336,8 +336,8 @@ contains
 
     if(.not. allocated(cache)) return
     do l = 1, size(cache)
-      if(allocated(cache(l)%pre))  deallocate(cache(l)%pre)
-      if(allocated(cache(l)%post)) deallocate(cache(l)%post)
+      call monolis_dealloc_F_2d(cache(l)%pre)
+      call monolis_dealloc_F_2d(cache(l)%post)
     end do
     deallocate(cache)
   end subroutine monolis_opt_vae_cache_free
@@ -352,8 +352,8 @@ contains
 
     if(.not. allocated(grads)) return
     do l = 1, size(grads)
-      if(allocated(grads(l)%gW)) deallocate(grads(l)%gW)
-      if(allocated(grads(l)%gb)) deallocate(grads(l)%gb)
+      call monolis_dealloc_F_2d(grads(l)%gW)
+      call monolis_dealloc_F_1d(grads(l)%gb)
     end do
     deallocate(grads)
   end subroutine monolis_opt_vae_grads_free
@@ -374,9 +374,9 @@ contains
 
     Np = Zdim + 1
     epsilon_ = sqrt(real(Zdim + 2, kdouble_ml))
-    allocate(center(Zdim),  source = 0.0_kdouble_ml)
-    allocate(x(Zdim, Np),   source = 0.0_kdouble_ml)
-    allocate(c(Zdim, Np),   source = 0.0_kdouble_ml)
+    call monolis_alloc_F_1d(center, Zdim)
+    call monolis_alloc_F_2d(x, Zdim, Np)
+    call monolis_alloc_F_2d(c, Zdim, Np)
     center = sum(parents, dim=2) / real(Np, kdouble_ml)
     do i = 1, Np
       x(:, i) = center + epsilon_ * (parents(:, i) - center)

@@ -39,10 +39,10 @@ contains
     !> [in] 重み行列の列数 (バイアス次元)
     integer(kint), intent(in) :: n2
 
-    allocate(st%m(n1, n2),  source = 0.0_kdouble_ml)
-    allocate(st%v(n1, n2),  source = 0.0_kdouble_ml)
-    allocate(st%mb(n2),     source = 0.0_kdouble_ml)
-    allocate(st%vb(n2),     source = 0.0_kdouble_ml)
+    call monolis_alloc_F_2d(st%m,  n1, n2)
+    call monolis_alloc_F_2d(st%v,  n1, n2)
+    call monolis_alloc_F_1d(st%mb, n2)
+    call monolis_alloc_F_1d(st%vb, n2)
   end subroutine monolis_opt_adam_init
 
   !> @ingroup optimize
@@ -52,10 +52,10 @@ contains
     !> [in,out] 解放対象の Adam 状態
     type(monolis_opt_adam_state), intent(inout) :: st
 
-    if(allocated(st%m))  deallocate(st%m)
-    if(allocated(st%v))  deallocate(st%v)
-    if(allocated(st%mb)) deallocate(st%mb)
-    if(allocated(st%vb)) deallocate(st%vb)
+    call monolis_dealloc_F_2d(st%m)
+    call monolis_dealloc_F_2d(st%v)
+    call monolis_dealloc_F_1d(st%mb)
+    call monolis_dealloc_F_1d(st%vb)
   end subroutine monolis_opt_adam_free
 
   !> @ingroup optimize
