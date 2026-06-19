@@ -163,7 +163,7 @@ sor/sor_nn.f90 \
 sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
-LU.f90 \
+LU_prec.f90 \
 precond.f90
 
 #MUMPS.f90 \
