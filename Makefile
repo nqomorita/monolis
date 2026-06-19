@@ -137,7 +137,10 @@ LU.f90
 
 SRC_OPT = \
 nnls.f90 \
-vae.f90 
+adam.f90 \
+vae_util.f90 \
+vae.f90 \
+cvae.f90
 
 #matmat.f90 \
 
