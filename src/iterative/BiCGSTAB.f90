@@ -411,6 +411,10 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
+    !# OpenACC: monolis_mpi_update_R_wrapper は device 常駐の X 上で ghost 成分を更新するため、
+    !#          呼び出し元（Newton 更新等）が正しい解を読めるよう host に戻す
+    !$acc update self(X(1:NPNDOF))
+
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp

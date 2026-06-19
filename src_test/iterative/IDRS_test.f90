@@ -27,7 +27,7 @@ contains
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
-    call monolis_std_global_log_string("monolis_solver_IDRS_test_main")
+    call monolis_std_global_log_string("monolis_solver_IDRS")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 
@@ -53,7 +53,7 @@ contains
     do i1 = 1, 10
       do i2 = 1, n_dof
         call random_number(val)
-        val = val + 2.0d0
+        val = val + 2.0d0*n_dof
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
     enddo
@@ -73,7 +73,7 @@ contains
 
     call monolis_matvec_product_R(mat, com, a, b)
 
-    call monolis_set_method(mat, monolis_iter_PipeBiCGSTAB)
+    call monolis_set_method(mat, monolis_iter_IDRS)
     call monolis_set_precond(mat, prec)
     call monolis_set_tolerance(mat, 1.0d-12)
     call monolis_show_timelog_statistics(mat, .true.)
