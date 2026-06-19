@@ -189,8 +189,9 @@ contains
     real(kdouble_ml), intent(out) :: recon_avg
     !> [out] バッチ平均 KL 損失
     real(kdouble_ml), intent(out) :: kl_avg
-    integer(kint) :: D, C, Z, B, j, l, Le, Ld
+    integer(kint) :: D, C, Z, B, l, Le, Ld
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:), dec_cache(:)
+    type(monolis_opt_vae_cache_t) :: cache_mu, cache_lv
     type(monolis_opt_vae_grad_t),  allocatable :: enc_grads(:), dec_grads(:)
     real(kdouble_ml), allocatable :: enc_in(:,:), dec_in(:,:), h_last(:,:)
     real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), eps(:,:), zlat(:,:), xhat(:,:)
@@ -211,15 +212,13 @@ contains
     call monolis_opt_vae_forward_stack(net%enc, enc_in, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
 
-    !> mu / logvar (線形ヘッド: out_dim x B)
+    !> mu / logvar (線形ヘッド: layer_forward 経由で GPU カーネル化、重みはデバイス常駐)
+    call monolis_opt_vae_layer_forward(net%head_mu, h_last, cache_mu)
+    call monolis_opt_vae_layer_forward(net%head_lv, h_last, cache_lv)
     call monolis_alloc_F_2d(mu,     Z, B)
     call monolis_alloc_F_2d(logvar, Z, B)
-    mu     = matmul(transpose(net%head_mu%W), h_last)
-    logvar = matmul(transpose(net%head_lv%W), h_last)
-    do j = 1, B
-      mu(:,j)     = mu(:,j)     + net%head_mu%b
-      logvar(:,j) = logvar(:,j) + net%head_lv%b
-    end do
+    mu     = cache_mu%post
+    logvar = cache_lv%post
     where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
 
@@ -254,19 +253,9 @@ contains
     dmu = dz_dec + kl_w * mu
     dlv = dz_dec * eps * 0.5_kdouble_ml * exp(0.5_kdouble_ml*logvar) + kl_w * 0.5_kdouble_ml*(exp(logvar) - 1.0_kdouble_ml)
 
-    !> ヘッド (線形) の勾配と h_last への逆伝播
-    call monolis_alloc_F_2d(gWmu, net%head_mu%in_dim, Z)
-    call monolis_alloc_F_1d(gbmu, Z)
-    call monolis_alloc_F_2d(gWlv, net%head_lv%in_dim, Z)
-    call monolis_alloc_F_1d(gblv, Z)
-    gWmu = matmul(h_last, transpose(dmu))
-    gbmu = sum(dmu, dim=2)
-    gWlv = matmul(h_last, transpose(dlv))
-    gblv = sum(dlv, dim=2)
-    call monolis_alloc_F_2d(dh1_mu, net%head_mu%in_dim, B)
-    call monolis_alloc_F_2d(dh1_lv, net%head_lv%in_dim, B)
-    dh1_mu = matmul(net%head_mu%W, dmu)
-    dh1_lv = matmul(net%head_lv%W, dlv)
+    !> ヘッド (線形) の勾配と h_last への逆伝播 (layer_backward 経由)
+    call monolis_opt_vae_layer_backward(net%head_mu, h_last, cache_mu, dmu, gWmu, gbmu, dh1_mu)
+    call monolis_opt_vae_layer_backward(net%head_lv, h_last, cache_lv, dlv, gWlv, gblv, dh1_lv)
     call monolis_alloc_F_2d(dh_last, net%head_mu%in_dim, B)
     dh_last = dh1_mu + dh1_lv
 
@@ -293,6 +282,10 @@ contains
     call monolis_opt_vae_cache_free(dec_cache)
     call monolis_opt_vae_grads_free(enc_grads)
     call monolis_opt_vae_grads_free(dec_grads)
+    call monolis_dealloc_F_2d(cache_mu%pre)
+    call monolis_dealloc_F_2d(cache_mu%post)
+    call monolis_dealloc_F_2d(cache_lv%pre)
+    call monolis_dealloc_F_2d(cache_lv%post)
   end subroutine monolis_opt_cvae_train_step
 
   !> @ingroup optimize
@@ -417,22 +410,26 @@ contains
     !> [out] 最終エンコーダ隠れ層出力
     real(kdouble_ml), allocatable, intent(out) :: h_last(:,:)
     real(kdouble_ml), allocatable :: enc_in(:,:)
-    integer(kint) :: j, B
+    type(monolis_opt_vae_cache_t) :: cache_mu, cache_lv
+    integer(kint) :: B
 
     B = size(X, 2)
     call monolis_opt_cvae_concat_rows(X, Cnd, enc_in)
     call monolis_opt_vae_forward_stack(net%enc, enc_in, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
+    !> mu / logvar (線形ヘッド: layer_forward 経由で GPU カーネル化、重みはデバイス常駐)
+    call monolis_opt_vae_layer_forward(net%head_mu, h_last, cache_mu)
+    call monolis_opt_vae_layer_forward(net%head_lv, h_last, cache_lv)
     call monolis_alloc_F_2d(mu,     net%Z, B)
     call monolis_alloc_F_2d(logvar, net%Z, B)
-    mu     = matmul(transpose(net%head_mu%W), h_last)
-    logvar = matmul(transpose(net%head_lv%W), h_last)
-    do j = 1, B
-      mu(:,j)     = mu(:,j)     + net%head_mu%b
-      logvar(:,j) = logvar(:,j) + net%head_lv%b
-    end do
+    mu     = cache_mu%post
+    logvar = cache_lv%post
     where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
+    call monolis_dealloc_F_2d(cache_mu%pre)
+    call monolis_dealloc_F_2d(cache_mu%post)
+    call monolis_dealloc_F_2d(cache_lv%pre)
+    call monolis_dealloc_F_2d(cache_lv%post)
   end subroutine monolis_opt_cvae_encode_mu_lv
 
   !> @ingroup optimize

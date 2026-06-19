@@ -108,6 +108,8 @@ contains
     call monolis_alloc_F_1d(layer%b, out_dim)
     call monolis_opt_vae_glorot_uniform(layer%W)
     call monolis_opt_adam_init(layer%a, in_dim, out_dim)
+    !> 重み・バイアスをデバイスに常駐させる (学習・推論中の転送を避ける)
+    !$acc enter data copyin(layer%W, layer%b)
   end subroutine monolis_opt_vae_layer_init
 
   !> @ingroup optimize
@@ -117,6 +119,9 @@ contains
     !> [in,out] 解放対象の層
     type(monolis_opt_vae_layer_t), intent(inout) :: layer
 
+    if(allocated(layer%W))then
+      !$acc exit data delete(layer%W, layer%b)
+    endif
     call monolis_dealloc_F_2d(layer%W)
     call monolis_dealloc_F_1d(layer%b)
     call monolis_opt_adam_free(layer%a)
@@ -191,24 +196,62 @@ contains
     real(kdouble_ml), intent(in) :: a_in(:,:)
     !> [out] 活性化前/後をキャッシュ
     type(monolis_opt_vae_cache_t), intent(out) :: cache
-    integer(kint) :: j, B
+    integer(kint) :: B
 
     B = size(a_in, 2)
     call monolis_alloc_F_2d(cache%pre,  layer%out_dim, B)
     call monolis_alloc_F_2d(cache%post, layer%out_dim, B)
-    cache%pre = matmul(transpose(layer%W), a_in)
-    do j = 1, B
-      cache%pre(:,j) = cache%pre(:,j) + layer%b
-    end do
-    select case(layer%act)
-    case(monolis_opt_vae_act_relu)
-      cache%post = max(0.0_kdouble_ml, cache%pre)
-    case(monolis_opt_vae_act_sigmoid)
-      cache%post = 1.0_kdouble_ml / (1.0_kdouble_ml + exp(-cache%pre))
-    case default
-      cache%post = cache%pre
-    end select
+    call monolis_opt_vae_layer_forward_kernel(layer%W, layer%b, a_in, cache%pre, cache%post, &
+      layer%in_dim, layer%out_dim, B, layer%act)
   end subroutine monolis_opt_vae_layer_forward
+
+  !> @ingroup optimize
+  !> 1 層の順伝播カーネル (OpenACC オフロード本体)
+  !> @details pre(o,j) = sum_i W(i,o)*a_in(i,j) + b(o)、post = act(pre)。
+  !>          重み W,b は present-or-copy (copyin)、入出力は copyin/copyout。
+  subroutine monolis_opt_vae_layer_forward_kernel(W, b, a_in, pre, post, in_dim, out_dim, nB, act)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: in_dim
+    !> [in] 出力次元
+    integer(kint), intent(in) :: out_dim
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: nB
+    !> [in] 活性関数種別
+    integer(kint), intent(in) :: act
+    !> [in] 重み行列 (in_dim x out_dim)
+    real(kdouble_ml), intent(in) :: W(in_dim, out_dim)
+    !> [in] バイアス (out_dim)
+    real(kdouble_ml), intent(in) :: b(out_dim)
+    !> [in] 入力活性 (in_dim x nB)
+    real(kdouble_ml), intent(in) :: a_in(in_dim, nB)
+    !> [out] 活性化前 (out_dim x nB)
+    real(kdouble_ml), intent(out) :: pre(out_dim, nB)
+    !> [out] 活性化後 (out_dim x nB)
+    real(kdouble_ml), intent(out) :: post(out_dim, nB)
+    integer(kint) :: o, j, i
+    real(kdouble_ml) :: s
+
+    !$acc parallel loop collapse(2) copyin(W, b, a_in) copyout(pre, post) private(s)
+    do j = 1, nB
+      do o = 1, out_dim
+        s = b(o)
+        do i = 1, in_dim
+          s = s + W(i,o)*a_in(i,j)
+        end do
+        pre(o,j) = s
+        select case(act)
+        case(monolis_opt_vae_act_relu)
+          post(o,j) = max(0.0_kdouble_ml, s)
+        case(monolis_opt_vae_act_sigmoid)
+          post(o,j) = 1.0_kdouble_ml / (1.0_kdouble_ml + exp(-s))
+        case default
+          post(o,j) = s
+        end select
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine monolis_opt_vae_layer_forward_kernel
 
   !> @ingroup optimize
   !> 層列に対する順伝播
@@ -263,31 +306,109 @@ contains
     real(kdouble_ml), allocatable, intent(out) :: gb(:)
     !> [out] 入力側勾配 (in_dim x B)
     real(kdouble_ml), allocatable, intent(out) :: dX_in(:,:)
-    real(kdouble_ml), allocatable :: dpre(:,:)
     integer(kint) :: B
 
     B = size(a_in, 2)
-    call monolis_alloc_F_2d(dpre, layer%out_dim, B)
-    select case(layer%act)
-    case(monolis_opt_vae_act_relu)
-      where(cache%pre > 0.0_kdouble_ml)
-        dpre = dY
-      elsewhere
-        dpre = 0.0_kdouble_ml
-      end where
-    case(monolis_opt_vae_act_sigmoid)
-      dpre = dY * cache%post * (1.0_kdouble_ml - cache%post)
-    case default
-      dpre = dY
-    end select
     call monolis_alloc_F_2d(gW, layer%in_dim, layer%out_dim)
     call monolis_alloc_F_1d(gb, layer%out_dim)
-    gW = matmul(a_in, transpose(dpre))
-    gb = sum(dpre, dim=2)
     call monolis_alloc_F_2d(dX_in, layer%in_dim, B)
-    dX_in = matmul(layer%W, dpre)
-    call monolis_dealloc_F_2d(dpre)
+    call monolis_opt_vae_layer_backward_kernel(layer%W, a_in, cache%pre, cache%post, dY, &
+      gW, gb, dX_in, layer%in_dim, layer%out_dim, B, layer%act)
   end subroutine monolis_opt_vae_layer_backward
+
+  !> @ingroup optimize
+  !> 1 層の逆伝播カーネル (OpenACC オフロード本体)
+  !> @details dpre = act'(pre,post)*dY、gW = a_in . dpre^T、gb = sum_j dpre、
+  !>          dX_in = W . dpre。重み W は present-or-copy (copyin)。
+  subroutine monolis_opt_vae_layer_backward_kernel(W, a_in, pre, post, dY, gW, gb, dX_in, &
+      in_dim, out_dim, B, act)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: in_dim
+    !> [in] 出力次元
+    integer(kint), intent(in) :: out_dim
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] 活性関数種別
+    integer(kint), intent(in) :: act
+    !> [in] 重み行列 (in_dim x out_dim)
+    real(kdouble_ml), intent(in) :: W(in_dim, out_dim)
+    !> [in] 入力活性 (in_dim x B)
+    real(kdouble_ml), intent(in) :: a_in(in_dim, B)
+    !> [in] 活性化前 (out_dim x B)
+    real(kdouble_ml), intent(in) :: pre(out_dim, B)
+    !> [in] 活性化後 (out_dim x B)
+    real(kdouble_ml), intent(in) :: post(out_dim, B)
+    !> [in] 上流勾配 (out_dim x B)
+    real(kdouble_ml), intent(in) :: dY(out_dim, B)
+    !> [out] 重み勾配 (in_dim x out_dim)
+    real(kdouble_ml), intent(out) :: gW(in_dim, out_dim)
+    !> [out] バイアス勾配 (out_dim)
+    real(kdouble_ml), intent(out) :: gb(out_dim)
+    !> [out] 入力側勾配 (in_dim x B)
+    real(kdouble_ml), intent(out) :: dX_in(in_dim, B)
+    real(kdouble_ml), allocatable :: dpre(:,:)
+    integer(kint) :: o, j, i
+    real(kdouble_ml) :: s
+
+    call monolis_alloc_F_2d(dpre, out_dim, B)
+    !$acc data copyin(W, a_in, pre, post, dY) copyout(gW, gb, dX_in) create(dpre)
+    !> 1) 活性関数微分を乗じた dpre
+    !$acc parallel loop collapse(2) present(pre, post, dY, dpre)
+    do j = 1, B
+      do o = 1, out_dim
+        select case(act)
+        case(monolis_opt_vae_act_relu)
+          if(pre(o,j) > 0.0_kdouble_ml)then
+            dpre(o,j) = dY(o,j)
+          else
+            dpre(o,j) = 0.0_kdouble_ml
+          endif
+        case(monolis_opt_vae_act_sigmoid)
+          dpre(o,j) = dY(o,j) * post(o,j) * (1.0_kdouble_ml - post(o,j))
+        case default
+          dpre(o,j) = dY(o,j)
+        end select
+      end do
+    end do
+    !$acc end parallel loop
+    !> 2) gW(i,o) = sum_j a_in(i,j)*dpre(o,j)
+    !$acc parallel loop collapse(2) present(a_in, dpre, gW) private(s)
+    do o = 1, out_dim
+      do i = 1, in_dim
+        s = 0.0_kdouble_ml
+        do j = 1, B
+          s = s + a_in(i,j)*dpre(o,j)
+        end do
+        gW(i,o) = s
+      end do
+    end do
+    !$acc end parallel loop
+    !> 3) gb(o) = sum_j dpre(o,j)
+    !$acc parallel loop present(dpre, gb) private(s)
+    do o = 1, out_dim
+      s = 0.0_kdouble_ml
+      do j = 1, B
+        s = s + dpre(o,j)
+      end do
+      gb(o) = s
+    end do
+    !$acc end parallel loop
+    !> 4) dX_in(i,j) = sum_o W(i,o)*dpre(o,j)
+    !$acc parallel loop collapse(2) present(W, dpre, dX_in) private(s)
+    do j = 1, B
+      do i = 1, in_dim
+        s = 0.0_kdouble_ml
+        do o = 1, out_dim
+          s = s + W(i,o)*dpre(o,j)
+        end do
+        dX_in(i,j) = s
+      end do
+    end do
+    !$acc end parallel loop
+    !$acc end data
+    call monolis_dealloc_F_2d(dpre)
+  end subroutine monolis_opt_vae_layer_backward_kernel
 
   !> @ingroup optimize
   !> 層列に対する逆伝播 (最終層側 dY_top -> 入力側 dX_in、層ごとの勾配)
