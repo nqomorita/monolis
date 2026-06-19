@@ -69,6 +69,8 @@ module mod_monolis_def_mat
     integer(kint) :: Ndiag = 0
     !> 各対角の主対角からのオフセット（負=下三角、正=上三角）
     integer(kint), pointer, contiguous :: offset(:) => null()
+    !> 可変ブロック版の各 (対角 d, 行 i) ブロックの Adia 内開始オフセット（prefix sum、length N*Ndiag+1、0-based）
+    integer(kint), pointer, contiguous :: Vptr(:) => null()
   end type monolis_mat_DIA
 
   !> 行列構造体（ELL 構造、整数情報）
@@ -77,6 +79,8 @@ module mod_monolis_def_mat
     integer(kint) :: Nmaxcol = 0
     !> 各スロットのブロック列番号（column-major で (N, Nmaxcol) を 1 次元化、0=パディング）
     integer(kint), pointer, contiguous :: col(:) => null()
+    !> 可変ブロック版の各 (スロット slot, 行 i) ブロックの Aell 内開始オフセット（prefix sum、length N*Nmaxcol+1、0-based）
+    integer(kint), pointer, contiguous :: Vptr(:) => null()
   end type monolis_mat_ELL
 
   !> 行列構造体（CSC 構造）
@@ -306,6 +310,7 @@ contains
 
     DIA%Ndiag = 0
     call monolis_pdealloc_I_1d(DIA%offset)
+    call monolis_pdealloc_I_1d(DIA%Vptr)
   end subroutine monolis_mat_initialize_DIA
 
   !> @ingroup def_mat_init
@@ -317,6 +322,7 @@ contains
 
     DIA%Ndiag = 0
     call monolis_pdealloc_I_1d(DIA%offset)
+    call monolis_pdealloc_I_1d(DIA%Vptr)
   end subroutine monolis_mat_finalize_DIA
 
   !> @ingroup def_mat_init
@@ -328,6 +334,7 @@ contains
 
     ELL%Nmaxcol = 0
     call monolis_pdealloc_I_1d(ELL%col)
+    call monolis_pdealloc_I_1d(ELL%Vptr)
   end subroutine monolis_mat_initialize_ELL
 
   !> @ingroup def_mat_init
@@ -339,6 +346,7 @@ contains
 
     ELL%Nmaxcol = 0
     call monolis_pdealloc_I_1d(ELL%col)
+    call monolis_pdealloc_I_1d(ELL%Vptr)
   end subroutine monolis_mat_finalize_ELL
 
   !> @ingroup def_mat_init

@@ -25,14 +25,21 @@ contains
     real(kdouble) :: tspmv, tcomm
 #ifdef _OPENACC
     real(kdouble), pointer, contiguous :: matAdia(:)
-    integer(kint), pointer, contiguous :: matOffset(:)
+    integer(kint), pointer, contiguous :: matOffset(:), matVptr(:)
+    integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
+    logical :: is_var
 #endif
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
 #ifdef _OPENACC
     !# 単発呼び出し経路では CSR から DIA への変換がまだ行われていないため、ここで変換する
-    call monolis_convert_CSR_to_DIA_R(monolis%MAT)
+    is_var = (monolis%MAT%NDOF == -1)
+    if(is_var)then
+      call monolis_convert_CSR_to_DIA_V_R(monolis%MAT)
+    else
+      call monolis_convert_CSR_to_DIA_R(monolis%MAT)
+    endif
 
     matAdia   => monolis%MAT%R%Adia
     matOffset => monolis%MAT%DIA%offset
@@ -41,6 +48,12 @@ contains
     !$acc enter data copyin(X)
     !$acc enter data copyin(matAdia, matOffset)
     !$acc enter data create(Y)
+    if(is_var)then
+      matVptr      => monolis%MAT%DIA%Vptr
+      matNdofList  => monolis%MAT%n_dof_list
+      matNdofIndex => monolis%MAT%n_dof_index
+      !$acc enter data copyin(matVptr, matNdofList, matNdofIndex)
+    endif
 #endif
 
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
@@ -53,6 +66,9 @@ contains
     call monolis_mpi_update_R_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
 
 #ifdef _OPENACC
+    if(is_var)then
+      !$acc exit data delete(matVptr, matNdofList, matNdofIndex)
+    endif
     !$acc exit data delete(Y)
     !$acc exit data delete(matAdia, matOffset)
     !$acc exit data delete(X)
@@ -109,11 +125,23 @@ contains
 #ifdef _OPENACC
     !# OpenACC 有効時は DIA / ELL 形式の SpMV を呼ぶ（変換済みの形式で分岐）
     if(associated(monoMAT%R%Aell))then
-      call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
-        monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
+      if(monoMAT%NDOF == -1)then
+        call monolis_matvec_ELL_V_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
+          monoMAT%ELL%col, monoMAT%ELL%Vptr, monoMAT%R%Aell, &
+          monoMAT%n_dof_list, monoMAT%n_dof_index, X, Y)
+      else
+        call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
+          monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
+      endif
     else
-      call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
-        monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
+      if(monoMAT%NDOF == -1)then
+        call monolis_matvec_DIA_V_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
+          monoMAT%DIA%offset, monoMAT%DIA%Vptr, monoMAT%R%Adia, &
+          monoMAT%n_dof_list, monoMAT%n_dof_index, X, Y)
+      else
+        call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
+          monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
+      endif
     endif
 #else
     if(monoMAT%NDOF == 3)then
@@ -471,6 +499,130 @@ contains
 !$omp end parallel
 #endif
   end subroutine monolis_matvec_ELL_nn_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、DIA 形式、可変ブロック）
+  subroutine monolis_matvec_DIA_V_R(N, NP, Ndiag, offset, Vptr, Adia, n_dof_list, n_dof_index, X, Y)
+    implicit none
+    !> [in] 内部ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] 全ブロック列数（X の有効範囲、ブロック単位）
+    integer(kint), intent(in) :: NP
+    !> [in] 対角線本数
+    integer(kint), intent(in) :: Ndiag
+    !> [in] 対角オフセット配列（ブロック単位）
+    integer(kint), intent(in) :: offset(:)
+    !> [in] 各 (対角, 行) ブロックの値配列内開始オフセット（prefix sum、0-based）
+    integer(kint), intent(in) :: Vptr(:)
+    !> [in] 行列成分（DIA 形式、ブロック連続）
+    real(kdouble), intent(in) :: Adia(:)
+    !> [in] 各ブロックの自由度
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 各ブロックの自由度の index 配列（prefix sum）
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, k, l, d, jcol, aoff, n1, n2, xoff, yoff
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Adia, Vptr, Y, X, offset, n_dof_list, n_dof_index) &
+!$omp & firstprivate(N, NP, Ndiag) &
+!$omp & private(i, k, l, d, jcol, aoff, n1, n2, xoff, yoff)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Adia, Vptr, offset, n_dof_list, n_dof_index, X, Y)
+    do i = 1, N
+      n1 = n_dof_list(i)
+      yoff = n_dof_index(i)
+      do k = 1, n1
+        Y(yoff + k) = 0.0d0
+      enddo
+!$acc loop seq
+      do d = 1, Ndiag
+        jcol = i + offset(d)
+        if(jcol >= 1 .and. jcol <= NP)then
+          n2 = n_dof_list(jcol)
+          xoff = n_dof_index(jcol)
+          aoff = Vptr((d-1)*N + i)
+          do k = 1, n1
+            do l = 1, n2
+              Y(yoff + k) = Y(yoff + k) + Adia(aoff + n2*(k-1) + l) * X(xoff + l)
+            enddo
+          enddo
+        endif
+      enddo
+    enddo
+!$acc end parallel loop
+#ifndef _OPENACC
+!$omp end do
+!$omp end parallel
+#endif
+  end subroutine monolis_matvec_DIA_V_R
+
+  !> @ingroup dev_linalg
+  !> 疎行列ベクトル積（実数型、ELL 形式、可変ブロック）
+  subroutine monolis_matvec_ELL_V_R(N, NP, Nmaxcol, col, Vptr, Aell, n_dof_list, n_dof_index, X, Y)
+    implicit none
+    !> [in] 内部ブロック行数
+    integer(kint), intent(in) :: N
+    !> [in] 全ブロック列数（X の有効範囲、ブロック単位）
+    integer(kint), intent(in) :: NP
+    !> [in] 1 行あたりの最大非ゼロブロック数
+    integer(kint), intent(in) :: Nmaxcol
+    !> [in] ブロック列番号配列（column-major、0=パディング）
+    integer(kint), intent(in) :: col(:)
+    !> [in] 各 (スロット, 行) ブロックの値配列内開始オフセット（prefix sum、0-based）
+    integer(kint), intent(in) :: Vptr(:)
+    !> [in] 行列成分（ELL 形式、ブロック連続）
+    real(kdouble), intent(in) :: Aell(:)
+    !> [in] 各ブロックの自由度
+    integer(kint), intent(in) :: n_dof_list(:)
+    !> [in] 各ブロックの自由度の index 配列（prefix sum）
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, k, l, j, jcol, aoff, n1, n2, xoff, yoff
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Aell, Vptr, Y, X, col, n_dof_list, n_dof_index) &
+!$omp & firstprivate(N, NP, Nmaxcol) &
+!$omp & private(i, k, l, j, jcol, aoff, n1, n2, xoff, yoff)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Aell, Vptr, col, n_dof_list, n_dof_index, X, Y)
+    do i = 1, N
+      n1 = n_dof_list(i)
+      yoff = n_dof_index(i)
+      do k = 1, n1
+        Y(yoff + k) = 0.0d0
+      enddo
+!$acc loop seq
+      do j = 1, Nmaxcol
+        jcol = col((j-1)*N + i)
+        if(jcol >= 1 .and. jcol <= NP)then
+          n2 = n_dof_list(jcol)
+          xoff = n_dof_index(jcol)
+          aoff = Vptr((j-1)*N + i)
+          do k = 1, n1
+            do l = 1, n2
+              Y(yoff + k) = Y(yoff + k) + Aell(aoff + n2*(k-1) + l) * X(xoff + l)
+            enddo
+          enddo
+        endif
+      enddo
+    enddo
+!$acc end parallel loop
+#ifndef _OPENACC
+!$omp end do
+!$omp end parallel
+#endif
+  end subroutine monolis_matvec_ELL_V_R
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（複素数、nxn ブロック）

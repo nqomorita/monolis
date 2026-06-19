@@ -88,6 +88,65 @@ contains
     call monolis_test_check_eq_I1("monolis_spmat_convert_ell_test Nmaxcol after dealloc", mat%MAT%ELL%Nmaxcol, 0)
 
     call monolis_finalize(mat)
+
+    call monolis_spmat_convert_ell_V_test()
   end subroutine monolis_spmat_convert_ell_test
+
+  !> 可変ブロック ELL 変換テスト
+  subroutine monolis_spmat_convert_ell_V_test()
+    implicit none
+    type(monolis_structure) :: mat
+    integer(kint) :: n_node, n_base, n_elem, elem(3,2)
+    integer(kint) :: n_dof_list(4)
+    integer(kint) :: N, Nmaxcol, k, nz
+    real(kdouble) :: sumA, sumAell
+
+    call monolis_std_global_log_string("monolis_convert_CSR_to_ELL_V_R")
+
+    if(monolis_mpi_get_global_comm_size() == 2) return
+
+    !# 4 節点・2 三角形要素、節点ごとに自由度 1,2,3,1 の可変ブロック
+    n_node = 4
+    n_base = 3
+    n_elem = 2
+    elem(1,1) = 1; elem(2,1) = 2; elem(3,1) = 3
+    elem(1,2) = 2; elem(2,2) = 3; elem(3,2) = 4
+    n_dof_list(1) = 1
+    n_dof_list(2) = 2
+    n_dof_list(3) = 3
+    n_dof_list(4) = 1
+
+    call monolis_initialize(mat)
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_R(mat, n_node, n_base, n_dof_list, n_elem, elem)
+
+    !# 行列値を相異なる決定論的な値で埋める
+    nz = mat%MAT%CSR%index(mat%MAT%N + 1)
+    do k = 1, size(mat%MAT%R%A)
+      mat%MAT%R%A(k) = dble(k)
+    enddo
+
+    call monolis_convert_CSR_to_ELL_V_R(mat%MAT)
+
+    N = mat%MAT%N
+    Nmaxcol = mat%MAT%ELL%Nmaxcol
+
+    !# 行 2,3 が最大 3 非ゼロブロック（自身 + 隣接 2 つ）→ Nmaxcol = 4（節点2,3 は 4 ブロック）
+    call monolis_test_check_eq_I1("monolis_convert_CSR_to_ELL_V Nmaxcol", Nmaxcol, 4)
+
+    !# Vptr の整合性：先頭 0、単調非減少、末尾が値配列長
+    call monolis_test_check_eq_I1("monolis_convert_CSR_to_ELL_V Vptr head", mat%MAT%ELL%Vptr(1), 0)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_to_ELL_V Vptr tail", &
+      mat%MAT%ELL%Vptr(N*Nmaxcol + 1), size(mat%MAT%R%Aell))
+
+    !# 値の総和は CSR と一致（ELL はパディングに値を持たないため）
+    sumA = sum(mat%MAT%R%A)
+    sumAell = sum(mat%MAT%R%Aell)
+    call monolis_test_check_eq_R1("monolis_convert_CSR_to_ELL_V sum", sumAell, sumA)
+
+    call monolis_dealloc_ELL_R(mat%MAT)
+    call monolis_test_check_eq_I1("monolis_convert_CSR_to_ELL_V Nmaxcol after dealloc", mat%MAT%ELL%Nmaxcol, 0)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_spmat_convert_ell_V_test
 
 end module mod_monolis_spmat_convert_ell_test

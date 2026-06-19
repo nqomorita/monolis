@@ -87,7 +87,8 @@ contains
 #ifdef _OPENACC
     integer(kint) :: NNDOF, NPNDOF
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
-    logical :: is_ell
+    integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
+    logical :: is_ell, is_var
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
@@ -101,10 +102,19 @@ contains
 #ifdef _OPENACC
     !# CSR 形式から DIA / ELL 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
     is_ell = (monoPRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
+    is_var = (monoMAT%NDOF == -1)
     if(is_ell)then
-      call monolis_convert_CSR_to_ELL_R(monoMAT)
+      if(is_var)then
+        call monolis_convert_CSR_to_ELL_V_R(monoMAT)
+      else
+        call monolis_convert_CSR_to_ELL_R(monoMAT)
+      endif
     else
-      call monolis_convert_CSR_to_DIA_R(monoMAT)
+      if(is_var)then
+        call monolis_convert_CSR_to_DIA_V_R(monoMAT)
+      else
+        call monolis_convert_CSR_to_DIA_R(monoMAT)
+      endif
     endif
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
@@ -118,11 +128,30 @@ contains
     else
       !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
     endif
+    !# 可変ブロック版は値オフセットと自由度配列もデバイスに常駐させる
+    if(is_var)then
+      matNdofList  => monoMAT%n_dof_list
+      matNdofIndex => monoMAT%n_dof_index
+      !$acc enter data copyin(matNdofList, matNdofIndex)
+      if(is_ell)then
+        !$acc enter data copyin(monoMAT%ELL%Vptr)
+      else
+        !$acc enter data copyin(monoMAT%DIA%Vptr)
+      endif
+    endif
 #endif
 
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
+    if(is_var)then
+      if(is_ell)then
+        !$acc exit data delete(monoMAT%ELL%Vptr)
+      else
+        !$acc exit data delete(monoMAT%DIA%Vptr)
+      endif
+      !$acc exit data delete(matNdofList, matNdofIndex)
+    endif
     !$acc exit data delete(precD)
     !$acc exit data delete(X(1:NPNDOF), B(1:NPNDOF))
     if(is_ell)then

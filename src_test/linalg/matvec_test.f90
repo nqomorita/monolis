@@ -2,6 +2,10 @@
 module mod_monolis_matvec_test
   use mod_monolis
   use mod_monolis_utils
+  use mod_monolis_matvec
+  use mod_monolis_spmat_convert_dia
+  use mod_monolis_spmat_convert_ell
+  use mod_monolis_spmat_nonzero_pattern
   implicit none
 
 contains
@@ -20,11 +24,82 @@ contains
     call monolis_matvec_nn_R_test()
     call monolis_matvec_nn_C_test()
 
+    call monolis_matvec_V_DIA_ELL_R_test()
+
     call monolis_std_global_log_string("monolis_matvec_product_R")
     call monolis_std_global_log_string("monolis_matvec_product_C")
     call monolis_std_global_log_string("monolis_matvec_product_main_R")
     call monolis_std_global_log_string("monolis_matvec_product_main_C")
   end subroutine monolis_matvec_test
+
+  !> 可変ブロックの DIA / ELL 形式 SpMV を CSR 可変ブロック SpMV と突き合わせる
+  subroutine monolis_matvec_V_DIA_ELL_R_test()
+    implicit none
+    type(monolis_structure) :: mat
+    integer(kint) :: n_node, n_base, n_elem, elem(3,2)
+    integer(kint) :: n_dof_list(4)
+    integer(kint) :: N, NP, NNDOF, NPNDOF, k
+    real(kdouble), allocatable :: X(:), Yref(:), Ydia(:), Yell(:)
+
+    call monolis_std_global_log_string("monolis_matvec_DIA_V_R")
+    call monolis_std_global_log_string("monolis_matvec_ELL_V_R")
+
+    !# 4 節点・2 三角形要素、節点ごとに自由度 1,2,3,1 の可変ブロック
+    n_node = 4
+    n_base = 3
+    n_elem = 2
+    elem(1,1) = 1; elem(2,1) = 2; elem(3,1) = 3
+    elem(1,2) = 2; elem(2,2) = 3; elem(3,2) = 4
+    n_dof_list(1) = 1
+    n_dof_list(2) = 2
+    n_dof_list(3) = 3
+    n_dof_list(4) = 1
+
+    call monolis_initialize(mat)
+    call monolis_get_nonzero_pattern_by_simple_mesh_V_R(mat, n_node, n_base, n_dof_list, n_elem, elem)
+
+    N  = mat%MAT%N
+    NP = mat%MAT%NP
+    NNDOF  = mat%MAT%n_dof_index(N + 1)
+    NPNDOF = mat%MAT%n_dof_index(NP + 1)
+
+    !# 行列値・入力ベクトルを決定論的な値で埋める
+    do k = 1, size(mat%MAT%R%A)
+      mat%MAT%R%A(k) = dble(mod(k, 7) + 1)
+    enddo
+
+    call monolis_alloc_R_1d(X,    NPNDOF)
+    call monolis_alloc_R_1d(Yref, NPNDOF)
+    call monolis_alloc_R_1d(Ydia, NPNDOF)
+    call monolis_alloc_R_1d(Yell, NPNDOF)
+    do k = 1, NPNDOF
+      X(k) = dble(mod(k, 5) + 1)
+    enddo
+
+    !# 参照解（CSR 可変ブロック SpMV）
+    call monolis_matvec_V_R(N, mat%MAT%n_dof_list, mat%MAT%n_dof_index, mat%MAT%n_dof_index2, &
+      mat%MAT%CSR%index, mat%MAT%CSR%item, mat%MAT%R%A, X, Yref)
+
+    !# DIA 可変ブロック SpMV
+    call monolis_convert_CSR_to_DIA_V_R(mat%MAT)
+    call monolis_matvec_DIA_V_R(N, NP, mat%MAT%DIA%Ndiag, mat%MAT%DIA%offset, mat%MAT%DIA%Vptr, &
+      mat%MAT%R%Adia, mat%MAT%n_dof_list, mat%MAT%n_dof_index, X, Ydia)
+    call monolis_test_check_eq_R("monolis_matvec_DIA_V_R_test", Ydia(1:NNDOF), Yref(1:NNDOF))
+    call monolis_dealloc_DIA_R(mat%MAT)
+
+    !# ELL 可変ブロック SpMV
+    call monolis_convert_CSR_to_ELL_V_R(mat%MAT)
+    call monolis_matvec_ELL_V_R(N, NP, mat%MAT%ELL%Nmaxcol, mat%MAT%ELL%col, mat%MAT%ELL%Vptr, &
+      mat%MAT%R%Aell, mat%MAT%n_dof_list, mat%MAT%n_dof_index, X, Yell)
+    call monolis_test_check_eq_R("monolis_matvec_ELL_V_R_test", Yell(1:NNDOF), Yref(1:NNDOF))
+    call monolis_dealloc_ELL_R(mat%MAT)
+
+    call monolis_dealloc_R_1d(X)
+    call monolis_dealloc_R_1d(Yref)
+    call monolis_dealloc_R_1d(Ydia)
+    call monolis_dealloc_R_1d(Yell)
+    call monolis_finalize(mat)
+  end subroutine monolis_matvec_V_DIA_ELL_R_test
 
   subroutine monolis_matvec_11_R_test()
     implicit none
