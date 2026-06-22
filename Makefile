@@ -243,10 +243,14 @@ SRC_WRAP_C = \
 monolis_wrapper_scalapack_c.c
 
 SRC_OPT_CF = \
-nnls_wrapper.f90 
+nnls_wrapper.f90 \
+vae_wrapper.f90 \
+cvae_wrapper.f90 
 
 SRC_OPT_C = \
-monolis_nnls_c.c 
+monolis_nnls_c.c \
+monolis_opt_vae_c.c \
+monolis_opt_cvae_c.c 
 
 SRC_SOLV_CF = \
 solver_wrapper.f90
@@ -326,7 +330,9 @@ SRC_WRAP_C_TEST = \
 monolis_wrapper_scalapack_c_test.c
 
 SRC_NNLS_C_TEST = \
-monolis_nnls_c_test.c
+monolis_nnls_c_test.c \
+monolis_opt_vae_c_test.c \
+monolis_opt_cvae_c_test.c
 
 SRC_SOLVER_C_TEST = \
 monolis_solver_c_test.c
