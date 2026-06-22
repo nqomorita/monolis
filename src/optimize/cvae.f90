@@ -282,6 +282,10 @@ contains
     call monolis_opt_vae_cache_free(dec_cache)
     call monolis_opt_vae_grads_free(enc_grads)
     call monolis_opt_vae_grads_free(dec_grads)
+    !$acc exit data delete(cache_mu%pre(1:size(cache_mu%pre,1),1:size(cache_mu%pre,2)))
+    !$acc exit data delete(cache_mu%post(1:size(cache_mu%post,1),1:size(cache_mu%post,2)))
+    !$acc exit data delete(cache_lv%pre(1:size(cache_lv%pre,1),1:size(cache_lv%pre,2)))
+    !$acc exit data delete(cache_lv%post(1:size(cache_lv%post,1),1:size(cache_lv%post,2)))
     call monolis_dealloc_F_2d(cache_mu%pre)
     call monolis_dealloc_F_2d(cache_mu%post)
     call monolis_dealloc_F_2d(cache_lv%pre)
@@ -426,6 +430,10 @@ contains
     logvar = cache_lv%post
     where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
+    !$acc exit data delete(cache_mu%pre(1:size(cache_mu%pre,1),1:size(cache_mu%pre,2)))
+    !$acc exit data delete(cache_mu%post(1:size(cache_mu%post,1),1:size(cache_mu%post,2)))
+    !$acc exit data delete(cache_lv%pre(1:size(cache_lv%pre,1),1:size(cache_lv%pre,2)))
+    !$acc exit data delete(cache_lv%post(1:size(cache_lv%post,1),1:size(cache_lv%post,2)))
     call monolis_dealloc_F_2d(cache_mu%pre)
     call monolis_dealloc_F_2d(cache_mu%post)
     call monolis_dealloc_F_2d(cache_lv%pre)

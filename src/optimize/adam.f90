@@ -126,7 +126,7 @@ contains
     real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml, eps = 1.0e-7_kdouble_ml
     integer(kint) :: i, k
 
-    !$acc parallel loop collapse(2) copy(W, m, v) copyin(gW)
+    !$acc parallel loop collapse(2) present_or_copy(W, m, v) present_or_copyin(gW)
     do k = 1, n2
       do i = 1, n1
         m(i,k) = b1*m(i,k) + (1.0_kdouble_ml - b1)*gW(i,k)
@@ -135,7 +135,7 @@ contains
       end do
     end do
     !$acc end parallel loop
-    !$acc parallel loop copy(b, mb, vb) copyin(gb)
+    !$acc parallel loop present_or_copy(b, mb, vb) present_or_copyin(gb)
     do k = 1, n2
       mb(k) = b1*mb(k) + (1.0_kdouble_ml - b1)*gb(k)
       vb(k) = b2*vb(k) + (1.0_kdouble_ml - b2)*gb(k)*gb(k)
