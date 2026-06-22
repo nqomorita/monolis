@@ -71,7 +71,6 @@ contains
   !> @ingroup optimize
   !> 任意層数の VAE モデルを初期化する
   !> @details 重みは Glorot 一様分布、バイアスは 0 で初期化する。
-  !>          乱数消費順 (旧 API 互換): enc(1)..enc(L), head_mu, head_lv, dec(1)..dec(M+1)
   subroutine monolis_opt_vae_init_layers(net, D, H_enc, Z, H_dec)
     implicit none
     !> [out] 初期化対象の VAE モデル
@@ -194,11 +193,13 @@ contains
     call monolis_alloc_F_2d(logvar, Z, B)
     call monolis_alloc_F_2d(eps,    Z, B)
     call monolis_alloc_F_2d(zlat,   Z, B)
+
     !> eps は host で乱数生成しデバイスへ転送 (数値再現性のため)
     call monolis_opt_vae_fill_randn(eps)
+
+    !> mu = head_mu post、logvar = clamp[-10,10](head_lv post)、zlat = mu + exp(0.5 logvar) eps
     !$acc enter data create(mu(1:Z,1:B), logvar(1:Z,1:B), zlat(1:Z,1:B))
     !$acc enter data copyin(eps(1:Z,1:B))
-    !> mu = head_mu post、logvar = clamp[-10,10](head_lv post)、zlat = mu + exp(0.5 logvar) eps
     call vae_reparam_dev(cache_mu%post, cache_lv%post, eps, mu, logvar, zlat, Z, B)
 
     !> デコーダ順伝播 (zlat デバイス常駐、xhat = dec_cache(Ld)%post)
@@ -217,6 +218,7 @@ contains
     call monolis_alloc_F_2d(dxhat, D, B)
     !$acc enter data create(dxhat(1:D,1:B))
     call vae_dxhat_dev(dec_cache(Ld)%post, X, dxhat, invBD, D, B)
+
     !> dz_dec は train_step スコープで確保・常駐 (backward の出力先、ディスクリプタ整合)
     call monolis_alloc_F_2d(dz_dec, Z, B)
     !$acc enter data create(dz_dec(1:Z,1:B))
@@ -226,6 +228,7 @@ contains
     !> dmu / dlv (デバイス)
     call monolis_alloc_F_2d(dmu, Z, B)
     call monolis_alloc_F_2d(dlv, Z, B)
+
     !$acc enter data create(dmu(1:Z,1:B), dlv(1:Z,1:B))
     call vae_dmudlv_dev(dz_dec, mu, logvar, eps, kl_w, dmu, dlv, Z, B)
 
@@ -243,6 +246,7 @@ contains
     !$acc enter data create(gWlv(1:net%head_lv%in_dim,1:net%head_lv%out_dim))
     !$acc enter data create(gblv(1:net%head_lv%out_dim))
     !$acc enter data create(dh1_lv(1:net%head_lv%in_dim,1:B))
+
     call monolis_opt_vae_layer_backward(net%head_mu, enc_cache(Le)%post, cache_mu, dmu, &
       gWmu, gbmu, dh1_mu, keep_device=.true.)
     call monolis_opt_vae_layer_backward(net%head_lv, enc_cache(Le)%post, cache_lv, dlv, &
@@ -534,6 +538,7 @@ contains
 
       call monolis_opt_vae_shuffle(perm)
       sum_loss = 0.0_kdouble_ml; sum_recon = 0.0_kdouble_ml; sum_kl = 0.0_kdouble_ml
+
       do b = 1, nbatches
         do k = 1, opts%batch_size
           Xb(:, k) = X(:, perm((b-1)*opts%batch_size + k))
@@ -550,6 +555,7 @@ contains
           endif
         endif
       end do
+
       epoch_loss = sum_loss / nbatches
       if(opts%verbose)then
         write(*,'(a,i0,a,f6.3,a,es12.4,a,es12.4,a,es12.4)') &

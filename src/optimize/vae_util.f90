@@ -382,8 +382,9 @@ contains
     real(kdouble_ml) :: s
 
     call monolis_alloc_F_2d(dpre, out_dim, B)
-    !$acc data present_or_copyin(W, a_in, pre, post, dY) present(gW, gb, dX_in) create(dpre)
+
     !> 1) 活性関数微分を乗じた dpre
+    !$acc data present_or_copyin(W, a_in, pre, post, dY) present(gW, gb, dX_in) create(dpre)
     !$acc parallel loop collapse(2) present(pre, post, dY, dpre)
     do j = 1, B
       do o = 1, out_dim
@@ -402,6 +403,7 @@ contains
       end do
     end do
     !$acc end parallel loop
+
     !> 2) gW(i,o) = sum_j a_in(i,j)*dpre(o,j) (自前 OpenACC タイル化並列ループ)
     !$acc parallel loop tile(16,16) present(a_in, dpre, gW) private(s)
     do o = 1, out_dim
@@ -414,6 +416,7 @@ contains
       end do
     end do
     !$acc end parallel loop
+
     !> 3) gb(o) = sum_j dpre(o,j)
     !$acc parallel loop present(dpre, gb) private(s)
     do o = 1, out_dim
@@ -424,6 +427,7 @@ contains
       gb(o) = s
     end do
     !$acc end parallel loop
+
     !> 4) dX_in(i,j) = sum_o W(i,o)*dpre(o,j) (自前 OpenACC タイル化並列ループ)
     !$acc parallel loop tile(16,16) present(W, dpre, dX_in) private(s)
     do j = 1, B
