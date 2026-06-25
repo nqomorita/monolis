@@ -135,6 +135,7 @@ contains
     call dgeqrf(m, n, A_, m, tau, work, lwork, info)
 
     !> get R matrix
+    R = 0.0d0
     do i = 1, min(m, n)
       do j = 1, i
         R(j,i) = A_(j,i)
