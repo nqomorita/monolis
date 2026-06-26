@@ -394,7 +394,6 @@ contains
     !> [in] 節点グラフの item 配列（近傍列番号、1 始まり）
     integer(kint), intent(in) :: item(:)
     integer(kint) :: i, deg, max_deg, needed_bw, cap_bw
-    integer(kint), allocatable :: n_dof_list(:)
 
     cap_bw = 0
     if(associated(monolis%MAT%CSR%item) .and. monolis%MAT%NP > 0) &
@@ -419,10 +418,6 @@ contains
       call monolis_palloc_R_1d(monolis%MAT%R%X, n_node*monolis%MAT%NDOF)
     endif
 
-    call monolis_alloc_I_1d(n_dof_list, n_node)
-    n_dof_list = ndof
-    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
-
     call monolis_update_nonzero_pattern_fixed_width_main(monolis%MAT, n_node, index, item)
   end subroutine monolis_update_nonzero_pattern_with_margin_by_nodal_graph_R
 
@@ -440,7 +435,6 @@ contains
     !> [in] 節点グラフの item 配列（近傍列番号、1 始まり）
     integer(kint), intent(in) :: item(:)
     integer(kint) :: i, deg, max_deg, needed_bw, cap_bw
-    integer(kint), allocatable :: n_dof_list(:)
 
     cap_bw = 0
     if(associated(monolis%MAT%CSR%item) .and. monolis%MAT%NP > 0) &
@@ -464,10 +458,6 @@ contains
       call monolis_palloc_C_1d(monolis%MAT%C%B, n_node*monolis%MAT%NDOF)
       call monolis_palloc_C_1d(monolis%MAT%C%X, n_node*monolis%MAT%NDOF)
     endif
-
-    call monolis_alloc_I_1d(n_dof_list, n_node)
-    n_dof_list = ndof
-    call monolis_set_n_dof_index(monolis%MAT, n_dof_list)
 
     call monolis_update_nonzero_pattern_fixed_width_main(monolis%MAT, n_node, index, item)
   end subroutine monolis_update_nonzero_pattern_with_margin_by_nodal_graph_C

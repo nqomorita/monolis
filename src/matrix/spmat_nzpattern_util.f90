@@ -304,6 +304,13 @@ contains
     call monolis_palloc_I_1d(MAT%n_dof_list, n_node)
     call monolis_palloc_I_1d(MAT%n_dof_index, n_node + 1)
     call monolis_palloc_I_1d(MAT%n_dof_index2, NZ + 1)
+    do i = 1, n_node
+      MAT%n_dof_list(i) = ndof
+      MAT%n_dof_index(i + 1) = i*ndof
+    enddo
+    do j = 1, NZ
+      MAT%n_dof_index2(j + 1) = j*ndof*ndof
+    enddo
   end subroutine monolis_alloc_nonzero_pattern_with_margin_main
 
   !> @ingroup dev_matrix
