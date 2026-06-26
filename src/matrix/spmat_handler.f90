@@ -391,4 +391,48 @@ contains
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm, &
       & monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, node_id, ndof_bc, val)
   end subroutine monolis_set_Dirichlet_bc_C
+
+  !> @ingroup matrix
+  !> 値配列を疎行列に一括設定（実数型）
+  !> @details 固定幅 BCSR レイアウトに従って整列済みの値配列 A を、行列の値配列へそのまま代入する。
+  !> 列探索を行わないため O(nnz) で高速。A の長さは内部値配列長（NZ*ndof^2）以上であること。
+  !> パディング成分には 0 を入れて呼び出す。
+  subroutine monolis_set_array_to_sparse_matrix_R(monolis, A)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 値配列（固定幅 BCSR レイアウト）
+    real(kdouble), intent(in) :: A(:)
+    integer(kint) :: NZ
+
+    call monolis_std_debug_log_header("monolis_set_array_to_sparse_matrix_R")
+
+    NZ = size(monolis%MAT%R%A)
+    if(size(A) < NZ)then
+      call monolis_std_error_string("monolis_set_array_to_sparse_matrix_R: input array is too small")
+      call monolis_std_error_stop()
+    endif
+    monolis%MAT%R%A(1:NZ) = A(1:NZ)
+  end subroutine monolis_set_array_to_sparse_matrix_R
+
+  !> @ingroup matrix
+  !> 値配列を疎行列に一括設定（複素数型）
+  !> @details 実数版 \ref monolis_set_array_to_sparse_matrix_R の複素数版。
+  subroutine monolis_set_array_to_sparse_matrix_C(monolis, A)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] 値配列（固定幅 BCSR レイアウト）
+    complex(kdouble), intent(in) :: A(:)
+    integer(kint) :: NZ
+
+    call monolis_std_debug_log_header("monolis_set_array_to_sparse_matrix_C")
+
+    NZ = size(monolis%MAT%C%A)
+    if(size(A) < NZ)then
+      call monolis_std_error_string("monolis_set_array_to_sparse_matrix_C: input array is too small")
+      call monolis_std_error_stop()
+    endif
+    monolis%MAT%C%A(1:NZ) = A(1:NZ)
+  end subroutine monolis_set_array_to_sparse_matrix_C
 end module mod_monolis_spmat_handler
