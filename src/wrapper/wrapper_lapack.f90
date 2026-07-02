@@ -228,6 +228,7 @@ contains
     call dgeqrf(m, n, A_, m, tau, work, lwork, info)
 
     !> get R matrix
+    R = 0.0d0
     do i = 1, min(m, n)
       do j = 1, i
         R(j,i) = A_(j,i)
@@ -245,6 +246,59 @@ contains
     Q = A_
     call dorgqr(m, min(m, n), min(m, n), Q, m, tau, work, lwork, info)
   end subroutine monolis_lapack_dgeqrf
+
+  !> @ingroup wrapper
+  !> DGEEV 関数（一般実行列の固有値・右固有ベクトル、実数型）
+  subroutine monolis_lapack_dgeev(n, A, eig_re, eig_im, eig_vec_re, eig_vec_im)
+    implicit none
+    !> [in] 行列の大きさ
+    integer(kint), intent(in) :: n
+    !> [in] 一般実行列
+    real(kdouble), intent(in) :: A(:,:)
+    !> [out] 固有値の実部
+    real(kdouble), intent(out) :: eig_re(:)
+    !> [out] 固有値の虚部
+    real(kdouble), intent(out) :: eig_im(:)
+    !> [out] 右固有ベクトルの実部
+    real(kdouble), intent(out) :: eig_vec_re(:,:)
+    !> [out] 右固有ベクトルの虚部
+    real(kdouble), intent(out) :: eig_vec_im(:,:)
+    real(kdouble), allocatable :: A_(:,:), VR(:,:), work(:)
+    real(kdouble) :: dummy(1, 1), work1(1)
+    integer(kint) :: j, lwork, info
+
+    !> copy A (dgeev destroys input matrix)
+    call monolis_alloc_R_2d(A_, n, n)
+    A_ = A
+
+    call monolis_alloc_R_2d(VR, n, n)
+
+    !> get optimal work size
+    call dgeev("N", "V", n, A_, n, eig_re, eig_im, dummy, 1, VR, n, work1, -1, info)
+    lwork = int(work1(1))
+    call monolis_alloc_R_1d(work, lwork)
+
+    !> main function
+    call dgeev("N", "V", n, A_, n, eig_re, eig_im, dummy, 1, VR, n, work, lwork, info)
+
+    !> expand right eigenvectors into real / imaginary parts
+    eig_vec_re = 0.0d0
+    eig_vec_im = 0.0d0
+    j = 1
+    do while (j <= n)
+      if(eig_im(j) == 0.0d0)then
+        eig_vec_re(1:n,j) = VR(1:n,j)
+      else
+        !> complex conjugate pair: lambda_j = a + bi, lambda_{j+1} = a - bi
+        eig_vec_re(1:n,j)     =  VR(1:n,j)
+        eig_vec_im(1:n,j)     =  VR(1:n,j+1)
+        eig_vec_re(1:n,j+1)   =  VR(1:n,j)
+        eig_vec_im(1:n,j+1)   = -VR(1:n,j+1)
+        j = j + 1
+      endif
+      j = j + 1
+    enddo
+  end subroutine monolis_lapack_dgeev
 
   !> @ingroup wrapper
   !> DSTEV 関数（対称行列の求解、実数型）

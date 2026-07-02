@@ -18,6 +18,13 @@ module mod_monolis_fact_analysis
   private
   public :: monolis_fact_analysis
 
+  !> amalgamation（スーパーノード融合）: relaxed 融合で対象とする子フロントの
+  !> ピボット数上限。これ以下の小フロントを列方向に隣接する親へ融合する。
+  integer(kint), parameter :: amalg_nemin = 32
+  !> amalgamation: relaxed 融合で許容する padding（親と子のフロントサイズ差）上限。
+  !> 余分なゼロ行の演算量を抑えるための制限。
+  integer(kint), parameter :: amalg_npad = 64
+
 contains
 
   !> @ingroup fact
@@ -219,8 +226,13 @@ contains
     integer(kint) :: n, nfronts, nz_off, row, entry, col, cnt, pos
     integer(kint) :: front, child, total_front_vars, pivot, first_col
     integer(kint) :: post_pos, new_col, i
+    integer(kint) :: nf0, p, r0, size_f, size_p
+    logical :: do_merge
     integer(kint), allocatable :: marker(:), work(:)
     integer(kint), allocatable :: vertex_front(:)
+    !> amalgamation 用作業配列（元フロント単位）
+    integer(kint), allocatable :: piv0(:), upd0(:), parent0(:), sstart0(:)
+    integer(kint), allocatable :: merged_into(:), grp_rep(:), newid(:)
 
     n = lu%N
 
@@ -254,8 +266,7 @@ contains
     opts_dummy = 0
     call monolis_pord_ordering(G, opts_dummy, .true., T)
 
-    nfronts = T%nfronts
-    lu%nfronts = nfronts
+    nf0 = T%nfronts
 
     call monolis_alloc_I_1d(lu%perm,  n)
     call monolis_alloc_I_1d(lu%iperm, n)
@@ -266,7 +277,74 @@ contains
       lu%iperm(lu%perm(i)) = i
     end do
 
-    call monolis_alloc_I_1d(vertex_front,             n)
+    !> 元フロント（PORD 出力）の情報を作業配列へ取り出す
+    call monolis_alloc_I_1d(vertex_front, n)
+    call monolis_alloc_I_1d(piv0,    nf0)
+    call monolis_alloc_I_1d(upd0,    nf0)
+    call monolis_alloc_I_1d(parent0, nf0)
+    call monolis_alloc_I_1d(sstart0, nf0)
+
+    do row = 1, n
+      vertex_front(row) = T%vtx2front(row - 1) + 1
+    end do
+
+    do front = 1, nf0
+      piv0(front) = T%ncolfactor(front - 1)
+      upd0(front) = T%ncolupdate(front - 1)
+      if (T%parent(front - 1) == -1) then
+        parent0(front) = 0
+      else
+        parent0(front) = T%parent(front - 1) + 1
+      end if
+    end do
+
+    sstart0(:) = n + 1
+    do row = 1, n
+      new_col = lu%perm(row)
+      front = vertex_front(row)
+      sstart0(front) = min(sstart0(front), new_col)
+    end do
+
+    !> --- amalgamation（スーパーノード融合） ---
+    !> 列方向に親と隣接する子フロント（sstart0(c)+piv0(c)==sstart0(p)）を、
+    !> fundamental supernode（更新列が親フロント全体に一致、padding なし）か
+    !> relaxed 条件（小フロントかつ padding 上限以下）を満たす場合に親へ融合する。
+    !> 融合は列ブロックの連続性を保つため、必ず直接の親に対してのみ行う。
+    call monolis_alloc_I_1d(merged_into, nf0)
+    do front = 1, nf0
+      p = parent0(front)
+      if (p <= 0) cycle
+      if (sstart0(front) + piv0(front) /= sstart0(p)) cycle
+      size_f = piv0(front) + upd0(front)
+      size_p = piv0(p) + upd0(p)
+      do_merge = (upd0(front) == size_p)
+      if (.not. do_merge) then
+        do_merge = (piv0(front) <= amalg_nemin .and. size_p - size_f <= amalg_npad)
+      end if
+      if (do_merge) merged_into(front) = p
+    end do
+
+    !> 各元フロントの代表（融合チェーンの最上位フロント）を求める
+    call monolis_alloc_I_1d(grp_rep, nf0)
+    do front = 1, nf0
+      r0 = front
+      do while (merged_into(r0) /= 0)
+        r0 = merged_into(r0)
+      end do
+      grp_rep(front) = r0
+    end do
+
+    !> 代表フロントへ新番号を付与
+    call monolis_alloc_I_1d(newid, nf0)
+    nfronts = 0
+    do front = 1, nf0
+      if (merged_into(front) == 0) then
+        nfronts = nfronts + 1
+        newid(front) = nfronts
+      end if
+    end do
+    lu%nfronts = nfronts
+
     call monolis_alloc_I_1d(column_to_super,          n)
     call monolis_alloc_I_1d(lu%super_start,           nfronts)
     call monolis_alloc_I_1d(lu%front_parent,          nfronts)
@@ -278,41 +356,48 @@ contains
     call monolis_alloc_I_1d(lu%front_update_size,     nfronts)
     call monolis_alloc_I_1d(lu%front_ptr,             nfronts + 1)
 
-    do row = 1, n
-      vertex_front(row) = T%vtx2front(row - 1) + 1
-    end do
-
     lu%super_start(:) = n + 1
-    column_to_super(:) = 0
+    lu%front_pivot_size(:) = 0
     lu%front_first_child(:) = 0
     lu%front_next_sibling(:) = 0
     lu%front_postorder(:) = 0
-    lu%max_front_size = 0
 
+    !> 融合後フロントのピボット数（融合元の総和）と super_start（最小）を集計
+    do front = 1, nf0
+      r0 = newid(grp_rep(front))
+      lu%front_pivot_size(r0) = lu%front_pivot_size(r0) + piv0(front)
+      lu%super_start(r0) = min(lu%super_start(r0), sstart0(front))
+    end do
+
+    !> 更新サイズと親は代表（最上位）フロントのものを採用
+    do front = 1, nf0
+      if (merged_into(front) /= 0) cycle
+      r0 = newid(front)
+      lu%front_update_size(r0) = upd0(front)
+      if (parent0(front) == 0) then
+        lu%front_parent(r0) = 0
+      else
+        lu%front_parent(r0) = newid(grp_rep(parent0(front)))
+      end if
+    end do
+
+    lu%max_front_size = 0
     lu%front_ptr(1) = 1
     total_front_vars = 0
     do front = 1, nfronts
-      lu%front_pivot_size(front)  = T%ncolfactor(front - 1)
-      lu%front_update_size(front) = T%ncolupdate(front - 1)
       lu%front_size(front) = lu%front_pivot_size(front) + lu%front_update_size(front)
       lu%max_front_size = max(lu%max_front_size, lu%front_size(front))
       total_front_vars = total_front_vars + lu%front_size(front)
       lu%front_ptr(front + 1) = lu%front_ptr(front) + lu%front_size(front)
-
-      if (T%parent(front - 1) == -1) then
-        lu%front_parent(front) = 0
-      else
-        lu%front_parent(front) = T%parent(front - 1) + 1
-      end if
     end do
 
     call monolis_alloc_I_1d(lu%front_ind, max(1, total_front_vars))
 
+    column_to_super(:) = 0
     do row = 1, n
       new_col = lu%perm(row)
-      front = vertex_front(row)
+      front = newid(grp_rep(vertex_front(row)))
       column_to_super(new_col) = front
-      lu%super_start(front) = min(lu%super_start(front), new_col)
     end do
 
     !> firstchild / next_sibling
@@ -323,6 +408,14 @@ contains
         lu%front_first_child(child) = front
       end if
     end do
+
+    call monolis_dealloc_I_1d(piv0)
+    call monolis_dealloc_I_1d(upd0)
+    call monolis_dealloc_I_1d(parent0)
+    call monolis_dealloc_I_1d(sstart0)
+    call monolis_dealloc_I_1d(merged_into)
+    call monolis_dealloc_I_1d(grp_rep)
+    call monolis_dealloc_I_1d(newid)
 
     !> postorder
     call build_front_postorder(lu, post_pos)

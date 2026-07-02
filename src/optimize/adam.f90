@@ -43,6 +43,8 @@ contains
     call monolis_alloc_F_2d(st%v,  n1, n2)
     call monolis_alloc_F_1d(st%mb, n2)
     call monolis_alloc_F_1d(st%vb, n2)
+    !> Adam 状態をデバイスに常駐させる (学習ループ中の転送を避ける)
+    !$acc enter data copyin(st%m, st%v, st%mb, st%vb)
   end subroutine monolis_opt_adam_init
 
   !> @ingroup optimize
@@ -52,6 +54,9 @@ contains
     !> [in,out] 解放対象の Adam 状態
     type(monolis_opt_adam_state), intent(inout) :: st
 
+    if(allocated(st%m))then
+      !$acc exit data delete(st%m, st%v, st%mb, st%vb)
+    endif
     call monolis_dealloc_F_2d(st%m)
     call monolis_dealloc_F_2d(st%v)
     call monolis_dealloc_F_1d(st%mb)
@@ -76,17 +81,67 @@ contains
     integer(kint), intent(in) :: t
     !> [in] 学習率
     real(kdouble_ml), intent(in) :: lr
-    real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml, eps = 1.0e-7_kdouble_ml
+    real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml
     real(kdouble_ml) :: bc1, bc2
 
-    st%m  = b1*st%m  + (1.0_kdouble_ml - b1)*gW
-    st%v  = b2*st%v  + (1.0_kdouble_ml - b2)*gW*gW
-    st%mb = b1*st%mb + (1.0_kdouble_ml - b1)*gb
-    st%vb = b2*st%vb + (1.0_kdouble_ml - b2)*gb*gb
     bc1 = 1.0_kdouble_ml - b1**t
     bc2 = 1.0_kdouble_ml - b2**t
-    W = W - lr * (st%m / bc1) / (sqrt(st%v / bc2) + eps)
-    b = b - lr * (st%mb/ bc1) / (sqrt(st%vb/ bc2) + eps)
+    call monolis_opt_adam_apply_kernel(W, b, gW, gb, st%m, st%v, st%mb, st%vb, &
+      size(W, 1), size(W, 2), lr, bc1, bc2)
   end subroutine monolis_opt_adam_apply
+
+  !> @ingroup optimize
+  !> Adam 更新カーネル (OpenACC オフロード本体)
+  !> @details 重み W,b と Adam 状態 m,v,mb,vb は present-or-copy (copy 句) で受ける。
+  !>          デバイス常駐時は転送せずデバイス上で更新し、非常駐時 (スタンドアロン
+  !>          呼び出し) はホストと同期する。
+  subroutine monolis_opt_adam_apply_kernel(W, b, gW, gb, m, v, mb, vb, n1, n2, lr, bc1, bc2)
+    implicit none
+    !> [in] 重み行列の行数
+    integer(kint), intent(in) :: n1
+    !> [in] 重み行列の列数 (バイアス次元)
+    integer(kint), intent(in) :: n2
+    !> [in,out] 重み行列
+    real(kdouble_ml), intent(inout) :: W(n1, n2)
+    !> [in,out] バイアス
+    real(kdouble_ml), intent(inout) :: b(n2)
+    !> [in] 重み勾配
+    real(kdouble_ml), intent(in) :: gW(n1, n2)
+    !> [in] バイアス勾配
+    real(kdouble_ml), intent(in) :: gb(n2)
+    !> [in,out] 重み 1 次モーメント
+    real(kdouble_ml), intent(inout) :: m(n1, n2)
+    !> [in,out] 重み 2 次モーメント
+    real(kdouble_ml), intent(inout) :: v(n1, n2)
+    !> [in,out] バイアス 1 次モーメント
+    real(kdouble_ml), intent(inout) :: mb(n2)
+    !> [in,out] バイアス 2 次モーメント
+    real(kdouble_ml), intent(inout) :: vb(n2)
+    !> [in] 学習率
+    real(kdouble_ml), intent(in) :: lr
+    !> [in] 1 次モーメントのバイアス補正項
+    real(kdouble_ml), intent(in) :: bc1
+    !> [in] 2 次モーメントのバイアス補正項
+    real(kdouble_ml), intent(in) :: bc2
+    real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml, eps = 1.0e-7_kdouble_ml
+    integer(kint) :: i, k
+
+    !$acc parallel loop collapse(2) present_or_copy(W, m, v) present_or_copyin(gW)
+    do k = 1, n2
+      do i = 1, n1
+        m(i,k) = b1*m(i,k) + (1.0_kdouble_ml - b1)*gW(i,k)
+        v(i,k) = b2*v(i,k) + (1.0_kdouble_ml - b2)*gW(i,k)*gW(i,k)
+        W(i,k) = W(i,k) - lr*(m(i,k)/bc1)/(sqrt(v(i,k)/bc2) + eps)
+      end do
+    end do
+    !$acc end parallel loop
+    !$acc parallel loop present_or_copy(b, mb, vb) present_or_copyin(gb)
+    do k = 1, n2
+      mb(k) = b1*mb(k) + (1.0_kdouble_ml - b1)*gb(k)
+      vb(k) = b2*vb(k) + (1.0_kdouble_ml - b2)*gb(k)*gb(k)
+      b(k) = b(k) - lr*(mb(k)/bc1)/(sqrt(vb(k)/bc2) + eps)
+    end do
+    !$acc end parallel loop
+  end subroutine monolis_opt_adam_apply_kernel
 
 end module mod_monolis_opt_adam

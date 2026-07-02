@@ -250,7 +250,7 @@ contains
       enddo
     enddo
   end subroutine monolis_get_nodal_graph_by_nonzero_pattern
-  
+
   subroutine monolis_get_nonzero_pattern_from_dense(n, n_dof, dense, n_elem, n_base, elem)
     implicit none
     integer(kint), intent(in) :: n
@@ -259,7 +259,7 @@ contains
     integer(kint) :: n_elem, n_base
     integer(kint), allocatable :: elem(:,:)
     integer(kint) :: i, j, in, jn, im, jm
-    
+
     n_base = 2
     n_elem = 0
 
@@ -299,4 +299,145 @@ contains
     enddo
   end subroutine monolis_get_nonzero_pattern_from_dense
 
+  !> @ingroup dev_matrix
+  !> マージン（固定バンド幅）付きの疎行列パターンのメモリを確保（メイン関数）
+  !> @details 各行を n_bandwidth スロットの固定幅として CSR/CSC 配列のメモリのみを確保する。
+  !> CSR%index・CSR%item の具体値と CSC 形式は \ref monolis_update_nonzero_pattern_fixed_width_main で構築する。
+  !> 自由度情報（一様自由度）のみ閉形式で設定する。
+  !> n_bandwidth は対角成分を含む 1 行あたりの最大非零ブロック数（許容する近傍数は n_bandwidth-1）。
+  subroutine monolis_alloc_nonzero_pattern_with_margin_main(MAT, n_node, ndof, n_bandwidth)
+    implicit none
+    !> [in,out] monolis 行列構造体
+    type(monolis_mat), intent(inout) :: MAT
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 計算点が持つ自由度
+    integer(kint), intent(in) :: ndof
+    !> [in] 1 行あたりの固定バンド幅（対角を含む）
+    integer(kint), intent(in) :: n_bandwidth
+    integer(kint) :: i, j, NZ
+
+    call monolis_std_debug_log_header("monolis_alloc_nonzero_pattern_with_margin_main")
+
+    if(n_bandwidth < 1)then
+      call monolis_std_error_string("monolis_alloc_nonzero_pattern_with_margin_main: n_bandwidth must be >= 1")
+      call monolis_std_error_stop()
+    endif
+
+    MAT%N = n_node
+    MAT%NP = n_node
+    MAT%NDOF = ndof
+    NZ = n_node*n_bandwidth
+
+    !> CSR index
+    call monolis_pdealloc_I_1d(MAT%CSR%index)
+    call monolis_palloc_I_1d(MAT%CSR%index, n_node + 1)
+
+    !> CSR item
+    call monolis_pdealloc_I_1d(MAT%CSR%item)
+    call monolis_palloc_I_1d(MAT%CSR%item, NZ)
+
+    !> CSC 形式
+    call monolis_pdealloc_I_1d(MAT%CSC%index)
+    call monolis_pdealloc_I_1d(MAT%CSC%item)
+    call monolis_pdealloc_I_1d(MAT%CSC%perm)
+    call monolis_palloc_I_1d(MAT%CSC%index, n_node + 1)
+    call monolis_palloc_I_1d(MAT%CSC%item, NZ)
+    call monolis_palloc_I_1d(MAT%CSC%perm, NZ)
+
+    !> 自由度情報（一様自由度の閉形式で設定）
+    call monolis_pdealloc_I_1d(MAT%n_dof_list)
+    call monolis_pdealloc_I_1d(MAT%n_dof_index)
+    call monolis_pdealloc_I_1d(MAT%n_dof_index2)
+    call monolis_palloc_I_1d(MAT%n_dof_list, n_node)
+    call monolis_palloc_I_1d(MAT%n_dof_index, n_node + 1)
+    call monolis_palloc_I_1d(MAT%n_dof_index2, NZ + 1)
+    do i = 1, n_node
+      MAT%n_dof_list(i) = ndof
+      MAT%n_dof_index(i + 1) = i*ndof
+    enddo
+    do j = 1, NZ
+      MAT%n_dof_index2(j + 1) = j*ndof*ndof
+    enddo
+  end subroutine monolis_alloc_nonzero_pattern_with_margin_main
+
+  !> @ingroup dev_matrix
+  !> 固定バンド幅パターンの非零構造を節点グラフで更新（メイン関数）
+  !> @details 確保済みの固定幅 BCSR 構造に対し、CSR%index（固定ストライド）を設定し、
+  !> 各行に対角成分と近傍、および対角・近傍と重複しない連続した列番号のパディングを格納する。
+  !> メモリアクセス最適化のため各行を昇順ソートし、CSC 形式を再構築する。値配列は変更しない。
+  subroutine monolis_update_nonzero_pattern_fixed_width_main(MAT, n_node, index, item)
+    implicit none
+    !> [in,out] monolis 行列構造体
+    type(monolis_mat), intent(inout) :: MAT
+    !> [in] 節点数
+    integer(kint), intent(in) :: n_node
+    !> [in] 節点グラフの index 配列（0 始まりプレフィックス）
+    integer(kint), intent(in) :: index(:)
+    !> [in] 節点グラフの item 配列（近傍列番号、1 始まり）
+    integer(kint), intent(in) :: item(:)
+    integer(kint) :: i, k, jS, jE, deg, bw, NZ, c, slot, ntouch
+    integer(kint), allocatable :: used(:), touched(:)
+
+    call monolis_std_debug_log_header("monolis_update_nonzero_pattern_fixed_width_main")
+
+    !> 固定バンド幅（確保済み item 長から算出）
+    bw = size(MAT%CSR%item)/MAT%NP
+
+    if(bw > n_node)then
+      call monolis_std_error_string &
+        & ("monolis_update_nonzero_pattern_fixed_width_main: n_bandwidth must be <= n_node")
+      call monolis_std_error_stop()
+    endif
+
+    !> CSR index（固定ストライド）
+    do i = 1, n_node
+      MAT%CSR%index(i + 1) = i*bw
+    enddo
+
+    call monolis_alloc_I_1d(used, n_node)
+    call monolis_alloc_I_1d(touched, bw)
+
+    do i = 1, n_node
+      jS = MAT%CSR%index(i) + 1
+      jE = MAT%CSR%index(i + 1)
+      deg = index(i + 1) - index(i)
+      if(deg + 1 > bw)then
+        call monolis_std_error_string("monolis_update_nonzero_pattern_fixed_width_main: bandwidth overflow")
+        call monolis_std_error_stop()
+      endif
+
+      ntouch = 0
+      !> 対角成分
+      MAT%CSR%item(jS) = i
+      ntouch = ntouch + 1; touched(ntouch) = i; used(i) = 1
+      !> 近傍成分
+      do k = 1, deg
+        c = item(index(i) + k)
+        MAT%CSR%item(jS + k) = c
+        ntouch = ntouch + 1; touched(ntouch) = c; used(c) = 1
+      enddo
+      !> パディング（対角・近傍と重複しない連続した列番号、値 0）
+      c = i
+      do slot = jS + deg + 1, jE
+        do
+          c = mod(c, n_node) + 1
+          if(used(c) == 0) exit
+        enddo
+        MAT%CSR%item(slot) = c
+        ntouch = ntouch + 1; touched(ntouch) = c; used(c) = 1
+      enddo
+      !> used 配列をリセット
+      do k = 1, ntouch
+        used(touched(k)) = 0
+      enddo
+      !> 行内の列番号を昇順ソート
+      call monolis_qsort_I_1d(MAT%CSR%item(jS:jE), 1, jE - jS + 1)
+    enddo
+
+    !> CSC 形式を再構築
+    NZ = MAT%CSR%index(n_node + 1)
+    call monolis_get_CSC_format(MAT%N, MAT%N, NZ, &
+      & MAT%CSR%index, MAT%CSR%item, MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
+  end subroutine monolis_update_nonzero_pattern_fixed_width_main
 end module mod_monolis_spmat_nonzero_pattern_util

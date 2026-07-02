@@ -20,6 +20,8 @@ module mod_monolis_opt_vae_util
   public :: monolis_opt_vae_layer_free
   public :: monolis_opt_vae_fill_randn
   public :: monolis_opt_vae_shuffle
+  public :: monolis_opt_vae_layer_forward
+  public :: monolis_opt_vae_layer_backward
   public :: monolis_opt_vae_forward_stack
   public :: monolis_opt_vae_top_post
   public :: monolis_opt_vae_backward_stack
@@ -108,6 +110,8 @@ contains
     call monolis_alloc_F_1d(layer%b, out_dim)
     call monolis_opt_vae_glorot_uniform(layer%W)
     call monolis_opt_adam_init(layer%a, in_dim, out_dim)
+    !> 重み・バイアスをデバイスに常駐させる (学習・推論中の転送を避ける)
+    !$acc enter data copyin(layer%W, layer%b)
   end subroutine monolis_opt_vae_layer_init
 
   !> @ingroup optimize
@@ -117,6 +121,9 @@ contains
     !> [in,out] 解放対象の層
     type(monolis_opt_vae_layer_t), intent(inout) :: layer
 
+    if(allocated(layer%W))then
+      !$acc exit data delete(layer%W, layer%b)
+    endif
     call monolis_dealloc_F_2d(layer%W)
     call monolis_dealloc_F_1d(layer%b)
     call monolis_opt_adam_free(layer%a)
@@ -191,24 +198,65 @@ contains
     real(kdouble_ml), intent(in) :: a_in(:,:)
     !> [out] 活性化前/後をキャッシュ
     type(monolis_opt_vae_cache_t), intent(out) :: cache
-    integer(kint) :: j, B
+    integer(kint) :: B
 
     B = size(a_in, 2)
     call monolis_alloc_F_2d(cache%pre,  layer%out_dim, B)
     call monolis_alloc_F_2d(cache%post, layer%out_dim, B)
-    cache%pre = matmul(transpose(layer%W), a_in)
-    do j = 1, B
-      cache%pre(:,j) = cache%pre(:,j) + layer%b
-    end do
-    select case(layer%act)
-    case(monolis_opt_vae_act_relu)
-      cache%post = max(0.0_kdouble_ml, cache%pre)
-    case(monolis_opt_vae_act_sigmoid)
-      cache%post = 1.0_kdouble_ml / (1.0_kdouble_ml + exp(-cache%pre))
-    case default
-      cache%post = cache%pre
-    end select
+    !$acc enter data create(cache%pre(1:layer%out_dim,1:B))
+    !$acc enter data create(cache%post(1:layer%out_dim,1:B))
+    call monolis_opt_vae_layer_forward_kernel(layer%W, layer%b, a_in, cache%pre, cache%post, &
+      layer%in_dim, layer%out_dim, B, layer%act)
   end subroutine monolis_opt_vae_layer_forward
+
+  !> @ingroup optimize
+  !> 1 層の順伝播カーネル (OpenACC オフロード本体)
+  !> @details pre(o,j) = sum_i W(i,o)*a_in(i,j) + b(o)、post = act(pre)。
+  !>          重み W,b は present-or-copy、入出力 cache は device 常駐を優先する。
+  subroutine monolis_opt_vae_layer_forward_kernel(W, b, a_in, pre, post, in_dim, out_dim, nB, act)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: in_dim
+    !> [in] 出力次元
+    integer(kint), intent(in) :: out_dim
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: nB
+    !> [in] 活性関数種別
+    integer(kint), intent(in) :: act
+    !> [in] 重み行列 (in_dim x out_dim)
+    real(kdouble_ml), intent(in) :: W(in_dim, out_dim)
+    !> [in] バイアス (out_dim)
+    real(kdouble_ml), intent(in) :: b(out_dim)
+    !> [in] 入力活性 (in_dim x nB)
+    real(kdouble_ml), intent(in) :: a_in(in_dim, nB)
+    !> [out] 活性化前 (out_dim x nB)
+    real(kdouble_ml), intent(out) :: pre(out_dim, nB)
+    !> [out] 活性化後 (out_dim x nB)
+    real(kdouble_ml), intent(out) :: post(out_dim, nB)
+    integer(kint) :: o, j, i
+    real(kdouble_ml) :: s
+
+    !> GEMM: pre = W^T * a_in (自前 OpenACC タイル化並列ループ)、bias 加算と活性化を融合
+    !$acc parallel loop tile(16,16) present_or_copyin(W, b, a_in) present(pre, post) private(s)
+    do j = 1, nB
+      do o = 1, out_dim
+        s = b(o)
+        do i = 1, in_dim
+          s = s + W(i,o)*a_in(i,j)
+        end do
+        pre(o,j) = s
+        select case(act)
+        case(monolis_opt_vae_act_relu)
+          post(o,j) = max(0.0_kdouble_ml, s)
+        case(monolis_opt_vae_act_sigmoid)
+          post(o,j) = 1.0_kdouble_ml / (1.0_kdouble_ml + exp(-s))
+        case default
+          post(o,j) = s
+        end select
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine monolis_opt_vae_layer_forward_kernel
 
   !> @ingroup optimize
   !> 層列に対する順伝播
@@ -220,7 +268,7 @@ contains
     real(kdouble_ml), intent(in) :: X(:,:)
     !> [out] 層ごとのキャッシュ (size(layers))
     type(monolis_opt_vae_cache_t), allocatable, intent(out) :: cache(:)
-    integer(kint) :: l, nL
+    integer(kint) :: l, nL, i, j
 
     nL = size(layers)
     allocate(cache(nL))
@@ -242,12 +290,16 @@ contains
 
     nL = size(cache)
     call monolis_alloc_F_2d(p, size(cache(nL)%post,1), size(cache(nL)%post,2))
+    !$acc update self(cache(nL)%post)
     p = cache(nL)%post
   end function monolis_opt_vae_top_post
 
   !> @ingroup optimize
   !> 1 層の逆伝播 (post 側勾配 dY -> pre 側勾配と重み勾配、入力側勾配)
-  subroutine monolis_opt_vae_layer_backward(layer, a_in, cache, dY, gW, gb, dX_in)
+  !> @details keep_device=.true. のとき gW,gb,dX_in は呼び出し側で確保済みかつデバイス常駐で
+  !>          あることを前提とし (この手続き内では確保・転送しない)、カーネルは present で扱う。
+  !>          省略時 (cvae/hvae 等) は本手続き内で確保しデバイスで計算後ホストへ同期する。
+  subroutine monolis_opt_vae_layer_backward(layer, a_in, cache, dY, gW, gb, dX_in, keep_device)
     implicit none
     !> [in] 対象の層
     type(monolis_opt_vae_layer_t), intent(in) :: layer
@@ -257,41 +309,170 @@ contains
     type(monolis_opt_vae_cache_t), intent(in) :: cache
     !> [in] 上流からの勾配 (out_dim x B、post に対する勾配)
     real(kdouble_ml), intent(in) :: dY(:,:)
-    !> [out] 重み勾配 (in_dim x out_dim)
-    real(kdouble_ml), allocatable, intent(out) :: gW(:,:)
-    !> [out] バイアス勾配 (out_dim)
-    real(kdouble_ml), allocatable, intent(out) :: gb(:)
-    !> [out] 入力側勾配 (in_dim x B)
-    real(kdouble_ml), allocatable, intent(out) :: dX_in(:,:)
-    real(kdouble_ml), allocatable :: dpre(:,:)
+    !> [in,out] 重み勾配 (in_dim x out_dim)。keep_device 時は確保済みを想定
+    real(kdouble_ml), allocatable, intent(inout) :: gW(:,:)
+    !> [in,out] バイアス勾配 (out_dim)
+    real(kdouble_ml), allocatable, intent(inout) :: gb(:)
+    !> [in,out] 入力側勾配 (in_dim x B)
+    real(kdouble_ml), allocatable, intent(inout) :: dX_in(:,:)
+    !> [in,optional] .true. で gW,gb,dX_in を常駐扱い (呼び出し側が確保・常駐管理)
+    logical, intent(in), optional :: keep_device
     integer(kint) :: B
+    logical :: keepd
 
+    keepd = .false.
+    if(present(keep_device)) keepd = keep_device
     B = size(a_in, 2)
-    call monolis_alloc_F_2d(dpre, layer%out_dim, B)
-    select case(layer%act)
-    case(monolis_opt_vae_act_relu)
-      where(cache%pre > 0.0_kdouble_ml)
-        dpre = dY
-      elsewhere
-        dpre = 0.0_kdouble_ml
-      end where
-    case(monolis_opt_vae_act_sigmoid)
-      dpre = dY * cache%post * (1.0_kdouble_ml - cache%post)
-    case default
-      dpre = dY
-    end select
-    call monolis_alloc_F_2d(gW, layer%in_dim, layer%out_dim)
-    call monolis_alloc_F_1d(gb, layer%out_dim)
-    gW = matmul(a_in, transpose(dpre))
-    gb = sum(dpre, dim=2)
-    call monolis_alloc_F_2d(dX_in, layer%in_dim, B)
-    dX_in = matmul(layer%W, dpre)
-    call monolis_dealloc_F_2d(dpre)
+    if(keepd)then
+      !> 呼び出し側で確保済み・デバイス常駐。計算のみ (kernel は present)。
+      call monolis_opt_vae_layer_backward_kernel(layer%W, a_in, cache%pre, cache%post, dY, &
+        gW, gb, dX_in, layer%in_dim, layer%out_dim, B, layer%act)
+    else
+      !> 非常駐: 本手続き内で確保・enter/exit を完結 (同一スコープでディスクリプタ整合)
+      call monolis_alloc_F_2d(gW, layer%in_dim, layer%out_dim)
+      call monolis_alloc_F_1d(gb, layer%out_dim)
+      call monolis_alloc_F_2d(dX_in, layer%in_dim, B)
+      !$acc enter data create(gW(1:layer%in_dim,1:layer%out_dim))
+      !$acc enter data create(gb(1:layer%out_dim))
+      !$acc enter data create(dX_in(1:layer%in_dim,1:B))
+      call monolis_opt_vae_layer_backward_kernel(layer%W, a_in, cache%pre, cache%post, dY, &
+        gW, gb, dX_in, layer%in_dim, layer%out_dim, B, layer%act)
+      !$acc update self(gW(1:layer%in_dim,1:layer%out_dim))
+      !$acc update self(gb(1:layer%out_dim))
+      !$acc update self(dX_in(1:layer%in_dim,1:B))
+      !$acc exit data delete(gW(1:layer%in_dim,1:layer%out_dim)) finalize
+      !$acc exit data delete(gb(1:layer%out_dim)) finalize
+      !$acc exit data delete(dX_in(1:layer%in_dim,1:B)) finalize
+    endif
   end subroutine monolis_opt_vae_layer_backward
 
   !> @ingroup optimize
+  !> 1 層の逆伝播カーネル (OpenACC オフロード本体)
+  !> @details dpre = act'(pre,post)*dY、gW = a_in . dpre^T、gb = sum_j dpre、
+  !>          dX_in = W . dpre。重み・cache・勾配は device 常駐を優先する。
+  subroutine monolis_opt_vae_layer_backward_kernel(W, a_in, pre, post, dY, gW, gb, dX_in, &
+      in_dim, out_dim, B, act)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: in_dim
+    !> [in] 出力次元
+    integer(kint), intent(in) :: out_dim
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] 活性関数種別
+    integer(kint), intent(in) :: act
+    !> [in] 重み行列 (in_dim x out_dim)
+    real(kdouble_ml), intent(in) :: W(in_dim, out_dim)
+    !> [in] 入力活性 (in_dim x B)
+    real(kdouble_ml), intent(in) :: a_in(in_dim, B)
+    !> [in] 活性化前 (out_dim x B)
+    real(kdouble_ml), intent(in) :: pre(out_dim, B)
+    !> [in] 活性化後 (out_dim x B)
+    real(kdouble_ml), intent(in) :: post(out_dim, B)
+    !> [in] 上流勾配 (out_dim x B)
+    real(kdouble_ml), intent(in) :: dY(out_dim, B)
+    !> [out] 重み勾配 (in_dim x out_dim)
+    real(kdouble_ml), intent(out) :: gW(in_dim, out_dim)
+    !> [out] バイアス勾配 (out_dim)
+    real(kdouble_ml), intent(out) :: gb(out_dim)
+    !> [out] 入力側勾配 (in_dim x B)
+    real(kdouble_ml), intent(out) :: dX_in(in_dim, B)
+    real(kdouble_ml), allocatable :: dpre(:,:)
+    integer(kint) :: o, j, i
+    real(kdouble_ml) :: s
+
+    call monolis_alloc_F_2d(dpre, out_dim, B)
+
+    !> 1) 活性関数微分を乗じた dpre
+    !$acc data present_or_copyin(W, a_in, pre, post, dY) present(gW, gb, dX_in) create(dpre)
+    !$acc parallel loop collapse(2) present(pre, post, dY, dpre)
+    do j = 1, B
+      do o = 1, out_dim
+        select case(act)
+        case(monolis_opt_vae_act_relu)
+          if(pre(o,j) > 0.0_kdouble_ml)then
+            dpre(o,j) = dY(o,j)
+          else
+            dpre(o,j) = 0.0_kdouble_ml
+          endif
+        case(monolis_opt_vae_act_sigmoid)
+          dpre(o,j) = dY(o,j) * post(o,j) * (1.0_kdouble_ml - post(o,j))
+        case default
+          dpre(o,j) = dY(o,j)
+        end select
+      end do
+    end do
+    !$acc end parallel loop
+
+    !> 2) gW(i,o) = sum_j a_in(i,j)*dpre(o,j) (自前 OpenACC タイル化並列ループ)
+    !$acc parallel loop tile(16,16) present(a_in, dpre, gW) private(s)
+    do o = 1, out_dim
+      do i = 1, in_dim
+        s = 0.0_kdouble_ml
+        do j = 1, B
+          s = s + a_in(i,j)*dpre(o,j)
+        end do
+        gW(i,o) = s
+      end do
+    end do
+    !$acc end parallel loop
+
+    !> 3) gb(o) = sum_j dpre(o,j)
+    !$acc parallel loop present(dpre, gb) private(s)
+    do o = 1, out_dim
+      s = 0.0_kdouble_ml
+      do j = 1, B
+        s = s + dpre(o,j)
+      end do
+      gb(o) = s
+    end do
+    !$acc end parallel loop
+
+    !> 4) dX_in(i,j) = sum_o W(i,o)*dpre(o,j) (自前 OpenACC タイル化並列ループ)
+    !$acc parallel loop tile(16,16) present(W, dpre, dX_in) private(s)
+    do j = 1, B
+      do i = 1, in_dim
+        s = 0.0_kdouble_ml
+        do o = 1, out_dim
+          s = s + W(i,o)*dpre(o,j)
+        end do
+        dX_in(i,j) = s
+      end do
+    end do
+    !$acc end parallel loop
+    !$acc end data
+    call monolis_dealloc_F_2d(dpre)
+  end subroutine monolis_opt_vae_layer_backward_kernel
+
+  !> @ingroup optimize
+  !> device 常駐配列間の複製 (explicit-shape 仮引数で dope vector を介さず descriptor の
+  !> attach/detach リークを避ける。両配列とも device に present であることを前提)
+  subroutine monolis_opt_vae_dev_copy2(dst, src, n, m)
+    implicit none
+    !> [in] 行数
+    integer(kint), intent(in) :: n
+    !> [in] 列数
+    integer(kint), intent(in) :: m
+    !> [in,out] コピー先 (n x m, device 常駐)
+    real(kdouble_ml), intent(inout) :: dst(n, m)
+    !> [in] コピー元 (n x m, device 常駐)
+    real(kdouble_ml), intent(in) :: src(n, m)
+    integer(kint) :: i, j
+
+    !$acc parallel loop collapse(2) present(dst, src)
+    do j = 1, m
+      do i = 1, n
+        dst(i, j) = src(i, j)
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine monolis_opt_vae_dev_copy2
+
+  !> @ingroup optimize
   !> 層列に対する逆伝播 (最終層側 dY_top -> 入力側 dX_in、層ごとの勾配)
-  subroutine monolis_opt_vae_backward_stack(layers, X, cache, dY_top, grads, dX_in)
+  !> @details keep_device=.true. で勾配・中間 dY/dX をデバイス常駐にし、backward 中の
+  !>          host<->device 転送を排除する (vae train_step 用)。省略時は従来通り。
+  subroutine monolis_opt_vae_backward_stack(layers, X, cache, dY_top, grads, dX_in, keep_device)
     implicit none
     !> [in] 層列
     type(monolis_opt_vae_layer_t), intent(in) :: layers(:)
@@ -303,27 +484,66 @@ contains
     real(kdouble_ml), intent(in) :: dY_top(:,:)
     !> [out] 層ごとの勾配
     type(monolis_opt_vae_grad_t), allocatable, intent(out) :: grads(:)
-    !> [out] 入力側勾配
-    real(kdouble_ml), allocatable, intent(out) :: dX_in(:,:)
+    !> [in,out] 入力側勾配。keep_device 時は呼び出し側で確保・常駐済みを想定
+    real(kdouble_ml), allocatable, intent(inout) :: dX_in(:,:)
+    !> [in,optional] .true. で勾配・dY/dX をデバイス常駐にする
+    logical, intent(in), optional :: keep_device
     real(kdouble_ml), allocatable :: dY(:,:), dX(:,:)
-    integer(kint) :: l, nL
+    integer(kint) :: l, nL, p, q, ii, jj
+    logical :: keepd
 
+    keepd = .false.
+    if(present(keep_device)) keepd = keep_device
     nL = size(layers)
     allocate(grads(nL))
-    call monolis_alloc_F_2d(dY, size(dY_top,1), size(dY_top,2))
-    dY = dY_top
+    p = size(dY_top,1); q = size(dY_top,2)
+    call monolis_alloc_F_2d(dY, p, q)
+    if(keepd)then
+      !> dY_top は keepd 時に呼び出し側で常駐済み。descriptor を介さず複製。
+      !$acc enter data create(dY(1:p,1:q))
+      call monolis_opt_vae_dev_copy2(dY, dY_top, p, q)
+    else
+      dY = dY_top
+    endif
     do l = nL, 1, -1
+      if(keepd)then
+        !> 勾配と dX を本手続きスコープで確保・常駐 (grads(l) のディスクリプタは grads_free まで安定)
+        call monolis_alloc_F_2d(grads(l)%gW, layers(l)%in_dim, layers(l)%out_dim)
+        call monolis_alloc_F_1d(grads(l)%gb, layers(l)%out_dim)
+        call monolis_alloc_F_2d(dX, layers(l)%in_dim, q)
+        !$acc enter data create(grads(l)%gW(1:layers(l)%in_dim,1:layers(l)%out_dim))
+        !$acc enter data create(grads(l)%gb(1:layers(l)%out_dim))
+        !$acc enter data create(dX(1:layers(l)%in_dim,1:q))
+      endif
       if(l == 1)then
         call monolis_opt_vae_layer_backward(layers(l), X, cache(l), dY, &
-          grads(l)%gW, grads(l)%gb, dX)
+          grads(l)%gW, grads(l)%gb, dX, keepd)
       else
         call monolis_opt_vae_layer_backward(layers(l), cache(l-1)%post, cache(l), dY, &
-          grads(l)%gW, grads(l)%gb, dX)
+          grads(l)%gW, grads(l)%gb, dX, keepd)
       endif
-      call monolis_dealloc_F_2d(dY)
-      call move_alloc(dX, dY)
+      if(keepd)then
+        !> move_alloc は present table を orphan 化するため device 間コピーで dY <- dX
+        !$acc exit data delete(dY(1:size(dY,1),1:size(dY,2))) finalize
+        call monolis_dealloc_F_2d(dY)
+        call monolis_alloc_F_2d(dY, layers(l)%in_dim, q)
+        !$acc enter data create(dY(1:layers(l)%in_dim,1:q))
+        call monolis_opt_vae_dev_copy2(dY, dX, layers(l)%in_dim, q)
+        !$acc exit data delete(dX(1:layers(l)%in_dim,1:q)) finalize
+        call monolis_dealloc_F_2d(dX)
+      else
+        call monolis_dealloc_F_2d(dY)
+        call move_alloc(dX, dY)
+      endif
     end do
-    call move_alloc(dY, dX_in)
+    if(keepd)then
+      !> dX_in は呼び出し側で確保・常駐済み。dY を dX_in へ device 間コピー (move_alloc 回避)。
+      call monolis_opt_vae_dev_copy2(dX_in, dY, size(dY,1), q)
+      !$acc exit data delete(dY(1:size(dY,1),1:size(dY,2))) finalize
+      call monolis_dealloc_F_2d(dY)
+    else
+      call move_alloc(dY, dX_in)
+    endif
   end subroutine monolis_opt_vae_backward_stack
 
   !> @ingroup optimize
@@ -336,6 +556,8 @@ contains
 
     if(.not. allocated(cache)) return
     do l = 1, size(cache)
+      !$acc exit data delete(cache(l)%pre(1:size(cache(l)%pre,1),1:size(cache(l)%pre,2)))
+      !$acc exit data delete(cache(l)%post(1:size(cache(l)%post,1),1:size(cache(l)%post,2)))
       call monolis_dealloc_F_2d(cache(l)%pre)
       call monolis_dealloc_F_2d(cache(l)%post)
     end do
@@ -344,14 +566,23 @@ contains
 
   !> @ingroup optimize
   !> 勾配列を解放する
-  subroutine monolis_opt_vae_grads_free(grads)
+  subroutine monolis_opt_vae_grads_free(grads, keep_device)
     implicit none
     !> [in,out] 解放対象
     type(monolis_opt_vae_grad_t), allocatable, intent(inout) :: grads(:)
+    !> [in,optional] .true. でデバイス常駐分も exit data delete する
+    logical, intent(in), optional :: keep_device
     integer(kint) :: l
+    logical :: keepd
 
+    keepd = .false.
+    if(present(keep_device)) keepd = keep_device
     if(.not. allocated(grads)) return
     do l = 1, size(grads)
+      if(keepd)then
+        !$acc exit data delete(grads(l)%gW(1:size(grads(l)%gW,1),1:size(grads(l)%gW,2))) finalize
+        !$acc exit data delete(grads(l)%gb(1:size(grads(l)%gb,1))) finalize
+      endif
       call monolis_dealloc_F_2d(grads(l)%gW)
       call monolis_dealloc_F_1d(grads(l)%gb)
     end do

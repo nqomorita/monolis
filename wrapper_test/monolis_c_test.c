@@ -18,6 +18,8 @@
 #include "./eigen/monolis_eigen_solver_c_test.h"
 #include "./wrapper/monolis_wrapper_scalapack_c_test.h"
 #include "./optimize/monolis_nnls_c_test.h"
+#include "./optimize/monolis_opt_vae_c_test.h"
+#include "./optimize/monolis_opt_cvae_c_test.h"
 
 int main()
 {
@@ -48,6 +50,10 @@ int main()
   monolis_scalapack_test();
   
   monolis_optimize_nnls_c_test();
+
+  monolis_opt_vae_c_test();
+
+  monolis_opt_cvae_c_test();
 
   if(monolis_mpi_get_global_comm_size() == 1){
     monolis_solve_c_test();

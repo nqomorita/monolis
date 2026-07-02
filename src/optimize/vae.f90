@@ -71,7 +71,6 @@ contains
   !> @ingroup optimize
   !> 任意層数の VAE モデルを初期化する
   !> @details 重みは Glorot 一様分布、バイアスは 0 で初期化する。
-  !>          乱数消費順 (旧 API 互換): enc(1)..enc(L), head_mu, head_lv, dec(1)..dec(M+1)
   subroutine monolis_opt_vae_init_layers(net, D, H_enc, Z, H_dec)
     implicit none
     !> [out] 初期化対象の VAE モデル
@@ -163,16 +162,16 @@ contains
     real(kdouble_ml), intent(out) :: recon_avg
     !> [out] バッチ平均 KL 損失
     real(kdouble_ml), intent(out) :: kl_avg
-    integer(kint) :: D, Z, B, j, l, Le, Ld
+    integer(kint) :: D, Z, B, l, Le, Ld, i, j
     type(monolis_opt_vae_cache_t), allocatable :: enc_cache(:), dec_cache(:)
+    type(monolis_opt_vae_cache_t) :: cache_mu, cache_lv
     type(monolis_opt_vae_grad_t),  allocatable :: enc_grads(:), dec_grads(:)
-    real(kdouble_ml), allocatable :: h_last(:,:)
-    real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), eps(:,:), zlat(:,:), xhat(:,:)
+    real(kdouble_ml), allocatable :: mu(:,:), logvar(:,:), eps(:,:), zlat(:,:)
     real(kdouble_ml), allocatable :: dxhat(:,:), dz_dec(:,:)
     real(kdouble_ml), allocatable :: dmu(:,:), dlv(:,:)
     real(kdouble_ml), allocatable :: gWmu(:,:), gWlv(:,:), gbmu(:), gblv(:)
     real(kdouble_ml), allocatable :: dh1_mu(:,:), dh1_lv(:,:), dh_last(:,:), dX_dummy(:,:)
-    real(kdouble_ml) :: invB, invBD, kl_w
+    real(kdouble_ml) :: invB, invBD, kl_w, rsum, ksum, lv, mv
 
     D = net%D; Z = net%Z; B = size(X, 2)
     Le = size(net%enc); Ld = size(net%dec)
@@ -180,68 +179,90 @@ contains
     invBD = 1.0_kdouble_ml / real(B*D, kdouble_ml)
     kl_w  = beta * invB
 
-    !> エンコーダ順伝播
-    call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
-    h_last = monolis_opt_vae_top_post(enc_cache)
+    !> 入力ミニバッチをデバイスに常駐 (以後の forward/loss/backward で転送不要)
+    !$acc enter data copyin(X(1:D,1:B))
 
-    !> mu / logvar (線形ヘッド: out_dim x B)
+    !> エンコーダ順伝播 (X はデバイス常駐、h_last は enc 最終 post をそのまま使用)
+    call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
+
+    !> mu / logvar の線形ヘッド (重み常駐、h_last = enc_cache(Le)%post 常駐)
+    call monolis_opt_vae_layer_forward(net%head_mu, enc_cache(Le)%post, cache_mu)
+    call monolis_opt_vae_layer_forward(net%head_lv, enc_cache(Le)%post, cache_lv)
+
     call monolis_alloc_F_2d(mu,     Z, B)
     call monolis_alloc_F_2d(logvar, Z, B)
-    mu     = matmul(transpose(net%head_mu%W), h_last)
-    logvar = matmul(transpose(net%head_lv%W), h_last)
-    do j = 1, B
-      mu(:,j)     = mu(:,j)     + net%head_mu%b
-      logvar(:,j) = logvar(:,j) + net%head_lv%b
-    end do
-    where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
-    where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
+    call monolis_alloc_F_2d(eps,    Z, B)
+    call monolis_alloc_F_2d(zlat,   Z, B)
 
-    !> 再パラメータ化
-    call monolis_alloc_F_2d(eps,  Z, B)
-    call monolis_alloc_F_2d(zlat, Z, B)
+    !> eps は host で乱数生成しデバイスへ転送 (数値再現性のため)
     call monolis_opt_vae_fill_randn(eps)
-    zlat = mu + exp(0.5_kdouble_ml*logvar) * eps
 
-    !> デコーダ順伝播
+    !> mu = head_mu post、logvar = clamp[-10,10](head_lv post)、zlat = mu + exp(0.5 logvar) eps
+    !$acc enter data create(mu(1:Z,1:B), logvar(1:Z,1:B), zlat(1:Z,1:B))
+    !$acc enter data copyin(eps(1:Z,1:B))
+    call vae_reparam_dev(cache_mu%post, cache_lv%post, eps, mu, logvar, zlat, Z, B)
+
+    !> デコーダ順伝播 (zlat デバイス常駐、xhat = dec_cache(Ld)%post)
     call monolis_opt_vae_forward_stack(net%dec, zlat, dec_cache)
-    xhat = monolis_opt_vae_top_post(dec_cache)
 
-    !> 損失
-    recon_avg = sum((X - xhat)**2) * invBD
-    kl_avg    = -0.5_kdouble_ml * sum(1.0_kdouble_ml + logvar - mu*mu - exp(logvar)) * invB
-    loss_avg  = recon_avg + beta * kl_avg
+    !> 損失 (GPU reduction)
+    call vae_recon_sumsq_dev(X, dec_cache(Ld)%post, D, B, rsum)
+    recon_avg = rsum * invBD
 
-    !> デコーダ逆伝播: 出力 post=xhat に対する勾配 (sigmoid は層内で処理)
+    ksum = 0.0_kdouble_ml
+    call vae_kl_sum_dev(mu, logvar, Z, B, ksum)
+    kl_avg   = -0.5_kdouble_ml * ksum * invB
+    loss_avg = recon_avg + beta * kl_avg
+
+    !> デコーダ逆伝播: dxhat = 2(xhat - X) invBD (デバイス)、勾配は keep_device で常駐
     call monolis_alloc_F_2d(dxhat, D, B)
-    dxhat = 2.0_kdouble_ml * (xhat - X) * invBD
-    call monolis_opt_vae_backward_stack(net%dec, zlat, dec_cache, dxhat, dec_grads, dz_dec)
+    !$acc enter data create(dxhat(1:D,1:B))
+    call vae_dxhat_dev(dec_cache(Ld)%post, X, dxhat, invBD, D, B)
 
-    !> dmu / dlv
+    !> dz_dec は train_step スコープで確保・常駐 (backward の出力先、ディスクリプタ整合)
+    call monolis_alloc_F_2d(dz_dec, Z, B)
+    !$acc enter data create(dz_dec(1:Z,1:B))
+    call monolis_opt_vae_backward_stack(net%dec, zlat, dec_cache, dxhat, dec_grads, dz_dec, &
+      keep_device=.true.)
+
+    !> dmu / dlv (デバイス)
     call monolis_alloc_F_2d(dmu, Z, B)
     call monolis_alloc_F_2d(dlv, Z, B)
-    dmu = dz_dec + kl_w * mu
-    dlv = dz_dec * eps * 0.5_kdouble_ml * exp(0.5_kdouble_ml*logvar) + kl_w * 0.5_kdouble_ml*(exp(logvar) - 1.0_kdouble_ml)
 
-    !> ヘッド (線形) の勾配と h_last への逆伝播
-    call monolis_alloc_F_2d(gWmu, net%head_mu%in_dim, Z)
-    call monolis_alloc_F_1d(gbmu, Z)
-    call monolis_alloc_F_2d(gWlv, net%head_lv%in_dim, Z)
-    call monolis_alloc_F_1d(gblv, Z)
-    gWmu = matmul(h_last, transpose(dmu))
-    gbmu = sum(dmu, dim=2)
-    gWlv = matmul(h_last, transpose(dlv))
-    gblv = sum(dlv, dim=2)
+    !$acc enter data create(dmu(1:Z,1:B), dlv(1:Z,1:B))
+    call vae_dmudlv_dev(dz_dec, mu, logvar, eps, kl_w, dmu, dlv, Z, B)
+
+    !> ヘッド (線形) の逆伝播 (keep_device) と h_last への勾配 dh_last
+    !> 勾配・dX は train_step スコープで確保・常駐させてから渡す (ディスクリプタ整合)
+    call monolis_alloc_F_2d(gWmu, net%head_mu%in_dim, net%head_mu%out_dim)
+    call monolis_alloc_F_1d(gbmu, net%head_mu%out_dim)
     call monolis_alloc_F_2d(dh1_mu, net%head_mu%in_dim, B)
+    call monolis_alloc_F_2d(gWlv, net%head_lv%in_dim, net%head_lv%out_dim)
+    call monolis_alloc_F_1d(gblv, net%head_lv%out_dim)
     call monolis_alloc_F_2d(dh1_lv, net%head_lv%in_dim, B)
-    dh1_mu = matmul(net%head_mu%W, dmu)
-    dh1_lv = matmul(net%head_lv%W, dlv)
+    !$acc enter data create(gWmu(1:net%head_mu%in_dim,1:net%head_mu%out_dim))
+    !$acc enter data create(gbmu(1:net%head_mu%out_dim))
+    !$acc enter data create(dh1_mu(1:net%head_mu%in_dim,1:B))
+    !$acc enter data create(gWlv(1:net%head_lv%in_dim,1:net%head_lv%out_dim))
+    !$acc enter data create(gblv(1:net%head_lv%out_dim))
+    !$acc enter data create(dh1_lv(1:net%head_lv%in_dim,1:B))
+
+    call monolis_opt_vae_layer_backward(net%head_mu, enc_cache(Le)%post, cache_mu, dmu, &
+      gWmu, gbmu, dh1_mu, keep_device=.true.)
+    call monolis_opt_vae_layer_backward(net%head_lv, enc_cache(Le)%post, cache_lv, dlv, &
+      gWlv, gblv, dh1_lv, keep_device=.true.)
     call monolis_alloc_F_2d(dh_last, net%head_mu%in_dim, B)
-    dh_last = dh1_mu + dh1_lv
+    !$acc enter data create(dh_last(1:net%head_mu%in_dim,1:B))
+    call vae_add2_dev(dh_last, dh1_mu, dh1_lv, net%head_mu%in_dim, B)
 
-    !> エンコーダ逆伝播
-    call monolis_opt_vae_backward_stack(net%enc, X, enc_cache, dh_last, enc_grads, dX_dummy)
+    !> エンコーダ逆伝播 (keep_device)
+    !> dX_dummy は train_step スコープで確保・常駐 (backward の出力先、ディスクリプタ整合)
+    call monolis_alloc_F_2d(dX_dummy, D, B)
+    !$acc enter data create(dX_dummy(1:D,1:B))
+    call monolis_opt_vae_backward_stack(net%enc, X, enc_cache, dh_last, enc_grads, dX_dummy, &
+      keep_device=.true.)
 
-    !> Adam 更新
+    !> Adam 更新 (W,b,Adam状態,勾配 すべてデバイス常駐 → 転送なし)
     net%t = net%t + 1
     do l = 1, Le
       call monolis_opt_adam_apply(net%enc(l)%W, net%enc(l)%b, &
@@ -256,12 +277,216 @@ contains
         dec_grads(l)%gW, dec_grads(l)%gb, net%dec(l)%a, net%t, lr)
     end do
 
+    !> デバイス常駐の一時配列を解放
+    !$acc exit data delete(dh1_mu(1:size(dh1_mu,1),1:size(dh1_mu,2))) finalize
+    !$acc exit data delete(dh1_lv(1:size(dh1_lv,1),1:size(dh1_lv,2))) finalize
+    !$acc exit data delete(gWmu(1:size(gWmu,1),1:size(gWmu,2))) finalize
+    !$acc exit data delete(gWlv(1:size(gWlv,1),1:size(gWlv,2))) finalize
+    !$acc exit data delete(gbmu(1:size(gbmu,1))) finalize
+    !$acc exit data delete(gblv(1:size(gblv,1))) finalize
+    !$acc exit data delete(dX_dummy(1:size(dX_dummy,1),1:size(dX_dummy,2))) finalize
+    !$acc exit data delete(dz_dec(1:size(dz_dec,1),1:size(dz_dec,2))) finalize
+    !$acc exit data delete(mu(1:Z,1:B), logvar(1:Z,1:B), zlat(1:Z,1:B), eps(1:Z,1:B)) finalize
+    !$acc exit data delete(dmu(1:Z,1:B), dlv(1:Z,1:B), dxhat(1:D,1:B)) finalize
+    !$acc exit data delete(dh_last(1:size(dh_last,1),1:size(dh_last,2))) finalize
+    !$acc exit data delete(X(1:D,1:B)) finalize
+    call monolis_opt_vae_grads_free(enc_grads, keep_device=.true.)
+    call monolis_opt_vae_grads_free(dec_grads, keep_device=.true.)
+
     !> 一時メモリ解放
     call monolis_opt_vae_cache_free(enc_cache)
     call monolis_opt_vae_cache_free(dec_cache)
-    call monolis_opt_vae_grads_free(enc_grads)
-    call monolis_opt_vae_grads_free(dec_grads)
+    !$acc exit data delete(cache_mu%pre(1:size(cache_mu%pre,1),1:size(cache_mu%pre,2)))
+    !$acc exit data delete(cache_mu%post(1:size(cache_mu%post,1),1:size(cache_mu%post,2)))
+    !$acc exit data delete(cache_lv%pre(1:size(cache_lv%pre,1),1:size(cache_lv%pre,2)))
+    !$acc exit data delete(cache_lv%post(1:size(cache_lv%post,1),1:size(cache_lv%post,2)))
+    call monolis_dealloc_F_2d(cache_mu%pre)
+    call monolis_dealloc_F_2d(cache_mu%post)
+    call monolis_dealloc_F_2d(cache_lv%pre)
+    call monolis_dealloc_F_2d(cache_lv%post)
   end subroutine monolis_opt_vae_train_step
+
+  !> @ingroup optimize
+  !> 再パラメータ化カーネル (平配列引数でデバイス常駐成分を flatten)
+  !> @details mu = mu_post、logvar = clamp[-10,10](lv_post)、zlat = mu + exp(0.5 logvar)*eps
+  subroutine vae_reparam_dev(mu_post, lv_post, eps, mu, logvar, zlat, n, B)
+    implicit none
+    !> [in] 潜在次元
+    integer(kint), intent(in) :: n
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] head_mu の post (n x B)
+    real(kdouble_ml), intent(in) :: mu_post(n, B)
+    !> [in] head_lv の post (n x B)
+    real(kdouble_ml), intent(in) :: lv_post(n, B)
+    !> [in] 標準正規乱数 (n x B)
+    real(kdouble_ml), intent(in) :: eps(n, B)
+    !> [out] mu (n x B)
+    real(kdouble_ml), intent(out) :: mu(n, B)
+    !> [out] clamp 済み logvar (n x B)
+    real(kdouble_ml), intent(out) :: logvar(n, B)
+    !> [out] 再パラメータ化サンプル (n x B)
+    real(kdouble_ml), intent(out) :: zlat(n, B)
+    integer(kint) :: i, j
+    real(kdouble_ml) :: lv
+
+    !$acc parallel loop collapse(2) present_or_copyin(mu_post, lv_post, eps) &
+    !$acc   present(mu, logvar, zlat) private(lv)
+    do j = 1, B
+      do i = 1, n
+        mu(i,j) = mu_post(i,j)
+        lv = lv_post(i,j)
+        if(lv >  10.0_kdouble_ml) lv =  10.0_kdouble_ml
+        if(lv < -10.0_kdouble_ml) lv = -10.0_kdouble_ml
+        logvar(i,j) = lv
+        zlat(i,j) = mu(i,j) + exp(0.5_kdouble_ml*lv) * eps(i,j)
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_reparam_dev
+
+  !> @ingroup optimize
+  !> 再構成二乗和 (GPU reduction、平配列引数で flatten)
+  subroutine vae_recon_sumsq_dev(X, xpost, D, B, rsum)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: D
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] 入力 (D x B)
+    real(kdouble_ml), intent(in) :: X(D, B)
+    !> [in] デコーダ出力 post (D x B)
+    real(kdouble_ml), intent(in) :: xpost(D, B)
+    !> [out] sum((X - xpost)^2)
+    real(kdouble_ml), intent(out) :: rsum
+    integer(kint) :: i, j
+
+    rsum = 0.0_kdouble_ml
+    !$acc parallel loop collapse(2) present_or_copyin(X, xpost) reduction(+:rsum)
+    do j = 1, B
+      do i = 1, D
+        rsum = rsum + (X(i,j) - xpost(i,j))**2
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_recon_sumsq_dev
+
+  !> @ingroup optimize
+  !> 出力側勾配 dxhat = 2(xpost - X) invBD (デバイス、平配列引数で flatten)
+  subroutine vae_dxhat_dev(xpost, X, dxhat, invBD, D, B)
+    implicit none
+    !> [in] 入力次元
+    integer(kint), intent(in) :: D
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] デコーダ出力 post (D x B)
+    real(kdouble_ml), intent(in) :: xpost(D, B)
+    !> [in] 入力 (D x B)
+    real(kdouble_ml), intent(in) :: X(D, B)
+    !> [out] 出力側勾配 (D x B)
+    real(kdouble_ml), intent(out) :: dxhat(D, B)
+    !> [in] 1/(B*D)
+    real(kdouble_ml), intent(in) :: invBD
+    integer(kint) :: i, j
+
+    !$acc parallel loop collapse(2) present_or_copyin(xpost, X) present(dxhat)
+    do j = 1, B
+      do i = 1, D
+        dxhat(i,j) = 2.0_kdouble_ml * (xpost(i,j) - X(i,j)) * invBD
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_dxhat_dev
+
+  !> @ingroup optimize
+  !> KL 項の和 (GPU reduction、explicit-shape 引数で descriptor を介さない)
+  subroutine vae_kl_sum_dev(mu, logvar, n, B, ksum)
+    implicit none
+    !> [in] 潜在次元
+    integer(kint), intent(in) :: n
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] mu (n x B)
+    real(kdouble_ml), intent(in) :: mu(n, B)
+    !> [in] logvar (n x B)
+    real(kdouble_ml), intent(in) :: logvar(n, B)
+    !> [out] sum(1 + logvar - mu^2 - exp(logvar))
+    real(kdouble_ml), intent(out) :: ksum
+    integer(kint) :: i, j
+    real(kdouble_ml) :: lv, mv
+
+    ksum = 0.0_kdouble_ml
+    !$acc parallel loop collapse(2) present(mu, logvar) reduction(+:ksum) private(lv, mv)
+    do j = 1, B
+      do i = 1, n
+        lv = logvar(i,j); mv = mu(i,j)
+        ksum = ksum + (1.0_kdouble_ml + lv - mv*mv - exp(lv))
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_kl_sum_dev
+
+  !> @ingroup optimize
+  !> dmu / dlv の計算 (explicit-shape 引数で descriptor を介さない)
+  subroutine vae_dmudlv_dev(dz_dec, mu, logvar, eps, kl_w, dmu, dlv, n, B)
+    implicit none
+    !> [in] 潜在次元
+    integer(kint), intent(in) :: n
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [in] z への勾配 (n x B)
+    real(kdouble_ml), intent(in) :: dz_dec(n, B)
+    !> [in] mu (n x B)
+    real(kdouble_ml), intent(in) :: mu(n, B)
+    !> [in] logvar (n x B)
+    real(kdouble_ml), intent(in) :: logvar(n, B)
+    !> [in] 標準正規乱数 (n x B)
+    real(kdouble_ml), intent(in) :: eps(n, B)
+    !> [in] KL 重み beta/B
+    real(kdouble_ml), intent(in) :: kl_w
+    !> [out] dmu (n x B)
+    real(kdouble_ml), intent(out) :: dmu(n, B)
+    !> [out] dlv (n x B)
+    real(kdouble_ml), intent(out) :: dlv(n, B)
+    integer(kint) :: i, j
+    real(kdouble_ml) :: lv
+
+    !$acc parallel loop collapse(2) present(dz_dec, mu, logvar, eps, dmu, dlv) private(lv)
+    do j = 1, B
+      do i = 1, n
+        lv = logvar(i,j)
+        dmu(i,j) = dz_dec(i,j) + kl_w * mu(i,j)
+        dlv(i,j) = dz_dec(i,j) * eps(i,j) * 0.5_kdouble_ml * exp(0.5_kdouble_ml*lv) &
+                 + kl_w * 0.5_kdouble_ml * (exp(lv) - 1.0_kdouble_ml)
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_dmudlv_dev
+
+  !> @ingroup optimize
+  !> dst = src1 + src2 (explicit-shape 引数で descriptor を介さない)
+  subroutine vae_add2_dev(dst, src1, src2, n, B)
+    implicit none
+    !> [in] 行数
+    integer(kint), intent(in) :: n
+    !> [in] バッチサイズ
+    integer(kint), intent(in) :: B
+    !> [out] 出力 (n x B)
+    real(kdouble_ml), intent(out) :: dst(n, B)
+    !> [in] 加数 1 (n x B)
+    real(kdouble_ml), intent(in) :: src1(n, B)
+    !> [in] 加数 2 (n x B)
+    real(kdouble_ml), intent(in) :: src2(n, B)
+    integer(kint) :: i, j
+
+    !$acc parallel loop collapse(2) present(dst, src1, src2)
+    do j = 1, B
+      do i = 1, n
+        dst(i,j) = src1(i,j) + src2(i,j)
+      end do
+    end do
+    !$acc end parallel loop
+  end subroutine vae_add2_dev
 
   !> @ingroup optimize
   !> ミニバッチ学習ループ (KL ウォームアップと EarlyStopping 付き)
@@ -313,6 +538,7 @@ contains
 
       call monolis_opt_vae_shuffle(perm)
       sum_loss = 0.0_kdouble_ml; sum_recon = 0.0_kdouble_ml; sum_kl = 0.0_kdouble_ml
+
       do b = 1, nbatches
         do k = 1, opts%batch_size
           Xb(:, k) = X(:, perm((b-1)*opts%batch_size + k))
@@ -329,6 +555,7 @@ contains
           endif
         endif
       end do
+
       epoch_loss = sum_loss / nbatches
       if(opts%verbose)then
         write(*,'(a,i0,a,f6.3,a,es12.4,a,es12.4,a,es12.4)') &
@@ -373,21 +600,31 @@ contains
     type(monolis_opt_vae_cache_t), allocatable, intent(out) :: enc_cache(:)
     !> [out] 最終エンコーダ隠れ層出力
     real(kdouble_ml), allocatable, intent(out) :: h_last(:,:)
-    integer(kint) :: j, B
+    type(monolis_opt_vae_cache_t) :: cache_mu, cache_lv
+    integer(kint) :: B
 
     B = size(X, 2)
     call monolis_opt_vae_forward_stack(net%enc, X, enc_cache)
     h_last = monolis_opt_vae_top_post(enc_cache)
+    !> mu / logvar (線形ヘッド: layer_forward 経由で GPU カーネル化、重みはデバイス常駐)
+    call monolis_opt_vae_layer_forward(net%head_mu, h_last, cache_mu)
+    call monolis_opt_vae_layer_forward(net%head_lv, h_last, cache_lv)
     call monolis_alloc_F_2d(mu,     net%Z, B)
     call monolis_alloc_F_2d(logvar, net%Z, B)
-    mu     = matmul(transpose(net%head_mu%W), h_last)
-    logvar = matmul(transpose(net%head_lv%W), h_last)
-    do j = 1, B
-      mu(:,j)     = mu(:,j)     + net%head_mu%b
-      logvar(:,j) = logvar(:,j) + net%head_lv%b
-    end do
+    !$acc update self(cache_mu%post)
+    !$acc update self(cache_lv%post)
+    mu     = cache_mu%post
+    logvar = cache_lv%post
     where(logvar >  10.0_kdouble_ml) logvar =  10.0_kdouble_ml
     where(logvar < -10.0_kdouble_ml) logvar = -10.0_kdouble_ml
+    !$acc exit data delete(cache_mu%pre(1:size(cache_mu%pre,1),1:size(cache_mu%pre,2)))
+    !$acc exit data delete(cache_mu%post(1:size(cache_mu%post,1),1:size(cache_mu%post,2)))
+    !$acc exit data delete(cache_lv%pre(1:size(cache_lv%pre,1),1:size(cache_lv%pre,2)))
+    !$acc exit data delete(cache_lv%post(1:size(cache_lv%post,1),1:size(cache_lv%post,2)))
+    call monolis_dealloc_F_2d(cache_mu%pre)
+    call monolis_dealloc_F_2d(cache_mu%post)
+    call monolis_dealloc_F_2d(cache_lv%pre)
+    call monolis_dealloc_F_2d(cache_lv%post)
   end subroutine monolis_opt_vae_encode_mu_lv
 
   !> @ingroup optimize
