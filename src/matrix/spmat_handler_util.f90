@@ -61,15 +61,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        A(im) = val
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      A(im) = val
+      return
+    endif
 
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_R
@@ -108,15 +107,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        A(im) = val
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      A(im) = val
+      return
+    endif
 
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_C
@@ -146,20 +144,19 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        n1 = n_dof_index(ci + 1) - n_dof_index(ci)
-        n2 = n_dof_index(cj + 1) - n_dof_index(cj)
-        do i1 = 1, n1
-        do i2 = 1, n2
-          im = n_dof_index2(j) + n2*(i1-1) + i2
-          A(im) = val(i1, i2)
-        enddo
-        enddo
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      n1 = n_dof_index(ci + 1) - n_dof_index(ci)
+      n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+      do i1 = 1, n1
+      do i2 = 1, n2
+        im = n_dof_index2(j) + n2*(i1-1) + i2
+        A(im) = val(i1, i2)
+      enddo
+      enddo
+      return
+    endif
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_block_to_sparse_matrix_main_R
 
@@ -188,20 +185,19 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        n1 = n_dof_index(ci + 1) - n_dof_index(ci)
-        n2 = n_dof_index(cj + 1) - n_dof_index(cj)
-        do i1 = 1, n1
-        do i2 = 1, n2
-          im = n_dof_index2(j) + n2*(i1-1) + i2
-          A(im) = val(i1, i2)
-        enddo
-        enddo
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      n1 = n_dof_index(ci + 1) - n_dof_index(ci)
+      n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+      do i1 = 1, n1
+      do i2 = 1, n2
+        im = n_dof_index2(j) + n2*(i1-1) + i2
+        A(im) = val(i1, i2)
+      enddo
+      enddo
+      return
+    endif
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_block_to_sparse_matrix_main_C
 
@@ -245,16 +241,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        val = A(im)
-        is_find = .true.
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j == -1) return
+
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+    im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+    val = A(im)
+    is_find = .true.
   end subroutine monolis_get_scalar_from_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -296,16 +290,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        val = A(im)
-        is_find = .true.
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j == -1) return
+
+    ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+    im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+    val = A(im)
+    is_find = .true.
   end subroutine monolis_get_scalar_from_sparse_matrix_main_C
 
   !# adder
@@ -343,15 +335,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        A(im) = A(im) + val
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      A(im) = A(im) + val
+      return
+    endif
 
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_R
@@ -390,15 +381,14 @@ contains
 
     jS = index(ci) + 1
     jE = index(ci + 1)
-    do j = jS, jE
-      jn = item(j)
-      if(jn == cj)then
-        ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-        im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-        A(im) = A(im) + val
-        return
-      endif
-    enddo
+    !# 行内の item は昇順ソート済みのため二分探索
+    call monolis_bsearch_I(item, jS, jE, cj, j)
+    if(j /= -1)then
+      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
+      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      A(im) = A(im) + val
+      return
+    endif
 
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_C
