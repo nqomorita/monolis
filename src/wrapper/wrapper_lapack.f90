@@ -95,7 +95,7 @@ contains
     t1 = monolis_get_time()
 
     Y = 0.0d0
-    call dgemv("N", N, M, 1.0d0, MAT, N, X, 1, 1.0d0, Y, 1)
+    call dgemv("N", N, M, 1.0d0, MAT, size(MAT, 1), X, 1, 1.0d0, Y, 1)
 
     t2 = monolis_get_time()
 
@@ -123,7 +123,7 @@ contains
     t1 = monolis_get_time()
 
     Y = 0.0d0
-    call dgemv("T", N, M, 1.0d0, MAT, N, X, 1, 1.0d0, Y, 1)
+    call dgemv("T", N, M, 1.0d0, MAT, size(MAT, 1), X, 1, 1.0d0, Y, 1)
 
     t2 = monolis_get_time()
 

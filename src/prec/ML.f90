@@ -204,6 +204,9 @@ end module mod_monolis_precond_ML
     integer(c_int) :: i
     real(c_double) :: tspmv, tcomm
 
+    tspmv = 0.0d0
+    tcomm = 0.0d0
+
     allocate(W(monoMAT_save%NP*monoMAT_save%NDOF), source = 0.0d0)
 
     do i = 1, monoMAT_save%N*monoMAT_save%NDOF

@@ -167,6 +167,8 @@ contains
 
     max_iter = 50
     tol = 1.0d-4
+    tspmv = 0.0d0
+    tcomm = 0.0d0
 
     invD => monoMAT%R%D
 

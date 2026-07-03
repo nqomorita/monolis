@@ -264,7 +264,7 @@ contains
 !$acc end parallel loop
 !$omp end parallel do
 
-    call monolis_palloc_R_1d(C%R%B, A%NP * NDOF)
-    call monolis_palloc_R_1d(C%R%X, A%NP * NDOF)
+    if(.not. associated(C%R%B)) call monolis_palloc_R_1d(C%R%B, A%NP * NDOF)
+    if(.not. associated(C%R%X)) call monolis_palloc_R_1d(C%R%X, A%NP * NDOF)
   end subroutine monolis_matmat_value_nn
 end module mod_monolis_matmat

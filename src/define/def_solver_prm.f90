@@ -82,7 +82,7 @@ module mod_monolis_def_solver
   & "BiCGSTAB_N128      ", &
   & "BiCGSAFE           ", &
   & "IDR(s)             ", &
-  & "SOR                ", &
+  & "JACOBI             ", &
   & "CHEBYSHEV          ", &
   !& "GMRES              ", &
   & "COCG               "/)

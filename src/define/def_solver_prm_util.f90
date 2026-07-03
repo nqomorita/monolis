@@ -272,15 +272,16 @@ contains
     call monolis_dealloc_R_2d(monolis%PRM%deflation_mode)
 
     n = monolis%MAT%NP*monolis%MAT%NDOF
-    call monolis_alloc_R_2d(monolis%PRM%deflation_mode, n, n_deflation_mode)
 
     if(size(deflation_mode,1) /= n)then
       !stop "** monolis_param_set_global_deflation_mode: size of input array is different with DoF."
       stop "monolis_set_deflation_mode"
     endif
 
+    call monolis_alloc_R_2d(monolis%PRM%deflation_mode, n, n_deflation_mode)
+
     monolis%PRM%Iarray(monolis_prm_I_n_local_deflation_mode) = n_deflation_mode
-    monolis%PRM%deflation_mode = deflation_mode
+    monolis%PRM%deflation_mode = deflation_mode(1:n, 1:n_deflation_mode)
   end subroutine monolis_set_deflation_mode
 
   !> @ingroup param

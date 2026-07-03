@@ -108,6 +108,8 @@ static const int MONOLIS_PRM_I_IS_ERROR_ABORT = 16;
 
 static const int MONOLIS_PRM_I_IS_PREC_PREPARED = 17;
 
+static const int MONOLIS_PRM_I_IS_SOLV_PREPARED = 18;
+
 
 static const int MONOLIS_PRM_I_SHOW_ITERLOG = 20;
 
@@ -129,6 +131,8 @@ static const int MONOLIS_PRM_I_DCG_INNER_METHOD = 33;
 static const int MONOLIS_PRM_I_DCG_INNER_PREC = 34;
 
 static const int MONOLIS_PRM_I_DCG_INNER_MAX_ITER = 35;
+
+static const int MONOLIS_PRM_I_CHEBYSHEV_DEGREE = 36;
 
 static const int MONOLIS_PRM_I_SPMV_FORMAT = 25;
 
@@ -157,6 +161,10 @@ static const int MONOLIS_R_TIME_COMM_DOTP = 8;
 static const int MONOLIS_R_TIME_COMM_SPMV = 9;
 
 static const int MONOLIS_PRM_R_DCG_INNER_RELAXATION_FACTOR = 10;
+
+static const int MONOLIS_PRM_R_CHEBYSHEV_MAX_EIGEN_VALUE = 11;
+
+static const int MONOLIS_PRM_R_CHEBYSHEV_MIN_EIGEN_VALUE = 12;
 
 
 typedef struct {

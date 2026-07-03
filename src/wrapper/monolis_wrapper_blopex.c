@@ -128,7 +128,7 @@ void blopex_lobpcg_solve_c_(
   /* eigen vector output */
   for (int i = 0; i < *n_eigs; ++i){
     for (int j = 0; j < *mat_n; ++j){
-      eigvec[i*(*n_eigs) + j] = x->data[i*(*n_eigs) + j];
+      eigvec[i*(*mat_n) + j] = x->data[i*(*mat_n) + j];
     }
   }
 

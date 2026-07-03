@@ -170,6 +170,8 @@ contains
 
     mumps%JOB = -2
     call DMUMPS(mumps)
+
+    deallocate(monoPREC%DMUMPS%mumps)
 #endif
   end subroutine monolis_precond_mumps_clear
 

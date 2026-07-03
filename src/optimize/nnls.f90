@@ -108,7 +108,7 @@ contains
       !> 残差を計算する
       r = b - matmul(A_z, w_z)
       r_norm = 0.0d0
-      do i = 1, n_loc
+      do i = 1, m
         r_norm = r_norm + r(i)*r(i)
       enddo
       call monolis_allreduce_R1(r_norm, monolis_mpi_sum, comm)

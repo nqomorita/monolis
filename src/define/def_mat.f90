@@ -512,10 +512,14 @@ contains
 
 #ifdef WITH_MUMPS
     if(allocated(MUMPS%mumps))then
-      MUMPS%mumps(1)%JOB = -2
-      call DMUMPS(MUMPS%mumps(1))
+      if(MUMPS%is_factored)then
+        MUMPS%mumps(1)%JOB = -2
+        call DMUMPS(MUMPS%mumps(1))
+      endif
+      deallocate(MUMPS%mumps)
     endif
 #endif
+    MUMPS%is_factored = .false.
   end subroutine monolis_mat_finalize_MUMPS
 
   !> @ingroup def_mat_init

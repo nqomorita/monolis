@@ -108,9 +108,9 @@ contains
 
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, rho, tdotp, tcomm_dotp)
 
-    if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
+    if(dsqrt(rho/B2) < monoPRM%Rarray(monolis_prm_R_tol))then
       monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
-      monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
+      monoPRM%Rarray(monolis_prm_R_cur_resid) = dsqrt(rho/B2)
       call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
       PtX = 0.0d0
@@ -189,6 +189,12 @@ contains
     if(M > 0)then
       call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
+
+      if(is_sparse_W)then
+        call monolis_mat_finalize(monoMAT_Wt)
+        call monolis_mat_finalize(monoMAT_AW)
+        call monolis_com_finalize(monoCOM_self)
+      endif
     endif
   end subroutine monolis_solver_DeflatedCG1
 
@@ -277,9 +283,9 @@ contains
 
     call monolis_inner_product_main_R(monoCOM, N*NDOF, R, R, rho, tdotp, tcomm_dotp)
 
-    if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
+    if(dsqrt(rho/B2) < monoPRM%Rarray(monolis_prm_R_tol))then
       monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
-      monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
+      monoPRM%Rarray(monolis_prm_R_cur_resid) = dsqrt(rho/B2)
       return
     endif
 
@@ -425,9 +431,9 @@ contains
 
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, rho, tdotp, tcomm_dotp)
 
-    if(rho/B2 < monoPRM%Rarray(monolis_prm_R_tol))then
+    if(dsqrt(rho/B2) < monoPRM%Rarray(monolis_prm_R_tol))then
       monoPRM%Iarray(monolis_prm_I_cur_iter) = 1
-      monoPRM%Rarray(monolis_prm_R_cur_resid) = rho/B2
+      monoPRM%Rarray(monolis_prm_R_cur_resid) = dsqrt(rho/B2)
       return
     endif
 
