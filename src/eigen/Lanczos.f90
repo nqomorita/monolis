@@ -106,7 +106,7 @@ contains
       enddo
 
       call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
-        & alpha, beta, q, eigen_value, eigen_mode, norm)
+        & alpha, beta, q, eigen_value, eigen_mode, norm, .false.)
 
       if(norm < ths) is_converge = .true.
 
@@ -115,6 +115,9 @@ contains
       endif
 
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
+        !# 収束時のみ Ritz ベクトルを生成（毎反復の O(iter x n) を回避）
+        call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
+          & alpha, beta, q, eigen_value, eigen_mode, norm, .true.)
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
           do j = 1, NPNDOF
@@ -216,7 +219,7 @@ contains
       enddo
 
       call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
-        & alpha, beta, q, eigen_value, eigen_mode, norm)
+        & alpha, beta, q, eigen_value, eigen_mode, norm, .false.)
 
       do i = 1, min(iter, n_get_eigen)
         eigen_value(i) = 1.0d0/eigen_value(i)
@@ -229,6 +232,12 @@ contains
       endif
 
       if(is_converge .or. iter >= total_dof .or. iter == maxiter)then
+        !# 収束時のみ Ritz ベクトルを生成（毎反復の O(iter x n) を回避）
+        call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
+          & alpha, beta, q, eigen_value, eigen_mode, norm, .true.)
+        do i = 1, min(iter, n_get_eigen)
+          eigen_value(i) = 1.0d0/eigen_value(i)
+        enddo
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
           do j = 1, NPNDOF

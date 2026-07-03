@@ -229,9 +229,9 @@ contains
     call monolis_alloc_R_1d(YT, max_dof)
 
 !$omp parallel default(none) &
-!$omp & shared(A, Y, X, index, item) &
-!$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
-!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp & shared(A, Y, X, index, item, n_dof_list, n_dof_index, n_dof_index2) &
+!$omp & firstprivate(N) &
+!$omp & private(YT, XT, i, j, k, l, jS, jE, in, kn, n1, n2)
 !$omp do
     do i = 1, N
       YT = 0.0d0
@@ -291,9 +291,9 @@ contains
     call monolis_alloc_C_1d(YT, max_dof)
 
 !$omp parallel default(none) &
-!$omp & shared(A, Y, X, index, item) &
-!$omp & firstprivate(N, NDOF, NDOF2, n_dof_list, n_dof_index, n_dof_index2) &
-!$omp & private(YT, XT, i, j, k, l, jS, jE, in)
+!$omp & shared(A, Y, X, index, item, n_dof_list, n_dof_index, n_dof_index2) &
+!$omp & firstprivate(N) &
+!$omp & private(YT, XT, i, j, k, l, jS, jE, in, kn, n1, n2)
 !$omp do
     do i = 1, N
       YT = 0.0d0

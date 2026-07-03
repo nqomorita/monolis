@@ -50,7 +50,7 @@ contains
     q(5,5) = 1.0d0
 
     call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
-      & alpha, beta, q, eig_val, eig_mode, norm)
+      & alpha, beta, q, eig_val, eig_mode, norm, .true.)
 
     call monolis_test_check_eq_R1("monolis_get_eigen_pair_from_tridiag_test 1", eig_val(1), 0.267949192431122d0)
     call monolis_test_check_eq_R1("monolis_get_eigen_pair_from_tridiag_test 2", eig_val(2), 0.333333333333333d0)
@@ -97,5 +97,16 @@ contains
     r_ans(5) =-0.28867513459481270d0
 
     call monolis_test_check_eq_R("monolis_get_eigen_pair_from_tridiag_test 5 b", dabs(r_ans), dabs(eig_mode(:,1)))
+
+    !> is_get_mode = .false. の場合、固有値と残差のみ計算され固有ベクトルは更新されない
+    eig_val = 0.0d0
+    eig_mode = 0.0d0
+
+    call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
+      & alpha, beta, q, eig_val, eig_mode, norm, .false.)
+
+    call monolis_test_check_eq_R1("monolis_get_eigen_pair_from_tridiag_test 6", eig_val(1), 0.267949192431122d0)
+    call monolis_test_check_eq_R1("monolis_get_eigen_pair_from_tridiag_test 7", eig_val(5), 3.732050807568877d0)
+    call monolis_test_check_eq_R1("monolis_get_eigen_pair_from_tridiag_test 8", eig_mode(1,5), 0.0d0)
   end subroutine monolis_get_eigen_pair_from_tridiag_test
 end module mod_monolis_eigen_lanczos_util_test

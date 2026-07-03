@@ -52,7 +52,7 @@ contains
   !> @ingroup eigen
   !> Lanczos 法における三重対角行列の固有値分解
   subroutine monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
-    & alpha, beta, q, eig_val, eig_mode, norm)
+    & alpha, beta, q, eig_val, eig_mode, norm, is_get_mode)
     implicit none
     !> [in] 反復回数
     integer(kint), intent(in) :: iter
@@ -70,6 +70,8 @@ contains
     real(kdouble), intent(out) :: eig_mode(:,:)
     !> [out] 固有方程式の残差
     real(kdouble), intent(out) :: norm
+    !> [in] Ritz ベクトル（固有モード）を生成するフラグ（残差のみ必要な場合は .false.）
+    logical, intent(in) :: is_get_mode
     integer(kint) :: i
     real(kdouble) :: r
     real(kdouble), allocatable :: eig_val_tri(:)
@@ -83,7 +85,12 @@ contains
     norm = 0.0d0
     do i = 1, min(iter, n_get_eigen)
       eig_val(i) = 1.0d0/eig_val_tri(iter - i +1)
-      eig_mode(:,i) = matmul(q(:,1:iter), eig_mode_tri(1:iter,iter - i + 1))
+
+      !# 残差評価には三重対角固有ベクトルの末尾成分のみで十分なため、
+      !# Ritz ベクトル（O(iter x n)）は要求時のみ生成
+      if(is_get_mode)then
+        eig_mode(:,i) = matmul(q(:,1:iter), eig_mode_tri(1:iter,iter - i + 1))
+      endif
 
       r = sqrt(eig_mode_tri(iter,iter - i + 1)**2)*beta(iter)
       if(norm < r)then
