@@ -2,6 +2,9 @@
 module mod_monolis_inner_product
   use mod_monolis_utils
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
   implicit none
 
 contains
@@ -80,7 +83,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-!$acc parallel loop reduction(+:sum)
+!$acc parallel loop reduction(+:sum) if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
@@ -170,7 +173,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-!$acc parallel loop present(X, Y) reduction(+:sum)
+!$acc parallel loop present(X, Y) reduction(+:sum) if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
@@ -479,7 +482,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-!$acc parallel loop reduction(+:sum)
+!$acc parallel loop reduction(+:sum) if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo
@@ -515,7 +518,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do reduction(+:sum)
-!$acc parallel loop reduction(+:sum)
+!$acc parallel loop reduction(+:sum) if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       sum = sum + X(i)*Y(i)
     enddo

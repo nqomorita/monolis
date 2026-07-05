@@ -3,6 +3,9 @@ module mod_monolis_precond_diag_33
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -115,7 +118,8 @@ contains
 !$omp & shared(monoMAT, ALU, X, Y) &
 !$omp & private(i, X1, X2, X3)
 !$omp do
-!$acc parallel loop present(ALU, X, Y) private(X1, X2, X3)
+!$acc parallel loop present(ALU, X, Y) private(X1, X2, X3) &
+!$acc & if(acc_is_present(ALU) .and. acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, N
       X1 = X(3*i-2)
       X2 = X(3*i-1)
