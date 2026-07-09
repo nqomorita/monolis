@@ -42,6 +42,8 @@ contains
         call monolis_std_error_string("norm of RHS vector B is 0.0")
       endif
       monoMAT%R%X = 0.0d0
+      !# OpenACC: デバイス常駐時はゼロクリアをデバイスにも反映する
+      !$acc update device(monoMAT%R%X) if_present
       is_converge = .true.
     endif
   end subroutine monolis_set_converge_R

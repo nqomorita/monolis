@@ -3,6 +3,9 @@ module mod_monolis_precond_diag_nn
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -201,7 +204,8 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
 !$omp do
-!$acc parallel loop gang vector private(T, j, k) present(ALU, X, Y)
+!$acc parallel loop gang vector private(T, j, k) present(ALU, X, Y) &
+!$acc & if(acc_is_present(ALU) .and. acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)
@@ -251,7 +255,8 @@ contains
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
 !$omp do
-!$acc parallel loop private(T, j, k)
+!$acc parallel loop private(T, j, k) &
+!$acc & if(acc_is_present(ALU) .and. acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, N
       do j = 1, NDOF
         T(j) = X(NDOF*(i-1) + j)

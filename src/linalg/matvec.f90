@@ -24,32 +24,48 @@ contains
     real(kdouble), intent(out) :: Y(:)
     real(kdouble) :: tspmv, tcomm
 #ifdef _OPENACC
-    real(kdouble), pointer, contiguous :: matAdia(:)
-    integer(kint), pointer, contiguous :: matOffset(:), matVptr(:)
+    real(kdouble), pointer, contiguous :: matA(:)
+    integer(kint), pointer, contiguous :: matIdx(:), matVptr(:)
     integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
-    logical :: is_var
+    logical :: is_var, is_ell
 #endif
 
     call monolis_std_debug_log_header("monolis_matvec_product_R")
 
 #ifdef _OPENACC
-    !# 単発呼び出し経路では CSR から DIA への変換がまだ行われていないため、ここで変換する
+    !# 単発呼び出し経路では CSR から ELL / DIA への変換がまだ行われていないため、ここで変換する。
+    !# 分割メッシュでは局所節点番号がバンド構造を持たず DIA の対角本数が爆発するため、
+    !# ソルバ本体と同じくデフォルトは ELL 形式とする
     is_var = (monolis%MAT%NDOF == -1)
-    if(is_var)then
-      call monolis_convert_CSR_to_DIA_V_R(monolis%MAT)
+    is_ell = (monolis%PRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
+    if(is_ell)then
+      if(is_var)then
+        call monolis_convert_CSR_to_ELL_V_R(monolis%MAT)
+      else
+        call monolis_convert_CSR_to_ELL_R(monolis%MAT)
+      endif
+      matA   => monolis%MAT%R%Aell
+      matIdx => monolis%MAT%ELL%col
     else
-      call monolis_convert_CSR_to_DIA_R(monolis%MAT)
+      if(is_var)then
+        call monolis_convert_CSR_to_DIA_V_R(monolis%MAT)
+      else
+        call monolis_convert_CSR_to_DIA_R(monolis%MAT)
+      endif
+      matA   => monolis%MAT%R%Adia
+      matIdx => monolis%MAT%DIA%offset
     endif
 
-    matAdia   => monolis%MAT%R%Adia
-    matOffset => monolis%MAT%DIA%offset
-
-    !# OpenACC: 単発呼び出し用に DIA 行列・X をデバイスに転送し、Y は create
+    !# OpenACC: 単発呼び出し用に行列・X をデバイスに転送し、Y は create
     !$acc enter data copyin(X)
-    !$acc enter data copyin(matAdia, matOffset)
+    !$acc enter data copyin(matA, matIdx)
     !$acc enter data create(Y)
     if(is_var)then
-      matVptr      => monolis%MAT%DIA%Vptr
+      if(is_ell)then
+        matVptr => monolis%MAT%ELL%Vptr
+      else
+        matVptr => monolis%MAT%DIA%Vptr
+      endif
       matNdofList  => monolis%MAT%n_dof_list
       matNdofIndex => monolis%MAT%n_dof_index
       !$acc enter data copyin(matVptr, matNdofList, matNdofIndex)
@@ -58,22 +74,26 @@ contains
 
     call monolis_matvec_product_main_R(monoCOM, monolis%MAT, X, Y, tspmv, tcomm)
 
-#ifdef _OPENACC
-    !# OpenACC: Y を host に取り出し（後続の MPI 通信は host で実施）
-    !$acc update self(Y)
-#endif
-
     call monolis_mpi_update_R_wrapper(monoCOM, monolis%MAT%NDOF, monolis%MAT%n_dof_index, Y, tcomm)
 
 #ifdef _OPENACC
+    !# OpenACC: 袖領域更新後の X, Y をホストへ取り出す（CPU 実行時と同じ状態にする）。
+    !# 袖領域の MPI 通信はデバイス常駐データに対して行われるため、
+    !# update self は通信の後に実行する必要がある
+    !$acc update self(X)
+    !$acc update self(Y)
     if(is_var)then
       !$acc exit data delete(matVptr, matNdofList, matNdofIndex)
     endif
     !$acc exit data delete(Y)
-    !$acc exit data delete(matAdia, matOffset)
+    !$acc exit data delete(matA, matIdx)
     !$acc exit data delete(X)
 
-    call monolis_dealloc_DIA_R(monolis%MAT)
+    if(is_ell)then
+      call monolis_dealloc_ELL_R(monolis%MAT)
+    else
+      call monolis_dealloc_DIA_R(monolis%MAT)
+    endif
 #endif
   end subroutine monolis_matvec_product_R
 
@@ -115,6 +135,7 @@ contains
     !> [in,out] 通信時間
     real(kdouble) :: tcomm
     real(kdouble) :: t1, t2
+    logical :: is_dev
 
     call monolis_std_debug_log_header("monolis_matvec_product_main_R")
 
@@ -122,8 +143,11 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm)
 
+    is_dev = .false.
 #ifdef _OPENACC
-    !# OpenACC 有効時は DIA / ELL 形式の SpMV を呼ぶ（変換済みの形式で分岐）
+    !# OpenACC 有効時、DIA / ELL 形式へ変換済みであればデバイス側 SpMV を呼ぶ。
+    !# 未変換（GPU 未対応の解法や固有値解法などホスト実行経路）の場合は
+    !# ホスト側 CSR カーネルへフォールバックする
     if(associated(monoMAT%R%Aell))then
       if(monoMAT%NDOF == -1)then
         call monolis_matvec_ELL_V_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
@@ -133,7 +157,8 @@ contains
         call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
           monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
       endif
-    else
+      is_dev = .true.
+    elseif(associated(monoMAT%R%Adia))then
       if(monoMAT%NDOF == -1)then
         call monolis_matvec_DIA_V_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
           monoMAT%DIA%offset, monoMAT%DIA%Vptr, monoMAT%R%Adia, &
@@ -142,19 +167,21 @@ contains
         call monolis_matvec_DIA_nn_R(monoMAT%N, monoMAT%NP, monoMAT%DIA%Ndiag, &
           monoMAT%DIA%offset, monoMAT%R%Adia, X, Y, monoMAT%NDOF)
       endif
-    endif
-#else
-    if(monoMAT%NDOF == 3)then
-      call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
-    elseif(monoMAT%NDOF == 1)then
-      call monolis_matvec_11_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
-    elseif(monoMAT%NDOF == -1)then
-      call monolis_matvec_V_R(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, &
-        monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
-    else
-      call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
+      is_dev = .true.
     endif
 #endif
+    if(.not. is_dev)then
+      if(monoMAT%NDOF == 3)then
+        call monolis_matvec_33_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
+      elseif(monoMAT%NDOF == 1)then
+        call monolis_matvec_11_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
+      elseif(monoMAT%NDOF == -1)then
+        call monolis_matvec_V_R(monoMAT%N, monoMAT%n_dof_list, monoMAT%n_dof_index, monoMAT%n_dof_index2, &
+          monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y)
+      else
+        call monolis_matvec_nn_R(monoMAT%N, monoMAT%CSR%index, monoMAT%CSR%item, monoMAT%R%A, X, Y, monoMAT%NDOF)
+      endif
+    endif
 
     t2 = monolis_get_time()
     tspmv = tspmv + t2 - t1

@@ -85,10 +85,10 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
 #ifdef _OPENACC
-    integer(kint) :: NNDOF, NPNDOF
+    integer(kint) :: NNDOF, NPNDOF, method
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
     integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
-    logical :: is_ell, is_var
+    logical :: is_ell, is_var, use_device
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
@@ -100,6 +100,19 @@ contains
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
+    !# GPU 実装のない解法（BiCGSTAB_N128 / SOR / IDRS）はデバイス常駐を行わず
+    !# ホスト（CSR 形式）で実行する
+    method = monoPRM%Iarray(monolis_prm_I_method)
+    use_device = .not. (method == monolis_iter_BiCGSTAB_N128 &
+      & .or. method == monolis_iter_SOR &
+      & .or. method == monolis_iter_IDRS)
+
+    if(use_device)then
+    !# 初期解のゼロクリアはデバイス転送前に行う（転送後にホスト側でクリアしても
+    !# デバイス側に反映されないため）
+    if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
+      monoMAT%R%X = 0.0d0
+    endif
     !# CSR 形式から DIA / ELL 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
     is_ell = (monoPRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
     is_var = (monoMAT%NDOF == -1)
@@ -139,11 +152,13 @@ contains
         !$acc enter data copyin(monoMAT%DIA%Vptr)
       endif
     endif
+    endif
 #endif
 
     call monolis_solver_select_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
+    if(use_device)then
     if(is_var)then
       if(is_ell)then
         !$acc exit data delete(monoMAT%ELL%Vptr)
@@ -160,6 +175,7 @@ contains
     else
       !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
       call monolis_dealloc_DIA_R(monoMAT)
+    endif
     endif
 #endif
 

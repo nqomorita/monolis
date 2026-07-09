@@ -6,6 +6,9 @@ module mod_monolis_precond
   use mod_monolis_precond_diag
   use mod_monolis_precond_SOR
   use mod_monolis_precond_LU
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -158,12 +161,28 @@ contains
     integer(kint) :: i, precond
     integer(kint) :: NNDOF, NPNDOF
     real(kdouble) :: t1, t2
+#ifdef _OPENACC
+    logical :: is_host_prec
+#endif
 
     call monolis_std_debug_log_header("monolis_precond_apply_R")
 
     t1 = monolis_get_time()
 
     precond = monoPRM%Iarray(monolis_prm_I_precond)
+
+#ifdef _OPENACC
+    !# GPU カーネル未実装の前処理（SOR / LU / 可変ブロック DIAG）はホストで適用する。
+    !# デバイス常駐データの場合は内部領域をホストへ同期してから適用し、
+    !# 結果をデバイスへ書き戻す（袖領域は CPU 実行と同じくホスト側の値を維持）
+    is_host_prec = (precond == monolis_prec_SOR) .or. (precond == monolis_prec_LU) &
+      & .or. (precond == monolis_prec_DIAG .and. monoMAT%NDOF == -1)
+    if(is_host_prec)then
+      call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+        monoMAT%n_dof_index, NNDOF, NPNDOF)
+      !$acc update self(X(1:NNDOF)) if_present
+    endif
+#endif
 
     if(precond == monolis_prec_DIAG)then
       call monolis_precond_diag_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, X, Y)
@@ -189,7 +208,7 @@ contains
 !$omp & firstprivate(NNDOF) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop present(X, Y)
+!$acc parallel loop present(X, Y) if(acc_is_present(X) .and. acc_is_present(Y))
       do i = 1, NNDOF
         Y(i) = X(i)
       enddo
@@ -200,6 +219,12 @@ contains
       write(*,*) "precond", precond
       stop "The preconditioner is not implemented in monolis_precond_apply_R"
     endif
+
+#ifdef _OPENACC
+    if(is_host_prec)then
+      !$acc update device(Y) if_present
+    endif
+#endif
 
     t2 = monolis_get_time()
     monoPRM%Rarray(monolis_R_time_prec) = monoPRM%Rarray(monolis_R_time_prec) + t2 - t1
