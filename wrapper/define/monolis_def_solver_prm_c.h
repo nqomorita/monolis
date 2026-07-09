@@ -54,9 +54,9 @@ static const int MONOLIS_PREC_DIAG   = 1;
 
 static const int MONOLIS_PREC_SOR    = 2;
 
-//static const int MONOLIS_PREC_SPIKE  = 5;
+static const int MONOLIS_PREC_LU     = 3;
 
-//static const int MONOLIS_PREC_LU     = 6;
+//static const int MONOLIS_PREC_SPIKE  = 5;
 
 //static const int MONOLIS_PREC_MUMPS  = 7;
 
