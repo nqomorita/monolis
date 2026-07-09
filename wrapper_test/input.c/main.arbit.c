@@ -214,7 +214,7 @@ void monolis_solver_parallel_R_test(){
   monolis_show_summary(&mat, true);
 
   for (iter = MONOLIS_ITER_CG; iter < MONOLIS_ITER_IDRS + 1; ++iter) {
-    for (prec = MONOLIS_PREC_NONE; prec < MONOLIS_PREC_SOR + 1; ++prec) {
+    for (prec = MONOLIS_PREC_NONE; prec < MONOLIS_PREC_LU + 1; ++prec) {
       // いくつかの組み合わせはスキップ
       if(iter == MONOLIS_ITER_PIPECG && prec == MONOLIS_PREC_SOR) continue;
       if(iter == MONOLIS_ITER_PIPECR && prec == MONOLIS_PREC_SOR) continue;
