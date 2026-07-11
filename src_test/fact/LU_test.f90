@@ -19,6 +19,10 @@ contains
     call monolis_std_global_log_string("monolis_fact_LU_nn_apply_R")
     call monolis_std_global_log_string("monolis_fact_LU_nn_clear_R")
 
+    call monolis_std_global_log_string("monolis_fact_LU_nn_setup_C")
+    call monolis_std_global_log_string("monolis_fact_LU_nn_apply_C")
+    call monolis_std_global_log_string("monolis_fact_LU_nn_clear_C")
+
     call monolis_initialize(mat)
     call monolis_initialize(prec)
     call monolis_com_initialize_by_self(com)

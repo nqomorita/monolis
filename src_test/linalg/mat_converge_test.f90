@@ -19,6 +19,9 @@ contains
     real(kdouble) :: tcomm
 
     call monolis_std_global_log_string("monolis_check_converge_R")
+    call monolis_std_global_log_string("monolis_check_converge_C")
+    call monolis_std_global_log_string("monolis_set_converge_R")
+    call monolis_std_global_log_string("monolis_set_converge_C")
 
     call monolis_initialize(monolis)
     call monolis_com_initialize_by_self(com)

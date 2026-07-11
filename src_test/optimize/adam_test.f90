@@ -17,6 +17,7 @@ contains
     call monolis_std_global_log_string("monolis_opt_adam_init")
     call monolis_std_global_log_string("monolis_opt_adam_free")
     call monolis_std_global_log_string("monolis_opt_adam_apply")
+    call monolis_std_global_log_string("monolis_opt_adam_apply_kernel")
 
     W  = 1.0d0
     b  = 0.0d0

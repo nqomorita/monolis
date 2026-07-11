@@ -6,7 +6,7 @@ module mod_monolis_precond_sor_V_test
 
 contains
 
-  subroutine monolis_precond_sor_nn_test
+  subroutine monolis_precond_sor_V_test
     implicit none
 
     call monolis_std_log_string("monolis_precond_sor_V_setup_R")
@@ -16,6 +16,6 @@ contains
     call monolis_std_log_string("monolis_precond_sor_V_setup_C")
     call monolis_std_log_string("monolis_precond_sor_V_apply_C")
     call monolis_std_log_string("monolis_precond_sor_V_clear_C")
-  end subroutine monolis_precond_sor_nn_test
+  end subroutine monolis_precond_sor_V_test
 
 end module mod_monolis_precond_sor_V_test

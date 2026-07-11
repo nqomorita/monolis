@@ -3,6 +3,7 @@ module mod_monolis_precond_diag_test
   use mod_monolis
   use mod_monolis_precond_diag_33_test
   use mod_monolis_precond_diag_nn_test
+  use mod_monolis_precond_diag_V_test
 
   implicit none
 
@@ -21,6 +22,7 @@ contains
 
     call  monolis_precond_diag_33_test()
     call  monolis_precond_diag_nn_test()
+    call  monolis_precond_diag_V_test()
   end subroutine monolis_precond_diag_test
 
 end module mod_monolis_precond_diag_test

@@ -15,8 +15,6 @@ contains
     call monolis_std_global_log_string("monolis_initialize")
 
     call monolis_std_global_log_string("monolis_finalize")
-
-    call monolis_std_global_log_string("monolis_com_input_comm_table")
   end subroutine monolis_def_struc_test
 
 end module mod_monolis_def_struc_test

@@ -16,6 +16,12 @@ contains
     integer(kint) :: n_node, nelem, elem(2,4), i
 
     call monolis_std_global_log_string("monolis_fact_factorize")
+    call monolis_std_global_log_string("assemble_child_contribution")
+    call monolis_std_global_log_string("allocate_front_storage")
+    call monolis_std_global_log_string("add_front_entry")
+    call monolis_std_global_log_string("add_front_column_run")
+    call monolis_std_global_log_string("factor_one_front")
+    call monolis_std_global_log_string("panel_column_update")
 
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)

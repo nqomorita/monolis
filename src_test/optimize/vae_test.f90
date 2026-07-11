@@ -30,6 +30,12 @@ contains
     call monolis_std_global_log_string("monolis_opt_vae_decode")
     call monolis_std_global_log_string("monolis_opt_vae_sample_prior")
     call monolis_std_global_log_string("monolis_opt_vae_generate_spx")
+    call monolis_std_global_log_string("vae_add2_dev")
+    call monolis_std_global_log_string("vae_dmudlv_dev")
+    call monolis_std_global_log_string("vae_dxhat_dev")
+    call monolis_std_global_log_string("vae_kl_sum_dev")
+    call monolis_std_global_log_string("vae_recon_sumsq_dev")
+    call monolis_std_global_log_string("vae_reparam_dev")
 
     !> 再現性のため Fortran 標準乱数を固定
     call monolis_opt_vae_test_seed_rng(123)

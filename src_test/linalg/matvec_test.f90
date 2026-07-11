@@ -30,6 +30,12 @@ contains
     call monolis_std_global_log_string("monolis_matvec_product_C")
     call monolis_std_global_log_string("monolis_matvec_product_main_R")
     call monolis_std_global_log_string("monolis_matvec_product_main_C")
+    call monolis_std_global_log_string("monolis_matvec_V_R")
+    call monolis_std_global_log_string("monolis_matvec_V_C")
+    call monolis_std_global_log_string("monolis_matvec_DIA_nn_R")
+    call monolis_std_global_log_string("monolis_matvec_ELL_nn_R")
+    call monolis_std_global_log_string("monolis_residual_main_R")
+    call monolis_std_global_log_string("monolis_residual_main_C")
   end subroutine monolis_matvec_test
 
   !> 可変ブロックの DIA / ELL 形式 SpMV を CSR 可変ブロック SpMV と突き合わせる

@@ -9,6 +9,10 @@ contains
 
   subroutine monolis_scalapack_test()
     implicit none
+    call monolis_std_global_log_string("monolis_scalapack_gesvd_R_main")
+    call monolis_std_global_log_string("gesvd_R_update_D")
+    call monolis_std_global_log_string("monolis_scalapack_comm_initialize")
+    call monolis_std_global_log_string("monolis_scalapack_comm_finalize")
     call monolis_scalapack_test_1()
     call monolis_scalapack_test_2()
     call monolis_scalapack_test_3()
@@ -302,7 +306,7 @@ contains
     real(kdouble) :: VD(2,6)
     real(kdouble) :: A_res(2,6)
 
-    call monolis_std_global_log_string("monolis_scalapack_gesvd_R section 4")
+    call monolis_std_global_log_string("monolis_scalapack_gesvd_R")
 
     comm = monolis_mpi_get_self_comm()
 
@@ -372,7 +376,8 @@ contains
 
     if(monolis_mpi_get_global_comm_size() == 1) return
 
-    call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R")
+    call monolis_std_global_log_string("monolis_scalapack_getrs_R")
+    call monolis_std_global_log_string("getrs_R_update_X")
 
     comm = monolis_mpi_get_global_comm()
 
@@ -447,7 +452,7 @@ contains
 
     if(monolis_mpi_get_global_comm_size() == 1) return
 
-    call monolis_std_global_log_string("monolis_scalapack_getrf_R/getrs_R (self_comm)")
+    call monolis_std_global_log_string("monolis_scalapack_getrs_R")
 
     comm = monolis_mpi_get_self_comm()
 
