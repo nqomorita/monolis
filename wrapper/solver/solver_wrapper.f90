@@ -1,4 +1,4 @@
-!> ���Υ���Х⥸��`��
+!> ���Υ���Х⥸��`��
 module mod_monolis_solve_wrapper
   use mod_monolis_utils
   use mod_monolis_solve
@@ -78,6 +78,11 @@ contains
     monoCOM%send_item = monoCOM%send_item + 1
 
     call monolis_solve_main_R(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
+
+    !# ソルバ内部で確保された対角配列を解放（ローカル構造体のためリーク防止）
+    if(associated(monolis%MAT%R%D))then
+      call monolis_pdealloc_R_1d(monolis%MAT%R%D)
+    endif
 
     monoCOM%recv_item = monoCOM%recv_item - 1
     monoCOM%send_item = monoCOM%send_item - 1

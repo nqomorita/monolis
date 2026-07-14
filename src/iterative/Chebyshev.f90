@@ -60,8 +60,13 @@ contains
     !call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
     !if(is_converge) return
 
-    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0)then
-      call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
+    !# フラグが立っていても D が未割当の場合（C ラッパ経由など行列構造体が
+    !# 呼び出し毎に再構築される場合）はセットアップを再実行する
+    if(monoPRM%Iarray(monolis_prm_I_is_solv_prepared) == 0 .or. &
+      & .not. associated(monoMAT%R%D))then
+      if(.not. associated(monoMAT%R%D))then
+        call monolis_palloc_R_1d(monoMAT%R%D, NPNDOF)
+      endif
       call monolis_solver_JACOBI_setup(monoMAT)
       monoPRM%Iarray(monolis_prm_I_is_solv_prepared) = 1
 
