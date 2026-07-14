@@ -11,6 +11,7 @@ contains
 
     call monolis_std_log_string("monolis_precond_diag_nn_setup_R")
     call monolis_std_log_string("monolis_precond_diag_nn_apply_R")
+    call monolis_std_log_string("monolis_precond_diag_nn_apply_kernel_R")
     call monolis_std_log_string("monolis_precond_diag_nn_clear_R")
 
     call monolis_std_log_string("monolis_precond_diag_nn_setup_C")

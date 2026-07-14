@@ -87,6 +87,7 @@ contains
     call monolis_std_global_log_string("monolis_eigen_standard_lanczos_R_main")
     call monolis_std_global_log_string("monolis_eigen_inverted_standard_lanczos_R")
     call monolis_std_global_log_string("monolis_eigen_inverted_standard_lanczos_R_main")
+    call monolis_std_global_log_string("monolis_get_condition_number_R")
 
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)

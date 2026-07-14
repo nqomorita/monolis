@@ -136,6 +136,7 @@ contains
     !# C%CSR%item の確保と設定
     nz = C%CSR%index(NP + 1)
     call monolis_palloc_I_1d(C%CSR%item, nz)
+
     call monolis_palloc_I_1d(C%n_dof_index2, nz + 1)
 
     do i = 1, nz

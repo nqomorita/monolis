@@ -16,8 +16,17 @@ contains
     real(kdouble) :: x(2)
     integer(kint) :: comm
 
-    call monolis_std_global_log_string("monolis_optimize_nnls")
-    call monolis_std_global_log_string("monolis_optimize_nnls_with_sparse_solution")
+    call monolis_std_global_log_string("monolis_optimize_nnls_R")
+    call monolis_std_global_log_string("monolis_optimize_nnls_R_with_sparse_solution")
+    call monolis_std_global_log_string("monolis_optimize_parallel_nnls_R_with_sparse_solution")
+
+    call monolis_std_global_log_string("check_all_positive")
+    call monolis_std_global_log_string("check_is_all")
+    call monolis_std_global_log_string("check_tolerance_inner")
+    call monolis_std_global_log_string("check_tolerance_outer")
+    call monolis_std_global_log_string("get_column_matrix")
+    call monolis_std_global_log_string("get_minimum_alpha")
+    call monolis_std_global_log_string("update_candidate")
 
     max_iter = 100
 

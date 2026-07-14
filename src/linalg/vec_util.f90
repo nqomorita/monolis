@@ -2,6 +2,9 @@
 module mod_monolis_vec_util
   use mod_monolis_utils
   use mod_monolis_inner_product
+#ifdef _OPENACC
+  use openacc
+#endif
   implicit none
 
 contains
@@ -25,7 +28,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       Y(i) = X(i)
     enddo
@@ -53,7 +56,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop present(X, Y)
+!$acc parallel loop present(X, Y) if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       Y(i) = X(i)
     enddo
@@ -81,7 +84,7 @@ contains
 !$omp & firstprivate(m) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y))
     do i = 1, m
       Y(i) = X(i)
     enddo
@@ -115,7 +118,7 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
@@ -149,7 +152,7 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop present(X, Y, Z)
+!$acc parallel loop present(X, Y, Z) if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
@@ -183,7 +186,7 @@ contains
 !$omp & firstprivate(m, alpha) &
 !$omp & private(i)
 !$omp do
-!$acc parallel loop
+!$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
     do i = 1, m
       Z(i) = alpha*X(i) + beta*Y(i)
     enddo
@@ -211,7 +214,7 @@ contains
 
     do i = 1, n_vec
       call monolis_inner_product_main_R(monoCOM, m, p, q(:,i), norm, tdotp, tcomm_dotp)
-!$acc parallel loop
+!$acc parallel loop if(acc_is_present(p) .and. acc_is_present(q))
       do j = 1, m
         p(j) = p(j) - norm*q(j,i)
       enddo

@@ -21,13 +21,26 @@ contains
     call monolis_std_global_log_string("monolis_mat_finalize_CSR")
     call monolis_std_global_log_string("monolis_mat_finalize_CSC")
 
+    call monolis_std_global_log_string("monolis_mat_initialize_DIA")
+    call monolis_std_global_log_string("monolis_mat_initialize_ELL")
+    call monolis_std_global_log_string("monolis_mat_initialize_LU")
+    call monolis_std_global_log_string("monolis_mat_initialize_frontal")
+    call monolis_std_global_log_string("monolis_mat_initialize_reorder")
+    call monolis_std_global_log_string("monolis_mat_finalize_DIA")
+    call monolis_std_global_log_string("monolis_mat_finalize_ELL")
+    call monolis_std_global_log_string("monolis_mat_finalize_LU")
+    call monolis_std_global_log_string("monolis_mat_finalize_frontal")
+    call monolis_std_global_log_string("monolis_mat_finalize_reorder")
+
     call monolis_std_global_log_string("monolis_set_RHS_R")
+    call monolis_std_global_log_string("monolis_set_RHS_C")
     call monolis_std_global_log_string("monolis_set_initial_solution_R")
     call monolis_std_global_log_string("monolis_set_initial_solution_C")
     call monolis_std_global_log_string("monolis_get_solution_R")
     call monolis_std_global_log_string("monolis_get_solution_C")
 
-    call monolis_std_global_log_string("monolis_check_input_param")
+    call monolis_std_global_log_string("monolis_get_mat_size")
+    call monolis_std_global_log_string("monolis_get_vec_size")
   end subroutine monolis_def_mat_test
 
 end module mod_monolis_def_mat_test

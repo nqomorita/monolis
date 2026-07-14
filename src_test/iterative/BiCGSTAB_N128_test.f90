@@ -14,6 +14,7 @@ contains
       call monolis_solver_BiCGSTAB_N128_test_main(n_dof, monolis_prec_NONE)
       call monolis_solver_BiCGSTAB_N128_test_main(n_dof, monolis_prec_DIAG)
       call monolis_solver_BiCGSTAB_N128_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_BiCGSTAB_N128_test_main(n_dof, monolis_prec_LU)
     enddo
   end subroutine monolis_solver_BiCGSTAB_N128_test
 
@@ -27,7 +28,8 @@ contains
     real(kdouble) :: val
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
-    call monolis_std_global_log_string("monolis_solver_BiCGSTAB")
+    call monolis_std_global_log_string("monolis_solver_BiCGSTAB_N128")
+    call monolis_std_global_log_string("monolis_global_sorted_inner_product_main_R_N128")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 

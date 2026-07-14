@@ -15,6 +15,14 @@ contains
     integer(kint) :: n_node, nelem, elem(2,4), i
 
     call monolis_std_global_log_string("monolis_fact_analysis")
+    call monolis_std_global_log_string("build_local_csr")
+    call monolis_std_global_log_string("build_symmetric_pattern")
+    call monolis_std_global_log_string("build_pord_front_structure")
+    call monolis_std_global_log_string("build_original_front_entries")
+    call monolis_std_global_log_string("build_child_contribution_maps")
+    call monolis_std_global_log_string("build_front_postorder")
+    call monolis_std_global_log_string("front_local_position")
+    call monolis_std_global_log_string("sort_int_range")
 
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)

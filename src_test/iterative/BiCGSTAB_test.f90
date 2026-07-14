@@ -14,6 +14,7 @@ contains
       call monolis_solver_BiCGSTAB_test_main(n_dof, monolis_prec_NONE)
       call monolis_solver_BiCGSTAB_test_main(n_dof, monolis_prec_DIAG)
       call monolis_solver_BiCGSTAB_test_main(n_dof, monolis_prec_SOR)
+      call monolis_solver_BiCGSTAB_test_main(n_dof, monolis_prec_LU)
     enddo
   end subroutine monolis_solver_BiCGSTAB_test
 
@@ -28,6 +29,7 @@ contains
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
     call monolis_std_global_log_string("monolis_solver_BiCGSTAB")
+    call monolis_std_global_log_string("monolis_solver_BiCGSTAB_GPU")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 

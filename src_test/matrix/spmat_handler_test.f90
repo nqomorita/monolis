@@ -31,7 +31,10 @@ contains
 
     call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_R")
     call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_get_scalar_from_sparse_matrix_R")
     call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_R")
+    call monolis_std_global_log_string("monolis_set_matrix_BCSR_R")
+    call monolis_std_global_log_string("monolis_set_matrix_BCSR_mat_val_R")
     call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_R")
     call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_main_R")
     call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_offdiag_R")
@@ -145,6 +148,7 @@ contains
 
     call monolis_std_global_log_string("monolis_set_scalar_to_sparse_matrix_C")
     call monolis_std_global_log_string("monolis_add_scalar_to_sparse_matrix_C")
+    call monolis_std_global_log_string("monolis_get_scalar_from_sparse_matrix_C")
     call monolis_std_global_log_string("monolis_set_block_to_sparse_matrix_C")
     call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_C")
     call monolis_std_global_log_string("monolis_add_matrix_to_sparse_matrix_main_C")

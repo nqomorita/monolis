@@ -303,8 +303,9 @@ contains
 
     if(monolis_mpi_get_global_comm_size() /= 1) return
 
-    call monolis_std_global_log_string("monolis_convert_sparse_matrix_to_dense_matrix_R_test")
     call monolis_std_global_log_string("monolis_convert_sparse_matrix_to_dense_matrix_R")
+    call monolis_std_global_log_string("monolis_check_diagonal_zero_component_main_R")
+    call monolis_std_global_log_string("monolis_get_max_matrix_component_main_R")
 
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)
@@ -383,7 +384,6 @@ contains
 
     if(monolis_mpi_get_global_comm_size() /= 1) return
 
-    call monolis_std_global_log_string("monolis_variable_dof_sparse_matrix_R_test")
     call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_simple_mesh_V_R")
 
     call monolis_initialize(mat)
@@ -480,7 +480,6 @@ contains
 
     if(monolis_mpi_get_global_comm_size() /= 1) return
 
-    call monolis_std_global_log_string("monolis_convert_CSR_matrix_to_CSC_matrix_R_test")
     call monolis_std_global_log_string("monolis_convert_CSR_matrix_to_CSC_matrix_R")
 
     call monolis_initialize(mat)

@@ -22,6 +22,8 @@ contains
     call monolis_std_global_log_string("monolis_inner_product_main_R")
     call monolis_std_global_log_string("monolis_inner_product_main_R_no_comm")
     call monolis_std_global_log_string("monolis_inner_product_main_R_N128")
+    call monolis_std_global_log_string("monolis_global_sorted_inner_product_main_R")
+    call monolis_std_global_log_string("monolis_global_sorted_inner_product_main_R_N128")
 
     call monolis_std_global_log_string("monolis_inner_product_I")
     call monolis_std_global_log_string("monolis_inner_product_R")

@@ -13,6 +13,7 @@ program monolis_test
   use mod_monolis_spmat_convert_sym_test
   use mod_monolis_spmat_convert_dia_test
   use mod_monolis_spmat_convert_ell_test
+  use mod_monolis_spmat_reordering_test
   use mod_monolis_vec_util_test
   use mod_monolis_linalg_test
   use mod_monolis_matalg_dense_test
@@ -25,6 +26,7 @@ program monolis_test
   use mod_monolis_solver_PipeCR_test
   use mod_monolis_solver_BiCGSTAB_test
   use mod_monolis_solver_BiCGSTAB_noprec_test
+  use mod_monolis_solver_BiCGSTAB_N128_test
   use mod_monolis_solver_PipeBiCGSTAB_test
   use mod_monolis_solver_PipeBiCGSTAB_noprec_test
   use mod_monolis_solver_DeflatedCG_test
@@ -36,7 +38,14 @@ program monolis_test
   use mod_monolis_lapack_test
   use mod_monolis_scalapack_test
   use mod_monolis_eigen_lanczos_util_test
+  use mod_monolis_eigen_lanczos_test
   use mod_monolis_eigen_solver_test
+  use mod_monolis_pord_core_test
+  use mod_monolis_pord_graph_test
+  use mod_monolis_pord_bisect_test
+  use mod_monolis_pord_decomp_test
+  use mod_monolis_pord_order_test
+  use mod_monolis_pord_ordering_test
   use mod_monolis_fact_analysis_test
   use mod_monolis_fact_factorize_test
   use mod_monolis_fact_solve_test
@@ -67,6 +76,7 @@ program monolis_test
   call monolis_spmat_convert_sym_test()
   call monolis_spmat_convert_dia_test()
   call monolis_spmat_convert_ell_test()
+  call monolis_spmat_reordering_test()
 
   call monolis_vec_util_test()
   call monolis_linalg_test()
@@ -77,6 +87,13 @@ program monolis_test
 
   call monolis_precond_test()
   call monolis_solve_test()
+
+  call monolis_pord_core_test()
+  call monolis_pord_graph_test()
+  call monolis_pord_bisect_test()
+  call monolis_pord_decomp_test()
+  call monolis_pord_order_test()
+  call monolis_pord_ordering_test()
 
   call monolis_fact_analysis_test()
   call monolis_fact_factorize_test()
@@ -100,6 +117,7 @@ program monolis_test
     call monolis_solver_PipeCR_test()
     call monolis_solver_BiCGSTAB_test()
     call monolis_solver_BiCGSTAB_noprec_test()
+    call monolis_solver_BiCGSTAB_N128_test()
     call monolis_solver_PipeBiCGSTAB_test()
     call monolis_solver_PipeBiCGSTAB_noprec_test()
     call monolis_solver_DeflatedCG_test()
@@ -110,6 +128,7 @@ program monolis_test
     call monolis_solver_COCG_test()
 
     call monolis_eigen_lanczos_util_test()
+    call monolis_eigen_lanczos_test()
     call monolis_eigen_solver_test()
   endif
 

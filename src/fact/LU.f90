@@ -21,10 +21,6 @@ contains
 
     type(monolis_mat), target, intent(inout) :: monoLU
 
-    if(monoMAT%NDOF == -1)then
-      stop "monolis_fact_LU_nn_setup_R"
-    endif
-
     call monolis_fact_analysis(monoMAT, monoLU%LU)
     call monolis_fact_factorize(monoMAT, monoLU%LU)
   end subroutine monolis_fact_LU_nn_setup_R

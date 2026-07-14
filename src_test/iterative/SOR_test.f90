@@ -26,6 +26,8 @@ contains
     real(kdouble) :: a(n_dof*10), b(n_dof*10)
 
     call monolis_std_global_log_string("monolis_solver_SOR")
+    call monolis_std_global_log_string("monolis_solver_SOR_setup")
+    call monolis_std_global_log_string("monolis_solver_SOR_matvec")
     call monolis_std_log_I1("DOF", n_dof)
     call monolis_std_log_I1("PRECOND", prec)
 

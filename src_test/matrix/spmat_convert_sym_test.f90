@@ -14,6 +14,13 @@ contains
     type(monolis_com) :: com
     integer(kint) :: n_node, n_elem, elem(2,4)
 
+    call monolis_std_global_log_string("monolis_matrix_convert_to_symmetric_R")
+    call monolis_std_global_log_string("monolis_matrix_convert_to_symmetric_inner_R")
+    call monolis_std_global_log_string("monolis_matrix_convert_to_symmetric_outer_R")
+    call monolis_std_global_log_string("get_block_matrix")
+    call monolis_std_global_log_string("get_sym_matrix")
+    call monolis_std_global_log_string("set_block_matrix")
+
     call monolis_initialize(mat)
     call monolis_com_initialize_by_self(com)
 

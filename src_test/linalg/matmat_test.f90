@@ -22,7 +22,7 @@ contains
     integer(kint) :: i, n_node, n_dof, n_elem, n_base
     integer(kint), allocatable :: elem(:,:)
 
-    call monolis_std_global_log_string("monolis_matmat_symbolic_test")
+    call monolis_std_global_log_string("monolis_matmat_symbolic")
 
     !# 簡単な3節点の1次元要素メッシュを作成
     !# 1--2--3
@@ -82,7 +82,7 @@ contains
     integer(kint), allocatable :: elem(:,:)
     real(kdouble) :: expected
 
-    call monolis_std_global_log_string("monolis_matmat_value_nn_test")
+    call monolis_std_global_log_string("monolis_matmat_value_nn")
 
     !# 簡単な3節点の1次元要素メッシュを作成
     n_node = 3
@@ -149,7 +149,8 @@ contains
     integer(kint), allocatable :: elem(:,:)
     real(kdouble) :: tol
 
-    call monolis_std_global_log_string("monolis_matmat_nn_test")
+    call monolis_std_global_log_string("monolis_matmat_nn")
+    call monolis_std_global_log_string("monolis_matmat_local")
 
     !# 簡単な3節点の1次元要素メッシュを作成
     n_node = 3

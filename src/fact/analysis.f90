@@ -53,12 +53,17 @@ contains
     call monolis_mat_finalize_LU(lu)
 
     ndof = monoMAT%NDOF
-    if (ndof <= 0) ndof = 1
-    n = monoMAT%N * ndof
+    if (ndof == -1) then
+      !> 可変ブロック：内部ブロックの自由度合計
+      n = monoMAT%n_dof_index(monoMAT%N + 1)
+    else
+      if (ndof <= 0) ndof = 1
+      n = monoMAT%N * ndof
+    end if
     lu%N = n
     if (n <= 0) return
 
-    call build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
+    call build_local_csr(monoMAT, n, row_ptr, col_ind, val_pos)
 
     call build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
 
@@ -79,51 +84,87 @@ contains
     lu%factorized = .false.
   end subroutine monolis_fact_analysis
 
-  !> monoMAT のブロック CSR を NDOF 倍に展開したスカラー CSR を作る
+  !> monoMAT のブロック CSR をスカラー CSR に展開する
   !>
-  !> 各 NDOF×NDOF ブロックを NDOF^2 個のスカラー非ゼロに展開し、
-  !> スカラー行 NDOF*(bi-1)+r、スカラー列 NDOF*(bj-1)+c の順で並べる。
-  !> val_pos(scalar_entry) = NDOF^2*(block_entry-1) + NDOF*(r-1) + c
-  !> （monoMAT%R%A 内での 1-based 位置）。
-  subroutine build_local_csr(monoMAT, ndof, n, row_ptr, col_ind, val_pos)
+  !> 各ブロックをスカラー非ゼロに展開し、スカラー行・スカラー列の順で並べる。
+  !> 固定ブロック（NDOF 指定）と可変ブロック（NDOF = -1、n_dof_list /
+  !> n_dof_index / n_dof_index2 を使用）の両方に対応する。
+  !> val_pos(scalar_entry) は monoMAT%R%A 内での 1-based 位置。
+  !> 並列実行時は袌領域のブロック列（item > N）を除外し、
+  !> 内部自由度のみの局所ブロック行列を分解対象とする（ブロック Jacobi 型前処理）。
+  subroutine build_local_csr(monoMAT, n, row_ptr, col_ind, val_pos)
     implicit none
     type(monolis_mat), intent(in) :: monoMAT
-    integer(kint),     intent(in) :: ndof
     integer(kint),     intent(in) :: n
     integer(kint), allocatable, intent(out) :: row_ptr(:)
     integer(kint), allocatable, intent(out) :: col_ind(:)
     integer(kint), allocatable, intent(out) :: val_pos(:)
 
-    integer(kint) :: nb, nz_block, ndof2, bi, bj, ii, jS, jE, r, c
-    integer(kint) :: sr, pos, nb_in_row
+    integer(kint) :: nb, ndof, bi, bj, ii, jS, jE, r, c
+    integer(kint) :: sr, pos, n1, n2, row_base, col_base, vpos_base, nnz_row
+    logical :: is_var
 
     nb = monoMAT%N
-    nz_block = monoMAT%CSR%index(nb + 1)
-    ndof2 = ndof * ndof
+    ndof = monoMAT%NDOF
+    is_var = (ndof == -1)
 
     call monolis_alloc_I_1d(row_ptr, n + 1)
-    call monolis_alloc_I_1d(col_ind, max(1, nz_block * ndof2))
-    call monolis_alloc_I_1d(val_pos, max(1, nz_block * ndof2))
 
     row_ptr(1) = 1
     do bi = 1, nb
-      nb_in_row = monoMAT%CSR%index(bi + 1) - monoMAT%CSR%index(bi)
-      do r = 1, ndof
-        sr = (bi - 1) * ndof + r
-        row_ptr(sr + 1) = row_ptr(sr) + nb_in_row * ndof
+      jS = monoMAT%CSR%index(bi) + 1
+      jE = monoMAT%CSR%index(bi + 1)
+      if (is_var) then
+        n1 = monoMAT%n_dof_list(bi)
+        row_base = monoMAT%n_dof_index(bi)
+      else
+        n1 = ndof
+        row_base = (bi - 1) * ndof
+      end if
+      nnz_row = 0
+      do ii = jS, jE
+        bj = monoMAT%CSR%item(ii)
+        if (bj > nb) cycle
+        if (is_var) then
+          nnz_row = nnz_row + monoMAT%n_dof_list(bj)
+        else
+          nnz_row = nnz_row + ndof
+        end if
+      end do
+      do r = 1, n1
+        sr = row_base + r
+        row_ptr(sr + 1) = row_ptr(sr) + nnz_row
       end do
     end do
+
+    call monolis_alloc_I_1d(col_ind, max(1, row_ptr(n + 1) - 1))
+    call monolis_alloc_I_1d(val_pos, max(1, row_ptr(n + 1) - 1))
 
     pos = 1
     do bi = 1, nb
       jS = monoMAT%CSR%index(bi) + 1
       jE = monoMAT%CSR%index(bi + 1)
-      do r = 1, ndof
+      if (is_var) then
+        n1 = monoMAT%n_dof_list(bi)
+      else
+        n1 = ndof
+      end if
+      do r = 1, n1
         do ii = jS, jE
           bj = monoMAT%CSR%item(ii)
-          do c = 1, ndof
-            col_ind(pos) = (bj - 1) * ndof + c
-            val_pos(pos) = ndof2 * (ii - 1) + ndof * (r - 1) + c
+          if (bj > nb) cycle
+          if (is_var) then
+            n2 = monoMAT%n_dof_list(bj)
+            col_base = monoMAT%n_dof_index(bj)
+            vpos_base = monoMAT%n_dof_index2(ii)
+          else
+            n2 = ndof
+            col_base = (bj - 1) * ndof
+            vpos_base = ndof * ndof * (ii - 1)
+          end if
+          do c = 1, n2
+            col_ind(pos) = col_base + c
+            val_pos(pos) = vpos_base + n2 * (r - 1) + c
             pos = pos + 1
           end do
         end do

@@ -111,7 +111,13 @@ contains
           NNDOF, T, T, CG(2), tdotp, tcomm_dotp)
       endif
 
-      omega = CG(1) / CG(2)
+      if(dabs(CG(2)) == 0.0d0)then
+        !# T = 0 の場合（完全 LU 前処理で S = 0 となる場合など）は
+        !# 0/0 を避けて omega = 0 とする（R = S = 0 のため次の収束判定で終了する）
+        omega = 0.0d0
+      else
+        omega = CG(1) / CG(2)
+      endif
 
       do i = 1, NNDOF
         X(i) = X(i) + alpha*PT(i) + omega*ST(i)

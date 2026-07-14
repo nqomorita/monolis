@@ -31,6 +31,9 @@ contains
     integer(kint) :: item(6)
 
     call monolis_std_global_log_string("monolis_get_nonzero_pattern_by_nodal_graph_main")
+    call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_V_R")
+    call monolis_std_global_log_string("monolis_alloc_nonzero_pattern_mat_val_V_C")
+    call monolis_std_global_log_string("monolis_get_nodal_graph_by_nonzero_pattern")
 
     n_node = 4
 
@@ -109,7 +112,7 @@ contains
     integer(kint) :: n_dof_list(3)
     integer(kint) :: n_dof_index(3)
 
-    call monolis_std_global_log_string("monolis_get_n_dof_index")
+    call monolis_std_global_log_string("monolis_set_n_dof_index")
 
     n_node = 3
 

@@ -118,7 +118,7 @@ contains
         !# 収束時のみ Ritz ベクトルを生成（毎反復の O(iter x n) を回避）
         call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
           & alpha, beta, q, eigen_value, eigen_mode, norm, .true.)
-        write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
+        !write(*,"(a,i6,a,1p2e12.4)")"iter: ", iter, ", ths: ", norm
         do i = 1, n_get_eigen
           val(i) = eigen_value(i)
           do j = 1, NPNDOF
