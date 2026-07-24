@@ -72,7 +72,7 @@ contains
     !$acc                   AU(1:NPNDOF), R0(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(P, U, Z, Y, R, V, T1, T2, AP, MR, AU, R0)

@@ -64,7 +64,7 @@ contains
     call monolis_alloc_R_1d(V , NPNDOF)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
     call monolis_vec_copy_R(NNDOF, R, RT)

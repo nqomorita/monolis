@@ -59,7 +59,7 @@ contains
     call monolis_alloc_C_1d(P, NPNDOF)
 
     call monolis_residual_main_C(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_C(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_C(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)

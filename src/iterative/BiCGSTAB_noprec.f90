@@ -64,7 +64,7 @@ contains
     !$acc enter data create(R(1:NPNDOF), RT(1:NPNDOF), P(1:NPNDOF), S(1:NPNDOF), T(1:NPNDOF), V(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, RT, P, S, T, V)
