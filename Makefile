@@ -377,6 +377,13 @@ DRV_BASENAMES = $(notdir $(basename $(DRV_SOURCES)))
 DRV_TARGETS = $(addprefix $(BIN_DIR)/, $(DRV_BASENAMES))
 DRV_OBJS = $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(DRV_BASENAMES)))
 
+##> **********
+##> dependency section (parallel build)
+DEPEND_FILE  = .depend
+DEPEND_GEN   = ./gen_depend.sh
+DEPEND_SCAN  = $(shell find $(SRC_DIR) $(WRAP_DIR) $(TST_DIR) $(DRV_DIR) -name '*.f90' 2> /dev/null)
+PREP_TARGETS = cp_header cp_header_lib cp_bin_lib
+
 ##> target
 default: \
 	cp_header \
@@ -394,13 +401,17 @@ all: \
 	$(TEST_C_TARGET) \
 	$(DRV_TARGETS)
 
+##> 並列ビルド時に、ヘッダ / submodule ライブラリのコピーを必ずコンパイルより先に完了させる
+$(LIB_OBJS) $(TST_OBJS) $(TST_C_OBJS) $(DRV_OBJS): | $(PREP_TARGETS)
+$(LIB_TARGET) $(TEST_TARGET) $(TEST_C_TARGET) $(DRV_TARGETS): | $(PREP_TARGETS)
+
 $(LIB_TARGET): $(LIB_OBJS)
 	$(AR) $@ $(LIB_OBJS) $(ARC_LIB)
 
-$(TEST_TARGET): $(TST_OBJS)
+$(TEST_TARGET): $(TST_OBJS) $(LIB_TARGET)
 	$(FC) $(FFLAGS) $(CPP) $(INCLUDE) -o $@ $(TST_OBJS) $(USE_LIB)
 
-$(TEST_C_TARGET): $(TST_C_OBJS)
+$(TEST_C_TARGET): $(TST_C_OBJS) $(LIB_TARGET)
 	$(LINK) $(FFLAGS) $(INCLUDE) -o $@ $(TST_C_OBJS) $(USE_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
@@ -441,7 +452,16 @@ cp_bin_lib:
 	$(CP) ./submodule/gedatsu/bin/* ./bin/
 #	$(CP) ./submodule/ggtools/bin/* ./bin/
 
+##> Fortran module 依存関係の自動生成 (make -j 時の .mod 生成順序を保証)
+$(DEPEND_FILE): $(DEPEND_SCAN) $(DEPEND_GEN)
+	@$(DEPEND_GEN) > $@
+
+ifeq ($(filter clean, $(MAKECMDGOALS)),)
+-include $(DEPEND_FILE)
+endif
+
 clean:
+	$(RM) $(DEPEND_FILE) \
 	$(RM) $(LIB_OBJS) \
 	$(RM) $(TST_OBJS) \
 	$(RM) $(TST_C_OBJS) \

@@ -12,10 +12,14 @@ Fortran で実装され、C ラッパが提供されます。
 ./install_lib_intel.sh  # Intel oneAPI
 ./install_lib_A64FX.sh  # 富岳 (mpifrtpx)
 make                    # ライブラリ + 全テストバイナリ
+make -j8                # 並列ビルド (Fortran module 依存は .depend で自動解決)
 make FLAGS=DEBUG        # デバッグビルド (bounds check, fpe trap)
 make FLAGS=INTEL        # Intel コンパイラビルド
 make clean
 ```
+
+`.depend` は [gen_depend.sh](gen_depend.sh) が `src/` `wrapper/` `src_test/` `driver/` の
+`module` / `use` を走査して生成します (Makefile が自動で呼ぶ)。手で編集しないこと。
 
 ビルド成果物:
 - `lib/libmonolis_solver.a` (Fortran 本体)、`lib/libmonolis.a` 相当のリンクは `USE_LIB1` を参照
