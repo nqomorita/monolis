@@ -153,6 +153,9 @@ contains
         call monolis_matvec_ELL_V_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
           monoMAT%ELL%col, monoMAT%ELL%Vptr, monoMAT%R%Aell, &
           monoMAT%n_dof_list, monoMAT%n_dof_index, X, Y)
+      elseif(monoMAT%NDOF == 1)then
+        call monolis_matvec_ELL_11_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
+          monoMAT%ELL%col, monoMAT%R%Aell, X, Y)
       else
         call monolis_matvec_ELL_nn_R(monoMAT%N, monoMAT%NP, monoMAT%ELL%Nmaxcol, &
           monoMAT%ELL%col, monoMAT%R%Aell, X, Y, monoMAT%NDOF)
@@ -526,6 +529,57 @@ contains
 !$omp end parallel
 #endif
   end subroutine monolis_matvec_ELL_nn_R
+
+  !> 疎行列ベクトル積（実数型、ELL 形式、1x1 ブロック）
+  !> @details
+  !> PPE のようなスカラー行列では、汎用 nxn カーネルの自動配列 XT/YT と
+  !> 自由度ループを除去する。ELL の slot-major 配置は維持し、同一 warp の
+  !> 各スレッドが連続した col/Aell を読む。
+  subroutine monolis_matvec_ELL_11_R(N, NP, Nmaxcol, col, Aell, X, Y)
+    implicit none
+    !> [in] 内部行数
+    integer(kint), intent(in) :: N
+    !> [in] 全列数（X の有効範囲）
+    integer(kint), intent(in) :: NP
+    !> [in] 1 行あたりの最大非ゼロ数
+    integer(kint), intent(in) :: Nmaxcol
+    !> [in] 列番号配列（slot-major、0=パディング）
+    integer(kint), intent(in) :: col(:)
+    !> [in] 行列成分（slot-major）
+    real(kdouble), intent(in) :: Aell(:)
+    !> [in] 右辺ベクトル
+    real(kdouble), intent(in) :: X(:)
+    !> [out] 結果ベクトル
+    real(kdouble), intent(out) :: Y(:)
+    integer(kint) :: i, j, jcol, offset
+    real(kdouble) :: yt
+
+#ifndef _OPENACC
+!$omp parallel default(none) &
+!$omp & shared(Aell, Y, X, col) &
+!$omp & firstprivate(N, NP, Nmaxcol) &
+!$omp & private(yt, i, j, jcol, offset)
+!$omp do
+#endif
+!$acc parallel loop gang vector present(Aell, col, X, Y) private(yt, j, jcol, offset)
+    do i = 1, N
+      yt = 0.0d0
+!$acc loop seq
+      do j = 1, Nmaxcol
+        offset = (j-1)*N + i
+        jcol = col(offset)
+        if(jcol >= 1 .and. jcol <= NP)then
+          yt = yt + Aell(offset)*X(jcol)
+        endif
+      enddo
+      Y(i) = yt
+    enddo
+!$acc end parallel loop
+#ifndef _OPENACC
+!$omp end do
+!$omp end parallel
+#endif
+  end subroutine monolis_matvec_ELL_11_R
 
   !> @ingroup dev_linalg
   !> 疎行列ベクトル積（実数型、DIA 形式、可変ブロック）

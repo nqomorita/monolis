@@ -31,11 +31,35 @@ contains
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
 
-    call monolis_alloc_R_1d(T, NDOF)
-    call monolis_alloc_R_2d(LU, NDOF, NDOF)
     call monolis_palloc_R_1d(monoPREC%R%D, NDOF2*N)
     ALU => monoPREC%R%D
     monoPREC%N = monoMAT%N
+
+    if(NDOF == 1)then
+!$omp parallel default(none) &
+!$omp & shared(A, ALU, index, item) &
+!$omp & firstprivate(N) &
+!$omp & private(i, ii, jS, jE, in)
+!$omp do
+      do i = 1, N
+        ALU(i) = 1.0d0
+        jS = index(i) + 1
+        jE = index(i + 1)
+        do ii = jS, jE
+          in = item(ii)
+          if(i == in)then
+            if(A(ii) /= 0.0d0) ALU(i) = 1.0d0/A(ii)
+            exit
+          endif
+        enddo
+      enddo
+!$omp end do
+!$omp end parallel
+      return
+    endif
+
+    call monolis_alloc_R_1d(T, NDOF)
+    call monolis_alloc_R_2d(LU, NDOF, NDOF)
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &

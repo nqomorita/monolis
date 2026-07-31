@@ -88,7 +88,7 @@ contains
     integer(kint) :: NNDOF, NPNDOF, method
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
     integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
-    logical :: is_ell, is_var, use_device
+    logical :: is_ell, is_var, is_ell_gpu_11, use_device
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
@@ -100,25 +100,28 @@ contains
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
-    !# GPU 実装のない解法（BiCGSTAB_N128 / SOR / IDRS）はデバイス常駐を行わず
-    !# ホスト（CSR 形式）で実行する
+    !# GPU 実装のない解法（BiCGSTAB_N128 / SOR / IDRS）はデバイス常駐を行わずホスト（CSR 形式）で実行する
     method = monoPRM%Iarray(monolis_prm_I_method)
     use_device = .not. (method == monolis_iter_BiCGSTAB_N128 &
       & .or. method == monolis_iter_SOR &
       & .or. method == monolis_iter_IDRS)
 
     if(use_device)then
-    !# 初期解のゼロクリアはデバイス転送前に行う（転送後にホスト側でクリアしても
-    !# デバイス側に反映されないため）
+    !# 初期解のゼロクリアはデバイス転送前に行う（転送後にホスト側でクリアしてもデバイス側に反映されないため）
     if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
       monoMAT%R%X = 0.0d0
     endif
+
     !# CSR 形式から DIA / ELL 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
     is_ell = (monoPRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
     is_var = (monoMAT%NDOF == -1)
+    is_ell_gpu_11 = .false.
     if(is_ell)then
       if(is_var)then
         call monolis_convert_CSR_to_ELL_V_R(monoMAT)
+      elseif(monoMAT%NDOF == 1)then
+        call monolis_convert_CSR_to_ELL_11_R_GPU(monoMAT)
+        is_ell_gpu_11 = .true.
       else
         call monolis_convert_CSR_to_ELL_R(monoMAT)
       endif
@@ -129,18 +132,23 @@ contains
         call monolis_convert_CSR_to_DIA_R(monoMAT)
       endif
     endif
+
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
     X     => monoMAT%R%X
     B     => monoMAT%R%B
     precD => monoPREC%R%D
+
     !$acc enter data copyin(X(1:NPNDOF), B(1:NPNDOF))
     !$acc enter data copyin(precD)
     if(is_ell)then
-      !$acc enter data copyin(monoMAT%R%Aell, monoMAT%ELL%col)
+      if(.not. is_ell_gpu_11)then
+        !$acc enter data copyin(monoMAT%R%Aell, monoMAT%ELL%col)
+      endif
     else
       !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
     endif
+
     !# 可変ブロック版は値オフセットと自由度配列もデバイスに常駐させる
     if(is_var)then
       matNdofList  => monoMAT%n_dof_list
