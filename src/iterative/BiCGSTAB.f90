@@ -39,6 +39,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     omega = 0.0d0
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
@@ -225,6 +226,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     omega = 0.0d0
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)

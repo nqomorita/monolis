@@ -13,6 +13,7 @@
 !# subroutine monolis_set_check_diag(monolis, param)
 !# subroutine monolis_set_prec_stored(monolis, param)
 !# subroutine monolis_set_error_abort(monolis, param)
+!# subroutine monolis_set_iter_RR(monolis, param)
 !# subroutine monolis_show_iterlog(monolis, param)
 !# subroutine monolis_show_timelog(monolis, param)
 !# subroutine monolis_show_summary(monolis, param)
@@ -219,6 +220,18 @@ contains
 
     monolis%PRM%Iarray(monolis_prm_I_IDRS_DIM) = param
   end subroutine monolis_set_solver_IDRS_num_basis
+
+  !> @ingroup param
+  !> 残差ベクトルの再計算間隔の設定（0 以下の場合は各解法の既定値を使用）
+  subroutine monolis_set_iter_RR(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    integer(kint), intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_iter_RR) = param
+  end subroutine monolis_set_iter_RR
 
   !> @ingroup param
   !> 反復回数と残差履歴の表示の設定

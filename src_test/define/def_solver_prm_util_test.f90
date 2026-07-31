@@ -23,6 +23,7 @@ contains
     call monolis_std_global_log_string("monolis_set_prec_stored")
     call monolis_std_global_log_string("monolis_set_error_abort")
     call monolis_std_global_log_string("monolis_set_solver_IDRS_num_basis")
+    call monolis_std_global_log_string("monolis_set_iter_RR")
     call monolis_std_global_log_string("monolis_set_spmv_format")
     call monolis_std_global_log_string("monolis_show_iterlog")
     call monolis_std_global_log_string("monolis_show_timelog")
@@ -144,6 +145,10 @@ contains
 
     call monolis_get_time_comm_spmv(monolis, r_param)
     call monolis_test_check_eq_R1("monolis_def_solver_util_test 26", r_param, 8.0d0)
+
+    monolis%PRM%Iarray = 0
+    call monolis_set_iter_RR(monolis, 100)
+    call monolis_test_check_eq_I1("monolis_def_solver_util_test 27", monolis%PRM%Iarray(monolis_prm_I_iter_RR), 100)
   end subroutine monolis_def_solver_util_test
 
 end module mod_monolis_def_solver_util_test

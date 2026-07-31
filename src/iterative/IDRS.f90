@@ -40,6 +40,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 50
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     S = monoPRM%Iarray(MONOLIS_PRM_I_IDRS_DIM)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)

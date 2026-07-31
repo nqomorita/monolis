@@ -38,6 +38,7 @@ void monolis_prm_initialize(
   prm->Iarray[MONOLIS_PRM_I_SHOW_SUMMARY] = MONOLIS_I_TRUE;
   prm->Iarray[MONOLIS_PRM_I_SHOW_TIME_STATISTICS] = MONOLIS_I_FALSE;
   prm->Iarray[MONOLIS_PRM_I_IDRS_DIM] = 4;
+  prm->Iarray[MONOLIS_PRM_I_ITER_RR] = 0;
 
   prm->Rarray[MONOLIS_PRM_R_TOL] = 1.0e-8;
 }
