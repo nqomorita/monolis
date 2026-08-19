@@ -6,7 +6,8 @@
 #module load metis
 #module load parmetis
 
-git submodule update --init --recursive
+git submodule update --init --depth 1 --single-branch --jobs 8
+git -C submodule/METIS submodule update --init --depth 1 --single-branch --jobs 8 GKlib
 BASE_DIR=$(pwd)
 
 #> METIS
