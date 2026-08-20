@@ -115,7 +115,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
@@ -149,7 +149,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop present(X, Y, Z) if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
@@ -183,7 +183,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))

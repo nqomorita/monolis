@@ -115,7 +115,8 @@ contains
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
-!$omp & shared(monoMAT, ALU, X, Y) &
+!$omp & shared(ALU, X, Y) &
+!$omp & firstprivate(N) &
 !$omp & private(i, X1, X2, X3)
 !$omp do
 !$acc parallel loop present(ALU, X, Y) private(X1, X2, X3) &

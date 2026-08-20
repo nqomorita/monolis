@@ -2,7 +2,7 @@
 
 ##> compiler setting
 FC     = mpif90
-FFLAGS = -fPIC -O2 -mtune=native -std=legacy -Wno-missing-include-dirs
+FFLAGS = -fPIC -O2 -mtune=native -std=legacy -Wno-missing-include-dirs -fopenmp
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
 LINK   = $(FC)
@@ -32,7 +32,7 @@ ifdef FLAGS
 	DFLAGS = $(subst $(comma), $(space), $(FLAGS))
 
 	ifeq ($(findstring DEBUG, $(DFLAGS)), DEBUG)
-		FFLAGS  = -fPIC -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow -Wno-missing-include-dirs
+		FFLAGS  = -fPIC -O2 -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow -Wno-missing-include-dirs -fopenmp
 		CFLAGS  = -fPIC -O2 -g -ggdb
 	endif
 

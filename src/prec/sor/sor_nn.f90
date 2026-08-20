@@ -30,15 +30,15 @@ contains
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    call monolis_alloc_R_1d(T, NDOF)
-    call monolis_alloc_R_2d(LU, NDOF, NDOF)
     call monolis_palloc_R_1d(monoPREC%R%D, NDOF2*N)
     ALU => monoPREC%R%D
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
-!$omp & private(T, LU, i, j, k, jS, jE, in)
+!$omp & private(T, LU, i, ii, j, k, l, jS, jE, in)
+    allocate(T(NDOF))
+    allocate(LU(NDOF, NDOF))
 !$omp do
     do i = 1, N
       jS = index(i) + 1
@@ -73,10 +73,9 @@ contains
       enddo
     enddo
 !$omp end do
-!$omp end parallel
-
     deallocate(T)
     deallocate(LU)
+!$omp end parallel
   end subroutine monolis_precond_sor_nn_setup_R
 
   !> @ingroup prec
@@ -101,15 +100,15 @@ contains
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    call monolis_alloc_C_1d(T, NDOF)
-    call monolis_alloc_C_2d(LU, NDOF, NDOF)
     call monolis_palloc_C_1d(monoPREC%C%D, NDOF2*N)
     ALU => monoPREC%C%D
 
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
-!$omp & private(T, LU, i, j, k, jS, jE, in)
+!$omp & private(T, LU, i, ii, j, k, l, jS, jE, in)
+    allocate(T(NDOF))
+    allocate(LU(NDOF, NDOF))
 !$omp do
     do i = 1, N
       jS = index(i) + 1
@@ -144,10 +143,9 @@ contains
       enddo
     enddo
 !$omp end do
-!$omp end parallel
-
     deallocate(T)
     deallocate(LU)
+!$omp end parallel
   end subroutine monolis_precond_sor_nn_setup_C
 
   !> @ingroup prec
