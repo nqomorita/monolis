@@ -33,18 +33,32 @@ contains
 
     call monolis_get_rundom_number_R(NNDOF, q, vtxdist(monoCOM%my_rank + 1))
 
+!$omp parallel default(none) &
+!$omp & shared(q, is_bc) &
+!$omp & firstprivate(NNDOF) &
+!$omp & private(i)
+!$omp do
     do i = 1, NNDOF
       if(is_bc(i)) q(i) = 0.0d0
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, q, t1)
 
     call monolis_inner_product_main_R(monoCOM, NNDOF, q, q, norm, t1, t2)
 
     norm = 1.0d0/dsqrt(norm)
+!$omp parallel default(none) &
+!$omp & shared(q) &
+!$omp & firstprivate(NNDOF, norm) &
+!$omp & private(i)
+!$omp do
     do i = 1, NNDOF
       q(i) = q(i)*norm
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, q, t1)
   end subroutine lanczos_initialze

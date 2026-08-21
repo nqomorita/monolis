@@ -85,11 +85,18 @@ contains
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
+!$omp parallel default(none) &
+!$omp & shared(P, R, V) &
+!$omp & firstprivate(NNDOF, beta, omega) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(P, R, V)
         do i = 1, NNDOF
           P(i) = R(i) + beta * (P(i) - omega * V(i))
         enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
       else
         call monolis_vec_copy_R(NNDOF, R, P)
       endif
@@ -108,11 +115,18 @@ contains
 
       omega = CG(1) / CG(2)
 
+!$omp parallel default(none) &
+!$omp & shared(X, P, S) &
+!$omp & firstprivate(NNDOF, alpha, omega) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(X, P, S)
       do i = 1, NNDOF
         X(i) = X(i) + alpha*P(i) + omega*S(i)
       enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)

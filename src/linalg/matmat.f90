@@ -128,7 +128,17 @@ contains
     nz = C%CSR%index(NP + 1)
     call monolis_palloc_I_1d(C%CSR%item, nz)
 
+    call monolis_dealloc_L_1d(is_nonzero)
+    call monolis_dealloc_I_1d(row_C)
+
     !# 各行の列インデックスを設定
+!$omp parallel default(none) &
+!$omp & shared(A, B, C) &
+!$omp & firstprivate(NP) &
+!$omp & private(i, j, jA, jB, jS, jE, col_A, col_B, nz, row_C, is_nonzero)
+    call monolis_alloc_L_1d(is_nonzero, B%NP)
+    call monolis_alloc_I_1d(row_C, B%NP)
+!$omp do
     do i = 1, NP
       nz = 0
 
@@ -166,6 +176,10 @@ contains
         C%CSR%item(j) = row_C(j - jS + 1)
       enddo
     enddo
+!$omp end do
+    call monolis_dealloc_L_1d(is_nonzero)
+    call monolis_dealloc_I_1d(row_C)
+!$omp end parallel
 
     call monolis_dealloc_L_1d(is_nonzero)
     call monolis_dealloc_I_1d(row_C)

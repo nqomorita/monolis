@@ -75,6 +75,18 @@ ifdef FLAGS
 		MOD_DIR  = -module ./include
 		LINK     = $(FC) -acc -gpu=managed
 	endif
+
+	##> OpenMP は他のオプションと併用可能なため最後に追記する
+	ifeq ($(findstring OPENMP, $(DFLAGS)), OPENMP)
+		ifeq ($(findstring A64FX, $(DFLAGS)), A64FX)
+			OMP_FLAG = -Kopenmp
+		else
+			OMP_FLAG = -fopenmp
+		endif
+		##> C ラッパには OpenMP 指示文が無いため CFLAGS には付けない
+		FFLAGS  += $(OMP_FLAG)
+		LINK    += $(OMP_FLAG)
+	endif
 endif
 
 USE_LIB = $(USE_LIB1) $(BLAS_LIB)

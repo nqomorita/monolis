@@ -311,17 +311,28 @@ contains
       monolis%MAT%n_dof_index2(i + 1) = monolis%MAT%n_dof_index2(i) + NDOF*NDOF
     enddo
 
+!$omp parallel default(none) &
+!$omp & shared(monolis, index, item, A) &
+!$omp & firstprivate(NP, NZ, NDOF) &
+!$omp & private(i)
+!$omp do
     do i = 1, NP
       monolis%MAT%CSR%index(i) = index(i)
     enddo
+!$omp end do
 
+!$omp do
     do i = 1, NZ
       monolis%MAT%CSR%item(i) = item(i)
     enddo
+!$omp end do
 
+!$omp do
     do i = 1, NDOF*NDOF*NZ
       monolis%MAT%R%A(i) = A(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_palloc_I_1d(monolis%MAT%CSC%index, NP + 1)
     call monolis_palloc_I_1d(monolis%MAT%CSC%item, NZ)
@@ -346,9 +357,16 @@ contains
     real(kdouble), intent(in) :: A(:)
     integer(kint) :: i
 
+!$omp parallel default(none) &
+!$omp & shared(monolis, A) &
+!$omp & firstprivate(NZ, NDOF) &
+!$omp & private(i)
+!$omp do
     do i = 1, NDOF*NDOF*NZ
       monolis%MAT%R%A(i) = A(i)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_set_matrix_BCSR_mat_val_R
 
   !# boundary condition

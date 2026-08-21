@@ -47,9 +47,16 @@ contains
 
     !# フラグ配列を昇順に走査して対角線本数と offset を確定
     Ndiag = 0
+!$omp parallel default(none) &
+!$omp & shared(diag_of_offset, Ndiag) &
+!$omp & firstprivate(NP) &
+!$omp & private(idx)
+!$omp do reduction(+:Ndiag)
     do idx = 1, 2*NP - 1
       if(diag_of_offset(idx) /= 0) Ndiag = Ndiag + 1
     enddo
+!$omp end do
+!$omp end parallel
 
     monoMAT%DIA%Ndiag = Ndiag
     call monolis_pdealloc_I_1d(monoMAT%DIA%offset)
@@ -69,6 +76,11 @@ contains
     call monolis_palloc_R_1d(monoMAT%R%Adia, NDOF2*N*Ndiag)
 
     !# CSR 値を DIA 配置に詰める
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, diag_of_offset) &
+!$omp & firstprivate(N, NP, NDOF, NDOF2) &
+!$omp & private(i, j, k, l, in, jS, jE, d)
+!$omp do
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
@@ -83,6 +95,8 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_R
@@ -121,9 +135,16 @@ contains
 
     !# フラグ配列を昇順に走査して対角線本数と offset を確定
     Ndiag = 0
+!$omp parallel default(none) &
+!$omp & shared(diag_of_offset, Ndiag) &
+!$omp & firstprivate(NP) &
+!$omp & private(idx)
+!$omp do reduction(+:Ndiag)
     do idx = 1, 2*NP - 1
       if(diag_of_offset(idx) /= 0) Ndiag = Ndiag + 1
     enddo
+!$omp end do
+!$omp end parallel
 
     monoMAT%DIA%Ndiag = Ndiag
     call monolis_pdealloc_I_1d(monoMAT%DIA%offset)
@@ -143,6 +164,11 @@ contains
     call monolis_pdealloc_I_1d(monoMAT%DIA%Vptr)
     call monolis_palloc_I_1d(monoMAT%DIA%Vptr, N*Ndiag + 1)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N, NP, Ndiag) &
+!$omp & private(d, i, p, jcol)
+!$omp do collapse(2)
     do d = 1, Ndiag
       do i = 1, N
         p = (d-1)*N + i
@@ -152,6 +178,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
     do p = 1, N*Ndiag
       monoMAT%DIA%Vptr(p + 1) = monoMAT%DIA%Vptr(p + 1) + monoMAT%DIA%Vptr(p)
     enddo
@@ -162,6 +190,11 @@ contains
     call monolis_palloc_R_1d(monoMAT%R%Adia, total)
 
     !# CSR 値を DIA 配置（ブロック連続）に詰める
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, diag_of_offset) &
+!$omp & firstprivate(N, NP) &
+!$omp & private(i, j, m, in, jS, jE, d, p, n1, n2, kn, aoff)
+!$omp do
     do i = 1, N
       n1 = monoMAT%n_dof_list(i)
       jS = monoMAT%CSR%index(i) + 1
@@ -178,6 +211,8 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_V_R

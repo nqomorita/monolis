@@ -45,10 +45,14 @@ contains
       N = mat%NP
     endif
 
+!$omp parallel default(none) &
+!$omp & shared(mat) &
+!$omp & firstprivate(N, n_dof) &
+!$omp & private(i, j, in, jn, jS, jE, A1, A2, A3)
     call monolis_alloc_R_2d(A1, n_dof, n_dof)
     call monolis_alloc_R_2d(A2, n_dof, n_dof)
     call monolis_alloc_R_2d(A3, n_dof, n_dof)
-
+!$omp do
     do i = 1, N
       jS = mat%CSR%index(i) + 1
       jE = mat%CSR%index(i + 1)
@@ -72,6 +76,11 @@ contains
         endif
       enddo aa
     enddo
+!$omp end do
+    call monolis_dealloc_R_2d(A1)
+    call monolis_dealloc_R_2d(A2)
+    call monolis_dealloc_R_2d(A3)
+!$omp end parallel
   end subroutine monolis_matrix_convert_to_symmetric_inner_R
 
   subroutine get_block_matrix(mat, n_dof, idx, A1)

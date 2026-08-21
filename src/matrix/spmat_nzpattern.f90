@@ -400,10 +400,17 @@ contains
       & cap_bw = size(monolis%MAT%CSR%item)/monolis%MAT%NP
 
     max_deg = 0
+!$omp parallel default(none) &
+!$omp & shared(index, max_deg) &
+!$omp & firstprivate(n_node) &
+!$omp & private(i, deg)
+!$omp do reduction(max:max_deg)
     do i = 1, n_node
       deg = index(i + 1) - index(i)
       if(deg > max_deg) max_deg = deg
     enddo
+!$omp end do
+!$omp end parallel
     needed_bw = max_deg + 1
 
     if(needed_bw > cap_bw .or. n_node /= monolis%MAT%NP)then
@@ -441,10 +448,17 @@ contains
       & cap_bw = size(monolis%MAT%CSR%item)/monolis%MAT%NP
 
     max_deg = 0
+!$omp parallel default(none) &
+!$omp & shared(index, max_deg) &
+!$omp & firstprivate(n_node) &
+!$omp & private(i, deg)
+!$omp do reduction(max:max_deg)
     do i = 1, n_node
       deg = index(i + 1) - index(i)
       if(deg > max_deg) max_deg = deg
     enddo
+!$omp end do
+!$omp end parallel
     needed_bw = max_deg + 1
 
     if(needed_bw > cap_bw .or. n_node /= monolis%MAT%NP)then

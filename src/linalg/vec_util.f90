@@ -115,7 +115,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
@@ -149,7 +149,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop present(X, Y, Z) if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
@@ -183,7 +183,7 @@ contains
 
 !$omp parallel default(none) &
 !$omp & shared(X, Y, Z) &
-!$omp & firstprivate(m, alpha) &
+!$omp & firstprivate(m, alpha, beta) &
 !$omp & private(i)
 !$omp do
 !$acc parallel loop if(acc_is_present(X) .and. acc_is_present(Y) .and. acc_is_present(Z))
@@ -214,11 +214,18 @@ contains
 
     do i = 1, n_vec
       call monolis_inner_product_main_R(monoCOM, m, p, q(:,i), norm, tdotp, tcomm_dotp)
+!$omp parallel default(none) &
+!$omp & shared(p, q) &
+!$omp & firstprivate(m, i, norm) &
+!$omp & private(j)
+!$omp do
 !$acc parallel loop if(acc_is_present(p) .and. acc_is_present(q))
       do j = 1, m
         p(j) = p(j) - norm*q(j,i)
       enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
     enddo
   end subroutine monolis_gram_schmidt_R
 end module mod_monolis_vec_util

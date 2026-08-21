@@ -81,9 +81,16 @@ contains
       monoPRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_true
       call monolis_solve_main_R(monoPRM, monoCOM, monoMAT, monoPREC)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, is_bc) &
+!$omp & firstprivate(NPNDOF) &
+!$omp & private(i)
+!$omp do
       do i = 1, NPNDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
+!$omp end do
+!$omp end parallel
 
       if(iter > 1)then
         call monolis_vec_AXPBY_R(NNDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
@@ -101,9 +108,16 @@ contains
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)
+!$omp parallel default(none) &
+!$omp & shared(p, q) &
+!$omp & firstprivate(NPNDOF, iter, beta_t) &
+!$omp & private(i)
+!$omp do
       do i = 1, NPNDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
+!$omp end do
+!$omp end parallel
 
       call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
         & alpha, beta, q, eigen_value, eigen_mode, norm, .false.)
@@ -194,9 +208,16 @@ contains
     do iter = 1, maxiter
       call monolis_matvec_product_main_R(monoCOM, monoMAT, q(:,iter), monoMAT%R%X, tspmv, tcomm_spmv)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, is_bc) &
+!$omp & firstprivate(NNDOF) &
+!$omp & private(i)
+!$omp do
       do i = 1, NNDOF
         if(is_bc(i)) monoMAT%R%X(i) = 0.0d0
       enddo
+!$omp end do
+!$omp end parallel
 
       if(iter > 1)then
         call monolis_vec_AXPBY_R(NNDOF, -beta(iter-1), q(:,iter-1), 1.0d0, monoMAT%R%X, p)
@@ -214,9 +235,16 @@ contains
 
       beta(iter) = dsqrt(beta_t)
       beta_t = 1.0d0/beta(iter)
+!$omp parallel default(none) &
+!$omp & shared(p, q) &
+!$omp & firstprivate(NPNDOF, iter, beta_t) &
+!$omp & private(i)
+!$omp do
       do i = 1, NPNDOF
         q(i,iter+1) = p(i)*beta_t
       enddo
+!$omp end do
+!$omp end parallel
 
       call monolis_get_inverted_eigen_pair_from_tridiag(iter, n_get_eigen, &
         & alpha, beta, q, eigen_value, eigen_mode, norm, .false.)

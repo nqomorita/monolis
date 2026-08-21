@@ -30,14 +30,26 @@ contains
 
     call monolis_palloc_I_1d(MAT%CSR%index, n_node + 1)
 
+!$omp parallel default(none) &
+!$omp & shared(MAT, index) &
+!$omp & firstprivate(n_node) &
+!$omp & private(i)
+!$omp do
     do i = 1, n_node
       MAT%CSR%index(i + 1) = index(i + 1) + i
     enddo
+!$omp end do
+!$omp end parallel
 
     nz = MAT%CSR%index(n_node + 1)
 
     call monolis_palloc_I_1d(MAT%CSR%item, nz)
 
+!$omp parallel default(none) &
+!$omp & shared(MAT, item) &
+!$omp & firstprivate(n_node) &
+!$omp & private(i, j, jS, jE)
+!$omp do
     do i = 1, n_node
       jS = MAT%CSR%index(i) + 1
       jE = MAT%CSR%index(i + 1)
@@ -47,6 +59,8 @@ contains
       enddo
       call monolis_qsort_I_1d(MAT%CSR%item(jS:jE), 1, jE - jS + 1)
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_palloc_I_1d(MAT%CSC%index, n_node + 1)
     call monolis_palloc_I_1d(MAT%CSC%item, nz)
@@ -210,11 +224,18 @@ contains
       enddo
     enddo
 
+!$omp parallel default(none) &
+!$omp & shared(indexR, itemR) &
+!$omp & firstprivate(NR) &
+!$omp & private(i, jS, jE)
+!$omp do
     do i = 1, NR
       jS = indexR(i) + 1
       jE = indexR(i + 1)
       call monolis_qsort_I_1d(itemR(jS:jE), 1, jE - jS + 1)
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_get_CSC_format
   
   !> @ingroup dev_matrix
@@ -304,13 +325,22 @@ contains
     call monolis_palloc_I_1d(MAT%n_dof_list, n_node)
     call monolis_palloc_I_1d(MAT%n_dof_index, n_node + 1)
     call monolis_palloc_I_1d(MAT%n_dof_index2, NZ + 1)
+!$omp parallel default(none) &
+!$omp & shared(MAT) &
+!$omp & firstprivate(n_node, ndof, NZ) &
+!$omp & private(i, j)
+!$omp do
     do i = 1, n_node
       MAT%n_dof_list(i) = ndof
       MAT%n_dof_index(i + 1) = i*ndof
     enddo
+!$omp end do
+!$omp do
     do j = 1, NZ
       MAT%n_dof_index2(j + 1) = j*ndof*ndof
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_alloc_nonzero_pattern_with_margin_main
 
   !> @ingroup dev_matrix
@@ -343,13 +373,25 @@ contains
     endif
 
     !> CSR index（固定ストライド）
+!$omp parallel default(none) &
+!$omp & shared(MAT) &
+!$omp & firstprivate(n_node, bw) &
+!$omp & private(i)
+!$omp do
     do i = 1, n_node
       MAT%CSR%index(i + 1) = i*bw
     enddo
+!$omp end do
+!$omp end parallel
 
+!$omp parallel default(none) &
+!$omp & shared(MAT, index, item) &
+!$omp & firstprivate(n_node, bw) &
+!$omp & private(i, k, jS, jE, deg, c, slot, ntouch, used, touched)
     call monolis_alloc_I_1d(used, n_node)
     call monolis_alloc_I_1d(touched, bw)
 
+!$omp do
     do i = 1, n_node
       jS = MAT%CSR%index(i) + 1
       jE = MAT%CSR%index(i + 1)
@@ -386,6 +428,10 @@ contains
       !> 行内の列番号を昇順ソート
       call monolis_qsort_I_1d(MAT%CSR%item(jS:jE), 1, jE - jS + 1)
     enddo
+!$omp end do
+    call monolis_dealloc_I_1d(used)
+    call monolis_dealloc_I_1d(touched)
+!$omp end parallel
 
     !> CSC 形式を再構築
     NZ = MAT%CSR%index(n_node + 1)
