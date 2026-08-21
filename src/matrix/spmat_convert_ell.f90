@@ -8,6 +8,7 @@ module mod_monolis_spmat_convert_ell
   private
 
   public :: monolis_convert_CSR_to_ELL_R
+  public :: monolis_convert_CSR_to_ELL_11_R_GPU
   public :: monolis_convert_CSR_to_ELL_V_R
   public :: monolis_dealloc_ELL_R
 
@@ -35,10 +36,17 @@ contains
 
     !# 1 行あたりの最大非ゼロブロック数を求める
     Nmaxcol = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, Nmaxcol) &
+!$omp & firstprivate(N) &
+!$omp & private(i, nrow)
+!$omp do reduction(max:Nmaxcol)
     do i = 1, N
       nrow = monoMAT%CSR%index(i + 1) - monoMAT%CSR%index(i)
       if(nrow > Nmaxcol) Nmaxcol = nrow
     enddo
+!$omp end do
+!$omp end parallel
 
     monoMAT%ELL%Nmaxcol = Nmaxcol
 
@@ -51,6 +59,11 @@ contains
     call monolis_palloc_R_1d(monoMAT%R%Aell, NDOF2*N*Nmaxcol)
 
     !# CSR 値を ELL 配置に詰める
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(i, j, k, l, in, jS, jE, slot)
+!$omp do
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
@@ -67,7 +80,80 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_convert_CSR_to_ELL_R
+
+  !> CSR 形式から ELL 形式への変換（実数型、1x1 ブロック、GPU）
+  !> @details
+  !> CSR の有効領域だけをデバイスへ送り、ELL の転置配置を GPU 上で直接生成する。
+  !> ホスト側 ELL 配列への詰め替えと、その結果の再転送を回避する。
+  !> 生成した ELL 配列は呼び出し後もデバイスに常駐する。
+  subroutine monolis_convert_CSR_to_ELL_11_R_GPU(monoMAT)
+    implicit none
+    !> [in,out] 行列構造体
+    type(monolis_mat), target, intent(inout) :: monoMAT
+    integer(kint) :: N, Nmaxcol, NNZ
+    integer(kint) :: i, j, jS, jE, slot, nrow, p
+    integer(kint), pointer, contiguous :: csrIndex(:), csrItem(:), ellCol(:)
+    real(kdouble), pointer, contiguous :: csrA(:), ellA(:)
+
+    call monolis_std_debug_log_header("monolis_convert_CSR_to_ELL_11_R_GPU")
+
+    N = monoMAT%N
+    csrIndex => monoMAT%CSR%index
+    csrItem  => monoMAT%CSR%item
+    csrA     => monoMAT%R%A
+
+    Nmaxcol = 0
+!$omp parallel default(none) &
+!$omp & shared(csrIndex, Nmaxcol) &
+!$omp & firstprivate(N) &
+!$omp & private(i, nrow)
+!$omp do reduction(max:Nmaxcol)
+    do i = 1, N
+      nrow = csrIndex(i + 1) - csrIndex(i)
+      if(nrow > Nmaxcol) Nmaxcol = nrow
+    enddo
+!$omp end do
+!$omp end parallel
+    NNZ = csrIndex(N + 1)
+    monoMAT%ELL%Nmaxcol = Nmaxcol
+
+    call monolis_pdealloc_I_1d(monoMAT%ELL%col)
+    call monolis_palloc_I_1d(monoMAT%ELL%col, N*Nmaxcol)
+    call monolis_pdealloc_R_1d(monoMAT%R%Aell)
+    call monolis_palloc_R_1d(monoMAT%R%Aell, N*Nmaxcol)
+    ellCol => monoMAT%ELL%col
+    ellA   => monoMAT%R%Aell
+
+    !$acc enter data copyin(csrIndex(1:N+1), csrItem(1:NNZ), csrA(1:NNZ))
+    !$acc enter data create(ellCol(1:N*Nmaxcol), ellA(1:N*Nmaxcol))
+
+!$acc parallel loop gang vector &
+!$acc present(csrIndex(1:N+1), csrItem(1:NNZ), csrA(1:NNZ), &
+!$acc         ellCol(1:N*Nmaxcol), ellA(1:N*Nmaxcol)) &
+!$acc private(j, jS, jE, slot, p)
+    do i = 1, N
+      jS = csrIndex(i) + 1
+      jE = csrIndex(i + 1)
+!$acc loop seq
+      do slot = 1, Nmaxcol
+        p = (slot-1)*N + i
+        j = jS + slot - 1
+        if(j <= jE)then
+          ellCol(p) = csrItem(j)
+          ellA(p) = csrA(j)
+        else
+          ellCol(p) = 0
+          ellA(p) = 0.0d0
+        endif
+      enddo
+    enddo
+!$acc end parallel loop
+
+    !$acc exit data delete(csrIndex(1:N+1), csrItem(1:NNZ), csrA(1:NNZ))
+  end subroutine monolis_convert_CSR_to_ELL_11_R_GPU
 
   !> @ingroup matrix
   !> CSR 形式から ELL 形式への変換（実数型、可変ブロック）
@@ -90,10 +176,17 @@ contains
 
     !# 1 行あたりの最大非ゼロブロック数を求める
     Nmaxcol = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, Nmaxcol) &
+!$omp & firstprivate(N) &
+!$omp & private(i, nrow)
+!$omp do reduction(max:Nmaxcol)
     do i = 1, N
       nrow = monoMAT%CSR%index(i + 1) - monoMAT%CSR%index(i)
       if(nrow > Nmaxcol) Nmaxcol = nrow
     enddo
+!$omp end do
+!$omp end parallel
 
     monoMAT%ELL%Nmaxcol = Nmaxcol
 
@@ -102,6 +195,11 @@ contains
     call monolis_palloc_I_1d(monoMAT%ELL%col, N*Nmaxcol)
 
     !# 列番号を ELL 配置に詰める
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N) &
+!$omp & private(i, j, in, jS, jE, slot)
+!$omp do
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
@@ -112,11 +210,18 @@ contains
         monoMAT%ELL%col((slot-1)*N + i) = in
       enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     !# 各 (スロット, 行) ブロックの値配列内開始オフセットを prefix sum で確定
     call monolis_pdealloc_I_1d(monoMAT%ELL%Vptr)
     call monolis_palloc_I_1d(monoMAT%ELL%Vptr, N*Nmaxcol + 1)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N, Nmaxcol) &
+!$omp & private(slot, i, p, in)
+!$omp do collapse(2)
     do slot = 1, Nmaxcol
       do i = 1, N
         p = (slot-1)*N + i
@@ -126,6 +231,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
     do p = 1, N*Nmaxcol
       monoMAT%ELL%Vptr(p + 1) = monoMAT%ELL%Vptr(p + 1) + monoMAT%ELL%Vptr(p)
     enddo
@@ -136,6 +243,11 @@ contains
     call monolis_palloc_R_1d(monoMAT%R%Aell, total)
 
     !# CSR 値を ELL 配置（ブロック連続）に詰める
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N) &
+!$omp & private(i, j, m, in, jS, jE, slot, p, n1, n2, kn, aoff)
+!$omp do
     do i = 1, N
       n1 = monoMAT%n_dof_list(i)
       jS = monoMAT%CSR%index(i) + 1
@@ -153,6 +265,8 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_convert_CSR_to_ELL_V_R
 
   !> @ingroup matrix

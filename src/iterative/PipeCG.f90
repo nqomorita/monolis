@@ -39,6 +39,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 50
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
@@ -67,7 +68,7 @@ contains
     !$acc                   Z(1:NPNDOF), L(1:NPNDOF), M(1:NPNDOF), S(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, U, V, Q, P, Z, L, M, S)

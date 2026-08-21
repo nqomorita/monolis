@@ -33,12 +33,14 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
     real(kdouble), allocatable :: R(:), U(:), V(:), Q(:), P(:), Z(:), L(:), M(:), S(:)
     real(kdouble), pointer, contiguous :: B(:), X(:)
+    logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_solver_PipeCR")
 
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 50
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
@@ -69,7 +71,21 @@ contains
     !$acc                   Z(1:NPNDOF), L(1:NPNDOF), M(1:NPNDOF), S(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, B2, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
+    if(is_converge)then
+      !$acc update self(X(1:NPNDOF))
+      !$acc exit data delete(R, U, V, Q, P, Z, L, M, S)
+      call monolis_dealloc_R_1d(R)
+      call monolis_dealloc_R_1d(U)
+      call monolis_dealloc_R_1d(V)
+      call monolis_dealloc_R_1d(Q)
+      call monolis_dealloc_R_1d(P)
+      call monolis_dealloc_R_1d(Z)
+      call monolis_dealloc_R_1d(L)
+      call monolis_dealloc_R_1d(M)
+      call monolis_dealloc_R_1d(S)
+      return
+    endif
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, R2, tdotp, tcomm_dotp)
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U)
     call monolis_inner_product_main_R(monoCOM, NNDOF, U, U, U2, tdotp, tcomm_dotp)

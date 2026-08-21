@@ -56,6 +56,11 @@ contains
     real(kdouble) :: A(:)
     real(kdouble) :: B(:)
     integer(kint) :: i, in, jn, jo, j
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, A, B) &
+!$omp & firstprivate(N, NDOF) &
+!$omp & private(i, j, in, jn, jo)
+!$omp do
     do i = 1, N
       in = monoMAT%REORDER%iperm(i)
       jn = (in-1)*NDOF
@@ -64,6 +69,8 @@ contains
         B(jn + j) = A(jo + j)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_reorder_vector_fw
 
   subroutine monolis_reorder_back_vector_bk(monoMAT, N, NDOF, B, A)
@@ -73,6 +80,11 @@ contains
     real(kdouble) :: B(:)
     real(kdouble) :: A(:)
     integer(kint) :: i, in, jn, jo, j
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, A, B) &
+!$omp & firstprivate(N, NDOF) &
+!$omp & private(i, j, in, jn, jo)
+!$omp do
     do i = 1, N
       in = monoMAT%REORDER%perm(i)
       jn = (i -1)*NDOF
@@ -81,6 +93,8 @@ contains
         A(jo + j) = B(jn + j)
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_reorder_back_vector_bk
 
   subroutine monolis_restruct_matrix(monoMAT, monoMAT_reorder, perm, iperm)
@@ -153,6 +167,11 @@ contains
     integer(kint) :: jo, ko, kn, jn, lo, ln, l
 
     NDOF2 = NDOF*NDOF
+!$omp parallel default(none) &
+!$omp & shared(perm, iperm, index, item, A, indexp, itemp, Ap) &
+!$omp & firstprivate(N, NDOF, NDOF2) &
+!$omp & private(i, in, jSn, jEn, jo, ko, kn, jn, lo, ln, l)
+!$omp do
     do i = 1, N
       in = iperm(i)
       jSn = indexp(in) + 1
@@ -168,5 +187,7 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_restruct_matrix_values
 end module mod_monolis_spmat_reorder

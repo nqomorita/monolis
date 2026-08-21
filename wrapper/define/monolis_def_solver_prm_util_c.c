@@ -102,6 +102,13 @@ void monolis_set_solver_IDRS_num_basis(
   mat->prm.Iarray[MONOLIS_PRM_I_IDRS_DIM] = param;
 }
 
+void monolis_set_iter_RR(
+  MONOLIS* mat,
+  int      param)
+{
+  mat->prm.Iarray[MONOLIS_PRM_I_ITER_RR] = param;
+}
+
 void monolis_show_iterlog(
   MONOLIS* mat,
   bool     param)

@@ -126,6 +126,11 @@ contains
     real(kdouble_ml), parameter :: b1 = 0.9_kdouble_ml, b2 = 0.999_kdouble_ml, eps = 1.0e-7_kdouble_ml
     integer(kint) :: i, k
 
+!$omp parallel default(none) &
+!$omp & shared(W, m, v, gW) &
+!$omp & firstprivate(n1, n2, lr, bc1, bc2) &
+!$omp & private(i, k)
+!$omp do collapse(2)
     !$acc parallel loop collapse(2) present_or_copy(W, m, v) present_or_copyin(gW)
     do k = 1, n2
       do i = 1, n1
@@ -135,6 +140,13 @@ contains
       end do
     end do
     !$acc end parallel loop
+!$omp end do
+!$omp end parallel
+!$omp parallel default(none) &
+!$omp & shared(b, mb, vb, gb) &
+!$omp & firstprivate(n2, lr, bc1, bc2) &
+!$omp & private(k)
+!$omp do
     !$acc parallel loop present_or_copy(b, mb, vb) present_or_copyin(gb)
     do k = 1, n2
       mb(k) = b1*mb(k) + (1.0_kdouble_ml - b1)*gb(k)
@@ -142,6 +154,8 @@ contains
       b(k) = b(k) - lr*(mb(k)/bc1)/(sqrt(vb(k)/bc2) + eps)
     end do
     !$acc end parallel loop
+!$omp end do
+!$omp end parallel
   end subroutine monolis_opt_adam_apply_kernel
 
 end module mod_monolis_opt_adam

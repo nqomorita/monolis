@@ -39,6 +39,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 50
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     omega = 0.0d0
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
@@ -64,7 +65,7 @@ contains
     !$acc enter data create(R(1:NPNDOF), RT(1:NPNDOF), P(1:NPNDOF), S(1:NPNDOF), T(1:NPNDOF), V(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, RT, P, S, T, V)
@@ -84,11 +85,18 @@ contains
 
       if(1 < iter)then
         beta = (rho/rho1) * (alpha/omega)
+!$omp parallel default(none) &
+!$omp & shared(P, R, V) &
+!$omp & firstprivate(NNDOF, beta, omega) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(P, R, V)
         do i = 1, NNDOF
           P(i) = R(i) + beta * (P(i) - omega * V(i))
         enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
       else
         call monolis_vec_copy_R(NNDOF, R, P)
       endif
@@ -107,11 +115,18 @@ contains
 
       omega = CG(1) / CG(2)
 
+!$omp parallel default(none) &
+!$omp & shared(X, P, S) &
+!$omp & firstprivate(NNDOF, alpha, omega) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(X, P, S)
       do i = 1, NNDOF
         X(i) = X(i) + alpha*P(i) + omega*S(i)
       enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
 
       if(mod(iter, iter_RR) == 0)then
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)

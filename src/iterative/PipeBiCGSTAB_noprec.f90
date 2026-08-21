@@ -39,6 +39,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 200
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
@@ -68,7 +69,7 @@ contains
     !$acc                   P(1:NPNDOF), Z(1:NPNDOF), Q(1:NPNDOF), Y(1:NPNDOF), V(1:NPNDOF))
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
       !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, R0, W0, T, S, P, Z, Q, Y, V)
@@ -97,6 +98,11 @@ contains
     omega = 0.0d0
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
+!$omp parallel default(none) &
+!$omp & shared(P, R, S, W0, Z, T, V, Q, Y) &
+!$omp & firstprivate(NNDOF, alpha, beta, omega) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(P, R, S, W0, Z, T, V, Q, Y)
       do i = 1, NNDOF
         P(i) = R (i) + beta *(P(i) - omega*S(i))
@@ -106,6 +112,8 @@ contains
         Y(i) = W0(i) - alpha* Z(i)
       enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
 
       call monolis_inner_product_main_R(monoCOM, NNDOF, Q, Y, CG(1), tdotp, tcomm_dotp)
       call monolis_inner_product_main_R(monoCOM, NNDOF, Y, Y, CG(2), tdotp, tcomm_dotp)
@@ -117,14 +125,26 @@ contains
       omega1 = QY / YY
 
       if(mod(iter, iter_RR) == 0)then
+!$omp parallel default(none) &
+!$omp & shared(X, P, T) &
+!$omp & firstprivate(NNDOF, alpha, omega1) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(X, P, T)
         do i = 1, NNDOF
           X(i) = X(i) + alpha*P(i) + omega1*T(i)
         enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
         call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
         call monolis_matvec_product_main_R(monoCOM, monoMAT, R, W0, tspmv, tcomm_spmv)
       else
+!$omp parallel default(none) &
+!$omp & shared(X, P, Q, R, Y, W0, T, V) &
+!$omp & firstprivate(NNDOF, alpha, omega1) &
+!$omp & private(i)
+!$omp do
 !$acc parallel loop present(X, P, Q, R, Y, W0, T, V)
         do i = 1, NNDOF
           X (i) = X(i) + alpha * P(i) + omega1*Q(i)
@@ -132,6 +152,8 @@ contains
           W0(i) = Y(i) - omega1*(T(i) - alpha*V(i))
         enddo
 !$acc end parallel loop
+!$omp end do
+!$omp end parallel
       endif
 
       call monolis_inner_product_main_R(monoCOM, NNDOF, R0, R, CG(1), tdotp, tcomm_dotp)

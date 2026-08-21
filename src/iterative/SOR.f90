@@ -102,6 +102,10 @@ contains
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, index, item, A, D) &
+!$omp & private(i, ii, j, jS, jE, in, n1, n2, nz)
+!$omp do
     do i = 1, monoMAT%N
       jS = index(i) + 1
       jE = index(i + 1)
@@ -117,6 +121,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_solver_JACOBI_setup
 
   subroutine monolis_solver_JACOBI_get_auto_relax_factor(monoCOM, monoMAT, NPNDOF, omega)
@@ -201,9 +207,16 @@ contains
 
     call monolis_matvec_product_main_R(monoCOM, monoMAT, X, Y, tspmv, tcomm)
 
+!$omp parallel default(none) &
+!$omp & shared(X, B, Y, D) &
+!$omp & firstprivate(NNDOF, omega) &
+!$omp & private(i)
+!$omp do
     do i = 1, NNDOF
       X(i) = (1.0d0 - omega)*X(i) + omega*(B(i) - Y(i) + D(i)*X(i)) / D(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_dealloc_R_1d(Y)
   end subroutine monolis_solver_JACOBI_matvec

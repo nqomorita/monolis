@@ -40,6 +40,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 50
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     S = monoPRM%Iarray(MONOLIS_PRM_I_IDRS_DIM)
 
     tspmv = monoPRM%Rarray(monolis_R_time_spmv)
@@ -66,7 +67,7 @@ contains
     call monolis_alloc_R_1d(F, S)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-    call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
+    call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge) return
 
     !# 行列 P の初期化

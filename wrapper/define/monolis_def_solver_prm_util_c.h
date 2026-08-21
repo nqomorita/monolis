@@ -150,6 +150,16 @@ void monolis_set_solver_IDRS_num_basis(
   int      param);
 
 /**
+ * @brief 残差ベクトルの再計算間隔の設定（0 以下の場合は各解法の既定値を使用）
+ * @param[inout] mat monolis 構造体
+ * @param[in] param パラメータ
+ * @ingroup param
+ */
+void monolis_set_iter_RR(
+  MONOLIS* mat,
+  int      param);
+
+/**
  * @brief 反復回数と残差履歴の表示の設定
  * @param[inout] mat monolis 構造体
  * @param[in] prm パラメータ

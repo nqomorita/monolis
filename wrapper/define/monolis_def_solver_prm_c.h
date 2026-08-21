@@ -136,6 +136,8 @@ static const int MONOLIS_PRM_I_CHEBYSHEV_DEGREE = 36;
 
 static const int MONOLIS_PRM_I_SPMV_FORMAT = 25;
 
+static const int MONOLIS_PRM_I_ITER_RR = 26;
+
 
 static const int MONOLIS_SPMV_ELL = 0;
 

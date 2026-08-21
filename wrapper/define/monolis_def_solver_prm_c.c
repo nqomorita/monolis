@@ -41,6 +41,7 @@ void monolis_prm_initialize(
   prm->Iarray[MONOLIS_PRM_I_DCG_INNER_METHOD] = 1;
   prm->Iarray[MONOLIS_PRM_I_DCG_INNER_PREC] = 1;
   prm->Iarray[MONOLIS_PRM_I_DCG_INNER_MAX_ITER] = 10000;
+  prm->Iarray[MONOLIS_PRM_I_ITER_RR] = 0;
 
   prm->Rarray[MONOLIS_PRM_R_TOL] = 1.0e-8;
   prm->Rarray[MONOLIS_PRM_R_DCG_INNER_RELAXATION_FACTOR] = -1.0;

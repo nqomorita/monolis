@@ -28,9 +28,16 @@ contains
     item => monoMAT%CSR%item
 
     NZ = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, NZ) &
+!$omp & firstprivate(N) &
+!$omp & private(i)
+!$omp do reduction(+:NZ)
     do i = 1, N
       NZ = NZ + monoMAT%n_dof_list(i)*monoMAT%n_dof_list(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     NDOF_MAX = maxval(monoMAT%n_dof_list)
 
@@ -102,9 +109,16 @@ contains
     item => monoMAT%CSR%item
 
     NZ = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, NZ) &
+!$omp & firstprivate(N) &
+!$omp & private(i)
+!$omp do reduction(+:NZ)
     do i = 1, N
       NZ = NZ + monoMAT%n_dof_list(i)*monoMAT%n_dof_list(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     NDOF_MAX = maxval(monoMAT%n_dof_list)
 
@@ -183,9 +197,15 @@ contains
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
+!$omp parallel default(none) &
+!$omp & shared(NNDOF, X, Y) &
+!$omp & private(i)
+!$omp do
     do i = 1, NNDOF
       Y(i) = X(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_alloc_R_1d(XT, NDOF_MAX)
     call monolis_alloc_R_1d(YT, NDOF_MAX)
@@ -322,9 +342,15 @@ contains
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
+!$omp parallel default(none) &
+!$omp & shared(NNDOF, X, Y) &
+!$omp & private(i)
+!$omp do
     do i = 1, NNDOF
       Y(i) = X(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_alloc_C_1d(XT, NDOF_MAX)
     call monolis_alloc_C_1d(YT, NDOF_MAX)

@@ -28,9 +28,16 @@ contains
     item => monoMAT%CSR%item
 
     NZ = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, NZ) &
+!$omp & firstprivate(N) &
+!$omp & private(i)
+!$omp do reduction(+:NZ)
     do i = 1, N
       NZ = NZ + monoMAT%n_dof_list(i)*monoMAT%n_dof_list(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     NDOF_MAX = maxval(monoMAT%n_dof_list)
 
@@ -103,9 +110,16 @@ contains
     item => monoMAT%CSR%item
 
     NZ = 0
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, NZ) &
+!$omp & firstprivate(N) &
+!$omp & private(i)
+!$omp do reduction(+:NZ)
     do i = 1, N
       NZ = NZ + monoMAT%n_dof_list(i)*monoMAT%n_dof_list(i)
     enddo
+!$omp end do
+!$omp end parallel
 
     NDOF_MAX = maxval(monoMAT%n_dof_list)
 

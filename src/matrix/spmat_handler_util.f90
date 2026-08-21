@@ -833,6 +833,11 @@ contains
 
     N = monoMAT%N
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT) &
+!$omp & firstprivate(N) &
+!$omp & private(i, j, k, jS, jE, in, kn, n_dof)
+!$omp do
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
@@ -850,6 +855,8 @@ contains
         endif
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_check_diagonal_zero_component_main_R
 
   !> @ingroup dev_matrix
@@ -891,6 +898,11 @@ contains
     enddo
     call monolis_mpi_update_I(monoCOM, 1, gindex, t1)
 
+!$omp parallel default(none) &
+!$omp & shared(monoMAT, dense, gindex) &
+!$omp & firstprivate(N) &
+!$omp & private(i, j, k1, k2, jS, jE, jn, kn, n1, n2, nd1, nd2)
+!$omp do
     do i = 1, N
       jS = monoMAT%CSR%index(i) + 1
       jE = monoMAT%CSR%index(i + 1)
@@ -908,6 +920,8 @@ contains
         enddo
       enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_convert_sparse_matrix_to_dense_matrix_R
 
   !> @ingroup dev_matrix
@@ -967,9 +981,16 @@ contains
     enddo
 
     !# 行列値をコピー（perm を使って並び替え）
+!$omp parallel default(none) &
+!$omp & shared(A_in, A_out, perm) &
+!$omp & firstprivate(nnz) &
+!$omp & private(i)
+!$omp do
     do i = 1, nnz
       A_out%R%A(i) = A_in%R%A(perm(i))
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_convert_CSR_matrix_to_CSC_matrix_R
 
 end module mod_monolis_spmat_handler_util

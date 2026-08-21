@@ -90,11 +90,18 @@ contains
     call monolis_alloc_R_1d(V_temp, P)
     call monolis_alloc_R_2d(D_temp, P, M_fix)
 
+!$omp parallel default(none) &
+!$omp & shared(A, A_temp) &
+!$omp & firstprivate(M, N_loc) &
+!$omp & private(i, j)
+!$omp do collapse(2)
     do i = 1, M
     do j = 1, N_loc
       A_temp(j,i) = A(j,i)
     enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     !# 特異値分解
     call monolis_scalapack_gesvd_R_main(N_loc_max, M_fix, A_temp, S_temp, V_temp, D_temp, comm, scalapack_comm)
@@ -104,21 +111,35 @@ contains
     call monolis_allreduce_I1(N, monolis_mpi_sum, comm)
     P = min(N, M)
 
+!$omp parallel default(none) &
+!$omp & shared(S, S_temp) &
+!$omp & firstprivate(P, N_loc) &
+!$omp & private(i, j)
+!$omp do collapse(2)
     do i = 1, P
     do j = 1, N_loc
       S(j,i) = S_temp(j,i)
     enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     do i = 1, P
       V(i) = V_temp(i)
     enddo
 
+!$omp parallel default(none) &
+!$omp & shared(D, D_temp) &
+!$omp & firstprivate(M, P) &
+!$omp & private(i, j)
+!$omp do collapse(2)
     do i = 1, M
     do j = 1, P
       D(j,i) = D_temp(j,i)
     enddo
     enddo
+!$omp end do
+!$omp end parallel
   end subroutine monolis_scalapack_gesvd_R
 
   !> @ingroup wrapper
@@ -241,11 +262,18 @@ contains
     call monolis_mat_to_vec_R(lld_D, M, D, D_temp)
     call monolis_allgather_V_R(size, D_temp, D_full, counts, displs, comm)
 
+!$omp parallel default(none) &
+!$omp & shared(D_perm, D_full) &
+!$omp & firstprivate(size, n_row) &
+!$omp & private(i, j)
+!$omp do collapse(2)
     do i = 1, size
     do j = 1, n_row
       D_perm(n_row*(i-1) + j) = D_full(i + size*(j - 1))
     enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     call monolis_vec_to_mat_R(P, M, D_perm, D)
   end subroutine gesvd_R_update_D
@@ -320,17 +348,26 @@ contains
     call monolis_alloc_R_2d(A_temp, N_loc_max, N_fix)
     call monolis_alloc_R_2d(B_temp, N_loc_max, NRHS)
 
+!$omp parallel default(none) &
+!$omp & shared(A, A_temp, B, B_temp) &
+!$omp & firstprivate(N_fix, N_loc_max, NRHS) &
+!$omp & private(i, j)
+!$omp do collapse(2)
     do i = 1, N_fix
     do j = 1, N_loc_max
       A_temp(j,i) = A(j,i)
     enddo
     enddo
+!$omp end do
 
+!$omp do collapse(2)
     do i = 1, NRHS
     do j = 1, N_loc_max
       B_temp(j,i) = B(j,i)
     enddo
     enddo
+!$omp end do
+!$omp end parallel
 
     NB = 1
     desc_A = 0
