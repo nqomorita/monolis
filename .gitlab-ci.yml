@@ -1,5 +1,14 @@
 image: nqoki709/monolis_build:latest
 
+default:
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - api_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
+
 stages:
   - lib_build
   - test
@@ -12,12 +21,15 @@ build_monolis:
     - ./install_lib.sh
     - make all FLAGS=DEBUG
   artifacts:
+    expire_in: 1 day
     paths:
       - bin
       - include
       - lib
-      - src_test
-      - wrapper_test
+      - src_test/monolis_test
+      - wrapper_test/monolis_c_test
+    exclude:
+      - "**/*.o"
 
 test_monolis:
   stage: test
@@ -38,6 +50,7 @@ doxygen_monolis:
     - cd ../c
     - doxygen
   artifacts:
+    expire_in: 1 day
     paths:
       - manual
 
