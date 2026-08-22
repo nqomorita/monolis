@@ -255,13 +255,14 @@ contains
     real(kdouble), allocatable :: XT(:), YT(:)
 
     max_dof = maxval(n_dof_list)
-    call monolis_alloc_R_1d(XT, max_dof)
-    call monolis_alloc_R_1d(YT, max_dof)
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item, n_dof_list, n_dof_index, n_dof_index2) &
-!$omp & firstprivate(N) &
+!$omp & firstprivate(N, max_dof) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in, kn, n1, n2)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_R_1d(XT, max_dof)
+    call monolis_alloc_R_1d(YT, max_dof)
 !$omp do
     do i = 1, N
       YT = 0.0d0
@@ -317,13 +318,14 @@ contains
     complex(kdouble), allocatable :: XT(:), YT(:)
 
     max_dof = maxval(n_dof_list)
-    call monolis_alloc_C_1d(XT, max_dof)
-    call monolis_alloc_C_1d(YT, max_dof)
 
 !$omp parallel default(none) &
 !$omp & shared(A, Y, X, index, item, n_dof_list, n_dof_index, n_dof_index2) &
-!$omp & firstprivate(N) &
+!$omp & firstprivate(N, max_dof) &
 !$omp & private(YT, XT, i, j, k, l, jS, jE, in, kn, n1, n2)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_C_1d(XT, max_dof)
+    call monolis_alloc_C_1d(YT, max_dof)
 !$omp do
     do i = 1, N
       YT = 0.0d0
