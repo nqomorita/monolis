@@ -32,7 +32,8 @@ contains
     np = monolis_mpi_get_global_comm_size()
 
     !> 初期化と次元チェック (全プロセス共通)
-    call monolis_opt_hvae_init(hnet, D, H_local, Z_local, H_top, Z_top)
+    call monolis_opt_hvae_init(hnet, D, H_local, Z_local, H_top, Z_top, &
+      monolis_mpi_get_global_comm())
     call monolis_test_check_eq_I1("hvae_test dim D",       hnet%D,       D)
     call monolis_test_check_eq_I1("hvae_test dim Z_local", hnet%Z_local, Z_local)
     call monolis_test_check_eq_I1("hvae_test dim Z_top",   hnet%Z_top,   Z_top)
@@ -112,7 +113,7 @@ contains
     !> 任意層数の初期化と学習 (下位 enc 2 層 / dec 2 層)
     call monolis_opt_hvae_test_seed_rng(654)
     call monolis_opt_hvae_init_layers(hnet, D, (/ 6, 4 /), Z_local, (/ 5, 7 /), &
-      (/ 5 /), Z_top, (/ 5 /))
+      (/ 5 /), Z_top, (/ 5 /), monolis_mpi_get_global_comm())
     call monolis_test_check_eq_I1("hvae_test deep enc layers", size(hnet%local%enc), 2)
     call monolis_test_check_eq_I1("hvae_test deep dec layers", size(hnet%local%dec), 3)
     call monolis_opt_hvae_fit(hnet, X, opts_local, opts_top)

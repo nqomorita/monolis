@@ -49,7 +49,7 @@ contains
 
   !> @ingroup optimize
   !> 階層的 VAE を初期化する (旧 API。各層 1 隠れ層で構成)
-  subroutine monolis_opt_hvae_init(hnet, D, H_local, Z_local, H_top, Z_top)
+  subroutine monolis_opt_hvae_init(hnet, D, H_local, Z_local, H_top, Z_top, comm)
     implicit none
     !> [out] 初期化対象の階層的 VAE モデル
     type(monolis_opt_hvae_t), intent(out) :: hnet
@@ -63,9 +63,11 @@ contains
     integer(kint), intent(in) :: H_top
     !> [in] 上位 VAE の潜在次元数
     integer(kint), intent(in) :: Z_top
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
 
     call monolis_opt_hvae_init_layers(hnet, D, (/ H_local /), Z_local, (/ H_local /), &
-      (/ H_top /), Z_top, (/ H_top /))
+      (/ H_top /), Z_top, (/ H_top /), comm)
   end subroutine monolis_opt_hvae_init
 
   !> @ingroup optimize
@@ -73,7 +75,7 @@ contains
   !> @details 下位 VAE は全プロセスで初期化する。上位 VAE は rank 0 のみ初期化する。
   !>          上位 VAE の入力次元は下位 VAE の潜在次元 Z_local に一致する。
   subroutine monolis_opt_hvae_init_layers(hnet, D, H_enc_local, Z_local, H_dec_local, &
-      H_enc_top, Z_top, H_dec_top)
+      H_enc_top, Z_top, H_dec_top, comm)
     implicit none
     !> [out] 初期化対象の階層的 VAE モデル
     type(monolis_opt_hvae_t), intent(out) :: hnet
@@ -91,15 +93,17 @@ contains
     integer(kint), intent(in) :: Z_top
     !> [in] 上位 VAE のデコーダ隠れ層次元の列 (size>=1)
     integer(kint), intent(in) :: H_dec_top(:)
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
 
     call monolis_std_debug_log_header("monolis_opt_hvae_init_layers")
 
     hnet%D         = D
     hnet%Z_local   = Z_local
     hnet%Z_top     = Z_top
-    hnet%comm      = monolis_mpi_get_global_comm()
-    hnet%my_rank   = monolis_mpi_get_global_my_rank()
-    hnet%comm_size = monolis_mpi_get_global_comm_size()
+    hnet%comm      = comm
+    hnet%my_rank   = monolis_mpi_get_local_my_rank(comm)
+    hnet%comm_size = monolis_mpi_get_local_comm_size(comm)
 
     !> 下位 VAE は全プロセスで初期化
     call monolis_opt_vae_init_layers(hnet%local, D, H_enc_local, Z_local, H_dec_local)
