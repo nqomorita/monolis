@@ -186,8 +186,21 @@ contains
 
     eig_mode = 0.0d0
 
+#ifdef WITH_MUMPS
+    call monolis_set_precond(mat, monolis_prec_MUMPS)
+#endif
+
     call monolis_eigen_inverted_standard_lanczos_R &
       & (mat, com, n_get_eigen, ths, maxiter, eig_val, eig_mode, is_bc)
+
+    call monolis_test_check_eq_I1("monolis_eigen_inverted_standard_lanczos_R prec stored", &
+      & mat%PRM%Iarray(monolis_prm_I_is_prec_stored), monolis_I_false)
+#ifdef WITH_MUMPS
+    call monolis_test_check_eq_L1("monolis_eigen_inverted_standard_lanczos_R MUMPS factored", &
+      & mat%PREC%DMUMPS%is_factored, .false.)
+    call monolis_test_check_eq_L1("monolis_eigen_inverted_standard_lanczos_R MUMPS allocated", &
+      & allocated(mat%PREC%DMUMPS%mumps), .false.)
+#endif
 
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 1 c", eig_val(1), 0.267949192431122d0)
     call monolis_test_check_eq_R1("monolis_eigen_standard_lanczos_R 2 c", eig_val(2), 1.0d0)
@@ -242,4 +255,3 @@ contains
 
   end subroutine monolis_eigen_solver_test_main
 end module mod_monolis_eigen_solver_test
-

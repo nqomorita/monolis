@@ -10,12 +10,45 @@ contains
     implicit none
     integer(kint) :: n_dof
 
+    call monolis_set_deflation_mode_local_test()
+
     do n_dof = 1, 3
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_NONE)
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_DIAG)
       call monolis_solver_DeflatedCG_test_main(n_dof, monolis_prec_SOR)
     enddo
   end subroutine monolis_solver_DeflatedCG_test
+
+  subroutine monolis_set_deflation_mode_local_test()
+    implicit none
+    type(monolis_structure) :: mat
+    real(kdouble) :: mode(3,4)
+    real(kdouble) :: mode_ans(3,2)
+
+    call monolis_std_global_log_string("monolis_set_deflation_mode")
+
+    call monolis_initialize(mat)
+    mat%MAT%N = 2
+    mat%MAT%NP = 3
+    mat%MAT%NDOF = 1
+
+    mode = 0.0d0
+    mode(:,1) = (/1.0d0, 0.0d0, 3.0d0/)
+    mode(:,3) = (/0.0d0, 2.0d0, 4.0d0/)
+    mode(:,4) = (/0.0d0, 0.0d0, 5.0d0/)
+    mode_ans(:,1) = mode(:,1)
+    mode_ans(:,2) = mode(:,3)
+
+    call monolis_set_deflation_mode(mat, 4, mode)
+
+    call monolis_test_check_eq_I1("n_local_deflation_mode", &
+      mat%PRM%Iarray(monolis_prm_I_n_local_deflation_mode), 2)
+    call monolis_test_check_eq_I1("deflation_mode_size", size(mat%PRM%deflation_mode,2), 2)
+    call monolis_test_check_eq_R("deflation_mode_col_1", mat%PRM%deflation_mode(:,1), mode_ans(:,1))
+    call monolis_test_check_eq_R("deflation_mode_col_2", mat%PRM%deflation_mode(:,2), mode_ans(:,2))
+
+    call monolis_finalize(mat)
+  end subroutine monolis_set_deflation_mode_local_test
 
   subroutine monolis_solver_DeflatedCG_test_main(n_dof, prec)
     implicit none

@@ -272,6 +272,7 @@ contains
 
   !> @ingroup param
   !> Deflated CG 法のローカル入力基底本数
+  !> 所有自由度に非零成分を持たない入力列は、このランクの局所基底から除外する
   subroutine monolis_set_deflation_mode(monolis, n_deflation_mode, deflation_mode)
     implicit none
     !> [in,out] monolis 構造体
@@ -280,21 +281,40 @@ contains
     integer(kint) :: n_deflation_mode
     !> [in] 基底ベクトル
     real(kdouble) :: deflation_mode(:,:)
-    integer(kint) :: n
+    integer(kint) :: n, n_internal, n_local_deflation_mode
+    integer(kint) :: i, j
 
     call monolis_dealloc_R_2d(monolis%PRM%deflation_mode)
 
     n = monolis%MAT%NP*monolis%MAT%NDOF
+    n_internal = monolis%MAT%N*monolis%MAT%NDOF
 
     if(size(deflation_mode,1) /= n)then
       !stop "** monolis_param_set_global_deflation_mode: size of input array is different with DoF."
       stop "monolis_set_deflation_mode"
     endif
 
-    call monolis_alloc_R_2d(monolis%PRM%deflation_mode, n, n_deflation_mode)
+    if(size(deflation_mode,2) < n_deflation_mode)then
+      stop "monolis_set_deflation_mode"
+    endif
 
-    monolis%PRM%Iarray(monolis_prm_I_n_local_deflation_mode) = n_deflation_mode
-    monolis%PRM%deflation_mode = deflation_mode(1:n, 1:n_deflation_mode)
+    n_local_deflation_mode = 0
+    do j = 1, n_deflation_mode
+      if(any(deflation_mode(1:n_internal,j) /= 0.0d0))then
+        n_local_deflation_mode = n_local_deflation_mode + 1
+      endif
+    enddo
+
+    call monolis_alloc_R_2d(monolis%PRM%deflation_mode, n, n_local_deflation_mode)
+
+    i = 0
+    do j = 1, n_deflation_mode
+      if(.not. any(deflation_mode(1:n_internal,j) /= 0.0d0)) cycle
+      i = i + 1
+      monolis%PRM%deflation_mode(:,i) = deflation_mode(1:n,j)
+    enddo
+
+    monolis%PRM%Iarray(monolis_prm_I_n_local_deflation_mode) = n_local_deflation_mode
   end subroutine monolis_set_deflation_mode
 
   !> @ingroup param

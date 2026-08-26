@@ -155,6 +155,8 @@ contains
     type(dmumps_struc), pointer :: mumps
 
     if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == 1) return
+    if(.not. monoPREC%DMUMPS%is_factored) return
+    if(.not. allocated(monoPREC%DMUMPS%mumps)) return
 
     mumps => monoPREC%DMUMPS%mumps(1)
 

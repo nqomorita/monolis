@@ -4,6 +4,7 @@ module mod_monolis_eigen_solver
   use mod_monolis_def_mat
   use mod_monolis_def_struc
   use mod_monolis_eigen_lanczos
+  use mod_monolis_precond
   use mod_monolis_spmat_handler_util
   use mod_monolis_scalapack
 
@@ -60,11 +61,22 @@ contains
     real(kdouble), intent(out) :: vec(:,:)
     !> [in] Dirhchlet 境界条件判定フラグ
     logical, intent(in) :: is_bc(:)
+    integer(kint) :: is_prec_stored
 
     if(monoCOM%comm_size > 1) monolis%MAT%N = monoCOM%n_internal_vertex
 
+    is_prec_stored = monolis%PRM%Iarray(monolis_prm_I_is_prec_stored)
+
     call monolis_eigen_inverted_standard_lanczos_R_main( &
       & monolis%PRM, monoCOM, monolis%MAT, monolis%PREC, n_get_eigen, ths, maxiter, val, vec, is_bc)
+
+    if(monolis%PRM%Iarray(monolis_prm_I_precond) == monolis_prec_MUMPS .or. &
+      & monolis%PRM%Iarray(monolis_prm_I_precond) == monolis_prec_MUMPS_LOCAL)then
+      monolis%PRM%Iarray(monolis_prm_I_is_prec_stored) = monolis_I_false
+      call monolis_precond_clear(monolis%PRM, monoCOM, monolis%MAT, monolis%PREC)
+    endif
+
+    monolis%PRM%Iarray(monolis_prm_I_is_prec_stored) = is_prec_stored
   end subroutine monolis_eigen_inverted_standard_lanczos_R
 
   !> @ingroup eigen
@@ -114,4 +126,3 @@ contains
   end subroutine monolis_get_condition_number_R
 
 end module mod_monolis_eigen_solver
-
