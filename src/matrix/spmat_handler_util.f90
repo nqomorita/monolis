@@ -340,6 +340,8 @@ contains
     if(j /= -1)then
       ndof = n_dof_index(cj + 1) - n_dof_index(cj)
       im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$omp atomic update
       A(im) = A(im) + val
       return
     endif
@@ -386,6 +388,8 @@ contains
     if(j /= -1)then
       ndof = n_dof_index(cj + 1) - n_dof_index(cj)
       im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+      !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$omp atomic update
       A(im) = A(im) + val
       return
     endif
@@ -484,6 +488,8 @@ contains
             do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
               im = n_dof_index2(j1) + kn*(k1-1) + k2
+              !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$omp atomic update
               A(im) = A(im) + temp(idx1t(i1)+k1, idx2t(i2)+k2)
             enddo
             enddo
@@ -587,6 +593,8 @@ contains
             do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
               im = n_dof_index2(j1) + kn*(k1-1) + k2
+              !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$omp atomic update
               A(im) = A(im) + temp(idx1t(i1)+k1, idx2t(i2)+k2)
             enddo
             enddo

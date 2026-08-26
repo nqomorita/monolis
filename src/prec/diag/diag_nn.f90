@@ -58,13 +58,13 @@ contains
       return
     endif
 
-    call monolis_alloc_R_1d(T, NDOF)
-    call monolis_alloc_R_2d(LU, NDOF, NDOF)
-
 !$omp parallel default(none) &
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_R_1d(T, NDOF)
+    call monolis_alloc_R_2d(LU, NDOF, NDOF)
 !$omp do
 !$acc parallel loop private(T, LU, ii, j, k, l, jS, jE, in)
     do i = 1, N
@@ -104,9 +104,6 @@ contains
 !$acc end parallel loop
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
-    deallocate(LU)
   end subroutine monolis_precond_diag_nn_setup_R
 
   !> @ingroup prec
@@ -129,8 +126,6 @@ contains
     index => monoMAT%CSR%index
     item => monoMAT%CSR%item
 
-    call monolis_alloc_C_1d(T, NDOF)
-    call monolis_alloc_C_2d(LU, NDOF, NDOF)
     call monolis_palloc_C_1d(monoPREC%C%D, NDOF2*N)
     ALU => monoPREC%C%D
     monoPREC%N = monoMAT%N
@@ -139,6 +134,9 @@ contains
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_C_1d(T, NDOF)
+    call monolis_alloc_C_2d(LU, NDOF, NDOF)
 !$omp do
 !$acc parallel loop private(T, LU, ii, j, k, l, jS, jE, in)
     do i = 1, N
@@ -177,9 +175,6 @@ contains
 !$acc end parallel loop
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
-    deallocate(LU)
   end subroutine monolis_precond_diag_nn_setup_C
 
   !> @ingroup prec
@@ -272,12 +267,12 @@ contains
     NDOF2 = NDOF*NDOF
     ALU => monoPREC%C%D
 
-    call monolis_alloc_C_1d(T, NDOF)
-
 !$omp parallel default(none) &
 !$omp & shared(ALU, X, Y) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(i, j, k, T)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_C_1d(T, NDOF)
 !$omp do
 !$acc parallel loop private(T, j, k) &
 !$acc & if(acc_is_present(ALU) .and. acc_is_present(X) .and. acc_is_present(Y))
@@ -303,8 +298,6 @@ contains
 !$acc end parallel loop
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
   end subroutine monolis_precond_diag_nn_apply_C
 
   !> @ingroup prec

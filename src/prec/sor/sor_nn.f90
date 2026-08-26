@@ -30,8 +30,6 @@ contains
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    call monolis_alloc_R_1d(T, NDOF)
-    call monolis_alloc_R_2d(LU, NDOF, NDOF)
     call monolis_palloc_R_1d(monoPREC%R%D, NDOF2*N)
     ALU => monoPREC%R%D
 
@@ -39,6 +37,9 @@ contains
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_R_1d(T, NDOF)
+    call monolis_alloc_R_2d(LU, NDOF, NDOF)
 !$omp do
     do i = 1, N
       jS = index(i) + 1
@@ -74,9 +75,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
-    deallocate(LU)
   end subroutine monolis_precond_sor_nn_setup_R
 
   !> @ingroup prec
@@ -101,8 +99,6 @@ contains
     item => monoMAT%CSR%item
     sigma = 1.0d0
 
-    call monolis_alloc_C_1d(T, NDOF)
-    call monolis_alloc_C_2d(LU, NDOF, NDOF)
     call monolis_palloc_C_1d(monoPREC%C%D, NDOF2*N)
     ALU => monoPREC%C%D
 
@@ -110,6 +106,9 @@ contains
 !$omp & shared(A, ALU, index, item) &
 !$omp & firstprivate(N, NDOF, NDOF2) &
 !$omp & private(T, LU, i, j, k, jS, jE, in)
+    !# private の allocatable はスレッドごとに未確保となるためリージョン内で確保する
+    call monolis_alloc_C_1d(T, NDOF)
+    call monolis_alloc_C_2d(LU, NDOF, NDOF)
 !$omp do
     do i = 1, N
       jS = index(i) + 1
@@ -145,9 +144,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-    deallocate(T)
-    deallocate(LU)
   end subroutine monolis_precond_sor_nn_setup_C
 
   !> @ingroup prec
