@@ -25,6 +25,10 @@ contains
 
     call monolis_std_debug_log_header("monolis_precond_LU_setup_R")
 
+    !> 保存済みの数値分解は、反復中の次の線形ソルバ呼び出しで再利用する
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == monolis_I_true .and. &
+      & monoPREC%LU%factorized) return
+
     !if(monoMAT%NDOF == 3)then
     !  call monolis_fact_LU_33_setup_R(monoMAT, monoPREC)
     !else
@@ -106,6 +110,9 @@ contains
     type(monolis_mat), intent(inout) :: monoPREC
 
     call monolis_std_debug_log_header("monolis_precond_LU_clear_R")
+
+    !> 保存指定中は、線形ソルバ終了時にも LU データを保持する
+    if(monoPRM%Iarray(monolis_prm_I_is_prec_stored) == monolis_I_true) return
 
     !if(monoMAT%NDOF == 3)then
     !  call monolis_fact_LU_33_clear_R(monoPREC)
