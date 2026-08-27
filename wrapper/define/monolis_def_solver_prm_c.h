@@ -76,6 +76,8 @@ static const int MONOLIS_PREC_MUMPS_LOCAL = 5;
 
 static const int MONOLIS_PREC_AMG = 6;
 
+static const int MONOLIS_PREC_CHOLESKY = 7;
+
 
 static const int MONOLIS_PRM_I_METHOD = 1;
 

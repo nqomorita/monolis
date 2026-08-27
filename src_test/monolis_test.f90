@@ -50,6 +50,9 @@ program monolis_test
   use mod_monolis_fact_factorize_test
   use mod_monolis_fact_solve_test
   use mod_monolis_precond_LU_nn_test
+  use mod_monolis_fact_factorize_cholesky_test
+  use mod_monolis_fact_solve_cholesky_test
+  use mod_monolis_precond_Cholesky_nn_test
   use mod_monolis_precond_test
   use mod_monolis_solve_test
   use mod_monolis_opt_nnls_test
@@ -99,6 +102,9 @@ program monolis_test
   call monolis_fact_factorize_test()
   call monolis_fact_solve_test()
   call monolis_precond_LU_nn_test()
+  call monolis_fact_factorize_cholesky_test()
+  call monolis_fact_solve_cholesky_test()
+  call monolis_precond_Cholesky_nn_test()
 
   call monolis_lapack_test()
   call monolis_scalapack_test()
