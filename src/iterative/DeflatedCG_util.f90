@@ -499,8 +499,17 @@ contains
 
   !> @ingroup dev_solver
   !> Deflated CG 法
-  subroutine deflatedCG_residual_replacement(M, N, NDOF, W, R, WtW, IPV_R)
+  subroutine deflatedCG_residual_replacement( &
+    & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
     implicit none
+    !> 通信テーブル構造体
+    type(monolis_com), intent(in) :: monoCOM
+    !> 行列構造体
+    type(monolis_mat), intent(in) :: monoMAT
+    !> 解ベクトル
+    real(kdouble), intent(inout) :: X(:)
+    !> 右辺ベクトル
+    real(kdouble), intent(in) :: B(:)
     !> 縮約次数 (local)
     integer(kint), intent(in) :: M
     !> 縮約次数 (local)
@@ -515,12 +524,19 @@ contains
     real(kdouble), intent(inout) :: WtW(:,:)
     !> LUピボット情報(残差再計算用)
     integer(kint), intent(inout) :: IPV_R(:)
+    !> 行列ベクトル積の計算時間
+    real(kdouble), intent(inout) :: tspmv
+    !> 行列ベクトル積の通信時間
+    real(kdouble), intent(inout) :: tcomm_spmv
     integer(kint) :: NNDOF
     real(kdouble) :: WTR(M), time
     real(kdouble), allocatable :: WWtWinvWtR(:)
 
     NNDOF = N*NDOF
     call monolis_alloc_R_1d(WWtWinvWtR, NNDOF)
+
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+
     call monolis_dense_matvec_local_R(M, NNDOF, transpose(W(1:NNDOF,1:M)), R(1:NNDOF), WTR, time)
 
     call monolis_lapack_LU_solve_R(M, WtW, WTR, IPV_R, WTR)

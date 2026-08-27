@@ -66,6 +66,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 100
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)  !> Mはプロセスごとに可変
     call monolis_mpi_get_n_neib_vector(monoCOM, M, M_neib)    !> M_neibは通信して取得
 
@@ -144,7 +145,15 @@ contains
 
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          call deflatedCG_residual_replacement(M, N, NDOF, W, R, WtW, IPV_R)
+          call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, NNDOF, W, B, Qb, tdemv)
+          call deflatedCG_Pt(monoCOM, monoMAT, &
+            monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
+          X0 = 0.0d0
+          call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X0)
+          call deflatedCG_residual_replacement( &
+            & monoCOM, monoMAT, X0, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
         endif
       endif
 
@@ -237,6 +246,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 100
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)
     M_neib = M*(monoCOM%recv_n_neib + 1)
 
@@ -308,7 +318,8 @@ contains
 
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          call deflatedCG_residual_replacement(M, N, NDOF, W, R, WtW, IPV_R)
+          call deflatedCG_residual_replacement( &
+            & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
         endif
       endif
 
@@ -384,6 +395,7 @@ contains
     X => monoMAT%R%X
     B => monoMAT%R%B
     iter_RR = 100
+    if(monoPRM%Iarray(monolis_prm_I_iter_RR) > 0) iter_RR = monoPRM%Iarray(monolis_prm_I_iter_RR)
     M = monoPRM%Iarray(monolis_prm_I_n_local_deflation_mode)  !> Mはプロセスごとに可変
     ! M_neib = M*(monoCOM%recv_n_neib + 1)
     call monolis_mpi_get_n_neib_vector(monoCOM, M, M_neib)    !> M_neibは通信して取得
@@ -463,7 +475,8 @@ contains
 
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          call deflatedCG_residual_replacement(M, N, NDOF, W, R, WtW, IPV_R)
+          call deflatedCG_residual_replacement( &
+            & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
         endif
       endif
 

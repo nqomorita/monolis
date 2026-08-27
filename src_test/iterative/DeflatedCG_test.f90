@@ -132,6 +132,7 @@ contains
     call monolis_set_method(mat, monolis_iter_DeflatedCG1)
     call monolis_set_precond(mat, prec)
     call monolis_set_maxiter(mat, 2000)
+    call monolis_set_iter_RR(mat, 1)
     call monolis_set_tolerance(mat, 1.0d-12)
     call monolis_show_iterlog(mat, .true.)
     call monolis_show_timelog(mat, .true.)
