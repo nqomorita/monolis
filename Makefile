@@ -146,7 +146,10 @@ pord/monolis_pord_ordering.f90 \
 analysis.f90 \
 factorize.f90 \
 solve.f90 \
-LU.f90
+LU.f90 \
+factorize_cholesky.f90 \
+solve_cholesky.f90 \
+Cholesky.f90
 
 SRC_OPT = \
 nnls.f90 \
@@ -176,6 +179,7 @@ sor/sor_V.f90 \
 diag.f90 \
 sor.f90 \
 LU_prec.f90 \
+Cholesky_prec.f90 \
 precond.f90
 
 #MUMPS.f90 \

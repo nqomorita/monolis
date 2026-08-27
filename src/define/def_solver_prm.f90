@@ -48,6 +48,8 @@ module mod_monolis_def_solver
   !integer(kint), parameter :: monolis_prec_SPIKE  = 5
   !> パラメータ：LU 分解
   integer(kint), parameter :: monolis_prec_LU     = 3
+  !> パラメータ：Cholesky 分解
+  integer(kint), parameter :: monolis_prec_CHOLESKY = 4
   !> パラメータ：LU 分解（MUMPS）
   !integer(kint), parameter :: monolis_prec_MUMPS  = 4
   !> パラメータ：ROM 前処理
@@ -82,7 +84,7 @@ module mod_monolis_def_solver
   & "SOR   ", &
 !  & "SPIKE ", &
   & "LU    ", &
-  & "MUMPS ", &
+  & "Chol  ", &
 !  & "ROM   ", &
 !  & "MF    ", &
   & "MUMPSL"/)

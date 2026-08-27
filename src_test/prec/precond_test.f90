@@ -4,6 +4,7 @@ module mod_monolis_precond_test
   use mod_monolis_precond_diag_test
   use mod_monolis_precond_sor_test
   use mod_monolis_precond_LU_test
+  use mod_monolis_precond_Cholesky_test
 
   implicit none
 
@@ -26,6 +27,7 @@ contains
     call monolis_precond_diag_test()
     call monolis_precond_sor_test()
     call monolis_precond_LU_test()
+    call monolis_precond_Cholesky_test()
   end subroutine monolis_precond_test
 
 end module mod_monolis_precond_test

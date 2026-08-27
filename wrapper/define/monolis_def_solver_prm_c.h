@@ -56,6 +56,8 @@ static const int MONOLIS_PREC_SOR    = 2;
 
 static const int MONOLIS_PREC_LU     = 3;
 
+static const int MONOLIS_PREC_CHOLESKY = 4;
+
 //static const int MONOLIS_PREC_SPIKE  = 5;
 
 //static const int MONOLIS_PREC_MUMPS  = 7;
