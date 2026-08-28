@@ -44,7 +44,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
-    logical :: is_converge
+    logical :: is_converge, is_residual_replaced
     logical :: is_sparse_W = .true.
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
@@ -143,6 +143,7 @@ contains
       call monolis_vec_AXPBY_R(NNDOF, alpha, P, 1.0d0, X, X)
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
+      is_residual_replaced = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
           call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
@@ -154,6 +155,7 @@ contains
           call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X0)
           call deflatedCG_residual_replacement( &
             & monoCOM, monoMAT, X0, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          is_residual_replaced = .true.
         endif
       endif
 
@@ -165,9 +167,12 @@ contains
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      beta = rho/rho1
-
-      call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, Z, P)
+      if(is_residual_replaced)then
+        call monolis_vec_copy_R(NNDOF, Z, P)
+      else
+        beta = rho/rho1
+        call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, Z, P)
+      endif
     enddo
 
     call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
@@ -225,7 +230,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
-    logical :: is_converge
+    logical :: is_converge, is_residual_replaced
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -316,10 +321,12 @@ contains
       call monolis_vec_AXPBY_R(NNDOF, alpha, P, 1.0d0, X, X)
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
+      is_residual_replaced = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
           call deflatedCG_residual_replacement( &
             & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          is_residual_replaced = .true.
         endif
       endif
 
@@ -331,13 +338,16 @@ contains
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      beta = rho/rho1
-
       call deflatedCG_Pt(monoCOM, monoMAT, &
         monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
-      call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, PtX, P)
+      if(is_residual_replaced)then
+        call monolis_vec_copy_R(NNDOF, PtX, P)
+      else
+        beta = rho/rho1
+        call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, PtX, P)
+      endif
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
@@ -379,7 +389,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
-    logical :: is_converge
+    logical :: is_converge, is_residual_replaced
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -473,10 +483,12 @@ contains
       call monolis_vec_AXPBY_R(NNDOF, alpha, P, 1.0d0, X, X)
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
+      is_residual_replaced = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
           call deflatedCG_residual_replacement( &
             & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          is_residual_replaced = .true.
         endif
       endif
 
@@ -498,9 +510,12 @@ contains
 
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      beta = rho/rho1
-
-      call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, Z, P)
+      if(is_residual_replaced)then
+        call monolis_vec_copy_R(NNDOF, Z, P)
+      else
+        beta = rho/rho1
+        call monolis_vec_AXPBY_R(NNDOF, beta, P, 1.0d0, Z, P)
+      endif
     enddo
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)

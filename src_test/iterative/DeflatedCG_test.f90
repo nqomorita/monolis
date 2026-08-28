@@ -88,9 +88,8 @@ contains
 
     do i1 = 1, 10
       do i2 = 1, n_dof
-        !call random_number(val)
-        val = 2.0d0
-        val = val + 2.0d0
+        !> CG の前提を満たすように狭義対角優位な正定値行列を構築
+        val = 2.0d0*n_dof + 1.0d0
         call monolis_add_scalar_to_sparse_matrix_R(mat, i1, i1, i2, i2, val)
       enddo
     enddo
