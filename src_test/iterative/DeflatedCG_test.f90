@@ -147,26 +147,52 @@ contains
     call monolis_test_check_eq_R("monolis_solver_DeflatedCG1_test_main", a, b)
 
     !> monolis_iter_DeflatedCG2
-    !call monolis_set_method(mat, monolis_iter_DeflatedCG2)
+    call monolis_set_method(mat, monolis_iter_DeflatedCG2)
 
-    !a = 0.0d0
+    a = 1.0d0
+    call monolis_matvec_product_R(mat, com, a, b)
+    a = 0.0d0
 
-    !call monolis_solve_R(mat, com, b, a)
+    call monolis_solve_R(mat, com, b, a)
 
-    !b = 1.0d0
+    b = 1.0d0
 
-    !call monolis_test_check_eq_R("monolis_solver_DeflatedCG2_test_main", a, b)
+    call monolis_test_check_eq_R("monolis_solver_DeflatedCG2_test_main", a, b)
+
+    if(n_dof == 1 .and. prec == monolis_prec_NONE)then
+      call monolis_set_iter_RR(mat, 1000)
+      a = 1.0d0
+      call monolis_matvec_product_R(mat, com, a, b)
+      a = 0.0d0
+      call monolis_solve_R(mat, com, b, a)
+      b = 1.0d0
+      call monolis_test_check_eq_R("monolis_solver_DeflatedCG2 true residual gate", a, b)
+      call monolis_set_iter_RR(mat, 1)
+    endif
 
     !> monolis_iter_ADeflatedCG2
-    !call monolis_set_method(mat, monolis_iter_ADeflatedCG2)
+    call monolis_set_method(mat, monolis_iter_ADeflatedCG2)
 
-    !a = 0.0d0
+    a = 1.0d0
+    call monolis_matvec_product_R(mat, com, a, b)
+    a = 0.0d0
 
-    !call monolis_solve_R(mat, com, b, a)
+    call monolis_solve_R(mat, com, b, a)
 
-    !b = 1.0d0
+    b = 1.0d0
 
-    !call monolis_test_check_eq_R("monolis_solver_ADeflatedCG_test_main", a, b)
+    call monolis_test_check_eq_R("monolis_solver_ADeflatedCG2_test_main", a, b)
+
+    if(n_dof == 1 .and. prec == monolis_prec_NONE)then
+      call monolis_set_iter_RR(mat, 1000)
+      a = 1.0d0
+      call monolis_matvec_product_R(mat, com, a, b)
+      a = 0.0d0
+      call monolis_solve_R(mat, com, b, a)
+      b = 1.0d0
+      call monolis_test_check_eq_R("monolis_solver_ADeflatedCG2 true residual gate", a, b)
+      call monolis_set_iter_RR(mat, 1)
+    endif
 
     call monolis_finalize(mat)
   end subroutine monolis_solver_DeflatedCG_test_main

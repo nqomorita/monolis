@@ -113,7 +113,9 @@ contains
     monoPRM_deflated_eq%Iarray(monolis_prm_I_CHEBYSHEV_degree) = maxiter
 
     !# common settings
-    monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = 1.0d-10
+    !> 粗視化方程式は外側の収束判定より 2 桁厳しくする
+    monoPRM_deflated_eq%Rarray(monolis_prm_R_tol) = &
+      & 1.0d-2*monoPRM%Rarray(monolis_prm_R_tol)
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_iterlog) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_time) = .false.
     monoPRM_deflated_eq%Iarray(monolis_prm_I_show_summary) = .false.

@@ -95,7 +95,6 @@ contains
       call deflatedCG_set_deflation_mode(monoPRM, monoCOM, monoMAT, NPNDOF, M, M_neib, W)
       call deflatedCG_E_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, WtA)
-      call deflatedCG_residual_replacement_initialize(M, NNDOF, W, WtW, IPV_R)
 
       call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, R, R, tdemv)
@@ -153,14 +152,30 @@ contains
             M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
           X0 = 0.0d0
           call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X0)
-          call deflatedCG_residual_replacement( &
-            & monoCOM, monoMAT, X0, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          call monolis_residual_main_R(monoCOM, monoMAT, X0, B, R, tspmv, tcomm_spmv)
+          call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, M_neib, NNDOF, W, AW, R, R, tdemv)
           is_residual_replaced = .true.
         endif
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
+      if(is_converge)then
+        call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          & M, NNDOF, W, B, Qb, tdemv)
+        call deflatedCG_Pt(monoCOM, monoMAT, &
+          monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
+        X0 = 0.0d0
+        call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X0)
+        call monolis_residual_main_R(monoCOM, monoMAT, X0, B, R, tspmv, tcomm_spmv)
+        call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(is_converge) exit
+
+        call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          & M, M_neib, NNDOF, W, AW, R, R, tdemv)
+        is_residual_replaced = .true.
+      endif
 
       rho1 = rho
 
@@ -232,7 +247,7 @@ contains
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
     logical :: is_converge, is_residual_replaced
     integer(kint), allocatable :: IPV_R(:)
-    real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
+    real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
     real(kdouble), pointer :: B(:), X(:)
 
@@ -268,7 +283,6 @@ contains
     call monolis_alloc_R_1d(Z, NPNDOF)
     call monolis_alloc_R_1d(Q, NPNDOF)
     call monolis_alloc_R_1d(P, NPNDOF)
-    call monolis_alloc_R_1d(X0, NPNDOF)
     call monolis_alloc_R_1d(Qb, NPNDOF)
     call monolis_alloc_R_1d(PtX, NPNDOF)
 
@@ -293,7 +307,6 @@ contains
       call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X)
       call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
 
-      call deflatedCG_residual_replacement_initialize(M, NNDOF, W, WtW, IPV_R)
     endif
 
     call monolis_inner_product_main_R(monoCOM, N*NDOF, R, R, rho, tdotp, tcomm_dotp)
@@ -324,14 +337,35 @@ contains
       is_residual_replaced = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          call deflatedCG_residual_replacement( &
-            & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          !> coarse 補正を解にも反映し、R = B - A*X を維持する
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+          call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, NNDOF, W, R, Qb, tdemv)
+          call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, X, X)
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
           is_residual_replaced = .true.
         endif
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
+      if(is_converge)then
+        if(is_residual_replaced) exit
+
+        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+        call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(is_converge) exit
+
+        if(M > 0)then
+          call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, NNDOF, W, R, Qb, tdemv)
+          call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, X, X)
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+          call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+          if(is_converge) exit
+        endif
+
+        is_residual_replaced = .true.
+      endif
 
       rho1 = rho
 
@@ -352,6 +386,9 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
@@ -361,7 +398,6 @@ contains
     call monolis_dealloc_R_1d(Z)
     call monolis_dealloc_R_1d(Q)
     call monolis_dealloc_R_1d(P)
-    call monolis_dealloc_R_1d(X0)
     call monolis_dealloc_R_1d(Qb)
     call monolis_dealloc_R_1d(PtX)
 
@@ -388,10 +424,10 @@ contains
     integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF, M, M_neib
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
-    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
+    real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv, time
     logical :: is_converge, is_residual_replaced
     integer(kint), allocatable :: IPV_R(:)
-    real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
+    real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), WtR(:), WtAZ(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
     real(kdouble), pointer :: B(:), X(:)
 
@@ -414,6 +450,7 @@ contains
     tcomm_spmv = monoPRM%Rarray(monolis_R_time_comm_spmv)
     tdotp = monoPRM%Rarray(monolis_R_time_dotp)
     tcomm_dotp = monoPRM%Rarray(monolis_R_time_comm_dotp)
+    time = 0.0d0
 
     if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
       X = 0.0d0
@@ -423,9 +460,7 @@ contains
     call monolis_alloc_R_1d(Z, NPNDOF)
     call monolis_alloc_R_1d(Q, NPNDOF)
     call monolis_alloc_R_1d(P, NPNDOF)
-    call monolis_alloc_R_1d(X0, NPNDOF)
     call monolis_alloc_R_1d(Qb, NPNDOF)
-    call monolis_alloc_R_1d(PtX, NPNDOF)
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, R, B2, is_converge, tdotp, tcomm_dotp)
@@ -436,19 +471,20 @@ contains
       call deflatedCG_E_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, WtA)
 
+      call monolis_alloc_R_1d(WtR, M)
+      call monolis_alloc_R_1d(WtAZ, M_neib)
+
       call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
         call deflatedCG_Pt(monoCOM, monoMAT, &
           monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-          M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
+          M, M_neib, NNDOF, W, WtA, X, Z, tdemv)
       endif
 
-      call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X)
+      call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, X)
       call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
-
-      call deflatedCG_residual_replacement_initialize(M, NNDOF, W, WtW, IPV_R)
     endif
 
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, R, rho, tdotp, tcomm_dotp)
@@ -461,14 +497,20 @@ contains
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-    call deflatedCG_Pt(monoCOM, monoMAT, &
-      monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-      M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
-
-    call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-      & M, NNDOF, W, R, Qb, tdemv)
-
-    call monolis_vec_AXPBY_R(NNDOF, 1.0d0, PtX, 1.0d0, Qb, Z)
+    if(M > 0)then
+      !> P^t*M^-1*R + Q*R = M^-1*R + W*E^-1*(W^t*R - W^t*A*M^-1*R)
+      call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
+      call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+      monoMAT_deflated_eq%R%B(1:M) = WtR(1:M) - WtAZ(1:M)
+      WtAZ(1:M) = 0.0d0
+      call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, &
+        & monoMAT_deflated_eq%n_dof_index, WtAZ, time)
+      monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) - WtAZ(1:M)
+      call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+        & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
+      call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+      call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, Z)
+    endif
 
     call monolis_vec_copy_R(NNDOF, Z, P)
 
@@ -486,25 +528,52 @@ contains
       is_residual_replaced = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
-          call deflatedCG_residual_replacement( &
-            & monoCOM, monoMAT, X, B, M, N, NDOF, W, R, WtW, IPV_R, tspmv, tcomm_spmv)
+          !> coarse 補正を解にも反映し、R = B - A*X を維持する
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+          call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, NNDOF, W, R, Qb, tdemv)
+          call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, X, X)
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
           is_residual_replaced = .true.
         endif
       endif
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
-      if(is_converge) exit
+      if(is_converge)then
+        if(is_residual_replaced) exit
+
+        call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+        call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+        if(is_converge) exit
+
+        if(M > 0)then
+          call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, NNDOF, W, R, Qb, tdemv)
+          call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, X, X)
+          call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+          call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+          if(is_converge) exit
+        endif
+
+        is_residual_replaced = .true.
+      endif
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-      call deflatedCG_Pt(monoCOM, monoMAT, &
-        monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-        M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
-
-      call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-        & M, NNDOF, W, R, Qb, tdemv)
-
-      call monolis_vec_AXPBY_R(NNDOF, 1.0d0, PtX, 1.0d0, Qb, Z)
+      if(M > 0)then
+        !> 2つの coarse 求解を合成右辺による1回の求解にまとめる
+        call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
+        call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+        monoMAT_deflated_eq%R%B(1:M) = WtR(1:M) - WtAZ(1:M)
+        WtAZ(1:M) = 0.0d0
+        call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, &
+          & monoMAT_deflated_eq%n_dof_index, WtAZ, time)
+        monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) - WtAZ(1:M)
+        call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
+        call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+        call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, Z)
+      endif
 
       rho1 = rho
 
@@ -520,6 +589,9 @@ contains
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
+    call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
+    call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
+
     monoPRM%Rarray(monolis_R_time_spmv) = tspmv
     monoPRM%Rarray(monolis_R_time_comm_spmv) = tcomm_spmv
     monoPRM%Rarray(monolis_R_time_dotp) = tdotp
@@ -529,9 +601,9 @@ contains
     call monolis_dealloc_R_1d(Z)
     call monolis_dealloc_R_1d(Q)
     call monolis_dealloc_R_1d(P)
-    call monolis_dealloc_R_1d(X0)
     call monolis_dealloc_R_1d(Qb)
-    call monolis_dealloc_R_1d(PtX)
+    call monolis_dealloc_R_1d(WtR)
+    call monolis_dealloc_R_1d(WtAZ)
 
     if(M > 0)then
       call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
