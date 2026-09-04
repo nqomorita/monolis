@@ -9,17 +9,18 @@ void monolis_optimize_nnls_R(
   double*  b,
   double*  x,
   int      m,
-  int      n,
+  int      n_loc,
   int      max_iter,
   double   tol,
-  double*  residual)
+  double*  residual,
+  int      comm)
 {
   int     i, j;
   double* A_tmp;
 
-  A_tmp = monolis_alloc_R_1d(A_tmp, m*n);
+  A_tmp = monolis_alloc_R_1d(A_tmp, m*n_loc);
 
-  for (i = 0; i < n; ++i) {
+  for (i = 0; i < n_loc; ++i) {
     for (j = 0; j < m; ++j) {
       A_tmp[i*m + j] = A[j][i];
     }
@@ -30,10 +31,11 @@ void monolis_optimize_nnls_R(
     b,
     x,
     m,
-    n,
+    n_loc,
     max_iter,
     tol,
-    residual);
+    residual,
+    comm);
 }
 
 void monolis_optimize_nnls_R_with_sparse_solution(
@@ -41,17 +43,19 @@ void monolis_optimize_nnls_R_with_sparse_solution(
   double*  b,
   double*  x,
   int      m,
-  int      n,
+  int      n_loc,
   int      max_iter,
-  double   tol,
-  double*  residual)
+  double   tol_outer,
+  double   tol_inner,
+  double*  residual,
+  int      comm)
 {
   int     i, j;
   double* A_tmp;
 
-  A_tmp = monolis_alloc_R_1d(A_tmp, m*n);
+  A_tmp = monolis_alloc_R_1d(A_tmp, m*n_loc);
 
-  for (i = 0; i < n; ++i) {
+  for (i = 0; i < n_loc; ++i) {
     for (j = 0; j < m; ++j) {
       A_tmp[i*m + j] = A[j][i];
     }
@@ -62,8 +66,10 @@ void monolis_optimize_nnls_R_with_sparse_solution(
     b,
     x,
     m,
-    n,
+    n_loc,
     max_iter,
-    tol,
-    residual);
+    tol_outer,
+    tol_inner,
+    residual,
+    comm);
 }

@@ -514,7 +514,7 @@ void monolis_clear_mat_value_rhs_C(
     mat->mat.n_dof_index2,
     &N, &NP, &NZ);
 
-  for(i = 0; i < NZ; i++) {
+  for(i = 0; i < NP; i++) {
     mat->mat.C.B[i] = 0.0;
   }
 }
