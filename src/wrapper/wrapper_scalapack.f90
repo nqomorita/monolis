@@ -493,6 +493,7 @@ contains
     integer, external :: numroc
     real(kdouble), allocatable :: A_temp(:,:)
     real(kdouble), allocatable :: B_temp(:,:)
+    integer(kint), allocatable :: ipiv_t(:)
 
     call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
 
@@ -535,8 +536,17 @@ contains
     call descinit(desc_A, N, N, NB, NB, 0, 0, scalapack_comm, lld_A, info)
     call descinit(desc_B, N, NRHS, NB, NB, 0, 0, scalapack_comm, lld_B, info)
 
-    call pdgetrf(N, N, A_temp, 1, 1, desc_A, ipiv, info)
-    call pdgetrs("N", N, NRHS, A_temp, 1, 1, desc_A, ipiv, B_temp, 1, 1, desc_B, info)
+    !# PDGETRF のピボット配列要件 (LOCr(M_A) + MB_A) を満たすバッファを内部で確保する
+    call monolis_alloc_I_1d(ipiv_t, lld_A + NB)
+
+    call pdgetrf(N, N, A_temp, 1, 1, desc_A, ipiv_t, info)
+    call pdgetrs("N", N, NRHS, A_temp, 1, 1, desc_A, ipiv_t, B_temp, 1, 1, desc_B, info)
+
+    do i = 1, min(size(ipiv), lld_A + NB)
+      ipiv(i) = ipiv_t(i)
+    enddo
+
+    call monolis_dealloc_I_1d(ipiv_t)
 
     call getrs_R_update_X(N_loc_max, NRHS, B_temp, n_row, comm)
 
