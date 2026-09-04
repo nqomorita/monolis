@@ -70,6 +70,56 @@ module mod_monolis_lapack
       real(kdouble), intent(in) :: alpha, beta
       real(kdouble), intent(inout) :: a(lda, *)
     end subroutine
+
+    subroutine dstev(jobz, n, d, e, z, ldz, work, info)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: jobz
+      integer(kint), intent(in) :: n, ldz
+      real(kdouble), intent(inout) :: d(*), e(*)
+      real(kdouble), intent(inout) :: z(ldz, *)
+      real(kdouble), intent(out) :: work(*)
+      integer(kint), intent(out) :: info
+    end subroutine
+
+    subroutine dgeqrf(m, n, a, lda, tau, work, lwork, info)
+      import :: kint, kdouble
+      integer(kint), intent(in) :: m, n, lda, lwork
+      real(kdouble), intent(inout) :: a(lda, *)
+      real(kdouble), intent(inout) :: tau(*)
+      real(kdouble), intent(out) :: work(*)
+      integer(kint), intent(out) :: info
+    end subroutine
+
+    subroutine dorgqr(m, n, k, a, lda, tau, work, lwork, info)
+      import :: kint, kdouble
+      integer(kint), intent(in) :: m, n, k, lda, lwork
+      real(kdouble), intent(inout) :: a(lda, *)
+      real(kdouble), intent(in) :: tau(*)
+      real(kdouble), intent(out) :: work(*)
+      integer(kint), intent(out) :: info
+    end subroutine
+
+    subroutine dgeev(jobvl, jobvr, n, a, lda, wr, wi, vl, ldvl, vr, ldvr, work, lwork, info)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: jobvl, jobvr
+      integer(kint), intent(in) :: n, lda, ldvl, ldvr, lwork
+      real(kdouble), intent(inout) :: a(lda, *)
+      real(kdouble), intent(inout) :: wr(*), wi(*)
+      real(kdouble), intent(inout) :: vl(ldvl, *), vr(ldvr, *)
+      real(kdouble), intent(out) :: work(*)
+      integer(kint), intent(out) :: info
+    end subroutine
+
+    subroutine dsysv(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: uplo
+      integer(kint), intent(in) :: n, nrhs, lda, ldb, lwork
+      real(kdouble), intent(inout) :: a(lda, *)
+      integer(kint), intent(out) :: ipiv(*)
+      real(kdouble), intent(inout) :: b(ldb, *)
+      real(kdouble), intent(out) :: work(*)
+      integer(kint), intent(out) :: info
+    end subroutine
   end interface
 
 contains
@@ -219,21 +269,25 @@ contains
     real(kdouble), intent(in) :: b(:)
     !> [in] 右辺ベクトル
     real(kdouble), intent(out) :: x(:)
-    real(kdouble), allocatable :: work(:)
+    real(kdouble), allocatable :: A_(:,:), work(:)
     integer(kint) :: lwork, info, ipiv(n)
+
+    !> copy A (dsysv destroys input matrix)
+    call monolis_alloc_R_2d(A_, n, n)
+    A_ = A(1:n,1:n)
 
     !> get optimal work size
     call monolis_alloc_R_1d(work, 1)
 
     x = b
-    call dsysv("U", n, 1, A, n, ipiv, x, n, work, -1, info)
+    call dsysv("U", n, 1, A_, n, ipiv, x, n, work, -1, info)
     lwork = int(work(1))
 
     !> main function
     call monolis_dealloc_R_1d(work)
     call monolis_alloc_R_1d(work, lwork)
 
-    call dsysv("U", n, 1, A, n, ipiv, x, n, work, lwork, info)
+    call dsysv("U", n, 1, A_, n, ipiv, x, n, work, lwork, info)
   end subroutine monolis_lapack_dsysv
 
   !> @ingroup wrapper

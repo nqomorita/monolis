@@ -2,6 +2,7 @@
 module mod_monolis_scalapack
   use mod_monolis_utils
   use mod_monolis_vec_util
+  use mod_monolis_lapack
 
   implicit none
 
