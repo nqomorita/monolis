@@ -19,6 +19,7 @@ contains
     call monolis_scalapack_test_4()
     call monolis_scalapack_test_5()
     call monolis_scalapack_test_6()
+    call monolis_scalapack_test_7()
   end subroutine monolis_scalapack_test
 
   subroutine monolis_scalapack_test_1()
@@ -508,4 +509,78 @@ contains
     call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-1", X(:,1), X_ref(:,1))
     call monolis_test_check_eq_R("monolis_scalapack_getrf_R/getrs_R 6-2", X(:,2), X_ref(:,2))
   end subroutine monolis_scalapack_test_6
+
+  subroutine monolis_scalapack_test_7()
+    implicit none
+    !> 行列の行数
+    integer(kint) :: m = 4
+    !> 全体列数
+    integer(kint) :: p = 3
+    !> 全体行列（m x p）
+    real(kdouble) :: A_g(4,3)
+    !> 右辺ベクトル（m、全ランク複製）
+    real(kdouble) :: b(4)
+    !> 参照解（p）
+    real(kdouble) :: w_ref(3)
+    real(kdouble), allocatable :: A_loc(:,:)
+    real(kdouble), allocatable :: w_loc(:)
+    integer(kint) :: p_loc, offset, i, j
+    integer(kint) :: comm
+    integer(kint) :: scalapack_comm
+
+    call monolis_std_global_log_string("monolis_scalapack_gram_gesv_R")
+
+    if(monolis_mpi_get_global_comm_size() > 2) return
+
+    comm = monolis_mpi_get_global_comm()
+
+    A_g(1,1) = 1.0d0; A_g(1,2) = 1.0d0; A_g(1,3) = 0.0d0
+    A_g(2,1) = 1.0d0; A_g(2,2) = 0.0d0; A_g(2,3) = 1.0d0
+    A_g(3,1) = 0.0d0; A_g(3,2) = 1.0d0; A_g(3,3) = 1.0d0
+    A_g(4,1) = 1.0d0; A_g(4,2) = 1.0d0; A_g(4,3) = 1.0d0
+
+    w_ref(1) = 1.0d0
+    w_ref(2) = 2.0d0
+    w_ref(3) = 3.0d0
+
+    !> b = A w_ref として正規方程式の解が w_ref に一致することを確認する
+    do i = 1, m
+      b(i) = 0.0d0
+      do j = 1, p
+        b(i) = b(i) + A_g(i,j)*w_ref(j)
+      enddo
+    enddo
+
+    !> 列ブロック分散（1 ランク: 3 列、2 ランク: 2 列 + 1 列）
+    if(monolis_mpi_get_global_comm_size() == 1)then
+      p_loc = 3
+      offset = 0
+    elseif(monolis_mpi_get_global_my_rank() == 0)then
+      p_loc = 2
+      offset = 0
+    else
+      p_loc = 1
+      offset = 2
+    endif
+
+    call monolis_alloc_R_2d(A_loc, m, p_loc)
+    call monolis_alloc_R_1d(w_loc, p_loc)
+
+    do i = 1, p_loc
+      do j = 1, m
+        A_loc(j,i) = A_g(j,offset+i)
+      enddo
+    enddo
+
+    call monolis_scalapack_comm_initialize(comm, scalapack_comm)
+    call monolis_scalapack_gram_gesv_R(m, p_loc, A_loc, b, w_loc, comm, scalapack_comm)
+    call monolis_scalapack_comm_finalize(scalapack_comm)
+
+    do i = 1, p_loc
+      call monolis_test_check_eq_R1("monolis_scalapack_gram_gesv_R 7", w_loc(i), w_ref(offset+i))
+    enddo
+
+    call monolis_dealloc_R_2d(A_loc)
+    call monolis_dealloc_R_1d(w_loc)
+  end subroutine monolis_scalapack_test_7
 end module mod_monolis_scalapack_test

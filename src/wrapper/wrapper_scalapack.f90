@@ -278,6 +278,162 @@ contains
     call monolis_vec_to_mat_R(P, M, D_perm, D)
   end subroutine gesvd_R_update_D
 
+  !> @ingroup wrapper
+  !> 正規方程式 (A^T A) w = A^T b の分散求解（実数型、PDGESV 使用）
+  !> @details 行列 A は列ブロック分散とする（各ランクが m x p_loc の列ブロックを保持し、
+  !> 全体の列順序はランク番号順に連結した順序とする）。右辺ベクトル b は全ランクに複製する。
+  !> Gram 行列 A^T A をブロックサイクリック分散（ブロック幅 1）で組み立て、PDGESV で求解する。
+  !> Gram 行列と求解は分散実行されるため、全体行列を単一ランクに集約しない。
+  subroutine monolis_scalapack_gram_gesv_R(m, p_loc, A_loc, b, w_loc, comm, scalapack_comm)
+    implicit none
+    !> [in] 行列の行数（全ランク共通）
+    integer(kint), intent(in) :: m
+    !> [in] 自ランクが保持する列数
+    integer(kint), intent(in) :: p_loc
+    !> [in] 列ブロック行列（m x p_loc）
+    real(kdouble), intent(in) :: A_loc(:,:)
+    !> [in] 右辺ベクトル（m、全ランク複製）
+    real(kdouble), intent(in) :: b(:)
+    !> [out] 解ベクトル（p_loc、自ランク保持列に対応）
+    real(kdouble), intent(out) :: w_loc(:)
+    !> [in] MPI コミュニケータ
+    integer(kint), intent(in) :: comm
+    !> [in] scalapack コミュニケータ
+    integer(kint), intent(in) :: scalapack_comm
+    integer(kint) :: my_col, my_row, n_col, n_row
+    integer(kint) :: p, lld, r, i, j, g, lr, info
+    integer(kint) :: desc_G(9), desc_c(9)
+    integer(kint), allocatable :: p_list(:), displs(:), ipiv(:)
+    integer(kint), allocatable :: counts_w(:), displs_w(:)
+    real(kdouble), allocatable :: A_cyc(:,:), G_loc(:,:), blk(:)
+    real(kdouble), allocatable :: c_loc(:), w_cyc(:), w_all(:)
+
+    integer :: numroc
+    external :: numroc
+
+    call blacs_gridinfo(scalapack_comm, n_row, n_col, my_row, my_col)
+
+    !# 各ランクの列数の共有と全体列数の取得
+    call monolis_alloc_I_1d(p_list, n_row)
+    call monolis_alloc_I_1d(displs, n_row)
+    call monolis_allgather_I1(p_loc, p_list, comm)
+
+    p = 0
+    do r = 1, n_row
+      displs(r) = p
+      p = p + p_list(r)
+    enddo
+
+    if(p == 0)then
+      call monolis_dealloc_I_1d(p_list)
+      call monolis_dealloc_I_1d(displs)
+      return
+    endif
+
+    !# ブロックサイクリック分散（ブロック幅 1）で自ランクが保持する行数
+    lld = numroc(p, 1, my_row, 0, n_row)
+
+    call monolis_alloc_R_2d(A_cyc, m, max(1, lld))
+    call monolis_alloc_R_1d(blk, m*maxval(p_list))
+
+    !# パス 1: 自ランク保持行に対応する列ベクトルの取得
+    do r = 0, n_row - 1
+      if(p_list(r+1) == 0) cycle
+      if(my_row == r)then
+        do i = 1, p_loc
+          do j = 1, m
+            blk(m*(i-1) + j) = A_loc(j,i)
+          enddo
+        enddo
+      endif
+      call monolis_bcast_R(m*p_list(r+1), blk, r, comm)
+      do i = 1, p_list(r+1)
+        g = displs(r+1) + i
+        if(mod(g - 1, n_row) /= my_row) cycle
+        lr = (g - 1)/n_row + 1
+        do j = 1, m
+          A_cyc(j,lr) = blk(m*(i-1) + j)
+        enddo
+      enddo
+    enddo
+
+    !# パス 2: Gram 行列（自ランク保持行 lld x p）の組み立て
+    call monolis_alloc_R_2d(G_loc, max(1, lld), p)
+
+    do r = 0, n_row - 1
+      if(p_list(r+1) == 0) cycle
+      if(my_row == r)then
+        do i = 1, p_loc
+          do j = 1, m
+            blk(m*(i-1) + j) = A_loc(j,i)
+          enddo
+        enddo
+      endif
+      call monolis_bcast_R(m*p_list(r+1), blk, r, comm)
+      if(lld > 0)then
+        call dgemm("T", "N", lld, p_list(r+1), m, 1.0d0, A_cyc, m, blk, m, &
+          & 0.0d0, G_loc(1,displs(r+1)+1), max(1, lld))
+      endif
+    enddo
+
+    !# 右辺ベクトル（自ランク保持行）
+    call monolis_alloc_R_1d(c_loc, max(1, lld))
+    if(lld > 0)then
+      call dgemv("T", m, lld, 1.0d0, A_cyc, m, b, 1, 0.0d0, c_loc, 1)
+    endif
+
+    !# PDGESV による分散求解
+    call descinit(desc_G, p, p, 1, 1, 0, 0, scalapack_comm, max(1, lld), info)
+    call descinit(desc_c, p, 1, 1, 1, 0, 0, scalapack_comm, max(1, lld), info)
+
+    call monolis_alloc_I_1d(ipiv, lld + 1)
+
+    call pdgesv(p, 1, G_loc, 1, 1, desc_G, ipiv, c_loc, 1, 1, desc_c, info)
+
+    if(info /= 0)then
+      call monolis_std_error_string("monolis_scalapack_gram_gesv_R: PDGESV")
+      call monolis_std_error_stop()
+    endif
+
+    !# サイクリック分散された解を列ブロック分散に再配置
+    call monolis_alloc_I_1d(counts_w, n_row)
+    call monolis_alloc_I_1d(displs_w, n_row)
+
+    do r = 0, n_row - 1
+      counts_w(r+1) = numroc(p, 1, r, 0, n_row)
+    enddo
+    do r = 2, n_row
+      displs_w(r) = displs_w(r-1) + counts_w(r-1)
+    enddo
+
+    call monolis_alloc_R_1d(w_cyc, max(1, lld))
+    call monolis_alloc_R_1d(w_all, p)
+
+    do i = 1, lld
+      w_cyc(i) = c_loc(i)
+    enddo
+    call monolis_allgather_V_R(lld, w_cyc, w_all, counts_w, displs_w, comm)
+
+    do i = 1, p_loc
+      g = displs(my_row+1) + i
+      r = mod(g - 1, n_row)
+      lr = (g - 1)/n_row + 1
+      w_loc(i) = w_all(displs_w(r+1) + lr)
+    enddo
+
+    call monolis_dealloc_I_1d(p_list)
+    call monolis_dealloc_I_1d(displs)
+    call monolis_dealloc_I_1d(ipiv)
+    call monolis_dealloc_I_1d(counts_w)
+    call monolis_dealloc_I_1d(displs_w)
+    call monolis_dealloc_R_2d(A_cyc)
+    call monolis_dealloc_R_2d(G_loc)
+    call monolis_dealloc_R_1d(blk)
+    call monolis_dealloc_R_1d(c_loc)
+    call monolis_dealloc_R_1d(w_cyc)
+    call monolis_dealloc_R_1d(w_all)
+  end subroutine monolis_scalapack_gram_gesv_R
+
 !  !> @ingroup wrapper
 !  !> PDGETRF 関数（実数型、LU分解）
 !  subroutine monolis_scalapack_getrf_R(N_loc, N, A, ipiv, comm, scalapack_comm)
