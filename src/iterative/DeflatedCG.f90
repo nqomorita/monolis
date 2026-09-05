@@ -44,7 +44,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
-    logical :: is_converge, is_residual_replaced
+    logical :: is_converge, is_residual_replaced, is_direction_restart
     logical :: is_sparse_W = .true.
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), X0(:), Qb(:), PtX(:)
@@ -143,8 +143,10 @@ contains
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
       is_residual_replaced = .false.
+      is_direction_restart = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
+          !> 残差の変化は微小なので探索方向は維持する (van der Vorst-Ye)
           call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
             & M, NNDOF, W, B, Qb, tdemv)
           call deflatedCG_Pt(monoCOM, monoMAT, &
@@ -161,6 +163,8 @@ contains
 
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge)then
+        if(is_residual_replaced) exit
+
         call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, NNDOF, W, B, Qb, tdemv)
         call deflatedCG_Pt(monoCOM, monoMAT, &
@@ -174,7 +178,7 @@ contains
 
         call deflatedCG_P(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, M_neib, NNDOF, W, AW, R, R, tdemv)
-        is_residual_replaced = .true.
+        is_direction_restart = .true.
       endif
 
       rho1 = rho
@@ -182,7 +186,7 @@ contains
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      if(is_residual_replaced)then
+      if(is_direction_restart)then
         call monolis_vec_copy_R(NNDOF, Z, P)
       else
         beta = rho/rho1
@@ -245,7 +249,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
-    logical :: is_converge, is_residual_replaced
+    logical :: is_converge, is_residual_replaced, is_direction_restart
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -335,9 +339,11 @@ contains
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
       is_residual_replaced = .false.
+      is_direction_restart = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
           !> coarse 補正を解にも反映し、R = B - A*X を維持する
+          !> 残差の変化は微小なので探索方向は維持する (van der Vorst-Ye)
           call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
           call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
             & M, NNDOF, W, R, Qb, tdemv)
@@ -364,7 +370,7 @@ contains
           if(is_converge) exit
         endif
 
-        is_residual_replaced = .true.
+        is_direction_restart = .true.
       endif
 
       rho1 = rho
@@ -376,7 +382,7 @@ contains
         monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
 
-      if(is_residual_replaced)then
+      if(is_direction_restart)then
         call monolis_vec_copy_R(NNDOF, PtX, P)
       else
         beta = rho/rho1
@@ -425,7 +431,7 @@ contains
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv, time
-    logical :: is_converge, is_residual_replaced
+    logical :: is_converge, is_residual_replaced, is_direction_restart
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), WtR(:), WtAZ(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -526,9 +532,11 @@ contains
       call monolis_vec_AXPBY_R(NNDOF,-alpha, Q, 1.0d0, R, R)
 
       is_residual_replaced = .false.
+      is_direction_restart = .false.
       if(mod(iter, iter_RR) == 0)then
         if(M > 0)then
           !> coarse 補正を解にも反映し、R = B - A*X を維持する
+          !> 残差の変化は微小なので探索方向は維持する (van der Vorst-Ye)
           call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
           call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
             & M, NNDOF, W, R, Qb, tdemv)
@@ -555,7 +563,7 @@ contains
           if(is_converge) exit
         endif
 
-        is_residual_replaced = .true.
+        is_direction_restart = .true.
       endif
 
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
@@ -579,7 +587,7 @@ contains
 
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      if(is_residual_replaced)then
+      if(is_direction_restart)then
         call monolis_vec_copy_R(NNDOF, Z, P)
       else
         beta = rho/rho1
