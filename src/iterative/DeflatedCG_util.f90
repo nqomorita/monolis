@@ -477,6 +477,48 @@ contains
   end subroutine deflatedCG_Pt
 
   !> @ingroup dev_solver
+  !> Deflated CG 法 (P^T 射影、疎行列版)
+  subroutine deflatedCG_Pt_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+      & M, M_neib, NNDOF, monoMAT_AWt, monoMAT_W, monoCOM_self, Z, P, tdemv)
+    implicit none
+    type(monolis_prm) :: monoPRM_deflated_eq
+    type(monolis_com) :: monoCOM_deflated_eq
+    type(monolis_mat) :: monoMAT_deflated_eq
+    type(monolis_mat) :: monoPRE_deflated_eq
+    !> (AW)^T の疎行列 (M_neib x NNDOF)
+    type(monolis_mat) :: monoMAT_AWt
+    !> W の疎行列 (NNDOF x M)
+    type(monolis_mat) :: monoMAT_W
+    type(monolis_com) :: monoCOM_self
+    integer(kint) :: M
+    integer(kint) :: M_neib
+    integer(kint) :: NNDOF
+    real(kdouble) :: P(:)
+    real(kdouble) :: Z(:)
+    real(kdouble) :: tdemv, time, WtAZ(M_neib), WEinvWtAZ(NNDOF)
+
+    if(M == 0)then
+      call monolis_vec_copy_R(NNDOF, Z, P)
+      return
+    endif
+
+    time = 0.0d0
+
+    call monolis_matvec_product_main_R(monoCOM_self, monoMAT_AWt, Z, WtAZ, time, time)
+    monoMAT_deflated_eq%R%B(1:M) = WtAZ(1:M)
+    WtAZ(1:M) = 0.0d0
+    call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, monoMAT_deflated_eq%n_dof_index, WtAZ, time)
+    monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) + WtAZ(1:M)
+
+    call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+    & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
+
+    call monolis_matvec_product_main_R(monoCOM_self, monoMAT_W, monoMAT_deflated_eq%R%X, WEinvWtAZ, time, time)
+
+    call monolis_vec_AXPBY_R(NNDOF, -1.0d0, WEinvWtAZ, 1.0d0, Z, P)
+  end subroutine deflatedCG_Pt_coarse
+
+  !> @ingroup dev_solver
   !> Deflated CG 法
   subroutine deflatedCG_residual_replacement_initialize(M, NNDOF, W, WtW, IPV_R)
     implicit none

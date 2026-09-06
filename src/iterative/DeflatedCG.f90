@@ -245,11 +245,15 @@ contains
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_mat) :: monoMAT_deflated_eq
     type(monolis_mat) :: monoPRE_deflated_eq
+    type(monolis_mat) :: monoMAT_AWt
+    type(monolis_mat) :: monoMAT_W
+    type(monolis_com) :: monoCOM_self
     integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF, M, M_neib
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv
     logical :: is_converge, is_residual_replaced, is_direction_restart
+    logical :: is_sparse_W = .true.
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), PtX(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -299,13 +303,24 @@ contains
       call deflatedCG_E_initialize(monoCOM, monoPRM, monoMAT, monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, &
         & M, M_neib, NNDOF, W, AW, WtA)
 
+      if(is_sparse_W)then
+        call monolis_com_initialize_by_self(monoCOM_self)
+        call deflatedCG_get_coarse_W (NNDOF, M_neib, AW, monoMAT_AWt)
+        call deflatedCG_get_coarse_AW(NNDOF, M, W, monoMAT_W)
+      endif
+
       call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
-        call deflatedCG_Pt(monoCOM, monoMAT, &
-          monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-          M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
+        if(is_sparse_W)then
+          call deflatedCG_Pt_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, M_neib, NNDOF, monoMAT_AWt, monoMAT_W, monoCOM_self, X, PtX, tdemv)
+        else
+          call deflatedCG_Pt(monoCOM, monoMAT, &
+            monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            M, M_neib, NNDOF, W, WtA, X, PtX, tdemv)
+        endif
       endif
 
       call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, PtX, X)
@@ -323,9 +338,14 @@ contains
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
 
-    call deflatedCG_Pt(monoCOM, monoMAT, &
-      monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-      M, M_neib, NNDOF, W, WtA, Z, P, tdemv)
+    if(is_sparse_W)then
+      call deflatedCG_Pt_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+        & M, M_neib, NNDOF, monoMAT_AWt, monoMAT_W, monoCOM_self, Z, P, tdemv)
+    else
+      call deflatedCG_Pt(monoCOM, monoMAT, &
+        monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+        M, M_neib, NNDOF, W, WtA, Z, P, tdemv)
+    endif
 
     call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
@@ -378,9 +398,14 @@ contains
       call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
       call monolis_inner_product_main_R(monoCOM, NNDOF, R, Z, rho, tdotp, tcomm_dotp)
 
-      call deflatedCG_Pt(monoCOM, monoMAT, &
-        monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-        M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
+      if(is_sparse_W)then
+        call deflatedCG_Pt_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          & M, M_neib, NNDOF, monoMAT_AWt, monoMAT_W, monoCOM_self, Z, PtX, tdemv)
+      else
+        call deflatedCG_Pt(monoCOM, monoMAT, &
+          monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+          M, M_neib, NNDOF, W, WtA, Z, PtX, tdemv)
+      endif
 
       if(is_direction_restart)then
         call monolis_vec_copy_R(NNDOF, PtX, P)
@@ -410,6 +435,12 @@ contains
     if(M > 0)then
       call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
+
+      if(is_sparse_W)then
+        call monolis_mat_finalize(monoMAT_AWt)
+        call monolis_mat_finalize(monoMAT_W)
+        call monolis_com_finalize(monoCOM_self)
+      endif
     endif
   end subroutine monolis_solver_DeflatedCG2
 
@@ -427,11 +458,16 @@ contains
     type(monolis_com) :: monoCOM_deflated_eq
     type(monolis_mat) :: monoMAT_deflated_eq
     type(monolis_mat) :: monoPRE_deflated_eq
+    type(monolis_mat) :: monoMAT_Wt
+    type(monolis_mat) :: monoMAT_AWt
+    type(monolis_mat) :: monoMAT_W
+    type(monolis_com) :: monoCOM_self
     integer(kint) :: N, NP, NDOF, NNDOF, NPNDOF, M, M_neib
     integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, beta, rho, rho1, omega, B2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp, tdemv, time
     logical :: is_converge, is_residual_replaced, is_direction_restart
+    logical :: is_sparse_W = .true.
     integer(kint), allocatable :: IPV_R(:)
     real(kdouble), allocatable :: R(:), Z(:), Q(:), P(:), Qb(:), WtR(:), WtAZ(:)
     real(kdouble), allocatable :: W(:,:), AW(:,:), WtA(:,:), WtW(:,:)
@@ -480,13 +516,25 @@ contains
       call monolis_alloc_R_1d(WtR, M)
       call monolis_alloc_R_1d(WtAZ, M_neib)
 
+      if(is_sparse_W)then
+        call monolis_com_initialize_by_self(monoCOM_self)
+        call deflatedCG_get_coarse_W (NNDOF, M, W, monoMAT_Wt)
+        call deflatedCG_get_coarse_W (NNDOF, M_neib, AW, monoMAT_AWt)
+        call deflatedCG_get_coarse_AW(NNDOF, M, W, monoMAT_W)
+      endif
+
       call deflatedCG_Q(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, NNDOF, W, B, Qb, tdemv)
 
       if(monoPRM%Iarray(monolis_prm_I_is_init_x) /= monolis_I_true)then
-        call deflatedCG_Pt(monoCOM, monoMAT, &
-          monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
-          M, M_neib, NNDOF, W, WtA, X, Z, tdemv)
+        if(is_sparse_W)then
+          call deflatedCG_Pt_coarse(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            & M, M_neib, NNDOF, monoMAT_AWt, monoMAT_W, monoCOM_self, X, Z, tdemv)
+        else
+          call deflatedCG_Pt(monoCOM, monoMAT, &
+            monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
+            M, M_neib, NNDOF, W, WtA, X, Z, tdemv)
+        endif
       endif
 
       call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, X)
@@ -505,8 +553,13 @@ contains
 
     if(M > 0)then
       !> P^t*M^-1*R + Q*R = M^-1*R + W*E^-1*(W^t*R - W^t*A*M^-1*R)
-      call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
-      call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+      if(is_sparse_W)then
+        call monolis_matvec_product_main_R(monoCOM_self, monoMAT_Wt, R, WtR, time, time)
+        call monolis_matvec_product_main_R(monoCOM_self, monoMAT_AWt, Z, WtAZ, time, time)
+      else
+        call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
+        call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+      endif
       monoMAT_deflated_eq%R%B(1:M) = WtR(1:M) - WtAZ(1:M)
       WtAZ(1:M) = 0.0d0
       call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, &
@@ -514,7 +567,11 @@ contains
       monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) - WtAZ(1:M)
       call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
-      call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+      if(is_sparse_W)then
+        call monolis_matvec_product_main_R(monoCOM_self, monoMAT_W, monoMAT_deflated_eq%R%X, Qb, time, time)
+      else
+        call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+      endif
       call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, Z)
     endif
 
@@ -570,8 +627,13 @@ contains
 
       if(M > 0)then
         !> 2つの coarse 求解を合成右辺による1回の求解にまとめる
-        call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
-        call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+        if(is_sparse_W)then
+          call monolis_matvec_product_main_R(monoCOM_self, monoMAT_Wt, R, WtR, time, time)
+          call monolis_matvec_product_main_R(monoCOM_self, monoMAT_AWt, Z, WtAZ, time, time)
+        else
+          call monolis_dense_matvec_local_R(M, NNDOF, transpose(W), R, WtR, tdemv)
+          call monolis_dense_matvec_local_R(M_neib, NNDOF, WtA, Z, WtAZ, tdemv)
+        endif
         monoMAT_deflated_eq%R%B(1:M) = WtR(1:M) - WtAZ(1:M)
         WtAZ(1:M) = 0.0d0
         call monolis_mpi_update_reverse_R_wrapper(monoCOM_deflated_eq, -1, &
@@ -579,7 +641,11 @@ contains
         monoMAT_deflated_eq%R%B(1:M) = monoMAT_deflated_eq%R%B(1:M) - WtAZ(1:M)
         call deflatedCG_E(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
           & M, monoMAT_deflated_eq%R%X, monoMAT_deflated_eq%R%B)
-        call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+        if(is_sparse_W)then
+          call monolis_matvec_product_main_R(monoCOM_self, monoMAT_W, monoMAT_deflated_eq%R%X, Qb, time, time)
+        else
+          call monolis_dense_matvec_local_R(NNDOF, M, W, monoMAT_deflated_eq%R%X, Qb, tdemv)
+        endif
         call monolis_vec_AXPBY_R(NNDOF, 1.0d0, Qb, 1.0d0, Z, Z)
       endif
 
@@ -616,6 +682,13 @@ contains
     if(M > 0)then
       call deflatedCG_finalize(monoPRM_deflated_eq, monoCOM_deflated_eq, monoMAT_deflated_eq, monoPRE_deflated_eq, &
         & IPV_R, W, AW, WtA, WtW)
+
+      if(is_sparse_W)then
+        call monolis_mat_finalize(monoMAT_Wt)
+        call monolis_mat_finalize(monoMAT_AWt)
+        call monolis_mat_finalize(monoMAT_W)
+        call monolis_com_finalize(monoCOM_self)
+      endif
     endif
   end subroutine monolis_solver_ADeflatedCG2
 
