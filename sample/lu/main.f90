@@ -96,14 +96,14 @@ program main
   b = c
 
   call monolis_set_method(mat, monolis_iter_CG)
-  call monolis_set_precond(mat, monolis_prec_MUMPS)
+  call monolis_set_precond(mat, monolis_prec_CHOLESKY)
 
   t0 = monolis_get_time()
   call monolis_solve_R(mat, com, b, a)
   t1 = monolis_get_time()
   err_max = maxval(abs(a - 1.0d0))
-  write(*,"(a,1pe12.4,a)")"[CG+DIAG]  elapsed = ", t1 - t0, " sec"
-  write(*,"(a,1pe12.4)")  "[CG+DIAG]  max|x - 1| = ", err_max
+  write(*,"(a,1pe12.4,a)")"[CG+Chol]  elapsed = ", t1 - t0, " sec"
+  write(*,"(a,1pe12.4)")  "[CG+Chol]  max|x - 1| = ", err_max
 
   call monolis_finalize(mat)
 

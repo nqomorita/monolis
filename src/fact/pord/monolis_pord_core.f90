@@ -37,7 +37,9 @@ module mod_monolis_pord_const
   integer(kint), parameter :: MONOLIS_PORD_QRAND = 2
 
   ! --- default options ---
-  integer(kint), parameter :: MONOLIS_PORD_SPACE_ORDTYPE         = MONOLIS_PORD_MULTISECTION
+  !> INCOMPLETE_ND は MULTISECTION より一貫して fill/flops が少ない
+  !> (s3dkq4m2: flops -8%, bcsstk16: -12%。METIS_NodeND と同等以上の品質)
+  integer(kint), parameter :: MONOLIS_PORD_SPACE_ORDTYPE         = MONOLIS_PORD_INCOMPLETE_ND
   integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION1 = MONOLIS_PORD_AMMF
   integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION2 = MONOLIS_PORD_AMMF
   integer(kint), parameter :: MONOLIS_PORD_SPACE_NODE_SELECTION3 = MONOLIS_PORD_QMRDV
