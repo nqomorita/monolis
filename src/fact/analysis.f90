@@ -173,6 +173,9 @@ contains
   end subroutine build_local_csr
 
   !> 対称化パターンを CSR で構築（1-based）
+  !>
+  !> 入力 CSR の各行は列昇順であることを利用し、転置パターンを作って
+  !> 行ごとに 2-way マージ（重複除去付き）することでソートを回避する。
   subroutine build_symmetric_pattern(n, row_ptr, col_ind, sym_row_ptr, sym_col_ind)
     implicit none
     integer(kint), intent(in) :: n
@@ -181,62 +184,69 @@ contains
     integer(kint), allocatable, intent(out) :: sym_row_ptr(:)
     integer(kint), allocatable, intent(out) :: sym_col_ind(:)
 
-    integer(kint) :: row, entry, col, pos, write_pos, cnt, prev, raw_nnz, sym_nnz
-    integer(kint), allocatable :: counts(:), raw_ptr(:), next_pos(:), raw_cols(:)
+    integer(kint) :: row, entry, col, write_pos, prev, raw_nnz, sym_nnz
+    integer(kint) :: pa, pa_end, pt, pt_end, cand
+    integer(kint), allocatable :: trans_ptr(:), next_pos(:), trans_rows(:)
     integer(kint), allocatable :: compact_cols(:)
 
-    call monolis_alloc_I_1d(counts, n)
+    !> 転置パターン（行昇順走査で埋めるため各行は自動的に列昇順）
+    call monolis_alloc_I_1d(trans_ptr, n + 1)
+    call monolis_alloc_I_1d(next_pos, n)
 
     do row = 1, n
       do entry = row_ptr(row), row_ptr(row + 1) - 1
         col = col_ind(entry)
-        counts(row) = counts(row) + 1
-        if (col /= row) counts(col) = counts(col) + 1
+        trans_ptr(col + 1) = trans_ptr(col + 1) + 1
       end do
     end do
 
-    call monolis_alloc_I_1d(raw_ptr, n + 1)
-    call monolis_alloc_I_1d(next_pos, n)
-
-    raw_ptr(1) = 1
+    trans_ptr(1) = 1
     do row = 1, n
-      raw_ptr(row + 1) = raw_ptr(row) + counts(row)
+      trans_ptr(row + 1) = trans_ptr(row + 1) + trans_ptr(row)
     end do
-    raw_nnz = raw_ptr(n + 1) - 1
+    raw_nnz = row_ptr(n + 1) - 1
 
-    call monolis_alloc_I_1d(raw_cols, max(1, raw_nnz))
+    call monolis_alloc_I_1d(trans_rows, max(1, raw_nnz))
 
-    next_pos(1:n) = raw_ptr(1:n)
+    next_pos(1:n) = trans_ptr(1:n)
     do row = 1, n
       do entry = row_ptr(row), row_ptr(row + 1) - 1
         col = col_ind(entry)
-        pos = next_pos(row)
-        raw_cols(pos) = col
-        next_pos(row) = pos + 1
-
-        if (col /= row) then
-          pos = next_pos(col)
-          raw_cols(pos) = row
-          next_pos(col) = pos + 1
-        end if
+        trans_rows(next_pos(col)) = row
+        next_pos(col) = next_pos(col) + 1
       end do
     end do
 
     call monolis_alloc_I_1d(sym_row_ptr, n + 1)
-    call monolis_alloc_I_1d(sym_col_ind, max(1, raw_nnz))
+    call monolis_alloc_I_1d(sym_col_ind, max(1, 2 * raw_nnz))
 
     write_pos = 1
     sym_row_ptr(1) = 1
     do row = 1, n
-      call sort_int_range(raw_cols, raw_ptr(row), raw_ptr(row + 1) - 1)
+      pa = row_ptr(row)
+      pa_end = row_ptr(row + 1) - 1
+      pt = trans_ptr(row)
+      pt_end = trans_ptr(row + 1) - 1
       prev = 0
-      cnt = 0
-      do entry = raw_ptr(row), raw_ptr(row + 1) - 1
-        if (cnt == 0 .or. raw_cols(entry) /= prev) then
-          sym_col_ind(write_pos) = raw_cols(entry)
+      do while (pa <= pa_end .or. pt <= pt_end)
+        if (pa > pa_end) then
+          cand = trans_rows(pt)
+          pt = pt + 1
+        else if (pt > pt_end) then
+          cand = col_ind(pa)
+          pa = pa + 1
+        else if (col_ind(pa) <= trans_rows(pt)) then
+          cand = col_ind(pa)
+          if (trans_rows(pt) == cand) pt = pt + 1
+          pa = pa + 1
+        else
+          cand = trans_rows(pt)
+          pt = pt + 1
+        end if
+        if (cand /= prev) then
+          sym_col_ind(write_pos) = cand
           write_pos = write_pos + 1
-          cnt = cnt + 1
-          prev = raw_cols(entry)
+          prev = cand
         end if
       end do
       sym_row_ptr(row + 1) = write_pos
@@ -247,10 +257,9 @@ contains
     compact_cols(1:sym_nnz) = sym_col_ind(1:sym_nnz)
     call move_alloc(compact_cols, sym_col_ind)
 
-    call monolis_dealloc_I_1d(counts)
-    call monolis_dealloc_I_1d(raw_ptr)
+    call monolis_dealloc_I_1d(trans_ptr)
     call monolis_dealloc_I_1d(next_pos)
-    call monolis_dealloc_I_1d(raw_cols)
+    call monolis_dealloc_I_1d(trans_rows)
   end subroutine build_symmetric_pattern
 
   !> PORD を呼び出し、perm/iperm/front_*/super_* を構築

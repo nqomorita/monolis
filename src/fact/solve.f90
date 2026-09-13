@@ -22,7 +22,7 @@ contains
 
     integer(kint) :: n, nfronts, order_pos, front
     integer(kint) :: fs, npiv, nupd, first_col, i, idx, ldp
-    real(kdouble), allocatable :: work(:), update_work(:), pivot_work(:,:)
+    real(kdouble), allocatable :: work(:), update_work(:)
 
     call monolis_std_debug_log_header("monolis_fact_solve")
 
@@ -38,13 +38,12 @@ contains
     ldp = max(1, lu%max_front_size)
     call monolis_alloc_R_1d(work, n)
     call monolis_alloc_R_1d(update_work, ldp)
-    call monolis_alloc_R_2d(pivot_work, ldp, 1)
 
     do i = 1, n
       work(i) = rhs(lu%iperm(i))
     end do
 
-    !> 前進代入（後順走査）
+    !> 前進代入（後順走査）。ピボット列は work 上で連続なので直接 dtrsv する
     do order_pos = 1, nfronts
       front = lu%front_postorder(order_pos)
       fs   = lu%factors(front)%front_size
@@ -53,10 +52,8 @@ contains
       first_col = lu%super_start(front)
 
       if (npiv > 0) then
-        pivot_work(1:npiv, 1) = work(first_col:first_col + npiv - 1)
-        call dtrsm('L', 'L', 'N', 'U', npiv, 1, 1.0d0, &
-            lu%factors(front)%factor, max(1, fs), pivot_work, ldp)
-        work(first_col:first_col + npiv - 1) = pivot_work(1:npiv, 1)
+        call dtrsv('L', 'N', 'U', npiv, &
+            lu%factors(front)%factor, max(1, fs), work(first_col), 1)
       end if
 
       if (nupd > 0) then
@@ -66,7 +63,7 @@ contains
         end do
         call dgemv('N', nupd, npiv, -1.0d0, &
             lu%factors(front)%factor(npiv + 1, 1), max(1, fs), &
-            pivot_work(1:npiv, 1), 1, 1.0d0, update_work, 1)
+            work(first_col), 1, 1.0d0, update_work, 1)
         do i = 1, nupd
           idx = lu%front_ind(lu%front_ptr(front) + npiv + i - 1)
           work(idx) = update_work(i)
@@ -83,22 +80,18 @@ contains
       first_col = lu%super_start(front)
 
       if (nupd > 0) then
-        pivot_work(1:npiv, 1) = work(first_col:first_col + npiv - 1)
         do i = 1, nupd
           idx = lu%front_ind(lu%front_ptr(front) + npiv + i - 1)
           update_work(i) = work(idx)
         end do
         call dgemv('N', npiv, nupd, -1.0d0, &
             lu%factors(front)%upper_update, max(1, npiv), update_work, 1, &
-            1.0d0, pivot_work(1:npiv, 1), 1)
-        work(first_col:first_col + npiv - 1) = pivot_work(1:npiv, 1)
+            1.0d0, work(first_col), 1)
       end if
 
       if (npiv > 0) then
-        pivot_work(1:npiv, 1) = work(first_col:first_col + npiv - 1)
-        call dtrsm('L', 'U', 'N', 'N', npiv, 1, 1.0d0, &
-            lu%factors(front)%factor, max(1, fs), pivot_work, ldp)
-        work(first_col:first_col + npiv - 1) = pivot_work(1:npiv, 1)
+        call dtrsv('U', 'N', 'N', npiv, &
+            lu%factors(front)%factor, max(1, fs), work(first_col), 1)
       end if
     end do
 
@@ -108,7 +101,6 @@ contains
 
     call monolis_dealloc_R_1d(work)
     call monolis_dealloc_R_1d(update_work)
-    call monolis_dealloc_R_2d(pivot_work)
   end subroutine monolis_fact_solve
 
 end module mod_monolis_fact_solve

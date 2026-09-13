@@ -63,6 +63,23 @@ module mod_monolis_lapack
       real(kdouble), intent(inout) :: a(lda, *)
     end subroutine
 
+    subroutine dsyrk(uplo, trans, n, k, alpha, a, lda, beta, c, ldc)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: uplo, trans
+      integer(kint), intent(in) :: n, k, lda, ldc
+      real(kdouble), intent(in) :: alpha, beta
+      real(kdouble), intent(in) :: a(lda, *)
+      real(kdouble), intent(inout) :: c(ldc, *)
+    end subroutine
+
+    subroutine dpotrf(uplo, n, a, lda, info)
+      import :: kint, kdouble
+      character(len=1), intent(in) :: uplo
+      integer(kint), intent(in) :: n, lda
+      real(kdouble), intent(inout) :: a(lda, *)
+      integer(kint), intent(out) :: info
+    end subroutine
+
     subroutine dlaset(uplo, m, n, alpha, beta, a, lda)
       import :: kint, kdouble
       character(len=1), intent(in) :: uplo

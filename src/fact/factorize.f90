@@ -215,6 +215,7 @@ contains
       panel_end  = min(npiv, k + front_block_size - 1)
       block_cols = panel_end - k + 1
 
+      !> パネル対角ブロック（block_cols 角）の非ピボット LU
       do j = k, panel_end
         pivot = front_data%factor(j, j)
         if (abs(pivot) <= 100.0d0 * epsilon(1.0d0)) then
@@ -222,14 +223,20 @@ contains
           return
         end if
 
-        len = fs - j
+        len = panel_end - j
         if (len > 0) then
           call dscal(len, 1.0d0 / pivot, front_data%factor(j + 1, j), 1)
-          if (j < panel_end) then
-            call panel_column_update(front_data, j, j + 1, panel_end, len)
-          end if
+          call dger(len, len, -1.0d0, front_data%factor(j + 1, j), 1, &
+              front_data%factor(j, j + 1), ldf, &
+              front_data%factor(j + 1, j + 1), ldf)
         end if
       end do
+
+      !> パネル下部の L: A21 U11^{-1}（対角ブロックの下の行を一括更新）
+      if (fs > panel_end) then
+        call dtrsm('R', 'U', 'N', 'N', fs - panel_end, block_cols, 1.0d0, &
+            front_data%factor(k, k), ldf, front_data%factor(panel_end + 1, k), ldf)
+      end if
 
       trailing_pivots = npiv - panel_end
       if (trailing_pivots > 0) then
@@ -264,22 +271,5 @@ contains
       k = panel_end + 1
     end do
   end subroutine factor_one_front
-
-  !> パネル内の右側列を pivot 列で更新
-  subroutine panel_column_update(front_data, pivot_col, first_col, last_col, len)
-    implicit none
-    type(monolis_mat_frontal), intent(inout) :: front_data
-    integer(kint), intent(in) :: pivot_col, first_col, last_col, len
-
-    integer(kint) :: col
-
-    do col = first_col, last_col
-      if (front_data%factor(pivot_col, col) /= 0.0d0) then
-        call daxpy(len, -front_data%factor(pivot_col, col), &
-            front_data%factor(pivot_col + 1, pivot_col), 1, &
-            front_data%factor(pivot_col + 1, col), 1)
-      end if
-    end do
-  end subroutine panel_column_update
 
 end module mod_monolis_fact_factorize

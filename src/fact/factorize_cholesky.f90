@@ -191,8 +191,7 @@ contains
     integer(kint), intent(out) :: ierr
 
     integer(kint) :: fs, npiv, nupd, ldf, k, j
-    integer(kint) :: panel_end, block_cols, len, trailing_pivots
-    real(kdouble) :: pivot
+    integer(kint) :: panel_end, block_cols, info
 
     ierr = 0
     fs   = front_data%front_size
@@ -206,57 +205,57 @@ contains
       panel_end  = min(npiv, k + front_block_size - 1)
       block_cols = panel_end - k + 1
 
+      !> パネル対角ブロックの Cholesky（LAPACK）
+      call dpotrf('L', block_cols, front_data%factor(k, k), ldf, info)
+      if (info /= 0) then
+        ierr = front
+        return
+      end if
+      !> 微小ピボット検出（元実装の pivot <= 100*eps 相当）
       do j = k, panel_end
-        pivot = front_data%factor(j, j)
-        if (pivot <= 100.0d0 * epsilon(1.0d0)) then
+        if (front_data%factor(j, j) <= sqrt(100.0d0 * epsilon(1.0d0))) then
           ierr = front
           return
         end if
-
-        front_data%factor(j, j) = sqrt(pivot)
-        len = fs - j
-        if (len > 0) then
-          call dscal(len, 1.0d0 / front_data%factor(j, j), front_data%factor(j + 1, j), 1)
-          if (j < panel_end) then
-            call panel_column_update_chol(front_data, j, j + 1, panel_end)
-          end if
-        end if
       end do
 
-      trailing_pivots = npiv - panel_end
-      if (trailing_pivots > 0) then
-        call dgemm('N', 'T', fs - panel_end, trailing_pivots, block_cols, &
-            -1.0d0, front_data%factor(panel_end + 1, k), ldf, &
-            front_data%factor(panel_end + 1, k), ldf, 1.0d0, &
+      !> パネル下部の L: A21 L11^{-T}（対角ブロックの下の行を一括更新）
+      if (fs > panel_end) then
+        call dtrsm('R', 'L', 'T', 'N', fs - panel_end, block_cols, 1.0d0, &
+            front_data%factor(k, k), ldf, front_data%factor(panel_end + 1, k), ldf)
+      end if
+
+      !> 対称性を利用し、正方ブロックは dsyrk（下三角のみ）、
+      !> それ以外の長方形部分は dgemm で更新する
+      if (npiv > panel_end) then
+        call dsyrk('L', 'N', npiv - panel_end, block_cols, &
+            -1.0d0, front_data%factor(panel_end + 1, k), ldf, 1.0d0, &
             front_data%factor(panel_end + 1, panel_end + 1), ldf)
+        if (fs > npiv) then
+          call dgemm('N', 'T', fs - npiv, npiv - panel_end, block_cols, &
+              -1.0d0, front_data%factor(npiv + 1, k), ldf, &
+              front_data%factor(panel_end + 1, k), ldf, 1.0d0, &
+              front_data%factor(npiv + 1, panel_end + 1), ldf)
+        end if
       end if
       if (nupd > 0) then
-        call dgemm('N', 'T', nupd, nupd, block_cols, -1.0d0, &
-            front_data%factor(npiv + 1, k), ldf, &
+        call dsyrk('L', 'N', nupd, block_cols, -1.0d0, &
             front_data%factor(npiv + 1, k), ldf, &
             1.0d0, front_data%contribution, max(1, nupd))
       end if
 
       k = panel_end + 1
     end do
+
+    !> contribution は親フロントへの assembly が全列 run を読むため、
+    !> dsyrk で未計算の狭義上三角を下三角の鏡像で補完する
+    if (nupd > 0) then
+      do k = 2, nupd
+        do j = 1, k - 1
+          front_data%contribution(j, k) = front_data%contribution(k, j)
+        end do
+      end do
+    end if
   end subroutine factor_one_front_cholesky
-
-  !> パネル内の右側列（下三角部）を pivot 列で更新
-  subroutine panel_column_update_chol(front_data, pivot_col, first_col, last_col)
-    implicit none
-    type(monolis_mat_frontal), intent(inout) :: front_data
-    integer(kint), intent(in) :: pivot_col, first_col, last_col
-
-    integer(kint) :: col, fs
-
-    fs = front_data%front_size
-    do col = first_col, last_col
-      if (front_data%factor(col, pivot_col) /= 0.0d0) then
-        call daxpy(fs - col + 1, -front_data%factor(col, pivot_col), &
-            front_data%factor(col, pivot_col), 1, &
-            front_data%factor(col, col), 1)
-      end if
-    end do
-  end subroutine panel_column_update_chol
 
 end module mod_monolis_fact_factorize_cholesky
