@@ -113,6 +113,8 @@ static const int MONOLIS_PRM_I_SPMV_FORMAT = 25;
 
 static const int MONOLIS_PRM_I_ITER_RR = 26;
 
+static const int MONOLIS_PRM_I_IS_HOST_SYNC = 27;
+
 
 static const int MONOLIS_SPMV_ELL = 0;
 

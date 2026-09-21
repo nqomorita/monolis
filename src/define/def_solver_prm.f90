@@ -143,6 +143,9 @@ module mod_monolis_def_solver
   !> パラメータ：残差ベクトルの再計算間隔（0 以下の場合は各解法の既定値を使用）
   integer(kint), parameter :: monolis_prm_I_iter_RR = 26
 
+  !> パラメータ：求解境界におけるホスト同期の有無（GPU ビルドのみ有効、既定 ON）
+  integer(kint), parameter :: monolis_prm_I_is_host_sync = 27
+
   !> パラメータ：SpMV 格納形式（ELL 形式、GPU 既定）
   integer(kint), parameter :: monolis_spmv_ELL = 0
   !> パラメータ：SpMV 格納形式（DIA 形式）
@@ -215,6 +218,7 @@ contains
     monoPRM%Iarray(monolis_prm_I_IDRS_DIM) = 4
     monoPRM%Iarray(monolis_prm_I_spmv_format) = monolis_spmv_ELL
     monoPRM%Iarray(monolis_prm_I_iter_RR) = 0
+    monoPRM%Iarray(monolis_prm_I_is_host_sync) = monolis_I_true
 
     monoPRM%Rarray(monolis_prm_R_tol) = 1.0d-8
     monoPRM%Rarray(monolis_prm_R_cur_resid) = 0.0d0

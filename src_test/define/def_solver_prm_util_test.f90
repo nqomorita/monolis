@@ -25,6 +25,7 @@ contains
     call monolis_std_global_log_string("monolis_set_solver_IDRS_num_basis")
     call monolis_std_global_log_string("monolis_set_iter_RR")
     call monolis_std_global_log_string("monolis_set_spmv_format")
+    call monolis_std_global_log_string("monolis_prm_enable_host_sync")
     call monolis_std_global_log_string("monolis_show_iterlog")
     call monolis_std_global_log_string("monolis_show_timelog")
     call monolis_std_global_log_string("monolis_show_summary")
@@ -149,6 +150,13 @@ contains
     monolis%PRM%Iarray = 0
     call monolis_set_iter_RR(monolis, 100)
     call monolis_test_check_eq_I1("monolis_def_solver_util_test 27", monolis%PRM%Iarray(monolis_prm_I_iter_RR), 100)
+
+    monolis%PRM%Iarray = 0
+    call monolis_prm_enable_host_sync(monolis, .true.)
+    call monolis_test_check_eq_I1("monolis_def_solver_util_test 28", monolis%PRM%Iarray(monolis_prm_I_is_host_sync), 1)
+
+    call monolis_prm_enable_host_sync(monolis, .false.)
+    call monolis_test_check_eq_I1("monolis_def_solver_util_test 29", monolis%PRM%Iarray(monolis_prm_I_is_host_sync), 0)
   end subroutine monolis_def_solver_util_test
 
 end module mod_monolis_def_solver_util_test

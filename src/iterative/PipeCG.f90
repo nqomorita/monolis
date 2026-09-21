@@ -26,7 +26,7 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
     integer(kint) :: NNDOF, NPNDOF
-    integer(kint) :: iter, iter_RR
+    integer(kint) :: i, iter, iter_RR
     real(kdouble) :: alpha, alpha1, beta, gamma, gamma1, delta
     real(kdouble) :: CG(3), B2, R2
     real(kdouble) :: tspmv, tdotp, tcomm_spmv, tcomm_dotp
@@ -67,10 +67,19 @@ contains
     !$acc enter data create(R(1:NPNDOF), U(1:NPNDOF), V(1:NPNDOF), Q(1:NPNDOF), P(1:NPNDOF), &
     !$acc                   Z(1:NPNDOF), L(1:NPNDOF), M(1:NPNDOF), S(1:NPNDOF))
 
+    !# 反復初回に係数ゼロで参照される配列をデバイス上で初期化（create 直後は不定値のため）
+    !$acc parallel loop present(P, Q, S, Z)
+    do i = 1, NPNDOF
+      P(i) = 0.0d0
+      Q(i) = 0.0d0
+      S(i) = 0.0d0
+      Z(i) = 0.0d0
+    enddo
+    !$acc end parallel loop
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
-      !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, U, V, Q, P, Z, L, M, S)
       call monolis_dealloc_R_1d(R)
       call monolis_dealloc_R_1d(U)
@@ -134,8 +143,6 @@ contains
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
     enddo
-
-    !$acc update self(X(1:NPNDOF))
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

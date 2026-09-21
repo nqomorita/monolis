@@ -68,10 +68,19 @@ contains
     !$acc enter data create(R(1:NPNDOF), R0(1:NPNDOF), W0(1:NPNDOF), T(1:NPNDOF), S(1:NPNDOF), &
     !$acc                   P(1:NPNDOF), Z(1:NPNDOF), Q(1:NPNDOF), Y(1:NPNDOF), V(1:NPNDOF))
 
+    !# 反復初回に係数ゼロで参照される配列をデバイス上で初期化（create 直後は不定値のため）
+    !$acc parallel loop present(P, S, Z, V)
+    do i = 1, NPNDOF
+      P(i) = 0.0d0
+      S(i) = 0.0d0
+      Z(i) = 0.0d0
+      V(i) = 0.0d0
+    enddo
+    !$acc end parallel loop
+
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
-      !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, R0, W0, T, S, P, Z, Q, Y, V)
       call monolis_dealloc_R_1d(R )
       call monolis_dealloc_R_1d(R0)
@@ -178,8 +187,6 @@ contains
       omega = omega1
       RR    = RR1
     enddo
-
-    !$acc update self(X(1:NPNDOF))
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

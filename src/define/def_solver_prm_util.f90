@@ -14,6 +14,7 @@
 !# subroutine monolis_set_prec_stored(monolis, param)
 !# subroutine monolis_set_error_abort(monolis, param)
 !# subroutine monolis_set_iter_RR(monolis, param)
+!# subroutine monolis_prm_enable_host_sync(monolis, param)
 !# subroutine monolis_show_iterlog(monolis, param)
 !# subroutine monolis_show_timelog(monolis, param)
 !# subroutine monolis_show_summary(monolis, param)
@@ -67,6 +68,22 @@ contains
     integer(kint), intent(in) :: param
     monolis%PRM%Iarray(monolis_prm_I_spmv_format) = param
   end subroutine monolis_set_spmv_format
+
+  !> @ingroup param
+  !> 求解境界におけるホスト同期の有無の設定（GPU ビルドのみ有効、既定 ON）
+  !> @details
+  !> ON（既定）では、求解開始時にホストの右辺・初期解を正としてデバイスへ転送し、
+  !> 求解終了時に共有節点（袖）を含む解をホストへ書き戻す。
+  !> OFF ではデバイス常駐値を正として境界転送を行わない（GPU 常駐向けの上級者設定）。
+  subroutine monolis_prm_enable_host_sync(monolis, param)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in] パラメータ
+    logical, intent(in) :: param
+
+    monolis%PRM%Iarray(monolis_prm_I_is_host_sync) = monolis_conv_L2I(param)
+  end subroutine monolis_prm_enable_host_sync
 
   !> @ingroup param
   !> 最大反復回数の設定

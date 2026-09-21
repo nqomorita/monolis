@@ -40,6 +40,16 @@ void monolis_set_spmv_format(
   int      param);
 
 /**
+ * @brief 求解境界におけるホスト同期の有無の設定（GPU ビルドのみ有効、既定 ON）
+ * @param[inout] mat monolis 構造体
+ * @param[in] param パラメータ
+ * @ingroup param
+ */
+void monolis_prm_enable_host_sync(
+  MONOLIS* mat,
+  bool     param);
+
+/**
  * @brief 最大反復回数の設定
  * @param[inout] mat monolis 構造体
  * @param[in] prm パラメータ

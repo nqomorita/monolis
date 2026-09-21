@@ -25,6 +25,13 @@ void monolis_set_spmv_format(
   mat->prm.Iarray[MONOLIS_PRM_I_SPMV_FORMAT] = param;
 }
 
+void monolis_prm_enable_host_sync(
+  MONOLIS* mat,
+  bool     param)
+{
+  mat->prm.Iarray[MONOLIS_PRM_I_IS_HOST_SYNC] = (int)param;
+}
+
 void monolis_set_maxiter(
   MONOLIS* mat,
   int      param)

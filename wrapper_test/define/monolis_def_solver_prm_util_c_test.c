@@ -150,4 +150,11 @@ void monolis_def_solver_util_c_test(){
   i_param = 100;
   monolis_set_iter_RR(&mat, i_param);
   monolis_test_check_eq_I1("monolis_def_solver_util_c_test 27", mat.prm.Iarray[MONOLIS_PRM_I_ITER_RR], 100);
+
+  clear_Iarray(&mat);
+  monolis_prm_enable_host_sync(&mat, true);
+  monolis_test_check_eq_I1("monolis_def_solver_util_c_test 28", mat.prm.Iarray[MONOLIS_PRM_I_IS_HOST_SYNC], 1);
+
+  monolis_prm_enable_host_sync(&mat, false);
+  monolis_test_check_eq_I1("monolis_def_solver_util_c_test 29", mat.prm.Iarray[MONOLIS_PRM_I_IS_HOST_SYNC], 0);
 }

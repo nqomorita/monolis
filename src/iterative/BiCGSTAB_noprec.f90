@@ -67,7 +67,6 @@ contains
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
     if(is_converge)then
-      !$acc update self(X(1:NPNDOF))
       !$acc exit data delete(R, RT, P, S, T, V)
       call monolis_dealloc_R_1d(R )
       call monolis_dealloc_R_1d(RT)
@@ -139,8 +138,6 @@ contains
 
       rho1 = rho
     enddo
-
-    !$acc update self(X(1:NPNDOF))
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 
