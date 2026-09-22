@@ -100,9 +100,10 @@ contains
     call monolis_precond_setup(monoPRM, monoCOM, monoMAT, monoPREC)
 
 #ifdef _OPENACC
-    !# GPU 実装のない解法（BiCGSTAB_N128 / IDRS）はデバイス常駐を行わずホスト（CSR 形式）で実行する
+    !# GPU 実装のない解法（BiCGSTAB_N128 / SOR / IDRS）はデバイス常駐を行わずホスト（CSR 形式）で実行する
     method = monoPRM%Iarray(monolis_prm_I_method)
     use_device = .not. (method == monolis_iter_BiCGSTAB_N128 &
+      & .or. method == monolis_iter_SOR &
       & .or. method == monolis_iter_IDRS)
 
     !# 求解境界でのホスト同期の有無（既定 ON）。OFF はデバイス常駐値を正とする上級者向けモード
