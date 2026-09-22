@@ -65,16 +65,8 @@ contains
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge)then
-      !$acc exit data delete(R, U, V, Q, P, S)
-      call monolis_dealloc_R_1d(R)
-      call monolis_dealloc_R_1d(U)
-      call monolis_dealloc_R_1d(V)
-      call monolis_dealloc_R_1d(Q)
-      call monolis_dealloc_R_1d(P)
-      call monolis_dealloc_R_1d(S)
-      return
-    endif
+    !# 早期収束（右辺が零ベクトル）時も終了処理は共通経路に流す
+    if(.not. is_converge)then
 
     call monolis_precond_apply_R(monoPRM, monoCOM, monoMAT, monoPREC, R, U)
 
@@ -115,6 +107,8 @@ contains
 
       rho1 = rho
     enddo
+
+    endif
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

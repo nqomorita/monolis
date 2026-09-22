@@ -53,7 +53,9 @@ contains
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+
+    !# 早期収束（右辺が零ベクトル）時も終了処理は共通経路に流す
+    if(.not. is_converge)then
 
     call monolis_solver_SOR_setup(monoMAT)
     call monolis_inner_product_main_R(monoCOM, NNDOF, B, B, B2, tdotp, tcomm_dotp)
@@ -65,6 +67,8 @@ contains
       call monolis_check_converge_R(monoPRM, monoCOM, monoMAT, R, B2, iter, is_converge, tdotp, tcomm_dotp)
       if(is_converge) exit
     enddo
+
+    endif
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

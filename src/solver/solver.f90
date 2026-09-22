@@ -85,13 +85,20 @@ contains
     !> [in,out] 前処理構造体
     type(monolis_mat), intent(inout) :: monoPREC
 #ifdef _OPENACC
-    integer(kint) :: NNDOF, NPNDOF, method, i
+    integer(kint) :: NNDOF, NPNDOF, method
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
     integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
-    logical :: is_ell, is_var, is_ell_gpu_11, use_device, is_host_sync
+    logical :: is_ell, is_var, is_ell_gpu_11, use_device
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
+
+    !# デバイス常駐モード（ホスト同期 OFF）は未対応。行列・前処理対角がホスト正本のままであり、
+    !# ホスト実行解法（SOR / IDRS / BiCGSTAB_N128）では解がデバイスに反映されないため禁止する。
+    if(monoPRM%Iarray(monolis_prm_I_is_host_sync) /= monolis_I_true)then
+      call monolis_std_error_string("device-resident mode (host sync disabled) is not supported")
+      call monolis_std_error_stop()
+    endif
 
     call monolis_timer_initialize(monoPRM)
 
@@ -105,12 +112,6 @@ contains
     use_device = .not. (method == monolis_iter_BiCGSTAB_N128 &
       & .or. method == monolis_iter_SOR &
       & .or. method == monolis_iter_IDRS)
-
-    !# 求解境界でのホスト同期の有無（既定 ON）。OFF はデバイス常駐値を正とする上級者向けモード
-    is_host_sync = (monoPRM%Iarray(monolis_prm_I_is_host_sync) == monolis_I_true)
-    if(.not. is_host_sync)then
-      call monolis_std_debug_log_string("monolis_solve_main_R", "host sync is disabled (device-resident mode)")
-    endif
 
     if(use_device)then
     !# 初期解のゼロクリアはデバイス転送前に行う（転送後にホスト側でクリアしてもデバイス側に反映されないため）
@@ -145,22 +146,9 @@ contains
     B     => monoMAT%R%B
     precD => monoPREC%R%D
 
-    if(is_host_sync)then
-      !# ホスト同期 ON（既定）：ホストの右辺・初期解を正としてデバイスへ転送（常駐済みでも上書き）
-      !$acc enter data create(X(1:NPNDOF), B(1:NPNDOF))
-      !$acc update device(X(1:NPNDOF), B(1:NPNDOF))
-    else
-      !# ホスト同期 OFF：デバイス常駐値を正とする（present の場合は転送されない）
-      !$acc enter data copyin(X(1:NPNDOF), B(1:NPNDOF))
-      if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
-        !# 初期解のゼロクリアをデバイス常駐値にも反映する
-        !$acc parallel loop present(X)
-        do i = 1, NPNDOF
-          X(i) = 0.0d0
-        enddo
-        !$acc end parallel loop
-      endif
-    endif
+    !# ホストの右辺・初期解を正としてデバイスへ転送する（常駐済みでも上書きする）
+    !$acc enter data create(X(1:NPNDOF), B(1:NPNDOF))
+    !$acc update device(X(1:NPNDOF), B(1:NPNDOF))
     !$acc enter data copyin(precD)
     if(is_ell)then
       if(.not. is_ell_gpu_11)then
@@ -189,10 +177,8 @@ contains
 #ifdef _OPENACC
     if(use_device)then
     !# ソルバの事後条件：デバイス上の X は共有節点（袖）を含めて最新である
-    !# ホスト同期 ON の場合のみ、ここで一元的にホストへ書き戻す
-    if(is_host_sync)then
-      !$acc update self(X(1:NPNDOF))
-    endif
+    !# ホストへの書き戻しはここで一元的に行う（各ソルバ内では行わない）
+    !$acc update self(X(1:NPNDOF))
     if(is_var)then
       if(is_ell)then
         !$acc exit data delete(monoMAT%ELL%Vptr)

@@ -61,7 +61,9 @@ contains
 
     call monolis_residual_main_C(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_C(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge) return
+
+    !# 早期収束（右辺が零ベクトル）時も終了処理は共通経路に流す
+    if(.not. is_converge)then
 
     do iter = 1, monoPRM%Iarray(monolis_prm_I_max_iter)
       call monolis_precond_apply_C(monoPRM, monoCOM, monoMAT, monoPREC, R, Z)
@@ -91,6 +93,8 @@ contains
 
       rho1 = rho
     enddo
+
+    endif
 
     call monolis_mpi_update_C_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

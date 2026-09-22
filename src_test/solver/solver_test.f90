@@ -25,8 +25,7 @@ contains
   end subroutine monolis_solve_test
 
   !> GPU 動作確認テスト
-  !> 構成 (b) シミュレータ CPU + monolis GPU（ホスト同期 ON）と
-  !> 構成 (c) シミュレータ GPU + monolis GPU（ホスト同期 OFF）を検証する。
+  !> シミュレータ CPU + monolis GPU（ホスト同期 ON）を検証する。
   !> CPU ビルドでは OpenACC 指示文がコメントとなり、袖領域の整合性テストとして機能する
   subroutine monolis_solve_gpu_test()
     implicit none
@@ -50,14 +49,9 @@ contains
         call monolis_solve_host_sync_test_main(n_dof, method(i), monolis_prec_SOR)
       enddo
     enddo
-
-    do i = 1, monolis_solve_test_n_method
-      call monolis_solve_device_resident_test_main(1, method(i), monolis_prec_DIAG)
-      call monolis_solve_device_resident_test_main(3, method(i), monolis_prec_DIAG)
-    enddo
   end subroutine monolis_solve_gpu_test
 
-  !> 構成 (b)：ホスト同期 ON（既定）の検証
+  !> ホスト同期 ON（既定）の検証
   !> 求解後のホスト側解ベクトルが袖（共有計算点）を含めて正しいことを確認する
   subroutine monolis_solve_host_sync_test_main(n_dof, method, prec)
     implicit none
@@ -105,69 +99,6 @@ contains
     call monolis_dealloc_R_1d(x_ans)
     call monolis_finalize(mat)
   end subroutine monolis_solve_host_sync_test_main
-
-  !> 構成 (c)：ホスト同期 OFF（デバイス常駐モード）の検証
-  !> 呼出し側が解・右辺ベクトルのデバイス常駐を所有し、求解後もデバイス上の値が正しいことを確認する
-  subroutine monolis_solve_device_resident_test_main(n_dof, method, prec)
-    implicit none
-    !> [in] 計算点が持つ自由度
-    integer(kint), intent(in) :: n_dof
-    !> [in] 反復解法
-    integer(kint), intent(in) :: method
-    !> [in] 前処理
-    integer(kint), intent(in) :: prec
-    type(monolis_structure) :: mat
-    type(monolis_com) :: com
-    integer(kint) :: NPNDOF, i
-    real(kdouble), allocatable :: b(:), x(:), x_comm(:), x_ans(:)
-
-    call monolis_std_log_I1("DOF", n_dof)
-    call monolis_std_log_I1("METHOD", method)
-    call monolis_std_log_I1("PRECOND", prec)
-
-    call monolis_solve_test_get_mat(mat, com, n_dof, NPNDOF, b)
-
-    call monolis_alloc_R_1d(x, NPNDOF)
-    call monolis_alloc_R_1d(x_comm, NPNDOF)
-    call monolis_alloc_R_1d(x_ans, NPNDOF)
-    x_ans = 1.0d0
-
-    call monolis_set_method(mat, method)
-    call monolis_set_precond(mat, prec)
-    call monolis_set_maxiter(mat, 1000)
-    call monolis_set_tolerance(mat, 1.0d-10)
-    call monolis_prm_enable_host_sync(mat, .false.)
-
-    do i = 1, NPNDOF
-      mat%MAT%R%B(i) = b(i)
-      mat%MAT%R%X(i) = 0.0d0
-    enddo
-
-    !# シミュレータ側が右辺・解ベクトルのデバイス常駐を所有する
-    !$acc enter data copyin(mat%MAT%R%X, mat%MAT%R%B)
-
-    call monolis_solve_main_R(mat%PRM, com, mat%MAT, mat%PREC)
-
-    !# ホスト同期 OFF ではデバイス上の値が正。ホストへの取り出しは呼出し側の責任で行う
-    !$acc update self(mat%MAT%R%X)
-    !$acc exit data delete(mat%MAT%R%X, mat%MAT%R%B)
-
-    do i = 1, NPNDOF
-      x(i) = mat%MAT%R%X(i)
-    enddo
-
-    call monolis_test_check_eq_R("monolis_solve_gpu_test device resident solution", x, x_ans)
-
-    x_comm = x
-    call monolis_mpi_update_R(com, n_dof, x_comm)
-    call monolis_test_check_eq_R("monolis_solve_gpu_test device resident ghost", x_comm, x)
-
-    call monolis_dealloc_R_1d(b)
-    call monolis_dealloc_R_1d(x)
-    call monolis_dealloc_R_1d(x_comm)
-    call monolis_dealloc_R_1d(x_ans)
-    call monolis_finalize(mat)
-  end subroutine monolis_solve_device_resident_test_main
 
   !> GPU 動作確認テスト用の分割行列・右辺ベクトルの生成
   !> 各ランクが内部計算点 4 個を持つ 1 次元チェーンを構成し、隣接ランクの端点を袖として保持する。

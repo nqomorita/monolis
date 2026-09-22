@@ -86,22 +86,8 @@ contains
 
     call monolis_residual_main_R(monoCOM, monoMAT, X, B, R, tspmv, tcomm_spmv)
     call monolis_set_converge_R(monoCOM, monoMAT, B, B2, is_converge, tdotp, tcomm_dotp)
-    if(is_converge)then
-      !$acc exit data delete(P, U, Z, Y, R, V, T1, T2, AP, MR, AU, R0)
-      call monolis_dealloc_R_1d(R)
-      call monolis_dealloc_R_1d(Z)
-      call monolis_dealloc_R_1d(P)
-      call monolis_dealloc_R_1d(U)
-      call monolis_dealloc_R_1d(Y)
-      call monolis_dealloc_R_1d(V)
-      call monolis_dealloc_R_1d(T1)
-      call monolis_dealloc_R_1d(T2)
-      call monolis_dealloc_R_1d(AP)
-      call monolis_dealloc_R_1d(MR)
-      call monolis_dealloc_R_1d(AU)
-      call monolis_dealloc_R_1d(R0)
-      return
-    endif
+    !# 早期収束（右辺が零ベクトル）時も終了処理は共通経路に流す
+    if(.not. is_converge)then
 
     call monolis_vec_copy_R(NNDOF, R, R0)
     call monolis_inner_product_main_R(monoCOM, NNDOF, R0, R, r1, tdotp, tcomm_dotp)
@@ -201,6 +187,8 @@ contains
         beta = (alpha/zeta) * (r1/rho)
       endif
     enddo
+
+    endif
 
     call monolis_mpi_update_R_wrapper(monoCOM, monoMAT%NDOF, monoMAT%n_dof_index, X, tcomm_spmv)
 

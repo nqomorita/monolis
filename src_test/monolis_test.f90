@@ -86,6 +86,7 @@ program monolis_test
 
   call monolis_precond_test()
   call monolis_solve_test()
+  call monolis_solver_IDRS_regression_test()
 
   call monolis_pord_core_test()
   call monolis_pord_graph_test()
