@@ -205,6 +205,12 @@ contains
     call monolis_std_debug_log_header("monolis_matmat_value_nn")
 #endif
 
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式により行列値のホスト鏡像は最新である)
+    !$acc wait(1)
+#endif
+
     NP = A%NP
     NDOF2 = NDOF * NDOF
     nz = C%CSR%index(NP + 1)

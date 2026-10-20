@@ -317,7 +317,7 @@ program main
     do i = 1, n_elem
       eid = elem(:,i)
       r = coef(global_eid(i))
-      val = complex(r, r)
+      val = cmplx(r, r, kind=kdouble)
       if(eid(1) == eid(2))then
         call monolis_add_scalar_to_sparse_matrix_C(mat, eid(1), eid(2), 1, 1, val)
       else

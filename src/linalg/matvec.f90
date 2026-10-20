@@ -438,7 +438,8 @@ contains
 !$omp & private(YT, XT, i, k, l, d, jcol, kn)
 !$omp do
 #endif
-!$acc parallel loop gang vector present(Adia, offset, X, Y) private(YT, XT)
+!# 非常駐データの単体呼び出しにも対応するため present_or_copy とする(常駐時は転送しない)
+!$acc parallel loop gang vector copyin(Adia, offset, X) copy(Y) private(YT, XT)
     do i = 1, N
       do k = 1, NDOF
         YT(k) = 0.0d0
@@ -501,7 +502,8 @@ contains
 !$omp & private(YT, XT, i, k, l, j, jcol, kn)
 !$omp do
 #endif
-!$acc parallel loop gang vector present(Aell, col, X, Y) private(YT, XT)
+!# 非常駐データの単体呼び出しにも対応するため present_or_copy とする(常駐時は転送しない)
+!$acc parallel loop gang vector copyin(Aell, col, X) copy(Y) private(YT, XT)
     do i = 1, N
       do k = 1, NDOF
         YT(k) = 0.0d0
@@ -563,7 +565,8 @@ contains
 !$omp & private(yt, i, j, jcol, offset)
 !$omp do
 #endif
-!$acc parallel loop gang vector present(Aell, col, X, Y) private(yt, j, jcol, offset)
+!# 非常駐データの単体呼び出しにも対応するため present_or_copy とする(常駐時は転送しない)
+!$acc parallel loop gang vector copyin(Aell, col, X) copy(Y) private(yt, j, jcol, offset)
     do i = 1, N
       yt = 0.0d0
 !$acc loop seq
@@ -616,7 +619,8 @@ contains
 !$omp & private(i, k, l, d, jcol, aoff, n1, n2, xoff, yoff)
 !$omp do
 #endif
-!$acc parallel loop gang vector present(Adia, Vptr, offset, n_dof_list, n_dof_index, X, Y)
+!# 非常駐データの単体呼び出しにも対応するため present_or_copy とする(常駐時は転送しない)
+!$acc parallel loop gang vector copyin(Adia, Vptr, offset, n_dof_list, n_dof_index, X) copy(Y)
     do i = 1, N
       n1 = n_dof_list(i)
       yoff = n_dof_index(i)
@@ -678,7 +682,8 @@ contains
 !$omp & private(i, k, l, j, jcol, aoff, n1, n2, xoff, yoff)
 !$omp do
 #endif
-!$acc parallel loop gang vector present(Aell, Vptr, col, n_dof_list, n_dof_index, X, Y)
+!# 非常駐データの単体呼び出しにも対応するため present_or_copy とする(常駐時は転送しない)
+!$acc parallel loop gang vector copyin(Aell, Vptr, col, n_dof_list, n_dof_index, X) copy(Y)
     do i = 1, N
       n1 = n_dof_list(i)
       yoff = n_dof_index(i)

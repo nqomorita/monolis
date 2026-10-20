@@ -106,6 +106,12 @@ contains
     integer(kint) :: perm(:), iperm(:)
     integer(kint) :: N, NP, NZ, NDOF, NDOF2
 
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式により行列値のホスト鏡像は最新である)
+    !$acc wait(1)
+#endif
+
     N = monoMAT%N
     NP = monoMAT%NP
     NZ = monoMAT%CSR%index(NP + 1)

@@ -11,10 +11,12 @@ Fortran で実装され、C ラッパが提供されます。
 ./install_lib.sh        # 通常 (gfortran/OpenMPI)
 ./install_lib_intel.sh  # Intel oneAPI
 ./install_lib_A64FX.sh  # 富岳 (mpifrtpx)
-make                    # ライブラリ + 全テストバイナリ
+make                    # ライブラリ + driver バイナリ
+make all                # ライブラリ + 全テストバイナリ
 make -j8                # 並列ビルド (Fortran module 依存は .depend で自動解決)
 make FLAGS=DEBUG        # デバッグビルド (bounds check, fpe trap)
 make FLAGS=INTEL        # Intel コンパイラビルド
+make FLAGS=GPU_GNU      # GPU ビルド (NVIDIA HPC SDK, OpenACC)
 make clean
 ```
 
@@ -83,6 +85,36 @@ CI のテストは [src_test/run.CI.sh](src_test/run.CI.sh) と [wrapper_test/ru
 5. テストは [wrapper_test/](wrapper_test/) に同名で追加し `SRC_*_C_TEST` に登録。
 
 C 側は **0-based**、Fortran 側に渡す際に通信テーブル (`recv_item`/`send_item`) は `+1` で 1-based に変換します ([wrapper/solver/solver_wrapper.f90](wrapper/solver/solver_wrapper.f90))。
+
+## GPU ビルド (OpenACC) と行列の GPU 正本化
+
+`make FLAGS=GPU_GNU` (NVIDIA HPC SDK) では行列を **GPU 正本 (device-resident)** として扱います。
+追加の API はなく、既存関数への OpenACC ディレクティブ挿入のみで実装されています
+(CPU ビルドではディレクティブが無効化され従来動作)。
+
+- **常駐の開始**: `monolis_get_nonzero_pattern_by_*` / `monolis_set_matrix_BCSR_R` /
+  `monolis_copy_mat_nonzero_pattern_R` で実数型の A・B・X・CSR/CSC・自由度配列を
+  `enter data copyin` でデバイスへ常駐。解放は `monolis_mat_finalize` 系の
+  `exit data delete` ガードで行う。常駐判定は `acc_is_present` (フラグ構造体なし)。
+- **ライトスルー方式**: 組み立て (`set/add_scalar/block/matrix`)・Dirichlet 境界条件・
+  クリア・`set_RHS`・変換 (CSR→ELL/DIA 詰め替え) は **ホスト鏡像とデバイスの両方** を更新する。
+  ホスト側 API を経由する限り両者は常に一致し、ホスト実行経路 (SOR/IDRS/BiCGSTAB_N128、
+  固有値解法、前処理生成、`get_scalar` 等) は転送なしでホスト鏡像を参照できる。
+- **非同期キュー**: 組み立てのデバイスカーネルは `async(1)` に投入する (同期実行比で約 2 倍高速)。
+  デバイス側で A を消費する箇所 (solve 入口、境界条件、形式変換、前処理生成、クリア、解放) は
+  `!$acc wait(1)` で順序を保証する。
+- **禁止事項**: GPU ビルドで `monolis%MAT%R%A` 等への**ホスト直接書き込み後にデバイス消費**
+  (solve・変換) を行うと、デバイス側へ反映されず不正な結果となる。必ず API
+  (`monolis_set_array_to_sparse_matrix_R` 等) を使用すること
+  ([src_test/linalg/matvec_test.f90](src_test/linalg/matvec_test.f90) 参照)。
+- **ソルバ内の扱い**: `monolis_solve_main_R` は X・B が常駐なら転送せず (present 前提)、
+  非常駐 (C ラッパ経路等) ならレガシー動作 (copyin/update) にフォールバックする。
+  `monolis_prm_I_is_host_sync` を OFF にすると solve 後の X のホスト書き戻しを省略できる
+  (解の取得は `monolis_get_solution_R` がデバイスから直接読む)。
+- **MPI 並列**: 袖通信はデバイスポインタで行われるため CUDA 対応 UCX が必要
+  (`UCX_TLS=self,sm,cuda_copy,cuda_ipc` 等。[build_gpu_mog1.sh](build_gpu_mog1.sh) 参照)。
+- **スコープ**: 実数型 (`_R`) のみ。複素数型・マージン付きパターン
+  (`monolis_alloc_nonzero_pattern_with_margin_*`) は非常駐 (ホスト経路) で動作する。
 
 ## テスト追加のルール
 

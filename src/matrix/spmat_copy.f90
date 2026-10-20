@@ -2,6 +2,9 @@ module mod_monolis_spmat_copy
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -77,6 +80,16 @@ contains
 
     call monolis_copy_mat_nonzero_pattern_val_R(NP_t, NZ_t, NZD, NZU, NZL, &
       mat_in%MAT%R, mat_out%MAT%R)
+
+#ifdef _OPENACC
+    !# GPU 正本モード:コピー先の行列値・ベクトル・パターン配列をデバイスへ常駐させる
+    !$acc enter data copyin(mat_out%MAT%CSR%index, mat_out%MAT%CSR%item)
+    if(associated(mat_out%MAT%CSC%index))then
+      !$acc enter data copyin(mat_out%MAT%CSC%index, mat_out%MAT%CSC%item, mat_out%MAT%CSC%perm)
+    endif
+    !$acc enter data copyin(mat_out%MAT%n_dof_list, mat_out%MAT%n_dof_index, mat_out%MAT%n_dof_index2)
+    !$acc enter data copyin(mat_out%MAT%R%A, mat_out%MAT%R%B, mat_out%MAT%R%X)
+#endif
   end subroutine monolis_copy_mat_nonzero_pattern_R
 
   !> @ingroup matrix_copy
@@ -139,6 +152,12 @@ contains
     type(monolis_mat_val_R), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_mat_val_R), intent(inout) :: mat_out
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式によりコピー元のホスト鏡像は最新である)
+    !$acc wait(1)
+#endif
 
     call monolis_pdealloc_R_1d(mat_out%X)
     call monolis_palloc_R_1d(mat_out%X, NP)
@@ -331,7 +350,15 @@ contains
     type(monolis_structure), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_structure), intent(inout) :: mat_out
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ってからホストでコピーし、
+    !# コピー先がデバイス常駐ならデバイスへ反映する(コピー元のホスト鏡像は最新である)
+    !$acc wait(1)
+#endif
     mat_out%MAT%R%A = mat_in%MAT%R%A
+#ifdef _OPENACC
+    !$acc update device(mat_out%MAT%R%A) if_present
+#endif
   end subroutine monolis_copy_mat_value_matrix_R
 
   !> @ingroup matrix_copy
@@ -342,7 +369,11 @@ contains
     type(monolis_structure), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_structure), intent(inout) :: mat_out
+    !# GPU 正本モード:ホストでコピーし、コピー先がデバイス常駐ならデバイスへ反映する
     mat_out%MAT%R%B = mat_in%MAT%R%B
+#ifdef _OPENACC
+    !$acc update device(mat_out%MAT%R%B) if_present
+#endif
   end subroutine monolis_copy_mat_value_rhs_R
 
   !> @ingroup matrix_copy
@@ -353,7 +384,11 @@ contains
     type(monolis_structure), intent(in) :: mat_in
     !> [in,out] monolis 構造体（出力）
     type(monolis_structure), intent(inout) :: mat_out
+    !# GPU 正本モード:ホストでコピーし、コピー先がデバイス常駐ならデバイスへ反映する
     mat_out%MAT%R%X = mat_in%MAT%R%X
+#ifdef _OPENACC
+    !$acc update device(mat_out%MAT%R%X) if_present
+#endif
   end subroutine monolis_copy_mat_value_solution_R
 
   !> @ingroup matrix_copy
@@ -419,7 +454,19 @@ contains
     implicit none
     !> [in,out] monolis 構造体（入力）
     type(monolis_structure), intent(inout) :: mat
-    mat%MAT%R%A = 0.0d0
+    real(kdouble), pointer, contiguous :: V(:)
+    V => mat%MAT%R%A
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、
+    !# デバイス常駐の場合はデバイス側もゼロ初期化する(ライトスルー)
+    !$acc wait(1)
+    if(acc_is_present(V))then
+!$acc kernels present(V)
+      V = 0.0d0
+!$acc end kernels
+    endif
+#endif
+    V = 0.0d0
   end subroutine monolis_clear_mat_value_matrix_R
 
   !> @ingroup matrix_copy
@@ -428,7 +475,17 @@ contains
     implicit none
     !> [in,out] monolis 構造体（入力）
     type(monolis_structure), intent(inout) :: mat
-    mat%MAT%R%B = 0.0d0
+    real(kdouble), pointer, contiguous :: V(:)
+    V => mat%MAT%R%B
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐の場合はデバイス側もゼロ初期化する(ライトスルー)
+    if(acc_is_present(V))then
+!$acc kernels present(V)
+      V = 0.0d0
+!$acc end kernels
+    endif
+#endif
+    V = 0.0d0
   end subroutine monolis_clear_mat_value_rhs_R
 
   !> @ingroup matrix_copy
@@ -437,7 +494,17 @@ contains
     implicit none
     !> [in,out] monolis 構造体（入力）
     type(monolis_structure), intent(inout) :: mat
-    mat%MAT%R%X = 0.0d0
+    real(kdouble), pointer, contiguous :: V(:)
+    V => mat%MAT%R%X
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐の場合はデバイス側もゼロ初期化する(ライトスルー)
+    if(acc_is_present(V))then
+!$acc kernels present(V)
+      V = 0.0d0
+!$acc end kernels
+    endif
+#endif
+    V = 0.0d0
   end subroutine monolis_clear_mat_value_solution_R
 
   !> @ingroup matrix_copy

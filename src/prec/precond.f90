@@ -78,6 +78,12 @@ contains
 
     precond = monoPRM%Iarray(monolis_prm_I_precond)
 
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式によりホスト実行の前処理生成もホスト鏡像を安全に参照できる)
+    !$acc wait(1)
+#endif
+
     if(precond == monolis_prec_DIAG)then
       call monolis_precond_diag_setup_R(monoPRM, monoCOM, monoMAT, monoPREC)
     !elseif(precond == monolis_prec_ILU)then

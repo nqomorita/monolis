@@ -3,6 +3,9 @@ module mod_monolis_spmat_convert_dia
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
   private
@@ -26,6 +29,11 @@ contains
     integer(kint) :: N, NP, NDOF, NDOF2, Ndiag
     integer(kint) :: i, j, k, l, in, jS, jE, d, idx
     integer(kint), allocatable :: diag_of_offset(:)
+    integer(kint), pointer, contiguous :: csrIndex(:), csrItem(:)
+    real(kdouble), pointer, contiguous :: csrA(:), diaA(:)
+#ifdef _OPENACC
+    logical :: is_dev
+#endif
 
     call monolis_std_debug_log_header("monolis_convert_CSR_to_DIA_R")
 
@@ -33,6 +41,9 @@ contains
     NP   = monoMAT%NP
     NDOF = monoMAT%NDOF
     NDOF2 = NDOF*NDOF
+    csrIndex => monoMAT%CSR%index
+    csrItem  => monoMAT%CSR%item
+    csrA     => monoMAT%R%A
 
     !# 各オフセットの存在フラグを立てる（オフセット値域は -(NP-1)..(NP-1)）
     call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
@@ -75,28 +86,67 @@ contains
     call monolis_pdealloc_R_1d(monoMAT%R%Adia)
     call monolis_palloc_R_1d(monoMAT%R%Adia, NDOF2*N*Ndiag)
 
+    diaA => monoMAT%R%Adia
+
+#ifdef _OPENACC
+    !# GPU 正本モード:行列値がデバイス常駐の場合、DIA 値配列をデバイス上にも確保・ゼロ初期化し、
+    !# 詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    is_dev = acc_is_present(csrA)
+    if(is_dev)then
+      !$acc enter data create(diaA)
+      !$acc kernels present(diaA)
+      diaA = 0.0d0
+      !$acc end kernels
+      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
+      !$acc wait(1)
+    endif
+#endif
+
     !# CSR 値を DIA 配置に詰める
 !$omp parallel default(none) &
-!$omp & shared(monoMAT, diag_of_offset) &
+!$omp & shared(csrIndex, csrItem, csrA, diaA, diag_of_offset) &
 !$omp & firstprivate(N, NP, NDOF, NDOF2) &
 !$omp & private(i, j, k, l, in, jS, jE, d)
 !$omp do
     do i = 1, N
-      jS = monoMAT%CSR%index(i) + 1
-      jE = monoMAT%CSR%index(i + 1)
+      jS = csrIndex(i) + 1
+      jE = csrIndex(i + 1)
       do j = jS, jE
-        in = monoMAT%CSR%item(j)
+        in = csrItem(j)
         d = diag_of_offset(in - i + NP)
         do k = 1, NDOF
           do l = 1, NDOF
-            monoMAT%R%Adia((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
-              monoMAT%R%A(NDOF2*(j-1) + NDOF*(k-1) + l)
+            diaA((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
+              csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
           enddo
         enddo
       enddo
     enddo
 !$omp end do
 !$omp end parallel
+
+#ifdef _OPENACC
+    if(is_dev)then
+!$acc parallel loop gang vector private(j, k, l, in, jS, jE, d) &
+!$acc & present(csrIndex, csrItem, csrA, diaA) copyin(diag_of_offset)
+    do i = 1, N
+      jS = csrIndex(i) + 1
+      jE = csrIndex(i + 1)
+!$acc loop seq
+      do j = jS, jE
+        in = csrItem(j)
+        d = diag_of_offset(in - i + NP)
+        do k = 1, NDOF
+          do l = 1, NDOF
+            diaA((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
+              csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
+          enddo
+        enddo
+      enddo
+    enddo
+!$acc end parallel loop
+    endif
+#endif
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_R
@@ -116,11 +166,22 @@ contains
     integer(kint) :: N, NP, Ndiag
     integer(kint) :: i, j, m, in, jS, jE, d, idx, p, jcol, n1, n2, kn, aoff, total
     integer(kint), allocatable :: diag_of_offset(:)
+    integer(kint), pointer, contiguous :: csrIndex(:), csrItem(:), vptr(:)
+    integer(kint), pointer, contiguous :: ndofList(:), ndofIndex2(:)
+    real(kdouble), pointer, contiguous :: csrA(:), diaA(:)
+#ifdef _OPENACC
+    logical :: is_dev
+#endif
 
     call monolis_std_debug_log_header("monolis_convert_CSR_to_DIA_V_R")
 
     N  = monoMAT%N
     NP = monoMAT%NP
+    csrIndex   => monoMAT%CSR%index
+    csrItem    => monoMAT%CSR%item
+    csrA       => monoMAT%R%A
+    ndofList   => monoMAT%n_dof_list
+    ndofIndex2 => monoMAT%n_dof_index2
 
     !# 各オフセットの存在フラグを立てる（オフセット値域は -(NP-1)..(NP-1)）
     call monolis_alloc_I_1d(diag_of_offset, 2*NP - 1)
@@ -189,30 +250,74 @@ contains
     call monolis_pdealloc_R_1d(monoMAT%R%Adia)
     call monolis_palloc_R_1d(monoMAT%R%Adia, total)
 
+    vptr => monoMAT%DIA%Vptr
+    diaA => monoMAT%R%Adia
+
+#ifdef _OPENACC
+    !# GPU 正本モード:行列値がデバイス常駐の場合、Vptr をデバイスへ転送し、
+    !# 値配列をデバイス上にも確保・ゼロ初期化して詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    is_dev = acc_is_present(csrA)
+    if(is_dev)then
+      !$acc enter data copyin(vptr)
+      !$acc enter data create(diaA)
+      !$acc kernels present(diaA)
+      diaA = 0.0d0
+      !$acc end kernels
+      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
+      !$acc wait(1)
+    endif
+#endif
+
     !# CSR 値を DIA 配置（ブロック連続）に詰める
 !$omp parallel default(none) &
-!$omp & shared(monoMAT, diag_of_offset) &
+!$omp & shared(csrIndex, csrItem, csrA, diaA, vptr, ndofList, ndofIndex2, diag_of_offset) &
 !$omp & firstprivate(N, NP) &
 !$omp & private(i, j, m, in, jS, jE, d, p, n1, n2, kn, aoff)
 !$omp do
     do i = 1, N
-      n1 = monoMAT%n_dof_list(i)
-      jS = monoMAT%CSR%index(i) + 1
-      jE = monoMAT%CSR%index(i + 1)
+      n1 = ndofList(i)
+      jS = csrIndex(i) + 1
+      jE = csrIndex(i + 1)
       do j = jS, jE
-        in = monoMAT%CSR%item(j)
+        in = csrItem(j)
         d = diag_of_offset(in - i + NP)
         p = (d-1)*N + i
-        n2 = monoMAT%n_dof_list(in)
-        aoff = monoMAT%DIA%Vptr(p)
-        kn = monoMAT%n_dof_index2(j)
+        n2 = ndofList(in)
+        aoff = vptr(p)
+        kn = ndofIndex2(j)
         do m = 1, n1*n2
-          monoMAT%R%Adia(aoff + m) = monoMAT%R%A(kn + m)
+          diaA(aoff + m) = csrA(kn + m)
         enddo
       enddo
     enddo
 !$omp end do
 !$omp end parallel
+
+#ifdef _OPENACC
+    if(is_dev)then
+!$acc parallel loop gang vector private(j, m, in, jS, jE, d, p, n1, n2, kn, aoff) &
+!$acc & present(csrIndex, csrItem, csrA, diaA, vptr, ndofList, ndofIndex2) &
+!$acc & copyin(diag_of_offset)
+    do i = 1, N
+      n1 = ndofList(i)
+      jS = csrIndex(i) + 1
+      jE = csrIndex(i + 1)
+!$acc loop seq
+      do j = jS, jE
+        in = csrItem(j)
+        d = diag_of_offset(in - i + NP)
+        p = (d-1)*N + i
+        n2 = ndofList(in)
+        aoff = vptr(p)
+        kn = ndofIndex2(j)
+        do m = 1, n1*n2
+          diaA(aoff + m) = csrA(kn + m)
+        enddo
+      enddo
+    enddo
+!$acc end parallel loop
+    endif
+#endif
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_V_R
@@ -225,6 +330,19 @@ contains
     type(monolis_mat), intent(inout) :: monoMAT
 
     call monolis_std_debug_log_header("monolis_dealloc_DIA_R")
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(monoMAT%DIA%offset))then
+      !$acc exit data delete(monoMAT%DIA%offset) if(acc_is_present(monoMAT%DIA%offset))
+    endif
+    if(associated(monoMAT%DIA%Vptr))then
+      !$acc exit data delete(monoMAT%DIA%Vptr) if(acc_is_present(monoMAT%DIA%Vptr))
+    endif
+    if(associated(monoMAT%R%Adia))then
+      !$acc exit data delete(monoMAT%R%Adia) if(acc_is_present(monoMAT%R%Adia))
+    endif
+#endif
 
     monoMAT%DIA%Ndiag = 0
     call monolis_pdealloc_I_1d(monoMAT%DIA%offset)

@@ -46,6 +46,7 @@ contains
     integer(kint) :: n_dof_list(4)
     integer(kint) :: N, NP, NNDOF, NPNDOF, k
     real(kdouble), allocatable :: X(:), Yref(:), Ydia(:), Yell(:)
+    real(kdouble), allocatable :: Aval(:)
 
     call monolis_std_global_log_string("monolis_matvec_DIA_V_R")
     call monolis_std_global_log_string("monolis_matvec_ELL_V_R")
@@ -70,9 +71,12 @@ contains
     NPNDOF = mat%MAT%n_dof_index(NP + 1)
 
     !# 行列値・入力ベクトルを決定論的な値で埋める
+    !# (GPU 正本モードではホスト配列への直接書き込みはデバイスに反映されないため、API で設定する)
+    call monolis_alloc_R_1d(Aval, size(mat%MAT%R%A))
     do k = 1, size(mat%MAT%R%A)
-      mat%MAT%R%A(k) = dble(mod(k, 7) + 1)
+      Aval(k) = dble(mod(k, 7) + 1)
     enddo
+    call monolis_set_array_to_sparse_matrix_R(mat, Aval)
 
     call monolis_alloc_R_1d(X,    NPNDOF)
     call monolis_alloc_R_1d(Yref, NPNDOF)
@@ -104,6 +108,7 @@ contains
     call monolis_dealloc_R_1d(Yref)
     call monolis_dealloc_R_1d(Ydia)
     call monolis_dealloc_R_1d(Yell)
+    call monolis_dealloc_R_1d(Aval)
     call monolis_finalize(mat)
   end subroutine monolis_matvec_V_DIA_ELL_R_test
 

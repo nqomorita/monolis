@@ -21,8 +21,20 @@ contains
     !> [in,out] monolis 構造体
     type(monolis_COM), intent(inout) :: com
 
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ってからホストで対称化し、
+    !# 結果をデバイスへ反映する(ライトスルー方式によりホスト鏡像は最新である)
+    !$acc wait(1)
+#endif
+
     call monolis_matrix_convert_to_symmetric_inner_R(monolis%MAT, com)
     call monolis_matrix_convert_to_symmetric_outer_R(monolis%MAT, com)
+
+#ifdef _OPENACC
+    if(associated(monolis%MAT%R%A))then
+      !$acc update device(monolis%MAT%R%A) if_present
+    endif
+#endif
   end subroutine monolis_matrix_convert_to_symmetric_R
 
   !> @ingroup matrix

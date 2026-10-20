@@ -1,6 +1,9 @@
 !> 行列構造体の定義
 module mod_monolis_def_mat
   use mod_monolis_utils
+#ifdef _OPENACC
+  use openacc
+#endif
   implicit none
 
   !> 行列構造体（実数型）
@@ -228,6 +231,19 @@ contains
     monoMAT%NP = 0
     monoMAT%NDOF = 0
 
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(monoMAT%n_dof_list))then
+      !$acc exit data delete(monoMAT%n_dof_list) if(acc_is_present(monoMAT%n_dof_list))
+    endif
+    if(associated(monoMAT%n_dof_index))then
+      !$acc exit data delete(monoMAT%n_dof_index) if(acc_is_present(monoMAT%n_dof_index))
+    endif
+    if(associated(monoMAT%n_dof_index2))then
+      !$acc exit data delete(monoMAT%n_dof_index2) if(acc_is_present(monoMAT%n_dof_index2))
+    endif
+#endif
+
     call monolis_pdealloc_I_1d(monoMAT%n_dof_list)
     call monolis_pdealloc_I_1d(monoMAT%n_dof_index)
     call monolis_pdealloc_I_1d(monoMAT%n_dof_index2)
@@ -249,6 +265,26 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat_val_R), intent(inout) :: R
+
+#ifdef _OPENACC
+    !# GPU 正本モード:足込カーネルの完了を待ち、デバイス常駐領域があれば解放する
+    !$acc wait(1)
+    if(associated(R%A))then
+      !$acc exit data delete(R%A) if(acc_is_present(R%A))
+    endif
+    if(associated(R%X))then
+      !$acc exit data delete(R%X) if(acc_is_present(R%X))
+    endif
+    if(associated(R%B))then
+      !$acc exit data delete(R%B) if(acc_is_present(R%B))
+    endif
+    if(associated(R%Adia))then
+      !$acc exit data delete(R%Adia) if(acc_is_present(R%Adia))
+    endif
+    if(associated(R%Aell))then
+      !$acc exit data delete(R%Aell) if(acc_is_present(R%Aell))
+    endif
+#endif
 
     call monolis_pdealloc_R_1d(R%A)
     call monolis_pdealloc_R_1d(R%U)
@@ -297,6 +333,16 @@ contains
     !> [in,out] 行列構造体
     type(monolis_mat_CSR), intent(inout) :: CSR
 
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(CSR%index))then
+      !$acc exit data delete(CSR%index) if(acc_is_present(CSR%index))
+    endif
+    if(associated(CSR%item))then
+      !$acc exit data delete(CSR%item) if(acc_is_present(CSR%item))
+    endif
+#endif
+
     call monolis_pdealloc_I_1d(CSR%index)
     call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_initialize_CSR
@@ -309,6 +355,15 @@ contains
     type(monolis_mat_DIA), intent(inout) :: DIA
 
     DIA%Ndiag = 0
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(DIA%offset))then
+      !$acc exit data delete(DIA%offset) if(acc_is_present(DIA%offset))
+    endif
+    if(associated(DIA%Vptr))then
+      !$acc exit data delete(DIA%Vptr) if(acc_is_present(DIA%Vptr))
+    endif
+#endif
     call monolis_pdealloc_I_1d(DIA%offset)
     call monolis_pdealloc_I_1d(DIA%Vptr)
   end subroutine monolis_mat_initialize_DIA
@@ -321,6 +376,15 @@ contains
     type(monolis_mat_DIA), intent(inout) :: DIA
 
     DIA%Ndiag = 0
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(DIA%offset))then
+      !$acc exit data delete(DIA%offset) if(acc_is_present(DIA%offset))
+    endif
+    if(associated(DIA%Vptr))then
+      !$acc exit data delete(DIA%Vptr) if(acc_is_present(DIA%Vptr))
+    endif
+#endif
     call monolis_pdealloc_I_1d(DIA%offset)
     call monolis_pdealloc_I_1d(DIA%Vptr)
   end subroutine monolis_mat_finalize_DIA
@@ -333,6 +397,15 @@ contains
     type(monolis_mat_ELL), intent(inout) :: ELL
 
     ELL%Nmaxcol = 0
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(ELL%col))then
+      !$acc exit data delete(ELL%col) if(acc_is_present(ELL%col))
+    endif
+    if(associated(ELL%Vptr))then
+      !$acc exit data delete(ELL%Vptr) if(acc_is_present(ELL%Vptr))
+    endif
+#endif
     call monolis_pdealloc_I_1d(ELL%col)
     call monolis_pdealloc_I_1d(ELL%Vptr)
   end subroutine monolis_mat_initialize_ELL
@@ -345,6 +418,15 @@ contains
     type(monolis_mat_ELL), intent(inout) :: ELL
 
     ELL%Nmaxcol = 0
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(ELL%col))then
+      !$acc exit data delete(ELL%col) if(acc_is_present(ELL%col))
+    endif
+    if(associated(ELL%Vptr))then
+      !$acc exit data delete(ELL%Vptr) if(acc_is_present(ELL%Vptr))
+    endif
+#endif
     call monolis_pdealloc_I_1d(ELL%col)
     call monolis_pdealloc_I_1d(ELL%Vptr)
   end subroutine monolis_mat_finalize_ELL
@@ -355,6 +437,19 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat_CSC), intent(inout) :: CSC
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(CSC%index))then
+      !$acc exit data delete(CSC%index) if(acc_is_present(CSC%index))
+    endif
+    if(associated(CSC%item))then
+      !$acc exit data delete(CSC%item) if(acc_is_present(CSC%item))
+    endif
+    if(associated(CSC%perm))then
+      !$acc exit data delete(CSC%perm) if(acc_is_present(CSC%perm))
+    endif
+#endif
 
     call monolis_pdealloc_I_1d(CSC%index)
     call monolis_pdealloc_I_1d(CSC%item)
@@ -371,6 +466,19 @@ contains
     monoMAT%N = 0
     monoMAT%NP = 0
     monoMAT%NDOF = 0
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(monoMAT%n_dof_list))then
+      !$acc exit data delete(monoMAT%n_dof_list) if(acc_is_present(monoMAT%n_dof_list))
+    endif
+    if(associated(monoMAT%n_dof_index))then
+      !$acc exit data delete(monoMAT%n_dof_index) if(acc_is_present(monoMAT%n_dof_index))
+    endif
+    if(associated(monoMAT%n_dof_index2))then
+      !$acc exit data delete(monoMAT%n_dof_index2) if(acc_is_present(monoMAT%n_dof_index2))
+    endif
+#endif
 
     call monolis_pdealloc_I_1d(monoMAT%n_dof_list)
     call monolis_pdealloc_I_1d(monoMAT%n_dof_index)
@@ -393,6 +501,26 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat_val_R), intent(inout) :: R
+
+#ifdef _OPENACC
+    !# GPU 正本モード:足込カーネルの完了を待ち、デバイス常駐領域があれば解放する
+    !$acc wait(1)
+    if(associated(R%A))then
+      !$acc exit data delete(R%A) if(acc_is_present(R%A))
+    endif
+    if(associated(R%X))then
+      !$acc exit data delete(R%X) if(acc_is_present(R%X))
+    endif
+    if(associated(R%B))then
+      !$acc exit data delete(R%B) if(acc_is_present(R%B))
+    endif
+    if(associated(R%Adia))then
+      !$acc exit data delete(R%Adia) if(acc_is_present(R%Adia))
+    endif
+    if(associated(R%Aell))then
+      !$acc exit data delete(R%Aell) if(acc_is_present(R%Aell))
+    endif
+#endif
 
     call monolis_pdealloc_R_1d(R%A)
     call monolis_pdealloc_R_1d(R%U)
@@ -441,6 +569,16 @@ contains
     !> [in,out] 行列構造体
     type(monolis_mat_CSR), intent(inout) :: CSR
 
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(CSR%index))then
+      !$acc exit data delete(CSR%index) if(acc_is_present(CSR%index))
+    endif
+    if(associated(CSR%item))then
+      !$acc exit data delete(CSR%item) if(acc_is_present(CSR%item))
+    endif
+#endif
+
     call monolis_pdealloc_I_1d(CSR%index)
     call monolis_pdealloc_I_1d(CSR%item)
   end subroutine monolis_mat_finalize_CSR
@@ -451,6 +589,19 @@ contains
     implicit none
     !> [in,out] 行列構造体
     type(monolis_mat_CSC), intent(inout) :: CSC
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    if(associated(CSC%index))then
+      !$acc exit data delete(CSC%index) if(acc_is_present(CSC%index))
+    endif
+    if(associated(CSC%item))then
+      !$acc exit data delete(CSC%item) if(acc_is_present(CSC%item))
+    endif
+    if(associated(CSC%perm))then
+      !$acc exit data delete(CSC%perm) if(acc_is_present(CSC%perm))
+    endif
+#endif
 
     call monolis_pdealloc_I_1d(CSC%index)
     call monolis_pdealloc_I_1d(CSC%item)
@@ -583,15 +734,19 @@ contains
     !> [in] 右辺ベクトル
     real(kdouble), intent(in) :: B(:)
     integer(kint) :: i, NNDOF, NPNDOF
+    real(kdouble), pointer, contiguous :: V(:)
 
     call monolis_std_debug_log_header("monolis_set_RHS_R")
 
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
+    !# GPU 正本モード:ホスト鏡像を更新し、右辺がデバイス常駐の場合はデバイスへも反映する(ライトスルー)
+    V => monoMAT%R%B
     do i = 1, NPNDOF
-      monoMAT%R%B(i) = B(i)
+      V(i) = B(i)
     enddo
+!$acc update device(V) if_present
   end subroutine monolis_set_RHS_R
 
   !> @ingroup def_mat_init
@@ -623,15 +778,19 @@ contains
     !> [in] 解ベクトル
     real(kdouble), intent(in) :: X(:)
     integer(kint) :: i, NNDOF, NPNDOF
+    real(kdouble), pointer, contiguous :: V(:)
 
     call monolis_std_debug_log_header("monolis_set_initial_solution_R")
 
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
+    !# GPU 正本モード:ホスト鏡像を更新し、解がデバイス常駐の場合はデバイスへも反映する(ライトスルー)
+    V => monoMAT%R%X
     do i = 1, NPNDOF
-      monoMAT%R%X(i) = X(i)
+      V(i) = X(i)
     enddo
+!$acc update device(V) if_present
   end subroutine monolis_set_initial_solution_R
 
   !> @ingroup def_mat_init
@@ -663,15 +822,21 @@ contains
     !> [out] 解ベクトル
     real(kdouble), intent(out) :: X(:)
     integer(kint) :: i, NNDOF, NPNDOF
+    real(kdouble), pointer, contiguous :: V(:)
 
     call monolis_std_debug_log_header("monolis_get_solution_R")
 
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
+    !# GPU 正本モード:解がデバイス常駐の場合、デバイスからユーザ配列へ直接取り出す
+    !# (デバイス同期点。非常駐の場合は従来どおりホストで実行される)
+    V => monoMAT%R%X
+!$acc parallel loop copyout(X(1:NPNDOF)) present(V) if(acc_is_present(V))
     do i = 1, NPNDOF
-      X(i) = monoMAT%R%X(i)
+      X(i) = V(i)
     enddo
+!$acc end parallel loop
   end subroutine monolis_get_solution_R
 
   !> @ingroup def_mat_init

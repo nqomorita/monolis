@@ -5,6 +5,9 @@ module mod_monolis_spmat_handler
   use mod_monolis_def_struc
   use mod_monolis_spmat_handler_util
   use mod_monolis_spmat_nonzero_pattern_util
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -282,6 +285,40 @@ contains
     real(kdouble), intent(in) :: A(:)
     integer(kint) :: i
 
+#ifdef _OPENACC
+    !# GPU 正本モード:再構築前にデバイス常駐領域があれば解放する
+    if(associated(monolis%MAT%CSR%index))then
+      !$acc exit data delete(monolis%MAT%CSR%index) if(acc_is_present(monolis%MAT%CSR%index))
+    endif
+    if(associated(monolis%MAT%CSR%item))then
+      !$acc exit data delete(monolis%MAT%CSR%item) if(acc_is_present(monolis%MAT%CSR%item))
+    endif
+    if(associated(monolis%MAT%CSC%index))then
+      !$acc exit data delete(monolis%MAT%CSC%index) if(acc_is_present(monolis%MAT%CSC%index))
+    endif
+    if(associated(monolis%MAT%CSC%item))then
+      !$acc exit data delete(monolis%MAT%CSC%item) if(acc_is_present(monolis%MAT%CSC%item))
+    endif
+    if(associated(monolis%MAT%CSC%perm))then
+      !$acc exit data delete(monolis%MAT%CSC%perm) if(acc_is_present(monolis%MAT%CSC%perm))
+    endif
+    if(associated(monolis%MAT%R%A))then
+      !$acc exit data delete(monolis%MAT%R%A) if(acc_is_present(monolis%MAT%R%A))
+    endif
+    if(associated(monolis%MAT%R%B))then
+      !$acc exit data delete(monolis%MAT%R%B) if(acc_is_present(monolis%MAT%R%B))
+    endif
+    if(associated(monolis%MAT%R%X))then
+      !$acc exit data delete(monolis%MAT%R%X) if(acc_is_present(monolis%MAT%R%X))
+    endif
+    if(associated(monolis%MAT%n_dof_index))then
+      !$acc exit data delete(monolis%MAT%n_dof_index) if(acc_is_present(monolis%MAT%n_dof_index))
+    endif
+    if(associated(monolis%MAT%n_dof_index2))then
+      !$acc exit data delete(monolis%MAT%n_dof_index2) if(acc_is_present(monolis%MAT%n_dof_index2))
+    endif
+#endif
+
     call monolis_pdealloc_I_1d(monolis%MAT%CSR%index)
     call monolis_pdealloc_I_1d(monolis%MAT%CSR%item)
     call monolis_pdealloc_I_1d(monolis%MAT%CSC%index)
@@ -341,6 +378,14 @@ contains
     call monolis_get_CSC_format(N, NP, NZ, &
       & monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
+
+#ifdef _OPENACC
+    !# GPU 正本モード:構築した行列値・ベクトル・パターン配列をデバイスへ常駐させる
+    !$acc enter data copyin(monolis%MAT%CSR%index, monolis%MAT%CSR%item)
+    !$acc enter data copyin(monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
+    !$acc enter data copyin(monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2)
+    !$acc enter data copyin(monolis%MAT%R%A, monolis%MAT%R%B, monolis%MAT%R%X)
+#endif
   end subroutine monolis_set_matrix_BCSR_R
 
   !> @ingroup matrix
@@ -367,6 +412,12 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、ホストで設定した行列値をデバイスへ反映する
+    !$acc wait(1)
+    !$acc update device(monolis%MAT%R%A) if_present
+#endif
   end subroutine monolis_set_matrix_BCSR_mat_val_R
 
   !# boundary condition
@@ -431,6 +482,12 @@ contains
       call monolis_std_error_stop()
     endif
     monolis%MAT%R%A(1:NZ) = A(1:NZ)
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、ホストで設定した行列値をデバイスへ反映する
+    !$acc wait(1)
+    !$acc update device(monolis%MAT%R%A) if_present
+#endif
   end subroutine monolis_set_array_to_sparse_matrix_R
 
   !> @ingroup matrix

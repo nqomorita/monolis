@@ -21,6 +21,9 @@ module mod_monolis_spmat_handler_util
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -67,6 +70,14 @@ contains
       ndof = n_dof_index(cj + 1) - n_dof_index(cj)
       im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
       A(im) = val
+#ifdef _OPENACC
+      !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)
+      if(acc_is_present(A))then
+!$acc serial present(A) async(1)
+        A(im) = val
+!$acc end serial
+      endif
+#endif
       return
     endif
 
@@ -149,12 +160,27 @@ contains
     if(j /= -1)then
       n1 = n_dof_index(ci + 1) - n_dof_index(ci)
       n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+      im = n_dof_index2(j)
       do i1 = 1, n1
       do i2 = 1, n2
-        im = n_dof_index2(j) + n2*(i1-1) + i2
-        A(im) = val(i1, i2)
+        A(im + n2*(i1-1) + i2) = val(i1, i2)
       enddo
       enddo
+#ifdef _OPENACC
+      !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)
+      if(acc_is_present(A))then
+!$acc data copyin(val(1:n1,1:n2))
+!$acc parallel loop collapse(2) present(A, val) async(1)
+        do i1 = 1, n1
+        do i2 = 1, n2
+          A(im + n2*(i1-1) + i2) = val(i1, i2)
+        enddo
+        enddo
+!$acc end parallel loop
+!$acc wait(1)
+!$acc end data
+      endif
+#endif
       return
     endif
     call monolis_stop_by_matrix_assemble(ci, cj)
@@ -247,6 +273,7 @@ contains
 
     ndof = n_dof_index(cj + 1) - n_dof_index(cj)
     im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+    !# GPU 正本モード:ライトスルー方式によりホスト鏡像は常に最新のため、ホスト側の値を返す
     val = A(im)
     is_find = .true.
   end subroutine monolis_get_scalar_from_sparse_matrix_main_R
@@ -343,6 +370,14 @@ contains
       !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
 !$omp atomic update
       A(im) = A(im) + val
+#ifdef _OPENACC
+      !# GPU 正本モード:デバイス常駐行列にも足し込む(ライトスルー。非同期キュー 1 で順序を保証)
+      if(acc_is_present(A))then
+!$acc serial present(A) async(1)
+        A(im) = A(im) + val
+!$acc end serial
+      endif
+#endif
       return
     endif
 
@@ -423,10 +458,12 @@ contains
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
     integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, in, jn, im, kn, jS, jE, i1, i2, j1, j2, k1, k2
+    integer(kint) :: i, in, jn, kn, jS, jE, i1, i2, j1, j2, k1, k2
+    integer(kint) :: n1t, n2t
     integer(kint) :: eperm1(n1), eperm2(n2)
     integer(kint), allocatable :: idx1(:), idx2(:)
     integer(kint), allocatable :: idx1t(:), idx2t(:)
+    integer(kint), allocatable :: imap(:,:)
     real(kdouble), allocatable :: temp(:,:)
 
     e1t = e1
@@ -476,6 +513,9 @@ contains
       enddo
     enddo
 
+    !# 足込み先の A 配列インデックスをホストで確定する(パターン外参照はここで検出する)
+    call monolis_alloc_I_2d(imap, idx1t(n1 + 1), idx2t(n2 + 1))
+
     do i1 = 1, n1
       in = e1t(i1)
       jS = index(in) + 1
@@ -487,10 +527,7 @@ contains
             kn = idx2t(i2 + 1) - idx2t(i2)
             do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
             do k2 = 1, kn
-              im = n_dof_index2(j1) + kn*(k1-1) + k2
-              !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
-!$omp atomic update
-              A(im) = A(im) + temp(idx1t(i1)+k1, idx2t(i2)+k2)
+              imap(idx1t(i1)+k1, idx2t(i2)+k2) = n_dof_index2(j1) + kn*(k1-1) + k2
             enddo
             enddo
             jS = j1
@@ -500,6 +537,35 @@ contains
       call monolis_stop_by_matrix_assemble(e1t(i1), e2t(i2))
       enddo aa
     enddo
+
+    n1t = idx1t(n1 + 1)
+    n2t = idx2t(n2 + 1)
+
+    do k2 = 1, n2t
+    do k1 = 1, n1t
+      !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$omp atomic update
+      A(imap(k1,k2)) = A(imap(k1,k2)) + temp(k1,k2)
+    enddo
+    enddo
+
+#ifdef _OPENACC
+    !# GPU 正本モード:要素行列を 1 カーネルでデバイス常駐行列にも足し込む
+    !# (ライトスルー。非同期キュー 1 に投入し、スカラ足込カーネルとの順序を保証する)
+    if(acc_is_present(A))then
+!$acc data copyin(imap(1:n1t,1:n2t), temp(1:n1t,1:n2t))
+!$acc parallel loop collapse(2) present(A, imap, temp) async(1)
+      do k2 = 1, n2t
+      do k1 = 1, n1t
+!$acc atomic update
+        A(imap(k1,k2)) = A(imap(k1,k2)) + temp(k1,k2)
+      enddo
+      enddo
+!$acc end parallel loop
+!$acc wait(1)
+!$acc end data
+    endif
+#endif
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -638,11 +704,22 @@ contains
     real(kdouble), intent(in) :: val
     integer(kint) :: j, k, jn, kn, m, n, jS, jE, ndof1, ndof2
     logical :: is_add
+#ifdef _OPENACC
+    logical :: is_dev
+#endif
 
     ndof1 = n_dof_index(node_id + 1) - n_dof_index(node_id)
     if(ndof1 < ndof_bc) call monolis_stop_by_submatrix_access(ndof1, ndof_bc)
 
     is_add = .false.
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ってから境界条件を適用する。
+    !# 右辺 B の更新と判定はホスト鏡像(ライトスルーにより最新)を用いてホストで行い、
+    !# デバイス常駐の行列 A には列・行の消去と対角 1 の設定をカーネルで反映する
+    is_dev = acc_is_present(A)
+    !$acc wait(1)
+#endif
 
     jS = indexR(node_id) + 1
     jE = indexR(node_id + 1)
@@ -658,6 +735,23 @@ contains
         A(m) = 0.0d0
       enddo
     enddo
+
+#ifdef _OPENACC
+    if(is_dev)then
+!$acc parallel loop private(jn, kn, ndof2, k, m) async(1) &
+!$acc & present(A, indexR, itemR, permA, n_dof_index, n_dof_index2)
+    do j = jS, jE
+      jn = itemR(j)
+      kn = permA(j)
+      ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+      do k = 1, ndof2
+        m = n_dof_index2(kn) + ndof1*(k-1) + ndof_bc
+        A(m) = 0.0d0
+      enddo
+    enddo
+!$acc end parallel loop
+    endif
+#endif
 
     jS = index(node_id) + 1
     jE = index(node_id + 1)
@@ -676,6 +770,28 @@ contains
         is_add = .true.
       endif
     enddo
+
+#ifdef _OPENACC
+    if(is_dev)then
+!$acc parallel loop private(jn, ndof2, k, m) async(1) &
+!$acc & present(A, index, item, n_dof_index, n_dof_index2)
+    do j = jS, jE
+      jn = item(j)
+      ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+      do k = 1, ndof2
+        m = n_dof_index2(j) + ndof2*(ndof_bc-1)
+        A(m + k) = 0.0d0
+      enddo
+
+      if(jn == node_id)then
+        m = n_dof_index2(j) + (ndof2+1)*(ndof_bc-1) + 1
+        A(m) = 1.0d0
+      endif
+    enddo
+!$acc end parallel loop
+    !$acc wait(1)
+    endif
+#endif
 
     if(.not. is_add)then
       call monolis_stop_by_set_DBC(node_id)

@@ -19,6 +19,9 @@ module mod_monolis_solve
   use mod_monolis_precond
   use mod_monolis_spmat_convert_dia
   use mod_monolis_spmat_convert_ell
+#ifdef _OPENACC
+  use openacc
+#endif
 
   implicit none
 
@@ -88,17 +91,16 @@ contains
     integer(kint) :: NNDOF, NPNDOF, method
     real(kdouble), pointer, contiguous :: X(:), B(:), precD(:)
     integer(kint), pointer, contiguous :: matNdofList(:), matNdofIndex(:)
-    logical :: is_ell, is_var, is_ell_gpu_11, use_device
+    logical :: is_ell, is_var, use_device, was_present
 #endif
 
     call monolis_std_debug_log_header("monolis_solve_main_R")
 
-    !# デバイス常駐モード（ホスト同期 OFF）は未対応。行列・前処理対角がホスト正本のままであり、
-    !# ホスト実行解法（SOR / IDRS / BiCGSTAB_N128）では解がデバイスに反映されないため禁止する。
-    if(monoPRM%Iarray(monolis_prm_I_is_host_sync) /= monolis_I_true)then
-      call monolis_std_error_string("device-resident mode (host sync disabled) is not supported")
-      call monolis_std_error_stop()
-    endif
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (前処理生成・形式変換は組み立て完了後の行列値を参照する)
+    !$acc wait(1)
+#endif
 
     call monolis_timer_initialize(monoPRM)
 
@@ -113,22 +115,30 @@ contains
       & .or. method == monolis_iter_SOR &
       & .or. method == monolis_iter_IDRS)
 
+    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
+      monoMAT%n_dof_index, NNDOF, NPNDOF)
+    X => monoMAT%R%X
+    B => monoMAT%R%B
+    was_present = acc_is_present(X)
+
     if(use_device)then
-    !# 初期解のゼロクリアはデバイス転送前に行う（転送後にホスト側でクリアしてもデバイス側に反映されないため）
+    !# 初期解のゼロクリア(デバイス常駐の場合はデバイス側もクリアする。ライトスルー)
     if(monoPRM%Iarray(monolis_prm_I_is_init_x) == monolis_I_true)then
-      monoMAT%R%X = 0.0d0
+      X = 0.0d0
+      if(was_present)then
+!$acc kernels present(X)
+        X = 0.0d0
+!$acc end kernels
+      endif
     endif
 
     !# CSR 形式から DIA / ELL 形式へ変換し、行列・解・右辺・前処理対角をデバイスに常駐させる
+    !# (GPU 正本モードでは値の詰め替えはデバイス上で実行される)
     is_ell = (monoPRM%Iarray(monolis_prm_I_spmv_format) /= monolis_spmv_DIA)
     is_var = (monoMAT%NDOF == -1)
-    is_ell_gpu_11 = .false.
     if(is_ell)then
       if(is_var)then
         call monolis_convert_CSR_to_ELL_V_R(monoMAT)
-      elseif(monoMAT%NDOF == 1)then
-        call monolis_convert_CSR_to_ELL_11_R_GPU(monoMAT)
-        is_ell_gpu_11 = .true.
       else
         call monolis_convert_CSR_to_ELL_R(monoMAT)
       endif
@@ -140,20 +150,17 @@ contains
       endif
     endif
 
-    call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
-      monoMAT%n_dof_index, NNDOF, NPNDOF)
-    X     => monoMAT%R%X
-    B     => monoMAT%R%B
     precD => monoPREC%R%D
 
-    !# ホストの右辺・初期解を正としてデバイスへ転送する（常駐済みでも上書きする）
+    !# デバイス常駐(GPU 正本)の場合はデバイス側の X・B が最新のため転送しない。
+    !# 非常駐(レガシー)経路ではホストの右辺・初期解をデバイスへ転送する
     !$acc enter data create(X(1:NPNDOF), B(1:NPNDOF))
-    !$acc update device(X(1:NPNDOF), B(1:NPNDOF))
+    if(.not. was_present)then
+      !$acc update device(X(1:NPNDOF), B(1:NPNDOF))
+    endif
     !$acc enter data copyin(precD)
     if(is_ell)then
-      if(.not. is_ell_gpu_11)then
-        !$acc enter data copyin(monoMAT%R%Aell, monoMAT%ELL%col)
-      endif
+      !$acc enter data copyin(monoMAT%R%Aell, monoMAT%ELL%col)
     else
       !$acc enter data copyin(monoMAT%R%Adia, monoMAT%DIA%offset)
     endif
@@ -169,6 +176,14 @@ contains
         !$acc enter data copyin(monoMAT%DIA%Vptr)
       endif
     endif
+
+    else
+    !# GPU 未対応解法のホスト実行:X・B の常駐を一時解除して
+    !# 全演算をホスト(非常駐)経路に揃える(A のホスト鏡像はライトスルーにより最新)
+    if(was_present)then
+      !$acc update self(X(1:NPNDOF), B(1:NPNDOF))
+      !$acc exit data delete(X, B)
+    endif
     endif
 #endif
 
@@ -177,8 +192,10 @@ contains
 #ifdef _OPENACC
     if(use_device)then
     !# ソルバの事後条件：デバイス上の X は共有節点（袖）を含めて最新である
-    !# ホストへの書き戻しはここで一元的に行う（各ソルバ内では行わない）
-    !$acc update self(X(1:NPNDOF))
+    !# ホスト同期が有効な場合のみ X をホストへ書き戻す(非常駐経路では常に書き戻す)
+    if(monoPRM%Iarray(monolis_prm_I_is_host_sync) == monolis_I_true .or. .not. was_present)then
+      !$acc update self(X(1:NPNDOF))
+    endif
     if(is_var)then
       if(is_ell)then
         !$acc exit data delete(monoMAT%ELL%Vptr)
@@ -195,6 +212,12 @@ contains
     else
       !$acc exit data delete(monoMAT%R%Adia, monoMAT%DIA%offset)
       call monolis_dealloc_DIA_R(monoMAT)
+    endif
+
+    else
+    !# ホスト実行解法の結果(X・B)をデバイスへ書き戻して常駐を復元する
+    if(was_present)then
+      !$acc enter data copyin(X, B)
     endif
     endif
 #endif

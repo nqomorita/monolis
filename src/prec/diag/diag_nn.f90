@@ -41,10 +41,12 @@ contains
 !$omp & firstprivate(N) &
 !$omp & private(i, ii, jS, jE, in)
 !$omp do
+!$acc parallel loop private(ii, jS, jE, in)
       do i = 1, N
         ALU(i) = 1.0d0
         jS = index(i) + 1
         jE = index(i + 1)
+!$acc loop seq
         do ii = jS, jE
           in = item(ii)
           if(i == in)then
@@ -53,6 +55,7 @@ contains
           endif
         enddo
       enddo
+!$acc end parallel loop
 !$omp end do
 !$omp end parallel
       return

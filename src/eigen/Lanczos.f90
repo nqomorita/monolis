@@ -46,6 +46,12 @@ contains
 
     call monolis_std_debug_log_header("monolis_eigen_inverted_standard_lanczos_R_main")
 
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式によりホスト実行経路は CSR 行列値のホスト鏡像を安全に参照できる)
+    !$acc wait(1)
+#endif
+
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
@@ -175,6 +181,12 @@ contains
     logical :: is_converge
 
     call monolis_std_debug_log_header("monolis_eigen_standard_lanczos_R_main")
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# (ライトスルー方式によりホスト実行経路は CSR 行列値のホスト鏡像を安全に参照できる)
+    !$acc wait(1)
+#endif
 
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)

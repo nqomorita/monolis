@@ -118,6 +118,15 @@ contains
     call monolis_palloc_R_1d(MAT%R%A, NZ*NDOF*NDOF)
     call monolis_palloc_R_1d(MAT%R%B, NP*NDOF)
     call monolis_palloc_R_1d(MAT%R%X, NP*NDOF)
+
+#ifdef _OPENACC
+    !# GPU 正本モード:非ゼロパターン確定時点で行列値・ベクトル・パターン配列をデバイスへ常駐させる。
+    !# 以降、行列値 A・右辺 B・解 X はデバイス側を正とし、ホスト側の鏡像は同期点でのみ更新される。
+    !$acc enter data copyin(MAT%CSR%index, MAT%CSR%item)
+    !$acc enter data copyin(MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
+    !$acc enter data copyin(MAT%n_dof_list, MAT%n_dof_index, MAT%n_dof_index2)
+    !$acc enter data copyin(MAT%R%A, MAT%R%B, MAT%R%X)
+#endif
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
   !> @ingroup dev_matrix
@@ -152,6 +161,15 @@ contains
     call monolis_palloc_R_1d(MAT%R%A, NZ)
     call monolis_palloc_R_1d(MAT%R%B, N)
     call monolis_palloc_R_1d(MAT%R%X, N)
+
+#ifdef _OPENACC
+    !# GPU 正本モード:非ゼロパターン確定時点で行列値・ベクトル・パターン配列をデバイスへ常駐させる。
+    !# 以降、行列値 A・右辺 B・解 X はデバイス側を正とし、ホスト側の鏡像は同期点でのみ更新される。
+    !$acc enter data copyin(MAT%CSR%index, MAT%CSR%item)
+    !$acc enter data copyin(MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
+    !$acc enter data copyin(MAT%n_dof_list, MAT%n_dof_index, MAT%n_dof_index2)
+    !$acc enter data copyin(MAT%R%A, MAT%R%B, MAT%R%X)
+#endif
   end subroutine monolis_alloc_nonzero_pattern_mat_val_V_R
 
   !> @ingroup dev_matrix
