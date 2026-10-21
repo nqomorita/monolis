@@ -72,13 +72,44 @@ contains
     ellA   => monoMAT%R%Aell
 
 #ifdef _OPENACC
-    !# GPU 正本モード:行列値がデバイス常駐の場合、ELL 配列をデバイス上にも確保し、
-    !# 詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    !# GPU 正本モード:行列値がデバイス常駐の場合、ELL 配列をデバイス上に確保し、
+    !# 詰め替えカーネルをデバイスのみで実行する(ホスト側の Aell・col は SpMV から
+    !# 参照されないため、ホスト詰め替えは行わない)
     is_dev = acc_is_present(csrA)
     if(is_dev)then
       !$acc enter data create(ellCol, ellA)
       !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
       call monolis_check_matrix_assemble_error()
+
+!$acc parallel loop gang vector private(j, k, l, in, jS, jE, slot) &
+!$acc & present(csrIndex, csrItem, csrA, ellCol, ellA)
+      do i = 1, N
+        jS = csrIndex(i) + 1
+        jE = csrIndex(i + 1)
+!$acc loop seq
+        do slot = 1, Nmaxcol
+          j = jS + slot - 1
+          if(j <= jE)then
+            in = csrItem(j)
+            ellCol((slot-1)*N + i) = in
+            do k = 1, NDOF
+              do l = 1, NDOF
+                ellA((slot-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
+                  csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
+              enddo
+            enddo
+          else
+            ellCol((slot-1)*N + i) = 0
+            do k = 1, NDOF
+              do l = 1, NDOF
+                ellA((slot-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = 0.0d0
+              enddo
+            enddo
+          endif
+        enddo
+      enddo
+!$acc end parallel loop
+      return
     endif
 #endif
 
@@ -114,39 +145,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-#ifdef _OPENACC
-    if(is_dev)then
-!$acc parallel loop gang vector private(j, k, l, in, jS, jE, slot) &
-!$acc & present(csrIndex, csrItem, csrA, ellCol, ellA)
-    do i = 1, N
-      jS = csrIndex(i) + 1
-      jE = csrIndex(i + 1)
-!$acc loop seq
-      do slot = 1, Nmaxcol
-        j = jS + slot - 1
-        if(j <= jE)then
-          in = csrItem(j)
-          ellCol((slot-1)*N + i) = in
-          do k = 1, NDOF
-            do l = 1, NDOF
-              ellA((slot-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
-                csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
-            enddo
-          enddo
-        else
-          ellCol((slot-1)*N + i) = 0
-          do k = 1, NDOF
-            do l = 1, NDOF
-              ellA((slot-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = 0.0d0
-            enddo
-          enddo
-        endif
-      enddo
-    enddo
-!$acc end parallel loop
-    endif
-#endif
   end subroutine monolis_convert_CSR_to_ELL_R
 
   !> @ingroup matrix
@@ -252,13 +250,37 @@ contains
 
 #ifdef _OPENACC
     !# GPU 正本モード:行列値がデバイス常駐の場合、Vptr をデバイスへ転送し、
-    !# 値配列をデバイス上にも確保して詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    !# 値配列をデバイス上に確保して詰め替えカーネルをデバイスのみで実行する
+    !# (ホスト側の Aell は SpMV から参照されないため、ホスト詰め替えは行わない)
     is_dev = acc_is_present(csrA)
     if(is_dev)then
       !$acc enter data copyin(vptr)
       !$acc enter data create(ellA)
       !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
       call monolis_check_matrix_assemble_error()
+
+!$acc parallel loop gang vector private(j, m, in, jS, jE, slot, p, n1, n2, kn, aoff) &
+!$acc & present(csrIndex, csrItem, csrA, ellA, vptr, ndofList, ndofIndex2)
+      do i = 1, N
+        n1 = ndofList(i)
+        jS = csrIndex(i) + 1
+        jE = csrIndex(i + 1)
+        slot = 0
+!$acc loop seq
+        do j = jS, jE
+          in = csrItem(j)
+          slot = slot + 1
+          p = (slot-1)*N + i
+          n2 = ndofList(in)
+          aoff = vptr(p)
+          kn = ndofIndex2(j)
+          do m = 1, n1*n2
+            ellA(aoff + m) = csrA(kn + m)
+          enddo
+        enddo
+      enddo
+!$acc end parallel loop
+      return
     endif
 #endif
 
@@ -287,32 +309,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-#ifdef _OPENACC
-    if(is_dev)then
-!$acc parallel loop gang vector private(j, m, in, jS, jE, slot, p, n1, n2, kn, aoff) &
-!$acc & present(csrIndex, csrItem, csrA, ellA, vptr, ndofList, ndofIndex2)
-    do i = 1, N
-      n1 = ndofList(i)
-      jS = csrIndex(i) + 1
-      jE = csrIndex(i + 1)
-      slot = 0
-!$acc loop seq
-      do j = jS, jE
-        in = csrItem(j)
-        slot = slot + 1
-        p = (slot-1)*N + i
-        n2 = ndofList(in)
-        aoff = vptr(p)
-        kn = ndofIndex2(j)
-        do m = 1, n1*n2
-          ellA(aoff + m) = csrA(kn + m)
-        enddo
-      enddo
-    enddo
-!$acc end parallel loop
-    endif
-#endif
   end subroutine monolis_convert_CSR_to_ELL_V_R
 
   !> @ingroup matrix

@@ -51,6 +51,9 @@ contains
 
     call monolis_convert_CSR_to_DIA_R(mat%MAT)
 
+    !# GPU 正本モードではデバイス側に詰められるため、検査前にホストへ同期する
+!$acc update self(mat%MAT%R%Adia) if_present
+
     N = mat%MAT%N
     Ndiag = mat%MAT%DIA%Ndiag
 
@@ -122,8 +125,13 @@ contains
     do k = 1, size(mat%MAT%R%A)
       mat%MAT%R%A(k) = dble(k)
     enddo
+    !# GPU 正本モードではホスト直接書き込みをデバイスへ反映する
+!$acc update device(mat%MAT%R%A) if_present
 
     call monolis_convert_CSR_to_DIA_V_R(mat%MAT)
+
+    !# GPU 正本モードではデバイス側に詰められるため、検査前にホストへ同期する
+!$acc update self(mat%MAT%R%Adia) if_present
 
     N = mat%MAT%N
     Ndiag = mat%MAT%DIA%Ndiag

@@ -90,8 +90,9 @@ contains
     diaA => monoMAT%R%Adia
 
 #ifdef _OPENACC
-    !# GPU 正本モード:行列値がデバイス常駐の場合、DIA 値配列をデバイス上にも確保・ゼロ初期化し、
-    !# 詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    !# GPU 正本モード:行列値がデバイス常駐の場合、DIA 値配列をデバイス上に確保・ゼロ初期化し、
+    !# 詰め替えカーネルをデバイスのみで実行する(ホスト側の Adia は SpMV から参照されないため、
+    !# ホスト詰め替えは行わない)
     is_dev = acc_is_present(csrA)
     if(is_dev)then
       !$acc enter data create(diaA)
@@ -100,6 +101,28 @@ contains
       !$acc end kernels
       !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
       call monolis_check_matrix_assemble_error()
+
+!$acc parallel loop gang vector private(j, k, l, in, jS, jE, d) &
+!$acc & present(csrIndex, csrItem, csrA, diaA) copyin(diag_of_offset)
+      do i = 1, N
+        jS = csrIndex(i) + 1
+        jE = csrIndex(i + 1)
+!$acc loop seq
+        do j = jS, jE
+          in = csrItem(j)
+          d = diag_of_offset(in - i + NP)
+          do k = 1, NDOF
+            do l = 1, NDOF
+              diaA((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
+                csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
+            enddo
+          enddo
+        enddo
+      enddo
+!$acc end parallel loop
+
+      call monolis_dealloc_I_1d(diag_of_offset)
+      return
     endif
 #endif
 
@@ -125,29 +148,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-#ifdef _OPENACC
-    if(is_dev)then
-!$acc parallel loop gang vector private(j, k, l, in, jS, jE, d) &
-!$acc & present(csrIndex, csrItem, csrA, diaA) copyin(diag_of_offset)
-    do i = 1, N
-      jS = csrIndex(i) + 1
-      jE = csrIndex(i + 1)
-!$acc loop seq
-      do j = jS, jE
-        in = csrItem(j)
-        d = diag_of_offset(in - i + NP)
-        do k = 1, NDOF
-          do l = 1, NDOF
-            diaA((d-1)*NDOF2*N + ((k-1)*NDOF + (l-1))*N + i) = &
-              csrA(NDOF2*(j-1) + NDOF*(k-1) + l)
-          enddo
-        enddo
-      enddo
-    enddo
-!$acc end parallel loop
-    endif
-#endif
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_R
@@ -256,7 +256,8 @@ contains
 
 #ifdef _OPENACC
     !# GPU 正本モード:行列値がデバイス常駐の場合、Vptr をデバイスへ転送し、
-    !# 値配列をデバイス上にも確保・ゼロ初期化して詰め替えカーネルをデバイスでも実行する(ライトスルー)
+    !# 値配列をデバイス上に確保・ゼロ初期化して詰め替えカーネルをデバイスのみで実行する
+    !# (ホスト側の Adia は SpMV から参照されないため、ホスト詰め替えは行わない)
     is_dev = acc_is_present(csrA)
     if(is_dev)then
       !$acc enter data copyin(vptr)
@@ -266,6 +267,31 @@ contains
       !$acc end kernels
       !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
       call monolis_check_matrix_assemble_error()
+
+!$acc parallel loop gang vector private(j, m, in, jS, jE, d, p, n1, n2, kn, aoff) &
+!$acc & present(csrIndex, csrItem, csrA, diaA, vptr, ndofList, ndofIndex2) &
+!$acc & copyin(diag_of_offset)
+      do i = 1, N
+        n1 = ndofList(i)
+        jS = csrIndex(i) + 1
+        jE = csrIndex(i + 1)
+!$acc loop seq
+        do j = jS, jE
+          in = csrItem(j)
+          d = diag_of_offset(in - i + NP)
+          p = (d-1)*N + i
+          n2 = ndofList(in)
+          aoff = vptr(p)
+          kn = ndofIndex2(j)
+          do m = 1, n1*n2
+            diaA(aoff + m) = csrA(kn + m)
+          enddo
+        enddo
+      enddo
+!$acc end parallel loop
+
+      call monolis_dealloc_I_1d(diag_of_offset)
+      return
     endif
 #endif
 
@@ -293,32 +319,6 @@ contains
     enddo
 !$omp end do
 !$omp end parallel
-
-#ifdef _OPENACC
-    if(is_dev)then
-!$acc parallel loop gang vector private(j, m, in, jS, jE, d, p, n1, n2, kn, aoff) &
-!$acc & present(csrIndex, csrItem, csrA, diaA, vptr, ndofList, ndofIndex2) &
-!$acc & copyin(diag_of_offset)
-    do i = 1, N
-      n1 = ndofList(i)
-      jS = csrIndex(i) + 1
-      jE = csrIndex(i + 1)
-!$acc loop seq
-      do j = jS, jE
-        in = csrItem(j)
-        d = diag_of_offset(in - i + NP)
-        p = (d-1)*N + i
-        n2 = ndofList(in)
-        aoff = vptr(p)
-        kn = ndofIndex2(j)
-        do m = 1, n1*n2
-          diaA(aoff + m) = csrA(kn + m)
-        enddo
-      enddo
-    enddo
-!$acc end parallel loop
-    endif
-#endif
 
     call monolis_dealloc_I_1d(diag_of_offset)
   end subroutine monolis_convert_CSR_to_DIA_V_R
