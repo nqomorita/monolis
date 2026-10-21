@@ -151,6 +151,22 @@ void monolis_set_Dirichlet_bc_R(
   double   val);
 
 /**
+ * @brief 境界条件の一括付与（実数型）
+ * @param[inout] mat monolis 構造体
+ * @param[inout] b 右辺ベクトル
+ * @param[in] is_bc 自由度ごとの固定フラグ（長さ NPNDOF。非ゼロ = 固定）
+ * @param[in] bc_val 固定自由度に課す値（長さ NPNDOF。非固定自由度の値は参照されない）
+ * @details monolis_set_Dirichlet_bc_R を固定自由度へ昇順に適用した結果と数学的に同値。
+ * 固定自由度数が多い場合はカーネル起動・同期回数が一定となるため大幅に高速である。
+ * @ingroup matrix
+ */
+void monolis_set_Dirichlet_bc_all_R(
+  MONOLIS* mat,
+  double*  b,
+  int*     is_bc,
+  double*  bc_val);
+
+/**
  * @brief スカラ値を疎行列に設定（複素数型）
  * @param[inout] mat monolis 構造体
  * @param[in] i 行番号

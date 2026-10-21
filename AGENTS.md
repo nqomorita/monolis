@@ -128,6 +128,10 @@ C 側は **0-based**、Fortran 側に渡す際に通信テーブル (`recv_item`
   付きで、C の `#pragma acc parallel loop` 内から呼び出せる。C 経路の行列配列は C 側 malloc
   (非常駐) のため、ユーザが `#pragma acc enter data copyin(...)` で常駐させてから使用する。
   GPU ビルドでは C ラッパも `-acc` でコンパイルされる ([Makefile](Makefile) の GPU_GNU)。
+- **一括 Dirichlet BC**: `monolis_set_Dirichlet_bc_all_R(monolis, B, is_bc, bc_val)`
+  (Fortran は logical フラグ、C は int フラグ) は全行を 1 カーネルで処理し、ノード単位
+  `monolis_set_Dirichlet_bc_R` の昇順適用と数学的に同値。固定自由度が多い場合に大幅高速
+  (357k 節点 / 10k BC でノード単位比 46 倍)。Newton 増分形式は呼び出し側で bc_val を生成する。
 - **MPI 並列**: 袖通信はデバイスポインタで行われるため CUDA 対応 UCX が必要
   (`UCX_TLS=self,sm,cuda_copy,cuda_ipc` 等。[build_gpu_mog1.sh](build_gpu_mog1.sh) 参照)。
 - **スコープ**: 実数型 (`_R`) のみ。複素数型・マージン付きパターン

@@ -296,6 +296,32 @@ void monolis_set_Dirichlet_bc_R(
     val);
 }
 
+void monolis_set_Dirichlet_bc_all_R(
+  MONOLIS* mat,
+  double*  b,
+  int*     is_bc,
+  double*  bc_val)
+{
+  int n_node = mat->mat.NP;
+  int nz = mat->mat.CSR.index[n_node];
+  int nza = mat->mat.n_dof_index2[nz];
+  int nzb = mat->mat.n_dof_index[n_node];
+
+  monolis_set_Dirichlet_bc_all_R_c_main(
+    n_node,
+    nz,
+    nza,
+    nzb,
+    mat->mat.n_dof_index,
+    mat->mat.n_dof_index2,
+    mat->mat.CSR.index,
+    mat->mat.CSR.item,
+    mat->mat.R.A,
+    b,
+    is_bc,
+    bc_val);
+}
+
 void monolis_set_scalar_to_sparse_matrix_C(
   MONOLIS*       mat,
   int            i,

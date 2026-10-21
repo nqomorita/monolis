@@ -97,6 +97,62 @@ void monolis_spmat_handler_c_test_R(){
   monolis_test_check_eq_R1("monolis_spmat_handler_c_test_R 6", b[7], 0.0);
 }
 
+/* 一括 Dirichlet 境界条件:ノード単位 API (テスト 6) と同一条件で結果一致を検証する */
+void monolis_spmat_handler_c_test_bc_all_R(){
+  MONOLIS mat;
+  int n_node;
+  int n_base;
+  int n_dof;
+  int n_elem;
+  int i;
+  int** elem;
+  int is_bc[8];
+  double bc_val[8];
+  double b[8];
+
+  monolis_std_log_string("monolis_spmat_handler_c_test_bc_all_R");
+
+  n_node = 4;
+  n_base = 2;
+  n_dof  = 2;
+  n_elem = 3;
+
+  elem = monolis_alloc_I_2d(elem, n_node, n_base);
+
+  elem[0][0] = 0; elem[0][1] = 1;
+  elem[1][0] = 1; elem[1][1] = 2;
+  elem[2][0] = 2; elem[2][1] = 3;
+
+  monolis_get_nonzero_pattern_by_simple_mesh_R(&mat, n_node, n_base, n_dof, n_elem, elem);
+
+  for(i = 0; i < 8; ++i){
+    b[i] = 0.0;
+    is_bc[i] = 0;
+    bc_val[i] = 0.0;
+  }
+
+  for(i = 0; i < 40; ++i){
+    mat.mat.R.A[i] = 2.0;
+  }
+
+  /* 節点 1 (0-based) の第 1 自由度を固定(テスト 6 と同一条件) */
+  is_bc[2] = 1;
+  bc_val[2] = 1.0;
+
+  monolis_set_Dirichlet_bc_all_R(&mat, b, is_bc, bc_val);
+
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[0],-2.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[1],-2.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[2], 1.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[3],-2.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[4],-2.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[5],-2.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[6], 0.0);
+  monolis_test_check_eq_R1("monolis_spmat_handler_c_test_bc_all_R 1", b[7], 0.0);
+
+  monolis_dealloc_I_2d(&elem, n_node, n_base);
+}
+
 void monolis_spmat_handler_c_test_C(){
   MONOLIS mat;
   int n_node;
@@ -343,4 +399,5 @@ void monolis_spmat_handler_c_test(){
   monolis_spmat_handler_c_test_R();
   monolis_spmat_handler_c_test_C();
   monolis_spmat_handler_c_test_V_R();
+  monolis_spmat_handler_c_test_bc_all_R();
 }

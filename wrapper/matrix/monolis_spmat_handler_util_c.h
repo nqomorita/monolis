@@ -173,6 +173,44 @@ void monolis_set_Dirichlet_bc_R_c_main(
   double  val);
 
 /**
+ * @brief 境界条件の一括付与（実数型、メイン関数）
+ * @param[in] n_node 全ブロック行数
+ * @param[in] nz 非零ブロック数
+ * @param[in] nza 行列値配列長
+ * @param[in] nzb 右辺ベクトル長（全自由度数）
+ * @param[in] n_dof_index ブロック自由度リスト
+ * @param[in] n_dof_index2 ブロック自由度リスト
+ * @param[in] index index 配列
+ * @param[in] item item 配列
+ * @param[inout] A 係数行列
+ * @param[inout] b 右辺ベクトル
+ * @param[in] is_bc 自由度ごとの固定フラグ（長さ nzb。非ゼロ = 固定）
+ * @param[in] bc_val 固定自由度に課す値（長さ nzb）
+ * @ingroup dev_matrix
+ */
+void monolis_set_Dirichlet_bc_all_R_c_main(
+  int     n_node,
+  int     nz,
+  int     nza,
+  int     nzb,
+  int*    n_dof_index,
+  int*    n_dof_index2,
+  int*    index,
+  int*    item,
+  double* A,
+  double* b,
+  int*    is_bc,
+  double* bc_val);
+
+/**
+ * @brief デバイス組立の遅延エラー検査
+ * @details GPU 要素ループからの組立で記録されたエラーを検査し、エラーがあれば停止する。
+ * solve 入口・境界条件・形式変換から自動的に呼ばれるため、通常ユーザが呼ぶ必要はない。
+ * @ingroup matrix
+ */
+void monolis_check_matrix_assemble_error();
+
+/**
  * @brief スカラ値を疎行列に設定（メイン関数、複素数型）
  * @param[in] n_node 
  * @param[in] nz

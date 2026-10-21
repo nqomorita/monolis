@@ -18,7 +18,114 @@ contains
     call monolis_convert_CSR_matrix_to_CSC_matrix_R_test()
     call monolis_variable_dof_sparse_matrix_R_test()
     call monolis_device_assembly_R_test()
+    call monolis_set_Dirichlet_bc_all_R_test()
   end subroutine monolis_spmat_handler_util_test
+
+  !> Dirichlet 境界条件一括付与のテスト
+  !> @details 既存のノード単位 API を昇順適用した結果と bit-exact 一致することを検証する。
+  !> GPU ビルドでは、右辺が非常駐のライトスルー経路と、右辺もデバイス常駐の
+  !> デバイス専有経路の両方を検証する(CPU ビルドでは同一コードがホスト実行される)。
+  subroutine monolis_set_Dirichlet_bc_all_R_test()
+    implicit none
+    type(monolis_structure) :: mat1, mat2
+    integer(kint) :: n_node, n_base, ndof, n_elem
+    integer(kint) :: elem(2,3)
+    integer(kint) :: i, j, NZA, NB
+    real(kdouble) :: B1(8), B2(8), B3(8)
+    logical :: is_bc(8)
+    real(kdouble) :: bc_val(8)
+    real(kdouble), pointer, contiguous :: tA(:)
+
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_all_R")
+    call monolis_std_global_log_string("monolis_set_Dirichlet_bc_all_main_R")
+
+    !# 4 節点チェーン(1-2, 2-3, 3-4)、2 自由度
+    n_node = 4
+    n_base = 2
+    ndof = 2
+    n_elem = 3
+    elem(1,1) = 1; elem(2,1) = 2
+    elem(1,2) = 2; elem(2,2) = 3
+    elem(1,3) = 3; elem(2,3) = 4
+
+    call monolis_initialize(mat1)
+    call monolis_initialize(mat2)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat1, n_node, n_base, ndof, n_elem, elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat2, n_node, n_base, ndof, n_elem, elem)
+
+    NZA = size(mat1%MAT%R%A)
+    NB = n_node*ndof
+
+    !# 非対称な値で行列を組み立てる(行消去と列消去の区別を検証するため)
+    do i = 1, n_node
+      do j = 1, n_node
+        if(abs(i - j) <= 1)then
+          call monolis_add_scalar_to_sparse_matrix_R(mat1, i, j, 1, 1, 10.0d0*i + 1.0d0*j)
+          call monolis_add_scalar_to_sparse_matrix_R(mat1, i, j, 1, 2, 10.0d0*i + 1.0d0*j + 0.1d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat1, i, j, 2, 1, 10.0d0*i + 1.0d0*j + 0.2d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat1, i, j, 2, 2, 10.0d0*i + 1.0d0*j + 0.3d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 1, 1, 10.0d0*i + 1.0d0*j)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 1, 2, 10.0d0*i + 1.0d0*j + 0.1d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 2, 1, 10.0d0*i + 1.0d0*j + 0.2d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 2, 2, 10.0d0*i + 1.0d0*j + 0.3d0)
+        endif
+      enddo
+    enddo
+
+    do i = 1, NB
+      B1(i) = 1.0d0*i
+      B2(i) = 1.0d0*i
+    enddo
+
+    !# 固定条件:節点 2 の自由度 1 に 10.0、節点 4 の自由度 2 に 20.0
+    is_bc = .false.
+    bc_val = 0.0d0
+    is_bc(3) = .true.; bc_val(3) = 10.0d0
+    is_bc(8) = .true.; bc_val(8) = 20.0d0
+
+    !# 既存ノード単位 API を昇順適用
+    call monolis_set_Dirichlet_bc_R(mat1, B1, 2, 1, 10.0d0)
+    call monolis_set_Dirichlet_bc_R(mat1, B1, 4, 2, 20.0d0)
+
+    !# 一括 API(ライトスルー経路:B 非常駐)
+    call monolis_set_Dirichlet_bc_all_R(mat2, B2, is_bc, bc_val)
+
+    call monolis_test_check_eq_R("monolis_set_Dirichlet_bc_all_R_test A", &
+      & mat2%MAT%R%A(1:NZA), mat1%MAT%R%A(1:NZA))
+    call monolis_test_check_eq_R("monolis_set_Dirichlet_bc_all_R_test B", &
+      & B2(1:NB), B1(1:NB))
+
+    !# デバイス専有経路(B もデバイス常駐。GPU ビルドのみ経路が変わる)
+    call monolis_clear_mat_value_matrix_R(mat2)
+    do i = 1, n_node
+      do j = 1, n_node
+        if(abs(i - j) <= 1)then
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 1, 1, 10.0d0*i + 1.0d0*j)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 1, 2, 10.0d0*i + 1.0d0*j + 0.1d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 2, 1, 10.0d0*i + 1.0d0*j + 0.2d0)
+          call monolis_add_scalar_to_sparse_matrix_R(mat2, i, j, 2, 2, 10.0d0*i + 1.0d0*j + 0.3d0)
+        endif
+      enddo
+    enddo
+    do i = 1, NB
+      B3(i) = 1.0d0*i
+    enddo
+!$acc enter data copyin(B3)
+    call monolis_set_Dirichlet_bc_all_R(mat2, B3, is_bc, bc_val)
+!$acc update self(B3)
+!$acc exit data delete(B3)
+    !# デバイス専有経路ではホスト鏡像 A は更新されないため、デバイス正本をホストへ同期する
+    tA => mat2%MAT%R%A
+!$acc update self(tA) if_present
+
+    call monolis_test_check_eq_R("monolis_set_Dirichlet_bc_all_R_test C", &
+      & tA(1:NZA), mat1%MAT%R%A(1:NZA))
+    call monolis_test_check_eq_R("monolis_set_Dirichlet_bc_all_R_test D", &
+      & B3(1:NB), B1(1:NB))
+
+    call monolis_finalize(mat1)
+    call monolis_finalize(mat2)
+  end subroutine monolis_set_Dirichlet_bc_all_R_test
 
   !> GPU 要素ループからの直接組立テスト
   !> @details OpenACC 有効時はデバイス常駐行列へ GPU カーネル内から組み立て、

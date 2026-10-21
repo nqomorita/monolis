@@ -595,6 +595,28 @@ contains
   end subroutine monolis_set_Dirichlet_bc_R
 
   !> @ingroup matrix
+  !> Dirichlet 境界条件の一括付与（実数型）
+  !> @details 全自由度の固定フラグと設定値を受け取り、全行を 1 パスで処理する。
+  !> \ref monolis_set_Dirichlet_bc_R を固定自由度へ昇順に適用した結果と数学的に同値で、
+  !> 固定自由度数が多い場合はカーネル起動・同期回数が一定となるため大幅に高速である。
+  !> MPI 並列では袖自由度の is_bc・bc_val も正しく設定して呼び出すこと。
+  subroutine monolis_set_Dirichlet_bc_all_R(monolis, B, is_bc, bc_val)
+    implicit none
+    !> [in,out] monolis 構造体
+    type(monolis_structure), intent(inout) :: monolis
+    !> [in,out] 右辺ベクトル
+    real(kdouble), intent(inout) :: B(:)
+    !> [in] 自由度ごとの固定フラグ（長さ NPNDOF）
+    logical, intent(in) :: is_bc(:)
+    !> [in] 固定自由度に課す値（長さ NPNDOF。非固定自由度の値は参照されない）
+    real(kdouble), intent(in) :: bc_val(:)
+
+    call monolis_set_Dirichlet_bc_all_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
+      & monolis%MAT%R%A, B, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
+      & monolis%MAT%NP, is_bc, bc_val)
+  end subroutine monolis_set_Dirichlet_bc_all_R
+
+  !> @ingroup matrix
   !> 境界条件処理（複素数型）
   subroutine monolis_set_Dirichlet_bc_C(monolis, B, node_id, ndof_bc, val)
     implicit none

@@ -130,6 +130,39 @@ contains
       & n_dof_index, n_dof_index2, nid_t, ndof_bc_t, val)
   end subroutine monolis_set_Dirichlet_bc_R_c
 
+  subroutine monolis_set_Dirichlet_bc_all_R_c(N, NZ, NZA, NZB, n_dof_index, n_dof_index2, &
+    index, item, A, B, is_bc, bc_val) &
+    bind(c, name = "monolis_set_Dirichlet_bc_all_R_c_main")
+    implicit none
+    integer(kint_c), intent(in), value :: N, NZ, NZA, NZB
+    integer(kint_c), intent(in) :: index(N + 1)
+    integer(kint_c), intent(in) :: item(NZ)
+    integer(kint_c), intent(in) :: n_dof_index(N + 1)
+    integer(kint_c), intent(in) :: n_dof_index2(NZ)
+    real(c_double) :: A(NZA)
+    real(c_double) :: B(NZB)
+    integer(kint_c), intent(in) :: is_bc(NZB)
+    real(c_double), intent(in) :: bc_val(NZB)
+    logical, allocatable :: is_bc_t(:)
+    integer(kint) :: i
+
+    call monolis_alloc_L_1d(is_bc_t, NZB)
+    do i = 1, NZB
+      is_bc_t(i) = (is_bc(i) /= 0)
+    enddo
+
+    call monolis_set_Dirichlet_bc_all_main_R(index, item, A, B, &
+      & n_dof_index, n_dof_index2, N, is_bc_t, bc_val)
+
+    call monolis_dealloc_L_1d(is_bc_t)
+  end subroutine monolis_set_Dirichlet_bc_all_R_c
+
+  subroutine monolis_check_matrix_assemble_error_c() &
+    bind(c, name = "monolis_check_matrix_assemble_error")
+    implicit none
+    call monolis_check_matrix_assemble_error()
+  end subroutine monolis_check_matrix_assemble_error_c
+
   subroutine monolis_set_scalar_to_sparse_matrix_C_c(N, NZ, NZA, n_dof_index, n_dof_index2, &
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_set_scalar_to_sparse_matrix_C_c_main")

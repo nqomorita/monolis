@@ -833,6 +833,205 @@ contains
     B(n_dof_index(node_id) + ndof_bc) = val
   end subroutine monolis_set_Dirichlet_bc_main_R
 
+  !> @ingroup matrix
+  !> Dirichlet 境界条件の一括付与（実数型、メイン関数）
+  !> @details 全自由度の固定フラグと設定値を受け取り、全行を 1 パスで処理する
+  !> （行オーナーシップ方式。1 スレッドが 1 ブロック行の A・B を専有するため atomic・CSC 不要）。
+  !> 既存の \ref monolis_set_Dirichlet_bc_main_R を固定自由度へ昇順に適用した結果と数学的に同値。
+  !> GPU 正本モードでは、行列 A と右辺 B が共にデバイス常駐の場合は全てデバイス上で実行し、
+  !> A のみ常駐の場合はホストで実行して A の消去をデバイスへ反映する（ライトスルー）。
+  subroutine monolis_set_Dirichlet_bc_all_main_R(index, item, A, B, &
+    & n_dof_index, n_dof_index2, NP, is_bc, bc_val)
+    implicit none
+    !> [in] index 配列
+    integer(kint), intent(in) :: index(:)
+    !> [in] item 配列
+    integer(kint), intent(in) :: item(:)
+    !> [in,out] 係数行列
+    real(kdouble), intent(inout) :: A(:)
+    !> [in,out] 右辺ベクトル
+    real(kdouble), intent(inout) :: B(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index(:)
+    !> [in] ブロック自由度リスト
+    integer(kint), intent(in) :: n_dof_index2(:)
+    !> [in] 全ブロック行数
+    integer(kint), intent(in) :: NP
+    !> [in] 自由度ごとの固定フラグ（長さ n_dof_index(NP+1)）
+    logical, intent(in) :: is_bc(:)
+    !> [in] 固定自由度に課す値（長さ n_dof_index(NP+1)。非固定自由度の値は参照されない）
+    real(kdouble), intent(in) :: bc_val(:)
+    integer(kint) :: i, j, jS, jE, jn, k1, k2, r, c, m, ndof1, ndof2
+    integer(kint) :: NPNDOF, missing_row
+    logical :: found
+#ifdef _OPENACC
+    logical :: is_dev, is_dev_B
+#endif
+
+    NPNDOF = n_dof_index(NP + 1)
+    missing_row = NP + 1
+
+#ifdef _OPENACC
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
+    is_dev = acc_is_present(A)
+    is_dev_B = .false.
+    if(is_dev) is_dev_B = acc_is_present(B)
+    call monolis_check_matrix_assemble_error()
+
+    !# デバイス完結版:右辺 B もデバイス常駐の場合(デバイス専有フロー)、全行の処理を
+    !# 1 カーネルで実行する(ホスト鏡像は更新しない)。固定フラグ・設定値はホスト正本とし、
+    !# 既にデバイス常駐の場合も最新のホスト値で上書きする
+    if(is_dev_B)then
+!$acc data copyin(is_bc(1:NPNDOF), bc_val(1:NPNDOF))
+!$acc update device(is_bc(1:NPNDOF), bc_val(1:NPNDOF))
+!$acc parallel loop private(j, jS, jE, jn, k1, k2, r, c, m, ndof1, ndof2, found) &
+!$acc & present(A, B, index, item, n_dof_index, n_dof_index2, is_bc, bc_val) &
+!$acc & reduction(min:missing_row)
+      do i = 1, NP
+        ndof1 = n_dof_index(i + 1) - n_dof_index(i)
+        jS = index(i) + 1
+        jE = index(i + 1)
+        do k1 = 1, ndof1
+          r = n_dof_index(i) + k1
+          if(is_bc(r))then
+            !# 固定行:行の全成分をゼロ化し、対角成分に 1 を設定する
+            found = .false.
+            do j = jS, jE
+              jn = item(j)
+              ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+              do k2 = 1, ndof2
+                A(n_dof_index2(j) + ndof2*(k1-1) + k2) = 0.0d0
+              enddo
+              if(jn == i)then
+                A(n_dof_index2(j) + ndof2*(k1-1) + k1) = 1.0d0
+                found = .true.
+              endif
+            enddo
+            B(r) = bc_val(r)
+            if(.not. found .and. i < missing_row) missing_row = i
+          else
+            !# 自由行:固定列の成分を右辺へ移項してゼロ化する(列昇順)
+            do j = jS, jE
+              jn = item(j)
+              ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+              do k2 = 1, ndof2
+                c = n_dof_index(jn) + k2
+                if(is_bc(c))then
+                  m = n_dof_index2(j) + ndof2*(k1-1) + k2
+                  B(r) = B(r) - bc_val(c)*A(m)
+                  A(m) = 0.0d0
+                endif
+              enddo
+            enddo
+          endif
+        enddo
+      enddo
+!$acc end parallel loop
+!$acc end data
+
+      if(missing_row <= NP)then
+        call monolis_stop_by_set_DBC(missing_row)
+      endif
+      return
+    endif
+#endif
+
+    !# ホスト実行(デバイス専有フロー以外)
+!$omp parallel default(none) &
+!$omp & shared(index, item, A, B, n_dof_index, n_dof_index2, is_bc, bc_val) &
+!$omp & firstprivate(NP) &
+!$omp & private(i, j, jS, jE, jn, k1, k2, r, c, m, ndof1, ndof2, found) &
+!$omp & reduction(min:missing_row)
+!$omp do
+    do i = 1, NP
+      ndof1 = n_dof_index(i + 1) - n_dof_index(i)
+      jS = index(i) + 1
+      jE = index(i + 1)
+      do k1 = 1, ndof1
+        r = n_dof_index(i) + k1
+        if(is_bc(r))then
+          !# 固定行:行の全成分をゼロ化し、対角成分に 1 を設定する
+          found = .false.
+          do j = jS, jE
+            jn = item(j)
+            ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+            do k2 = 1, ndof2
+              A(n_dof_index2(j) + ndof2*(k1-1) + k2) = 0.0d0
+            enddo
+            if(jn == i)then
+              A(n_dof_index2(j) + ndof2*(k1-1) + k1) = 1.0d0
+              found = .true.
+            endif
+          enddo
+          B(r) = bc_val(r)
+          if(.not. found .and. i < missing_row) missing_row = i
+        else
+          !# 自由行:固定列の成分を右辺へ移項してゼロ化する(列昇順)
+          do j = jS, jE
+            jn = item(j)
+            ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+            do k2 = 1, ndof2
+              c = n_dof_index(jn) + k2
+              if(is_bc(c))then
+                m = n_dof_index2(j) + ndof2*(k1-1) + k2
+                B(r) = B(r) - bc_val(c)*A(m)
+                A(m) = 0.0d0
+              endif
+            enddo
+          enddo
+        endif
+      enddo
+    enddo
+!$omp end do
+!$omp end parallel
+
+    if(missing_row <= NP)then
+      call monolis_stop_by_set_DBC(missing_row)
+    endif
+
+#ifdef _OPENACC
+    !# ライトスルー:デバイス常駐の行列 A に消去と対角 1 の設定を反映する(B はホストのみ)
+    if(is_dev)then
+!$acc data copyin(is_bc(1:NPNDOF))
+!$acc update device(is_bc(1:NPNDOF))
+!$acc parallel loop private(j, jS, jE, jn, k1, k2, c, ndof1, ndof2) &
+!$acc & present(A, index, item, n_dof_index, n_dof_index2, is_bc)
+      do i = 1, NP
+        ndof1 = n_dof_index(i + 1) - n_dof_index(i)
+        jS = index(i) + 1
+        jE = index(i + 1)
+        do k1 = 1, ndof1
+          if(is_bc(n_dof_index(i) + k1))then
+            do j = jS, jE
+              jn = item(j)
+              ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+              do k2 = 1, ndof2
+                A(n_dof_index2(j) + ndof2*(k1-1) + k2) = 0.0d0
+              enddo
+              if(jn == i)then
+                A(n_dof_index2(j) + ndof2*(k1-1) + k1) = 1.0d0
+              endif
+            enddo
+          else
+            do j = jS, jE
+              jn = item(j)
+              ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+              do k2 = 1, ndof2
+                c = n_dof_index(jn) + k2
+                if(is_bc(c))then
+                  A(n_dof_index2(j) + ndof2*(k1-1) + k2) = 0.0d0
+                endif
+              enddo
+            enddo
+          endif
+        enddo
+      enddo
+!$acc end parallel loop
+!$acc end data
+    endif
+#endif
+  end subroutine monolis_set_Dirichlet_bc_all_main_R
+
   !> @ingroup dev_matrix
   !> 境界条件処理（複素数型、メイン関数）
   subroutine monolis_set_Dirichlet_bc_main_C(index, item, A, B, indexR, itemR, permA, &
