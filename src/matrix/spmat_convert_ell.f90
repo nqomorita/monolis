@@ -3,6 +3,7 @@ module mod_monolis_spmat_convert_ell
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_spmat_handler_util
 #ifdef _OPENACC
   use openacc
 #endif
@@ -76,8 +77,8 @@ contains
     is_dev = acc_is_present(csrA)
     if(is_dev)then
       !$acc enter data create(ellCol, ellA)
-      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
-      !$acc wait(1)
+      !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
+      call monolis_check_matrix_assemble_error()
     endif
 #endif
 
@@ -256,8 +257,8 @@ contains
     if(is_dev)then
       !$acc enter data copyin(vptr)
       !$acc enter data create(ellA)
-      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
-      !$acc wait(1)
+      !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
+      call monolis_check_matrix_assemble_error()
     endif
 #endif
 

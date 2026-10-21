@@ -27,14 +27,74 @@ module mod_monolis_spmat_handler_util
 
   implicit none
 
+  !> デバイス組立の遅延エラー検出:エラー数（GPU 要素ループからの組立はデバイス上で停止できないため、
+  !> パターン外参照等をカウンタに記録し、solve 入口・境界条件・形式変換の同期点で検査する）
+  integer(kint) :: monolis_assemble_error_count = 0
+  !> デバイス組立の遅延エラー検出:エラー発生位置（行番号）
+  integer(kint) :: monolis_assemble_error_i = 0
+  !> デバイス組立の遅延エラー検出:エラー発生位置（列番号）
+  integer(kint) :: monolis_assemble_error_j = 0
+!$acc declare create(monolis_assemble_error_count, monolis_assemble_error_i, monolis_assemble_error_j)
+
 contains
 
-  !# setter
   !> @ingroup dev_matrix
+  !> 組立エラーの記録（デバイス呼び出し可能。エラーカウンタと発生位置を更新する）
+  subroutine monolis_record_matrix_assemble_error(ci, cj)
+    implicit none
+!$acc routine seq
+    !> [in] 行番号
+    integer(kint), intent(in) :: ci
+    !> [in] 列番号
+    integer(kint), intent(in) :: cj
+
+!$acc atomic update
+!$omp atomic update
+    monolis_assemble_error_count = monolis_assemble_error_count + 1
+    !# 発生位置は競合時にいずれかの失敗位置が残れば十分(報告用)
+    monolis_assemble_error_i = ci
+    monolis_assemble_error_j = cj
+  end subroutine monolis_record_matrix_assemble_error
+
+  !> @ingroup matrix
+  !> デバイス組立の遅延エラー検査
+  !> @details GPU 要素ループからの組立（\ref monolis_add_matrix_to_sparse_matrix_main_R 等の
+  !> デバイス直接呼び出し）で記録されたエラーを検査し、エラーがあれば停止する。
+  !> solve 入口・境界条件・形式変換の同期点から自動的に呼ばれるため、通常ユーザが呼ぶ必要はない。
+  subroutine monolis_check_matrix_assemble_error()
+    implicit none
+#ifdef _OPENACC
+    !$acc wait(1)
+    !$acc update self(monolis_assemble_error_count)
+    if(monolis_assemble_error_count > 0)then
+      !$acc update self(monolis_assemble_error_i, monolis_assemble_error_j)
+      call monolis_stop_by_matrix_assemble(monolis_assemble_error_i, monolis_assemble_error_j)
+    endif
+#endif
+  end subroutine monolis_check_matrix_assemble_error
+
+  !> @ingroup dev_matrix
+  !> デバイス組立エラーカウンタの初期化（常駐開始時に呼ばれる）
+  subroutine monolis_init_matrix_assemble_error()
+    implicit none
+    monolis_assemble_error_count = 0
+    monolis_assemble_error_i = 0
+    monolis_assemble_error_j = 0
+#ifdef _OPENACC
+    !$acc update device(monolis_assemble_error_count, monolis_assemble_error_i, monolis_assemble_error_j)
+#endif
+  end subroutine monolis_init_matrix_assemble_error
+
+  !# setter
+  !> @ingroup matrix
   !> スカラ値を疎行列に設定（メイン関数、実数型）
+  !> @details GPU 要素ループ（OpenACC compute region）内から直接呼び出し可能（acc routine seq）。
+  !> デバイス呼び出し時は常駐配列（index, item, A, n_dof_index, n_dof_index2）を present で渡すこと。
+  !> パターン外参照等のエラーはカウンタに記録され、\ref monolis_check_matrix_assemble_error で検査される。
   subroutine monolis_set_scalar_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
     ci, cj, csub_i, csub_j, val)
     implicit none
+!$acc routine seq
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
@@ -55,33 +115,30 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, ndof
+    integer(kint) :: j, im, jS, jE, ndof
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_i)then
+      call monolis_record_matrix_assemble_error(ci, cj)
+      return
+    endif
     ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_j)then
+      call monolis_record_matrix_assemble_error(ci, cj)
+      return
+    endif
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     !# 行内の item は昇順ソート済みのため二分探索
     call monolis_bsearch_I(item, jS, jE, cj, j)
-    if(j /= -1)then
-      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-      A(im) = val
-#ifdef _OPENACC
-      !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)
-      if(acc_is_present(A))then
-!$acc serial present(A) async(1)
-        A(im) = val
-!$acc end serial
-      endif
-#endif
+    if(j == -1)then
+      call monolis_record_matrix_assemble_error(ci, cj)
       return
     endif
 
-    call monolis_stop_by_matrix_assemble(ci, cj)
+    im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+    A(im) = val
   end subroutine monolis_set_scalar_to_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -130,11 +187,15 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_set_scalar_to_sparse_matrix_main_C
 
-  !> @ingroup dev_matrix
+  !> @ingroup matrix
   !> 小行列を疎行列に設定（メイン関数、実数型）
+  !> @details GPU 要素ループ（OpenACC compute region）内から直接呼び出し可能（acc routine seq）。
+  !> デバイス呼び出し時は常駐配列（index, item, A, n_dof_index, n_dof_index2）を present で渡すこと。
+  !> パターン外参照等のエラーはカウンタに記録され、\ref monolis_check_matrix_assemble_error で検査される。
   subroutine monolis_set_block_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
     ci, cj, val)
     implicit none
+!$acc routine seq
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
@@ -151,39 +212,25 @@ contains
     integer(kint), intent(in) :: cj
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
-    integer(kint) :: j, jn, im, jS, jE, i1, i2, n1, n2
+    integer(kint) :: j, im, jS, jE, i1, i2, n1, n2
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     !# 行内の item は昇順ソート済みのため二分探索
     call monolis_bsearch_I(item, jS, jE, cj, j)
-    if(j /= -1)then
-      n1 = n_dof_index(ci + 1) - n_dof_index(ci)
-      n2 = n_dof_index(cj + 1) - n_dof_index(cj)
-      im = n_dof_index2(j)
-      do i1 = 1, n1
-      do i2 = 1, n2
-        A(im + n2*(i1-1) + i2) = val(i1, i2)
-      enddo
-      enddo
-#ifdef _OPENACC
-      !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)
-      if(acc_is_present(A))then
-!$acc data copyin(val(1:n1,1:n2))
-!$acc parallel loop collapse(2) present(A, val) async(1)
-        do i1 = 1, n1
-        do i2 = 1, n2
-          A(im + n2*(i1-1) + i2) = val(i1, i2)
-        enddo
-        enddo
-!$acc end parallel loop
-!$acc wait(1)
-!$acc end data
-      endif
-#endif
+    if(j == -1)then
+      call monolis_record_matrix_assemble_error(ci, cj)
       return
     endif
-    call monolis_stop_by_matrix_assemble(ci, cj)
+
+    n1 = n_dof_index(ci + 1) - n_dof_index(ci)
+    n2 = n_dof_index(cj + 1) - n_dof_index(cj)
+    im = n_dof_index2(j)
+    do i1 = 1, n1
+    do i2 = 1, n2
+      A(im + n2*(i1-1) + i2) = val(i1, i2)
+    enddo
+    enddo
   end subroutine monolis_set_block_to_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -328,11 +375,16 @@ contains
   end subroutine monolis_get_scalar_from_sparse_matrix_main_C
 
   !# adder
-  !> @ingroup dev_matrix
+  !> @ingroup matrix
   !> スカラ値を疎行列に足込（メイン関数、実数型）
+  !> @details GPU 要素ループ（OpenACC compute region）内から直接呼び出し可能（acc routine seq）。
+  !> デバイス呼び出し時は常駐配列（index, item, A, n_dof_index, n_dof_index2）を present で渡すこと。
+  !> 足し込みは atomic で行われる。パターン外参照等のエラーはカウンタに記録され、
+  !> \ref monolis_check_matrix_assemble_error で検査される。
   subroutine monolis_add_scalar_to_sparse_matrix_main_R(index, item, A, n_dof_index, n_dof_index2, &
     ci, cj, csub_i, csub_j, val)
     implicit none
+!$acc routine seq
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
@@ -353,35 +405,33 @@ contains
     integer(kint), intent(in) :: csub_j
     !> [in] 設定値
     real(kdouble), intent(in) :: val
-    integer(kint) :: j, jn, im, jS, jE, ndof
+    integer(kint) :: j, im, jS, jE, ndof
 
     ndof = n_dof_index(ci + 1) - n_dof_index(ci)
-    if(ndof < csub_i) call monolis_stop_by_submatrix_access(ndof, csub_i)
+    if(ndof < csub_i)then
+      call monolis_record_matrix_assemble_error(ci, cj)
+      return
+    endif
     ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-    if(ndof < csub_j) call monolis_stop_by_submatrix_access(ndof, csub_j)
+    if(ndof < csub_j)then
+      call monolis_record_matrix_assemble_error(ci, cj)
+      return
+    endif
 
     jS = index(ci) + 1
     jE = index(ci + 1)
     !# 行内の item は昇順ソート済みのため二分探索
     call monolis_bsearch_I(item, jS, jE, cj, j)
-    if(j /= -1)then
-      ndof = n_dof_index(cj + 1) - n_dof_index(cj)
-      im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
-      !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
-!$omp atomic update
-      A(im) = A(im) + val
-#ifdef _OPENACC
-      !# GPU 正本モード:デバイス常駐行列にも足し込む(ライトスルー。非同期キュー 1 で順序を保証)
-      if(acc_is_present(A))then
-!$acc serial present(A) async(1)
-        A(im) = A(im) + val
-!$acc end serial
-      endif
-#endif
+    if(j == -1)then
+      call monolis_record_matrix_assemble_error(ci, cj)
       return
     endif
 
-    call monolis_stop_by_matrix_assemble(ci, cj)
+    im = n_dof_index2(j) + ndof*(csub_i-1) + csub_j
+    !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
+!$acc atomic update
+!$omp atomic update
+    A(im) = A(im) + val
   end subroutine monolis_add_scalar_to_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -432,11 +482,18 @@ contains
     call monolis_stop_by_matrix_assemble(ci, cj)
   end subroutine monolis_add_scalar_to_sparse_matrix_main_C
 
-  !> @ingroup dev_matrix
+  !> @ingroup matrix
   !> 行列値を疎行列に足込（メイン関数、実数型）
+  !> @details 要素剛性行列を全体行列へ足し込む。GPU 要素ループ（OpenACC compute region）内から
+  !> 直接呼び出し可能（acc routine seq）。デバイス呼び出し時は常駐配列
+  !> （index, item, A, n_dof_index, n_dof_index2）を present で渡し、e1/e2/val は
+  !> スレッドローカル（private）配列を渡すこと。各 (行, 列) ブロックは行内二分探索で特定され、
+  !> 足し込みは atomic で行われる。パターン外参照のエラーはカウンタに記録され、
+  !> \ref monolis_check_matrix_assemble_error で検査される。
   subroutine monolis_add_matrix_to_sparse_matrix_main_R(index, item, A, n1, n2, &
     n_dof_index, n_dof_index2, e1, e2, val)
     implicit none
+!$acc routine seq
     !> [in] index 配列
     integer(kint), intent(in) :: index(:)
     !> [in] item 配列
@@ -457,115 +514,39 @@ contains
     integer(kint), intent(in) :: e2(n2)
     !> [in] 設定値
     real(kdouble), intent(in) :: val(:,:)
-    integer(kint) :: e1t(n1), e2t(n2)
-    integer(kint) :: i, in, jn, kn, jS, jE, i1, i2, j1, j2, k1, k2
-    integer(kint) :: n1t, n2t
-    integer(kint) :: eperm1(n1), eperm2(n2)
-    integer(kint), allocatable :: idx1(:), idx2(:)
-    integer(kint), allocatable :: idx1t(:), idx2t(:)
-    integer(kint), allocatable :: imap(:,:)
-    real(kdouble), allocatable :: temp(:,:)
+    integer(kint) :: i1, i2, j, jS, jE, in, jn, kn
+    integer(kint) :: k1, k2, im, ioff, joff, ndof1, ndof2
 
-    e1t = e1
-    call monolis_get_sequence_array_I(eperm1, n1, 1, 1)
-    call monolis_qsort_I_2d(e1t, eperm1, 1, n1)
-
-    e2t = e2
-    call monolis_get_sequence_array_I(eperm2, n2, 1, 1)
-    call monolis_qsort_I_2d(e2t, eperm2, 1, n2)
-
-    call monolis_alloc_I_1d(idx1, n1 + 1)
-    call monolis_alloc_I_1d(idx2, n2 + 1)
-    call monolis_alloc_I_1d(idx1t, n1 + 1)
-    call monolis_alloc_I_1d(idx2t, n2 + 1)
-
-    do i = 1, n1
-      in = e1(i)
-      idx1(i + 1) = idx1(i) + n_dof_index(in + 1) - n_dof_index(in)
-    enddo
-
-    do i = 1, n2
-      in = e2(i)
-      idx2(i + 1) = idx2(i) + n_dof_index(in + 1) - n_dof_index(in)
-    enddo
-
-    do i = 1, n1
-      in = e1t(i)
-      idx1t(i + 1) = idx1t(i) + n_dof_index(in + 1) - n_dof_index(in)
-    enddo
-
-    do i = 1, n2
-      in = e2t(i)
-      idx2t(i + 1) = idx2t(i) + n_dof_index(in + 1) - n_dof_index(in)
-    enddo
-
-    call monolis_alloc_R_2d(temp, idx1t(n1 + 1), idx2t(n2 + 1))
-
-    do i2 = 1, n2
-      j2 = eperm2(i2)
-      do i1 = 1, n1
-        j1 = eperm1(i1)
-        do k2 = 1, idx2t(i2 + 1) - idx2t(i2)
-        do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-          temp(idx1t(i1)+k1, idx2t(i2)+k2) = val(idx1(j1)+k1, idx2(j2)+k2)
-        enddo
-        enddo
-      enddo
-    enddo
-
-    !# 足込み先の A 配列インデックスをホストで確定する(パターン外参照はここで検出する)
-    call monolis_alloc_I_2d(imap, idx1t(n1 + 1), idx2t(n2 + 1))
-
+    ioff = 0
     do i1 = 1, n1
-      in = e1t(i1)
+      in = e1(i1)
+      ndof1 = n_dof_index(in + 1) - n_dof_index(in)
       jS = index(in) + 1
       jE = index(in + 1)
-      aa:do i2 = 1, n2
-        do j1 = jS, jE
-          jn = item(j1)
-          if(jn == e2t(i2))then
-            kn = idx2t(i2 + 1) - idx2t(i2)
-            do k1 = 1, idx1t(i1 + 1) - idx1t(i1)
-            do k2 = 1, kn
-              imap(idx1t(i1)+k1, idx2t(i2)+k2) = n_dof_index2(j1) + kn*(k1-1) + k2
-            enddo
-            enddo
-            jS = j1
-            cycle aa
-          endif
-        enddo
-      call monolis_stop_by_matrix_assemble(e1t(i1), e2t(i2))
-      enddo aa
-    enddo
-
-    n1t = idx1t(n1 + 1)
-    n2t = idx2t(n2 + 1)
-
-    do k2 = 1, n2t
-    do k1 = 1, n1t
-      !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
-!$omp atomic update
-      A(imap(k1,k2)) = A(imap(k1,k2)) + temp(k1,k2)
-    enddo
-    enddo
-
-#ifdef _OPENACC
-    !# GPU 正本モード:要素行列を 1 カーネルでデバイス常駐行列にも足し込む
-    !# (ライトスルー。非同期キュー 1 に投入し、スカラ足込カーネルとの順序を保証する)
-    if(acc_is_present(A))then
-!$acc data copyin(imap(1:n1t,1:n2t), temp(1:n1t,1:n2t))
-!$acc parallel loop collapse(2) present(A, imap, temp) async(1)
-      do k2 = 1, n2t
-      do k1 = 1, n1t
+      joff = 0
+      do i2 = 1, n2
+        jn = e2(i2)
+        ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+        !# 行内の item は昇順ソート済みのため二分探索
+        call monolis_bsearch_I(item, jS, jE, jn, j)
+        if(j == -1)then
+          call monolis_record_matrix_assemble_error(in, jn)
+        else
+          kn = n_dof_index2(j)
+          do k1 = 1, ndof1
+          do k2 = 1, ndof2
+            im = kn + ndof2*(k1-1) + k2
+            !# 複数スレッドから同じ成分に足し込まれる場合があるため atomic
 !$acc atomic update
-        A(imap(k1,k2)) = A(imap(k1,k2)) + temp(k1,k2)
+!$omp atomic update
+            A(im) = A(im) + val(ioff+k1, joff+k2)
+          enddo
+          enddo
+        endif
+        joff = joff + ndof2
       enddo
-      enddo
-!$acc end parallel loop
-!$acc wait(1)
-!$acc end data
-    endif
-#endif
+      ioff = ioff + ndof1
+    enddo
   end subroutine monolis_add_matrix_to_sparse_matrix_main_R
 
   !> @ingroup dev_matrix
@@ -705,7 +686,7 @@ contains
     integer(kint) :: j, k, jn, kn, m, n, jS, jE, ndof1, ndof2
     logical :: is_add
 #ifdef _OPENACC
-    logical :: is_dev
+    logical :: is_dev, is_dev_B
 #endif
 
     ndof1 = n_dof_index(node_id + 1) - n_dof_index(node_id)
@@ -714,11 +695,63 @@ contains
     is_add = .false.
 
 #ifdef _OPENACC
-    !# GPU 正本モード:組み立て中の非同期カーネルを待ってから境界条件を適用する。
-    !# 右辺 B の更新と判定はホスト鏡像(ライトスルーにより最新)を用いてホストで行い、
-    !# デバイス常駐の行列 A には列・行の消去と対角 1 の設定をカーネルで反映する
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
     is_dev = acc_is_present(A)
-    !$acc wait(1)
+    is_dev_B = .false.
+    if(is_dev) is_dev_B = acc_is_present(B)
+    call monolis_check_matrix_assemble_error()
+
+    !# デバイス完結版:右辺 B もデバイス常駐の場合(GPU 要素ループ組立のデバイス専有フロー)、
+    !# 列・行の消去、右辺の更新、対角 1 の設定を全てデバイス上で実行する(ホスト鏡像は更新しない)
+    if(is_dev_B)then
+      jS = indexR(node_id) + 1
+      jE = indexR(node_id + 1)
+      !< ndof1: 横、ndof2: 縦
+!$acc parallel loop private(jn, kn, ndof2, k, m, n) &
+!$acc & present(A, B, indexR, itemR, permA, n_dof_index, n_dof_index2)
+      do j = jS, jE
+        jn = itemR(j)
+        kn = permA(j)
+        ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+        do k = 1, ndof2
+          m = n_dof_index2(kn) + ndof1*(k-1) + ndof_bc
+          n = n_dof_index(jn) + k
+          B(n) = B(n) - val*A(m)
+          A(m) = 0.0d0
+        enddo
+      enddo
+!$acc end parallel loop
+
+      jS = index(node_id) + 1
+      jE = index(node_id + 1)
+!$acc parallel loop private(jn, ndof2, k, m) reduction(.or.:is_add) &
+!$acc & present(A, index, item, n_dof_index, n_dof_index2)
+      do j = jS, jE
+        jn = item(j)
+        !< ndof2: 横、ndof1: 縦
+        ndof2 = n_dof_index(jn + 1) - n_dof_index(jn)
+        do k = 1, ndof2
+          m = n_dof_index2(j) + ndof2*(ndof_bc-1)
+          A(m + k) = 0.0d0
+        enddo
+
+        if(jn == node_id)then
+          m = n_dof_index2(j) + (ndof2+1)*(ndof_bc-1) + 1
+          A(m) = 1.0d0
+          is_add = .true.
+        endif
+      enddo
+!$acc end parallel loop
+
+      if(.not. is_add)then
+        call monolis_stop_by_set_DBC(node_id)
+      endif
+
+!$acc serial present(B, n_dof_index)
+      B(n_dof_index(node_id) + ndof_bc) = val
+!$acc end serial
+      return
+    endif
 #endif
 
     jS = indexR(node_id) + 1

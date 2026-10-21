@@ -17,7 +17,77 @@ contains
     call monolis_convert_sparse_matrix_to_dense_matrix_R_test()
     call monolis_convert_CSR_matrix_to_CSC_matrix_R_test()
     call monolis_variable_dof_sparse_matrix_R_test()
+    call monolis_device_assembly_R_test()
   end subroutine monolis_spmat_handler_util_test
+
+  !> GPU 要素ループからの直接組立テスト
+  !> @details OpenACC 有効時はデバイス常駐行列へ GPU カーネル内から組み立て、
+  !> CPU ビルドでは同一コードがホストループとして実行される。
+  subroutine monolis_device_assembly_R_test()
+    implicit none
+    type(monolis_structure) :: mat
+    integer(kint) :: n_node, n_base, ndof, n_elem
+    integer(kint) :: elem(2,3)
+    integer(kint) :: ielem, e(2)
+    real(kdouble) :: Ke(2,2)
+    integer(kint), pointer, contiguous :: tindex(:), titem(:), tnidx(:), tnidx2(:)
+    real(kdouble), pointer, contiguous :: tA(:)
+
+    call monolis_std_global_log_string("monolis_check_matrix_assemble_error")
+    call monolis_std_global_log_string("monolis_record_matrix_assemble_error")
+    call monolis_std_global_log_string("monolis_init_matrix_assemble_error")
+
+    !# 4 節点チェーン(1-2, 2-3, 3-4)、1 自由度
+    n_node = 4
+    n_base = 2
+    ndof = 1
+    n_elem = 3
+    elem(1,1) = 1; elem(2,1) = 2
+    elem(1,2) = 2; elem(2,2) = 3
+    elem(1,3) = 3; elem(2,3) = 4
+
+    call monolis_initialize(mat)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, n_base, ndof, n_elem, elem)
+
+    tindex => mat%MAT%CSR%index
+    titem  => mat%MAT%CSR%item
+    tA     => mat%MAT%R%A
+    tnidx  => mat%MAT%n_dof_index
+    tnidx2 => mat%MAT%n_dof_index2
+
+    !# 要素ループ(GPU ではデバイスカーネル内から直接組立、CPU では同一コードがホスト実行)
+!$acc parallel loop private(e, Ke) copyin(elem) &
+!$acc & present(tindex, titem, tA, tnidx, tnidx2)
+    do ielem = 1, n_elem
+      e(1) = elem(1, ielem)
+      e(2) = elem(2, ielem)
+      Ke(1,1) =  2.0d0; Ke(1,2) = -1.0d0
+      Ke(2,1) = -1.0d0; Ke(2,2) =  2.0d0
+      call monolis_add_matrix_to_sparse_matrix_main_R(tindex, titem, tA, 2, 2, &
+        & tnidx, tnidx2, e, e, Ke)
+    enddo
+!$acc end parallel loop
+
+    !# デバイス組立の遅延エラー検査(エラーなしで通過すること)
+    call monolis_check_matrix_assemble_error()
+
+    !# GPU ではデバイス正本をホストへ同期して検証する
+!$acc update self(tA) if_present
+
+    !# CSR パターン: 行1 {1,2} / 行2 {1,2,3} / 行3 {2,3,4} / 行4 {3,4}
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 1",  tA(1),  2.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 2",  tA(2), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 3",  tA(3), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 4",  tA(4),  4.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 5",  tA(5), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 6",  tA(6), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 7",  tA(7),  4.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 8",  tA(8), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 9",  tA(9), -1.0d0)
+    call monolis_test_check_eq_R1("monolis_device_assembly_R_test 10", tA(10), 2.0d0)
+
+    call monolis_finalize(mat)
+  end subroutine monolis_device_assembly_R_test
 
   subroutine monolis_set_scalar_to_sparse_matrix_main_R_test()
     implicit none

@@ -3,6 +3,7 @@ module mod_monolis_spmat_convert_dia
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_spmat_handler_util
 #ifdef _OPENACC
   use openacc
 #endif
@@ -97,8 +98,8 @@ contains
       !$acc kernels present(diaA)
       diaA = 0.0d0
       !$acc end kernels
-      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
-      !$acc wait(1)
+      !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
+      call monolis_check_matrix_assemble_error()
     endif
 #endif
 
@@ -263,8 +264,8 @@ contains
       !$acc kernels present(diaA)
       diaA = 0.0d0
       !$acc end kernels
-      !# 組み立て中の非同期カーネルを待つ(詰め替えは組み立て完了後の値を参照する)
-      !$acc wait(1)
+      !# 組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
+      call monolis_check_matrix_assemble_error()
     endif
 #endif
 

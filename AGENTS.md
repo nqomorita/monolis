@@ -111,6 +111,18 @@ C 側は **0-based**、Fortran 側に渡す際に通信テーブル (`recv_item`
   非常駐 (C ラッパ経路等) ならレガシー動作 (copyin/update) にフォールバックする。
   `monolis_prm_I_is_host_sync` を OFF にすると solve 後の X のホスト書き戻しを省略できる
   (解の取得は `monolis_get_solution_R` がデバイスから直接読む)。
+- **GPU 要素ループからの直接組立**: `monolis_set/add_scalar_to_sparse_matrix_main_R`、
+  `monolis_set_block_to_sparse_matrix_main_R`、`monolis_add_matrix_to_sparse_matrix_main_R` は
+  `acc routine seq` 付きで、ユーザの `!$acc parallel loop`(要素ループ)内から直接呼び出せる。
+  常駐配列 (`CSR%index/item`, `R%A`, `n_dof_index`, `n_dof_index2`) をポインタに取り出して
+  `present` で渡すこと ([sample/cg_diag_3d/main.f90](sample/cg_diag_3d/main.f90) の `-dev 1`、
+  [src_test/matrix/spmat_handler_util_test.f90](src_test/matrix/spmat_handler_util_test.f90) の
+  `monolis_device_assembly_R_test` 参照)。パターン外参照等のエラーはデバイス上で停止できないため
+  カウンタに記録され、solve 入口・境界条件・形式変換の同期点
+  (`monolis_check_matrix_assemble_error`) で検査・停止される。
+  デバイス組立ではホスト鏡像が更新されない (stale) ため、SOR/LU/Cholesky 前処理・
+  ホスト実行解法・`get_scalar`・行列コピー・密変換等との併用は不可
+  (必要なら従来のホスト API 組立を使用する)。
 - **MPI 並列**: 袖通信はデバイスポインタで行われるため CUDA 対応 UCX が必要
   (`UCX_TLS=self,sm,cuda_copy,cuda_ipc` 等。[build_gpu_mog1.sh](build_gpu_mog1.sh) 参照)。
 - **スコープ**: 実数型 (`_R`) のみ。複素数型・マージン付きパターン

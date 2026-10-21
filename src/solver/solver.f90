@@ -19,6 +19,7 @@ module mod_monolis_solve
   use mod_monolis_precond
   use mod_monolis_spmat_convert_dia
   use mod_monolis_spmat_convert_ell
+  use mod_monolis_spmat_handler_util
 #ifdef _OPENACC
   use openacc
 #endif
@@ -97,9 +98,9 @@ contains
     call monolis_std_debug_log_header("monolis_solve_main_R")
 
 #ifdef _OPENACC
-    !# GPU 正本モード:組み立て中の非同期カーネルを待つ
+    !# GPU 正本モード:組み立て中の非同期カーネルを待ち、デバイス組立の遅延エラーを検査する
     !# (前処理生成・形式変換は組み立て完了後の行列値を参照する)
-    !$acc wait(1)
+    call monolis_check_matrix_assemble_error()
 #endif
 
     call monolis_timer_initialize(monoPRM)

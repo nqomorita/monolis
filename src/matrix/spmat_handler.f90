@@ -30,9 +30,40 @@ contains
     integer(kint), intent(in) :: sub_j
     !> [in] 行列値
     real(kdouble), intent(in) :: val
+    integer(kint) :: ndof
+#ifdef _OPENACC
+    integer(kint) :: jj, jS, jE, im
+    real(kdouble), pointer, contiguous :: tA(:)
+#endif
+
+    !# 添字検査(ホスト、即時エラー)
+    ndof = monolis%MAT%n_dof_index(i + 1) - monolis%MAT%n_dof_index(i)
+    if(ndof < sub_i) call monolis_stop_by_submatrix_access(ndof, sub_i)
+    ndof = monolis%MAT%n_dof_index(j + 1) - monolis%MAT%n_dof_index(j)
+    if(ndof < sub_j) call monolis_stop_by_submatrix_access(ndof, sub_j)
 
     call monolis_set_scalar_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
+
+    !# パターン外参照の即時検査(ホスト経路)
+    if(monolis_assemble_error_count > 0)then
+      call monolis_stop_by_matrix_assemble(i, j)
+    endif
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)。
+    !# 書込先はホストで確定し、カーネルは 1 成分書込のみとする(引数記述子のホスト一時を避ける)
+    if(acc_is_present(monolis%MAT%R%A))then
+      jS = monolis%MAT%CSR%index(i) + 1
+      jE = monolis%MAT%CSR%index(i + 1)
+      call monolis_bsearch_I(monolis%MAT%CSR%item, jS, jE, j, jj)
+      im = monolis%MAT%n_dof_index2(jj) + ndof*(sub_i-1) + sub_j
+      tA => monolis%MAT%R%A
+!$acc serial present(tA) async(1)
+      tA(im) = val
+!$acc end serial
+    endif
+#endif
   end subroutine monolis_set_scalar_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -68,9 +99,37 @@ contains
     integer(kint), intent(in) :: j
     !> [in] 行列値（サイズ：[ndof, ndof]）
     real(kdouble), intent(in) :: val(:,:)
+    integer(kint) :: n1, n2
+#ifdef _OPENACC
+    integer(kint), pointer, contiguous :: tindex(:), titem(:), tnidx(:), tnidx2(:)
+    real(kdouble), pointer, contiguous :: tA(:)
+#endif
 
     call monolis_set_block_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, val)
+
+    !# パターン外参照の即時検査(ホスト経路)
+    if(monolis_assemble_error_count > 0)then
+      call monolis_stop_by_matrix_assemble(i, j)
+    endif
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐行列にも書き込む(ライトスルー。非同期キュー 1 で順序を保証)
+    if(acc_is_present(monolis%MAT%R%A))then
+      n1 = monolis%MAT%n_dof_index(i + 1) - monolis%MAT%n_dof_index(i)
+      n2 = monolis%MAT%n_dof_index(j + 1) - monolis%MAT%n_dof_index(j)
+      tindex => monolis%MAT%CSR%index
+      titem  => monolis%MAT%CSR%item
+      tA     => monolis%MAT%R%A
+      tnidx  => monolis%MAT%n_dof_index
+      tnidx2 => monolis%MAT%n_dof_index2
+!$acc serial copyin(val(1:n1,1:n2)) present(tindex, titem, tA, tnidx, tnidx2) async(1)
+      call monolis_set_block_to_sparse_matrix_main_R(tindex, titem, tA, tnidx, tnidx2, i, j, val)
+!$acc end serial
+      !# ホスト一時配列(val)の転送完了を保証する
+!$acc wait(1)
+    endif
+#endif
   end subroutine monolis_set_block_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -154,9 +213,40 @@ contains
     integer(kint), intent(in) :: sub_j
     !> [in] 行列値
     real(kdouble), intent(in) :: val
+    integer(kint) :: ndof
+#ifdef _OPENACC
+    integer(kint) :: jj, jS, jE, im
+    real(kdouble), pointer, contiguous :: tA(:)
+#endif
+
+    !# 添字検査(ホスト、即時エラー)
+    ndof = monolis%MAT%n_dof_index(i + 1) - monolis%MAT%n_dof_index(i)
+    if(ndof < sub_i) call monolis_stop_by_submatrix_access(ndof, sub_i)
+    ndof = monolis%MAT%n_dof_index(j + 1) - monolis%MAT%n_dof_index(j)
+    if(ndof < sub_j) call monolis_stop_by_submatrix_access(ndof, sub_j)
 
     call monolis_add_scalar_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       & monolis%MAT%R%A, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, i, j, sub_i, sub_j, val)
+
+    !# パターン外参照の即時検査(ホスト経路)
+    if(monolis_assemble_error_count > 0)then
+      call monolis_stop_by_matrix_assemble(i, j)
+    endif
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐行列にも足し込む(ライトスルー。非同期キュー 1 で順序を保証)。
+    !# 書込先はホストで確定し、カーネルは 1 成分足込のみとする(引数記述子のホスト一時を避ける)
+    if(acc_is_present(monolis%MAT%R%A))then
+      jS = monolis%MAT%CSR%index(i) + 1
+      jE = monolis%MAT%CSR%index(i + 1)
+      call monolis_bsearch_I(monolis%MAT%CSR%item, jS, jE, j, jj)
+      im = monolis%MAT%n_dof_index2(jj) + ndof*(sub_i-1) + sub_j
+      tA => monolis%MAT%R%A
+!$acc serial present(tA) async(1)
+      tA(im) = tA(im) + val
+!$acc end serial
+    endif
+#endif
   end subroutine monolis_add_scalar_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -192,10 +282,40 @@ contains
     integer(kint), intent(in) :: connectivity(n_base)
     !> [in] 行列値
     real(kdouble), intent(in) :: mat(:,:)
+#ifdef _OPENACC
+    integer(kint) :: m1, m2
+    integer(kint), pointer, contiguous :: tindex(:), titem(:), tnidx(:), tnidx2(:)
+    real(kdouble), pointer, contiguous :: tA(:)
+#endif
 
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       monolis%MAT%R%A, n_base, n_base, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
       connectivity, connectivity, mat)
+
+    !# パターン外参照の即時検査(ホスト経路)
+    if(monolis_assemble_error_count > 0)then
+      call monolis_stop_by_matrix_assemble(monolis_assemble_error_i, monolis_assemble_error_j)
+    endif
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐行列にも足し込む(ライトスルー。非同期キュー 1 で順序を保証)
+    if(acc_is_present(monolis%MAT%R%A))then
+      m1 = size(mat, 1)
+      m2 = size(mat, 2)
+      tindex => monolis%MAT%CSR%index
+      titem  => monolis%MAT%CSR%item
+      tA     => monolis%MAT%R%A
+      tnidx  => monolis%MAT%n_dof_index
+      tnidx2 => monolis%MAT%n_dof_index2
+!$acc serial copyin(connectivity(1:n_base), mat(1:m1,1:m2)) &
+!$acc & present(tindex, titem, tA, tnidx, tnidx2) async(1)
+      call monolis_add_matrix_to_sparse_matrix_main_R(tindex, titem, tA, n_base, n_base, &
+        tnidx, tnidx2, connectivity, connectivity, mat)
+!$acc end serial
+      !# ホスト一時配列(connectivity, mat)の転送完了を保証する
+!$acc wait(1)
+    endif
+#endif
   end subroutine monolis_add_matrix_to_sparse_matrix_R
 
   !> @ingroup matrix
@@ -233,10 +353,40 @@ contains
     integer(kint), intent(in) :: connectivity_j(n_base_j)
     !> [in] 行列値
     real(kdouble), intent(in) :: mat(:,:)
+#ifdef _OPENACC
+    integer(kint) :: m1, m2
+    integer(kint), pointer, contiguous :: tindex(:), titem(:), tnidx(:), tnidx2(:)
+    real(kdouble), pointer, contiguous :: tA(:)
+#endif
 
     call monolis_add_matrix_to_sparse_matrix_main_R(monolis%MAT%CSR%index, monolis%MAT%CSR%item, &
       monolis%MAT%R%A, n_base_i, n_base_j, monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2, &
       connectivity_i, connectivity_j, mat)
+
+    !# パターン外参照の即時検査(ホスト経路)
+    if(monolis_assemble_error_count > 0)then
+      call monolis_stop_by_matrix_assemble(monolis_assemble_error_i, monolis_assemble_error_j)
+    endif
+
+#ifdef _OPENACC
+    !# GPU 正本モード:デバイス常駐行列にも足し込む(ライトスルー。非同期キュー 1 で順序を保証)
+    if(acc_is_present(monolis%MAT%R%A))then
+      m1 = size(mat, 1)
+      m2 = size(mat, 2)
+      tindex => monolis%MAT%CSR%index
+      titem  => monolis%MAT%CSR%item
+      tA     => monolis%MAT%R%A
+      tnidx  => monolis%MAT%n_dof_index
+      tnidx2 => monolis%MAT%n_dof_index2
+!$acc serial copyin(connectivity_i(1:n_base_i), connectivity_j(1:n_base_j), mat(1:m1,1:m2)) &
+!$acc & present(tindex, titem, tA, tnidx, tnidx2) async(1)
+      call monolis_add_matrix_to_sparse_matrix_main_R(tindex, titem, tA, n_base_i, n_base_j, &
+        tnidx, tnidx2, connectivity_i, connectivity_j, mat)
+!$acc end serial
+      !# ホスト一時配列(connectivity, mat)の転送完了を保証する
+!$acc wait(1)
+    endif
+#endif
   end subroutine monolis_add_matrix_to_sparse_matrix_offdiag_R
 
   !> @ingroup matrix
@@ -286,7 +436,9 @@ contains
     integer(kint) :: i
 
 #ifdef _OPENACC
-    !# GPU 正本モード:再構築前にデバイス常駐領域があれば解放する
+    !# GPU 正本モード:組立カーネル(非同期キュー 1)の完了を待ってから、
+    !# 再構築前にデバイス常駐領域があれば解放する
+    !$acc wait(1)
     if(associated(monolis%MAT%CSR%index))then
       !$acc exit data delete(monolis%MAT%CSR%index) if(acc_is_present(monolis%MAT%CSR%index))
     endif
@@ -385,6 +537,7 @@ contains
     !$acc enter data copyin(monolis%MAT%CSC%index, monolis%MAT%CSC%item, monolis%MAT%CSC%perm)
     !$acc enter data copyin(monolis%MAT%n_dof_index, monolis%MAT%n_dof_index2)
     !$acc enter data copyin(monolis%MAT%R%A, monolis%MAT%R%B, monolis%MAT%R%X)
+    call monolis_init_matrix_assemble_error()
 #endif
   end subroutine monolis_set_matrix_BCSR_R
 

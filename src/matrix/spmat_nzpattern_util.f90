@@ -3,6 +3,7 @@ module mod_monolis_spmat_nonzero_pattern_util
   use mod_monolis_utils
   use mod_monolis_def_mat
   use mod_monolis_def_struc
+  use mod_monolis_spmat_handler_util
 
   implicit none
 
@@ -126,6 +127,7 @@ contains
     !$acc enter data copyin(MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
     !$acc enter data copyin(MAT%n_dof_list, MAT%n_dof_index, MAT%n_dof_index2)
     !$acc enter data copyin(MAT%R%A, MAT%R%B, MAT%R%X)
+    call monolis_init_matrix_assemble_error()
 #endif
   end subroutine monolis_alloc_nonzero_pattern_mat_val_R
 
@@ -169,6 +171,7 @@ contains
     !$acc enter data copyin(MAT%CSC%index, MAT%CSC%item, MAT%CSC%perm)
     !$acc enter data copyin(MAT%n_dof_list, MAT%n_dof_index, MAT%n_dof_index2)
     !$acc enter data copyin(MAT%R%A, MAT%R%B, MAT%R%X)
+    call monolis_init_matrix_assemble_error()
 #endif
   end subroutine monolis_alloc_nonzero_pattern_mat_val_V_R
 

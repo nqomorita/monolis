@@ -232,7 +232,9 @@ contains
     monoMAT%NDOF = 0
 
 #ifdef _OPENACC
-    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    !# GPU 正本モード:組立カーネル(非同期キュー 1)の完了を待ってから、
+    !# デバイス常駐領域があれば解放する(カーネルが参照中の配列を解放しないため)
+    !$acc wait(1)
     if(associated(monoMAT%n_dof_list))then
       !$acc exit data delete(monoMAT%n_dof_list) if(acc_is_present(monoMAT%n_dof_list))
     endif
@@ -468,7 +470,9 @@ contains
     monoMAT%NDOF = 0
 
 #ifdef _OPENACC
-    !# GPU 正本モード:デバイス常駐領域があれば解放する
+    !# GPU 正本モード:組立カーネル(非同期キュー 1)の完了を待ってから、
+    !# デバイス常駐領域があれば解放する(カーネルが参照中の配列を解放しないため)
+    !$acc wait(1)
     if(associated(monoMAT%n_dof_list))then
       !$acc exit data delete(monoMAT%n_dof_list) if(acc_is_present(monoMAT%n_dof_list))
     endif
@@ -741,12 +745,22 @@ contains
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
-    !# GPU 正本モード:ホスト鏡像を更新し、右辺がデバイス常駐の場合はデバイスへも反映する(ライトスルー)
+    !# GPU 正本モード:ホスト鏡像を更新し、右辺がデバイス常駐の場合はデバイスへも反映する。
+    !# ユーザ配列 B がデバイス常駐の場合(GPU 要素ループ組立のデバイス専有フロー)は
+    !# デバイス上の B を正として device-to-device でコピーする
     V => monoMAT%R%B
+#ifdef _OPENACC
+    if(acc_is_present(V))then
+!$acc parallel loop copyin(B(1:NPNDOF)) present(V)
+      do i = 1, NPNDOF
+        V(i) = B(i)
+      enddo
+!$acc end parallel loop
+    endif
+#endif
     do i = 1, NPNDOF
       V(i) = B(i)
     enddo
-!$acc update device(V) if_present
   end subroutine monolis_set_RHS_R
 
   !> @ingroup def_mat_init
@@ -785,12 +799,22 @@ contains
     call monolis_get_vec_size(monoMAT%N, monoMAT%NP, monoMAT%NDOF, &
       monoMAT%n_dof_index, NNDOF, NPNDOF)
 
-    !# GPU 正本モード:ホスト鏡像を更新し、解がデバイス常駐の場合はデバイスへも反映する(ライトスルー)
+    !# GPU 正本モード:ホスト鏡像を更新し、解がデバイス常駐の場合はデバイスへも反映する。
+    !# ユーザ配列 X がデバイス常駐の場合(GPU 要素ループ組立のデバイス専有フロー)は
+    !# デバイス上の X を正として device-to-device でコピーする
     V => monoMAT%R%X
+#ifdef _OPENACC
+    if(acc_is_present(V))then
+!$acc parallel loop copyin(X(1:NPNDOF)) present(V)
+      do i = 1, NPNDOF
+        V(i) = X(i)
+      enddo
+!$acc end parallel loop
+    endif
+#endif
     do i = 1, NPNDOF
       V(i) = X(i)
     enddo
-!$acc update device(V) if_present
   end subroutine monolis_set_initial_solution_R
 
   !> @ingroup def_mat_init
