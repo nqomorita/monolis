@@ -123,6 +123,11 @@ C 側は **0-based**、Fortran 側に渡す際に通信テーブル (`recv_item`
   デバイス組立ではホスト鏡像が更新されない (stale) ため、SOR/LU/Cholesky 前処理・
   ホスト実行解法・`get_scalar`・行列コピー・密変換等との併用は不可
   (必要なら従来のホスト API 組立を使用する)。
+- **C からのデバイス直接組立**: `monolis_set/add_scalar_to_sparse_matrix_R`(MONOLIS* 版)と
+  `monolis_set/add_scalar_to_sparse_matrix_R_c_main`(配列引数版)は `#pragma acc routine seq`
+  付きで、C の `#pragma acc parallel loop` 内から呼び出せる。C 経路の行列配列は C 側 malloc
+  (非常駐) のため、ユーザが `#pragma acc enter data copyin(...)` で常駐させてから使用する。
+  GPU ビルドでは C ラッパも `-acc` でコンパイルされる ([Makefile](Makefile) の GPU_GNU)。
 - **MPI 並列**: 袖通信はデバイスポインタで行われるため CUDA 対応 UCX が必要
   (`UCX_TLS=self,sm,cuda_copy,cuda_ipc` 等。[build_gpu_mog1.sh](build_gpu_mog1.sh) 参照)。
 - **スコープ**: 実数型 (`_R`) のみ。複素数型・マージン付きパターン

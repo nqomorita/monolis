@@ -22,7 +22,9 @@ extern "C" {
  * @param[in] submat_j ブロック中の列番号
  * @param[in] val 設定値
  * @ingroup dev_matrix
+ * @details GPU 要素ループ（OpenACC compute region）内から直接呼び出し可能（acc routine seq）。
  */
+#pragma acc routine seq
 void monolis_set_scalar_to_sparse_matrix_R_c_main(
   int     n_node,
   int     nz,
@@ -53,7 +55,9 @@ void monolis_set_scalar_to_sparse_matrix_R_c_main(
  * @param[in] submat_j ブロック中の列番号
  * @param[in] val 設定値
  * @ingroup dev_matrix
+ * @details GPU 要素ループ（OpenACC compute region）内から直接呼び出し可能（acc routine seq）。
  */
+#pragma acc routine seq
 void monolis_add_scalar_to_sparse_matrix_R_c_main(
   int     n_node,
   int     nz,

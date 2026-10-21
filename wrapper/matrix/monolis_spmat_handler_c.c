@@ -7,6 +7,7 @@
 #include "monolis_spmat_nzpattern_util_c.h"
 #include "monolis_def_struc_c.h"
 
+#pragma acc routine seq
 void monolis_set_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,
@@ -35,6 +36,7 @@ void monolis_set_scalar_to_sparse_matrix_R(
     val);
 }
 
+#pragma acc routine seq
 void monolis_add_scalar_to_sparse_matrix_R(
   MONOLIS* mat,
   int      i,

@@ -13,6 +13,7 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_set_scalar_to_sparse_matrix_R_c_main")
     implicit none
+!$acc routine seq
     integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
     integer(kint_c), intent(in) :: index(N + 1)
     integer(kint_c), intent(in) :: item(NZ)
@@ -34,6 +35,7 @@ contains
     index, item, A, i, j, sub_i, sub_j, val) &
     bind(c, name = "monolis_add_scalar_to_sparse_matrix_R_c_main")
     implicit none
+!$acc routine seq
     integer(kint_c), intent(in), value :: N, NZ, NZA, i, j, sub_i, sub_j
     integer(kint_c), intent(in) :: index(N + 1)
     integer(kint_c), intent(in) :: item(NZ)

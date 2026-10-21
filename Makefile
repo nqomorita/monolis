@@ -61,7 +61,8 @@ ifdef FLAGS
 		FC       = mpif90
 		FFLAGS   = -fPIC -O3 -acc -gpu=mem:separate -Minfo=accel -Mscalapack
 		CC       = mpicc
-		CFLAGS   = -fPIC -O3
+		##> C ラッパのデバイス版(acc routine seq 付き関数)生成のため C 側にも -acc が必要
+		CFLAGS   = -fPIC -O3 -acc -gpu=mem:separate
 		MOD_DIR  = -module ./include
                 LINK     = $(FC) -acc -gpu=mem:separate -Mnomain
 		BLAS_LIB =
