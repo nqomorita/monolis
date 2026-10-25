@@ -18,6 +18,8 @@ contains
 
   !> @ingroup fact
   !> 数値分解フェーズ
+  !> 微小ピボットは相対しきい値 sqrt(eps) * max|A| で検出し、static pivoting
+  !> （符号を保った摂動値への置換）で分解を続行する。摂動数は lu%n_perturbed に記録される。
   subroutine monolis_fact_factorize(monoMAT, lu)
     implicit none
     !> [in] 行列構造体（値配列を参照）
@@ -26,7 +28,8 @@ contains
     type(monolis_mat_lu), intent(inout) :: lu
 
     integer(kint) :: nfronts, order_pos, front, child
-    integer(kint) :: fs, npiv, nupd, entry_pos, ierr_front
+    integer(kint) :: fs, npiv, nupd, entry_pos, n_perturbed
+    real(kdouble) :: anorm, tau
 
     call monolis_std_debug_log_header("monolis_fact_factorize")
 
@@ -38,6 +41,22 @@ contains
     nfronts = lu%nfronts
     if (allocated(lu%factors)) deallocate(lu%factors)
     allocate(lu%factors(max(1, nfronts)))
+
+    !> 相対ピボット判定の基準となる元行列の最大絶対値成分
+    anorm = 0.0d0
+    do entry_pos = 1, lu%orig_ptr(nfronts + 1) - 1
+      anorm = max(anorm, abs(monoMAT%R%A(lu%orig_entry(entry_pos))))
+    end do
+    lu%anorm = anorm
+
+    if (anorm == 0.0d0) then
+      call monolis_std_error_string("monolis_fact_factorize: zero matrix (all entries are zero)")
+      call monolis_std_error_stop()
+    end if
+
+    !> static pivoting のしきい値（sqrt(eps) * max|A|。後退誤差を sqrt(eps)*||A|| 程度に抑える）
+    tau = sqrt(epsilon(1.0d0)) * anorm
+    n_perturbed = 0
 
     do order_pos = 1, nfronts
       front = lu%front_postorder(order_pos)
@@ -59,12 +78,15 @@ contains
             monoMAT%R%A(lu%orig_entry(entry_pos)))
       end do
 
-      call factor_one_front(lu%factors(front), front, ierr_front)
-      if (ierr_front /= 0) then
-        call monolis_std_error_string("monolis_fact_factorize: zero pivot")
-        call monolis_std_error_stop()
-      end if
+      call factor_one_front(lu%factors(front), tau, n_perturbed)
     end do
+
+    lu%n_perturbed = n_perturbed
+    if (n_perturbed > 0) then
+      !> 分解対象は A + E（E は摂動対角成分のみ）。解の精度が必要な場合は反復改良を推奨
+      call monolis_std_warning_string("monolis_fact_factorize: small pivots perturbed by static pivoting")
+      call monolis_std_log_I1("[warning] number of perturbed pivots", n_perturbed)
+    end if
 
     !> contribution は親に展開済みなので解放
     do front = 1, nfronts
@@ -191,18 +213,19 @@ contains
     end if
   end subroutine add_front_column_run
 
-  !> 単一フロントの LU 分解（パネル化、対角ピボット）
-  subroutine factor_one_front(front_data, front, ierr)
+  !> 単一フロントの LU 分解（パネル化、対角ピボット、static pivoting）
+  subroutine factor_one_front(front_data, tau, n_perturbed)
     implicit none
     type(monolis_mat_frontal), intent(inout) :: front_data
-    integer(kint), intent(in)  :: front
-    integer(kint), intent(out) :: ierr
+    !> [in] ピボット摂動しきい値（sqrt(eps) * max|A|）
+    real(kdouble), intent(in)    :: tau
+    !> [in,out] 摂動されたピボット数（加算）
+    integer(kint), intent(inout) :: n_perturbed
 
     integer(kint) :: fs, npiv, nupd, ldf, ldu, k, j
     integer(kint) :: panel_end, block_cols, len, trailing_pivots, update_pivot_rows
     real(kdouble) :: pivot
 
-    ierr = 0
     fs   = front_data%front_size
     npiv = front_data%pivot_size
     nupd = front_data%update_size
@@ -218,9 +241,11 @@ contains
       !> パネル対角ブロック（block_cols 角）の非ピボット LU
       do j = k, panel_end
         pivot = front_data%factor(j, j)
-        if (abs(pivot) <= 100.0d0 * epsilon(1.0d0)) then
-          ierr = front
-          return
+        if (abs(pivot) <= tau) then
+          !> static pivoting: 符号を保って tau に置換して続行（pivot = 0 は +tau）
+          pivot = sign(tau, pivot)
+          front_data%factor(j, j) = pivot
+          n_perturbed = n_perturbed + 1
         end if
 
         len = panel_end - j
