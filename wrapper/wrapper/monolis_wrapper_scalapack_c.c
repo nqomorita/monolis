@@ -74,6 +74,10 @@ void monolis_scalapack_gesvd_R(
       D[j][i] = D_tmp[i*P + j];
     }
   }
+
+  monolis_dealloc_R_1d(&A_tmp);
+  monolis_dealloc_R_1d(&S_tmp);
+  monolis_dealloc_R_1d(&D_tmp);
 }
 
 /*
@@ -156,4 +160,7 @@ void monolis_scalapack_getrs_R(
       B[j][i] = B_tmp[i*N_loc + j];
     }
   }
+
+  monolis_dealloc_R_1d(&A_tmp);
+  monolis_dealloc_R_1d(&B_tmp);
 }
