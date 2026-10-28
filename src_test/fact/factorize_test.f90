@@ -3,7 +3,6 @@ module mod_monolis_fact_factorize_test
   use mod_monolis
   use mod_monolis_fact_analysis
   use mod_monolis_fact_factorize
-  use mod_monolis_fact_solve
 
   implicit none
 
@@ -53,68 +52,8 @@ contains
       call monolis_test_assert_fail("monolis_fact_factorize_test factorized", "lu%factorized is false")
     end if
 
-    call monolis_test_check_eq_R1("monolis_fact_factorize_test anorm", lu%anorm, 4.0d0)
-    call monolis_test_check_eq_I1("monolis_fact_factorize_test n_perturbed", lu%n_perturbed, 0)
-
     call monolis_mat_finalize_LU(lu)
     call monolis_finalize(mat)
-
-    call monolis_fact_factorize_static_pivot_test
   end subroutine monolis_fact_factorize_test
-
-  !> static pivoting のテスト（対角成分がすべて 0 だが正則な行列 tridiag(1, 0, 1)、6 節点）
-  subroutine monolis_fact_factorize_static_pivot_test
-    implicit none
-    type(monolis_structure) :: mat
-    type(monolis_mat_lu) :: lu
-    integer(kint) :: n_node, nelem, elem(2,5), i
-    real(kdouble) :: b(6), x_ans(6)
-
-    call monolis_initialize(mat)
-
-    n_node = 6
-    nelem  = 5
-    do i = 1, nelem
-      elem(1,i) = i
-      elem(2,i) = i + 1
-    end do
-
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, n_node, 2, 1, nelem, elem)
-
-    !> 対角は 0 のまま、隣接のみ 1（偶数次元の tridiag(1,0,1) は正則、det = -1）
-    do i = 1, nelem
-      call monolis_add_scalar_to_sparse_matrix_R(mat, elem(1,i), elem(2,i), 1, 1, 1.0d0)
-      call monolis_add_scalar_to_sparse_matrix_R(mat, elem(2,i), elem(1,i), 1, 1, 1.0d0)
-    end do
-
-    call monolis_fact_analysis(mat%MAT, lu)
-    call monolis_fact_factorize(mat%MAT, lu)
-
-    if (lu%factorized) then
-      call monolis_test_assert_pass("monolis_fact_factorize_static_pivot_test factorized")
-    else
-      call monolis_test_assert_fail("monolis_fact_factorize_static_pivot_test factorized", &
-          "lu%factorized is false")
-    end if
-
-    !> 最初に消去される節点の対角は必ず 0 なので、摂動は少なくとも 1 回発生する
-    if (lu%n_perturbed >= 1) then
-      call monolis_test_assert_pass("monolis_fact_factorize_static_pivot_test n_perturbed")
-    else
-      call monolis_test_assert_fail("monolis_fact_factorize_static_pivot_test n_perturbed", &
-          "lu%n_perturbed is 0")
-    end if
-
-    !> 厳密解 x = (1,...,6)、b = A x。摂動による誤差は sqrt(eps)*O(1) 程度
-    x_ans = [1.0d0, 2.0d0, 3.0d0, 4.0d0, 5.0d0, 6.0d0]
-    b = [2.0d0, 4.0d0, 6.0d0, 8.0d0, 10.0d0, 5.0d0]
-    call monolis_fact_solve(lu, b)
-    do i = 1, n_node
-      call monolis_test_check_eq_R1("monolis_fact_factorize_static_pivot_test x", b(i), x_ans(i))
-    end do
-
-    call monolis_mat_finalize_LU(lu)
-    call monolis_finalize(mat)
-  end subroutine monolis_fact_factorize_static_pivot_test
 
 end module mod_monolis_fact_factorize_test

@@ -178,10 +178,6 @@ module mod_monolis_def_mat
     integer(kint), allocatable :: contrib_run_parent_first(:)
     !> 数値フロント配列
     type(monolis_mat_frontal), allocatable :: factors(:)
-    !> 元行列の最大絶対値成分（数値分解時に計算、相対ピボット判定の基準）
-    real(kdouble) :: anorm = 0.0d0
-    !> static pivoting により摂動されたピボット数（数値分解時に計算）
-    integer(kint) :: n_perturbed = 0
     !> 解析フェーズ完了フラグ
     logical :: analyzed = .false.
     !> 数値分解フェーズ完了フラグ
@@ -731,8 +727,6 @@ contains
     LU%nfronts = 0
     LU%max_front_size = 0
     LU%N = 0
-    LU%anorm = 0.0d0
-    LU%n_perturbed = 0
   end subroutine monolis_mat_finalize_LU
 
   !> @ingroup def_mat_init
